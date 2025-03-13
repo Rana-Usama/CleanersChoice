@@ -6,17 +6,15 @@ export const Colors:{[key: string] : string} = {
     gradient2 :'rgba(92, 142, 255, 1)',
     buttonColor : 'rgba(235, 245, 255, 1)',
     inputFieldColor : 'rgba(229, 231, 235, 1)',
-    heading : 'rgba(87, 83, 78, 1)',
-    fieldColor :'rgba(100, 116, 139, 1)',
-    brown : 'rgba(168, 162, 158, 1)',
-    profileField : 'rgba(243, 244, 246, 1)',
-    error : 'rgba(248, 113, 113, 1)'
+    placeholderColor : 'rgba(107, 114, 128, 1)'
 
 }
 
 export const Icons : {[key : string] : any} = {
     customer : require('../assets/icons/customer.png'),
     owner : require('../assets/icons/owner.png'),
+    edit : require('../assets/icons/Edit-Icon.png'),
+
   
 }
 

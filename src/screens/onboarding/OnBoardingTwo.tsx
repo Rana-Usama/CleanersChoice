@@ -36,7 +36,7 @@ const OnBoardingTwo: React.FC = () => {
                     <Text style={{ color: Colors.primaryText, fontFamily: Fonts.semiBold, fontSize: RFPercentage(2.2), textAlign: 'center' }}>Register Yourself As</Text>
                 </View>
                 <View style={{ marginTop: RFPercentage(4.8) }}>
-                    <SelectionButton title='Customer / Get Cleaning Service' onPress={() => console.log('hi')} icon={Icons.customer} />
+                    <SelectionButton title='Customer / Get Cleaning Service' onPress={() => navigation.navigate('SignUp')} icon={Icons.customer} />
                 </View>
                 <View style={{ marginTop: RFPercentage(4) }}>
                     <SelectionButton title='Business Owner /Cleaner' onPress={() => console.log('hi')} icon={Icons.owner} />
@@ -49,7 +49,7 @@ const OnBoardingTwo: React.FC = () => {
                     <Image
                         source={IMAGES.stars}
                         resizeMode='contain'
-                        style={{ width: RFPercentage(10), height: RFPercentage(10), top: RFPercentage(20), left: RFPercentage(2) }}
+                        style={{ width: RFPercentage(10), height: RFPercentage(10), top: RFPercentage(25), left: RFPercentage(2) }}
                     />
                 </View>
 
