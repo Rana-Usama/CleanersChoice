@@ -57,11 +57,8 @@ const ResetPassword: React.FC = () => {
 
                         </View>
 
-                        <View style={{ alignSelf: 'center', marginTop: RFPercentage(5) }}>
-                            <View style={{ left: RFPercentage(1.5) }}>
+                        <View style={{alignSelf: 'center', marginTop:RFPercentage(5) , width:'100%', justifyContent:'center', alignItems:'center'}}>
                                 <GradientButton title='Send OTP' onPress={() => navigation.navigate('Verify')} />
-                            </View>
-
                         </View>
 
                         <View style={{ alignSelf: 'flex-end', position: 'absolute', top: RFPercentage(80) }}>

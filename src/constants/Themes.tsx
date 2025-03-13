@@ -14,6 +14,16 @@ export const Icons : {[key : string] : any} = {
     customer : require('../assets/icons/customer.png'),
     owner : require('../assets/icons/owner.png'),
     edit : require('../assets/icons/Edit-Icon.png'),
+    home : require('../assets/icons/homeActive.png'),
+    msg : require('../assets/icons/msg.png'),
+    job : require('../assets/icons/job.png'),
+    settings : require('../assets/icons/setting.png'),
+    profile : require('../assets/icons/profile-inactive.png'),
+    msgActive :  require('../assets/icons/msg-active.png'),
+    jobActive :  require('../assets/icons/job-active.png'),
+    settingActive :  require('../assets/icons/settingsActive.png'),
+    profileActive :  require('../assets/icons/profileActive2.png'),
+    homeInactive : require('../assets/icons/home-inactive.png'),
 
   
 }

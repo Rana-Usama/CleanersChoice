@@ -207,8 +207,9 @@ const styles = StyleSheet.create({
     marginTop: height * 0.16,
     alignSelf: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: RFPercentage(2.5),
-    marginLeft: RFPercentage(1.55),
+    width:'100%',
+    paddingHorizontal: RFPercentage(3.2),
+    // marginLeft: RFPercentage(1.55),
     bottom: RFPercentage(2)
   },
 });

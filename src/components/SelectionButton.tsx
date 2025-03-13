@@ -26,7 +26,7 @@ interface Props {
 
 const SelectionButton: React.FC<Props> = (props: Props) => {
     return (
-        <TouchableOpacity onPress={props.onPress} disabled={props.disabled}>
+        <TouchableOpacity activeOpacity={0.7} onPress={props.onPress} disabled={props.disabled}>
             <View style={{position: "absolute", zIndex:999999, left:RFPercentage(0.6), top:RFPercentage(-1.2)}}>
                 <Image source={props.icon} resizeMode='contain' style={{width:RFPercentage(2.5), height:RFPercentage(2.5)}} />
             </View>

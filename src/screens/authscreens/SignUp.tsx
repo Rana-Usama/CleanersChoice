@@ -32,7 +32,7 @@ const SignUp: React.FC = () => {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'SignUp'>>();
     const [selected, setSelected] = useState<boolean>(false);
     const [img, setImg] = useState(null)
-    console.log('img................',img)
+    console.log('img................', img)
 
     const uploadImg = () => {
         console.log("Opening Image Picker...");
@@ -47,7 +47,7 @@ const SignUp: React.FC = () => {
             console.log("Image Picker Error:", error);
         });
     };
-    
+
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -66,21 +66,21 @@ const SignUp: React.FC = () => {
                             </Text>
                         </View>
 
-                        <View style={{ marginTop: RFPercentage(3) }}>
-                            <TouchableOpacity onPress={uploadImg}>
+                        <View style={{ marginTop: RFPercentage(2) }}>
+                            <TouchableOpacity activeOpacity={0.5} onPress={uploadImg}>
                                 <View style={styles.pictureContainer}>
                                     {
                                         img ?
                                             <>
                                                 <Image source={img?.path} resizeMode='cover' style={{
-                                                    width: RFPercentage(14),
-                                                    height: RFPercentage(14),
+                                                    width: RFPercentage(12),
+                                                    height: RFPercentage(12),
                                                     borderRadius: RFPercentage(10),
                                                 }} />
                                             </>
                                             :
                                             <>
-                                                <Text style={{ color: Colors.secondaryText, fontFamily: Fonts.fontRegular, fontSize: RFPercentage(1.3) }}>
+                                                <Text style={{ color: Colors.secondaryText, fontFamily: Fonts.fontRegular, fontSize: RFPercentage(1.2) }}>
                                                     Upload Picture
                                                 </Text>
                                             </>
@@ -124,18 +124,17 @@ const SignUp: React.FC = () => {
                             <Text style={{ color: Colors.primaryText, fontSize: RFPercentage(1.4), fontFamily: Fonts.fontRegular, bottom: 2, marginLeft: RFPercentage(0.8) }}>I agree to terms and conditions</Text>
                         </View>
 
-                        <View style={{ alignSelf: 'flex-end', position: 'absolute', top: RFPercentage(65) }}>
+                        <View style={{ alignSelf: 'flex-end', position: 'absolute', top: RFPercentage(60) }}>
                             <Image
                                 source={IMAGES.stars}
                                 resizeMode='contain'
                                 style={{ width: RFPercentage(10), height: RFPercentage(10) }}
                             />
                         </View>
-                        <View style={{ alignSelf: 'center', marginTop: RFPercentage(5) }}>
-                            <View style={{ left: RFPercentage(1.5) }}>
-                                <GradientButton title='Sign Up' />
-                            </View>
-                            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: RFPercentage(1) }}>
+                        <View style={{ alignSelf: 'center', marginTop: RFPercentage(5), width: '100%', alignItems: 'center', justifyContent: 'center' }}>
+
+                            <GradientButton title='Sign Up' />
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: RFPercentage(1.5) }}>
                                 <Text style={{ color: Colors.secondaryText, fontSize: RFPercentage(1.2), fontFamily: Fonts.fontRegular }}>Already have an account?</Text>
                                 <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>
                                     <Text style={{ color: Colors.gradient1, fontSize: RFPercentage(1.2), fontFamily: Fonts.fontRegular, left: 3 }}> Signin</Text>
@@ -164,8 +163,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     pictureContainer: {
-        width: RFPercentage(14),
-        height: RFPercentage(14),
+        width: RFPercentage(12),
+        height: RFPercentage(12),
         borderRadius: RFPercentage(10),
         alignItems: 'center',
         justifyContent: 'center',

@@ -24,7 +24,7 @@ interface Props {
 
 const GradientButton: React.FC<Props> = (props: Props) => {
     return (
-        <TouchableOpacity onPress={props.onPress} disabled={props.disabled} >
+        <TouchableOpacity activeOpacity={0.8} onPress={props.onPress} disabled={props.disabled}>
             <LinearGradient  colors={[Colors.gradient1, Colors.gradient2]} style={[styles.nextButton, { ...props.style }]}>
                 <Text style={[styles.nextButtonText]}>{props.loading ? <ActivityIndicator size={'small'} color={Colors.background} /> : props.title}</Text>
             </LinearGradient>

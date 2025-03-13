@@ -76,16 +76,15 @@ const SignIn: React.FC = () => {
                                     </TouchableOpacity>
                                 </View>
 
-                        <View style={{alignSelf: 'center', marginTop:RFPercentage(5) }}>
-                            <View style={{left:RFPercentage(1.5)}}>
-                                <GradientButton title='Sign In' />
-                            </View>
+                        <View style={{alignSelf: 'center', marginTop:RFPercentage(5) , width:'100%', justifyContent:'center', alignItems:'center'}}>
+                                <GradientButton title='Sign In' 
+                                // onPress={()=>navigation.navigate('Home')} 
+                                />
                             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop:RFPercentage(3.5) }}>
                                 <Text style={{ color: Colors.secondaryText, fontSize: RFPercentage(1.3), fontFamily: Fonts.fontRegular }}>Don't have an account?</Text>
                                 <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
                                     <Text style={{ color: Colors.gradient1, fontSize: RFPercentage(1.3), fontFamily: Fonts.fontRegular, left: 3 }}> Signup</Text>
                                 </TouchableOpacity>
-
                             </View>
                         </View>
 

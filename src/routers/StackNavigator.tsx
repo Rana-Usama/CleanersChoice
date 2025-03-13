@@ -10,7 +10,7 @@ import SignUp from '../screens/authscreens/SignUp';
 import ResetPassword from '../screens/authscreens/ResetPassword';
 import Verify from '../screens/authscreens/Verify';
 import ChangePassword from '../screens/authscreens/ChangePassword';
-// import BottomNavigation from './BottomNavigator';
+import BottomNavigation from './BottomTabNavigator';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 // import OrderCompleted from '../screens/homescreens/home/OrderCompleted';
 // import OrderFuel from '../screens/homescreens/home/OrderFuel';
@@ -39,7 +39,7 @@ export type RootStackParamList = {
     ResetPassword: undefined;
     Verify: undefined;
     ChangePassword: undefined;
-    // Home: undefined;
+    Home: undefined;
     // OrderCompleted: undefined;
     // FuelOrder: undefined;
     // PaymentMethod: undefined;
@@ -108,7 +108,7 @@ const StackNavigator: React.FC = () => {
                     <Stack.Screen name='ResetPassword' component={ResetPassword} />
                     <Stack.Screen name='Verify' component={Verify} />
                     <Stack.Screen name='ChangePassword' component={ChangePassword} />
-                    {/* <Stack.Screen name='Home' component={BottomNavigation} /> */}
+                    <Stack.Screen name='Home' component={BottomNavigation} />
                     {/* <Stack.Screen name='OrderCompleted' component={OrderCompleted} />
                     <Stack.Screen name='FuelOrder' component={OrderFuel} />
                     <Stack.Screen name='PaymentMethod' component={PaymentMethod} />
