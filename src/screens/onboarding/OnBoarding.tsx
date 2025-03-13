@@ -7,47 +7,52 @@ import {
   Text,
   View,
   Animated,
-  TouchableOpacity
+  TouchableOpacity,
 } from 'react-native';
-import React, { useState, useRef, useEffect } from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import NextButton from '../../components/NextButton';
 //   import SkipButton from '../../components/SkipButton';
 import LinearGradient from 'react-native-linear-gradient';
-import { useNavigation } from '@react-navigation/native';
-import { Fonts, IMAGES, Colors } from '../../constants/Themes';
-import { RFPercentage } from "react-native-responsive-fontsize";
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../routers/StackNavigator';
-import HeaderComponent from '../../components/HeaderComponent'
-const { width, height } = Dimensions.get('window');
+import {useNavigation} from '@react-navigation/native';
+import {Fonts, IMAGES, Colors} from '../../constants/Themes';
+import {RFPercentage} from 'react-native-responsive-fontsize';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {RootStackParamList} from '../../routers/StackNavigator';
+import HeaderComponent from '../../components/HeaderComponent';
+const {width, height} = Dimensions.get('window');
 
 interface StepsData {
   image: any;
   title: string;
-  description: string
+  description: string;
 }
 
 const stepsData: StepsData[] = [
   {
     image: IMAGES.onBoarding1,
     title: 'List your services',
-    description: 'List your cleaning services with details for customers to contact you',
+    description:
+      'List your cleaning services with details for customers to contact you',
   },
   {
     image: IMAGES.onBoarding2,
     title: 'Get your space cleaned',
-    description: 'Reach best cleaning businesses to clean up your precious spaces',
+    description:
+      'Reach best cleaning businesses to clean up your precious spaces',
   },
   {
     image: IMAGES.onBoarding3,
     title: 'Post Cleaning Jobs',
-    description: 'Post cleaning jobs for businesses to reach you with custom offers',
-  }
+    description:
+      'Post cleaning jobs for businesses to reach you with custom offers',
+  },
 ];
 
-
 const OnBoarding: React.FC = () => {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'OnBoarding'>>()
+  const navigation =
+    useNavigation<
+      NativeStackNavigationProp<RootStackParamList, 'OnBoarding'>
+    >();
   const [step, setStep] = useState<number>(1);
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -60,11 +65,9 @@ const OnBoarding: React.FC = () => {
     }
   };
 
-
   const skipPress = () => {
-    setStep(3)
+    setStep(3);
   };
-
 
   useEffect(() => {
     Animated.parallel([
@@ -81,15 +84,21 @@ const OnBoarding: React.FC = () => {
     ]).start();
   }, [step]);
 
-
-
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle={'dark-content'} translucent backgroundColor="transparent" />
+      <StatusBar
+        barStyle={'dark-content'}
+        translucent
+        backgroundColor="transparent"
+      />
       <HeaderComponent />
       <View style={styles.container}>
-
-        <View style={{ alignSelf: 'center', alignItems: 'center', marginTop: RFPercentage(9) }}>
+        <View
+          style={{
+            alignSelf: 'center',
+            alignItems: 'center',
+            marginTop: RFPercentage(9),
+          }}>
           <View style={{}}>
             {stepsData[step - 1] && (
               <Animated.Image
@@ -98,22 +107,24 @@ const OnBoarding: React.FC = () => {
                 style={{
                   width: width * 0.9,
                   height: height * 0.2,
-                  transform: [{ scale: scaleAnim }],
+                  transform: [{scale: scaleAnim}],
                   opacity: opacityAnim,
                 }}
               />
             )}
           </View>
 
-          <View style={{ marginTop: height * 0.05 }}>
+          <View style={{marginTop: height * 0.05}}>
             <Text style={styles.title}>{stepsData[step - 1].title}</Text>
             <View style={styles.descriptionContainer}>
-              <Text style={styles.description}>{stepsData[step - 1].description}</Text>
+              <Text style={styles.description}>
+                {stepsData[step - 1].description}
+              </Text>
             </View>
           </View>
 
           <View style={styles.dotsContainer}>
-            {[1, 2, 3].map((index) => (
+            {[1, 2, 3].map(index => (
               <TouchableOpacity key={index} onPress={() => setStep(index)}>
                 {step === index ? (
                   <LinearGradient
@@ -140,19 +151,30 @@ const OnBoarding: React.FC = () => {
             ))}
           </View>
         </View>
-        <View style={{ alignSelf: 'flex-end' }}>
+        <View style={{alignSelf: 'flex-end'}}>
           <Image
             source={IMAGES.stars}
-            resizeMode='contain'
-            style={{ width: RFPercentage(10), height: RFPercentage(10), top: RFPercentage(12), left: RFPercentage(2) }}
+            resizeMode="contain"
+            style={{
+              width: RFPercentage(10),
+              height: RFPercentage(10),
+              top: RFPercentage(12),
+              left: RFPercentage(2),
+            }}
           />
         </View>
 
         <View style={styles.buttonContainer}>
           <NextButton title={'Skip'} onPress={skipPress} />
-          <NextButton title={'Next'} onPress={step === 4 ? () => navigation.navigate('OnBoardingTwo') : nextPress} />
+          <NextButton
+            title={'Next'}
+            onPress={
+              step === 4
+                ? () => navigation.navigate('OnBoardingTwo')
+                : nextPress
+            }
+          />
         </View>
-
       </View>
     </SafeAreaView>
   );
@@ -170,7 +192,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: width * 0.05,
     backgroundColor: Colors.background,
     // paddingTop: height * 0.03,
-    alignItems: 'center'
+    alignItems: 'center',
   },
   title: {
     color: Colors.primaryText,
@@ -193,7 +215,7 @@ const styles = StyleSheet.create({
   dotsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: RFPercentage(1)
+    marginTop: RFPercentage(1),
   },
   dot: {
     width: RFPercentage(1.5),
@@ -207,9 +229,9 @@ const styles = StyleSheet.create({
     marginTop: height * 0.16,
     alignSelf: 'center',
     justifyContent: 'space-between',
-    width:'100%',
+    width: '100%',
     paddingHorizontal: RFPercentage(3.2),
     // marginLeft: RFPercentage(1.55),
-    bottom: RFPercentage(2)
+    bottom: RFPercentage(2),
   },
 });
