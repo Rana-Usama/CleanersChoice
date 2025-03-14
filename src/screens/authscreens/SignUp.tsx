@@ -51,7 +51,6 @@ const SignUp: React.FC = () => {
       });
   };
 
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar
@@ -102,7 +101,7 @@ const SignUp: React.FC = () => {
                   {img ? (
                     <>
                       <Image
-                        source={img?.path}
+                        source={{uri: img?.path}}
                         resizeMode="cover"
                         style={{
                           width: RFPercentage(12),
@@ -134,8 +133,8 @@ const SignUp: React.FC = () => {
                           width: RFPercentage(3),
                           height: RFPercentage(3),
                           position: 'absolute',
-                          left: RFPercentage(10),
-                          bottom: RFPercentage(0.6),
+                          left: RFPercentage(8.5),
+                          bottom: RFPercentage(0.5),
                         }}
                       />
                     </TouchableOpacity>
@@ -237,22 +236,22 @@ const SignUp: React.FC = () => {
               </View>
             </View>
           </View>
-        </ScrollView>
-        <View
-          style={{
-            position: 'absolute',
-            bottom: RFPercentage(14),
-            right: RFPercentage(1.5),
-          }}>
-          <Image
-            source={IMAGES.stars}
-            resizeMode="contain"
+          <View
             style={{
-              width: RFPercentage(10),
-              height: RFPercentage(10),
-            }}
-          />
-        </View>
+              position: 'absolute',
+              bottom: RFPercentage(14),
+              right: RFPercentage(1.5),
+            }}>
+            <Image
+              source={IMAGES.stars}
+              resizeMode="contain"
+              style={{
+                width: RFPercentage(8),
+                height: RFPercentage(8),
+              }}
+            />
+          </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -268,7 +267,7 @@ const styles = StyleSheet.create({
   container: {
     // flex: 1,
     backgroundColor: Colors.background,
-    paddingTop: height * 0.02,
+    // paddingTop: height * 0.02,
   },
   pictureContainer: {
     width: RFPercentage(12),
@@ -277,7 +276,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(243, 244, 246, 1)',
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: 'rgba(64, 123, 255, 1)',
     shadowColor: 'rgba(0, 0, 0, 0.15)',
     shadowOffset: {width: 0, height: 0},

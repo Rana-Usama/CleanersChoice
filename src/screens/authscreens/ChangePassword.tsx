@@ -110,8 +110,8 @@ const ChangePassword: React.FC = () => {
             source={IMAGES.stars}
             resizeMode="contain"
             style={{
-              width: RFPercentage(10),
-              height: RFPercentage(10),
+              width: RFPercentage(8),
+              height: RFPercentage(8),
             }}
           />
         </View>
@@ -128,48 +128,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   container: {
-    // flex: 1,
-    // paddingHorizontal: width * 0.05,
+    marginTop: Platform.OS == 'android' ? RFPercentage(4) : RFPercentage(-0.8),
     backgroundColor: Colors.background,
-    paddingTop: RFPercentage(6),
   },
-  pictureContainer: {
-    width: RFPercentage(14),
-    height: RFPercentage(14),
-    borderRadius: RFPercentage(10),
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(243, 244, 246, 1)',
-    borderWidth: 1,
-    borderColor: 'rgba(64, 123, 255, 1)',
-    // shadowColor: 'red',
-    // shadowOffset: { width: 40, height: 40 },
-    // shadowOpacity: 0,
-    // shadowRadius: 0,
-    // elevation: 8,
-  },
-  radioContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: RFPercentage(0.3),
-    paddingHorizontal: RFPercentage(1.4),
-  },
-  radioButtonRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  radioLabel: {
-    fontSize: RFPercentage(1.4),
-    color: Colors.primaryText,
-    marginLeft: 5,
-    fontFamily: Fonts.fontRegular,
-    bottom: 1.5,
-  },
-  forgotPassword: {
-    fontSize: RFPercentage(1.4),
-    color: Colors.primaryText,
-    fontFamily: Fonts.fontRegular,
-    bottom: 1.5,
-  },
+ 
 });

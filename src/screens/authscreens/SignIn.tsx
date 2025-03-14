@@ -155,8 +155,8 @@ const SignIn: React.FC = () => {
               source={IMAGES.stars}
               resizeMode="contain"
               style={{
-                width: RFPercentage(10),
-                height: RFPercentage(10),
+                width: RFPercentage(8),
+                height: RFPercentage(8),
               }}
             />
           </View>
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
   container: {
     // flex: 1,
     backgroundColor: Colors.background,
-    paddingTop: height * 0.02,
+    // paddingTop: height * 0.02,
   },
   pictureContainer: {
     width: RFPercentage(14),

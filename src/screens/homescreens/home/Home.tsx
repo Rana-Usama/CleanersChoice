@@ -7,6 +7,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Platform,
 } from 'react-native';
 import React, {useState} from 'react';
 import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
@@ -128,7 +129,9 @@ const Home = () => {
   const [Filter, setFilter] = useState(null);
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={{paddingBottom:RFPercentage(10)}} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={{paddingBottom: RFPercentage(10)}}
+        showsVerticalScrollIndicator={false}>
         <View style={styles.container}>
           <View
             style={{
@@ -191,7 +194,7 @@ const Home = () => {
               Categories
             </Text>
           </View>
-          <View style={{marginTop: RFPercentage(1.5)}}>
+          <View style={{marginTop: RFPercentage(1.5), }}>
             <FlatList
               data={categories}
               keyExtractor={item => item.id.toString()}
@@ -313,7 +316,12 @@ const Home = () => {
               Cleaning Services
             </Text>
           </View>
-          <View style={{width: '95%', alignSelf: 'center', marginTop:RFPercentage(2)}}>
+          <View
+            style={{
+              width: '95%',
+              alignSelf: 'center',
+              marginTop: RFPercentage(2),
+            }}>
             <FlatList
               data={services}
               keyExtractor={item => item.id.toString()}
@@ -349,6 +357,6 @@ const styles = StyleSheet.create({
   },
   container: {
     backgroundColor: Colors.background,
-    paddingTop: RFPercentage(4),
+    marginTop: Platform.OS == 'android' ? RFPercentage(4) : RFPercentage(-0.8),
   },
 });

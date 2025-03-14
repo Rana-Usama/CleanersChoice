@@ -71,7 +71,7 @@ const OnBoarding = () => {
     Animated.parallel([
       Animated.timing(imageAnim, {
         toValue: 0,
-        duration: 1000,
+        duration: 1200,
         useNativeDriver: true,
       }),
       Animated.timing(textAnim, {

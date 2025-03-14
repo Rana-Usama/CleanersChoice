@@ -67,7 +67,7 @@ const CustomTabBar:React.FC<BottomTabBarProps> = ({ state, descriptors, navigati
                         style={[styles.tabButton, isFocused && styles.activeTab]}
                         >
                         {route.name === "Home" ? (
-                            <View style={{ bottom: RFPercentage(2.5), right:RFPercentage(0.5) }}>
+                            <View style={{ bottom: RFPercentage(2.5) }}>
                                 <Image source={isFocused ? Icons.home : Icons.homeInactive} style={{ width: RFPercentage(6.5), height: RFPercentage(6.5) }} resizeMode="contain" />
                             </View>
                         ) :
@@ -144,6 +144,7 @@ const styles = StyleSheet.create({
     },
     tabButton: {
         alignItems: "center",
+        width:RFPercentage(8)
     },
     activeTab: {
         fontWeight: "bold",

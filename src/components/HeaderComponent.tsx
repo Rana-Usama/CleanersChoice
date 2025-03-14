@@ -12,7 +12,7 @@ const HeaderComponent: React.FC = () => {
         justifyContent: 'center',
         alignSelf: 'center',
         marginTop:
-          Platform.OS == 'android' ? RFPercentage(2) : RFPercentage(-0.8),
+          Platform.OS == 'android' ? RFPercentage(4) : RFPercentage(-0.8),
       }}>
       <View style={{position: 'absolute', left: 0}}>
         <Image
