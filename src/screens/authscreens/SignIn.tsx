@@ -118,7 +118,7 @@ const SignIn: React.FC = () => {
             }}>
             <GradientButton
               title="Sign In"
-              // onPress={()=>navigation.navigate('Home')}
+              onPress={()=>navigation.navigate('Home')}
             />
             <View
               style={{

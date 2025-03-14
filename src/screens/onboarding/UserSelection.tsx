@@ -69,7 +69,7 @@ const UserSelection: React.FC = () => {
         </View>
         <View
           style={{
-            marginTop: RFPercentage(4),
+            marginTop: RFPercentage(3),
             width: '90%',
             alignItems: 'center',
             justifyContent: 'center',
@@ -111,8 +111,8 @@ const UserSelection: React.FC = () => {
           source={IMAGES.stars}
           resizeMode="contain"
           style={{
-            width: RFPercentage(10),
-            height: RFPercentage(10),
+            width: RFPercentage(8),
+            height: RFPercentage(8),
           }}
         />
       </View>

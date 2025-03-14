@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Image, Keyboard, BackHandler } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Icons , Colors} from "../constants/Themes";
+import { Icons , Colors, Fonts} from "../constants/Themes";
 import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import Messages from "../screens/homescreens/messages/Messages";
@@ -54,6 +54,7 @@ const CustomTabBar:React.FC<BottomTabBarProps> = ({ state, descriptors, navigati
 
     return (
         <View style={styles.tabBarContainer}>
+            <View style={{width:'90%', flexDirection:'row', alignItems:'center', justifyContent:'space-around',}}>
             {state.routes.map((route, index) => {
                 const { options } = descriptors[route.key];
                 const label = options.tabBarLabel !== undefined ? options.tabBarLabel : route.name;
@@ -66,36 +67,37 @@ const CustomTabBar:React.FC<BottomTabBarProps> = ({ state, descriptors, navigati
                         style={[styles.tabButton, isFocused && styles.activeTab]}
                         >
                         {route.name === "Home" ? (
-                            <View style={{ bottom: RFPercentage(1.6), marginRight:RFPercentage(3) }}>
-                                <Image source={isFocused ? Icons.home : Icons.homeInactive} style={{ width: RFPercentage(3), height: 55 }} resizeMode="contain" />
+                            <View style={{ bottom: RFPercentage(2.5), right:RFPercentage(0.5) }}>
+                                <Image source={isFocused ? Icons.home : Icons.homeInactive} style={{ width: RFPercentage(6.5), height: RFPercentage(6.5) }} resizeMode="contain" />
                             </View>
                         ) :
                             route.name === "Messages" ?
                                 (
-                                    <Image source={isFocused ? Icons.msgActive : Icons.msg} style={{ width: 20, height: 20 }} resizeMode="contain" />
+                                    <Image source={isFocused ? Icons.msgActive : Icons.msg} style={{ width: RFPercentage(2.5), height: RFPercentage(2.5) }} resizeMode="contain" />
                                 )
                                 :
-                                route.name === "Jobs" ?
+                                route.name === "Job Board" ?
                                     (
-                                        <Image source={isFocused ? Icons.jobActive : Icons.job} style={{ width: 20, height: 20 }} resizeMode="contain" />
+                                        <Image source={isFocused ? Icons.jobActive : Icons.job} style={{width: RFPercentage(2.5), height: RFPercentage(2.5)  }} resizeMode="contain" />
                                     )
                                     :
                                     route.name === "Settings" ?
                                         (
-                                            <Image source={isFocused ? Icons.settingActive : Icons.settings} style={{ width: 20, height: 20 }} resizeMode="contain" />
+                                            <Image source={isFocused ? Icons.settingActive : Icons.settings} style={{ width: RFPercentage(2.5), height: RFPercentage(2.5),}} resizeMode="contain" />
                                         )
                                         :
 
                                         (
-                                            <Image source={isFocused ? Icons.profileActive : Icons.profile} style={{ width: 20, height: 20 }} resizeMode="contain" />
+                                            <Image source={isFocused ? Icons.profileActive : Icons.profile} style={{ width: RFPercentage(2.5), height: RFPercentage(2.5)  }} resizeMode="contain" />
                                         )
 
 
                         }
-                        <Text style={{ color: isFocused ? Colors.gradient2 : "#777", fontSize: 11, top: 5, fontFamily: 'Poppins-Regular' }}>{route.name === "Home" ? '' : label}</Text>
+                        <Text style={{ color: isFocused ? Colors.gradient2 : Colors.secondaryText, fontSize: RFPercentage(1.2), top: 5, fontFamily: Fonts.fontRegular }}>{route.name === "Home" ? '' : label}</Text>
                     </TouchableOpacity>
                 );
             })}
+            </View>
         </View>
     );
 };
@@ -128,18 +130,16 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     tabBarContainer: {
-        flexDirection: "row",
         height: RFPercentage(8),
         backgroundColor: "rgba(241, 245, 249, 1)",
-        borderRadius: RFPercentage(5),
+        borderRadius: RFPercentage(3),
         position: "absolute",
         bottom: 0,
         left: 0,
         right: 0,
-        justifyContent: "space-around",
-        alignItems: "center",
-        width: '99%',
-        paddingHorizontal: RFPercentage(1.5)
+        width: '100%',
+        alignItems:'center',
+        justifyContent:'center'
 
     },
     tabButton: {
