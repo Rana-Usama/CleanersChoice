@@ -22,7 +22,7 @@ import HeaderComponent from '../../components/HeaderComponent';
 
 const {width, height} = Dimensions.get('window');
 
-const OnBoardingTwo: React.FC = () => {
+const UserSelection: React.FC = () => {
   const navigation =
     useNavigation<
       NativeStackNavigationProp<RootStackParamList, 'OnBoardingTwo'>
@@ -35,9 +35,14 @@ const OnBoardingTwo: React.FC = () => {
         translucent
         backgroundColor="transparent"
       />
-      <HeaderComponent />
       <View style={styles.container}>
-        <View style={{marginTop: RFPercentage(7), alignSelf: 'center'}}>
+        <HeaderComponent />
+        <View
+          style={{
+            marginTop: RFPercentage(7),
+            alignSelf: 'center',
+            width: '90%',
+          }}>
           <Text
             style={{
               color: Colors.primaryText,
@@ -48,14 +53,28 @@ const OnBoardingTwo: React.FC = () => {
             Register Yourself As
           </Text>
         </View>
-        <View style={{marginTop: RFPercentage(4.8)}}>
+        <View
+          style={{
+            marginTop: RFPercentage(4.8),
+            width: '90%',
+            alignItems: 'center',
+            justifyContent: 'center',
+            alignSelf: 'center',
+          }}>
           <SelectionButton
             title="Customer / Get Cleaning Service"
             onPress={() => navigation.navigate('SignUp')}
             icon={Icons.customer}
           />
         </View>
-        <View style={{marginTop: RFPercentage(4)}}>
+        <View
+          style={{
+            marginTop: RFPercentage(4),
+            width: '90%',
+            alignItems: 'center',
+            justifyContent: 'center',
+            alignSelf: 'center',
+          }}>
           <SelectionButton
             title="Business Owner /Cleaner"
             onPress={() => console.log('hi')}
@@ -64,8 +83,11 @@ const OnBoardingTwo: React.FC = () => {
         </View>
         <View
           style={{
-            marginTop: RFPercentage(3.9),
-            paddingHorizontal: RFPercentage(4),
+            marginTop: RFPercentage(4.8),
+            width: '90%',
+            alignItems: 'center',
+            justifyContent: 'center',
+            alignSelf: 'center',
           }}>
           <Text
             style={{
@@ -73,28 +95,32 @@ const OnBoardingTwo: React.FC = () => {
               fontFamily: Fonts.fontRegular,
               fontSize: RFPercentage(1.5),
               textAlign: 'center',
+              width: '80%',
             }}>
             Let us know how you would like to register yourself!
           </Text>
         </View>
-        <View style={{alignSelf: 'flex-end'}}>
-          <Image
-            source={IMAGES.stars}
-            resizeMode="contain"
-            style={{
-              width: RFPercentage(10),
-              height: RFPercentage(10),
-              top: RFPercentage(25),
-              left: RFPercentage(2),
-            }}
-          />
-        </View>
+      </View>
+      <View
+        style={{
+          position: 'absolute',
+          bottom: RFPercentage(14),
+          right: RFPercentage(1.5),
+        }}>
+        <Image
+          source={IMAGES.stars}
+          resizeMode="contain"
+          style={{
+            width: RFPercentage(10),
+            height: RFPercentage(10),
+          }}
+        />
       </View>
     </SafeAreaView>
   );
 };
 
-export default OnBoardingTwo;
+export default UserSelection;
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -102,11 +128,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   container: {
-    flex: 1,
-    paddingHorizontal: width * 0.05,
+    // flex: 1,
     backgroundColor: Colors.background,
-    paddingTop: height * 0.03,
-    alignItems: 'center',
+    paddingTop: height * 0.02,
   },
   title: {
     color: Colors.primaryText,

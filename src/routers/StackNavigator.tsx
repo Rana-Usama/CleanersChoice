@@ -4,7 +4,7 @@ import { DarkTheme, NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import Splash from '../screens/splashscreens/Splash';
 import OnBoarding from '../screens/onboarding/OnBoarding';
-import OnBoardingTwo from '../screens/onboarding/OnBoardingTwo';
+import UserSelection from '../screens/onboarding/UserSelection';
 import SignIn from '../screens/authscreens/SignIn';
 import SignUp from '../screens/authscreens/SignUp';
 import ResetPassword from '../screens/authscreens/ResetPassword';
@@ -33,7 +33,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 export type RootStackParamList = {
     Splash: undefined;
     OnBoarding: undefined;
-    OnBoardingTwo: undefined;
+    UserSelection: undefined;
     SignIn: undefined;
     SignUp: undefined;
     ResetPassword: undefined;
@@ -102,7 +102,7 @@ const StackNavigator: React.FC = () => {
                     initialRouteName={'Splash'}>
                     <Stack.Screen name='Splash' component={Splash} />
                     <Stack.Screen name='OnBoarding' component={OnBoarding} />
-                    <Stack.Screen name='OnBoardingTwo' component={OnBoardingTwo} />
+                    <Stack.Screen name='UserSelection' component={UserSelection} />
                     <Stack.Screen name='SignUp' component={SignUp} />
                     <Stack.Screen name='SignIn' component={SignIn} />
                     <Stack.Screen name='ResetPassword' component={ResetPassword} />
