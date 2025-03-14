@@ -12,8 +12,6 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import React, {useState} from 'react';
-import NextButton from '../../components/NextButton';
-import LinearGradient from 'react-native-linear-gradient';
 import {useNavigation} from '@react-navigation/native';
 import {Fonts, IMAGES, Colors, Icons} from '../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -116,7 +114,7 @@ const SignUp: React.FC = () => {
                         style={{
                           color: Colors.secondaryText,
                           fontFamily: Fonts.fontRegular,
-                          fontSize: RFPercentage(1.2),
+                          fontSize: RFPercentage(1.5),
                         }}>
                         Upload Picture
                       </Text>
@@ -172,27 +170,26 @@ const SignUp: React.FC = () => {
                   flexDirection: 'row',
                   alignItems: 'center',
                 }}>
-                <RadioButton>
-                  <RadioButtonInput
-                    obj={{value: 0}}
-                    index={0}
-                    isSelected={selected}
-                    onPress={() => setSelected(!selected)}
-                    borderWidth={1}
-                    buttonInnerColor={Colors.gradient1}
-                    buttonOuterColor={
-                      selected ? Colors.gradient1 : 'rgba(229, 231, 235, 1)'
-                    }
-                    buttonSize={9}
-                    buttonOuterSize={16}
-                  />
-                </RadioButton>
+                {/* <RadioButton> */}
+                <RadioButtonInput
+                  obj={{value: 0}}
+                  index={0}
+                  isSelected={selected}
+                  onPress={() => setSelected(!selected)}
+                  borderWidth={1}
+                  buttonInnerColor={Colors.gradient1}
+                  buttonOuterColor={
+                    selected ? Colors.gradient1 : 'rgba(229, 231, 235, 1)'
+                  }
+                  buttonSize={9}
+                  buttonOuterSize={16}
+                />
+                {/* </RadioButton> */}
                 <Text
                   style={{
                     color: Colors.primaryText,
                     fontSize: RFPercentage(1.4),
                     fontFamily: Fonts.fontRegular,
-                    bottom: 1.5,
                     marginLeft: RFPercentage(0.8),
                   }}>
                   I agree to terms and conditions
@@ -212,12 +209,12 @@ const SignUp: React.FC = () => {
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
-                  marginTop: RFPercentage(1.5),
+                  marginTop: RFPercentage(4),
                 }}>
                 <Text
                   style={{
                     color: Colors.secondaryText,
-                    fontSize: RFPercentage(1.4),
+                    fontSize: RFPercentage(1.5),
                     fontFamily: Fonts.fontRegular,
                   }}>
                   Already have an account?
@@ -226,8 +223,8 @@ const SignUp: React.FC = () => {
                   <Text
                     style={{
                       color: Colors.gradient1,
-                      fontSize: RFPercentage(1.4),
-                      fontFamily: Fonts.fontRegular,
+                      fontSize: RFPercentage(1.5),
+                      fontFamily: Fonts.fontMedium,
                       left: 3,
                     }}>
                     Signin
@@ -251,6 +248,7 @@ const SignUp: React.FC = () => {
               }}
             />
           </View>
+          <View style={{marginBottom: RFPercentage(5)}} />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -270,8 +268,8 @@ const styles = StyleSheet.create({
     // paddingTop: height * 0.02,
   },
   pictureContainer: {
-    width: RFPercentage(12),
-    height: RFPercentage(12),
+    width: RFPercentage(13.5),
+    height: RFPercentage(13.5),
     borderRadius: RFPercentage(10),
     alignItems: 'center',
     justifyContent: 'center',

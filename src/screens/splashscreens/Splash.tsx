@@ -1,10 +1,4 @@
-import {
-  ImageBackground,
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-  Image,
-} from 'react-native';
+import {SafeAreaView, StatusBar, StyleSheet, Image} from 'react-native';
 import React, {useEffect} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {IMAGES, Colors} from '../../constants/Themes';

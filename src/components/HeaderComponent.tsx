@@ -11,19 +11,20 @@ const HeaderComponent: React.FC = () => {
         alignItems: 'center',
         justifyContent: 'center',
         alignSelf: 'center',
-        marginTop:
-          Platform.OS == 'android' ? RFPercentage(4) : RFPercentage(-0.8),
+        marginTop: Platform.OS == 'android' ? RFPercentage(4) : RFPercentage(0),
       }}>
-      <View style={{position: 'absolute', left: 0}}>
-        <Image
-          source={IMAGES.stars}
-          resizeMode="contain"
-          style={{
-            width: RFPercentage(8),
-            height: RFPercentage(8),
-          }}
-        />
-      </View>
+      {/* {!topLeftStars ? (
+        <View style={{position: 'absolute', left: 0}}>
+          <Image
+            source={IMAGES.stars}
+            resizeMode="contain"
+            style={{
+              width: RFPercentage(8),
+              height: RFPercentage(8),
+            }}
+          />
+        </View>
+      ) : null} */}
 
       <Image
         source={IMAGES.logo}

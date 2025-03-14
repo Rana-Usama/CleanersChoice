@@ -25,8 +25,6 @@ import InputField from '../../components/InputField';
 import PasswordField from '../../components/PasswordField';
 import GradientButton from '../../components/GradientButton';
 
-const {width, height} = Dimensions.get('window');
-
 const SignIn: React.FC = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, 'SignIn'>>();
@@ -48,8 +46,8 @@ const SignIn: React.FC = () => {
           <View
             style={{
               alignSelf: 'center',
-              marginVertical: RFPercentage(2),
               width: '90%',
+              marginTop: RFPercentage(2.2),
             }}>
             <Text
               style={{
@@ -66,7 +64,7 @@ const SignIn: React.FC = () => {
           <View
             style={{
               alignSelf: 'center',
-              marginTop: RFPercentage(1.8),
+              marginTop: RFPercentage(2.9),
               width: '95%',
               alignItems: 'center',
             }}>
@@ -82,21 +80,19 @@ const SignIn: React.FC = () => {
                 flexDirection: 'row',
               }}>
               <View style={styles.radioButtonRow}>
-                <RadioButton>
-                  <RadioButtonInput
-                    obj={{value: 0}}
-                    index={0}
-                    isSelected={selected}
-                    onPress={() => setSelected(!selected)}
-                    borderWidth={1}
-                    buttonInnerColor={Colors.gradient1}
-                    buttonOuterColor={
-                      selected ? Colors.gradient1 : 'rgba(229, 231, 235, 1)'
-                    }
-                    buttonSize={8}
-                    buttonOuterSize={14}
-                  />
-                </RadioButton>
+                <RadioButtonInput
+                  obj={{value: 0}}
+                  index={0}
+                  isSelected={selected}
+                  onPress={() => setSelected(!selected)}
+                  borderWidth={1}
+                  buttonInnerColor={Colors.gradient1}
+                  buttonOuterColor={
+                    selected ? Colors.gradient1 : 'rgba(229, 231, 235, 1)'
+                  }
+                  buttonSize={8}
+                  buttonOuterSize={14}
+                />
                 <Text style={styles.radioLabel}>Remember me?</Text>
               </View>
 
@@ -118,7 +114,7 @@ const SignIn: React.FC = () => {
             }}>
             <GradientButton
               title="Sign In"
-              onPress={()=>navigation.navigate('Home')}
+              onPress={() => navigation.navigate('Home')}
             />
             <View
               style={{
@@ -129,7 +125,7 @@ const SignIn: React.FC = () => {
               <Text
                 style={{
                   color: Colors.secondaryText,
-                  fontSize: RFPercentage(1.4),
+                  fontSize: RFPercentage(1.5),
                   fontFamily: Fonts.fontRegular,
                 }}>
                 Don't have an account?
@@ -138,8 +134,8 @@ const SignIn: React.FC = () => {
                 <Text
                   style={{
                     color: Colors.gradient1,
-                    fontSize: RFPercentage(1.4),
-                    fontFamily: Fonts.fontRegular,
+                    fontSize: RFPercentage(1.5),
+                    fontFamily: Fonts.fontMedium,
                     left: 3,
                   }}>
                   Signup
@@ -147,19 +143,22 @@ const SignIn: React.FC = () => {
               </TouchableOpacity>
             </View>
           </View>
-
-          
         </View>
-        <View style={{position: 'absolute',bottom:RFPercentage(6), right: RFPercentage(1.5),}}>
-            <Image
-              source={IMAGES.stars}
-              resizeMode="contain"
-              style={{
-                width: RFPercentage(8),
-                height: RFPercentage(8),
-              }}
-            />
-          </View>
+        <View
+          style={{
+            position: 'absolute',
+            bottom: RFPercentage(6),
+            right: RFPercentage(1.5),
+          }}>
+          <Image
+            source={IMAGES.stars}
+            resizeMode="contain"
+            style={{
+              width: RFPercentage(8),
+              height: RFPercentage(8),
+            }}
+          />
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -202,13 +201,13 @@ const styles = StyleSheet.create({
   radioButtonRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   radioLabel: {
     fontSize: RFPercentage(1.4),
     color: Colors.primaryText,
     marginLeft: 6,
     fontFamily: Fonts.fontRegular,
-    bottom: 1,
   },
   forgotPassword: {
     fontSize: RFPercentage(1.4),

@@ -42,6 +42,7 @@ const UserSelection: React.FC = () => {
             marginTop: RFPercentage(7),
             alignSelf: 'center',
             width: '90%',
+            justifyContent: 'center',
           }}>
           <Text
             style={{
@@ -83,7 +84,7 @@ const UserSelection: React.FC = () => {
         </View>
         <View
           style={{
-            marginTop: RFPercentage(4.8),
+            marginTop: RFPercentage(4.6),
             width: '90%',
             alignItems: 'center',
             justifyContent: 'center',
@@ -93,7 +94,7 @@ const UserSelection: React.FC = () => {
             style={{
               color: Colors.primaryText,
               fontFamily: Fonts.fontRegular,
-              fontSize: RFPercentage(1.5),
+              fontSize: RFPercentage(1.6),
               textAlign: 'center',
               width: '80%',
             }}>

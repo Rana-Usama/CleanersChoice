@@ -51,12 +51,12 @@ const ResetPassword: React.FC = () => {
         <View style={styles.container}>
           <View
             style={{
-              marginVertical: RFPercentage(2),
               flexDirection: 'row',
               alignItems: 'center',
               justifyContent: 'space-between',
               width: '90%',
               alignSelf: 'center',
+              marginTop: RFPercentage(3),
             }}>
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <Entypo
@@ -80,7 +80,7 @@ const ResetPassword: React.FC = () => {
           <View
             style={{
               alignSelf: 'center',
-              marginTop: RFPercentage(1.8),
+              marginTop: RFPercentage(3),
               width: '95%',
               alignItems: 'center',
             }}>
@@ -90,7 +90,7 @@ const ResetPassword: React.FC = () => {
           <View
             style={{
               alignSelf: 'center',
-              marginTop: RFPercentage(5),
+              marginTop: RFPercentage(3),
               width: '95%',
               justifyContent: 'center',
               alignItems: 'center',

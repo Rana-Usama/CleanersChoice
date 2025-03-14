@@ -162,7 +162,7 @@ const Home = () => {
               <Text
                 style={{
                   color: Colors.gradient1,
-                  fontFamily: Fonts.fontRegular,
+                  fontFamily: Fonts.semiBold,
                   fontSize: RFPercentage(1.5),
                 }}>
                 Post Job
@@ -194,7 +194,7 @@ const Home = () => {
               Categories
             </Text>
           </View>
-          <View style={{marginTop: RFPercentage(1.5), }}>
+          <View style={{marginTop: RFPercentage(1.5)}}>
             <FlatList
               data={categories}
               keyExtractor={item => item.id.toString()}

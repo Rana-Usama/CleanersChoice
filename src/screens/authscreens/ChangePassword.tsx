@@ -29,16 +29,16 @@ const ChangePassword: React.FC = () => {
       NativeStackNavigationProp<RootStackParamList, 'ChangePassword'>
     >();
 
-    const [loading, setLoading] = useState(false)
-              
-                const handleNext = () => {
-                  setLoading(true)
-                  setTimeout(() => {
-                    navigation.navigate('SignIn')
-                    setLoading(false)
-                  }, 2000);
-                }
-    
+  const [loading, setLoading] = useState(false);
+
+  const handleNext = () => {
+    setLoading(true);
+    setTimeout(() => {
+      navigation.navigate('SignIn');
+      setLoading(false);
+    }, 2000);
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar
@@ -48,17 +48,9 @@ const ChangePassword: React.FC = () => {
       />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{flex: 1}}>
+        style={styles.keyboardAvoidingView}>
         <View style={styles.container}>
-          <View
-            style={{
-              marginVertical: RFPercentage(2),
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              width:'90%',
-              alignSelf:'center'
-            }}>
+          <View style={styles.header}>
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <Entypo
                 name="chevron-thin-left"
@@ -66,53 +58,28 @@ const ChangePassword: React.FC = () => {
                 size={RFPercentage(2)}
               />
             </TouchableOpacity>
-            <Text
-              style={{
-                color: Colors.primaryText,
-                fontFamily: Fonts.semiBold,
-                fontSize: RFPercentage(2.3),
-                textAlign: 'center',
-              }}>
-              Set New Password
-            </Text>
+            <Text style={styles.headerText}>Set New Password</Text>
             <View></View>
           </View>
 
-          <View
-            style={{
-              alignSelf: 'center',
-              marginTop: RFPercentage(1.8),
-              width: '95%',
-              alignItems: 'center',
-            }}>
+          <View style={styles.inputContainer}>
             <InputField placeholder="Enter new Password" />
             <InputField placeholder="Repeat new Password" />
           </View>
 
-          <View
-            style={{
-              alignSelf: 'center',
-              marginTop: RFPercentage(5),
-              width: '90%',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
-            <GradientButton title="Save" onPress={handleNext} loading={loading} />
+          <View style={styles.buttonContainer}>
+            <GradientButton
+              title="Save"
+              onPress={handleNext}
+              loading={loading}
+            />
           </View>
         </View>
-        <View
-          style={{
-            position: 'absolute',
-            bottom: RFPercentage(6),
-            right: RFPercentage(1.5),
-          }}>
+        <View style={styles.imageContainer}>
           <Image
             source={IMAGES.stars}
             resizeMode="contain"
-            style={{
-              width: RFPercentage(8),
-              height: RFPercentage(8),
-            }}
+            style={styles.starImage}
           />
         </View>
       </KeyboardAvoidingView>
@@ -131,5 +98,43 @@ const styles = StyleSheet.create({
     marginTop: Platform.OS == 'android' ? RFPercentage(4) : RFPercentage(-0.8),
     backgroundColor: Colors.background,
   },
- 
+  keyboardAvoidingView: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '90%',
+    alignSelf: 'center',
+    marginTop: RFPercentage(3),
+  },
+  headerText: {
+    color: Colors.primaryText,
+    fontFamily: Fonts.semiBold,
+    fontSize: RFPercentage(2.3),
+    textAlign: 'center',
+  },
+  inputContainer: {
+    alignSelf: 'center',
+    marginTop: RFPercentage(3),
+    width: '95%',
+    alignItems: 'center',
+  },
+  buttonContainer: {
+    alignSelf: 'center',
+    marginTop: RFPercentage(3),
+    width: '90%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  imageContainer: {
+    position: 'absolute',
+    bottom: RFPercentage(6),
+    right: RFPercentage(1.5),
+  },
+  starImage: {
+    width: RFPercentage(8),
+    height: RFPercentage(8),
+  },
 });

@@ -41,10 +41,11 @@ const PasswordField: React.FC<Props> = (props: Props) => {
             color: Colors.primaryText,
             fontFamily: Fonts.fontRegular,
             fontSize: RFPercentage(1.5),
-            paddingVertical:0,
-            marginVertical:0,
+            paddingVertical: 0,
+            marginVertical: 0,
             textAlignVertical: 'center',
-            includeFontPadding: false
+            includeFontPadding: false,
+            width: '80%',
           }}
           secureTextEntry={!visible}
           value={props.value}
@@ -70,7 +71,7 @@ export default PasswordField;
 const styles = StyleSheet.create({
   container: {
     width: '90%',
-    height: RFPercentage(5),
+    height: RFPercentage(5.4),
     borderWidth: 1,
     borderColor: Colors.inputFieldColor,
     borderRadius: RFPercentage(0.8),
