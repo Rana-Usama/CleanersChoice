@@ -70,12 +70,12 @@ const OnBoarding = () => {
 
     Animated.parallel([
       Animated.timing(imageAnim, {
-        toValue: 0, 
+        toValue: 0,
         duration: 1000,
         useNativeDriver: true,
       }),
       Animated.timing(textAnim, {
-        toValue: 0, 
+        toValue: 0,
         duration: 1000,
         useNativeDriver: true,
       }),
@@ -96,6 +96,7 @@ const OnBoarding = () => {
       />
       <View style={styles.container}>
         <HeaderComponent />
+
         <View style={styles.content}>
           {/* Animated Image */}
           <Animated.Image
@@ -113,7 +114,7 @@ const OnBoarding = () => {
           {/* Animated Text */}
           <Animated.View
             style={{
-              marginTop: height * 0.05,
+              marginTop: RFPercentage(2),
               alignItems: 'center',
               transform: [{translateY: textAnim}],
               opacity: opacityAnim,
@@ -145,8 +146,8 @@ const OnBoarding = () => {
 
         {/* Buttons */}
         <View style={styles.buttonWrapper}>
-          <View style={{flexDirection:'row', alignItems:'center', justifyContent:'space-between', width:'80%'}}>
-            <NextButton title="Skip" onPress={() => setStep(3)} />
+          <NextButton title="Skip" onPress={() => setStep(3)} />
+          <View style={{marginLeft: RFPercentage(2)}}>
             <NextButton title="Next" onPress={nextPress} />
           </View>
         </View>
@@ -161,8 +162,8 @@ const OnBoarding = () => {
           source={IMAGES.stars}
           resizeMode="contain"
           style={{
-            width: RFPercentage(10),
-            height: RFPercentage(10),
+            width: RFPercentage(8),
+            height: RFPercentage(8),
           }}
         />
       </View>
@@ -179,7 +180,6 @@ const styles = StyleSheet.create({
   },
   container: {
     backgroundColor: Colors.background,
-    paddingTop: height * 0.02,
   },
   content: {
     alignSelf: 'center',
@@ -188,18 +188,18 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(12),
   },
   image: {
-    width: width * 0.9,
+    width: width * 0.8,
     height: height * 0.2,
   },
   title: {
     color: Colors.primaryText,
-    fontSize: RFPercentage(2.5),
+    fontSize: RFPercentage(2.4),
     fontFamily: Fonts.semiBold,
     textAlign: 'center',
   },
   descriptionContainer: {
     width: '80%',
-    marginVertical: RFPercentage(1.5),
+    marginVertical: RFPercentage(1.2),
   },
   description: {
     color: Colors.secondaryText,
@@ -226,10 +226,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(209, 213, 219, 1)',
   },
   buttonWrapper: {
-    width: '90%',
+    width: '100%',
     justifyContent: 'center',
     alignSelf: 'center',
-    marginTop: height * 0.22,
-    alignItems:'center'
+    marginTop: height * 0.25,
+    alignItems: 'center',
+    flexDirection: 'row',
   },
 });
