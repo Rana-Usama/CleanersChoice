@@ -1,25 +1,21 @@
 import {
-  Dimensions,
   Image,
   SafeAreaView,
   StatusBar,
   StyleSheet,
   Text,
   View,
-  ScrollView,
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
 } from 'react-native';
 import React, {useState} from 'react';
-import NextButton from '../../components/NextButton';
-import LinearGradient from 'react-native-linear-gradient';
 import {useNavigation} from '@react-navigation/native';
 import {Fonts, IMAGES, Colors, Icons} from '../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../routers/StackNavigator';
-import {RadioButton, RadioButtonInput} from 'react-native-simple-radio-button';
+import {RadioButtonInput} from 'react-native-simple-radio-button';
 import HeaderComponent from '../../components/HeaderComponent';
 import InputField from '../../components/InputField';
 import PasswordField from '../../components/PasswordField';
@@ -43,42 +39,16 @@ const SignIn: React.FC = () => {
         style={{flex: 1}}>
         <View style={styles.container}>
           <HeaderComponent />
-          <View
-            style={{
-              alignSelf: 'center',
-              width: '90%',
-              marginTop: RFPercentage(2.2),
-            }}>
-            <Text
-              style={{
-                color: Colors.primaryText,
-                fontFamily: Fonts.fontMedium,
-                fontSize: RFPercentage(2),
-                textAlign: 'center',
-                marginTop: RFPercentage(1),
-              }}>
-              Welcome Back
-            </Text>
+          <View style={styles.headerContainer}>
+            <Text style={styles.heading}>Welcome Back</Text>
           </View>
 
-          <View
-            style={{
-              alignSelf: 'center',
-              marginTop: RFPercentage(2.9),
-              width: '95%',
-              alignItems: 'center',
-            }}>
+          <View style={styles.fieldContainer}>
             <InputField placeholder="Username" />
             <PasswordField placeholder="Password" />
           </View>
           <View style={styles.radioContainer}>
-            <View
-              style={{
-                width: '90%',
-                alignItems: 'center',
-                justifyContent: 'flex-start',
-                flexDirection: 'row',
-              }}>
+            <View style={styles.radioInner}>
               <View style={styles.radioButtonRow}>
                 <RadioButtonInput
                   obj={{value: 0}}
@@ -88,7 +58,7 @@ const SignIn: React.FC = () => {
                   borderWidth={1}
                   buttonInnerColor={Colors.gradient1}
                   buttonOuterColor={
-                    selected ? Colors.gradient1 : 'rgba(229, 231, 235, 1)'
+                    selected ? Colors.gradient1 : Colors.inputFieldColor
                   }
                   buttonSize={8}
                   buttonOuterSize={14}
@@ -104,59 +74,24 @@ const SignIn: React.FC = () => {
             </View>
           </View>
 
-          <View
-            style={{
-              alignSelf: 'center',
-              marginTop: RFPercentage(5),
-              width: '90%',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
+          <View style={styles.buttonContainer}>
             <GradientButton
               title="Sign In"
               onPress={() => navigation.navigate('Home')}
             />
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginTop: RFPercentage(3.5),
-              }}>
-              <Text
-                style={{
-                  color: Colors.secondaryText,
-                  fontSize: RFPercentage(1.5),
-                  fontFamily: Fonts.fontRegular,
-                }}>
-                Don't have an account?
-              </Text>
+            <View style={styles.bottomContainer}>
+              <Text style={styles.bottomText}>Don't have an account?</Text>
               <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-                <Text
-                  style={{
-                    color: Colors.gradient1,
-                    fontSize: RFPercentage(1.5),
-                    fontFamily: Fonts.fontMedium,
-                    left: 3,
-                  }}>
-                  Signup
-                </Text>
+                <Text style={styles.signUp}>Signup</Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
-        <View
-          style={{
-            position: 'absolute',
-            bottom: RFPercentage(6),
-            right: RFPercentage(1.5),
-          }}>
+        <View style={styles.starContainer}>
           <Image
             source={IMAGES.stars}
             resizeMode="contain"
-            style={{
-              width: RFPercentage(8),
-              height: RFPercentage(8),
-            }}
+            style={styles.star}
           />
         </View>
       </KeyboardAvoidingView>
@@ -172,24 +107,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   container: {
-    // flex: 1,
     backgroundColor: Colors.background,
-    // paddingTop: height * 0.02,
-  },
-  pictureContainer: {
-    width: RFPercentage(14),
-    height: RFPercentage(14),
-    borderRadius: RFPercentage(10),
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(243, 244, 246, 1)',
-    borderWidth: 1,
-    borderColor: 'rgba(64, 123, 255, 1)',
-    // shadowColor: 'red',
-    // shadowOffset: { width: 40, height: 40 },
-    // shadowOpacity: 0,
-    // shadowRadius: 0,
-    // elevation: 8,
   },
   radioContainer: {
     alignItems: 'center',
@@ -213,6 +131,62 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.4),
     color: Colors.primaryText,
     fontFamily: Fonts.fontRegular,
-    bottom: 1.5,
+    // bottom: 1.5,
+  },
+  headerContainer: {
+    alignSelf: 'center',
+    width: '90%',
+    marginTop: RFPercentage(2.2),
+  },
+  heading: {
+    color: Colors.primaryText,
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(2),
+    textAlign: 'center',
+    marginTop: RFPercentage(1),
+  },
+  fieldContainer: {
+    alignSelf: 'center',
+    marginTop: RFPercentage(2.9),
+    width: '95%',
+    alignItems: 'center',
+  },
+  radioInner: {
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    flexDirection: 'row',
+  },
+  buttonContainer: {
+    alignSelf: 'center',
+    marginTop: RFPercentage(5),
+    width: '90%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  bottomContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: RFPercentage(3.5),
+  },
+  bottomText: {
+    color: Colors.secondaryText,
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontRegular,
+  },
+  signUp: {
+    color: Colors.gradient1,
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontMedium,
+    left: 3,
+  },
+  starContainer: {
+    position: 'absolute',
+    bottom: RFPercentage(6),
+    right: RFPercentage(1.5),
+  },
+  star: {
+    width: RFPercentage(8),
+    height: RFPercentage(8),
   },
 });

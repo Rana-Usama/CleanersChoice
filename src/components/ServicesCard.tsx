@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: RFPercentage(1),
+    marginTop: RFPercentage(2),
   },
   activeDot: {
     width: RFPercentage(0.8),
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(209, 213, 219, 1)',
   },
   detailsContainer: {
-    padding: RFPercentage(1),
+    padding: RFPercentage(1.5),
   },
   rowContainer: {
     flexDirection: 'row',
@@ -159,6 +159,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: RFPercentage(1.6),
+    marginTop: RFPercentage(1.5),
   },
 });

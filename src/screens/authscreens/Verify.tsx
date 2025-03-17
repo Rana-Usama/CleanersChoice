@@ -20,6 +20,7 @@ import {RootStackParamList} from '../../routers/StackNavigator';
 import InputField from '../../components/InputField';
 import GradientButton from '../../components/GradientButton';
 import Entypo from 'react-native-vector-icons/Entypo';
+import HeaderBack from '../../components/HeaderBack';
 
 const Verify: React.FC = () => {
   const navigation =
@@ -44,54 +45,14 @@ const Verify: React.FC = () => {
       />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{flex: 1}}>
+        style={styles.flexOne}>
         <View style={styles.container}>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              width: '90%',
-              alignSelf: 'center',
-              marginTop: RFPercentage(3),
-            }}>
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <Entypo
-                name="chevron-thin-left"
-                color={Colors.secondaryText}
-                size={RFPercentage(2)}
-              />
-            </TouchableOpacity>
-            <Text
-              style={{
-                color: Colors.primaryText,
-                fontFamily: Fonts.semiBold,
-                fontSize: RFPercentage(2.3),
-                textAlign: 'center',
-              }}>
-              Reset Password?
-            </Text>
-            <View></View>
-          </View>
-
-          <View
-            style={{
-              alignSelf: 'center',
-              marginTop: RFPercentage(3),
-              width: '95%',
-              alignItems: 'center',
-            }}>
+        <HeaderBack title={'Reset Password?'} />
+          <View style={styles.inputContainer}>
             <InputField placeholder="Enter sent OTP" />
           </View>
 
-          <View
-            style={{
-              alignSelf: 'center',
-              marginTop: RFPercentage(3),
-              width: '95%',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
+          <View style={styles.buttonContainer}>
             <GradientButton
               title="Verify"
               onPress={handleNext}
@@ -99,19 +60,11 @@ const Verify: React.FC = () => {
             />
           </View>
         </View>
-        <View
-          style={{
-            position: 'absolute',
-            bottom: RFPercentage(6),
-            right: RFPercentage(1.5),
-          }}>
+        <View style={styles.imageContainer}>
           <Image
             source={IMAGES.stars}
             resizeMode="contain"
-            style={{
-              width: RFPercentage(8),
-              height: RFPercentage(8),
-            }}
+            style={styles.image}
           />
         </View>
       </KeyboardAvoidingView>
@@ -126,8 +79,47 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
+  flexOne: {
+    flex: 1,
+  },
   container: {
     marginTop: Platform.OS == 'android' ? RFPercentage(4) : RFPercentage(-0.8),
     backgroundColor: Colors.background,
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '90%',
+    alignSelf: 'center',
+    marginTop: RFPercentage(3),
+  },
+  headerText: {
+    color: Colors.primaryText,
+    fontFamily: Fonts.semiBold,
+    fontSize: RFPercentage(2.3),
+    textAlign: 'center',
+  },
+  inputContainer: {
+    alignSelf: 'center',
+    marginTop: RFPercentage(3),
+    width: '95%',
+    alignItems: 'center',
+  },
+  buttonContainer: {
+    alignSelf: 'center',
+    marginTop: RFPercentage(3),
+    width: '95%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  imageContainer: {
+    position: 'absolute',
+    bottom: RFPercentage(8),
+    right: RFPercentage(1.5),
+  },
+  image: {
+    width: RFPercentage(8),
+    height: RFPercentage(8),
   },
 });

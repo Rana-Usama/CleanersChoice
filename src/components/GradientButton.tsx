@@ -28,12 +28,12 @@ const GradientButton: React.FC<Props> = (props: Props) => {
         colors={[Colors.gradient1, Colors.gradient2]}
         style={[styles.nextButton, {...props.style}]}>
         <Text style={[styles.nextButtonText]}>
-          {/* {props.loading ? (
+          {props.loading ? (
             <ActivityIndicator size={'small'} color={Colors.background} />
           ) : (
-            
-          )} */}
-          {props.title}
+            props.title
+          )}
+          {/* {props.title} */}
         </Text>
       </LinearGradient>
     </TouchableOpacity>

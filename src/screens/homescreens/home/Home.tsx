@@ -18,31 +18,36 @@ import ServicesCard from '../../../components/ServicesCard';
 const categories = [
   {
     id: 1,
-    name: 'Residential',
+    name: 'All',
     icon: Icons.category,
   },
   {
     id: 2,
-    name: 'Pressure W..',
+    name: 'Residential',
     icon: Icons.category,
   },
   {
     id: 3,
-    name: 'Window Cl..',
+    name: 'Pressure W..',
     icon: Icons.category,
   },
   {
     id: 4,
-    name: 'Carpet Cle..',
+    name: 'Window Cl..',
     icon: Icons.category,
   },
   {
     id: 5,
-    name: 'Chimney C..',
+    name: 'Carpet Cle..',
     icon: Icons.category,
   },
   {
     id: 6,
+    name: 'Chimney C..',
+    icon: Icons.category,
+  },
+  {
+    id: 7,
     name: 'Chimney C..',
     icon: Icons.category,
   },
@@ -127,6 +132,8 @@ const services = [
 ];
 const Home = () => {
   const [Filter, setFilter] = useState(null);
+  const [categorySelection, setCategorySelection] = useState(1);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
@@ -203,14 +210,14 @@ const Home = () => {
               renderItem={({item}) => {
                 return (
                   <View>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={()=> setCategorySelection(item.id)}>
                       <View
                         style={{
                           width: RFPercentage(9.5),
                           height: RFPercentage(9.5),
                           borderRadius: RFPercentage(1),
                           borderWidth: 1,
-                          borderColor: Colors.inputFieldColor,
+                          borderColor: categorySelection === item.id ? Colors.gradient2 : Colors.inputFieldColor,
                           alignItems: 'center',
                           justifyContent: 'center',
                           marginHorizontal: RFPercentage(1),
@@ -228,9 +235,10 @@ const Home = () => {
                           <Text
                             style={{
                               color: Colors.primaryText,
-                              fontFamily: Fonts.fontRegular,
-                              fontSize: RFPercentage(1.2),
-                              top: RFPercentage(0.7),
+                              fontFamily: categorySelection === item.id ? Fonts.semiBold :   Fonts.fontRegular,
+                              fontSize: RFPercentage(1.3),
+                              top: RFPercentage(0.9),
+                              textAlign:'center'
                             }}>
                             {item.name}
                           </Text>
@@ -240,7 +248,7 @@ const Home = () => {
                   </View>
                 );
               }}
-              contentContainerStyle={{paddingHorizontal: RFPercentage(1.8)}}
+              contentContainerStyle={{paddingHorizontal: RFPercentage(1.4)}}
             />
           </View>
           <View
@@ -290,7 +298,7 @@ const Home = () => {
                           style={{
                             color: Colors.primaryText,
                             fontSize: RFPercentage(1.4),
-                            fontFamily: Fonts.fontRegular,
+                            fontFamily: Filter === item.id ? Fonts.semiBold :   Fonts.fontRegular,
                           }}>
                           {item.name}
                         </Text>
@@ -320,7 +328,7 @@ const Home = () => {
             style={{
               width: '95%',
               alignSelf: 'center',
-              marginTop: RFPercentage(2),
+              marginTop: RFPercentage(0.8),
             }}>
             <FlatList
               data={services}

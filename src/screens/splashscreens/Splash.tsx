@@ -12,7 +12,7 @@ const Splash: React.FC = () => {
   useEffect(() => {
     const timeout = setTimeout(() => {
       navigation.navigate('OnBoarding');
-    }, 3000);
+    }, 2500);
 
     return () => clearTimeout(timeout);
   }, [navigation]);

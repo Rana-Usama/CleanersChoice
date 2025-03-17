@@ -6,11 +6,9 @@ import {
   StyleSheet,
   Text,
   View,
-  Animated,
 } from 'react-native';
-import React, {useState, useRef, useEffect} from 'react';
+import React from 'react';
 import NextButton from '../../components/NextButton';
-//   import SkipButton from '../../components/SkipButton';
 import LinearGradient from 'react-native-linear-gradient';
 import {useNavigation} from '@react-navigation/native';
 import {Fonts, IMAGES, Colors, Icons} from '../../constants/Themes';
@@ -37,85 +35,31 @@ const UserSelection: React.FC = () => {
       />
       <View style={styles.container}>
         <HeaderComponent />
-        <View
-          style={{
-            marginTop: RFPercentage(7),
-            alignSelf: 'center',
-            width: '90%',
-            justifyContent: 'center',
-          }}>
-          <Text
-            style={{
-              color: Colors.primaryText,
-              fontFamily: Fonts.semiBold,
-              fontSize: RFPercentage(2.2),
-              textAlign: 'center',
-            }}>
-            Register Yourself As
-          </Text>
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>Register Yourself As</Text>
         </View>
-        <View
-          style={{
-            marginTop: RFPercentage(4.8),
-            width: '90%',
-            alignItems: 'center',
-            justifyContent: 'center',
-            alignSelf: 'center',
-          }}>
+        <View style={styles.selectionContainer}>
           <SelectionButton
             title="Customer / Get Cleaning Service"
             onPress={() => navigation.navigate('SignUp')}
             icon={Icons.customer}
           />
         </View>
-        <View
-          style={{
-            marginTop: RFPercentage(3),
-            width: '90%',
-            alignItems: 'center',
-            justifyContent: 'center',
-            alignSelf: 'center',
-          }}>
+        <View style={styles.selectionContainer}>
           <SelectionButton
             title="Business Owner /Cleaner"
             onPress={() => console.log('hi')}
             icon={Icons.owner}
           />
         </View>
-        <View
-          style={{
-            marginTop: RFPercentage(4.6),
-            width: '90%',
-            alignItems: 'center',
-            justifyContent: 'center',
-            alignSelf: 'center',
-          }}>
-          <Text
-            style={{
-              color: Colors.primaryText,
-              fontFamily: Fonts.fontRegular,
-              fontSize: RFPercentage(1.6),
-              textAlign: 'center',
-              width: '80%',
-            }}>
+        <View style={styles.descriptionContainer}>
+          <Text style={styles.description}>
             Let us know how you would like to register yourself!
           </Text>
         </View>
       </View>
-      <View
-        style={{
-          position: 'absolute',
-          bottom: RFPercentage(14),
-          right: RFPercentage(1.5),
-        }}>
-        <Image
-          source={IMAGES.stars}
-          resizeMode="contain"
-          style={{
-            width: RFPercentage(8),
-            height: RFPercentage(8),
-          }}
-        />
+      <View style={styles.imageContainer}>
+        <Image source={IMAGES.stars} resizeMode="contain" style={styles.image} />
       </View>
     </SafeAreaView>
   );
@@ -129,47 +73,48 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   container: {
-    // flex: 1,
     backgroundColor: Colors.background,
-    // paddingTop: height * 0.02,
+  },
+  titleContainer: {
+    marginTop: RFPercentage(7),
+    alignSelf: 'center',
+    width: '90%',
+    justifyContent: 'center',
   },
   title: {
     color: Colors.primaryText,
-    fontSize: RFPercentage(2.5),
-    fontFamily: Fonts.fontBold,
-    lineHeight: 27,
+    fontFamily: Fonts.semiBold,
+    fontSize: RFPercentage(2.2),
     textAlign: 'center',
+  },
+  selectionContainer: {
+    marginTop: RFPercentage(3.5),
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
   },
   descriptionContainer: {
-    marginHorizontal: RFPercentage(6),
-    marginVertical: RFPercentage(1.5),
+    marginTop: RFPercentage(4.6),
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
   },
   description: {
-    color: Colors.secondaryText,
-    fontSize: RFPercentage(1.6),
+    color: Colors.primaryText,
     fontFamily: Fonts.fontRegular,
-    lineHeight: 19,
+    fontSize: RFPercentage(1.6),
     textAlign: 'center',
+    width: '80%',
   },
-  dotsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: RFPercentage(1),
+  imageContainer: {
+    position: 'absolute',
+    bottom: RFPercentage(14),
+    right: RFPercentage(1.5),
   },
-  dot: {
-    width: RFPercentage(1.5),
-    height: RFPercentage(1.5),
-    borderRadius: 8,
-    marginHorizontal: 5,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: height * 0.16,
-    alignSelf: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: RFPercentage(2.6),
-    marginLeft: RFPercentage(1.55),
-    bottom: RFPercentage(2),
+  image: {
+    width: RFPercentage(8),
+    height: RFPercentage(8),
   },
 });
