@@ -7,6 +7,7 @@ export const Colors: {[key: string]: string} = {
   buttonColor: 'rgba(235, 245, 255, 1)',
   inputFieldColor: 'rgba(229, 231, 235, 1)',
   placeholderColor: 'rgba(107, 114, 128, 1)',
+  brown : "rgba(68, 64, 60, 1)"
 };
 
 export const Icons: {[key: string]: any} = {
@@ -25,6 +26,10 @@ export const Icons: {[key: string]: any} = {
   homeInactive: require('../assets/icons/home-inactive.png'),
   homeLogo: require('../assets/icons/homeLogo.png'),
   category: require('../assets/icons/category.png'),
+  availability: require('../assets/icons/availability.png'),
+  calendar: require('../assets/icons/calendar-2.png'),
+  editProfile: require('../assets/icons/editProfile.png'),
+
 };
 
 export const IMAGES: {[key: string]: any} = {
@@ -43,6 +48,8 @@ export const IMAGES: {[key: string]: any} = {
   cleaners: require('../assets/images/cleaners.png'),
   clean: require('../assets/images/clean.png'),
   star: require('../assets/images/star.png'),
+  picture: require('../assets/images/picture.png'),
+
 };
 
 export const Fonts: {[key: string]: string} = {

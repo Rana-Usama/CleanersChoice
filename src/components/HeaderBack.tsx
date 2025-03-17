@@ -34,7 +34,7 @@ const HeaderBack: React.FC = props => {
           />
         </TouchableOpacity>
       </View>
-      <Text style={styles.headerText}>{props.title}</Text>
+      <Text style={[styles.headerText, props.textStyle]}>{props.title}</Text>
     </View>
   );
 };

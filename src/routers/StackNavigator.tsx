@@ -12,23 +12,10 @@ import Verify from '../screens/authscreens/Verify';
 import ChangePassword from '../screens/authscreens/ChangePassword';
 import BottomNavigation from './BottomTabNavigator';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-// import OrderCompleted from '../screens/homescreens/home/OrderCompleted';
-// import OrderFuel from '../screens/homescreens/home/OrderFuel';
-// import PaymentMethod from '../screens/homescreens/home/PaymentMethod';
-// import PlaceOrder from '../screens/homescreens/home/PlaceOrder';
-// import EditProfile from '../screens/homescreens/profile/EditProfile';
-// import ChangePasswordScreen from '../screens/homescreens/profile/ChangePassword';
-// import Cards from '../screens/homescreens/profile/Cards';
-// import AddCard from '../screens/homescreens/profile/AddCard';
-// import FAQS from '../screens/homescreens/settings/FAQ';
-// import Terms from '../screens/homescreens/settings/Terms';
-// import Privacy from '../screens/homescreens/settings/Privacy';
-// import AddVehicle from '../screens/homescreens/vehicles/AddVehicle';
-// import AsyncStorage from '@react-native-async-storage/async-storage';
-// import messaging from '@react-native-firebase/messaging';
-// import VitalsDetails from '../screens/chart/VitalsDetails';
-// import BarChartScreen from '../screens/chart/BarChart';
-// import { navigationRef } from '../../index'
+import ServiceDetails from '../screens/homescreens/home/ServiceDetails';
+import PostJob from '../screens/homescreens/home/PostJob';
+import JobPosted from '../screens/homescreens/home/JobPosted';
+import EditProfile from '../screens/homescreens/profile/EditProfile';
 
 export type RootStackParamList = {
     Splash: undefined;
@@ -40,11 +27,11 @@ export type RootStackParamList = {
     Verify: undefined;
     ChangePassword: undefined;
     Home: undefined;
-    // OrderCompleted: undefined;
-    // FuelOrder: undefined;
-    // PaymentMethod: undefined;
+    ServiceDetails: undefined;
+    PostJob: undefined;
+    JobPosted: undefined;
     // PlaceOrder: undefined;
-    // EditProfile: undefined;
+    EditProfile: undefined;
     // ChangePasswordScreen: undefined;
     // Cards: undefined;
     // AddCard: undefined;
@@ -109,20 +96,10 @@ const StackNavigator: React.FC = () => {
                     <Stack.Screen name='Verify' component={Verify} />
                     <Stack.Screen name='ChangePassword' component={ChangePassword} />
                     <Stack.Screen name='Home' component={BottomNavigation} />
-                    {/* <Stack.Screen name='OrderCompleted' component={OrderCompleted} />
-                    <Stack.Screen name='FuelOrder' component={OrderFuel} />
-                    <Stack.Screen name='PaymentMethod' component={PaymentMethod} />
-                    <Stack.Screen name='PlaceOrder' component={PlaceOrder} />
+                    <Stack.Screen name='ServiceDetails' component={ServiceDetails} />
+                    <Stack.Screen name='PostJob' component={PostJob} />
+                    <Stack.Screen name='JobPosted' component={JobPosted} />
                     <Stack.Screen name='EditProfile' component={EditProfile} />
-                    <Stack.Screen name='ChangePasswordScreen' component={ChangePasswordScreen} />
-                    <Stack.Screen name='Cards' component={Cards} />
-                    <Stack.Screen name='AddCard' component={AddCard} />
-                    <Stack.Screen name='FAQS' component={FAQS} />
-                    <Stack.Screen name='Terms' component={Terms} />
-                    <Stack.Screen name='Privacy' component={Privacy} />
-                    <Stack.Screen name='AddVehicle' component={AddVehicle} />
-                    <Stack.Screen name='VitalsDetails' component={VitalsDetails} />
-                    <Stack.Screen name='BarChartScreen' component={BarChartScreen} /> */}
                 </Stack.Navigator>
             </NavigationContainer>
         </SafeAreaProvider>

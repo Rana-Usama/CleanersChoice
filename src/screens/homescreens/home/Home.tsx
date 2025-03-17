@@ -14,6 +14,7 @@ import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import SearchField from '../../../components/SearchField';
 import ServicesCard from '../../../components/ServicesCard';
+import {useNavigation} from '@react-navigation/native';
 
 const categories = [
   {
@@ -78,6 +79,7 @@ const services = [
     location: 'Ohio',
     rating: 5,
     star: IMAGES.star,
+    joining : '26 April, 2024'
   },
   {
     id: 2,
@@ -88,6 +90,8 @@ const services = [
     location: 'Ohio',
     rating: 5,
     star: IMAGES.star,
+    joining : '26 April, 2024'
+
   },
   {
     id: 3,
@@ -98,6 +102,8 @@ const services = [
     location: 'Ohio',
     rating: 5,
     star: IMAGES.star,
+    joining : '26 April, 2024'
+
   },
   {
     id: 4,
@@ -108,6 +114,8 @@ const services = [
     location: 'Ohio',
     rating: 5,
     star: IMAGES.star,
+    joining : '26 April, 2024'
+
   },
   {
     id: 5,
@@ -118,6 +126,8 @@ const services = [
     location: 'Ohio',
     rating: 5,
     star: IMAGES.star,
+    joining : '26 April, 2024'
+
   },
   {
     id: 6,
@@ -128,11 +138,14 @@ const services = [
     location: 'Ohio',
     rating: 5,
     star: IMAGES.star,
+    joining : '26 April, 2024'
+
   },
 ];
 const Home = () => {
   const [Filter, setFilter] = useState(null);
   const [categorySelection, setCategorySelection] = useState(1);
+  const navigation = useNavigation();
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -165,7 +178,7 @@ const Home = () => {
                 Home
               </Text>
             </View>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={()=> navigation.navigate('PostJob')}>
               <Text
                 style={{
                   color: Colors.gradient1,
@@ -210,14 +223,18 @@ const Home = () => {
               renderItem={({item}) => {
                 return (
                   <View>
-                    <TouchableOpacity onPress={()=> setCategorySelection(item.id)}>
+                    <TouchableOpacity
+                      onPress={() => setCategorySelection(item.id)}>
                       <View
                         style={{
                           width: RFPercentage(9.5),
                           height: RFPercentage(9.5),
                           borderRadius: RFPercentage(1),
                           borderWidth: 1,
-                          borderColor: categorySelection === item.id ? Colors.gradient2 : Colors.inputFieldColor,
+                          borderColor:
+                            categorySelection === item.id
+                              ? Colors.gradient2
+                              : Colors.inputFieldColor,
                           alignItems: 'center',
                           justifyContent: 'center',
                           marginHorizontal: RFPercentage(1),
@@ -235,10 +252,13 @@ const Home = () => {
                           <Text
                             style={{
                               color: Colors.primaryText,
-                              fontFamily: categorySelection === item.id ? Fonts.semiBold :   Fonts.fontRegular,
+                              fontFamily:
+                                categorySelection === item.id
+                                  ? Fonts.semiBold
+                                  : Fonts.fontRegular,
                               fontSize: RFPercentage(1.3),
                               top: RFPercentage(0.9),
-                              textAlign:'center'
+                              textAlign: 'center',
                             }}>
                             {item.name}
                           </Text>
@@ -298,7 +318,10 @@ const Home = () => {
                           style={{
                             color: Colors.primaryText,
                             fontSize: RFPercentage(1.4),
-                            fontFamily: Filter === item.id ? Fonts.semiBold :   Fonts.fontRegular,
+                            fontFamily:
+                              Filter === item.id
+                                ? Fonts.semiBold
+                                : Fonts.fontRegular,
                           }}>
                           {item.name}
                         </Text>
@@ -345,6 +368,11 @@ const Home = () => {
                     star={item.star}
                     rating={item.rating}
                     location={item.location}
+                    onPress={() =>
+                      navigation.navigate('ServiceDetails', {
+                        item: item,
+                      })
+                    }
                   />
                 </View>
               )}

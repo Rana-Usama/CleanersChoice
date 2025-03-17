@@ -5,11 +5,11 @@ import {RFPercentage} from 'react-native-responsive-fontsize';
 import LinearGradient from 'react-native-linear-gradient';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 
-const ServicesCard = ({covers, icon, name, price, rating, star, location}) => {
+const ServicesCard = ({covers, icon, name, price, rating, star, location, onPress}) => {
   const [step, setStep] = useState(0);
 
   return (
-    <TouchableOpacity>
+    <TouchableOpacity  activeOpacity={0.6} onPress={onPress}>
       <View style={styles.container}>
         <View style={{width: '100%', height: RFPercentage(13)}}>
           <Image

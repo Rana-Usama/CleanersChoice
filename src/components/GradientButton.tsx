@@ -16,6 +16,7 @@ interface Props {
   title: string;
   style?: object;
   loading?: boolean;
+  textStyle? : object
 }
 
 const GradientButton: React.FC<Props> = (props: Props) => {
@@ -27,7 +28,7 @@ const GradientButton: React.FC<Props> = (props: Props) => {
       <LinearGradient
         colors={[Colors.gradient1, Colors.gradient2]}
         style={[styles.nextButton, {...props.style}]}>
-        <Text style={[styles.nextButtonText]}>
+        <Text style={[styles.nextButtonText, {...props.textStyle}]}>
           {props.loading ? (
             <ActivityIndicator size={'small'} color={Colors.background} />
           ) : (
