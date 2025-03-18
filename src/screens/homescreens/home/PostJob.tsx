@@ -156,10 +156,10 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: Colors.background,
-    paddingTop: RFPercentage(1),
   },
   scrollContainer: {
     flexGrow: 1,
+    paddingBottom:RFPercentage(8),
   },
   container: {
     width: '90%',

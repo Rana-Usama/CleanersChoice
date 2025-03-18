@@ -7,7 +7,7 @@ export const Colors: {[key: string]: string} = {
   buttonColor: 'rgba(235, 245, 255, 1)',
   inputFieldColor: 'rgba(229, 231, 235, 1)',
   placeholderColor: 'rgba(107, 114, 128, 1)',
-  brown : "rgba(68, 64, 60, 1)"
+  brown: 'rgba(68, 64, 60, 1)',
 };
 
 export const Icons: {[key: string]: any} = {
@@ -29,7 +29,16 @@ export const Icons: {[key: string]: any} = {
   availability: require('../assets/icons/availability.png'),
   calendar: require('../assets/icons/calendar-2.png'),
   editProfile: require('../assets/icons/editProfile.png'),
-
+  delete: require('../assets/icons/delete.png'),
+  arrowRight: require('../assets/icons/arrow-right.png'),
+  priceRange: require('../assets/icons/price-range.png'),
+  verify: require('../assets/icons/verify.png'),
+  bars: require('../assets/icons/bars.png'),
+  location: require('../assets/icons/location-2.png'),
+  policy: require('../assets/icons/policy.png'),
+  faqs: require('../assets/icons/Faqs.png'),
+  logOut: require('../assets/icons/log-out.png'),
+  terms : require('../assets/icons/terms.png'),
 };
 
 export const IMAGES: {[key: string]: any} = {
@@ -49,7 +58,6 @@ export const IMAGES: {[key: string]: any} = {
   clean: require('../assets/images/clean.png'),
   star: require('../assets/images/star.png'),
   picture: require('../assets/images/picture.png'),
-
 };
 
 export const Fonts: {[key: string]: string} = {

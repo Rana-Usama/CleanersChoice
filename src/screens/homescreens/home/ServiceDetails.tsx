@@ -178,11 +178,7 @@ const ServiceDetails: React.FC = ({route}) => {
                 style={styles.icon}
               />
               <Text
-                style={{
-                  color: Colors.primaryText,
-                  fontFamily: Fonts.fontMedium,
-                  fontSize: RFPercentage(1.4),
-                }}>
+                style={[styles.headeing2,{color:Colors.primaryText}]}>
                 {item.name}
               </Text>
             </View>
@@ -210,11 +206,7 @@ const ServiceDetails: React.FC = ({route}) => {
           <View style={{marginTop: RFPercentage(2.1)}}>
             <View>
               <Text
-                style={{
-                  color: Colors.placeholderColor,
-                  fontFamily: Fonts.fontMedium,
-                  fontSize: RFPercentage(1.5),
-                }}>
+                style={styles.headeing2}>
                 Description:
               </Text>
               <Text
@@ -266,11 +258,7 @@ const ServiceDetails: React.FC = ({route}) => {
                 justifyContent: 'space-between',
               }}>
               <Text
-                style={{
-                  color: Colors.placeholderColor,
-                  fontFamily: Fonts.fontMedium,
-                  fontSize: RFPercentage(1.5),
-                }}>
+                style={styles.headeing2}>
                 Services:
               </Text>
               <TouchableOpacity>
@@ -332,13 +320,7 @@ const ServiceDetails: React.FC = ({route}) => {
         </View>
         <View>
           <Text
-            style={{
-              color: Colors.placeholderColor,
-              fontFamily: Fonts.fontMedium,
-              fontSize: RFPercentage(1.5),
-              width: '90%',
-              alignSelf: 'center',
-            }}>
+            style={[styles.headeing2,{width:'90%', alignSelf:'center'}]}>
             Starting Packages:
           </Text>
           <View style={{marginTop: RFPercentage(1.5)}}>
@@ -363,12 +345,7 @@ const ServiceDetails: React.FC = ({route}) => {
         <View style={styles.container}>
           <View>
             <Text
-              style={{
-                color: Colors.placeholderColor,
-                fontFamily: Fonts.fontMedium,
-                fontSize: RFPercentage(1.4),
-                marginTop: RFPercentage(0.8),
-              }}>
+              style={[styles.headeing2,{marginTop:RFPercentage(0.9)}]}>
               Rating & Reviews:
             </Text>
           </View>
@@ -380,11 +357,7 @@ const ServiceDetails: React.FC = ({route}) => {
               marginTop: RFPercentage(1.8),
             }}>
             <Text
-              style={{
-                color: Colors.primaryText,
-                fontFamily: Fonts.fontMedium,
-                fontSize: RFPercentage(1.4),
-              }}>
+              style={[styles.headeing2,{color:Colors.primaryText}]}>
               Overall Rating
             </Text>
             <View
@@ -416,8 +389,11 @@ const ServiceDetails: React.FC = ({route}) => {
             <Review />
           </View>
         </View>
-        <View style={{alignSelf:'center', marginTop:RFPercentage(7)}}>
-            <GradientButton title='Get Custom Offer'  textStyle={{fontSize: RFPercentage(1.3)}}/>
+        <View style={{alignSelf: 'center', marginTop: RFPercentage(7)}}>
+          <GradientButton
+            title="Get Custom Offer"
+            textStyle={{fontSize: RFPercentage(1.3)}}
+          />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -430,7 +406,6 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: Colors.background,
-    paddingTop: RFPercentage(1),
   },
   container: {
     width: '90%',
@@ -480,5 +455,10 @@ const styles = StyleSheet.create({
     height: RFPercentage(1.3),
     marginRight: RFPercentage(0.2),
     bottom: RFPercentage(0.5),
+  },
+  headeing2: {
+    color: Colors.placeholderColor,
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.5),
   },
 });

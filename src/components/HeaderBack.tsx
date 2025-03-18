@@ -23,7 +23,7 @@ const HeaderBack: React.FC = props => {
         alignItems: 'center',
         justifyContent: 'center',
         alignSelf: 'center',
-        marginTop: Platform.OS == 'android' ? RFPercentage(4) : RFPercentage(0),
+        marginTop: Platform.OS == 'android' ? RFPercentage(6) : RFPercentage(0),
       }}>
       <View style={{position: 'absolute', left: 0}}>
         <TouchableOpacity onPress={() => navigation.goBack()}>

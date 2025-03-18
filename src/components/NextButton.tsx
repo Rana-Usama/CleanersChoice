@@ -19,14 +19,15 @@ interface Props {
     color?: string,
     title: string,
     style?: object,
-    loading? : boolean
+    loading? : boolean,
+    textStyle? : object
 }
 
 const NextButton: React.FC<Props> = (props: Props) => {
     return (
         <TouchableOpacity activeOpacity={0.8} onPress={props.onPress} disabled={props.disabled} >
             <View style={[styles.nextButton, { ...props.style }]}>
-                <Text style={[styles.nextButtonText]}>{props.loading ? <ActivityIndicator size={'small'} color={Colors.background} /> : props.title}</Text>
+                <Text style={[styles.nextButtonText,{...props.textStyle}]}>{props.loading ? <ActivityIndicator size={'small'} color={Colors.background} /> : props.title}</Text>
             </View>
         </TouchableOpacity>
     )
