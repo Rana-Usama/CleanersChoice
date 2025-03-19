@@ -12,25 +12,20 @@ import HeaderBack from '../../../components/HeaderBack';
 import ProfileField from '../../../components/ProfileField';
 import {useNavigation} from '@react-navigation/native';
 import {BlurView} from '@react-native-community/blur';
-import GradientButton from '../../../components/GradientButton';
-import NextButton from '../../../components/NextButton';
 import CustomModal from '../../../components/CustomModal';
 
 const Settings = () => {
   const navigation = useNavigation();
-  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [modalVisible, setModalVisible] = useState(false);
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <HeaderBack
-        title={'Settings'}
-        textStyle={{fontSize: RFPercentage(1.8)}}
-      />
+      <HeaderBack title={'Settings'} textStyle={styles.headerText} />
       <View style={styles.container}>
         <View style={styles.sectionTitle}>
           <Text style={styles.sectionTitleText}>Help & Security</Text>
         </View>
-        <View style={{marginTop: RFPercentage(1)}}>
+        <View style={styles.profileFieldsContainer}>
           <ProfileField
             text="Change Password"
             icon={Icons.policy}
@@ -61,12 +56,8 @@ const Settings = () => {
       </View>
       {modalVisible && (
         <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-          <View style={{position: 'absolute', width: '100%', height: '100%'}}>
-            <BlurView
-              style={{width: '100%', height: '100%', position: 'absolute'}}
-              blurType="light"
-              blurAmount={5}
-            />
+          <View style={styles.modalContainer}>
+            <BlurView style={styles.blurView} blurType="light" blurAmount={5} />
             <CustomModal
               title={'Are you sure you want to Logout?'}
               onPress={() => setModalVisible(false)}
@@ -86,6 +77,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
+  headerText: {
+    fontSize: RFPercentage(1.8),
+  },
   container: {
     width: '90%',
     alignSelf: 'center',
@@ -102,5 +96,18 @@ const styles = StyleSheet.create({
     color: Colors.primaryText,
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.6),
+  },
+  profileFieldsContainer: {
+    marginTop: RFPercentage(1),
+  },
+  modalContainer: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+  },
+  blurView: {
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
   },
 });

@@ -10,7 +10,7 @@ const CustomModal = props => {
   return (
     <View
       style={{
-        width: RFPercentage(35),
+        width: RFPercentage(38),
         borderRadius: RFPercentage(2),
         backgroundColor: 'rgb(232, 243, 252)',
         alignSelf: 'center',
@@ -31,10 +31,10 @@ const CustomModal = props => {
       <Text
         style={{
           textAlign: 'center',
-          fontSize: RFPercentage(1.5),
+          fontSize: RFPercentage(1.7),
           fontFamily: Fonts.fontRegular,
           color: Colors.fieldColor,
-          marginTop: RFPercentage(1),
+          marginTop: RFPercentage(1.5),
           marginHorizontal: RFPercentage(3),
           lineHeight: 20,
         }}>
@@ -50,11 +50,11 @@ const CustomModal = props => {
         <>
           <View
             style={{
-              marginTop: RFPercentage(2),
+              marginTop: RFPercentage(3),
               flexDirection: 'row',
               alignItems: 'center',
               justifyContent: 'space-between',
-              width: '94%',
+              width: '88%',
             }}>
             <NextButton
               title="Cancel"

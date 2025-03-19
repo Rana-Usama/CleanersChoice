@@ -14,41 +14,41 @@ import Message from '../../../components/Message';
 
 const messages = [
   {
-    id : 1,
-    name : 'Jane Smith',
-    message : 'Hey, will be be available...'
+    id: 1,
+    name: 'Jane Smith',
+    message: 'Hey, will be be available...',
   },
   {
-    id : 2,
-    name : 'Jane Smith',
-    message : 'Hey, will be be available...'
+    id: 2,
+    name: 'Jane Smith',
+    message: 'Hey, will be be available...',
   },
   {
-    id : 3,
-    name : 'Jane Smith',
-    message : 'Hey, will be be available...'
+    id: 3,
+    name: 'Jane Smith',
+    message: 'Hey, will be be available...',
   },
   {
-    id : 4,
-    name : 'Jane Smith',
-    message : 'Hey, will be be available...'
+    id: 4,
+    name: 'Jane Smith',
+    message: 'Hey, will be be available...',
   },
   {
-    id : 5,
-    name : 'Jane Smith',
-    message : 'Hey, will be be available...'
+    id: 5,
+    name: 'Jane Smith',
+    message: 'Hey, will be be available...',
   },
   {
-    id : 6,
-    name : 'Jane Smith',
-    message : 'Hey, will be be available...'
+    id: 6,
+    name: 'Jane Smith',
+    message: 'Hey, will be be available...',
   },
   {
-    id : 7,
-    name : 'Jane Smith',
-    message : 'Hey, will be be available...'
+    id: 7,
+    name: 'Jane Smith',
+    message: 'Hey, will be be available...',
   },
-]
+];
 
 const Messages = () => {
   const [all, setAll] = useState(true);
@@ -65,74 +65,59 @@ const Messages = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <HeaderBack title="Messages" textStyle={{fontSize: RFPercentage(1.8)}} />
+      <HeaderBack title="Messages" textStyle={styles.headerText} />
       <View style={styles.container}>
-        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+        <View style={styles.toggleContainer}>
           <TouchableOpacity onPress={toggle1}>
             <View
-              style={{
-                width: RFPercentage(12),
-                height: RFPercentage(4),
-                borderRadius: RFPercentage(100),
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor:
-                  all === true ? Colors.gradient1 : 'transparent',
-                borderWidth: 1,
-                borderColor:
-                  all === true ? 'transparent' : Colors.inputFieldColor,
-              }}>
+              style={[
+                styles.toggleButton,
+                {
+                  backgroundColor: all ? Colors.gradient1 : 'transparent',
+                  borderColor: all ? 'transparent' : Colors.inputFieldColor,
+                },
+              ]}>
               <Text
-                style={{
-                  color:
-                    all === true ? Colors.background : Colors.placeholderColor,
-                  fontFamily:
-                    all === true ? Fonts.fontMedium : Fonts.fontRegular,
-                  fontSize: RFPercentage(1.5),
-                }}>
+                style={[
+                  styles.toggleText,
+                  {
+                    color: all ? Colors.background : Colors.placeholderColor,
+                    fontFamily: all ? Fonts.fontMedium : Fonts.fontRegular,
+                  },
+                ]}>
                 All
               </Text>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity onPress={toggle2} style={{left: RFPercentage(2.8)}}>
+          <TouchableOpacity onPress={toggle2} style={styles.unreadButton}>
             <View
-              style={{
-                width: RFPercentage(12),
-                height: RFPercentage(4),
-                borderRadius: RFPercentage(100),
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor:
-                  unread === true ? Colors.gradient1 : 'transparent',
-                borderWidth: 1,
-                borderColor:
-                  unread === true ? 'transparent' : Colors.inputFieldColor,
-              }}>
+              style={[
+                styles.toggleButton,
+                {
+                  backgroundColor: unread ? Colors.gradient1 : 'transparent',
+                  borderColor: unread ? 'transparent' : Colors.inputFieldColor,
+                },
+              ]}>
               <Text
-                style={{
-                  color:
-                    unread === true
-                      ? Colors.background
-                      : Colors.placeholderColor,
-                  fontFamily:
-                    unread === true ? Fonts.fontMedium : Fonts.fontRegular,
-                  fontSize: RFPercentage(1.5),
-                }}>
+                style={[
+                  styles.toggleText,
+                  {
+                    color: unread ? Colors.background : Colors.placeholderColor,
+                    fontFamily: unread ? Fonts.fontMedium : Fonts.fontRegular,
+                  },
+                ]}>
                 Unread
               </Text>
             </View>
           </TouchableOpacity>
         </View>
-        <View style={{marginTop:RFPercentage(2)}}>
-          <FlatList 
-          data={messages}
-          keyExtractor={(item)=> item.id.toString()}
-          renderItem={({item})=> {
-            return (
-              <Message name={item.name} message={item.message} />
-            )
-          }}
-          
+        <View style={styles.messageList}>
+          <FlatList
+            data={messages}
+            keyExtractor={item => item.id.toString()}
+            renderItem={({item}) => {
+              return <Message name={item.name} message={item.message} />;
+            }}
           />
         </View>
       </View>
@@ -151,5 +136,29 @@ const styles = StyleSheet.create({
     width: '90%',
     alignSelf: 'center',
     paddingTop: RFPercentage(3),
+  },
+  headerText: {
+    fontSize: RFPercentage(1.8),
+  },
+  toggleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  toggleButton: {
+    width: RFPercentage(12),
+    height: RFPercentage(4),
+    borderRadius: RFPercentage(100),
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+  },
+  toggleText: {
+    fontSize: RFPercentage(1.5),
+  },
+  unreadButton: {
+    left: RFPercentage(2.8),
+  },
+  messageList: {
+    marginTop: RFPercentage(2),
   },
 });

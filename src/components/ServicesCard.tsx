@@ -85,6 +85,7 @@ const ServicesCard = ({covers, icon, name, price, rating, star, location, onPres
                     color: Colors.secondaryText,
                     fontFamily: Fonts.fontRegular,
                     fontSize: RFPercentage(1.1),
+                    left:2
                   }}>
                   {location}
                 </Text>

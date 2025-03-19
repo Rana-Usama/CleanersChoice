@@ -1,37 +1,29 @@
-import {Image, SafeAreaView, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
+import { Image, SafeAreaView, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import React from 'react';
-import {RFPercentage} from 'react-native-responsive-fontsize';
-import {Colors, Fonts, IMAGES, Icons} from '../../../constants/Themes';
+import { RFPercentage } from 'react-native-responsive-fontsize';
+import { Colors, Fonts, IMAGES, Icons } from '../../../constants/Themes';
 import HeaderBack from '../../../components/HeaderBack';
 import ProfileField from '../../../components/ProfileField';
 import { useNavigation } from '@react-navigation/native';
 
 const Profile = () => {
-  const navigation = useNavigation()
+  const navigation = useNavigation();
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <HeaderBack title="Profile" textStyle={{fontSize: RFPercentage(1.8)}} />
+      <HeaderBack title="Profile" textStyle={styles.headerText} />
       <View style={styles.container}>
-        <View style={{alignSelf: 'center'}}>
-          <Image
-            source={IMAGES.picture}
-            resizeMode="contain"
-            style={{width: RFPercentage(13), height: RFPercentage(13)}}
-          />
+        <View style={styles.imageContainer}>
+          <Image source={IMAGES.picture} resizeMode="contain" style={styles.profileImage} />
           <TouchableOpacity>
-            <Image
-              source={Icons.edit}
-              resizeMode="contain"
-              style={{width:RFPercentage(2.5), height:RFPercentage(2.5),position: 'absolute',right:RFPercentage(0.8), bottom:RFPercentage(1.4),}}
-            />
+            <Image source={Icons.edit} resizeMode="contain" style={styles.editIcon} />
           </TouchableOpacity>
         </View>
-        <View style={{marginTop:RFPercentage(2)}}>
-          <Text style={{textAlign:'center', color:Colors.primaryText, fontFamily:Fonts.fontMedium}}>Emma Stone</Text>
+        <View style={styles.nameContainer}>
+          <Text style={styles.nameText}>Emma Stone</Text>
         </View>
-        <View style={{marginTop:RFPercentage(4)}}>
-          <ProfileField text='Edit Profile' icon={Icons.editProfile}  onPress={()=> navigation.navigate('EditProfile')} />
+        <View style={styles.profileFieldContainer}>
+          <ProfileField text='Edit Profile' icon={Icons.editProfile} onPress={() => navigation.navigate('EditProfile')} />
         </View>
       </View>
     </SafeAreaView>
@@ -49,5 +41,33 @@ const styles = StyleSheet.create({
     width: '90%',
     alignSelf: 'center',
     paddingTop: RFPercentage(4),
+  },
+  headerText: {
+    fontSize: RFPercentage(1.8),
+  },
+  imageContainer: {
+    alignSelf: 'center',
+  },
+  profileImage: {
+    width: RFPercentage(13),
+    height: RFPercentage(13),
+  },
+  editIcon: {
+    width: RFPercentage(2.5),
+    height: RFPercentage(2.5),
+    position: 'absolute',
+    right: RFPercentage(0.8),
+    bottom: RFPercentage(1.4),
+  },
+  nameContainer: {
+    marginTop: RFPercentage(2),
+  },
+  nameText: {
+    textAlign: 'center',
+    color: Colors.primaryText,
+    fontFamily: Fonts.fontMedium,
+  },
+  profileFieldContainer: {
+    marginTop: RFPercentage(4),
   },
 });

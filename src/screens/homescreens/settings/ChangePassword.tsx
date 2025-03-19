@@ -73,7 +73,7 @@ const ChangePasswordV2 = () => {
             />
           </View>
 
-          <View style={{marginTop: RFPercentage(20), alignSelf: 'center'}}>
+          <View style={{marginTop: RFPercentage(8), alignSelf: 'center'}}>
             <GradientButton
               title="Change"
               onPress={() => setModalVisible(true)}

@@ -1,17 +1,4 @@
-import {
-  Dimensions,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  Image,
-  KeyboardAvoidingView,
-  ScrollView,
-  TouchableWithoutFeedback,
-  Keyboard,
-  Platform,
-} from 'react-native';
+import {Dimensions, SafeAreaView, StyleSheet, Text, View, TouchableOpacity, Image, KeyboardAvoidingView, ScrollView, TouchableWithoutFeedback, Keyboard, Platform} from 'react-native';
 import React, {useState} from 'react';
 import {Colors, Icons, Fonts, IMAGES} from '../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -37,18 +24,18 @@ const EditProfile = () => {
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{flex: 1}}>
+        style={styles.flexContainer}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <ScrollView
-            contentContainerStyle={{flexGrow: 1}}
+            contentContainerStyle={styles.scrollContainer}
             keyboardShouldPersistTaps="handled">
             <HeaderBack
               title="Edit Profile"
-              textStyle={{fontSize: RFPercentage(1.8)}}
+              textStyle={styles.headerText}
             />
             <View style={styles.container}>
               {/* Profile Image */}
-              <View style={{alignSelf: 'center', marginTop: RFPercentage(2)}}>
+              <View style={styles.profileImageWrapper}>
                 <View style={styles.imageContainer}>
                   <Image
                     source={IMAGES.picture}
@@ -71,14 +58,14 @@ const EditProfile = () => {
               </View>
 
               {/* Input Fields */}
-              <View style={{marginTop: RFPercentage(1)}}>
+              <View style={styles.inputFieldsWrapper}>
                 <View style={styles.inputContainer}>
                   <Text style={styles.label}>Name</Text>
                   <InputField
                     placeholder="Sana Asghar"
                     value={name}
                     onChangeText={setName}
-                    customStyle={{width: '100%'}}
+                    customStyle={styles.inputField}
                   />
                 </View>
                 <View style={styles.inputContainer}>
@@ -87,7 +74,7 @@ const EditProfile = () => {
                     placeholder="sanafahad6658@gmail.com"
                     value={email}
                     onChangeText={setEmail}
-                    customStyle={{width: '100%'}}
+                    customStyle={styles.inputField}
                   />
                 </View>
                 <View style={styles.inputContainer}>
@@ -96,13 +83,13 @@ const EditProfile = () => {
                     placeholder="03076590664"
                     value={phone}
                     onChangeText={setPhone}
-                    customStyle={{width: '100%'}}
+                    customStyle={styles.inputField}
                   />
                 </View>
               </View>
 
               {/* Edit Button */}
-              <View style={{marginTop: RFPercentage(6), alignSelf: 'center'}}>
+              <View style={styles.editButtonWrapper}>
                 <GradientButton title={'Edit'} />
               </View>
             </View>
@@ -120,10 +107,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
+  flexContainer: {
+    flex: 1,
+  },
+  scrollContainer: {
+    flexGrow: 1,
+  },
+  headerText: {
+    fontSize: RFPercentage(1.8),
+  },
   container: {
     width: '90%',
     paddingTop: RFPercentage(3),
     alignSelf: 'center',
+  },
+  profileImageWrapper: {
+    alignSelf: 'center',
+    marginTop: RFPercentage(2),
   },
   imageContainer: {
     width: RFPercentage(16),
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
   },
   editIcon: {
     position: 'absolute',
-    bottom: RFPercentage(2),
+    bottom: RFPercentage(1.5),
     right: RFPercentage(2),
   },
   editImage: {
@@ -158,6 +158,9 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.6),
   },
+  inputFieldsWrapper: {
+    marginTop: RFPercentage(1),
+  },
   inputContainer: {
     marginTop: RFPercentage(1.6),
   },
@@ -165,5 +168,13 @@ const styles = StyleSheet.create({
     color: Colors.primaryText,
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.6),
+  },
+  inputField: {
+    width: '100%',
+    marginVertical : 7
+  },
+  editButtonWrapper: {
+    marginTop: RFPercentage(6),
+    alignSelf: 'center',
   },
 });
