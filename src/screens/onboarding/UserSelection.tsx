@@ -8,8 +8,6 @@ import {
   View,
 } from 'react-native';
 import React from 'react';
-import NextButton from '../../components/NextButton';
-import LinearGradient from 'react-native-linear-gradient';
 import {useNavigation} from '@react-navigation/native';
 import {Fonts, IMAGES, Colors, Icons} from '../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -17,14 +15,26 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../routers/StackNavigator';
 import SelectionButton from '../../components/SelectionButton';
 import HeaderComponent from '../../components/HeaderComponent';
-
-const {width, height} = Dimensions.get('window');
+import {useDispatch} from 'react-redux';
+import { setUserFlow } from '../../redux/Actions';
 
 const UserSelection: React.FC = () => {
   const navigation =
     useNavigation<
       NativeStackNavigationProp<RootStackParamList, 'OnBoardingTwo'>
     >();
+
+  const dispatch = useDispatch();
+
+  const handleNext = () => {
+    dispatch(setUserFlow('Customer'))
+    navigation.navigate('SignUp')
+  }
+
+  const handleNext2 = () => {
+    dispatch(setUserFlow('Cleaner'))
+    navigation.navigate('SignUp')
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -41,14 +51,14 @@ const UserSelection: React.FC = () => {
         <View style={styles.selectionContainer}>
           <SelectionButton
             title="Customer / Get Cleaning Service"
-            onPress={() => navigation.navigate('SignUp')}
+            onPress={handleNext}
             icon={Icons.customer}
           />
         </View>
         <View style={styles.selectionContainer}>
           <SelectionButton
             title="Business Owner /Cleaner"
-            onPress={() => console.log('hi')}
+            onPress={handleNext2}
             icon={Icons.owner}
           />
         </View>
@@ -59,7 +69,11 @@ const UserSelection: React.FC = () => {
         </View>
       </View>
       <View style={styles.imageContainer}>
-        <Image source={IMAGES.stars} resizeMode="contain" style={styles.image} />
+        <Image
+          source={IMAGES.stars}
+          resizeMode="contain"
+          style={styles.image}
+        />
       </View>
     </SafeAreaView>
   );

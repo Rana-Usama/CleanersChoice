@@ -3,20 +3,6 @@ import React from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts} from '../constants/Themes';
 
-const data = [
-  {
-    id: 1,
-    name: 'Chimney Cleaning',
-  },
-  {
-    id: 2,
-    name: '1x Carpet Cleaning',
-  },
-  {
-    id: 3,
-    name: '100 Ft Garden Cleaning',
-  },
-];
 
 const Package = (props) => {
   return (

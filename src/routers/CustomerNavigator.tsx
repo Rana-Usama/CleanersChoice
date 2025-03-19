@@ -102,7 +102,7 @@ const CustomTabBar:React.FC<BottomTabBarProps> = ({ state, descriptors, navigati
     );
 };
 
-const BottomNavigation: React.FC = () => {
+const CustomerNavigator: React.FC = () => {
     return (
         <Tab.Navigator tabBar={(props) => <CustomTabBar {...props} />}
 
@@ -121,7 +121,7 @@ const BottomNavigation: React.FC = () => {
     );
 }
 
-export default BottomNavigation;
+export default CustomerNavigator;
 
 const styles = StyleSheet.create({
     screen: {

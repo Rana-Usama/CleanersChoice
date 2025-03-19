@@ -23,12 +23,23 @@ import InputField from '../../components/InputField';
 import PasswordField from '../../components/PasswordField';
 import GradientButton from '../../components/GradientButton';
 import ImagePicker from 'react-native-image-crop-picker';
+import {useSelector} from 'react-redux';
 
 const SignUp: React.FC = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, 'SignUp'>>();
   const [selected, setSelected] = useState<boolean>(false);
   const [img, setImg] = useState(null);
+  const userFlow = useSelector(state => state.userFlow);
+  console.log('userFlow.........', userFlow.userFlow);
+
+  const handleNext = () => {
+    if (userFlow?.userFlow === 'Customer') {
+      navigation.navigate('Home');
+    } else {
+      navigation.navigate('Premium');
+    }
+  };
 
   const uploadImg = () => {
     ImagePicker.openPicker({
@@ -126,7 +137,7 @@ const SignUp: React.FC = () => {
               </View>
             </View>
             <View style={styles.buttonContainer}>
-              <GradientButton title="Sign Up" />
+              <GradientButton title="Sign Up" onPress={handleNext} />
               <View style={styles.buttonInnerContainer}>
                 <Text style={styles.bottomText}>Already have an account?</Text>
                 <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>

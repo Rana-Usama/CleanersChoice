@@ -39,6 +39,9 @@ export const Icons: {[key: string]: any} = {
   faqs: require('../assets/icons/Faqs.png'),
   logOut: require('../assets/icons/log-out.png'),
   terms : require('../assets/icons/terms.png'),
+  dashBoard : require('../assets/icons/dashboard.png'),
+  gallery : require('../assets/icons/gallery.png'),
+
 };
 
 export const IMAGES: {[key: string]: any} = {
@@ -58,6 +61,8 @@ export const IMAGES: {[key: string]: any} = {
   clean: require('../assets/images/clean.png'),
   star: require('../assets/images/star.png'),
   picture: require('../assets/images/picture.png'),
+  timeLine: require('../assets/images/timeline1.png'),
+
 };
 
 export const Fonts: {[key: string]: string} = {

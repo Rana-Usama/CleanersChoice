@@ -10,7 +10,7 @@ import SignUp from '../screens/authscreens/SignUp';
 import ResetPassword from '../screens/authscreens/ResetPassword';
 import Verify from '../screens/authscreens/Verify';
 import ChangePassword from '../screens/authscreens/ChangePassword';
-import BottomNavigation from './BottomTabNavigator';
+import CustomerNavigator from './CustomerNavigator';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import ServiceDetails from '../screens/homescreens/home/ServiceDetails';
 import PostJob from '../screens/homescreens/home/PostJob';
@@ -21,6 +21,12 @@ import FAQS from '../screens/homescreens/settings/Faqs';
 import Terms from '../screens/homescreens/settings/Terms';
 import Privacy from '../screens/homescreens/settings/PrivacyPolicy';
 import ChangePasswordV2 from '../screens/homescreens/settings/ChangePassword';
+import Premium from '../screens/cleanerflow/premium/Premium';
+import CleanerNavigator from './CleanerNavigator';
+import ServiceOne from '../screens/cleanerflow/homescreens/home/ServiceOne';
+import ServiceTwo from '../screens/cleanerflow/homescreens/home/ServiceTwo';
+import ServiceThree from '../screens/cleanerflow/homescreens/home/ServiceThree';
+import HomeScreen from '../screens/cleanerflow/homescreens/home/Home';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -38,14 +44,15 @@ export type RootStackParamList = {
   JobDetails: undefined;
   EditProfile: undefined;
   ChangePasswordV2: undefined;
-  // Cards: undefined;
-  // AddCard: undefined;
   FAQS: undefined;
   Terms: undefined;
   Privacy: undefined;
-  // AddVehicle: undefined;
-  // VitalsDetails : undefined;
-  // BarChartScreen : undefined
+  Premium: undefined;
+  CleanerNavigator: undefined;
+  ServiceOne : undefined;
+  ServiceTwo : undefined;
+  ServiceThree : undefined;
+  HomeScreen : undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -97,7 +104,7 @@ const StackNavigator: React.FC = () => {
           <Stack.Screen name="ResetPassword" component={ResetPassword} />
           <Stack.Screen name="Verify" component={Verify} />
           <Stack.Screen name="ChangePassword" component={ChangePassword} />
-          <Stack.Screen name="Home" component={BottomNavigation} />
+          <Stack.Screen name="Home" component={CustomerNavigator} />
           <Stack.Screen name="ServiceDetails" component={ServiceDetails} />
           <Stack.Screen name="PostJob" component={PostJob} />
           <Stack.Screen name="JobPosted" component={JobPosted} />
@@ -107,6 +114,14 @@ const StackNavigator: React.FC = () => {
           <Stack.Screen name="Terms" component={Terms} />
           <Stack.Screen name="Privacy" component={Privacy} />
           <Stack.Screen name="ChangePasswordV2" component={ChangePasswordV2} />
+
+          {/* ----------------- Cleaner Flow ---------------- */}
+          <Stack.Screen name="Premium" component={Premium} />
+          <Stack.Screen name="CleanerNavigator" component={CleanerNavigator} />
+          <Stack.Screen name="ServiceOne" component={ServiceOne} />
+          <Stack.Screen name="ServiceTwo" component={ServiceTwo} />
+          <Stack.Screen name="ServiceThree" component={ServiceThree} />
+          <Stack.Screen name="HomeScreen" component={HomeScreen} />
 
         </Stack.Navigator>
       </NavigationContainer>

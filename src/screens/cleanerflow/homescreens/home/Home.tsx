@@ -9,13 +9,14 @@ import {
   ScrollView,
 } from 'react-native';
 import React, {useState} from 'react';
-import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
+import {Colors, Fonts, Icons, IMAGES} from '../../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
-import HeaderBack from '../../../components/HeaderBack';
-import LinearGradient from 'react-native-linear-gradient';
-import Package from '../../../components/Package';
-import Review from '../../../components/Review';
-import GradientButton from '../../../components/GradientButton';
+import HeaderBack from '../../../../components/HeaderBack';
+import Package from '../../../../components/Package';
+import Review from '../../../../components/Review';
+import GradientButton from '../../../../components/GradientButton';
+import {useNavigation} from '@react-navigation/native';
+import ImagePicker from 'react-native-image-crop-picker';
 
 const services = [
   {
@@ -131,10 +132,25 @@ const Packages = [
   },
 ];
 
-const ServiceDetails: React.FC = ({route}) => {
-  const {item} = route.params;
-  const [step, setStep] = useState(0);
+const HomeScreen: React.FC = () => {
   const [visibleItems, setVisibleItems] = useState(5);
+  const navigation = useNavigation();
+
+  const [img, setImg] = useState(null);
+
+  const uploadImg = () => {
+    ImagePicker.openPicker({
+      width: 1000,
+      height: 1000,
+      cropping: true,
+    })
+      .then(image => {
+        setImg(image);
+      })
+      .catch(error => {
+        console.log('Image Picker Error:', error);
+      });
+  };
 
   const handleShowMore = () => {
     setVisibleItems(prev => prev + 5);
@@ -144,76 +160,57 @@ const ServiceDetails: React.FC = ({route}) => {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={{paddingBottom: RFPercentage(10)}}>
         <HeaderBack
-          title={'Service Details'}
+          logo={true}
+          title="Dashboard"
+          right={true}
+          rightText="Edit Service"
           textStyle={{fontSize: RFPercentage(1.8)}}
+          onPress={()=>navigation.navigate('ServiceOne')}
         />
         <View style={styles.container}>
-          <View>
-            <Image
-              source={item.cover[step]}
-              resizeMode="cover"
-              style={styles.image}
-              borderRadius={RFPercentage(1.3)}
-            />
-            <View style={styles.dotsContainer}>
-              {item.cover.map((_, index) => (
-                <TouchableOpacity key={index} onPress={() => setStep(index)}>
-                  {step === index ? (
-                    <LinearGradient
-                      colors={[Colors.gradient1, Colors.gradient2]}
-                      style={styles.activeDot}
-                    />
-                  ) : (
-                    <View style={styles.inactiveDot} />
-                  )}
-                </TouchableOpacity>
-              ))}
+          <View style={styles.imgContainer}>
+            <View>
+              <View style={styles.pictureContainer}>
+                <Image
+                  source={IMAGES.alpha}
+                  resizeMode="cover"
+                  style={styles.imgStyle}
+                />
+              </View>
+
+              <TouchableOpacity onPress={uploadImg}>
+                <Image
+                  source={Icons.edit}
+                  resizeMode="contain"
+                  style={styles.uploadedImg}
+                />
+              </TouchableOpacity>
             </View>
           </View>
-          <View style={{marginTop: RFPercentage(1.8)}}>
-            <View style={styles.rowContainer}>
-              <Image
-                source={item.icon}
-                resizeMode="contain"
-                style={styles.icon}
-              />
-              <Text style={[styles.headeing2, {color: Colors.primaryText}]}>
-                {item.name}
-              </Text>
-            </View>
+          <View style={styles.nameContainer}>
+            <Text style={styles.nameText}>Alpha Cleaning</Text>
+          </View>
+          <View
+            style={{
+              marginTop: RFPercentage(0.8),
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
             <View style={styles.starContainer}>
-              {Array.from({length: item.rating}, (_, index) => (
+              {Array.from({length: 5}, (_, index) => (
                 <Image
                   key={index}
-                  source={item.star}
+                  source={IMAGES.star}
                   resizeMode="contain"
                   style={styles.star}
                 />
               ))}
             </View>
-            <View style={{position: 'absolute', right: 0, top: 6}}>
-              <Text
-                style={{
-                  color: Colors.placeholderColor,
-                  fontFamily: Fonts.fontRegular,
-                  fontSize: RFPercentage(1.2),
-                }}>
-                Joined on : {item.joining}
-              </Text>
-            </View>
           </View>
           <View style={{marginTop: RFPercentage(2.1)}}>
             <View>
               <Text style={styles.headeing2}>Description:</Text>
-              <Text
-                style={{
-                  color: 'rgba(75, 85, 99, 1)',
-                  fontFamily: Fonts.fontRegular,
-                  fontSize: RFPercentage(1.4),
-                  textAlign: 'justify',
-                  lineHeight: 18,
-                  marginTop: RFPercentage(0.5),
-                }}>
+              <Text style={styles.description}>
                 We provide best cleaning services in the area ranging from
                 Chimney cleaning to copeporate level cleanings with quality like
                 no one else provide. Reach out to us now to get your space
@@ -226,95 +223,47 @@ const ServiceDetails: React.FC = ({route}) => {
               <TouchableOpacity
                 activeOpacity={0.6}
                 style={{flexDirection: 'row', alignItems: 'center'}}>
-                <Text
-                  style={{
-                    color: Colors.gradient1,
-                    fontFamily: Fonts.fontMedium,
-                    fontSize: RFPercentage(1.4),
-                  }}>
-                  Check Availability
-                </Text>
+                <Text style={styles.availability}>Check Availability</Text>
                 <Image
                   source={Icons.availability}
                   resizeMode="contain"
-                  style={{
-                    width: RFPercentage(1.5),
-                    height: RFPercentage(1.4),
-                    left: 3,
-                  }}
+                  style={styles.availabilityIcon}
                 />
               </TouchableOpacity>
             </View>
           </View>
           <View style={{marginTop: RFPercentage(2)}}>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}>
+            <View style={styles.serviceContainer}>
               <Text style={styles.headeing2}>Services:</Text>
               <TouchableOpacity>
-                <Text
-                  style={{
-                    color: Colors.gradient1,
-                    fontFamily: Fonts.fontMedium,
-                    fontSize: RFPercentage(1.4),
-                  }}>
-                  See All
-                </Text>
+                <Text style={styles.allText}>See All</Text>
               </TouchableOpacity>
             </View>
-            <View style={{right: RFPercentage(0.7), marginTop:RFPercentage(1)}}>
+            <View style={{right: RFPercentage(0.7), marginTop:RFPercentage(0.5)}}>
               <FlatList
                 data={services.slice(0, visibleItems)}
                 numColumns={2}
                 keyExtractor={item => item.id.toString()}
                 renderItem={({item, index}) => (
-                  <View
-                    style={{
-                      height: RFPercentage(4),
-                      borderWidth: 1,
-                      borderColor: Colors.inputFieldColor,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      borderRadius: RFPercentage(0.8),
-                      margin: RFPercentage(0.7),
-                      paddingHorizontal: RFPercentage(2),
-                      alignSelf: 'flex-start',
-                    }}>
-                    <Text
-                      style={{
-                        color: Colors.placeholderColor,
-                        fontSize: RFPercentage(1.3),
-                        fontFamily: Fonts.fontRegular,
-                      }}>
-                      {item.name}
-                    </Text>
+                  <View style={styles.serviceBox}>
+                    <Text style={styles.serviceName}>{item.name}</Text>
                   </View>
                 )}
               />
               {visibleItems < services.length ? (
                 <TouchableOpacity onPress={handleShowMore}>
-                  <Text
-                    style={{
-                      color: Colors.placeholderColor,
-                      fontSize: RFPercentage(1.3),
-                      fontFamily: Fonts.fontMedium,
-                      textAlign: 'center',
-                      position: 'absolute',
-                      bottom: RFPercentage(1.5),
-                      left: RFPercentage(22),
-                    }}>
-                    +5 More
-                  </Text>
+                  <Text style={styles.moreButton}>+5 More</Text>
                 </TouchableOpacity>
               ) : null}
             </View>
           </View>
         </View>
         <View>
-          <Text style={[styles.headeing2, {width: '90%', alignSelf: 'center', marginTop:RFPercentage(2)}]}>
+          <Text
+            style={[
+              styles.headeing2,
+              {width: '90%', alignSelf: 'center', marginTop:RFPercentage(2)},
+            ]}>
             Starting Packages:
           </Text>
           <View style={{marginTop: RFPercentage(1.5)}}>
@@ -338,17 +287,11 @@ const ServiceDetails: React.FC = ({route}) => {
         </View>
         <View style={styles.container}>
           <View>
-            <Text style={[styles.headeing2, {marginTop: RFPercentage(0.9)}]}>
+            <Text style={[styles.headeing2, {marginTop: RFPercentage(2.5)}]}>
               Rating & Reviews:
             </Text>
           </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginTop: RFPercentage(1.8),
-            }}>
+          <View style={styles.ratingContainer}>
             <Text style={[styles.headeing2, {color: Colors.primaryText}]}>
               Overall Rating
             </Text>
@@ -360,21 +303,9 @@ const ServiceDetails: React.FC = ({route}) => {
               <Image
                 source={IMAGES.star}
                 resizeMode="contain"
-                style={{
-                  width: RFPercentage(1.8),
-                  height: RFPercentage(1.8),
-                  right: 3,
-                }}
+                style={styles.ratingStar}
               />
-              <Text
-                style={{
-                  color: 'rgba(0, 0, 0, 1)',
-                  fontFamily: Fonts.semiBold,
-                  fontSize: RFPercentage(1.4),
-                  top: 1,
-                }}>
-                5.0
-              </Text>
+              <Text style={styles.ratingText}>5.0</Text>
             </View>
           </View>
           <View style={{marginTop: RFPercentage(2)}}>
@@ -392,7 +323,7 @@ const ServiceDetails: React.FC = ({route}) => {
   );
 };
 
-export default ServiceDetails;
+export default HomeScreen;
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -402,7 +333,6 @@ const styles = StyleSheet.create({
   container: {
     width: '90%',
     alignSelf: 'center',
-    paddingTop: RFPercentage(2.5),
   },
   dotsContainer: {
     flexDirection: 'row',
@@ -439,8 +369,6 @@ const styles = StyleSheet.create({
   },
   starContainer: {
     flexDirection: 'row',
-    marginTop: RFPercentage(0.4),
-    marginLeft: RFPercentage(4.5),
   },
   star: {
     width: RFPercentage(1.3),
@@ -452,5 +380,118 @@ const styles = StyleSheet.create({
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.5),
+  },
+
+  imgContainer: {
+    alignSelf: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: RFPercentage(4),
+  },
+  pictureContainer: {
+    width: RFPercentage(12),
+    height: RFPercentage(12),
+    borderRadius: RFPercentage(100),
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(243, 244, 246, 1)',
+    borderWidth: 2,
+    borderColor: 'rgba(64, 123, 255, 1)',
+    shadowColor: 'rgba(0, 0, 0, 0.15)',
+    shadowOffset: {width: 0, height: 0},
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+    elevation: 40,
+  },
+  imgStyle: {
+    width: RFPercentage(12),
+    height: RFPercentage(12),
+    borderRadius: RFPercentage(100),
+  },
+  uploadedImg: {
+    width: RFPercentage(3),
+    height: RFPercentage(3),
+    position: 'absolute',
+    left: RFPercentage(9),
+    bottom: RFPercentage(1),
+  },
+  nameContainer: {
+    marginTop: RFPercentage(2),
+  },
+  nameText: {
+    textAlign: 'center',
+    fontFamily: Fonts.fontRegular,
+    color: 'rgba(55, 65, 81, 1)',
+    fontSize: RFPercentage(1.6),
+  },
+  description: {
+    color: 'rgba(75, 85, 99, 1)',
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.4),
+    textAlign: 'justify',
+    lineHeight: 18,
+    marginTop: RFPercentage(0.5),
+  },
+  availability: {
+    color: Colors.gradient1,
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.4),
+  },
+  availabilityIcon: {
+    width: RFPercentage(1.5),
+    height: RFPercentage(1.4),
+    left: 3,
+  },
+  serviceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  allText: {
+    color: Colors.gradient1,
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.4),
+  },
+  serviceBox: {
+    height: RFPercentage(4),
+    borderWidth: 1,
+    borderColor: Colors.inputFieldColor,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: RFPercentage(0.8),
+    margin: RFPercentage(0.7),
+    paddingHorizontal: RFPercentage(2),
+    alignSelf: 'flex-start',
+  },
+  serviceName: {
+    color: Colors.placeholderColor,
+    fontSize: RFPercentage(1.3),
+    fontFamily: Fonts.fontRegular,
+  },
+  moreButton: {
+    color: Colors.placeholderColor,
+    fontSize: RFPercentage(1.3),
+    fontFamily: Fonts.fontMedium,
+    textAlign: 'center',
+    position: 'absolute',
+    bottom: RFPercentage(2.6),
+    left:RFPercentage(22)
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: RFPercentage(1.8),
+  },
+  ratingStar: {
+    width: RFPercentage(1.8),
+    height: RFPercentage(1.8),
+    right: 3,
+  },
+  ratingText: {
+    color: 'rgba(0, 0, 0, 1)',
+    fontFamily: Fonts.semiBold,
+    fontSize: RFPercentage(1.4),
+    top: 1,
   },
 });
