@@ -17,7 +17,7 @@ const DescriptionField = props => {
   };
 
   return (
-    <View style={styles.textArea}>
+    <View style={[styles.textArea,{...props.style}]}>
       <TextInput
         placeholder={props.placeholder}
         placeholderTextColor={Colors.placeholderColor}
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     paddingVertical: RFPercentage(0.8),
   },
   textInput: {
-    color: Colors.primaryText,
+    color: Colors.inputTextColor,
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.6),
     paddingVertical: 0,

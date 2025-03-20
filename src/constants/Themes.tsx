@@ -8,6 +8,7 @@ export const Colors: {[key: string]: string} = {
   inputFieldColor: 'rgba(229, 231, 235, 1)',
   placeholderColor: 'rgba(107, 114, 128, 1)',
   brown: 'rgba(68, 64, 60, 1)',
+  inputTextColor : 'rgba(0, 0, 0, 0.8)'
 };
 
 export const Icons: {[key: string]: any} = {

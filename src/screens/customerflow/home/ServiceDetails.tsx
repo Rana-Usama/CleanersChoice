@@ -137,7 +137,11 @@ const ServiceDetails: React.FC = ({route}) => {
   const [visibleItems, setVisibleItems] = useState(5);
 
   const handleShowMore = () => {
-    setVisibleItems(prev => prev + 5);
+    setVisibleItems(prev => Math.min(prev + 5, services.length));
+  };
+
+  const handleShowLess = () => {
+    setVisibleItems(5);
   };
 
   return (
@@ -254,7 +258,11 @@ const ServiceDetails: React.FC = ({route}) => {
                 justifyContent: 'space-between',
               }}>
               <Text style={styles.headeing2}>Services:</Text>
-              <TouchableOpacity>
+              <TouchableOpacity onPress={
+                    visibleItems < services.length
+                      ? handleShowMore
+                      : handleShowLess
+                  }>
                 <Text
                   style={{
                     color: Colors.gradient1,
@@ -265,7 +273,8 @@ const ServiceDetails: React.FC = ({route}) => {
                 </Text>
               </TouchableOpacity>
             </View>
-            <View style={{right: RFPercentage(0.7), marginTop:RFPercentage(1)}}>
+            <View
+              style={{right: RFPercentage(0.7), marginTop: RFPercentage(1)}}>
               <FlatList
                 data={services.slice(0, visibleItems)}
                 numColumns={2}
@@ -294,27 +303,38 @@ const ServiceDetails: React.FC = ({route}) => {
                   </View>
                 )}
               />
-              {visibleItems < services.length ? (
-                <TouchableOpacity onPress={handleShowMore}>
+
+              {/* Show More / Show Less button */}
+              {services.length > 5 && (
+                <TouchableOpacity
+                  onPress={
+                    visibleItems < services.length
+                      ? handleShowMore
+                      : handleShowLess
+                  }>
                   <Text
                     style={{
                       color: Colors.placeholderColor,
                       fontSize: RFPercentage(1.3),
                       fontFamily: Fonts.fontMedium,
                       textAlign: 'center',
+                      bottom:RFPercentage(1.5),
                       position: 'absolute',
-                      bottom: RFPercentage(1.5),
-                      left: RFPercentage(22),
+                      left: visibleItems < services.length ?  RFPercentage(18.5) : RFPercentage(34.5),
                     }}>
-                    +5 More
+                    {visibleItems < services.length ? `+5 More` : `See Less`}
                   </Text>
                 </TouchableOpacity>
-              ) : null}
+              )}
             </View>
           </View>
         </View>
         <View>
-          <Text style={[styles.headeing2, {width: '90%', alignSelf: 'center', marginTop:RFPercentage(2)}]}>
+          <Text
+            style={[
+              styles.headeing2,
+              {width: '90%', alignSelf: 'center', marginTop: RFPercentage(2)},
+            ]}>
             Starting Packages:
           </Text>
           <View style={{marginTop: RFPercentage(1.5)}}>

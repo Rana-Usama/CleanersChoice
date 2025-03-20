@@ -60,7 +60,7 @@ import { useNavigation } from '@react-navigation/native';
             </View>
           </View>
           <View style={styles.buttonContainer}>
-            <GradientButton title="Proceed To Payment" textStyle={styles.buttonText} onPress={()=> navigation.navigate('CleanerNavigator')} style={{width:RFPercentage(18)}} />
+            <GradientButton title="Proceed To Payment" textStyle={styles.buttonText} onPress={()=> navigation.navigate('CleanerNavigator')} style={{width:RFPercentage(19)}} />
           </View>
         </View>
         <View style={styles.starContainer}>
@@ -80,26 +80,26 @@ import { useNavigation } from '@react-navigation/native';
     container: {
       width: '90%',
       alignSelf: 'center',
-      paddingTop: RFPercentage(3),
+      paddingTop: RFPercentage(11),
     },
     premiumHeader: {
       flexDirection: 'row',
-      alignItems: 'center',
+      alignItems: 'flex-end',
       justifyContent: 'center',
     },
     ownerIcon: {
-      width: RFPercentage(3),
-      height: RFPercentage(3),
+      width: RFPercentage(3.5),
+      height: RFPercentage(3.5),
     },
     premiumText: {
       color: Colors.brown,
       fontSize: RFPercentage(2),
-      fontFamily: Fonts.semiBold,
-      marginLeft: 4,
-      marginTop: 1,
+      fontFamily: Fonts.fontMedium,
+      marginLeft: RFPercentage(0.6),
+      top:RFPercentage(0.3)
     },
     subscriptionContainer: {
-      marginTop: RFPercentage(4.5),
+      marginTop: RFPercentage(4),
     },
     subscriptionBox: {
       width: '85%',
@@ -160,10 +160,10 @@ import { useNavigation } from '@react-navigation/native';
     },
     buttonContainer: {
       alignSelf: 'center',
-      marginTop: RFPercentage(6),
+      marginTop: RFPercentage(5),
     },
     buttonText: {
-      fontSize: RFPercentage(1.3),
+      fontSize: RFPercentage(1.4),
     },
     starContainer: {
       position: 'absolute',

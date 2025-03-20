@@ -12,10 +12,10 @@ import {Colors, Fonts, Icons, IMAGES} from '../../../../constants/Themes';
 import HeaderBack from '../../../../components/HeaderBack';
 import ImagePicker from 'react-native-image-crop-picker';
 import GradientButton from '../../../../components/GradientButton';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 
 const Dashboard: React.FC = () => {
-  const navigation = useNavigation()
+  const navigation = useNavigation();
   const [img, setImg] = useState(null);
 
   const uploadImg = () => {
@@ -34,17 +34,13 @@ const Dashboard: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <HeaderBack
-        logo={true}
-        title="Dashboard"
-        textStyle={styles.headerText}
-      />
+      <HeaderBack logo={true} title="Dashboard" textStyle={styles.headerText} />
       <View style={styles.container}>
         <View style={styles.imgContainer}>
           <View>
             <View style={styles.pictureContainer}>
               <Image
-                source={ img ? {uri : img?.path} : IMAGES.alpha}
+                source={img ? {uri: img?.path} : IMAGES.alpha}
                 resizeMode="contain"
                 style={styles.imgStyle}
               />
@@ -63,7 +59,9 @@ const Dashboard: React.FC = () => {
           <Text style={styles.nameText}>Alpha Cleaning</Text>
         </View>
         <View style={styles.profileCompletionContainer}>
-          <Text style={styles.profileCompletionText}>Profile Completion 50%</Text>
+          <Text style={styles.profileCompletionText}>
+            Profile Completion 50%
+          </Text>
         </View>
         <View style={styles.noServiceContainer}>
           <Image
@@ -75,12 +73,13 @@ const Dashboard: React.FC = () => {
             You haven’t listed any services
           </Text>
         </View>
+
         <View style={styles.completeProfileContainer}>
-          <GradientButton 
-            title='Complete Profile Now' 
-            textStyle={styles.buttonText} 
-            style={styles.button} 
-            onPress={()=> navigation.navigate('ServiceOne')} 
+          <GradientButton
+            title="Complete Profile Now"
+            textStyle={styles.buttonText}
+            style={styles.button}
+            onPress={() => navigation.navigate('ServiceOne')}
           />
         </View>
       </View>
@@ -98,6 +97,7 @@ const styles = StyleSheet.create({
   container: {
     width: '90%',
     alignSelf: 'center',
+    flex:1
   },
   imgContainer: {
     alignSelf: 'center',
@@ -176,12 +176,13 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(1),
   },
   completeProfileContainer: {
-    marginTop: RFPercentage(18),
-    alignItems: 'center',
-    justifyContent: 'center',
+    position: 'absolute',
+    alignSelf: 'center',
+    bottom:RFPercentage(15)
+
   },
   button: {
-    width: RFPercentage(18),
+    width: RFPercentage(19),
   },
   buttonText: {
     fontSize: RFPercentage(1.4),

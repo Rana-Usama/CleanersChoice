@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
     width: '95%',
   },
   textInput: {
-    color: Colors.primaryText,
+    color: Colors.inputTextColor,
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.6),
     paddingVertical: 0,

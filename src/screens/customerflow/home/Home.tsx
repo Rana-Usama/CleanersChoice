@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(-0.3),
   },
   filterText: {
-    color: Colors.secondaryText,
+    color: Colors.primaryText,
     fontSize: RFPercentage(1.5),
   },
   serviceColumnWrapper: {

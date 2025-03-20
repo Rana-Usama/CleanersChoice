@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   textInput: {
-    color: Colors.primaryText,
+    color: Colors.inputTextColor,
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.5),
     paddingVertical: 0,

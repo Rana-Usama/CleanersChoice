@@ -112,8 +112,10 @@ const CleanerJobs = () => {
               )}
               contentContainerStyle={{
                 paddingTop: RFPercentage(1.5),
+                right:RFPercentage(0.5)
               }}
             />
+          </View>
           </View>
           <View>
             <View style={styles.listContainer}>
@@ -133,7 +135,6 @@ const CleanerJobs = () => {
               />
             </View>
           </View>
-        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -155,11 +156,10 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   sectionTitle: {
-    marginTop: RFPercentage(3),
+    marginTop: RFPercentage(2.5),
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.5),
-    left: 5,
   },
   filterBox: {
     width: RFPercentage(12.5),
@@ -169,21 +169,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: RFPercentage(0.8),
     marginHorizontal: RFPercentage(0.5),
-    marginTop: RFPercentage(-0.3),
   },
   filterText: {
-    color: Colors.secondaryText,
+    color: Colors.primaryText,
     fontSize: RFPercentage(1.5),
   },
   listContainer: {
-    marginTop: RFPercentage(1),
-    left: 3,
+    marginTop: RFPercentage(0.7),
+    width:'100%',
   },
   jobPosted: {
     textAlign: 'center',
-    color: Colors.brown,
+    color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
   },
   jobPostedContainer: {
     alignItems: 'center',

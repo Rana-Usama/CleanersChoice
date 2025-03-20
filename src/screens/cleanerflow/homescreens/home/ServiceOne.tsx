@@ -37,7 +37,7 @@ const ServiceOne: React.FC = () => {
   const [date, setDate] = useState<Date>(new Date());
   const [open, setOpen] = useState<boolean>(false);
   const navigation = useNavigation();
- const formattedDate = moment(date).format("YYYY-MM-DD  HH:mm:ss");
+ const formattedDate = moment(date).format("YYYY-MM-DD  HH:mm A");
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -144,11 +144,11 @@ const styles = StyleSheet.create({
     height: RFPercentage(2),
   },
   dateText: {
-    color: Colors.placeholderColor,
+    color: Colors.inputTextColor,
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.5),
     marginLeft: 5,
-    marginTop: 1,
+    top:RFPercentage(0.2)
   },
   buttonContainer: {
     alignItems: 'center',

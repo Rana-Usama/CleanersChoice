@@ -36,7 +36,7 @@ const CustomDropDown: React.FC<Props> = (props: Props) => {
         ]}
         onPress={() => setOpen(!open)}>
         <View style={styles.rowContainer}>
-          <Text style={styles.placeholderText}>
+          <Text style={[styles.placeholderText,{color:selectedLabel ? Colors.inputTextColor : Colors.placeholderColor}]}>
             {selectedLabel || props.placeholder}
           </Text>
           <TouchableOpacity onPress={() => setOpen(!open)}>

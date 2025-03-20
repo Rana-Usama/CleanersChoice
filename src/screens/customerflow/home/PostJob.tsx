@@ -27,7 +27,7 @@ const PostJob = () => {
   const navigation = useNavigation();
   const [date, setDate] = useState<Date>(new Date());
   const [open, setOpen] = useState<boolean>(false);
-  const formattedDate = moment(date).format("YYYY-MM-DD  HH:mm:ss");
+  const formattedDate = moment(date).format("YYYY-MM-DD  HH:mm A");
 
   const data1 = [
     {
@@ -115,18 +115,10 @@ const PostJob = () => {
                 <Text style={styles.remarksText}>
                   Leave any special remarks (Optional)
                 </Text>
-                <View style={[styles.textArea, {height: RFPercentage(7)}]}>
-                  <TextInput
-                    placeholder="Any special remarks"
-                    placeholderTextColor={Colors.placeholderColor}
-                    style={styles.textInput}
-                    numberOfLines={5}
-                    multiline
-                  />
-                </View>
+                <DescriptionField placeholder='Any Special Remarks' style={{height:RFPercentage(11)}} />
               </View>
             </View>
-            <View style={{alignSelf: 'center', marginTop: RFPercentage(5)}}>
+            <View style={{alignSelf: 'center', marginTop: RFPercentage(3)}}>
               <GradientButton
                 title="Make Job Live"
                 textStyle={{fontSize: RFPercentage(1.4)}}
@@ -193,7 +185,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   dateText: {
-    color: Colors.placeholderColor,
+    color: Colors.inputTextColor,
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.5),
     left: 5,

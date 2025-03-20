@@ -45,12 +45,13 @@ export default JobCard;
 
 const styles = StyleSheet.create({
   container: {
-    width: '98%',
+    width: '90%',
     borderWidth: 1,
-    borderColor: 'rgba(156, 163, 175, 1)',
+    borderColor: 'rgba(156, 163, 175, 0.5)',
     borderRadius: RFPercentage(1),
     padding: RFPercentage(1.3),
     marginTop: RFPercentage(2.5),
+    alignSelf:'center'
   },
   deleteButton: {
     position: 'absolute',

@@ -133,7 +133,6 @@ const Packages = [
 ];
 
 const HomeScreen: React.FC = () => {
-  const [visibleItems, setVisibleItems] = useState(5);
   const navigation = useNavigation();
 
   const [img, setImg] = useState(null);
@@ -152,10 +151,15 @@ const HomeScreen: React.FC = () => {
       });
   };
 
+  const [visibleItems, setVisibleItems] = useState(5);
+
   const handleShowMore = () => {
-    setVisibleItems(prev => prev + 5);
+    setVisibleItems(prev => Math.min(prev + 5, services.length));
   };
 
+  const handleShowLess = () => {
+    setVisibleItems(5);
+  };
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={{paddingBottom: RFPercentage(10)}}>
@@ -165,7 +169,7 @@ const HomeScreen: React.FC = () => {
           right={true}
           rightText="Edit Service"
           textStyle={{fontSize: RFPercentage(1.8)}}
-          onPress={()=>navigation.navigate('ServiceOne')}
+          onPress={() => navigation.navigate('ServiceOne')}
         />
         <View style={styles.container}>
           <View style={styles.imgContainer}>
@@ -235,11 +239,17 @@ const HomeScreen: React.FC = () => {
           <View style={{marginTop: RFPercentage(2)}}>
             <View style={styles.serviceContainer}>
               <Text style={styles.headeing2}>Services:</Text>
-              <TouchableOpacity>
-                <Text style={styles.allText}>See All</Text>
+              <TouchableOpacity
+                onPress={
+                  visibleItems < services.length
+                    ? handleShowMore
+                    : handleShowLess
+                }>
+                {/* <Text style={styles.allText}>See All</Text> */}
               </TouchableOpacity>
             </View>
-            <View style={{right: RFPercentage(0.7), marginTop:RFPercentage(0.5)}}>
+            <View
+              style={{right: RFPercentage(0.7), marginTop: RFPercentage(0.5)}}>
               <FlatList
                 data={services.slice(0, visibleItems)}
                 numColumns={2}
@@ -250,11 +260,30 @@ const HomeScreen: React.FC = () => {
                   </View>
                 )}
               />
-              {visibleItems < services.length ? (
-                <TouchableOpacity onPress={handleShowMore}>
-                  <Text style={styles.moreButton}>+5 More</Text>
+              {services.length > 5 && (
+                <TouchableOpacity
+                  onPress={
+                    visibleItems < services.length
+                      ? handleShowMore
+                      : handleShowLess
+                  }>
+                  <Text
+                    style={{
+                      color: Colors.gradient1,
+                      fontSize: RFPercentage(1.3),
+                      fontFamily: Fonts.fontMedium,
+                      textAlign: 'center',
+                      bottom: RFPercentage(1.5),
+                      position: 'absolute',
+                      left:
+                        visibleItems < services.length
+                          ? RFPercentage(18.5)
+                          : RFPercentage(34.5),
+                    }}>
+                    {visibleItems < services.length ? `+5 More` : `See Less`}
+                  </Text>
                 </TouchableOpacity>
-              ) : null}
+              )}
             </View>
           </View>
         </View>
@@ -262,7 +291,7 @@ const HomeScreen: React.FC = () => {
           <Text
             style={[
               styles.headeing2,
-              {width: '90%', alignSelf: 'center', marginTop:RFPercentage(2)},
+              {width: '90%', alignSelf: 'center', marginTop: RFPercentage(2)},
             ]}>
             Starting Packages:
           </Text>
@@ -311,12 +340,6 @@ const HomeScreen: React.FC = () => {
           <View style={{marginTop: RFPercentage(2)}}>
             <Review />
           </View>
-        </View>
-        <View style={{alignSelf: 'center', marginTop: RFPercentage(7)}}>
-          <GradientButton
-            title="Get Custom Offer"
-            textStyle={{fontSize: RFPercentage(1.3)}}
-          />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -475,7 +498,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     position: 'absolute',
     bottom: RFPercentage(2.6),
-    left:RFPercentage(22)
+    left: RFPercentage(22),
   },
   ratingContainer: {
     flexDirection: 'row',

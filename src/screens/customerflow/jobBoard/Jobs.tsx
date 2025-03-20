@@ -96,23 +96,23 @@ const Jobs = () => {
               </View>
             </TouchableOpacity>
           </View>
-          <View style={styles.listContainer}>
-            <FlatList
-              data={jobData}
-              keyExtractor={item => item.id.toString()}
-              renderItem={({item}) => (
-                <JobCard
-                  name={item.name}
-                  location={item.location}
-                  price={item.price}
-                  date={item.date}
-                  onPress={() => navigation.navigate('JobDetails')}
-                  onPress2={() => setModalVisible(true)}
-                  delete={true}
-                />
-              )}
-            />
-          </View>
+        </View>
+        <View style={styles.listContainer}>
+          <FlatList
+            data={jobData}
+            keyExtractor={item => item.id.toString()}
+            renderItem={({item}) => (
+              <JobCard
+                name={item.name}
+                location={item.location}
+                price={item.price}
+                date={item.date}
+                onPress={() => navigation.navigate('JobDetails')}
+                onPress2={() => setModalVisible(true)}
+                delete={true}
+              />
+            )}
+          />
         </View>
       </ScrollView>
       {modalVisible && (
@@ -195,6 +195,7 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     marginTop: RFPercentage(2),
+    width: '100%',
   },
   modalContainer: {
     position: 'absolute',
