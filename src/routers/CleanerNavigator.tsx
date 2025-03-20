@@ -17,8 +17,8 @@ import Dashboard from '../screens/cleanerflow/homescreens/home/Dashboard';
 import CleanerMessages from '../screens/cleanerflow/homescreens/messages/CleanerMessages';
 import CleanerJobs from '../screens/cleanerflow/homescreens/jobs/CleanerJobs';
 import CleanerSettings from '../screens/cleanerflow/homescreens/settings/CleanerSettings';
-import CleanerProfile from '../screens/cleanerflow/homescreens/profile/CleanerProfile';
 import {RFPercentage} from 'react-native-responsive-fontsize';
+import Profile from '../screens/commonflow/home/profile/Profile';
 
 const Tab = createBottomTabNavigator();
 
@@ -108,7 +108,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                   style={{width: RFPercentage(2.5), height: RFPercentage(2.5)}}
                   resizeMode="contain"
                 />
-              ) : route.name === 'Job Board' ? (
+              ) : route.name === 'Job Listings' ? (
                 <Image
                   source={isFocused ? Icons.jobActive : Icons.job}
                   style={{width: RFPercentage(2.5), height: RFPercentage(2.5)}}
@@ -154,10 +154,10 @@ const CleanerNavigator: React.FC = () => {
         tabBarHideOnKeyboard: true,
       }}>
       <Tab.Screen name="Messages" component={CleanerMessages} />
-      <Tab.Screen name="Job Board" component={CleanerJobs} />
+      <Tab.Screen name="Job Listings" component={CleanerJobs} />
       <Tab.Screen name="Home" component={Dashboard} />
       <Tab.Screen name="Settings" component={CleanerSettings} />
-      <Tab.Screen name="Profile" component={CleanerProfile} />
+      <Tab.Screen name="Profile" component={Profile} />
     </Tab.Navigator>
   );
 };

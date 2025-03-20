@@ -2,31 +2,32 @@ import {StyleSheet, Text, View} from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {DarkTheme, NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import Splash from '../screens/splashscreens/Splash';
-import OnBoarding from '../screens/onboarding/OnBoarding';
-import UserSelection from '../screens/onboarding/UserSelection';
-import SignIn from '../screens/authscreens/SignIn';
-import SignUp from '../screens/authscreens/SignUp';
-import ResetPassword from '../screens/authscreens/ResetPassword';
-import Verify from '../screens/authscreens/Verify';
-import ChangePassword from '../screens/authscreens/ChangePassword';
+import Splash from '../screens/commonflow/splashscreens/Splash';
+import OnBoarding from '../screens/commonflow/onboarding/OnBoarding';
+import UserSelection from '../screens/commonflow/onboarding/UserSelection';
+import SignIn from '../screens/commonflow/authscreens/SignIn';
+import SignUp from '../screens/commonflow/authscreens/SignUp';
+import ResetPassword from '../screens/commonflow/authscreens/ResetPassword';
+import Verify from '../screens/commonflow/authscreens/Verify';
+import ChangePassword from '../screens/commonflow/authscreens/ChangePassword';
 import CustomerNavigator from './CustomerNavigator';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
-import ServiceDetails from '../screens/homescreens/home/ServiceDetails';
-import PostJob from '../screens/homescreens/home/PostJob';
-import JobPosted from '../screens/homescreens/home/JobPosted';
-import EditProfile from '../screens/homescreens/profile/EditProfile';
-import JobDetails from '../screens/homescreens/jobBoard/JobDetails';
-import FAQS from '../screens/homescreens/settings/Faqs';
-import Terms from '../screens/homescreens/settings/Terms';
-import Privacy from '../screens/homescreens/settings/PrivacyPolicy';
-import ChangePasswordV2 from '../screens/homescreens/settings/ChangePassword';
+import ServiceDetails from '../screens/customerflow/home/ServiceDetails';
+import PostJob from '../screens/customerflow/home/PostJob';
+import JobPosted from '../screens/customerflow/home/JobPosted';
+import EditProfile from '../screens/commonflow/home/profile/EditProfile';
+import JobDetails from '../screens/commonflow/home/JobDetails';
+import FAQS from '../screens/commonflow/home/settings/Faqs';
+import Terms from '../screens/commonflow/home/settings/Terms';
+import Privacy from '../screens/commonflow/home/settings/PrivacyPolicy';
+import ChangePasswordV2 from '../screens/commonflow/home/settings/ChangePassword';
 import Premium from '../screens/cleanerflow/premium/Premium';
 import CleanerNavigator from './CleanerNavigator';
 import ServiceOne from '../screens/cleanerflow/homescreens/home/ServiceOne';
 import ServiceTwo from '../screens/cleanerflow/homescreens/home/ServiceTwo';
 import ServiceThree from '../screens/cleanerflow/homescreens/home/ServiceThree';
 import HomeScreen from '../screens/cleanerflow/homescreens/home/Home';
+import CancelSubscription from '../screens/cleanerflow/homescreens/settings/CancelSubscription';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -53,6 +54,7 @@ export type RootStackParamList = {
   ServiceTwo : undefined;
   ServiceThree : undefined;
   HomeScreen : undefined;
+  CancelSubscription: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -96,6 +98,8 @@ const StackNavigator: React.FC = () => {
             headerShown: false,
           }}
           initialRouteName={'Splash'}>
+            
+            {/* -------Common Screens----- */}
           <Stack.Screen name="Splash" component={Splash} />
           <Stack.Screen name="OnBoarding" component={OnBoarding} />
           <Stack.Screen name="UserSelection" component={UserSelection} />
@@ -104,16 +108,20 @@ const StackNavigator: React.FC = () => {
           <Stack.Screen name="ResetPassword" component={ResetPassword} />
           <Stack.Screen name="Verify" component={Verify} />
           <Stack.Screen name="ChangePassword" component={ChangePassword} />
-          <Stack.Screen name="Home" component={CustomerNavigator} />
-          <Stack.Screen name="ServiceDetails" component={ServiceDetails} />
-          <Stack.Screen name="PostJob" component={PostJob} />
-          <Stack.Screen name="JobPosted" component={JobPosted} />
           <Stack.Screen name="EditProfile" component={EditProfile} />
           <Stack.Screen name="JobDetails" component={JobDetails} />
           <Stack.Screen name="FAQS" component={FAQS} />
           <Stack.Screen name="Terms" component={Terms} />
           <Stack.Screen name="Privacy" component={Privacy} />
           <Stack.Screen name="ChangePasswordV2" component={ChangePasswordV2} />
+
+
+          {/* ------------------Customer Flow------------- */}
+          <Stack.Screen name="Home" component={CustomerNavigator} />
+          <Stack.Screen name="ServiceDetails" component={ServiceDetails} />
+          <Stack.Screen name="PostJob" component={PostJob} />
+          <Stack.Screen name="JobPosted" component={JobPosted} />
+
 
           {/* ----------------- Cleaner Flow ---------------- */}
           <Stack.Screen name="Premium" component={Premium} />
@@ -122,6 +130,7 @@ const StackNavigator: React.FC = () => {
           <Stack.Screen name="ServiceTwo" component={ServiceTwo} />
           <Stack.Screen name="ServiceThree" component={ServiceThree} />
           <Stack.Screen name="HomeScreen" component={HomeScreen} />
+          <Stack.Screen name="CancelSubscription" component={CancelSubscription} />
 
         </Stack.Navigator>
       </NavigationContainer>

@@ -1,41 +1,39 @@
 import {
-  Dimensions,
   Image,
   SafeAreaView,
   StatusBar,
   StyleSheet,
   Text,
   View,
-  ScrollView,
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
 } from 'react-native';
 import React, {useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
-import {Fonts, IMAGES, Colors, Icons} from '../../constants/Themes';
+import {Fonts, IMAGES, Colors, Icons} from '../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../../routers/StackNavigator';
-import InputField from '../../components/InputField';
-import GradientButton from '../../components/GradientButton';
-import Entypo from 'react-native-vector-icons/Entypo';
-import HeaderBack from '../../components/HeaderBack';
+import {RootStackParamList} from '../../../routers/StackNavigator';
+import InputField from '../../../components/InputField';
+import GradientButton from '../../../components/GradientButton';
+import HeaderBack from '../../../components/HeaderBack';
 
-const Verify: React.FC = () => {
+const ResetPassword: React.FC = () => {
   const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList, 'Verify'>>();
+    useNavigation<
+      NativeStackNavigationProp<RootStackParamList, 'ResetPassword'>
+    >();
 
   const [loading, setLoading] = useState(false);
 
   const handleNext = () => {
     setLoading(true);
     setTimeout(() => {
-      navigation.navigate('ChangePassword');
+      navigation.navigate('Verify');
       setLoading(false);
     }, 2000);
   };
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar
@@ -45,16 +43,16 @@ const Verify: React.FC = () => {
       />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.flexOne}>
+        style={styles.flexContainer}>
         <View style={styles.container}>
-        <HeaderBack title={'Reset Password?'} />
+          <HeaderBack title={'Reset Password?'} />
           <View style={styles.inputContainer}>
-            <InputField placeholder="Enter sent OTP" />
+            <InputField placeholder="Enter Email" />
           </View>
 
           <View style={styles.buttonContainer}>
             <GradientButton
-              title="Verify"
+              title="Send OTP"
               onPress={handleNext}
               loading={loading}
             />
@@ -64,7 +62,7 @@ const Verify: React.FC = () => {
           <Image
             source={IMAGES.stars}
             resizeMode="contain"
-            style={styles.image}
+            style={styles.imageStyle}
           />
         </View>
       </KeyboardAvoidingView>
@@ -72,19 +70,19 @@ const Verify: React.FC = () => {
   );
 };
 
-export default Verify;
+export default ResetPassword;
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: Colors.background,
   },
-  flexOne: {
+  flexContainer: {
     flex: 1,
   },
   container: {
-    marginTop: Platform.OS == 'android' ? RFPercentage(4) : RFPercentage(-0.8),
     backgroundColor: Colors.background,
+    marginTop: Platform.OS == 'android' ? RFPercentage(4) : RFPercentage(-0.8),
   },
   headerContainer: {
     flexDirection: 'row',
@@ -118,7 +116,7 @@ const styles = StyleSheet.create({
     bottom: RFPercentage(8),
     right: RFPercentage(1.5),
   },
-  image: {
+  imageStyle: {
     width: RFPercentage(8),
     height: RFPercentage(8),
   },

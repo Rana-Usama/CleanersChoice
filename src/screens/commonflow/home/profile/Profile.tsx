@@ -1,9 +1,9 @@
 import { Image, SafeAreaView, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import React from 'react';
 import { RFPercentage } from 'react-native-responsive-fontsize';
-import { Colors, Fonts, IMAGES, Icons } from '../../../constants/Themes';
-import HeaderBack from '../../../components/HeaderBack';
-import ProfileField from '../../../components/ProfileField';
+import { Colors, Fonts, IMAGES, Icons } from '../../../../constants/Themes';
+import HeaderBack from '../../../../components/HeaderBack';
+import ProfileField from '../../../../components/ProfileField';
 import { useNavigation } from '@react-navigation/native';
 
 const Profile = () => {

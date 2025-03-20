@@ -14,37 +14,14 @@ const JobPosted = () => {
       NativeStackNavigationProp<RootStackParamList, 'JobPosted'>
     >();
   return (
-    <LinearGradient
-      colors={[Colors.gradient1, Colors.gradient2]}
-      style={styles.safeArea}>
-      <View style={{alignItems: 'center', justifyContent: 'center', flex: 1}}>
+    <LinearGradient colors={[Colors.gradient1, Colors.gradient2]} style={styles.safeArea}>
+      <View style={styles.centeredView}>
         <AntDesign name="checkcircleo" color={Colors.background} size={120} />
-        <Text
-          style={{
-            color: Colors.background,
-            fontFamily: Fonts.fontBold,
-            fontSize: RFPercentage(2.2),
-            marginTop: RFPercentage(4),
-          }}>
-          Job Posted Successfully!
-        </Text>
+        <Text style={styles.successText}>Job Posted Successfully!</Text>
       </View>
       <TouchableOpacity onPress={() => navigation.navigate('Home')}>
-        <View
-          style={{
-            width: RFPercentage(18),
-            height: RFPercentage(5),
-            backgroundColor: Colors.background,
-            borderRadius: RFPercentage(100),
-            alignItems: 'center',
-            justifyContent: 'center',
-            alignSelf: 'center',
-            bottom: RFPercentage(10),
-          }}>
-          <Text
-            style={{color: 'rgba(37, 50, 117, 1)', fontFamily: Fonts.fontBold}}>
-            Home
-          </Text>
+        <View style={styles.homeButton}>
+          <Text style={styles.homeButtonText}>Home</Text>
         </View>
       </TouchableOpacity>
     </LinearGradient>
@@ -57,5 +34,30 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     position: 'relative',
+  },
+  centeredView: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+  },
+  successText: {
+    color: Colors.background,
+    fontFamily: Fonts.fontBold,
+    fontSize: RFPercentage(2.2),
+    marginTop: RFPercentage(4),
+  },
+  homeButton: {
+    width: RFPercentage(18),
+    height: RFPercentage(5),
+    backgroundColor: Colors.background,
+    borderRadius: RFPercentage(100),
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    bottom: RFPercentage(10),
+  },
+  homeButtonText: {
+    color: 'rgba(37, 50, 117, 1)',
+    fontFamily: Fonts.fontBold,
   },
 });

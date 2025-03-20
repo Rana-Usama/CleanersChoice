@@ -20,6 +20,8 @@ import CustomDropDown from '../../../components/DropDown';
 import GradientButton from '../../../components/GradientButton';
 import {useNavigation} from '@react-navigation/native';
 import DatePicker from 'react-native-date-picker';
+import DescriptionField from '../../../components/DescriptionField';
+import InfoHeader from '../../../components/InfoHeader';
 
 const PostJob = () => {
   const navigation = useNavigation();
@@ -71,25 +73,14 @@ const PostJob = () => {
             textStyle={{fontSize: RFPercentage(1.8)}}
           />
           <View style={styles.container}>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Feather name="info" color={Colors.gradient1} size={18} />
-              <Text style={styles.infoText}>
-                Post your cleaning job by providing the following details!
-              </Text>
-            </View>
+           <InfoHeader text='Post your cleaning job by providing following details!' />
             <View style={{marginTop: RFPercentage(1.5)}}>
               <InputField
                 placeholder="Job Title e.g, Garden Cleaning"
                 customStyle={{width: '100%'}}
               />
-              <View style={styles.textArea}>
-                <TextInput
-                  placeholder="Description of the cleaning job"
-                  placeholderTextColor={Colors.placeholderColor}
-                  style={styles.textInput}
-                  numberOfLines={20}
-                  multiline
-                />
+              <View>
+                <DescriptionField placeholder='Description of the cleaning job' />
               </View>
               <InputField
                 placeholder="Enter Location you want service at"

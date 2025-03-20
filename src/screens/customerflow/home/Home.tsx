@@ -185,12 +185,7 @@ const Home = () => {
           />
 
           <Text style={styles.sectionTitle}>Cleaning Services</Text>
-          <View
-            style={{
-              marginTop: RFPercentage(0.5),
-              width: '95%',
-              alignSelf: 'center',
-            }}>
+          <View style={styles.servicesContainer}>
             <FlatList
               data={services}
               keyExtractor={item => item.id.toString()}
@@ -262,7 +257,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop:RFPercentage(1.5)
+    marginTop: RFPercentage(1.5),
   },
   sectionTitle: {
     width: '90%',
@@ -307,7 +302,7 @@ const styles = StyleSheet.create({
   },
   filterText: {
     color: Colors.secondaryText,
-    fontSize:RFPercentage(1.5)
+    fontSize: RFPercentage(1.5),
   },
   serviceColumnWrapper: {
     justifyContent: 'space-between',
@@ -316,5 +311,10 @@ const styles = StyleSheet.create({
     margin: RFPercentage(1),
     width: '46%',
     marginTop: RFPercentage(1),
+  },
+  servicesContainer: {
+    marginTop: RFPercentage(0.5),
+    width: '95%',
+    alignSelf: 'center',
   },
 });

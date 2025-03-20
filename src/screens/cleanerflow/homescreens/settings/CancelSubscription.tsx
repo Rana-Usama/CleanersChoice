@@ -8,9 +8,9 @@ import {
   } from 'react-native';
   import React from 'react';
   import {RFPercentage} from 'react-native-responsive-fontsize';
-  import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
-  import HeaderComponent from '../../../components/HeaderComponent';
-  import GradientButton from '../../../components/GradientButton';
+  import {Colors, Fonts, Icons, IMAGES} from '../../../../constants/Themes';
+  import HeaderComponent from '../../../../components/HeaderComponent';
+  import GradientButton from '../../../../components/GradientButton';
 import { useNavigation } from '@react-navigation/native';
   
   const services = [
@@ -20,7 +20,7 @@ import { useNavigation } from '@react-navigation/native';
     { id: 4, name: 'Cancel any time' },
   ];
   
-  const Premium = () => {
+  const CancelSubscription = () => {
     const navigation = useNavigation()
 
     return (
@@ -28,13 +28,16 @@ import { useNavigation } from '@react-navigation/native';
         <HeaderComponent />
         <View style={styles.container}>
           <View style={styles.premiumHeader}>
-            <Image source={Icons.owner} resizeMode="contain" style={styles.ownerIcon} />
-            <Text style={styles.premiumText}>Premium Business Account</Text>
+            {/* <Image source={Icons.owner} resizeMode="contain" style={styles.ownerIcon} /> */}
+            <Text style={styles.premiumText}>Cancel Premium Subscription</Text>
           </View>
           <View style={styles.subscriptionContainer}>
             <View style={styles.subscriptionBox}>
               <View style={styles.starLeft}>
                 <Image source={IMAGES.stars} resizeMode="contain" style={styles.starIcon} />
+              </View>
+              <View>
+                <Text style={{textAlign:'center', bottom:3, fontFamily:Fonts.fontMedium, color:Colors.brown, fontSize:RFPercentage(1.5)}}>Current Plan</Text>
               </View>
               <Text style={styles.priceText}>
                 $12.
@@ -60,7 +63,9 @@ import { useNavigation } from '@react-navigation/native';
             </View>
           </View>
           <View style={styles.buttonContainer}>
-            <GradientButton title="Proceed To Payment" textStyle={styles.buttonText} onPress={()=> navigation.navigate('CleanerNavigator')} style={{width:RFPercentage(18)}} />
+            <GradientButton title="Cancel" textStyle={styles.buttonText} 
+            // onPress={()=> navigation.navigate('CleanerNavigator')}
+             style={{width:RFPercentage(18)}} />
           </View>
         </View>
         <View style={styles.starContainer}>
@@ -70,7 +75,7 @@ import { useNavigation } from '@react-navigation/native';
     );
   };
   
-  export default Premium;
+  export default CancelSubscription;
   
   const styles = StyleSheet.create({
     safeArea: {
@@ -93,13 +98,13 @@ import { useNavigation } from '@react-navigation/native';
     },
     premiumText: {
       color: Colors.brown,
-      fontSize: RFPercentage(2),
-      fontFamily: Fonts.semiBold,
-      marginLeft: 4,
-      marginTop: 1,
+      fontSize: RFPercentage(1.8),
+      fontFamily: Fonts.fontMedium,
     },
     subscriptionContainer: {
       marginTop: RFPercentage(4.5),
+      alignItems:'center',
+      justifyContent:'center'
     },
     subscriptionBox: {
       width: '85%',

@@ -12,14 +12,13 @@ import {
 } from 'react-native';
 import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { Fonts, IMAGES, Colors } from '../../constants/Themes';
+import { Fonts, IMAGES, Colors } from '../../../constants/Themes';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../routers/StackNavigator';
-import InputField from '../../components/InputField';
-import GradientButton from '../../components/GradientButton';
-import Entypo from 'react-native-vector-icons/Entypo';
-import HeaderBack from '../../components/HeaderBack';
+import { RootStackParamList } from '../../../routers/StackNavigator';
+import InputField from '../../../components/InputField';
+import GradientButton from '../../../components/GradientButton';
+import HeaderBack from '../../../components/HeaderBack';
 
 
 const ChangePassword: React.FC = () => {

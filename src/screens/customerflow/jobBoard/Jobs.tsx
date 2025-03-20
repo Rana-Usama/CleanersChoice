@@ -77,6 +77,7 @@ const Jobs = () => {
                   date={item.date}
                   onPress={() => navigation.navigate('JobDetails')}
                   onPress2={() => setModalVisible(true)}
+                  delete={true}
                 />
               )}
             />

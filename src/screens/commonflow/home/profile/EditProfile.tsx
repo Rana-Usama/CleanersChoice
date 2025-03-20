@@ -1,13 +1,13 @@
 import {Dimensions, SafeAreaView, StyleSheet, Text, View, TouchableOpacity, Image, KeyboardAvoidingView, ScrollView, TouchableWithoutFeedback, Keyboard, Platform} from 'react-native';
 import React, {useState} from 'react';
-import {Colors, Icons, Fonts, IMAGES} from '../../../constants/Themes';
+import {Colors, Icons, Fonts, IMAGES} from '../../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../../../routers/StackNavigator';
-import HeaderBack from '../../../components/HeaderBack';
-import GradientButton from '../../../components/GradientButton';
-import InputField from '../../../components/InputField';
+import {RootStackParamList} from '../../../../routers/StackNavigator';
+import HeaderBack from '../../../../components/HeaderBack';
+import GradientButton from '../../../../components/GradientButton';
+import InputField from '../../../../components/InputField';
 import ImagePicker from 'react-native-image-crop-picker';
 
 

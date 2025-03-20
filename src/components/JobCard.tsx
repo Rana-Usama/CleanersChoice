@@ -7,18 +7,20 @@ import EvilIcons from 'react-native-vector-icons/EvilIcons';
 const JobCard = props => {
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-      onPress={props.onPress2}
-        style={{position: 'absolute', right: -5, top: RFPercentage(-1.3)}}>
-        <Image
-          source={Icons.delete}
-          resizeMode="contain"
-          style={{
-            width: RFPercentage(2.3),
-            height: RFPercentage(2.3),
-          }}
-        />
-      </TouchableOpacity>
+      {props.delete && (
+        <TouchableOpacity
+          onPress={props.onPress2}
+          style={{position: 'absolute', right: -5, top: RFPercentage(-1.3)}}>
+          <Image
+            source={Icons.delete}
+            resizeMode="contain"
+            style={{
+              width: RFPercentage(2.3),
+              height: RFPercentage(2.3),
+            }}
+          />
+        </TouchableOpacity>
+      )}
 
       <View style={styles.innerView}>
         <Text

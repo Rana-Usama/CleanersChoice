@@ -10,7 +10,6 @@ import React from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, Icons} from '../../../constants/Themes';
 import HeaderBack from '../../../components/HeaderBack';
-import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import GradientButton from '../../../components/GradientButton';
 import NextButton from '../../../components/NextButton';
 import {useNavigation} from '@react-navigation/native';

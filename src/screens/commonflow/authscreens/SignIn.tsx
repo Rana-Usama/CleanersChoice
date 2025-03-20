@@ -11,20 +11,31 @@ import {
 } from 'react-native';
 import React, {useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
-import {Fonts, IMAGES, Colors, Icons} from '../../constants/Themes';
+import {Fonts, IMAGES, Colors, Icons} from '../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../../routers/StackNavigator';
+import {RootStackParamList} from '../../../routers/StackNavigator';
 import {RadioButtonInput} from 'react-native-simple-radio-button';
-import HeaderComponent from '../../components/HeaderComponent';
-import InputField from '../../components/InputField';
-import PasswordField from '../../components/PasswordField';
-import GradientButton from '../../components/GradientButton';
+import HeaderComponent from '../../../components/HeaderComponent';
+import InputField from '../../../components/InputField';
+import PasswordField from '../../../components/PasswordField';
+import GradientButton from '../../../components/GradientButton';
+import {useSelector} from 'react-redux';
 
 const SignIn: React.FC = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, 'SignIn'>>();
   const [selected, setSelected] = useState<boolean>(false);
+ const userFlow = useSelector(state => state.userFlow);
+  console.log('userFlow.........', userFlow.userFlow);
+
+  const handleNext = () => {
+    if (userFlow?.userFlow === 'Customer') {
+      navigation.navigate('Home');
+    } else {
+      navigation.navigate('CleanerNavigator');
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -77,7 +88,7 @@ const SignIn: React.FC = () => {
           <View style={styles.buttonContainer}>
             <GradientButton
               title="Sign In"
-              onPress={() => navigation.navigate('Home')}
+              onPress={handleNext}
             />
             <View style={styles.bottomContainer}>
               <Text style={styles.bottomText}>Don't have an account?</Text>

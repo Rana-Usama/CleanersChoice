@@ -7,12 +7,12 @@ import {
 } from 'react-native';
 import React, {useState} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
-import {Colors, Fonts, Icons} from '../../../constants/Themes';
-import HeaderBack from '../../../components/HeaderBack';
-import ProfileField from '../../../components/ProfileField';
+import {Colors, Fonts, Icons} from '../../../../constants/Themes';
+import HeaderBack from '../../../../components/HeaderBack';
+import ProfileField from '../../../../components/ProfileField';
 import {useNavigation} from '@react-navigation/native';
 import {BlurView} from '@react-native-community/blur';
-import CustomModal from '../../../components/CustomModal';
+import CustomModal from '../../../../components/CustomModal';
 
 const Settings = () => {
   const navigation = useNavigation();

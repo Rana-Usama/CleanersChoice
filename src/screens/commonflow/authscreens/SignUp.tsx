@@ -13,15 +13,15 @@ import {
 } from 'react-native';
 import React, {useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
-import {Fonts, IMAGES, Colors, Icons} from '../../constants/Themes';
+import {Fonts, IMAGES, Colors, Icons} from '../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../../routers/StackNavigator';
+import {RootStackParamList} from '../../../routers/StackNavigator';
 import {RadioButtonInput} from 'react-native-simple-radio-button';
-import HeaderComponent from '../../components/HeaderComponent';
-import InputField from '../../components/InputField';
-import PasswordField from '../../components/PasswordField';
-import GradientButton from '../../components/GradientButton';
+import HeaderComponent from '../../../components/HeaderComponent';
+import InputField from '../../../components/InputField';
+import PasswordField from '../../../components/PasswordField';
+import GradientButton from '../../../components/GradientButton';
 import ImagePicker from 'react-native-image-crop-picker';
 import {useSelector} from 'react-redux';
 

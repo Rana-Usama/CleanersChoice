@@ -12,17 +12,16 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
-import {Colors, Icons, Fonts} from '../../../constants/Themes';
+import {Colors, Icons, Fonts} from '../../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../../../routers/StackNavigator';
-import HeaderBack from '../../../components/HeaderBack';
-import GradientButton from '../../../components/GradientButton';
-import PasswordField from '../../../components/PasswordField';
+import {RootStackParamList} from '../../../../routers/StackNavigator';
+import HeaderBack from '../../../../components/HeaderBack';
+import GradientButton from '../../../../components/GradientButton';
+import PasswordField from '../../../../components/PasswordField';
 import {BlurView} from '@react-native-community/blur';
-import AntDesign from 'react-native-vector-icons/AntDesign';
-import CustomModal from '../../../components/CustomModal';
+import CustomModal from '../../../../components/CustomModal';
 
 const ChangePasswordV2 = () => {
   const navigation =

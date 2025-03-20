@@ -4,11 +4,11 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Icons , Colors, Fonts} from "../constants/Themes";
 import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import Messages from "../screens/homescreens/messages/Messages";
-import Settings from "../screens/homescreens/settings/Settings";
-import Home from "../screens/homescreens/home/Home";
-import Jobs from "../screens/homescreens/jobBoard/Jobs";
-import Profile from "../screens/homescreens/profile/Profile";
+import Messages from "../screens/customerflow/messages/Messages";
+import Settings from "../screens/commonflow/home/settings/Settings";
+import Home from "../screens/customerflow/home/Home";
+import Jobs from "../screens/customerflow/jobBoard/Jobs";
+import Profile from "../screens/commonflow/home/profile/Profile";
 import { RFPercentage } from "react-native-responsive-fontsize";
 
 const { width, height } = Dimensions.get('window');
