@@ -14,11 +14,10 @@ interface Props {
 const ProfileField: React.FC<Props> = (props: Props) => {
     return (
         <TouchableOpacity onPress={props.onPress}>
-            <View
-                style={{ width: '100%', height: RFPercentage(5.4), borderWidth: 1, borderColor: Colors.inputFieldColor, borderRadius: 8, alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10, marginVertical: 10 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Image source={props.icon} resizeMode='contain' style={{ width: RFPercentage(2), height: RFPercentage(2) }} />
-                    <Text style={[{ color: Colors.brown, fontFamily: Fonts.fontRegular, fontSize: RFPercentage(1.5), left: 8, top: 1 }, props.color && { color: props.color }]}>{props.text}</Text>
+            <View style={styles.container}>
+                <View style={styles.textContainer}>
+                    <Image source={props.icon} resizeMode='contain' style={styles.icon} />
+                    <Text style={[styles.text, props.color && { color: props.color }]}>{props.text}</Text>
                 </View>
                 <TouchableOpacity onPress={props.onPress}>
                     <Entypo name='chevron-thin-right' size={RFPercentage(1.6)} color={Colors.brown} />
@@ -30,4 +29,32 @@ const ProfileField: React.FC<Props> = (props: Props) => {
 
 export default ProfileField
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+    container: {
+        width: '100%',
+        height: RFPercentage(5.4),
+        borderWidth: 1,
+        borderColor: Colors.inputFieldColor,
+        borderRadius: 8,
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingHorizontal: 10,
+        marginVertical: 10,
+    },
+    textContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    icon: {
+        width: RFPercentage(2),
+        height: RFPercentage(2),
+    },
+    text: {
+        color: Colors.brown,
+        fontFamily: Fonts.fontRegular,
+        fontSize: RFPercentage(1.5),
+        left: 8,
+        top: 1,
+    }
+})

@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
   title: {
     color: Colors.primaryText,
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(1.8),
     left: RFPercentage(1),
   },
   postJobText: {

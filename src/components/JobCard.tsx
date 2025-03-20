@@ -8,96 +8,31 @@ const JobCard = props => {
   return (
     <View style={styles.container}>
       {props.delete && (
-        <TouchableOpacity
-          onPress={props.onPress2}
-          style={{position: 'absolute', right: -5, top: RFPercentage(-1.3)}}>
-          <Image
-            source={Icons.delete}
-            resizeMode="contain"
-            style={{
-              width: RFPercentage(2.3),
-              height: RFPercentage(2.3),
-            }}
-          />
+        <TouchableOpacity onPress={props.onPress2} style={styles.deleteButton}>
+          <Image source={Icons.delete} resizeMode="contain" style={styles.deleteIcon} />
         </TouchableOpacity>
       )}
 
       <View style={styles.innerView}>
-        <Text
-          style={{
-            color: 'rgba(55, 65, 81, 1)',
-            fontFamily: Fonts.fontMedium,
-            fontSize: RFPercentage(1.5),
-          }}>
-          {props.name}
-        </Text>
-        <Text
-          style={{
-            color: Colors.placeholderColor,
-            fontFamily: Fonts.fontRegular,
-            fontSize: RFPercentage(1.2),
-          }}>
-          Due Date & Time: {props.date}
-        </Text>
+        <Text style={styles.nameText}>{props.name}</Text>
+        <Text style={styles.dateText}>Due Date & Time: {props.date}</Text>
       </View>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          marginTop: RFPercentage(1),
-        }}>
-        <EvilIcons
-          name="location"
-          size={RFPercentage(1.8)}
-          style={{bottom: 1.5, right: 4}}
-        />
-        <Text
-          style={{
-            color: Colors.placeholderColor,
-            fontFamily: Fonts.fontRegular,
-            fontSize: RFPercentage(1.4),
-            left: -2,
-          }}>
-          {props.location}
-        </Text>
+      
+      <View style={styles.locationContainer}>
+        <EvilIcons name="location" size={RFPercentage(1.8)} style={styles.locationIcon} />
+        <Text style={styles.locationText}>{props.location}</Text>
       </View>
-      <View style={[styles.innerView, {marginTop: RFPercentage(1)}]}>
-        <Text
-          style={{
-            color: Colors.placeholderColor,
-            fontFamily: Fonts.fontRegular,
-            fontSize: RFPercentage(1.4),
-          }}>
+      
+      <View style={[styles.innerView, styles.priceContainer]}>
+        <Text style={styles.priceText}>
           Price Range:
-          <Text style={{color: Colors.gradient1, fontFamily: Fonts.fontMedium}}>
-            {`\t`} {props.price}
-          </Text>
+          <Text style={styles.priceHighlight}>{`	`} {props.price}</Text>
         </Text>
         <TouchableOpacity onPress={props.onPress}>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-            }}>
-            <Text
-              style={{
-                color: 'rgba(55, 65, 81, 1)',
-                fontFamily: Fonts.fontRegular,
-                fontSize: RFPercentage(1.4),
-                right: 5,
-              }}>
-              Details
-            </Text>
+          <View style={styles.detailsContainer}>
+            <Text style={styles.detailsText}>Details</Text>
             <TouchableOpacity onPress={props.onPress}>
-              <Image
-                source={Icons.arrowRight}
-                resizeMode="contain"
-                style={{
-                  width: RFPercentage(1.8),
-                  height: RFPercentage(1.8),
-                  bottom: 1,
-                }}
-              />
+              <Image source={Icons.arrowRight} resizeMode="contain" style={styles.arrowIcon} />
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -117,10 +52,70 @@ const styles = StyleSheet.create({
     padding: RFPercentage(1.3),
     marginTop: RFPercentage(2.5),
   },
+  deleteButton: {
+    position: 'absolute',
+    right: -5,
+    top: RFPercentage(-1.3),
+  },
+  deleteIcon: {
+    width: RFPercentage(2.3),
+    height: RFPercentage(2.3),
+  },
   innerView: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    // width: '100%',
+  },
+  nameText: {
+    color: 'rgba(55, 65, 81, 1)',
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.5),
+  },
+  dateText: {
+    color: Colors.placeholderColor,
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.2),
+  },
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: RFPercentage(1),
+  },
+  locationIcon: {
+    bottom: 1.5,
+    right: 4,
+  },
+  locationText: {
+    color: Colors.placeholderColor,
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.4),
+    left: -2,
+  },
+  priceContainer: {
+    marginTop: RFPercentage(1),
+  },
+  priceText: {
+    color: Colors.placeholderColor,
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.4),
+  },
+  priceHighlight: {
+    color: Colors.gradient1,
+    fontFamily: Fonts.fontMedium,
+  },
+  detailsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  detailsText: {
+    color: 'rgba(55, 65, 81, 1)',
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.4),
+    right: 5,
+  },
+  arrowIcon: {
+    width: RFPercentage(1.8),
+    height: RFPercentage(1.8),
+    bottom: 1,
   },
 });

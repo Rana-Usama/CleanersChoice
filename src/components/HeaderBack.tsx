@@ -7,56 +7,30 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import React from 'react';
-import {RFPercentage} from 'react-native-responsive-fontsize';
+import { RFPercentage } from 'react-native-responsive-fontsize';
 import Entypo from 'react-native-vector-icons/Entypo';
-import {Colors, Fonts, Icons} from '../constants/Themes';
-import {useNavigation} from '@react-navigation/native';
+import { Colors, Fonts, Icons } from '../constants/Themes';
+import { useNavigation } from '@react-navigation/native';
 
-const  HeaderBack: React.FC = props => {
+const HeaderBack: React.FC = (props) => {
   const navigation = useNavigation();
 
   return (
-    <View
-      style={{
-        width: '90%',
-        alignItems: 'center',
-        justifyContent: 'center',
-        alignSelf: 'center',
-        marginTop: Platform.OS == 'android' ? RFPercentage(6) : RFPercentage(0),
-      }}>
-      <View style={{position: 'absolute', left: 0}}>
+    <View style={styles.container}>
+      <View style={styles.leftContainer}>
         {props.logo ? (
-          <>
-            <Image
-              source={Icons.homeLogo}
-              resizeMode="contain"
-              style={styles.logo}
-            />
-          </>
+          <Image source={Icons.homeLogo} resizeMode="contain" style={styles.logo} />
         ) : (
-          <>
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <Entypo
-                name="chevron-thin-left"
-                color={Colors.secondaryText}
-                size={RFPercentage(2)}
-              />
-            </TouchableOpacity>
-          </>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Entypo name="chevron-thin-left" color={Colors.secondaryText} size={RFPercentage(2)} />
+          </TouchableOpacity>
         )}
       </View>
       <Text style={[styles.headerText, props.textStyle]}>{props.title}</Text>
       {props.right && (
-        <View style={{position: 'absolute', right: 0}}>
+        <View style={styles.rightContainer}>
           <TouchableOpacity onPress={props.onPress}>
-            <Text
-              style={{
-                color: Colors.gradient1,
-                fontFamily: Fonts.fontMedium,
-                fontSize: RFPercentage(1.5),
-              }}>
-              {props.rightText}
-            </Text>
+            <Text style={styles.rightText}>{props.rightText}</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -67,6 +41,21 @@ const  HeaderBack: React.FC = props => {
 export default HeaderBack;
 
 const styles = StyleSheet.create({
+  container: {
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    marginTop: Platform.OS === 'android' ? RFPercentage(6) : RFPercentage(0),
+  },
+  leftContainer: {
+    position: 'absolute',
+    left: 0,
+  },
+  rightContainer: {
+    position: 'absolute',
+    right: 0,
+  },
   headerText: {
     color: Colors.primaryText,
     fontFamily: Fonts.semiBold,
@@ -76,5 +65,10 @@ const styles = StyleSheet.create({
   logo: {
     width: RFPercentage(7),
     height: RFPercentage(7),
+  },
+  rightText: {
+    color: Colors.gradient1,
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.5),
   },
 });

@@ -2,14 +2,12 @@ import {
   StyleSheet,
   Text,
   View,
-  Dimensions,
   TouchableOpacity,
   FlatList,
-  Image,
 } from 'react-native';
 import React, {useState} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
-import {Colors, Fonts, Icons} from '../constants/Themes';
+import {Colors, Fonts} from '../constants/Themes';
 import Entypo from 'react-native-vector-icons/Entypo';
 
 interface Item {
@@ -26,93 +24,44 @@ interface Props {
 
 const CustomDropDown: React.FC<Props> = (props: Props) => {
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(null);
+  const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
 
   return (
     <View>
       <TouchableOpacity
         style={[
           styles.container,
-          {
-            borderTopWidth: 1,
-            borderLeftWidth:1,
-            borderRightWidth:1,
-            borderLeftColor :  Colors.inputFieldColor,
-            borderTopColor: Colors.inputFieldColor,
-            borderRightColor :  Colors.inputFieldColor,
-            borderBottomWidth : open ? 0 : 1,
-            borderBottomColor : Colors.inputFieldColor
-
-          },
+          styles.borderStyle,
+          open ? styles.borderOpen : styles.borderClosed,
         ]}
         onPress={() => setOpen(!open)}>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}>
-          <Text
-            style={{
-              color: Colors.placeholderColor,
-              fontFamily: Fonts.fontRegular,
-              fontSize: RFPercentage(1.6),
-            }}>
-            {props.placeholder}
+        <View style={styles.rowContainer}>
+          <Text style={styles.placeholderText}>
+            {selectedLabel || props.placeholder}
           </Text>
           <TouchableOpacity onPress={() => setOpen(!open)}>
-            <Entypo
-              name="chevron-small-down"
-              color={Colors.placeholderColor}
-              size={22}
-            />
+            <Entypo name="chevron-small-down" color={Colors.placeholderColor} size={22} />
           </TouchableOpacity>
         </View>
       </TouchableOpacity>
       {open && (
-        <>
-          <View
-            style={{
-              backgroundColor: 'transparent',
-              borderBottomLeftRadius: RFPercentage(2),
-              borderBottomRightRadius: RFPercentage(2),
-              bottom: 16,
-              borderWidth: 1,
-              borderColor: Colors.inputFieldColor,
-            }}>
-            <FlatList
-              data={props.data}
-              keyExtractor={item => item.id.toString()}
-              renderItem={({item}) => {
-                return (
-                  <TouchableOpacity
-                  // onPress={() => {
-                  //   setValue(item);
-                  // }}
-                  >
-                    <View
-                      style={{
-                        paddingVertical: 8,
-                        backgroundColor: 'transparent',
-                        borderBottomWidth: 1,
-                        borderBottomColor: 'rgba(244, 244, 245, 1)',
-                        paddingHorizontal: 15,
-                      }}>
-                      <Text
-                        style={{
-                          color: Colors.placeholderColor,
-                          fontFamily: Fonts.fontRegular,
-                          fontSize: RFPercentage(1.4),
-                        }}>
-                        {item.label}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-                );
-              }}
-            />
-          </View>
-        </>
+        <View style={styles.dropdownContainer}>
+          <FlatList
+            data={props.data}
+            keyExtractor={item => item.id.toString()}
+            renderItem={({item}) => (
+              <TouchableOpacity
+                onPress={() => {
+                  setOpen(false);
+                  setSelectedLabel(item.label);
+                }}>
+                <View style={styles.listItem}>
+                  <Text style={styles.listItemText}>{item.label}</Text>
+                </View>
+              </TouchableOpacity>
+            )}
+          />
+        </View>
       )}
     </View>
   );
@@ -128,5 +77,56 @@ const styles = StyleSheet.create({
     marginVertical: RFPercentage(1.5),
     justifyContent: 'center',
     paddingHorizontal: RFPercentage(1.5),
+  },
+  borderStyle: {
+    borderTopWidth: 1,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderLeftColor: Colors.inputFieldColor,
+    borderTopColor: Colors.inputFieldColor,
+    borderRightColor: Colors.inputFieldColor,
+  },
+  borderOpen: {
+    borderBottomWidth: 0,
+  },
+  borderClosed: {
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.inputFieldColor,
+  },
+  rowContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  placeholderText: {
+    color: Colors.placeholderColor,
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.6),
+  },
+  dropdownContainer: {
+    backgroundColor: 'transparent',
+    borderBottomLeftRadius: RFPercentage(2),
+    borderBottomRightRadius: RFPercentage(2),
+    bottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.inputFieldColor,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderRightColor: Colors.inputFieldColor,
+    borderLeftColor: Colors.inputFieldColor,
+    borderTopWidth:1,
+    borderTopColor:Colors.inputFieldColor
+  },
+  listItem: {
+    paddingVertical: 8,
+    backgroundColor: 'transparent',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(244, 244, 245, 1)',
+    paddingHorizontal: 15,
+  },
+  listItemText: {
+    color: Colors.placeholderColor,
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.4),
   },
 });

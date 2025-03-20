@@ -39,8 +39,8 @@ const ChangePassword: React.FC = () => {
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.keyboardAvoidingView}>
-        <View style={styles.container}>
         <HeaderBack title={'Set New Password'} />
+        <View style={styles.container}>
 
           <View style={styles.inputContainer}>
             <InputField placeholder="Enter new Password" />
@@ -67,7 +67,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   container: {
-    marginTop: Platform.OS === 'android' ? RFPercentage(4) : RFPercentage(-0.8),
     backgroundColor: Colors.background,
   },
   keyboardAvoidingView: {

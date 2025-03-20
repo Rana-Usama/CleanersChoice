@@ -71,13 +71,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
 
   return (
     <View style={styles.tabBarContainer}>
-      <View
-        style={{
-          width: '90%',
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-around',
-        }}>
+      <View style={styles.labelContainer}>
         {state.routes.map((route, index) => {
           const {options} = descriptors[route.key];
           const label =
@@ -95,35 +89,32 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                 <View style={{bottom: RFPercentage(2.5)}}>
                   <Image
                     source={isFocused ? Icons.home : Icons.homeInactive}
-                    style={{
-                      width: RFPercentage(6.5),
-                      height: RFPercentage(6.5),
-                    }}
+                    style={styles.middle}
                     resizeMode="contain"
                   />
                 </View>
               ) : route.name === 'Messages' ? (
                 <Image
                   source={isFocused ? Icons.msgActive : Icons.msg}
-                  style={{width: RFPercentage(2.5), height: RFPercentage(2.5)}}
+                  style={styles.imgStyle}
                   resizeMode="contain"
                 />
               ) : route.name === 'Job Listings' ? (
                 <Image
                   source={isFocused ? Icons.jobActive : Icons.job}
-                  style={{width: RFPercentage(2.5), height: RFPercentage(2.5)}}
+                  style={styles.imgStyle}
                   resizeMode="contain"
                 />
               ) : route.name === 'Settings' ? (
                 <Image
                   source={isFocused ? Icons.settingActive : Icons.settings}
-                  style={{width: RFPercentage(2.5), height: RFPercentage(2.5)}}
+                  style={styles.imgStyle}
                   resizeMode="contain"
                 />
               ) : (
                 <Image
                   source={isFocused ? Icons.profileActive : Icons.profile}
-                  style={{width: RFPercentage(2.5), height: RFPercentage(2.5)}}
+                  style={styles.imgStyle}
                   resizeMode="contain"
                 />
               )}
@@ -188,5 +179,19 @@ const styles = StyleSheet.create({
   },
   activeTab: {
     fontWeight: 'bold',
+  },
+  imgStyle: {
+    width: RFPercentage(2.5),
+    height: RFPercentage(2.5),
+  },
+  middle: {
+    width: RFPercentage(6.5),
+    height: RFPercentage(6.5),
+  },
+  labelContainer: {
+    width: '90%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
   },
 });

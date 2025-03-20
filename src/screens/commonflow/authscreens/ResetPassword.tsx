@@ -44,8 +44,8 @@ const ResetPassword: React.FC = () => {
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.flexContainer}>
-        <View style={styles.container}>
           <HeaderBack title={'Reset Password?'} />
+        <View style={styles.container}>
           <View style={styles.inputContainer}>
             <InputField placeholder="Enter Email" />
           </View>
@@ -82,7 +82,6 @@ const styles = StyleSheet.create({
   },
   container: {
     backgroundColor: Colors.background,
-    marginTop: Platform.OS == 'android' ? RFPercentage(4) : RFPercentage(-0.8),
   },
   headerContainer: {
     flexDirection: 'row',

@@ -5,36 +5,24 @@ import {RFPercentage} from 'react-native-responsive-fontsize';
 
 const HeaderComponent: React.FC = () => {
   return (
-    <View
-      style={{
-        width: '100%',
-        alignItems: 'center',
-        justifyContent: 'center',
-        alignSelf: 'center',
-        marginTop: Platform.OS == 'android' ? RFPercentage(4) : RFPercentage(0),
-      }}>
-      {/* {!topLeftStars ? (
-        <View style={{position: 'absolute', left: 0}}>
-          <Image
-            source={IMAGES.stars}
-            resizeMode="contain"
-            style={{
-              width: RFPercentage(8),
-              height: RFPercentage(8),
-            }}
-          />
-        </View>
-      ) : null} */}
-
-      <Image
-        source={IMAGES.logo}
-        resizeMode="contain"
-        style={{width: RFPercentage(13), height: RFPercentage(12)}}
-      />
+    <View style={styles.container}>
+      <Image source={IMAGES.logo} resizeMode="contain" style={styles.logo} />
     </View>
   );
 };
 
 export default HeaderComponent;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  container: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    marginTop: Platform.OS == 'android' ? RFPercentage(4) : RFPercentage(0),
+  },
+  logo: {
+    width: RFPercentage(13),
+    height: RFPercentage(12),
+  },
+});

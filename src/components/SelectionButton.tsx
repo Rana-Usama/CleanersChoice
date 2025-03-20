@@ -2,16 +2,13 @@ import {
   StyleSheet,
   Text,
   View,
-  ImageBackground,
-  TouchableOpacity,
-  Dimensions,
-  ActivityIndicator,
   Image,
+  TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import React from 'react';
-import LinearGradient from 'react-native-linear-gradient';
-import {Fonts, Colors, Icons} from '../constants/Themes';
-import {RFPercentage} from 'react-native-responsive-fontsize';
+import { Fonts, Colors } from '../constants/Themes';
+import { RFPercentage } from 'react-native-responsive-fontsize';
 
 interface Props {
   onPress: () => void;
@@ -28,22 +25,13 @@ const SelectionButton: React.FC<Props> = (props: Props) => {
     <TouchableOpacity
       activeOpacity={0.7}
       onPress={props.onPress}
-      disabled={props.disabled}>
-      <View
-        style={{
-          position: 'absolute',
-          zIndex: 999999,
-          left: RFPercentage(0.6),
-          top: RFPercentage(-1.2),
-        }}>
-        <Image
-          source={props.icon}
-          resizeMode="contain"
-          style={{width: RFPercentage(2.5), height: RFPercentage(2.5)}}
-        />
+      disabled={props.disabled}
+    >
+      <View style={styles.iconContainer}>
+        <Image source={props.icon} resizeMode="contain" style={styles.icon} />
       </View>
-      <View style={[styles.nextButton, {...props.style}]}>
-        <Text style={[styles.nextButtonText]}>
+      <View style={[styles.nextButton, props.style]}>
+        <Text style={styles.nextButtonText}>
           {props.loading ? (
             <ActivityIndicator size={'small'} color={Colors.background} />
           ) : (
@@ -58,6 +46,16 @@ const SelectionButton: React.FC<Props> = (props: Props) => {
 export default SelectionButton;
 
 const styles = StyleSheet.create({
+  iconContainer: {
+    position: 'absolute',
+    zIndex: 999999,
+    left: RFPercentage(0.6),
+    top: RFPercentage(-1.2),
+  },
+  icon: {
+    width: RFPercentage(2.5),
+    height: RFPercentage(2.5),
+  },
   nextButton: {
     height: RFPercentage(5.8),
     borderRadius: RFPercentage(5),

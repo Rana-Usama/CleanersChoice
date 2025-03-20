@@ -45,8 +45,8 @@ const Verify: React.FC = () => {
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.flexOne}>
-        <View style={styles.container}>
         <HeaderBack title={'Reset Password?'} />
+        <View style={styles.container}>
           <View style={styles.inputContainer}>
             <InputField placeholder="Enter sent OTP" />
           </View>
@@ -82,7 +82,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   container: {
-    marginTop: Platform.OS == 'android' ? RFPercentage(4) : RFPercentage(-0.8),
     backgroundColor: Colors.background,
   },
   headerContainer: {

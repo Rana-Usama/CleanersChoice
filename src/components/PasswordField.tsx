@@ -1,6 +1,5 @@
 import {
   StyleSheet,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
@@ -27,34 +26,17 @@ const PasswordField: React.FC<Props> = (props: Props) => {
 
   return (
     <View style={[styles.container, props.customStyle]}>
-      <View
-        style={{
-          width: '95%',
-          alignItems: 'center',
-          justifyContent: 'flex-start',
-          flexDirection: 'row',
-        }}>
+      <View style={styles.inputWrapper}>
         <TextInput
           placeholder={props.placeholder}
           placeholderTextColor={Colors.placeholderColor}
-          style={{
-            color: Colors.primaryText,
-            fontFamily: Fonts.fontRegular,
-            fontSize: RFPercentage(1.5),
-            paddingVertical: 0,
-            marginVertical: 0,
-            textAlignVertical: 'center',
-            includeFontPadding: false,
-            width: '80%',
-          }}
+          style={styles.textInput}
           secureTextEntry={!visible}
           value={props.value}
           onChangeText={props.onChangeText}
           onBlur={props.handleBlur}
         />
-        <TouchableOpacity
-          onPress={togglePasswordVisibility}
-          style={{position: 'absolute', right: 0}}>
+        <TouchableOpacity onPress={togglePasswordVisibility} style={styles.iconWrapper}>
           <Feather
             name={visible ? 'eye' : 'eye-off'}
             size={RFPercentage(1.5)}
@@ -78,5 +60,25 @@ const styles = StyleSheet.create({
     marginVertical: RFPercentage(1.5),
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  inputWrapper: {
+    width: '95%',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    flexDirection: 'row',
+  },
+  textInput: {
+    color: Colors.primaryText,
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.5),
+    paddingVertical: 0,
+    marginVertical: 0,
+    textAlignVertical: 'center',
+    includeFontPadding: false,
+    width: '80%',
+  },
+  iconWrapper: {
+    position: 'absolute',
+    right: 0,
   },
 });

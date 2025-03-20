@@ -14,7 +14,6 @@ import React, {useState} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, Icons} from '../../../constants/Themes';
 import HeaderBack from '../../../components/HeaderBack';
-import Feather from 'react-native-vector-icons/Feather';
 import InputField from '../../../components/InputField';
 import CustomDropDown from '../../../components/DropDown';
 import GradientButton from '../../../components/GradientButton';
@@ -22,13 +21,13 @@ import {useNavigation} from '@react-navigation/native';
 import DatePicker from 'react-native-date-picker';
 import DescriptionField from '../../../components/DescriptionField';
 import InfoHeader from '../../../components/InfoHeader';
+import moment from 'moment';
 
 const PostJob = () => {
   const navigation = useNavigation();
   const [date, setDate] = useState<Date>(new Date());
   const [open, setOpen] = useState<boolean>(false);
-  const [value, setValue] = useState(null);
-  const [value2, setValue2] = useState(null);
+  const formattedDate = moment(date).format("YYYY-MM-DD  HH:mm:ss");
 
   const data1 = [
     {
@@ -97,7 +96,7 @@ const PostJob = () => {
                     resizeMode="contain"
                     style={{width: RFPercentage(2), height: RFPercentage(2)}}
                   />
-                  <Text style={styles.dateText}>Job Due Date and Time</Text>
+                  <Text style={styles.dateText}>{formattedDate || 'Job Due Date and Time'}</Text>
                 </TouchableOpacity>
               </View>
               <DatePicker
@@ -198,7 +197,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.5),
     left: 5,
-    top: 1,
+    top: 1.5,
   },
   remarksText: {
     fontFamily: Fonts.fontMedium,

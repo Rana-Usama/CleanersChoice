@@ -9,23 +9,16 @@ const ServicesCard = ({covers, icon, name, price, rating, star, location, onPres
   const [step, setStep] = useState(0);
 
   return (
-    <TouchableOpacity  activeOpacity={0.6} onPress={onPress}>
+    <TouchableOpacity activeOpacity={0.6} onPress={onPress}>
       <View style={styles.container}>
-        <View style={{width: '100%', height: RFPercentage(13)}}>
-          <Image
-            source={covers[step]}
-            resizeMode="cover"
-            style={styles.image}
-          />
+        <View style={styles.imageContainer}>
+          <Image source={covers[step]} resizeMode="cover" style={styles.image} />
         </View>
         <View style={styles.dotsContainer}>
           {covers.map((_, index) => (
             <TouchableOpacity key={index} onPress={() => setStep(index)}>
               {step === index ? (
-                <LinearGradient
-                  colors={[Colors.gradient1, Colors.gradient2]}
-                  style={styles.activeDot}
-                />
+                <LinearGradient colors={[Colors.gradient1, Colors.gradient2]} style={styles.activeDot} />
               ) : (
                 <View style={styles.inactiveDot} />
               )}
@@ -35,60 +28,20 @@ const ServicesCard = ({covers, icon, name, price, rating, star, location, onPres
         <View style={styles.detailsContainer}>
           <View style={styles.rowContainer}>
             <Image source={icon} resizeMode="contain" style={styles.icon} />
-            <Text
-              style={{
-                color: Colors.primaryText,
-                fontFamily: Fonts.fontMedium,
-                fontSize: RFPercentage(1.3),
-              }}>
-              {name}
-            </Text>
+            <Text style={styles.nameText}>{name}</Text>
           </View>
-
           <View style={styles.starContainer}>
             {Array.from({length: rating}, (_, index) => (
-              <Image
-                key={index}
-                source={star}
-                resizeMode="contain"
-                style={styles.star}
-              />
+              <Image key={index} source={star} resizeMode="contain" style={styles.star} />
             ))}
           </View>
-
           <View style={styles.priceContainer}>
-            <Text
-              style={{
-                color: Colors.primaryText,
-                fontFamily: Fonts.fontMedium,
-                fontSize: RFPercentage(1.3),
-              }}>
-              Starts at {price}
-            </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Text
-                style={{
-                  color: Colors.secondaryText,
-                  fontFamily: Fonts.fontRegular,
-                  fontSize: RFPercentage(1.1),
-                }}>
-                From :
-              </Text>
-              <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                <EvilIcons
-                  name="location"
-                  size={RFPercentage(1.3)}
-                  style={{bottom: 1.5}}
-                />
-                <Text
-                  style={{
-                    color: Colors.secondaryText,
-                    fontFamily: Fonts.fontRegular,
-                    fontSize: RFPercentage(1.1),
-                    left:2
-                  }}>
-                  {location}
-                </Text>
+            <Text style={styles.priceText}>Starts at {price}</Text>
+            <View style={styles.locationContainer}>
+              <Text style={styles.fromText}>From :</Text>
+              <View style={styles.locationRow}>
+                <EvilIcons name="location" size={RFPercentage(1.3)} style={styles.locationIcon} />
+                <Text style={styles.locationText}>{location}</Text>
               </View>
             </View>
           </View>
@@ -106,6 +59,10 @@ const styles = StyleSheet.create({
     borderColor: Colors.inputFieldColor,
     borderWidth: 1,
     borderRadius: RFPercentage(1),
+  },
+  imageContainer: {
+    width: '100%',
+    height: RFPercentage(13),
   },
   image: {
     width: '100%',
@@ -145,6 +102,11 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(100),
     marginRight: RFPercentage(1),
   },
+  nameText: {
+    color: Colors.primaryText,
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.3),
+  },
   starContainer: {
     flexDirection: 'row',
     marginTop: RFPercentage(0.4),
@@ -161,5 +123,32 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: RFPercentage(1.5),
+  },
+  priceText: {
+    color: Colors.primaryText,
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.3),
+  },
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  fromText: {
+    color: Colors.secondaryText,
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.1),
+  },
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  locationIcon: {
+    bottom: 1.5,
+  },
+  locationText: {
+    color: Colors.secondaryText,
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.1),
+    left: 2,
   },
 });

@@ -3,12 +3,10 @@ import {
   Text,
   TextInput,
   View,
-  NativeSyntheticEvent,
-  TextInputFocusEventData,
 } from 'react-native';
 import React from 'react';
-import {Fonts, Colors} from '../constants/Themes';
-import {RFPercentage} from 'react-native-responsive-fontsize';
+import { Fonts, Colors } from '../constants/Themes';
+import { RFPercentage } from 'react-native-responsive-fontsize';
 
 interface Props {
   placeholder: string;
@@ -21,19 +19,11 @@ interface Props {
 const InputField: React.FC<Props> = (props: Props) => {
   return (
     <View style={[styles.container, props.customStyle]}>
-      <View style={{width: '95%'}}>
+      <View style={styles.inputContainer}>
         <TextInput
           placeholder={props.placeholder}
           placeholderTextColor={Colors.placeholderColor}
-          style={{
-            color: Colors.primaryText,
-            fontFamily: Fonts.fontRegular,
-            fontSize: RFPercentage(1.6),
-            paddingVertical: 0,
-            marginVertical: 0,
-            textAlignVertical: 'center',
-            includeFontPadding: false,
-          }}
+          style={styles.textInput}
           value={props.value}
           onChangeText={props.onChangeText}
           onBlur={props.handleBlur}
@@ -55,5 +45,17 @@ const styles = StyleSheet.create({
     marginVertical: RFPercentage(1.5),
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  inputContainer: {
+    width: '95%',
+  },
+  textInput: {
+    color: Colors.primaryText,
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.6),
+    paddingVertical: 0,
+    marginVertical: 0,
+    textAlignVertical: 'center',
+    includeFontPadding: false,
   },
 });
