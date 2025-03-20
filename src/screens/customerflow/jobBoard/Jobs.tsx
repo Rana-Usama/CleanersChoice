@@ -10,19 +10,37 @@ import {
   FlatList,
   TouchableWithoutFeedback,
 } from 'react-native';
-import React, { useState } from 'react';
-import { RFPercentage } from 'react-native-responsive-fontsize';
-import { Colors, Fonts } from '../../../constants/Themes';
-import { useNavigation } from '@react-navigation/native';
+import React, {useState} from 'react';
+import {RFPercentage} from 'react-native-responsive-fontsize';
+import {Colors, Fonts} from '../../../constants/Themes';
+import {useNavigation} from '@react-navigation/native';
 import Entypo from 'react-native-vector-icons/Entypo';
 import JobCard from '../../../components/JobCard';
-import { BlurView } from '@react-native-community/blur';
+import {BlurView} from '@react-native-community/blur';
 import CustomModal from '../../../components/CustomModal';
 
 const jobData = [
-  { id: 1, name: 'Garden Cleaning', date: '26 April, 2024 | 5PM', location: 'Blumenwag 5, 8008 Zürich, Ohio', price: '50$-200$' },
-  { id: 2, name: 'Garden Cleaning', date: '26 April, 2024 | 5PM', location: 'Blumenwag 5, 8008 Zürich, Ohio', price: '50$-200$' },
-  { id: 3, name: 'Garden Cleaning', date: '26 April, 2024 | 5PM', location: 'Blumenwag 5, 8008 Zürich, Ohio', price: '50$-200$' },
+  {
+    id: 1,
+    name: 'Garden Cleaning',
+    date: '26 April, 2024 | 5PM',
+    location: 'Blumenwag 5, 8008 Zürich, Ohio',
+    price: '50$-200$',
+  },
+  {
+    id: 2,
+    name: 'Garden Cleaning',
+    date: '26 April, 2024 | 5PM',
+    location: 'Blumenwag 5, 8008 Zürich, Ohio',
+    price: '50$-200$',
+  },
+  {
+    id: 3,
+    name: 'Garden Cleaning',
+    date: '26 April, 2024 | 5PM',
+    location: 'Blumenwag 5, 8008 Zürich, Ohio',
+    price: '50$-200$',
+  },
 ];
 
 const Jobs = () => {
@@ -42,11 +60,17 @@ const Jobs = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scrollView}
+        showsVerticalScrollIndicator={false}>
         <View style={styles.container}>
           <View style={styles.header}>
             <TouchableOpacity onPress={() => navigation.goBack()}>
-              <Entypo name="chevron-thin-left" color={Colors.secondaryText} size={RFPercentage(2)} />
+              <Entypo
+                name="chevron-thin-left"
+                color={Colors.secondaryText}
+                size={RFPercentage(2)}
+              />
             </TouchableOpacity>
             <Text style={styles.title}>My Posted Jobs</Text>
             <TouchableOpacity onPress={() => navigation.navigate('PostJob')}>
@@ -55,13 +79,20 @@ const Jobs = () => {
           </View>
           <View style={styles.toggleContainer}>
             <TouchableOpacity onPress={toggle1}>
-              <View style={[styles.toggleButton, active && styles.activeButton]}>
-                <Text style={[styles.toggleText, active && styles.activeText]}>Active</Text>
+              <View
+                style={[styles.toggleButton, active && styles.activeButton]}>
+                <Text style={[styles.toggleText, active && styles.activeText]}>
+                  Active
+                </Text>
               </View>
             </TouchableOpacity>
             <TouchableOpacity onPress={toggle2} style={styles.toggleSpacing}>
-              <View style={[styles.toggleButton, completed && styles.activeButton]}>
-                <Text style={[styles.toggleText, completed && styles.activeText]}>Completed</Text>
+              <View
+                style={[styles.toggleButton, completed && styles.activeButton]}>
+                <Text
+                  style={[styles.toggleText, completed && styles.activeText]}>
+                  Completed
+                </Text>
               </View>
             </TouchableOpacity>
           </View>
@@ -69,7 +100,7 @@ const Jobs = () => {
             <FlatList
               data={jobData}
               keyExtractor={item => item.id.toString()}
-              renderItem={({ item }) => (
+              renderItem={({item}) => (
                 <JobCard
                   name={item.name}
                   location={item.location}
@@ -88,7 +119,11 @@ const Jobs = () => {
         <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
           <View style={styles.modalContainer}>
             <BlurView style={styles.blurView} blurType="light" blurAmount={5} />
-            <CustomModal title={'Are you sure you want to delete this job?'} onPress={() => setModalVisible(false)} onPress2={() => setModalVisible(false)} />
+            <CustomModal
+              title={'Are you sure you want to delete this job?'}
+              onPress={() => setModalVisible(false)}
+              onPress2={() => setModalVisible(false)}
+            />
           </View>
         </TouchableWithoutFeedback>
       )}

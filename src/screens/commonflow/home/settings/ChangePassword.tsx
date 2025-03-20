@@ -88,7 +88,13 @@ const ChangePasswordV2 = () => {
               blurType="light"
               blurAmount={5}
             />
-            <CustomModal passwordModal={true} title={'Your password hase been successfuly changed'} onPress3={()=> setModalVisible(false)} />
+            <CustomModal
+              passwordModal={true}
+              title={
+                'Your password hase been successfuly changed successfully!'
+              }
+              onPress3={() => setModalVisible(false)}
+            />
           </View>
         </TouchableWithoutFeedback>
       )}
