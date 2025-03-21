@@ -27,7 +27,10 @@ import ServiceOne from '../screens/cleanerflow/homescreens/home/ServiceOne';
 import ServiceTwo from '../screens/cleanerflow/homescreens/home/ServiceTwo';
 import ServiceThree from '../screens/cleanerflow/homescreens/home/ServiceThree';
 import HomeScreen from '../screens/cleanerflow/homescreens/home/Home';
-import CancelSubscription from '../screens/cleanerflow/homescreens/settings/CancelSubscription';
+import CancelSubscription from '../screens/cleanerflow/premium/CancelSubscription';
+import PriceRangeScreen from '../screens/customerflow/Range';
+import Availability from '../screens/commonflow/home/Availability';
+
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -55,6 +58,8 @@ export type RootStackParamList = {
   ServiceThree : undefined;
   HomeScreen : undefined;
   CancelSubscription: undefined;
+  PriceRangeScreen : undefined;
+  Availability : undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -114,6 +119,7 @@ const StackNavigator: React.FC = () => {
           <Stack.Screen name="Terms" component={Terms} />
           <Stack.Screen name="Privacy" component={Privacy} />
           <Stack.Screen name="ChangePasswordV2" component={ChangePasswordV2} />
+          <Stack.Screen name="Availability" component={Availability} />
 
 
           {/* ------------------Customer Flow------------- */}
@@ -121,6 +127,7 @@ const StackNavigator: React.FC = () => {
           <Stack.Screen name="ServiceDetails" component={ServiceDetails} />
           <Stack.Screen name="PostJob" component={PostJob} />
           <Stack.Screen name="JobPosted" component={JobPosted} />
+          <Stack.Screen name="PriceRangeScreen" component={PriceRangeScreen} />
 
 
           {/* ----------------- Cleaner Flow ---------------- */}

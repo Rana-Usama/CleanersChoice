@@ -3,7 +3,12 @@ import React from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts} from '../constants/Themes';
 
-const TimeLine = (props) => {
+interface Props {
+  stepTwo : number;
+  stepThree : number
+}
+
+const TimeLine = (props:Props) => {
   return (
     <View style={styles.wrapper}>
       <View style={styles.container}>

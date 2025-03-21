@@ -11,8 +11,8 @@ import {RFPercentage} from 'react-native-responsive-fontsize';
 
 interface Props {
   placeholder: string;
-  onChangeText: (text: string) => void;
-  value: string;
+  onChangeText?: (text: string) => void;
+  value?: string;
   handleBlur?: (event: any) => void;
   customStyle?: object;
 }

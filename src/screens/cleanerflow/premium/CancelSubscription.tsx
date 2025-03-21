@@ -8,9 +8,9 @@ import {
   } from 'react-native';
   import React from 'react';
   import {RFPercentage} from 'react-native-responsive-fontsize';
-  import {Colors, Fonts, Icons, IMAGES} from '../../../../constants/Themes';
-  import HeaderComponent from '../../../../components/HeaderComponent';
-  import GradientButton from '../../../../components/GradientButton';
+  import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
+  import HeaderComponent from '../../../components/HeaderComponent';
+  import GradientButton from '../../../components/GradientButton';
 import { useNavigation } from '@react-navigation/native';
   
   const services = [
@@ -28,7 +28,6 @@ import { useNavigation } from '@react-navigation/native';
         <HeaderComponent />
         <View style={styles.container}>
           <View style={styles.premiumHeader}>
-            {/* <Image source={Icons.owner} resizeMode="contain" style={styles.ownerIcon} /> */}
             <Text style={styles.premiumText}>Cancel Premium Subscription</Text>
           </View>
           <View style={styles.subscriptionContainer}>
@@ -37,7 +36,7 @@ import { useNavigation } from '@react-navigation/native';
                 <Image source={IMAGES.stars} resizeMode="contain" style={styles.starIcon} />
               </View>
               <View>
-                <Text style={{textAlign:'center', bottom:3, fontFamily:Fonts.fontMedium, color:Colors.brown, fontSize:RFPercentage(1.5)}}>Current Plan</Text>
+                <Text style={{textAlign:'center', bottom:2, fontFamily:Fonts.fontMedium, color:Colors.brown, fontSize:RFPercentage(1.5)}}>Current Plan</Text>
               </View>
               <Text style={styles.priceText}>
                 $12.
@@ -64,7 +63,7 @@ import { useNavigation } from '@react-navigation/native';
           </View>
           <View style={styles.buttonContainer}>
             <GradientButton title="Cancel" textStyle={styles.buttonText} 
-            // onPress={()=> navigation.navigate('CleanerNavigator')}
+            onPress={()=> {}}
              style={{width:RFPercentage(18)}} />
           </View>
         </View>
@@ -85,26 +84,26 @@ import { useNavigation } from '@react-navigation/native';
     container: {
       width: '90%',
       alignSelf: 'center',
-      paddingTop: RFPercentage(3),
+      paddingTop: RFPercentage(11),
     },
     premiumHeader: {
       flexDirection: 'row',
-      alignItems: 'center',
+      alignItems: 'flex-end',
       justifyContent: 'center',
     },
     ownerIcon: {
-      width: RFPercentage(3),
-      height: RFPercentage(3),
+      width: RFPercentage(3.5),
+      height: RFPercentage(3.5),
     },
     premiumText: {
       color: Colors.brown,
-      fontSize: RFPercentage(1.8),
+      fontSize: RFPercentage(2),
       fontFamily: Fonts.fontMedium,
+      marginLeft: RFPercentage(0.6),
+      top:RFPercentage(0.3)
     },
     subscriptionContainer: {
-      marginTop: RFPercentage(4.5),
-      alignItems:'center',
-      justifyContent:'center'
+      marginTop: RFPercentage(4),
     },
     subscriptionBox: {
       width: '85%',
@@ -165,10 +164,10 @@ import { useNavigation } from '@react-navigation/native';
     },
     buttonContainer: {
       alignSelf: 'center',
-      marginTop: RFPercentage(6),
+      marginTop: RFPercentage(5),
     },
     buttonText: {
-      fontSize: RFPercentage(1.3),
+      fontSize: RFPercentage(1.5),
     },
     starContainer: {
       position: 'absolute',

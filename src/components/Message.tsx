@@ -3,7 +3,12 @@ import React from 'react';
 import { IMAGES, Fonts, Colors } from '../constants/Themes';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 
-const Message = (props) => {
+interface props {
+  message : string;
+  name : string
+}
+
+const Message = (props:props) => {
   return (
     <View style={styles.container}>
       <Image source={IMAGES.picture} resizeMode="contain" style={styles.image} />

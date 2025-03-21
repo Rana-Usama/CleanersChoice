@@ -13,10 +13,13 @@ import ProfileField from '../../../../components/ProfileField';
 import {useNavigation} from '@react-navigation/native';
 import {BlurView} from '@react-native-community/blur';
 import CustomModal from '../../../../components/CustomModal';
+import {useSelector} from 'react-redux';
 
 const Settings = () => {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
+  const userFlow = useSelector(state => state.userFlow);
+  console.log('userFlow.........', userFlow.userFlow);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -26,6 +29,15 @@ const Settings = () => {
           <Text style={styles.sectionTitleText}>Help & Security</Text>
         </View>
         <View style={styles.profileFieldsContainer}>
+          {userFlow?.userFlow === 'Cleaner' && (
+            <>
+              <ProfileField
+                text="Cancel Subscription"
+                icon={Icons.policy}
+                onPress={() => navigation.navigate('CancelSubscription')}
+              />
+            </>
+          )}
           <ProfileField
             text="Change Password"
             icon={Icons.policy}

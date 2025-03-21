@@ -1,14 +1,11 @@
 import {
-  Dimensions,
   Image,
   SafeAreaView,
   StatusBar,
   StyleSheet,
-  Text,
   View,
   KeyboardAvoidingView,
   Platform,
-  TouchableOpacity,
 } from 'react-native';
 import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';

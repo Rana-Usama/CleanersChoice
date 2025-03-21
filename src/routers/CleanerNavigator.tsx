@@ -16,9 +16,9 @@ import {BottomTabBarProps} from '@react-navigation/bottom-tabs';
 import Dashboard from '../screens/cleanerflow/homescreens/home/Dashboard';
 import CleanerMessages from '../screens/cleanerflow/homescreens/messages/CleanerMessages';
 import CleanerJobs from '../screens/cleanerflow/homescreens/jobs/CleanerJobs';
-import CleanerSettings from '../screens/cleanerflow/homescreens/settings/CleanerSettings';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import Profile from '../screens/commonflow/home/profile/Profile';
+import Settings from '../screens/commonflow/home/settings/Settings';
 
 const Tab = createBottomTabNavigator();
 
@@ -147,7 +147,7 @@ const CleanerNavigator: React.FC = () => {
       <Tab.Screen name="Messages" component={CleanerMessages} />
       <Tab.Screen name="Job Listings" component={CleanerJobs} />
       <Tab.Screen name="Home" component={Dashboard} />
-      <Tab.Screen name="Settings" component={CleanerSettings} />
+      <Tab.Screen name="Settings" component={Settings} />
       <Tab.Screen name="Profile" component={Profile} />
     </Tab.Navigator>
   );

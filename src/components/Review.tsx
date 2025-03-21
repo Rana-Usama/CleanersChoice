@@ -3,7 +3,7 @@ import React from 'react';
 import {IMAGES, Fonts, Colors} from '../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 
-const Review = props => {
+const Review = () => {
   return (
     <View>
       <View style={styles.container}>

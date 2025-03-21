@@ -14,9 +14,9 @@ import {RFPercentage} from 'react-native-responsive-fontsize';
 import HeaderBack from '../../../../components/HeaderBack';
 import Package from '../../../../components/Package';
 import Review from '../../../../components/Review';
-import GradientButton from '../../../../components/GradientButton';
 import {useNavigation} from '@react-navigation/native';
 import ImagePicker from 'react-native-image-crop-picker';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 
 const services = [
   {
@@ -226,10 +226,11 @@ const HomeScreen: React.FC = () => {
             <View>
               <TouchableOpacity
                 activeOpacity={0.6}
+                onPress={()=> navigation.navigate('Availability')}
                 style={{flexDirection: 'row', alignItems: 'center'}}>
-                <Text style={styles.availability}>Check Availability</Text>
+                <Text style={styles.availability}>Edit Your Availability</Text>
                 <Image
-                  source={Icons.availability}
+                  source={Icons.editIcon}
                   resizeMode="contain"
                   style={styles.availabilityIcon}
                 />
@@ -239,14 +240,6 @@ const HomeScreen: React.FC = () => {
           <View style={{marginTop: RFPercentage(2)}}>
             <View style={styles.serviceContainer}>
               <Text style={styles.headeing2}>Services:</Text>
-              <TouchableOpacity
-                onPress={
-                  visibleItems < services.length
-                    ? handleShowMore
-                    : handleShowLess
-                }>
-                {/* <Text style={styles.allText}>See All</Text> */}
-              </TouchableOpacity>
             </View>
             <View
               style={{right: RFPercentage(0.7), marginTop: RFPercentage(0.5)}}>

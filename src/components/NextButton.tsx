@@ -8,7 +8,6 @@ import {
     ActivityIndicator
 } from 'react-native';
 import React from 'react';
-import LinearGradient from 'react-native-linear-gradient'
 import { Fonts, Colors } from '../constants/Themes';
 import { RFPercentage } from "react-native-responsive-fontsize";
 

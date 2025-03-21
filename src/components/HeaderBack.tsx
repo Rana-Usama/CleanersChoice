@@ -12,7 +12,16 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import { Colors, Fonts, Icons } from '../constants/Themes';
 import { useNavigation } from '@react-navigation/native';
 
-const HeaderBack: React.FC = (props) => {
+interface props {
+  logo? : boolean;
+  textStyle? : object;
+  title : string;
+  right? : boolean;
+  rightText? : string;
+  onPress? : ()=> void
+}
+
+const HeaderBack = (props: props) => {
   const navigation = useNavigation();
 
   return (

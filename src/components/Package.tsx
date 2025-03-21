@@ -3,7 +3,18 @@ import React from 'react';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 import { Colors, Fonts } from '../constants/Themes';
 
-const Package = (props) => {
+interface Service {
+  id: number;
+  name: string;
+}
+
+interface props {
+  name : string,
+  services : Service[];
+  price : string;
+}
+
+const Package = (props:props) => {
   return (
     <View style={styles.container}>
       <Text style={styles.packageName}>{props.name}</Text>

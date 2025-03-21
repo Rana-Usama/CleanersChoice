@@ -42,6 +42,14 @@ export const Icons: {[key: string]: any} = {
   terms : require('../assets/icons/terms.png'),
   dashBoard : require('../assets/icons/dashboard.png'),
   gallery : require('../assets/icons/gallery.png'),
+  all : require('../assets/icons/list.png'),
+  residential : require('../assets/icons/house.png'),
+  pressure : require('../assets/icons/pressure-washer.png'),
+  window : require('../assets/icons/window-cleaning.png'),
+  chimney : require('../assets/icons/chimney.png'),
+  car : require('../assets/icons/car.png'),
+  carpet : require('../assets/icons/carpet-cleaner.png'),
+  editIcon : require('../assets/icons/message-edit.png'),
 
 };
 

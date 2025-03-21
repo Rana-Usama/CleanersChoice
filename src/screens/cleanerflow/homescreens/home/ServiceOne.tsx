@@ -13,11 +13,11 @@ import HeaderBack from '../../../../components/HeaderBack';
 import InfoHeader from '../../../../components/InfoHeader';
 import DescriptionField from '../../../../components/DescriptionField';
 import TimeLine from '../../../../components/TimeLine';
-import DatePicker from 'react-native-date-picker';
 import CustomDropDown from '../../../../components/DropDown';
 import GradientButton from '../../../../components/GradientButton';
 import {useNavigation} from '@react-navigation/native';
-import moment from 'moment';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+
 const data1 = [
   {
     id: 1,
@@ -34,10 +34,7 @@ const data1 = [
 ];
 
 const ServiceOne: React.FC = () => {
-  const [date, setDate] = useState<Date>(new Date());
-  const [open, setOpen] = useState<boolean>(false);
   const navigation = useNavigation();
- const formattedDate = moment(date).format("YYYY-MM-DD  HH:mm A");
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -57,31 +54,23 @@ const ServiceOne: React.FC = () => {
           <DescriptionField placeholder="Service Description" count={true} />
         </View>
 
-        <View style={styles.dateContainer}>
-          <TouchableOpacity
-            onPress={() => setOpen(true)}
-            style={styles.dateButton}>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Availability')}
+          style={styles.dateContainer}>
+          <View style={styles.dateButton}>
             <Image
               source={Icons.calendar}
               resizeMode="contain"
               style={styles.dateIcon}
             />
-            <Text style={styles.dateText}>{formattedDate || 'Set Availability'}</Text>
-          </TouchableOpacity>
-        </View>
-
-        <DatePicker
-          modal
-          open={open}
-          date={date}
-          onConfirm={date => {
-            setOpen(false);
-            setDate(date);
-          }}
-          onCancel={() => {
-            setOpen(false);
-          }}
-        />
+            <Text style={styles.dateText}>{'Set Availability'}</Text>
+          </View>
+          <View style={{position: 'absolute',right:RFPercentage(1)}}>
+            <TouchableOpacity>
+              <AntDesign name="right" size={RFPercentage(1.5)} color={Colors.placeholderColor} />
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
 
         <CustomDropDown
           placeholder="Select services you provide"
@@ -144,11 +133,11 @@ const styles = StyleSheet.create({
     height: RFPercentage(2),
   },
   dateText: {
-    color: Colors.inputTextColor,
+    color: Colors.placeholderColor,
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.5),
     marginLeft: 5,
-    top:RFPercentage(0.2)
+    top: RFPercentage(0.2),
   },
   buttonContainer: {
     alignItems: 'center',

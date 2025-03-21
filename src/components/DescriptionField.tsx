@@ -5,7 +5,13 @@ import {Colors, Fonts} from '../constants/Themes';
 
 const MAX_WORDS = 150;
 
-const DescriptionField = props => {
+interface props {
+  style? : object;
+  placeholder : string;
+  count : boolean;
+}
+
+const DescriptionField = (props: props) => {
   const [wordCount, setWordCount] = useState(0);
 
   const handleTextChange = text => {

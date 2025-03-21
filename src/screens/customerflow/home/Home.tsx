@@ -16,15 +16,16 @@ import SearchField from '../../../components/SearchField';
 import ServicesCard from '../../../components/ServicesCard';
 import {useNavigation} from '@react-navigation/native';
 import HeaderBack from '../../../components/HeaderBack';
+import {useSelector} from 'react-redux';
 
 const categories = [
-  {id: 1, name: 'All', icon: Icons.category},
-  {id: 2, name: 'Residential', icon: Icons.category},
-  {id: 3, name: 'Pressure W..', icon: Icons.category},
-  {id: 4, name: 'Window Cl..', icon: Icons.category},
-  {id: 5, name: 'Carpet Cle..', icon: Icons.category},
-  {id: 6, name: 'Chimney C..', icon: Icons.category},
-  {id: 7, name: 'Chimney C..', icon: Icons.category},
+  {id: 1, name: 'All', icon: Icons.all},
+  {id: 2, name: 'Residential', icon: Icons.residential},
+  {id: 3, name: 'Car Clean..', icon: Icons.car},
+  {id: 4, name: 'Pressure W..', icon: Icons.pressure},
+  {id: 5, name: 'Chimney C..', icon: Icons.chimney},
+  {id: 6, name: 'Carpet Cle..', icon: Icons.carpet},
+  {id: 7, name: 'Window Cl..', icon: Icons.window},
 ];
 
 const filter = [
@@ -126,7 +127,11 @@ const Home = () => {
                   <Image
                     source={item.icon}
                     resizeMode="contain"
-                    style={styles.categoryIcon}
+                    style={[styles.categoryIcon,{
+                      width:item.id === 1 ? RFPercentage(3.2)  : RFPercentage(4),
+                      height:item.id === 1 ? RFPercentage(3.2)  : RFPercentage(4)
+
+                    }]}
                   />
                   <Text
                     style={[
@@ -152,7 +157,10 @@ const Home = () => {
             data={filter}
             keyExtractor={item => item.id.toString()}
             renderItem={({item}) => (
-              <TouchableOpacity onPress={() => setFilter(item.id)}>
+              <TouchableOpacity
+                onPress={() => setFilter(item.id)}
+                // onPress={() => navigation.navigate('PriceRangeScreen')}
+                >
                 <View
                   style={[
                     styles.filterBox,

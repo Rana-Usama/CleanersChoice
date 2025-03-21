@@ -4,7 +4,18 @@ import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, Icons} from '../constants/Themes';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 
-const JobCard = props => {
+interface props {
+  delete? : boolean;
+  onPress2 : ()=> void;
+  name : string;
+  date : string;
+  location : string;
+  price : string;
+  onPress : ()=> void
+
+}
+
+const JobCard = (props:props) => {
   return (
     <View style={styles.container}>
       {props.delete && (

@@ -32,6 +32,10 @@ const ServiceThree: React.FC = () => {
     }
   };
 
+  const removePackage = (id:any) => {
+    setPackages(packages.filter(pkg => pkg.id !== id));
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
@@ -62,7 +66,7 @@ const ServiceThree: React.FC = () => {
                 {pkg.id === 1 ? null : (
                   <>
                     <View style={{position: 'absolute', right: 0}}>
-                      <TouchableOpacity activeOpacity={0.8}>
+                      <TouchableOpacity activeOpacity={0.8} onPress={() => removePackage(pkg.id)}>
                         <AntDesign
                           name="minuscircleo"
                           size={RFPercentage(2.2)}

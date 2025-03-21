@@ -6,7 +6,15 @@ import {Colors, Fonts} from '../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
-const CustomModal = props => {
+interface props {
+  title: string;
+  passwordModal: boolean;
+  onPress3: () => void;
+  onPress: () => void;
+  onPress2: () => void; 
+}
+
+const CustomModal = (props : props) => {
   return (
     <View style={styles.modalContainer}>
       {props.passwordModal && (

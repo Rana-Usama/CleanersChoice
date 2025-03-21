@@ -4,7 +4,11 @@ import { RFPercentage } from 'react-native-responsive-fontsize';
 import { Colors, Fonts } from '../constants/Themes';
 import Feather from 'react-native-vector-icons/Feather';
 
-const InfoHeader = props => {
+interface props {
+  text? : string
+}
+
+const InfoHeader = (props:props) => {
   return (
     <View style={styles.container}>
       <Feather name="info" color={Colors.gradient1} size={RFPercentage(2)} />

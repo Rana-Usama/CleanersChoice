@@ -7,8 +7,9 @@ import {
   TouchableOpacity,
   FlatList,
   ScrollView,
+  Dimensions,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useState, useRef} from 'react';
 import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import HeaderBack from '../../../components/HeaderBack';
@@ -16,6 +17,8 @@ import LinearGradient from 'react-native-linear-gradient';
 import Package from '../../../components/Package';
 import Review from '../../../components/Review';
 import GradientButton from '../../../components/GradientButton';
+import GestureRecognizer from 'react-native-swipe-gestures';
+import { useNavigation } from '@react-navigation/native';
 
 const services = [
   {
@@ -131,10 +134,24 @@ const Packages = [
   },
 ];
 
+const {width} = Dimensions.get('window');
+
 const ServiceDetails: React.FC = ({route}) => {
   const {item} = route.params;
   const [step, setStep] = useState(0);
   const [visibleItems, setVisibleItems] = useState(5);
+const navigation = useNavigation()
+  const onSwipeLeft = () => {
+    if (step < item.cover.length - 1) {
+      setStep(step + 1);
+    }
+  };
+
+  const onSwipeRight = () => {
+    if (step > 0) {
+      setStep(step - 1);
+    }
+  };
 
   const handleShowMore = () => {
     setVisibleItems(prev => Math.min(prev + 5, services.length));
@@ -153,13 +170,24 @@ const ServiceDetails: React.FC = ({route}) => {
         />
         <View style={styles.container}>
           <View>
-            <Image
-              source={item.cover[step]}
-              resizeMode="cover"
-              style={styles.image}
-              borderRadius={RFPercentage(1.3)}
-            />
-            <View style={styles.dotsContainer}>
+            <GestureRecognizer
+              onSwipeLeft={onSwipeLeft}
+              onSwipeRight={onSwipeRight}
+              style={{}}>
+              <View>
+                <Image
+                  source={
+                    typeof item.cover[step] === 'string'
+                      ? {uri: item.cover[step]}
+                      : item.cover[step]
+                  }
+                  resizeMode="cover"
+                  style={styles.image}
+                  borderRadius={RFPercentage(1)}
+                />
+              </View>
+
+              <View style={styles.dotsContainer}>
               {item.cover.map((_, index) => (
                 <TouchableOpacity key={index} onPress={() => setStep(index)}>
                   {step === index ? (
@@ -173,8 +201,11 @@ const ServiceDetails: React.FC = ({route}) => {
                 </TouchableOpacity>
               ))}
             </View>
+            </GestureRecognizer>
+
+            
           </View>
-          <View style={{marginTop: RFPercentage(1.8)}}>
+          <View style={{marginTop: RFPercentage(2)}}>
             <View style={styles.rowContainer}>
               <Image
                 source={item.icon}
@@ -229,6 +260,7 @@ const ServiceDetails: React.FC = ({route}) => {
             <View>
               <TouchableOpacity
                 activeOpacity={0.6}
+                onPress={()=> navigation.navigate('Availability')}
                 style={{flexDirection: 'row', alignItems: 'center'}}>
                 <Text
                   style={{
@@ -258,20 +290,7 @@ const ServiceDetails: React.FC = ({route}) => {
                 justifyContent: 'space-between',
               }}>
               <Text style={styles.headeing2}>Services:</Text>
-              <TouchableOpacity onPress={
-                    visibleItems < services.length
-                      ? handleShowMore
-                      : handleShowLess
-                  }>
-                <Text
-                  style={{
-                    color: Colors.gradient1,
-                    fontFamily: Fonts.fontMedium,
-                    fontSize: RFPercentage(1.4),
-                  }}>
-                  See All
-                </Text>
-              </TouchableOpacity>
+             
             </View>
             <View
               style={{right: RFPercentage(0.7), marginTop: RFPercentage(1)}}>
@@ -314,13 +333,16 @@ const ServiceDetails: React.FC = ({route}) => {
                   }>
                   <Text
                     style={{
-                      color: Colors.placeholderColor,
+                      color: Colors.gradient1,
                       fontSize: RFPercentage(1.3),
                       fontFamily: Fonts.fontMedium,
                       textAlign: 'center',
-                      bottom:RFPercentage(1.5),
+                      bottom: RFPercentage(1.5),
                       position: 'absolute',
-                      left: visibleItems < services.length ?  RFPercentage(18.5) : RFPercentage(34.5),
+                      left:
+                        visibleItems < services.length
+                          ? RFPercentage(18.6)
+                          : RFPercentage(34.5),
                     }}>
                     {visibleItems < services.length ? `+5 More` : `See Less`}
                   </Text>
@@ -404,7 +426,7 @@ const ServiceDetails: React.FC = ({route}) => {
         <View style={{alignSelf: 'center', marginTop: RFPercentage(7)}}>
           <GradientButton
             title="Get Custom Offer"
-            textStyle={{fontSize: RFPercentage(1.3)}}
+            textStyle={{fontSize: RFPercentage(1.4)}}
           />
         </View>
       </ScrollView>
