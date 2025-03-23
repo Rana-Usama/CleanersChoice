@@ -13,7 +13,6 @@ interface Props {
   placeholder: string;
   onChangeText: (text: string) => void;
   value: string;
-  handleBlur?: (event: any) => void;
   customStyle?: object;
 }
 

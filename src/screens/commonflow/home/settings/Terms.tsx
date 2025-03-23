@@ -53,19 +53,12 @@ const Terms: React.FC = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
-        contentContainerStyle={{paddingBottom: RFPercentage(10)}}
+        contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}>
-        <HeaderBack title={`T&C’s`} textStyle={{fontSize: RFPercentage(1.8)}} />
+        <HeaderBack title={`T&C’s`} textStyle={styles.headerText} />
         <View style={styles.container}>
-          <View style={{marginTop: RFPercentage(3)}}>
-            <Text
-              style={{
-                color: Colors.heading,
-                fontFamily: Fonts.fontRegular,
-                fontSize: RFPercentage(1.5),
-                textAlign: 'justify',
-                lineHeight: 23,
-              }}>
+          <View style={styles.termsTextContainer}>
+            <Text style={styles.termsText}>
               These Terms and Conditions ("Terms") govern your use of the fuel
               delivery services offered by Fueled Up ("Company," "we," "us," or
               "our") through our mobile application ("App"). By accessing or
@@ -73,37 +66,16 @@ const Terms: React.FC = () => {
               do not agree with these Terms, you may not use our services.
             </Text>
           </View>
-          <View style={{marginTop: 10}}>
+          <View style={styles.listContainer}>
             <FlatList
               data={data}
               keyExtractor={item => item.id.toString()}
-              renderItem={({item}) => {
-                return (
-                  <>
-                    <View style={{marginTop: RFPercentage(2)}}>
-                      <Text
-                        style={{
-                          color: Colors.brown,
-                          fontFamily: Fonts.fontMedium,
-                          fontSize: RFPercentage(1.7),
-                        }}>
-                        {item.q}
-                      </Text>
-                      <Text
-                        style={{
-                          color: Colors.heading,
-                          fontFamily: Fonts.fontRegular,
-                          fontSize: RFPercentage(1.5),
-                          marginTop: 5,
-                          textAlign: 'justify',
-                          lineHeight: 23,
-                        }}>
-                        {item.e}
-                      </Text>
-                    </View>
-                  </>
-                );
-              }}
+              renderItem={({item}) => (
+                <View style={styles.listItem}>
+                  <Text style={styles.listItemTitle}>{item.q}</Text>
+                  <Text style={styles.listItemText}>{item.e}</Text>
+                </View>
+              )}
             />
           </View>
         </View>
@@ -120,8 +92,43 @@ const styles = StyleSheet.create({
     position: 'relative',
     backgroundColor: Colors.background,
   },
+  scrollContainer: {
+    paddingBottom: RFPercentage(10),
+  },
   container: {
     width: '90%',
     alignSelf: 'center',
+  },
+  headerText: {
+    fontSize: RFPercentage(1.8),
+  },
+  termsTextContainer: {
+    marginTop: RFPercentage(3),
+  },
+  termsText: {
+    color: Colors.heading,
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.5),
+    textAlign: 'justify',
+    lineHeight: 23,
+  },
+  listContainer: {
+    marginTop: 10,
+  },
+  listItem: {
+    marginTop: RFPercentage(2),
+  },
+  listItemTitle: {
+    color: Colors.brown,
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.7),
+  },
+  listItemText: {
+    color: Colors.heading,
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.5),
+    marginTop: 5,
+    textAlign: 'justify',
+    lineHeight: 23,
   },
 });

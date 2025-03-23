@@ -17,6 +17,8 @@ import ServicesCard from '../../../components/ServicesCard';
 import {useNavigation} from '@react-navigation/native';
 import HeaderBack from '../../../components/HeaderBack';
 import {useSelector} from 'react-redux';
+import {RootStackParamList} from '../../../routers/StackNavigator';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 
 const categories = [
   {id: 1, name: 'All', icon: Icons.all},
@@ -84,7 +86,11 @@ const services = [
 const Home = () => {
   const [Filter, setFilter] = useState(null);
   const [categorySelection, setCategorySelection] = useState(1);
-  const navigation = useNavigation();
+  const navigation =
+    useNavigation<
+      NativeStackNavigationProp<RootStackParamList, 'Home'>
+    >();
+  const [searchQuery, setSearchQuery] = useState('');
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -102,7 +108,11 @@ const Home = () => {
           />
 
           <View style={styles.searchContainer}>
-            <SearchField placeholder="Search" />
+            <SearchField
+              placeholder="Search"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
           </View>
           <Text style={[styles.sectionTitle, {bottom: RFPercentage(1)}]}>
             Categories
@@ -127,11 +137,15 @@ const Home = () => {
                   <Image
                     source={item.icon}
                     resizeMode="contain"
-                    style={[styles.categoryIcon,{
-                      width:item.id === 1 ? RFPercentage(3.2)  : RFPercentage(4),
-                      height:item.id === 1 ? RFPercentage(3.2)  : RFPercentage(4)
-
-                    }]}
+                    style={[
+                      styles.categoryIcon,
+                      {
+                        width:
+                          item.id === 1 ? RFPercentage(3.2) : RFPercentage(4),
+                        height:
+                          item.id === 1 ? RFPercentage(3.2) : RFPercentage(4),
+                      },
+                    ]}
                   />
                   <Text
                     style={[
@@ -160,7 +174,7 @@ const Home = () => {
               <TouchableOpacity
                 onPress={() => setFilter(item.id)}
                 // onPress={() => navigation.navigate('PriceRangeScreen')}
-                >
+              >
                 <View
                   style={[
                     styles.filterBox,

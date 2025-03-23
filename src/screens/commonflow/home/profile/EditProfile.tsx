@@ -50,18 +50,18 @@ const EditProfile = () => {
             />
             <View style={styles.container}>
               {/* Profile Image */}
-              <View style={styles.profileImageWrapper}>
-                <View style={styles.imageContainer}>
+              <View style={styles.imgContainer}>
+                <View style={styles.pictureContainer}>
                   <Image
                     source={ img ? {uri : img?.path} : IMAGES.picture}
                     resizeMode="contain"
-                    style={styles.profileImage}
+                    style={styles.imgStyle}
                   />
-                  <TouchableOpacity style={styles.editIcon} onPress={uploadImg}>
+                  <TouchableOpacity onPress={uploadImg}>
                     <Image
                       source={Icons.edit}
                       resizeMode="contain"
-                      style={styles.editImage}
+                      style={styles.uploadedImg}
                     />
                   </TouchableOpacity>
                 </View>
@@ -140,26 +140,39 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginTop: RFPercentage(2),
   },
-  imageContainer: {
-    width: RFPercentage(13),
-    height: RFPercentage(13),
-    borderRadius: RFPercentage(100),
+  imgContainer: {
+    alignSelf: 'center',
+    width: '90%',
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: RFPercentage(3),
   },
-  profileImage: {
-    width: RFPercentage(13),
-    height: RFPercentage(13),
+  pictureContainer: {
+    width: RFPercentage(13.5),
+    height: RFPercentage(13.5),
+    borderRadius: RFPercentage(10),
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(243, 244, 246, 1)',
+    borderWidth: 1.8,
+    borderColor: 'rgba(64, 123, 255, 1)',
+    shadowColor: 'rgba(0, 0, 0, 0.15)',
+    shadowOffset: {width: 0, height: 0},
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+    elevation: 40,
+  },
+  imgStyle: {
+    width: RFPercentage(12.5),
+    height: RFPercentage(12.5),
     borderRadius: RFPercentage(100),
   },
-  editIcon: {
-    // position: 'absolute',
-    bottom: RFPercentage(4.2),
-    left: RFPercentage(4.5),
-  },
-  editImage: {
-    width: RFPercentage(3.5),
-    height: RFPercentage(3.5),
+  uploadedImg: {
+    width: RFPercentage(3),
+    height: RFPercentage(3),
+    position: 'absolute',
+    left: RFPercentage(3),
+    bottom: RFPercentage(0.5),
   },
   sectionTitle: {
     marginTop: RFPercentage(2),

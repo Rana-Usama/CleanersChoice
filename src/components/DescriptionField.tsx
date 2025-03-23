@@ -14,11 +14,11 @@ interface props {
 const DescriptionField = (props: props) => {
   const [wordCount, setWordCount] = useState(0);
 
-  const handleTextChange = text => {
+  const handleTextChange = (text : any) => {
     const words = text
       .trim()
       .split(/\s+/)
-      .filter(word => word.length > 0);
+      .filter((word : any) => word.length > 0);
     setWordCount(words.length);
   };
 

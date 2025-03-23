@@ -17,7 +17,7 @@ interface Item {
 
 interface Props {
   data: Item[];
-  setValue: (item: Item) => void;
+  setValue?: (item: Item) => void;
   icon?: any;
   placeholder: string;
 }

@@ -1,6 +1,7 @@
 import {
   FlatList,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -65,6 +66,8 @@ const Messages = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <ScrollView>
+        
       <HeaderBack title="Messages" textStyle={styles.headerText} />
       <View style={styles.container}>
         <View style={styles.toggleContainer}>
@@ -121,6 +124,7 @@ const Messages = () => {
           />
         </View>
       </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };

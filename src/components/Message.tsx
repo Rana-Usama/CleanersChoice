@@ -11,7 +11,7 @@ interface props {
 const Message = (props:props) => {
   return (
     <View style={styles.container}>
-      <Image source={IMAGES.picture} resizeMode="contain" style={styles.image} />
+      <Image source={IMAGES.picture} resizeMode="contain" style={styles.image} borderRadius={RFPercentage(100)} />
       <View style={styles.messageContainer}>
         <View style={styles.textContainer}>
           <Text style={styles.nameText}>{props.name}</Text>

@@ -5,7 +5,6 @@ import {
   Text,
   View,
   TouchableOpacity,
-  Image,
   FlatList,
   ScrollView,
 } from 'react-native';
@@ -17,7 +16,6 @@ import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../../../routers/StackNavigator';
 import HeaderBack from '../../../../components/HeaderBack';
-
 
 interface Data {
   id: number;
@@ -62,67 +60,41 @@ const FAQS: React.FC = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
-        contentContainerStyle={{paddingBottom: RFPercentage(10)}}
+        contentContainerStyle={styles.scrollViewContent}
         showsVerticalScrollIndicator={false}>
-        <HeaderBack title={`FAQ's`} textStyle={{fontSize: RFPercentage(1.8)}} />
+        <HeaderBack title={`FAQ's`} textStyle={styles.headerText} />
         <View style={styles.container}>
-          <View>
-            <FlatList
-              data={data}
-              keyExtractor={item => item.id.toString()}
-              renderItem={({item}) => {
-                return (
-                  <>
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        borderBottomColor: Colors.inputFieldColor,
-                        borderBottomWidth: 1,
-                        paddingBottom: 8,
-                        marginTop: RFPercentage(3.5),
+          <FlatList
+            data={data}
+            keyExtractor={item => item.id.toString()}
+            renderItem={({item}) => {
+              return (
+                <>
+                  <View style={styles.questionContainer}>
+                    <Text style={styles.questionText}>{item.q}</Text>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setVisible(!visible);
+                        setExplanation(item.id);
                       }}>
-                      <Text
-                        style={{
-                          color: 'rgba(51, 65, 85, 1)',
-                          fontFamily: Fonts.fontMedium,
-                          fontSize: RFPercentage(1.6),
-                        }}>
-                        {item.q}
-                      </Text>
-                      <TouchableOpacity
-                        onPress={() => {
-                          setVisible(!visible);
-                          setExplanation(item.id);
-                        }}>
-                        <Entypo
-                          name={
-                            visible && explanation === item.id
-                              ? 'chevron-small-up'
-                              : 'chevron-small-down'
-                          }
-                          color={Colors.secondaryText}
-                          size={RFPercentage(3)}
-                        />
-                      </TouchableOpacity>
-                    </View>
-                    {visible && explanation === item.id && (
-                      <Text
-                        style={{
-                          color: Colors.secondaryText,
-                          fontFamily: Fonts.fontRegular,
-                          fontSize: RFPercentage(1.5),
-                          marginTop: 10,
-                        }}>
-                        {item.e}
-                      </Text>
-                    )}
-                  </>
-                );
-              }}
-            />
-          </View>
+                      <Entypo
+                        name={
+                          visible && explanation === item.id
+                            ? 'chevron-small-up'
+                            : 'chevron-small-down'
+                        }
+                        color={Colors.secondaryText}
+                        size={RFPercentage(3)}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                  {visible && explanation === item.id && (
+                    <Text style={styles.answerText}>{item.e}</Text>
+                  )}
+                </>
+              );
+            }}
+          />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -137,8 +109,34 @@ const styles = StyleSheet.create({
     position: 'relative',
     backgroundColor: Colors.background,
   },
+  scrollViewContent: {
+    paddingBottom: RFPercentage(10),
+  },
+  headerText: {
+    fontSize: RFPercentage(1.8),
+  },
   container: {
     width: '90%',
     alignSelf: 'center',
+  },
+  questionContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottomColor: Colors.inputFieldColor,
+    borderBottomWidth: 1,
+    paddingBottom: 8,
+    marginTop: RFPercentage(3.5),
+  },
+  questionText: {
+    color: 'rgba(51, 65, 85, 1)',
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.6),
+  },
+  answerText: {
+    color: Colors.secondaryText,
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.5),
+    marginTop: 10,
   },
 });

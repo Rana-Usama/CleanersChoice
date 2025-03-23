@@ -21,7 +21,7 @@ import { setUserFlow } from '../../../redux/Actions';
 const UserSelection: React.FC = () => {
   const navigation =
     useNavigation<
-      NativeStackNavigationProp<RootStackParamList, 'OnBoardingTwo'>
+      NativeStackNavigationProp<RootStackParamList, 'UserSelection'>
     >();
 
   const dispatch = useDispatch();

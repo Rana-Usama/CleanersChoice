@@ -8,10 +8,10 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 
 interface props {
   title: string;
-  passwordModal: boolean;
-  onPress3: () => void;
-  onPress: () => void;
-  onPress2: () => void; 
+  passwordModal?: boolean;
+  onPress3?: () => void;
+  onPress?: () => void;
+  onPress2?: () => void; 
 }
 
 const CustomModal = (props : props) => {

@@ -30,10 +30,10 @@ import HomeScreen from '../screens/cleanerflow/homescreens/home/Home';
 import CancelSubscription from '../screens/cleanerflow/premium/CancelSubscription';
 import PriceRangeScreen from '../screens/customerflow/Range';
 import Availability from '../screens/commonflow/home/Availability';
-
+import Settings from '../screens/commonflow/home/settings/Settings';
 
 export type RootStackParamList = {
-  Splash: undefined;
+  SplashOne: undefined;
   OnBoarding: undefined;
   UserSelection: undefined;
   SignIn: undefined;
@@ -42,7 +42,7 @@ export type RootStackParamList = {
   Verify: undefined;
   ChangePassword: undefined;
   Home: undefined;
-  ServiceDetails: undefined;
+  ServiceDetails: { item: any };
   PostJob: undefined;
   JobPosted: undefined;
   JobDetails: undefined;
@@ -60,6 +60,7 @@ export type RootStackParamList = {
   CancelSubscription: undefined;
   PriceRangeScreen : undefined;
   Availability : undefined;
+  Settings: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -102,10 +103,10 @@ const StackNavigator: React.FC = () => {
           screenOptions={{
             headerShown: false,
           }}
-          initialRouteName={'Splash'}>
+          initialRouteName={'SplashOne'}>
             
             {/* -------Common Screens----- */}
-          <Stack.Screen name="Splash" component={Splash} />
+          <Stack.Screen name="SplashOne" component={Splash} />
           <Stack.Screen name="OnBoarding" component={OnBoarding} />
           <Stack.Screen name="UserSelection" component={UserSelection} />
           <Stack.Screen name="SignUp" component={SignUp} />

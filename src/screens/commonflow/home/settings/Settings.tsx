@@ -14,12 +14,12 @@ import {useNavigation} from '@react-navigation/native';
 import {BlurView} from '@react-native-community/blur';
 import CustomModal from '../../../../components/CustomModal';
 import {useSelector} from 'react-redux';
-
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../../../routers/StackNavigator';
 const Settings = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList,'Settings'>>();
   const [modalVisible, setModalVisible] = useState(false);
   const userFlow = useSelector(state => state.userFlow);
-  console.log('userFlow.........', userFlow.userFlow);
 
   return (
     <SafeAreaView style={styles.safeArea}>

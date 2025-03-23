@@ -22,12 +22,15 @@ import DatePicker from 'react-native-date-picker';
 import DescriptionField from '../../../components/DescriptionField';
 import InfoHeader from '../../../components/InfoHeader';
 import moment from 'moment';
+import {RootStackParamList} from '../../../routers/StackNavigator';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 
 const PostJob = () => {
-  const navigation = useNavigation();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList, 'PostJob'>>();
   const [date, setDate] = useState<Date>(new Date());
   const [open, setOpen] = useState<boolean>(false);
-  const formattedDate = moment(date).format("YYYY-MM-DD  HH:mm A");
+  const formattedDate = moment(date).format('YYYY-MM-DD  HH:mm A');
 
   const data1 = [
     {
@@ -72,14 +75,17 @@ const PostJob = () => {
             textStyle={{fontSize: RFPercentage(1.8)}}
           />
           <View style={styles.container}>
-           <InfoHeader text='Post your cleaning job by providing following details!' />
+            <InfoHeader text="Post your cleaning job by providing following details!" />
             <View style={{marginTop: RFPercentage(1.5)}}>
               <InputField
                 placeholder="Job Title e.g, Garden Cleaning"
                 customStyle={{width: '100%'}}
               />
               <View>
-                <DescriptionField placeholder='Description of the cleaning job' />
+                <DescriptionField
+                  placeholder="Description of the cleaning job"
+                  count={false}
+                />
               </View>
               <InputField
                 placeholder="Enter Location you want service at"
@@ -96,7 +102,9 @@ const PostJob = () => {
                     resizeMode="contain"
                     style={{width: RFPercentage(2), height: RFPercentage(2)}}
                   />
-                  <Text style={styles.dateText}>{formattedDate || 'Job Due Date and Time'}</Text>
+                  <Text style={styles.dateText}>
+                    {formattedDate || 'Job Due Date and Time'}
+                  </Text>
                 </TouchableOpacity>
               </View>
               <DatePicker
@@ -115,13 +123,17 @@ const PostJob = () => {
                 <Text style={styles.remarksText}>
                   Leave any special remarks (Optional)
                 </Text>
-                <DescriptionField placeholder='Any Special Remarks' style={{height:RFPercentage(11)}} />
+                <DescriptionField
+                  placeholder="Any Special Remarks"
+                  style={{height: RFPercentage(11)}}
+                  count={false}
+                />
               </View>
             </View>
             <View style={{alignSelf: 'center', marginTop: RFPercentage(3)}}>
               <GradientButton
                 title="Make Job Live"
-                textStyle={{fontSize: RFPercentage(1.4)}}
+                textStyle={{fontSize: RFPercentage(1.5)}}
                 onPress={() => navigation.navigate('JobPosted')}
               />
             </View>
@@ -141,7 +153,7 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
-    paddingBottom:RFPercentage(8),
+    paddingBottom: RFPercentage(8),
   },
   container: {
     width: '90%',

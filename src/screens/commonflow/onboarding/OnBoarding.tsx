@@ -146,25 +146,18 @@ const OnBoarding = () => {
 
         {/* Buttons */}
         <View style={styles.buttonWrapper}>
-          <NextButton title="Skip" onPress={() => setStep(3)} />
+          <NextButton title="Skip" onPress={() => navigation.navigate('UserSelection')} />
           <View style={{marginLeft: RFPercentage(2)}}>
             <NextButton title="Next" onPress={nextPress} />
           </View>
         </View>
       </View>
       <View
-        style={{
-          position: 'absolute',
-          bottom: RFPercentage(14),
-          right: RFPercentage(1.5),
-        }}>
+        style={styles.starContainer}>
         <Image
           source={IMAGES.stars}
           resizeMode="contain"
-          style={{
-            width: RFPercentage(8),
-            height: RFPercentage(8),
-          }}
+          style={styles.star}
         />
       </View>
     </SafeAreaView>
@@ -233,4 +226,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
   },
+  starContainer : {
+    position: 'absolute',
+    bottom: RFPercentage(14),
+    right: RFPercentage(1.5),
+  },
+  star : {
+    width: RFPercentage(8),
+    height: RFPercentage(8),
+  }
 });

@@ -27,7 +27,6 @@ const SignIn: React.FC = () => {
     useNavigation<NativeStackNavigationProp<RootStackParamList, 'SignIn'>>();
   const [selected, setSelected] = useState<boolean>(false);
  const userFlow = useSelector(state => state.userFlow);
-  console.log('userFlow.........', userFlow.userFlow);
 
   const handleNext = () => {
     if (userFlow?.userFlow === 'Customer') {

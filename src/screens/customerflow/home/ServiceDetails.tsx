@@ -18,8 +18,9 @@ import Package from '../../../components/Package';
 import Review from '../../../components/Review';
 import GradientButton from '../../../components/GradientButton';
 import GestureRecognizer from 'react-native-swipe-gestures';
-import { useNavigation } from '@react-navigation/native';
-
+import {useNavigation} from '@react-navigation/native';
+import {RootStackParamList} from '../../../routers/StackNavigator';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 const services = [
   {
     id: 1,
@@ -134,13 +135,12 @@ const Packages = [
   },
 ];
 
-const {width} = Dimensions.get('window');
-
 const ServiceDetails: React.FC = ({route}) => {
   const {item} = route.params;
   const [step, setStep] = useState(0);
   const [visibleItems, setVisibleItems] = useState(5);
-const navigation = useNavigation()
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList, 'ServiceDetails'>>();
   const onSwipeLeft = () => {
     if (step < item.cover.length - 1) {
       setStep(step + 1);
@@ -188,22 +188,20 @@ const navigation = useNavigation()
               </View>
 
               <View style={styles.dotsContainer}>
-              {item.cover.map((_, index) => (
-                <TouchableOpacity key={index} onPress={() => setStep(index)}>
-                  {step === index ? (
-                    <LinearGradient
-                      colors={[Colors.gradient1, Colors.gradient2]}
-                      style={styles.activeDot}
-                    />
-                  ) : (
-                    <View style={styles.inactiveDot} />
-                  )}
-                </TouchableOpacity>
-              ))}
-            </View>
+                {item.cover.map((_, index) => (
+                  <TouchableOpacity key={index} onPress={() => setStep(index)}>
+                    {step === index ? (
+                      <LinearGradient
+                        colors={[Colors.gradient1, Colors.gradient2]}
+                        style={styles.activeDot}
+                      />
+                    ) : (
+                      <View style={styles.inactiveDot} />
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </View>
             </GestureRecognizer>
-
-            
           </View>
           <View style={{marginTop: RFPercentage(2)}}>
             <View style={styles.rowContainer}>
@@ -260,7 +258,7 @@ const navigation = useNavigation()
             <View>
               <TouchableOpacity
                 activeOpacity={0.6}
-                onPress={()=> navigation.navigate('Availability')}
+                onPress={() => navigation.navigate('Availability')}
                 style={{flexDirection: 'row', alignItems: 'center'}}>
                 <Text
                   style={{
@@ -290,10 +288,9 @@ const navigation = useNavigation()
                 justifyContent: 'space-between',
               }}>
               <Text style={styles.headeing2}>Services:</Text>
-             
             </View>
             <View
-              style={{right: RFPercentage(0.7), marginTop: RFPercentage(1)}}>
+              style={{right: RFPercentage(0.7), marginTop: RFPercentage(0.5)}}>
               <FlatList
                 data={services.slice(0, visibleItems)}
                 numColumns={2}
@@ -427,6 +424,7 @@ const navigation = useNavigation()
           <GradientButton
             title="Get Custom Offer"
             textStyle={{fontSize: RFPercentage(1.4)}}
+            onPress={()=>{}}
           />
         </View>
       </ScrollView>

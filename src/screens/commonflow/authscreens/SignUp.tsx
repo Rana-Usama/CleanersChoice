@@ -30,8 +30,13 @@ const SignUp: React.FC = () => {
     useNavigation<NativeStackNavigationProp<RootStackParamList, 'SignUp'>>();
   const [selected, setSelected] = useState<boolean>(false);
   const [img, setImg] = useState(null);
+  const [name, setName] = useState('');
+  const [email, SetEmail] = useState('');
+  const [phone, SetPhone] = useState('');
+  const [password, SetPassword] = useState('');
+  const [confirmPassword, SetConfirmPassword] = useState('');
+
   const userFlow = useSelector(state => state.userFlow);
-  console.log('userFlow.........', userFlow.userFlow);
 
   const handleNext = () => {
     if (userFlow?.userFlow === 'Customer') {
@@ -109,11 +114,23 @@ const SignUp: React.FC = () => {
             </View>
 
             <View style={styles.fieldContainer}>
-              <InputField placeholder="Username" />
-              <InputField placeholder="Email" />
-              <PasswordField placeholder="Password" />
-              <PasswordField placeholder="Confirm Password" />
-              <InputField placeholder="Phone Number" />
+              <InputField
+                placeholder="Username"
+                value={name}
+                onChangeText={setName}
+              />
+              <InputField
+                placeholder="Email"
+                value={email}
+                onChangeText={SetEmail}
+              />
+              <PasswordField placeholder="Password" value={password} onChangeText={SetPassword} />
+              <PasswordField placeholder="Confirm Password"  value={confirmPassword} onChangeText={SetConfirmPassword} />
+              <InputField
+                placeholder="Phone Number"
+                value={phone}
+                onChangeText={SetPhone}
+              />
             </View>
 
             <View style={styles.radioContainer}>
