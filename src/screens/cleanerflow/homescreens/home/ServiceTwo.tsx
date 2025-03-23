@@ -67,7 +67,7 @@ const ServiceTwo: React.FC = () => {
                   <Image
                     source={selectedImages[index] ? selectedImages[index] : Icons.gallery}
                     resizeMode="contain"
-                    style={styles.image}
+                    style={[styles.image, {width : selectedImages[index] ? RFPercentage(13) : RFPercentage(3), height :  selectedImages[index] ? RFPercentage(13) : RFPercentage(3) }]}
                   />
                 </View>
               </TouchableOpacity>

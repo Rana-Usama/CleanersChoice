@@ -106,8 +106,8 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(4),
   },
   pictureContainer: {
-    width: RFPercentage(12),
-    height: RFPercentage(12),
+    width: RFPercentage(13),
+    height: RFPercentage(13),
     borderRadius: RFPercentage(100),
     alignItems: 'center',
     justifyContent: 'center',

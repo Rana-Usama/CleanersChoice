@@ -14,6 +14,8 @@ import SetAvailablity from '../../../components/SetAvailablity';
 import {useSelector} from 'react-redux';
 import GradientButton from '../../../components/GradientButton';
 import {useNavigation} from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../../routers/StackNavigator';
 
 const days = [
   {
@@ -48,8 +50,7 @@ const days = [
 
 const Availability = () => {
   const userFlow = useSelector(state => state.userFlow.userFlow);
-  console.log('userFlow.........', userFlow);
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Availability'>>();
 
   return (
     <SafeAreaView style={styles.safeArea}>

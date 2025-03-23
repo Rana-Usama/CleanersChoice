@@ -13,9 +13,12 @@ import HeaderBack from '../../../components/HeaderBack';
 import GradientButton from '../../../components/GradientButton';
 import NextButton from '../../../components/NextButton';
 import {useNavigation} from '@react-navigation/native';
-
+import {useSelector} from 'react-redux';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../../routers/StackNavigator';
 const JobDetails = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'JobDetails'>>();
+  const userFlow = useSelector(state => state.userFlow.userFlow);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -26,15 +29,23 @@ const JobDetails = () => {
         <View style={styles.container}>
           <View style={styles.sectionContainer}>
             <View style={styles.rowAlign}>
-              <Image source={Icons.verify} resizeMode="contain" style={styles.icon} />
+              <Image
+                source={Icons.verify}
+                resizeMode="contain"
+                style={styles.icon}
+              />
               <Text style={styles.label}>Job Title:</Text>
             </View>
             <Text style={styles.value}>Garden Cleaning</Text>
           </View>
-          
+
           <View style={styles.sectionContainer}>
             <View style={styles.rowAlign}>
-              <Image source={Icons.bars} resizeMode="contain" style={styles.icon} />
+              <Image
+                source={Icons.bars}
+                resizeMode="contain"
+                style={styles.icon}
+              />
               <Text style={styles.label}>Description:</Text>
             </View>
             <Text style={styles.description}>
@@ -43,46 +54,71 @@ const JobDetails = () => {
               it.
             </Text>
           </View>
-          
+
           <View style={styles.sectionContainer}>
             <View style={styles.rowAlign}>
-              <Image source={Icons.location} resizeMode="contain" style={styles.icon} />
+              <Image
+                source={Icons.location}
+                resizeMode="contain"
+                style={styles.icon}
+              />
               <Text style={styles.label}>Location:</Text>
             </View>
             <Text style={styles.value}>Blumenwag 5, 8008 Zürich, Ohio</Text>
           </View>
-          
+
           <View style={styles.sectionContainer}>
             <View style={styles.rowAlign}>
-              <Image source={Icons.verify} resizeMode="contain" style={styles.icon} />
+              <Image
+                source={Icons.verify}
+                resizeMode="contain"
+                style={styles.icon}
+              />
               <Text style={styles.label}>Service Type:</Text>
             </View>
             <Text style={styles.value}>Residential</Text>
           </View>
-          
+
           <View style={styles.sectionContainer}>
             <View style={styles.rowAlign}>
-              <Image source={Icons.priceRange} resizeMode="contain" style={styles.icon} />
+              <Image
+                source={Icons.priceRange}
+                resizeMode="contain"
+                style={styles.icon}
+              />
               <Text style={styles.label}>Price Range:</Text>
             </View>
             <Text style={styles.value}>50$-200$</Text>
           </View>
-          
+
           <View style={styles.sectionContainer}>
             <View style={styles.rowAlign}>
-              <Image source={Icons.calendar} resizeMode="contain" style={styles.icon} />
+              <Image
+                source={Icons.calendar}
+                resizeMode="contain"
+                style={styles.icon}
+              />
               <Text style={styles.label}>Due Date & Time:</Text>
             </View>
             <Text style={styles.value}>26 April, 2024 | 5PM</Text>
           </View>
         </View>
-        
-        <View style={styles.buttonWrapper}>
-          <NextButton title="Edit Job Post" onPress={() => navigation.navigate('PostJob')} textStyle={styles.buttonText} />
-          <View style={styles.buttonSpacing}>
-            <GradientButton title="Mark as complete" textStyle={styles.buttonText} />
+        {userFlow === 'Customer' && (
+          <View style={styles.buttonWrapper}>
+            <NextButton
+              title="Edit Job Post"
+              onPress={() => navigation.navigate('PostJob')}
+              textStyle={styles.buttonText}
+            />
+            <View style={styles.buttonSpacing}>
+              <GradientButton
+                title="Mark as complete"
+                textStyle={styles.buttonText}
+                onPress={() => {}}
+              />
+            </View>
           </View>
-        </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
