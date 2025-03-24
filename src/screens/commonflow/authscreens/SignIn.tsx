@@ -21,20 +21,73 @@ import InputField from '../../../components/InputField';
 import PasswordField from '../../../components/PasswordField';
 import GradientButton from '../../../components/GradientButton';
 import {useSelector} from 'react-redux';
+import * as yup from 'yup';
+import {Formik} from 'formik';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
+import Toast from 'react-native-toast-message';
 
 const SignIn: React.FC = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, 'SignIn'>>();
   const [selected, setSelected] = useState<boolean>(false);
- const userFlow = useSelector(state => state.userFlow);
+  const userFlow = useSelector(state => state.userFlow);
+const [loading, setLoading] = useState(false)
+  let validationSchema = yup.object({
+    name: yup.string().required('Username is required'),
+    password: yup.string().required('Password is required'),
+  });
 
-  const handleNext = () => {
-    if (userFlow?.userFlow === 'Customer') {
-      navigation.navigate('Home');
-    } else {
-      navigation.navigate('CleanerNavigator');
+
+  const handleSignIn = async (values: any) => {
+    setLoading(true);
+    try {
+      const userCredential = await auth().signInWithEmailAndPassword(values.email, values.password);
+      const user = userCredential.user;
+  
+      const userDoc = await firestore().collection('Users').doc(user.uid).get();
+  
+      if (userDoc.exists) {
+        const userData = userDoc.data();
+        const userRole = userData?.role; 
+  
+        Toast.show({
+          type: 'success',
+          text1: 'Sign In',
+          text2: 'Login successful!',
+          position: 'top',
+        });
+  
+        if (userRole === 'Customer') {
+          navigation.replace('Home'); 
+        } else {
+          navigation.replace('CleanerNavigator'); 
+        }
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: 'Sign In Failed',
+          text2: 'User data not found',
+          position: 'top',
+        });
+      }
+    } catch (error: any) {
+      Toast.show({
+        type: 'error',
+        text1: 'Sign In Failed',
+        text2:
+          error.code === 'auth/user-not-found'
+            ? 'User not found'
+            : error.code === 'auth/wrong-password'
+            ? 'Incorrect password'
+            : error.message,
+        position: 'top',
+      });
+    } finally {
+      setLoading(false);
     }
   };
+
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -53,49 +106,92 @@ const SignIn: React.FC = () => {
             <Text style={styles.heading}>Welcome Back</Text>
           </View>
 
-          <View style={styles.fieldContainer}>
-            <InputField placeholder="Username" />
-            <PasswordField placeholder="Password" />
-          </View>
-          <View style={styles.radioContainer}>
-            <View style={styles.radioInner}>
-              <View style={styles.radioButtonRow}>
-                <RadioButtonInput
-                  obj={{value: 0}}
-                  index={0}
-                  isSelected={selected}
-                  onPress={() => setSelected(!selected)}
-                  borderWidth={1}
-                  buttonInnerColor={Colors.gradient1}
-                  buttonOuterColor={
-                    selected ? Colors.gradient1 : Colors.inputFieldColor
-                  }
-                  buttonSize={8}
-                  buttonOuterSize={14}
-                />
-                <Text style={styles.radioLabel}>Remember me?</Text>
-              </View>
+          <Formik
+            initialValues={{
+              name: '',
+              password: '',
+            }}
+            validationSchema={validationSchema}
+            onSubmit={values => handleSignIn(values)}>
+            {({
+              handleChange,
+              handleBlur,
+              handleSubmit,
+              values,
+              errors,
+              touched,
+            }) => (
+              <>
+                <View style={styles.fieldContainer}>
+                  <InputField
+                    placeholder="Username"
+                    onChangeText={handleChange('name')}
+                    handleBlur={handleBlur('name')}
+                    value={values.name}
+                    customStyle={{
+                      borderColor:
+                        touched.name && errors.name
+                          ? Colors.error
+                          : Colors.inputFieldColor,
+                    }}
+                  />
+                  <PasswordField
+                    placeholder="Password"
+                    onChangeText={handleChange('password')}
+                    handleBlur={handleBlur('password')}
+                    value={values.password}
+                    customStyle={{
+                      borderColor:
+                        touched.password && errors.password
+                          ? Colors.error
+                          : Colors.inputFieldColor,
+                    }}
+                  />
+                </View>
+                <View style={styles.radioContainer}>
+                  <View style={styles.radioInner}>
+                    <View style={styles.radioButtonRow}>
+                      <RadioButtonInput
+                        obj={{value: 0}}
+                        index={0}
+                        isSelected={selected}
+                        onPress={() => setSelected(!selected)}
+                        borderWidth={1}
+                        buttonInnerColor={Colors.gradient1}
+                        buttonOuterColor={
+                          selected ? Colors.gradient1 : Colors.inputFieldColor
+                        }
+                        buttonSize={8}
+                        buttonOuterSize={14}
+                      />
+                      <Text style={styles.radioLabel}>Remember me?</Text>
+                    </View>
 
-              <TouchableOpacity
-                onPress={() => navigation.navigate('ResetPassword')}
-                style={{position: 'absolute', right: 0}}>
-                <Text style={styles.forgotPassword}>Forgot Password?</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate('ResetPassword')}
+                      style={{position: 'absolute', right: 0}}>
+                      <Text style={styles.forgotPassword}>
+                        Forgot Password?
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
 
-          <View style={styles.buttonContainer}>
-            <GradientButton
-              title="Sign In"
-              onPress={handleNext}
-            />
-            <View style={styles.bottomContainer}>
-              <Text style={styles.bottomText}>Don't have an account?</Text>
-              <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-                <Text style={styles.signUp}>Signup</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+                <View style={styles.buttonContainer}>
+                  <GradientButton title="Sign In" onPress={handleSubmit} />
+                  <View style={styles.bottomContainer}>
+                    <Text style={styles.bottomText}>
+                      Don't have an account?
+                    </Text>
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate('SignUp')}>
+                      <Text style={styles.signUp}>Signup</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </>
+            )}
+          </Formik>
         </View>
         <View style={styles.starContainer}>
           <Image

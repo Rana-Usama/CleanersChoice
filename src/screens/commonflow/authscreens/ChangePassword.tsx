@@ -7,49 +7,117 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import React, { useState } from 'react';
-import { useNavigation } from '@react-navigation/native';
-import { Fonts, IMAGES, Colors } from '../../../constants/Themes';
-import { RFPercentage } from 'react-native-responsive-fontsize';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../../routers/StackNavigator';
+import React, {useState} from 'react';
+import {useNavigation} from '@react-navigation/native';
+import {Fonts, IMAGES, Colors} from '../../../constants/Themes';
+import {RFPercentage} from 'react-native-responsive-fontsize';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {RootStackParamList} from '../../../routers/StackNavigator';
 import InputField from '../../../components/InputField';
 import GradientButton from '../../../components/GradientButton';
 import HeaderBack from '../../../components/HeaderBack';
-
+import * as yup from 'yup';
+import {Formik} from 'formik';
+import Toast from 'react-native-toast-message';
 
 const ChangePassword: React.FC = () => {
   const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList, 'ChangePassword'>>();
-
+    useNavigation<
+      NativeStackNavigationProp<RootStackParamList, 'ChangePassword'>
+    >();
   const [loading, setLoading] = useState(false);
 
-  const handleNext = () => {
-    setLoading(true);
-    setTimeout(() => {
-      navigation.navigate('SignIn');
-      setLoading(false);
-    }, 2000);
+  let validationSchema = yup.object({
+    password: yup.string().required('Password is required'),
+    confirmPassword: yup
+      .string()
+      .required('Confirm Password is required')
+      .oneOf([yup.ref('password')], 'Passwords must match'),
+  });
+
+  const handleNext = (values: any) => {
+    if (values.password && values.confirmPassword) {
+      setLoading(true);
+      setTimeout(() => {
+        navigation.navigate('SignIn');
+        setLoading(false);
+      }, 2000);
+    }
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.keyboardAvoidingView}>
+      <StatusBar
+        barStyle="dark-content"
+        translucent
+        backgroundColor="transparent"
+      />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardAvoidingView}>
         <HeaderBack title={'Set New Password'} />
-        <View style={styles.container}>
 
-          <View style={styles.inputContainer}>
-            <InputField placeholder="Enter new Password" />
-            <InputField placeholder="Repeat new Password" />
-          </View>
+        <Formik
+          initialValues={{
+            password: '',
+            confirmPassword: '',
+          }}
+          validationSchema={validationSchema}
+          onSubmit={values => handleNext(values)}>
+          {({
+            handleChange,
+            handleBlur,
+            handleSubmit,
+            values,
+            errors,
+            touched,
+          }) => (
+            <>
+              <View style={styles.container}>
+                <View style={styles.inputContainer}>
+                  <InputField
+                    placeholder="Enter new Password"
+                    onChangeText={handleChange('password')}
+                    handleBlur={handleBlur('password')}
+                    value={values.password}
+                    customStyle={{
+                      borderColor:
+                        touched.password && errors.password
+                          ? Colors.error
+                          : Colors.inputFieldColor,
+                    }}
+                  />
+                  <InputField
+                    placeholder="Repeat new Password"
+                    onChangeText={handleChange('confirmPassword')}
+                    handleBlur={handleBlur('confirmPassword')}
+                    value={values.confirmPassword}
+                    customStyle={{
+                      borderColor:
+                        touched.confirmPassword && errors.confirmPassword
+                          ? Colors.error
+                          : Colors.inputFieldColor,
+                    }}
+                  />
+                </View>
 
-          <View style={styles.buttonContainer}>
-            <GradientButton title="Save" onPress={handleNext} loading={loading} />
-          </View>
-        </View>
+                <View style={styles.buttonContainer}>
+                  <GradientButton
+                    title="Save"
+                    onPress={handleSubmit}
+                    loading={loading}
+                  />
+                </View>
+              </View>
+            </>
+          )}
+        </Formik>
         <View style={styles.imageContainer}>
-          <Image source={IMAGES.stars} resizeMode="contain" style={styles.starImage} />
+          <Image
+            source={IMAGES.stars}
+            resizeMode="contain"
+            style={styles.starImage}
+          />
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
