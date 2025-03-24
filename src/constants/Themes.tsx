@@ -8,7 +8,8 @@ export const Colors: {[key: string]: string} = {
   inputFieldColor: 'rgba(229, 231, 235, 1)',
   placeholderColor: 'rgba(107, 114, 128, 1)',
   brown: 'rgba(68, 64, 60, 1)',
-  inputTextColor : 'rgba(0, 0, 0, 0.8)'
+  inputTextColor: 'rgba(0, 0, 0, 0.8)',
+  error: 'rgba(248, 113, 113, 0.8)',
 };
 
 export const Icons: {[key: string]: any} = {
@@ -39,18 +40,17 @@ export const Icons: {[key: string]: any} = {
   policy: require('../assets/icons/policy.png'),
   faqs: require('../assets/icons/Faqs.png'),
   logOut: require('../assets/icons/log-out.png'),
-  terms : require('../assets/icons/terms.png'),
-  dashBoard : require('../assets/icons/dashboard.png'),
-  gallery : require('../assets/icons/gallery.png'),
-  all : require('../assets/icons/list.png'),
-  residential : require('../assets/icons/house.png'),
-  pressure : require('../assets/icons/pressure-washer.png'),
-  window : require('../assets/icons/window-cleaning.png'),
-  chimney : require('../assets/icons/chimney.png'),
-  car : require('../assets/icons/car.png'),
-  carpet : require('../assets/icons/carpet-cleaner.png'),
-  editIcon : require('../assets/icons/message-edit.png'),
-
+  terms: require('../assets/icons/terms.png'),
+  dashBoard: require('../assets/icons/dashboard.png'),
+  gallery: require('../assets/icons/gallery.png'),
+  all: require('../assets/icons/list.png'),
+  residential: require('../assets/icons/house.png'),
+  pressure: require('../assets/icons/pressure-washer.png'),
+  window: require('../assets/icons/window-cleaning.png'),
+  chimney: require('../assets/icons/chimney.png'),
+  car: require('../assets/icons/car.png'),
+  carpet: require('../assets/icons/carpet-cleaner.png'),
+  editIcon: require('../assets/icons/message-edit.png'),
 };
 
 export const IMAGES: {[key: string]: any} = {
@@ -71,7 +71,6 @@ export const IMAGES: {[key: string]: any} = {
   star: require('../assets/images/star.png'),
   picture: require('../assets/images/picture.png'),
   timeLine: require('../assets/images/timeline1.png'),
-
 };
 
 export const Fonts: {[key: string]: string} = {

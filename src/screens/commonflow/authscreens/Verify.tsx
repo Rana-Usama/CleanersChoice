@@ -20,19 +20,26 @@ import {RootStackParamList} from '../../../routers/StackNavigator';
 import InputField from '../../../components/InputField';
 import GradientButton from '../../../components/GradientButton';
 import HeaderBack from '../../../components/HeaderBack';
+import * as yup from 'yup';
+import {Formik} from 'formik';
+import Toast from 'react-native-toast-message';
 
 const Verify: React.FC = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, 'Verify'>>();
-
   const [loading, setLoading] = useState(false);
+  let validationSchema = yup.object({
+    code: yup.string().required('Code is required'),
+  });
 
-  const handleNext = () => {
-    setLoading(true);
-    setTimeout(() => {
-      navigation.navigate('ChangePassword');
-      setLoading(false);
-    }, 2000);
+  const handleNext = (values: any) => {
+    if (values.code) {
+      setLoading(true);
+      setTimeout(() => {
+        navigation.navigate('ChangePassword');
+        setLoading(false);
+      }, 2000);
+    }
   };
 
   return (
@@ -46,19 +53,49 @@ const Verify: React.FC = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.flexOne}>
         <HeaderBack title={'Reset Password?'} />
-        <View style={styles.container}>
-          <View style={styles.inputContainer}>
-            <InputField placeholder="Enter sent OTP" />
-          </View>
 
-          <View style={styles.buttonContainer}>
-            <GradientButton
-              title="Verify"
-              onPress={handleNext}
-              loading={loading}
-            />
-          </View>
-        </View>
+        <Formik
+          initialValues={{
+            code: '',
+          }}
+          validationSchema={validationSchema}
+          onSubmit={values => handleNext(values)}>
+          {({
+            handleChange,
+            handleBlur,
+            handleSubmit,
+            values,
+            errors,
+            touched,
+          }) => (
+            <>
+              <View style={styles.container}>
+                <View style={styles.inputContainer}>
+                  <InputField
+                    placeholder="Enter sent OTP"
+                    onChangeText={handleChange('code')}
+                    handleBlur={handleBlur('code')}
+                    value={values.code}
+                    customStyle={{
+                      borderColor:
+                        touched.code && errors.code
+                          ? Colors.error
+                          : Colors.inputFieldColor,
+                    }}
+                  />
+                </View>
+
+                <View style={styles.buttonContainer}>
+                  <GradientButton
+                    title="Verify"
+                    onPress={handleSubmit}
+                    loading={loading}
+                  />
+                </View>
+              </View>
+            </>
+          )}
+        </Formik>
         <View style={styles.imageContainer}>
           <Image
             source={IMAGES.stars}
