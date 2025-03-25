@@ -22,6 +22,8 @@ import GradientButton from '../../../../components/GradientButton';
 import PasswordField from '../../../../components/PasswordField';
 import {BlurView} from '@react-native-community/blur';
 import CustomModal from '../../../../components/CustomModal';
+import auth from '@react-native-firebase/auth';
+import Toast from 'react-native-toast-message';
 
 const ChangePasswordV2 = () => {
   const navigation =
@@ -33,6 +35,44 @@ const ChangePasswordV2 = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [modalVisible, setModalVisible] = useState<boolean>(false);
+
+  const handleChangePassword = async () => {
+    setLoading(true);
+    const user = auth().currentUser;
+    if (!user) {
+      Toast.show({
+        type : 'error',
+        text1 : 'User Sign In',
+        text2 : 'User not found',
+        text1Style : {fontFamily : Fonts.fontBold},
+        text2Style : {fontFamily : Fonts.fontRegular}
+      })
+      setLoading(false);
+      return;
+    }
+    const credential = auth.EmailAuthProvider.credential(
+      user?.email,
+      oldPassword,
+    );
+    try {
+      await user.reauthenticateWithCredential(credential);
+      await user.updatePassword(newPassword);
+      setModalVisible(true);
+      setOldPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
+    } catch (error) {
+      Toast.show({
+        type : 'error',
+        text1 : 'Error',
+        text2 : `${error?.message}`,
+        text1Style : {fontFamily : Fonts.fontBold},
+        text2Style : {fontFamily : Fonts.fontRegular}
+      })
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -73,10 +113,7 @@ const ChangePasswordV2 = () => {
           </View>
 
           <View style={{marginTop: RFPercentage(8), alignSelf: 'center'}}>
-            <GradientButton
-              title="Change"
-              onPress={() => setModalVisible(true)}
-            />
+            <GradientButton title="Change" onPress={handleChangePassword} loading={loading} />
           </View>
         </View>
       </ScrollView>
@@ -93,7 +130,13 @@ const ChangePasswordV2 = () => {
               title={
                 'Your password hase been successfuly changed successfully!'
               }
-              onPress3={() => setModalVisible(false)}
+              onPress3={
+              () => 
+              {
+                navigation.navigate('SignIn')
+                setModalVisible(false)
+              }
+            }
             />
           </View>
         </TouchableWithoutFeedback>

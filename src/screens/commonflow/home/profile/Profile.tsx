@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     width: '90%',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: RFPercentage(3),
+    marginTop: RFPercentage(1),
   },
   pictureContainer: {
     width: RFPercentage(13.5),
@@ -91,6 +91,6 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.fontMedium,
   },
   profileFieldContainer: {
-    marginTop: RFPercentage(4),
+    marginTop: RFPercentage(4.5),
   },
 });

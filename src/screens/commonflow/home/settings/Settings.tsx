@@ -16,10 +16,31 @@ import CustomModal from '../../../../components/CustomModal';
 import {useSelector} from 'react-redux';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../../../routers/StackNavigator';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Toast from 'react-native-toast-message';
+
 const Settings = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList,'Settings'>>();
   const [modalVisible, setModalVisible] = useState(false);
   const userFlow = useSelector(state => state.userFlow);
+
+  const logOut = async () => {
+    try {   
+      await AsyncStorage.multiRemove(['email', 'password', 'role']);
+      navigation.navigate('SignIn');
+      setModalVisible(false)
+      
+      Toast.show({
+        type: 'success',
+        text1: 'Log Out',
+        text2: 'Logged out successfully',
+        position: 'top',
+      });
+  
+    } catch (error) {
+      console.log('Logout Error:', error);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -73,7 +94,7 @@ const Settings = () => {
             <CustomModal
               title={'Are you sure you want to Logout?'}
               onPress={() => setModalVisible(false)}
-              onPress2={() => setModalVisible(false)}
+              onPress2={logOut}
             />
           </View>
         </TouchableWithoutFeedback>

@@ -31,8 +31,6 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 
-
-
 const SignUp: React.FC = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, 'SignUp'>>();
@@ -45,14 +43,15 @@ const SignUp: React.FC = () => {
     name: yup.string().required('Username is required'),
     email: yup.string().email('Invalid email').required('Email is required'),
     phone: yup.string().required('Phone number is required'),
-    password: yup.string().required('Password is required'),
+    password: yup
+      .string()
+      .min(6, 'Password must be at least 6 characters long')
+      .required('Password is required'),
     confirmPassword: yup
       .string()
-      .required('Confirm Password is required')
-      .oneOf([yup.ref('password')], 'Passwords must match'),
+      .oneOf([yup.ref('password')], 'Passwords must match')
+      .required('Passwords must match'),
   });
-
-  
 
   const uploadImg = () => {
     ImagePicker.openPicker({
@@ -68,7 +67,6 @@ const SignUp: React.FC = () => {
       });
   };
 
-
   const handleSignUp = async (values: any) => {
     if (!selected) {
       Toast.show({
@@ -79,45 +77,55 @@ const SignUp: React.FC = () => {
       });
       return;
     }
-  
+
     setLoading(true);
     try {
       const userCredential = await auth().createUserWithEmailAndPassword(
         values.email,
-        values.password
+        values.password,
       );
       const user = userCredential.user;
-  
+
       let profileUrl = '';
-  
+
       if (img) {
-        const uploadUri = img.path;
+        console.log('Image Path:', img.path);
+        const uploadUri = img.path.replace('file://', '');
         const fileName = `profile_${user.uid}.jpg`;
         const storageRef = storage().ref(`user_profiles/${fileName}`);
-  
-        await storageRef.putFile(uploadUri);
+
+        console.log('Storage Path:', `user_profiles/${fileName}`);
+
+        const uploadTask = storageRef.putFile(uploadUri);
+        await uploadTask;
         profileUrl = await storageRef.getDownloadURL();
+        console.log('Uploaded File URL:', profileUrl);
       }
-  
-      await firestore().collection('Users').doc(user.uid).set({
-        name: values.name,
-        email: values.email,
-        phone: values.phone,
-        uid: user.uid,
-        profile: profileUrl || null,
-        role: userFlow?.userFlow,
-      });
-  
+
+      await firestore()
+        .collection('Users')
+        .doc(user.uid)
+        .set({
+          name: values.name,
+          email: values.email,
+          phone: values.phone,
+          uid: user.uid,
+          profile: profileUrl || null,
+          role: userFlow?.userFlow,
+        });
+
       Toast.show({
         type: 'success',
         text1: 'Sign Up',
         text2: 'User registered successfully',
         position: 'top',
       });
-  
-      navigation.navigate(userFlow?.userFlow === 'Customer' ? 'Home' : 'Premium');
+
+      navigation.navigate(
+        userFlow?.userFlow === 'Customer' ? 'Home' : 'Premium',
+      );
     } catch (error: any) {
-      console.log(error);
+      console.log('Sign Up Error:', error);
       Toast.show({
         type: 'error',
         text1: 'Sign Up Failed',
@@ -141,9 +149,8 @@ const SignUp: React.FC = () => {
         keyboardVerticalOffset={
           Platform.OS === 'android' ? StatusBar.currentHeight : 0
         }
-        style={{flex: 1}}>
+        >
         <ScrollView
-          contentContainerStyle={{flexGrow: 1}}
           keyboardShouldPersistTaps="handled">
           <View style={styles.container}>
             <HeaderComponent />
@@ -214,6 +221,21 @@ const SignUp: React.FC = () => {
                             : Colors.inputFieldColor,
                       }}
                     />
+                    {touched.name && errors.name && (
+                      <>
+                        <View style={{width: '90%', height: 16, bottom: 8}}>
+                          <Text
+                            style={{
+                              fontSize: RFPercentage(1.3),
+                              fontFamily: Fonts.fontRegular,
+                              color: Colors.error,
+                              textAlign: 'left',
+                            }}>
+                            {errors.name}
+                          </Text>
+                        </View>
+                      </>
+                    )}
                     <InputField
                       placeholder="Email"
                       onChangeText={handleChange('email')}
@@ -226,6 +248,21 @@ const SignUp: React.FC = () => {
                             : Colors.inputFieldColor,
                       }}
                     />
+                    {touched.email && errors.email && (
+                      <>
+                        <View style={{width: '90%', height: 16, bottom: 8}}>
+                          <Text
+                            style={{
+                              fontSize: RFPercentage(1.3),
+                              fontFamily: Fonts.fontRegular,
+                              color: Colors.error,
+                              textAlign: 'left',
+                            }}>
+                            {errors.email}
+                          </Text>
+                        </View>
+                      </>
+                    )}
                     <PasswordField
                       placeholder="Password"
                       onChangeText={handleChange('password')}
@@ -238,6 +275,21 @@ const SignUp: React.FC = () => {
                             : Colors.inputFieldColor,
                       }}
                     />
+                    {touched.password && errors.password && (
+                      <>
+                        <View style={{width: '90%', height: 16, bottom: 8}}>
+                          <Text
+                            style={{
+                              fontSize: RFPercentage(1.3),
+                              fontFamily: Fonts.fontRegular,
+                              color: Colors.error,
+                              textAlign: 'left',
+                            }}>
+                            {errors.password}
+                          </Text>
+                        </View>
+                      </>
+                    )}
                     <PasswordField
                       placeholder="Confirm Password"
                       onChangeText={handleChange('confirmPassword')}
@@ -250,6 +302,21 @@ const SignUp: React.FC = () => {
                             : Colors.inputFieldColor,
                       }}
                     />
+                    {touched.confirmPassword && errors.confirmPassword && (
+                      <>
+                        <View style={{width: '90%', height: 16, bottom: 8}}>
+                          <Text
+                            style={{
+                              fontSize: RFPercentage(1.3),
+                              fontFamily: Fonts.fontRegular,
+                              color: Colors.error,
+                              textAlign: 'left',
+                            }}>
+                            {errors.confirmPassword}
+                          </Text>
+                        </View>
+                      </>
+                    )}
                     <InputField
                       placeholder="Phone Number"
                       onChangeText={handleChange('phone')}
@@ -262,6 +329,21 @@ const SignUp: React.FC = () => {
                             : Colors.inputFieldColor,
                       }}
                     />
+                    {touched.phone && errors.phone && (
+                      <>
+                        <View style={{width: '90%', height: 16, bottom: 8}}>
+                          <Text
+                            style={{
+                              fontSize: RFPercentage(1.3),
+                              fontFamily: Fonts.fontRegular,
+                              color: Colors.error,
+                              textAlign: 'left',
+                            }}>
+                            {errors.phone}
+                          </Text>
+                        </View>
+                      </>
+                    )}
                   </View>
 
                   <View style={styles.radioContainer}>
@@ -324,6 +406,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: Colors.background,
+
   },
   container: {
     backgroundColor: Colors.background,

@@ -31,6 +31,7 @@ import CancelSubscription from '../screens/cleanerflow/premium/CancelSubscriptio
 import PriceRangeScreen from '../screens/customerflow/Range';
 import Availability from '../screens/commonflow/home/Availability';
 import Settings from '../screens/commonflow/home/settings/Settings';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export type RootStackParamList = {
   SplashOne: undefined;
@@ -66,35 +67,37 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const StackNavigator: React.FC = () => {
-  // const [email, setEmail] = useState<string | null>(null);
-  // const [password, setPassword] = useState<string | null>(null);
-  // const [loading, setLoading] = useState(true);
-  // const [google, setGoogle] = useState<string | null>(null);
-  // const [facebook, setFaceBook] = useState<string | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
+  const [password, setPassword] = useState<string | null>(null);
+  const [user, setUser] = useState<string | null> (null)
+  const [isLoading, setIsLoading] = useState(true);
 
-  // useEffect(() => {
-  //     const fetchCredentials = async () => {
-  //         try {
-  //             const storedEmail = await AsyncStorage.getItem('email');
-  //             const storedPassword = await AsyncStorage.getItem('password');
-  //             const storedGoogle = await AsyncStorage.getItem('google');
-  //             const storedFacebook = await AsyncStorage.getItem('facebook');
+  useEffect(() => {
+    const fetchCredentials = async () => {
+      try {
+        const storedEmail = await AsyncStorage.getItem('email');
+        const storedPassword = await AsyncStorage.getItem('password');
+        const storedUser = await AsyncStorage.getItem('role');
+        
+        setEmail(storedEmail);
+        setPassword(storedPassword);
+        setUser(storedUser);
+      } catch (error) {
+        console.error('Error fetching credentials:', error);
+      } finally {
+        setIsLoading(false); 
+      }
+    };
+    fetchCredentials();
+  }, []);
 
-  //             setFaceBook(storedFacebook);
-  //             setGoogle(storedGoogle);
-  //             setEmail(storedEmail);
-  //             setPassword(storedPassword);
-  //         } catch (error) {
-  //             console.error('Error fetching credentials:', error);
-  //         } finally {
-  //             setLoading(false);
-  //         }
-  //     };
+  console.log('Stored Credentials:', email, password, user);
+  if (isLoading) return null;
 
-  //     fetchCredentials();
-  // }, []);
+  
 
-  // if (loading) return null;
+ 
+
 
   return (
     <SafeAreaProvider>
@@ -103,7 +106,7 @@ const StackNavigator: React.FC = () => {
           screenOptions={{
             headerShown: false,
           }}
-          initialRouteName={'SplashOne'}>
+          initialRouteName={(email && password) && user === 'Customer' ? 'Home' : user === 'Cleaner' ? 'CleanerNavigator' : 'SplashOne'}>
             
             {/* -------Common Screens----- */}
           <Stack.Screen name="SplashOne" component={Splash} />

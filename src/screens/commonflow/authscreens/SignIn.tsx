@@ -20,73 +20,75 @@ import HeaderComponent from '../../../components/HeaderComponent';
 import InputField from '../../../components/InputField';
 import PasswordField from '../../../components/PasswordField';
 import GradientButton from '../../../components/GradientButton';
-import {useSelector} from 'react-redux';
 import * as yup from 'yup';
 import {Formik} from 'formik';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import Toast from 'react-native-toast-message';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 
 const SignIn: React.FC = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, 'SignIn'>>();
   const [selected, setSelected] = useState<boolean>(false);
-  const userFlow = useSelector(state => state.userFlow);
-const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
   let validationSchema = yup.object({
-    name: yup.string().required('Username is required'),
+    email: yup.string().email('Invalid email').required('Email is required'),
     password: yup.string().required('Password is required'),
   });
-
 
   const handleSignIn = async (values: any) => {
     setLoading(true);
     try {
-      const userCredential = await auth().signInWithEmailAndPassword(values.email, values.password);
-      const user = userCredential.user;
+      const userCredential = await auth().signInWithEmailAndPassword(
+        values.email,
+        values.password
+      );
+  
+      const user = userCredential?.user;
+      if (!user) throw new Error('No user found after sign-in.');
   
       const userDoc = await firestore().collection('Users').doc(user.uid).get();
   
-      if (userDoc.exists) {
-        const userData = userDoc.data();
-        const userRole = userData?.role; 
+      if (!userDoc.exists) throw new Error('User data not found in Firestore.');
   
-        Toast.show({
-          type: 'success',
-          text1: 'Sign In',
-          text2: 'Login successful!',
-          position: 'top',
-        });
+      const userData = userDoc.data();
+      const userRole = userData?.role;
   
-        if (userRole === 'Customer') {
-          navigation.replace('Home'); 
-        } else {
-          navigation.replace('CleanerNavigator'); 
-        }
-      } else {
-        Toast.show({
-          type: 'error',
-          text1: 'Sign In Failed',
-          text2: 'User data not found',
-          position: 'top',
-        });
+      Toast.show({
+        type: 'success',
+        text1: 'Sign In',
+        text2: 'Login successful!',
+        position: 'top',
+      });
+  
+      if (selected) {
+        await AsyncStorage.setItem("email", values.email);
+        await AsyncStorage.setItem("password", values.password);
+        await AsyncStorage.setItem("role", userRole); 
       }
-    } catch (error: any) {
+  
+      if (userRole === 'Customer') {
+        navigation.replace('Home');
+      } else {
+        navigation.replace('CleanerNavigator');
+      }
+    } catch (error) {
+      console.error('Sign In Error:', error);
+      const errorMessage = error?.message || 'An unknown error occurred';
       Toast.show({
         type: 'error',
         text1: 'Sign In Failed',
-        text2:
-          error.code === 'auth/user-not-found'
-            ? 'User not found'
-            : error.code === 'auth/wrong-password'
-            ? 'Incorrect password'
-            : error.message,
+        text2: errorMessage,
         position: 'top',
       });
     } finally {
       setLoading(false);
     }
   };
+  
+  
 
 
   return (
@@ -108,7 +110,7 @@ const [loading, setLoading] = useState(false)
 
           <Formik
             initialValues={{
-              name: '',
+              email: '',
               password: '',
             }}
             validationSchema={validationSchema}
@@ -124,17 +126,32 @@ const [loading, setLoading] = useState(false)
               <>
                 <View style={styles.fieldContainer}>
                   <InputField
-                    placeholder="Username"
-                    onChangeText={handleChange('name')}
-                    handleBlur={handleBlur('name')}
-                    value={values.name}
+                    placeholder="Email"
+                    onChangeText={handleChange('email')}
+                    handleBlur={handleBlur('email')}
+                    value={values.email}
                     customStyle={{
                       borderColor:
-                        touched.name && errors.name
+                        touched.email && errors.email
                           ? Colors.error
                           : Colors.inputFieldColor,
                     }}
                   />
+                  {touched.email && errors.email && (
+                    <>
+                      <View style={{width: '90%', height: 16, bottom: 8}}>
+                        <Text
+                          style={{
+                            fontSize: RFPercentage(1.3),
+                            fontFamily: Fonts.fontRegular,
+                            color: Colors.error,
+                            textAlign: 'left',
+                          }}>
+                          {errors.email}
+                        </Text>
+                      </View>
+                    </>
+                  )}
                   <PasswordField
                     placeholder="Password"
                     onChangeText={handleChange('password')}
@@ -147,6 +164,21 @@ const [loading, setLoading] = useState(false)
                           : Colors.inputFieldColor,
                     }}
                   />
+                  {touched.password && errors.password && (
+                    <>
+                      <View style={{width: '90%', height: 16, bottom: 8}}>
+                        <Text
+                          style={{
+                            fontSize: RFPercentage(1.3),
+                            fontFamily: Fonts.fontRegular,
+                            color: Colors.error,
+                            textAlign: 'left',
+                          }}>
+                          {errors.password}
+                        </Text>
+                      </View>
+                    </>
+                  )}
                 </View>
                 <View style={styles.radioContainer}>
                   <View style={styles.radioInner}>
@@ -178,7 +210,7 @@ const [loading, setLoading] = useState(false)
                 </View>
 
                 <View style={styles.buttonContainer}>
-                  <GradientButton title="Sign In" onPress={handleSubmit} />
+                  <GradientButton title="Sign In" onPress={handleSubmit} loading={loading} />
                   <View style={styles.bottomContainer}>
                     <Text style={styles.bottomText}>
                       Don't have an account?
