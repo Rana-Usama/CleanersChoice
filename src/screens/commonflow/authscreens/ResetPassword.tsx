@@ -21,6 +21,7 @@ import HeaderBack from '../../../components/HeaderBack';
 import * as yup from 'yup';
 import {Formik} from 'formik';
 import Toast from 'react-native-toast-message';
+import auth from '@react-native-firebase/auth';
 
 const ResetPassword: React.FC = () => {
   const navigation =
@@ -33,20 +34,32 @@ const ResetPassword: React.FC = () => {
     email: yup.string().email('Invalid email').required('Email is required'),
   });
 
-  const handleNext = (values: any) => {
+  const handleNext = async (values: any) => {
     if (values.email) {
       setLoading(true);
-      setTimeout(() => {
-        navigation.navigate('Verify');
+      try {
+        await auth().sendPasswordResetEmail(values.email);
+        Toast.show({
+          type: 'success',
+          text1: 'Success',
+          text2: 'Reset password link sent to your email.',
+        });
+        navigation.navigate('SignIn');
+      } catch (error) {
+        console.log('Error sending email:', error);
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: error?.message,
+        });
+      } finally {
         setLoading(false);
-      }, 2000);
-    }
-    else {
-      console.log('error')
+      }
+    } else {
+      console.log('Error: Email is required');
     }
   };
 
-  
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar
@@ -88,11 +101,26 @@ const ResetPassword: React.FC = () => {
                           : Colors.inputFieldColor,
                     }}
                   />
+                  {touched.email && errors.email && (
+                    <>
+                      <View style={{width: '90%', height: 16, bottom: 8}}>
+                        <Text
+                          style={{
+                            fontSize: RFPercentage(1.3),
+                            fontFamily: Fonts.fontRegular,
+                            color: Colors.error,
+                            textAlign: 'left',
+                          }}>
+                          {errors.email}
+                        </Text>
+                      </View>
+                    </>
+                  )}
                 </View>
 
                 <View style={styles.buttonContainer}>
                   <GradientButton
-                    title="Send OTP"
+                    title="Enter Email"
                     onPress={handleSubmit}
                     loading={loading}
                   />

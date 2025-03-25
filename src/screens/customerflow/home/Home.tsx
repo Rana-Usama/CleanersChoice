@@ -19,6 +19,8 @@ import HeaderBack from '../../../components/HeaderBack';
 import {useSelector} from 'react-redux';
 import {RootStackParamList} from '../../../routers/StackNavigator';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {Popable} from 'react-native-popable';
+import Slider from '@react-native-community/slider';
 
 const categories = [
   {id: 1, name: 'All', icon: Icons.all},
@@ -87,10 +89,9 @@ const Home = () => {
   const [Filter, setFilter] = useState(null);
   const [categorySelection, setCategorySelection] = useState(1);
   const navigation =
-    useNavigation<
-      NativeStackNavigationProp<RootStackParamList, 'Home'>
-    >();
+    useNavigation<NativeStackNavigationProp<RootStackParamList, 'Home'>>();
   const [searchQuery, setSearchQuery] = useState('');
+  const [priceRange, setPriceRange] = useState([10, 100]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -165,45 +166,101 @@ const Home = () => {
             contentContainerStyle={styles.flatListPadding}
           />
 
-          <Text style={styles.sectionTitle}>Apply Filters</Text>
+          <Text style={styles.sectionTitle}>Apply Filter</Text>
           <FlatList
             horizontal
             data={filter}
             keyExtractor={item => item.id.toString()}
-            renderItem={({item}) => (
-              <TouchableOpacity
-                onPress={() => setFilter(item.id)}
-                // onPress={() => navigation.navigate('PriceRangeScreen')}
-              >
-                <View
-                  style={[
-                    styles.filterBox,
-                    {
-                      borderColor:
-                        Filter === item.id
-                          ? Colors.gradient2
-                          : Colors.inputFieldColor,
-                    },
-                  ]}>
-                  <Text
+            renderItem={({item}) => {
+              return item.id === 2 ? (
+                <Popable
+                  position="top"
+                  style={styles.popableStyle}
+                  backgroundColor={'rgba(229, 231, 235, 0.3)'}
+                  caretPosition='center'
+                  content={
+                    <View style={styles.popableContent}>
+                      <View style={styles.popableInnerView}>
+                        <Slider
+                          style={styles.sliderStyle}
+                          minimumValue={10}
+                          maximumValue={2000}
+                          step={1}
+                          value={priceRange[0]}
+                          onValueChange={value =>
+                            setPriceRange([value, priceRange[1]])
+                          }
+                          onSlidingComplete={value =>
+                            setPriceRange([value, priceRange[1]])
+                          }
+                          minimumTrackTintColor={Colors.gradient1}
+                          maximumTrackTintColor="gray"
+                          thumbTintColor={Colors.gradient1}
+                        />
+                        <View style={styles.sliderLabelsContainer}>
+                          <Text style={styles.sliderLabel}>0</Text>
+                          <Text style={styles.sliderLabel}>1000</Text>
+                          <Text style={styles.sliderLabel}>2000+</Text>
+                        </View>
+                      </View>
+                    </View>
+                  }>
+                  <View>
+                    <View
+                      style={[
+                        styles.filterBox,
+                        {
+                          borderColor:
+                            Filter === item.id
+                              ? Colors.gradient2
+                              : Colors.inputFieldColor,
+                        },
+                      ]}>
+                      <Text
+                        style={[
+                          styles.filterText,
+                          {
+                            fontFamily:
+                              Filter === item.id
+                                ? Fonts.semiBold
+                                : Fonts.fontRegular,
+                          },
+                        ]}>
+                        {item.name}
+                      </Text>
+                    </View>
+                  </View>
+                </Popable>
+              ) : (
+                <View>
+                  <TouchableOpacity
+                    onPress={() => setFilter(item?.id)}
                     style={[
-                      styles.filterText,
+                      styles.filterBox,
                       {
-                        fontFamily:
+                        borderColor:
                           Filter === item.id
-                            ? Fonts.semiBold
-                            : Fonts.fontRegular,
+                            ? Colors.gradient2
+                            : Colors.inputFieldColor,
                       },
                     ]}>
-                    {item.name}
-                  </Text>
+                    <Text
+                      style={[
+                        styles.filterText,
+                        {
+                          fontFamily:
+                            Filter === item.id
+                              ? Fonts.semiBold
+                              : Fonts.fontRegular,
+                        },
+                      ]}>
+                      {item.name}
+                    </Text>
+                  </TouchableOpacity>
                 </View>
-              </TouchableOpacity>
-            )}
-            contentContainerStyle={{
-              paddingHorizontal: RFPercentage(1.2),
-              paddingTop: RFPercentage(1.5),
+              );
             }}
+            contentContainerStyle={styles.flatListContainer}
           />
 
           <Text style={styles.sectionTitle}>Cleaning Services</Text>
@@ -338,5 +395,40 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(0.5),
     width: '95%',
     alignSelf: 'center',
+  },
+  popableStyle: {
+    width: RFPercentage(24),
+    zIndex: 9999,
+    borderRadius: 6,
+    backgroundColor: 'rgba(229, 231, 235, 0.2)',
+  },
+  popableContent: {
+    backgroundColor: 'rgba(229, 231, 235, 0.2)',
+    alignItems: 'center',
+    width: RFPercentage(24),
+  },
+  popableInnerView: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  sliderStyle: {
+    width: RFPercentage(24),
+    height: RFPercentage(3),
+  },
+  sliderLabelsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: RFPercentage(22),
+    bottom: 5,
+    // marginTop: -4,
+  },
+  sliderLabel: {
+    color: Colors.secondaryText,
+    fontSize: 8,
+    fontFamily: Fonts.semiBold,
+  },
+  flatListContainer: {
+    paddingHorizontal: RFPercentage(1.2),
+    paddingTop: RFPercentage(1.5),
   },
 });
