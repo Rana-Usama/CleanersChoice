@@ -24,6 +24,9 @@ import {BlurView} from '@react-native-community/blur';
 import CustomModal from '../../../../components/CustomModal';
 import auth from '@react-native-firebase/auth';
 import Toast from 'react-native-toast-message';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as yup from 'yup';
+import {Formik} from 'formik';
 
 const ChangePasswordV2 = () => {
   const navigation =
@@ -36,39 +39,52 @@ const ChangePasswordV2 = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [modalVisible, setModalVisible] = useState<boolean>(false);
 
-  const handleChangePassword = async () => {
+  let validationSchema = yup.object({
+    oldPassword: yup.string().required('Password is required'),
+    password: yup
+      .string()
+      .min(6, 'Password must be at least 6 characters long')
+      .required('Password is required'),
+    confirmPassword: yup
+      .string()
+      .oneOf([yup.ref('password')], 'Passwords must match')
+      .required('Passwords must match'),
+  });
+
+  const handleChangePassword = async (values: any) => {
     setLoading(true);
     const user = auth().currentUser;
     if (!user) {
       Toast.show({
-        type : 'error',
-        text1 : 'User Sign In',
-        text2 : 'User not found',
-        text1Style : {fontFamily : Fonts.fontBold},
-        text2Style : {fontFamily : Fonts.fontRegular}
-      })
+        type: 'error',
+        text1: 'User Sign In',
+        text2: 'User not found',
+        text1Style: {fontFamily: Fonts.fontBold},
+        text2Style: {fontFamily: Fonts.fontRegular},
+      });
       setLoading(false);
       return;
     }
     const credential = auth.EmailAuthProvider.credential(
       user?.email,
-      oldPassword,
+      values.oldPassword,
     );
     try {
       await user.reauthenticateWithCredential(credential);
-      await user.updatePassword(newPassword);
+      await user.updatePassword(values.password);
+      await AsyncStorage.multiRemove(['email', 'password', 'role']);
       setModalVisible(true);
-      setOldPassword('')
-      setNewPassword('')
-      setConfirmPassword('')
+      setOldPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
     } catch (error) {
       Toast.show({
-        type : 'error',
-        text1 : 'Error',
-        text2 : `${error?.message}`,
-        text1Style : {fontFamily : Fonts.fontBold},
-        text2Style : {fontFamily : Fonts.fontRegular}
-      })
+        type: 'error',
+        text1: 'Error',
+        text2: `${error?.message}`,
+        text1Style: {fontFamily: Fonts.fontBold},
+        text2Style: {fontFamily: Fonts.fontRegular},
+      });
     } finally {
       setLoading(false);
     }
@@ -83,39 +99,130 @@ const ChangePasswordV2 = () => {
           title={`Change Password`}
           textStyle={{fontSize: RFPercentage(1.8)}}
         />
-        <View style={styles.container}>
-          <View style={{marginTop: RFPercentage(4)}}>
-            <Text style={styles.label}>Old Password</Text>
-            <PasswordField
-              placeholder="Enter old password"
-              value={oldPassword}
-              onChangeText={setOldPassword}
-              customStyle={{width: '100%'}}
-            />
-          </View>
-          <View style={{marginTop: RFPercentage(2)}}>
-            <Text style={styles.label}>New Password</Text>
-            <PasswordField
-              placeholder="Enter new password"
-              value={newPassword}
-              onChangeText={setNewPassword}
-              customStyle={{width: '100%'}}
-            />
-          </View>
-          <View style={{marginTop: RFPercentage(2)}}>
-            <Text style={styles.label}>Repeat New Password</Text>
-            <PasswordField
-              placeholder="Re-enter new password"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              customStyle={{width: '100%'}}
-            />
-          </View>
 
-          <View style={{marginTop: RFPercentage(8), alignSelf: 'center'}}>
-            <GradientButton title="Change" onPress={handleChangePassword} loading={loading} />
-          </View>
-        </View>
+        <Formik
+          initialValues={{
+            oldPassword: '',
+            password: '',
+            confirmPassword: '',
+          }}
+          validationSchema={validationSchema}
+          onSubmit={values => handleChangePassword(values)}>
+          {({
+            handleChange,
+            handleBlur,
+            handleSubmit,
+            values,
+            errors,
+            touched,
+          }) => (
+            <>
+              <View style={styles.container}>
+                <View style={{marginTop: RFPercentage(4)}}>
+                  <Text style={styles.label}>Old Password</Text>
+                  <PasswordField
+                    placeholder="Enter old password"
+                    onChangeText={handleChange('oldPassword')}
+                    handleBlur={handleBlur('oldPassword')}
+                    value={values.oldPassword}
+                    customStyle={{
+                      width : '100%',
+                      borderColor:
+                        touched.oldPassword && errors.oldPassword
+                          ? Colors.error
+                          : Colors.inputFieldColor,
+                    }}
+                  />
+                  {touched.oldPassword && errors.oldPassword && (
+                    <>
+                      <View style={{width: '90%', height: 16, bottom: 8}}>
+                        <Text
+                          style={{
+                            fontSize: RFPercentage(1.3),
+                            fontFamily: Fonts.fontRegular,
+                            color: Colors.error,
+                            textAlign: 'left',
+                          }}>
+                          {errors.oldPassword}
+                        </Text>
+                      </View>
+                    </>
+                  )}
+                </View>
+                <View style={{marginTop: RFPercentage(2)}}>
+                  <Text style={styles.label}>New Password</Text>
+                  <PasswordField
+                    placeholder="Enter new password"
+                    onChangeText={handleChange('password')}
+                    handleBlur={handleBlur('password')}
+                    value={values.password}
+                    customStyle={{
+                      width : '100%',
+                      borderColor:
+                        touched.password && errors.password
+                          ? Colors.error
+                          : Colors.inputFieldColor,
+                    }}
+                  />
+                  {touched.password && errors.password && (
+                    <>
+                      <View style={{width: '90%', height: 16, bottom: 8}}>
+                        <Text
+                          style={{
+                            fontSize: RFPercentage(1.3),
+                            fontFamily: Fonts.fontRegular,
+                            color: Colors.error,
+                            textAlign: 'left',
+                          }}>
+                          {errors.password}
+                        </Text>
+                      </View>
+                    </>
+                  )}
+                </View>
+                <View style={{marginTop: RFPercentage(2)}}>
+                  <Text style={styles.label}>Repeat New Password</Text>
+                  <PasswordField
+                    placeholder="Re-enter new password"
+                    onChangeText={handleChange('confirmPassword')}
+                    handleBlur={handleBlur('confirmPassword')}
+                    value={values.confirmPassword}
+                    customStyle={{
+                      width : '100%',
+                      borderColor:
+                        touched.confirmPassword && errors.confirmPassword
+                          ? Colors.error
+                          : Colors.inputFieldColor,
+                    }}
+                  />
+                  {touched.confirmPassword && errors.confirmPassword && (
+                    <>
+                      <View style={{width: '90%', height: 16, bottom: 8}}>
+                        <Text
+                          style={{
+                            fontSize: RFPercentage(1.3),
+                            fontFamily: Fonts.fontRegular,
+                            color: Colors.error,
+                            textAlign: 'left',
+                          }}>
+                          {errors.confirmPassword}
+                        </Text>
+                      </View>
+                    </>
+                  )}
+                </View>
+
+                <View style={{marginTop: RFPercentage(6), alignSelf: 'center'}}>
+                  <GradientButton
+                    title="Change"
+                    onPress={handleSubmit}
+                    loading={loading}
+                  />
+                </View>
+              </View>
+            </>
+          )}
+        </Formik>
       </ScrollView>
       {modalVisible && (
         <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
@@ -128,15 +235,12 @@ const ChangePasswordV2 = () => {
             <CustomModal
               passwordModal={true}
               title={
-                'Your password hase been successfuly changed successfully!'
+                'Your password hase been successfuly changed!'
               }
-              onPress3={
-              () => 
-              {
-                navigation.navigate('SignIn')
-                setModalVisible(false)
-              }
-            }
+              onPress3={() => {
+                navigation.navigate('SignIn');
+                setModalVisible(false);
+              }}
             />
           </View>
         </TouchableWithoutFeedback>
