@@ -125,7 +125,6 @@ const SignUp: React.FC = () => {
         userFlow?.userFlow === 'Customer' ? 'Home' : 'Premium',
       );
     } catch (error: any) {
-      console.log('Sign Up Error:', error);
       Toast.show({
         type: 'error',
         text1: 'Sign Up Failed',
@@ -136,6 +135,28 @@ const SignUp: React.FC = () => {
       setLoading(false);
     }
   };
+
+
+  const formatPhoneNumber = (phoneNumber:any) => {
+    if (!phoneNumber) return '';
+  
+    let cleaned = phoneNumber.replace(/\D/g, '');
+  
+    if (cleaned.startsWith('1')) {
+      cleaned = `+${cleaned}`;
+    } else if (cleaned.startsWith('0')) {
+      cleaned = `+1${cleaned.slice(1)}`;
+    } else if (!cleaned.startsWith('+1')) {
+      cleaned = `+1${cleaned}`;
+    }
+  
+    const match = cleaned.match(/^\+1(\d{3})(\d{3})(\d{4})$/);
+    if (!match) return cleaned;
+  
+    return `+1 (${match[1]}) ${match[2]}-${match[3]}`;
+  };
+  
+  
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -148,10 +169,8 @@ const SignUp: React.FC = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={
           Platform.OS === 'android' ? StatusBar.currentHeight : 0
-        }
-        >
-        <ScrollView
-          keyboardShouldPersistTaps="handled">
+        }>
+        <ScrollView keyboardShouldPersistTaps="handled">
           <View style={styles.container}>
             <HeaderComponent />
             <View style={styles.titleContainer}>
@@ -223,16 +242,8 @@ const SignUp: React.FC = () => {
                     />
                     {touched.name && errors.name && (
                       <>
-                        <View style={{width: '90%', height: 16, bottom: 8}}>
-                          <Text
-                            style={{
-                              fontSize: RFPercentage(1.3),
-                              fontFamily: Fonts.fontRegular,
-                              color: Colors.error,
-                              textAlign: 'left',
-                            }}>
-                            {errors.name}
-                          </Text>
+                        <View style={styles.errorContainer}>
+                          <Text style={styles.errorText}>{errors.name}</Text>
                         </View>
                       </>
                     )}
@@ -250,16 +261,8 @@ const SignUp: React.FC = () => {
                     />
                     {touched.email && errors.email && (
                       <>
-                        <View style={{width: '90%', height: 16, bottom: 8}}>
-                          <Text
-                            style={{
-                              fontSize: RFPercentage(1.3),
-                              fontFamily: Fonts.fontRegular,
-                              color: Colors.error,
-                              textAlign: 'left',
-                            }}>
-                            {errors.email}
-                          </Text>
+                        <View style={styles.errorContainer}>
+                          <Text style={styles.errorText}>{errors.email}</Text>
                         </View>
                       </>
                     )}
@@ -277,14 +280,8 @@ const SignUp: React.FC = () => {
                     />
                     {touched.password && errors.password && (
                       <>
-                        <View style={{width: '90%', height: 16, bottom: 8}}>
-                          <Text
-                            style={{
-                              fontSize: RFPercentage(1.3),
-                              fontFamily: Fonts.fontRegular,
-                              color: Colors.error,
-                              textAlign: 'left',
-                            }}>
+                        <View style={styles.errorContainer}>
+                          <Text style={styles.errorText}>
                             {errors.password}
                           </Text>
                         </View>
@@ -304,14 +301,8 @@ const SignUp: React.FC = () => {
                     />
                     {touched.confirmPassword && errors.confirmPassword && (
                       <>
-                        <View style={{width: '90%', height: 16, bottom: 8}}>
-                          <Text
-                            style={{
-                              fontSize: RFPercentage(1.3),
-                              fontFamily: Fonts.fontRegular,
-                              color: Colors.error,
-                              textAlign: 'left',
-                            }}>
+                        <View style={styles.errorContainer}>
+                          <Text style={styles.errorText}>
                             {errors.confirmPassword}
                           </Text>
                         </View>
@@ -319,7 +310,10 @@ const SignUp: React.FC = () => {
                     )}
                     <InputField
                       placeholder="Phone Number"
-                      onChangeText={handleChange('phone')}
+                      onChangeText={(text) => {
+                        const formatted = formatPhoneNumber(text);
+                        handleChange('phone')(formatted);
+                      }}
                       handleBlur={handleBlur('phone')}
                       value={values.phone}
                       customStyle={{
@@ -331,16 +325,8 @@ const SignUp: React.FC = () => {
                     />
                     {touched.phone && errors.phone && (
                       <>
-                        <View style={{width: '90%', height: 16, bottom: 8}}>
-                          <Text
-                            style={{
-                              fontSize: RFPercentage(1.3),
-                              fontFamily: Fonts.fontRegular,
-                              color: Colors.error,
-                              textAlign: 'left',
-                            }}>
-                            {errors.phone}
-                          </Text>
+                        <View style={styles.errorContainer}>
+                          <Text style={styles.errorText}>{errors.phone}</Text>
                         </View>
                       </>
                     )}
@@ -406,10 +392,17 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: Colors.background,
-
   },
   container: {
     backgroundColor: Colors.background,
+  },
+  errorContainer: {width: '90%', height: 16, bottom: 8},
+
+  errorText: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: Fonts.fontRegular,
+    color: Colors.error,
+    textAlign: 'left',
   },
   titleContainer: {
     alignSelf: 'center',

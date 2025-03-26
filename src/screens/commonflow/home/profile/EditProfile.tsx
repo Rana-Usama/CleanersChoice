@@ -11,6 +11,8 @@ import InputField from '../../../../components/InputField';
 import ImagePicker from 'react-native-image-crop-picker';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import Toast from 'react-native-toast-message';
+import storage from '@react-native-firebase/storage';
 
 const EditProfile = () => {
   const navigation =
@@ -23,8 +25,6 @@ const EditProfile = () => {
   const [img, setImg] = useState(null);
   const [loading, setLoading] = useState(false)
   const [userData, setUserData] = useState(null)
-
-  console.log(userData)
 
   const uploadImg = () => {
     ImagePicker.openPicker({
@@ -62,6 +62,72 @@ const EditProfile = () => {
     fetchUserData();
   }, []);
 
+
+  const handleEditProfile = async () => {
+    const user = auth().currentUser;
+    if (!user) return;
+    setLoading(true);
+    
+    try {
+      let imageUrl = userData?.profile;
+      if (img && img.path !== userData?.profile) {
+        const imageRef = storage().ref(`user_profiles/${user.uid}.jpg`);
+        await imageRef.putFile(img.path);
+        imageUrl = await imageRef.getDownloadURL();
+      }
+  
+      if (
+        name !== userData?.name ||
+        email !== userData?.email ||
+        phone !== userData?.phone ||
+        imageUrl !== userData?.profile
+      ) {
+        await firestore().collection('Users').doc(user.uid).update({
+          name: name || userData?.name,
+          email: email || userData?.email,
+          phone: phone || userData?.phone,
+          profile: imageUrl,
+        });
+  
+        setUserData(prev => ({
+          ...prev,
+          name: name || prev?.name,
+          email: email || prev?.email,
+          phone: phone || prev?.phone,
+          profile: imageUrl,
+        }));
+  
+        Toast.show({
+          type: 'success',
+          text1: 'Update Profile',
+          text2: 'Profile has been updated successfully',
+          text1Style: { fontFamily: Fonts.fontBold },
+          text2Style: { fontFamily: Fonts.fontRegular },
+        });
+      } else {
+        Toast.show({
+          type: 'info',
+          text1: 'No Changes',
+          text2: 'No updates were made to your profile',
+          text1Style: { fontFamily: Fonts.fontBold },
+          text2Style: { fontFamily: Fonts.fontRegular },
+        });
+      }
+      setLoading(false);
+      navigation.navigate('Home'); 
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      setLoading(false);
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to update profile. Please try again.',
+        text1Style: { fontFamily: Fonts.fontBold },
+        text2Style: { fontFamily: Fonts.fontRegular },
+      });
+    }
+  };
+  
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -133,7 +199,7 @@ const EditProfile = () => {
 
               {/* Edit Button */}
               <View style={styles.editButtonWrapper}>
-                <GradientButton title={'Edit'}  onPress={()=>{}} />
+                <GradientButton title={'Edit'}  onPress={handleEditProfile} loading={loading} />
               </View>
             </View>
           </ScrollView>
