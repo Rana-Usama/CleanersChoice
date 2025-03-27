@@ -3,17 +3,17 @@
 <plist version="1.0">
 <dict>
 	<key>API_KEY</key>
-	<string>AIzaSyBtU0fm_DOXxgr6EcUbmaW3V0EgjYjm5kU</string>
+	<string>AIzaSyBHHlwkDsHvDWtRpZp9tuq2Vo3Fus7Vn2Q</string>
 	<key>GCM_SENDER_ID</key>
-	<string>746480712374</string>
+	<string>476530530610</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.cleanerschoice</string>
+	<string>org.reactjs.native.example.CleanersChoice</string>
 	<key>PROJECT_ID</key>
-	<string>cleaners-choice</string>
+	<string>cleaner-choice</string>
 	<key>STORAGE_BUCKET</key>
-	<string>cleaners-choice.firebasestorage.app</string>
+	<string>cleaner-choice.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:746480712374:ios:44f0da3f9c7e5c25b8c417</string>
+	<string>1:476530530610:ios:d9bb71e28d551391fbdf2b</string>
 </dict>
 </plist>

@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "746480712374",
-    "project_id": "cleaners-choice",
-    "storage_bucket": "cleaners-choice.firebasestorage.app"
+    "project_number": "476530530610",
+    "project_id": "cleaner-choice",
+    "storage_bucket": "cleaner-choice.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:746480712374:android:911a468df1c50d75b8c417",
+        "mobilesdk_app_id": "1:476530530610:android:9747bb2660f335ecfbdf2b",
         "android_client_info": {
           "package_name": "com.cleanerschoice"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAh-O9dbp2A14IFzcjIBsCp5q6EzG8Rc0s"
+          "current_key": "AIzaSyBrTKGTLEmautWU0m2xpmj0zSQCHo8LqGQ"
         }
       ],
       "services": {

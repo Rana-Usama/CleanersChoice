@@ -74,6 +74,8 @@ const SignUp: React.FC = () => {
         text1: 'Terms & Conditions',
         text2: 'Accepting terms and conditions is necessary',
         position: 'top',
+        text1Style: {fontFamily: Fonts.fontBold},
+        text2Style: {fontFamily: Fonts.fontRegular},
       });
       return;
     }
@@ -119,6 +121,8 @@ const SignUp: React.FC = () => {
         text1: 'Sign Up',
         text2: 'User registered successfully',
         position: 'top',
+        text1Style: {fontFamily: Fonts.fontBold},
+        text2Style: {fontFamily: Fonts.fontRegular},
       });
 
       navigation.navigate(
@@ -130,18 +134,19 @@ const SignUp: React.FC = () => {
         text1: 'Sign Up Failed',
         text2: error.message,
         position: 'top',
+        text1Style: {fontFamily: Fonts.fontBold},
+        text2Style: {fontFamily: Fonts.fontRegular},
       });
     } finally {
       setLoading(false);
     }
   };
 
-
-  const formatPhoneNumber = (phoneNumber:any) => {
+  const formatPhoneNumber = (phoneNumber: any) => {
     if (!phoneNumber) return '';
-  
+
     let cleaned = phoneNumber.replace(/\D/g, '');
-  
+
     if (cleaned.startsWith('1')) {
       cleaned = `+${cleaned}`;
     } else if (cleaned.startsWith('0')) {
@@ -149,14 +154,12 @@ const SignUp: React.FC = () => {
     } else if (!cleaned.startsWith('+1')) {
       cleaned = `+1${cleaned}`;
     }
-  
+
     const match = cleaned.match(/^\+1(\d{3})(\d{3})(\d{4})$/);
     if (!match) return cleaned;
-  
+
     return `+1 (${match[1]}) ${match[2]}-${match[3]}`;
   };
-  
-  
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -310,10 +313,12 @@ const SignUp: React.FC = () => {
                     )}
                     <InputField
                       placeholder="Phone Number"
-                      onChangeText={(text) => {
+                      onChangeText={text => {
                         const formatted = formatPhoneNumber(text);
                         handleChange('phone')(formatted);
                       }}
+                      type={'phone-pad'}
+                      length={16}
                       handleBlur={handleBlur('phone')}
                       value={values.phone}
                       customStyle={{

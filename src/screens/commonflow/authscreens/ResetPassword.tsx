@@ -43,6 +43,8 @@ const ResetPassword: React.FC = () => {
           type: 'success',
           text1: 'Success',
           text2: 'Reset password link sent to your email.',
+          text1Style: {fontFamily: Fonts.fontBold},
+          text2Style: {fontFamily: Fonts.fontRegular},
         });
         navigation.navigate('SignIn');
       } catch (error) {
@@ -51,6 +53,8 @@ const ResetPassword: React.FC = () => {
           type: 'error',
           text1: 'Error',
           text2: error?.message,
+          text1Style: {fontFamily: Fonts.fontBold},
+          text2Style: {fontFamily: Fonts.fontRegular},
         });
       } finally {
         setLoading(false);

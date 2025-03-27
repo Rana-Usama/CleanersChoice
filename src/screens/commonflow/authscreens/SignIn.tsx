@@ -25,8 +25,7 @@ import {Formik} from 'formik';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import Toast from 'react-native-toast-message';
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SignIn: React.FC = () => {
   const navigation =
@@ -43,32 +42,34 @@ const SignIn: React.FC = () => {
     try {
       const userCredential = await auth().signInWithEmailAndPassword(
         values.email,
-        values.password
+        values.password,
       );
-  
+
       const user = userCredential?.user;
       if (!user) throw new Error('No user found after sign-in.');
-  
+
       const userDoc = await firestore().collection('Users').doc(user.uid).get();
-  
+
       if (!userDoc.exists) throw new Error('User data not found in Firestore.');
-  
+
       const userData = userDoc.data();
       const userRole = userData?.role;
-  
+
       Toast.show({
         type: 'success',
         text1: 'Sign In',
         text2: 'Login successful!',
         position: 'top',
+        text1Style: {fontFamily: Fonts.fontBold},
+        text2Style: {fontFamily: Fonts.fontRegular},
       });
-  
+
       if (selected) {
-        await AsyncStorage.setItem("email", values.email);
-        await AsyncStorage.setItem("password", values.password);
-        await AsyncStorage.setItem("role", userRole); 
+        await AsyncStorage.setItem('email', values.email);
+        await AsyncStorage.setItem('password', values.password);
+        await AsyncStorage.setItem('role', userRole);
       }
-  
+
       if (userRole === 'Customer') {
         navigation.replace('Home');
       } else {
@@ -80,16 +81,15 @@ const SignIn: React.FC = () => {
       Toast.show({
         type: 'error',
         text1: 'Sign In Failed',
-        text2: errorMessage,
+        text2: 'Invalid credentials',
         position: 'top',
+        text1Style: {fontFamily: Fonts.fontBold},
+        text2Style: {fontFamily: Fonts.fontRegular},
       });
     } finally {
       setLoading(false);
     }
   };
-  
-  
-
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -98,10 +98,9 @@ const SignIn: React.FC = () => {
         translucent
         backgroundColor="transparent"
       />
-
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{flex: 1}}>
+        style={{flex: 1}}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <View style={styles.container}>
           <HeaderComponent />
           <View style={styles.headerContainer}>
@@ -210,7 +209,11 @@ const SignIn: React.FC = () => {
                 </View>
 
                 <View style={styles.buttonContainer}>
-                  <GradientButton title="Sign In" onPress={handleSubmit} loading={loading} />
+                  <GradientButton
+                    title="Sign In"
+                    onPress={handleSubmit}
+                    loading={loading}
+                  />
                   <View style={styles.bottomContainer}>
                     <Text style={styles.bottomText}>
                       Don't have an account?
@@ -224,13 +227,14 @@ const SignIn: React.FC = () => {
               </>
             )}
           </Formik>
-        </View>
+        
         <View style={styles.starContainer}>
           <Image
             source={IMAGES.stars}
             resizeMode="contain"
             style={styles.star}
           />
+        </View>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -245,7 +249,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   container: {
-    backgroundColor: Colors.background,
+    // backgroundColor: 'red',
+    flex:1
+
   },
   radioContainer: {
     alignItems: 'center',
@@ -319,9 +325,11 @@ const styles = StyleSheet.create({
     left: 3,
   },
   starContainer: {
-    position: 'absolute',
-    bottom: RFPercentage(6),
+    // position: 'absolute',
+    // bottom: RFPercentage(6),
     right: RFPercentage(1.5),
+    top:RFPercentage(15),
+    alignSelf:'flex-end'
   },
   star: {
     width: RFPercentage(8),

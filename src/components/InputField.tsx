@@ -14,6 +14,8 @@ interface Props {
   value?: string;
   handleBlur?: (event: any) => void;
   customStyle?: object;
+  type? : any;
+  length? : any
 }
 
 const InputField: React.FC<Props> = (props: Props) => {
@@ -27,6 +29,9 @@ const InputField: React.FC<Props> = (props: Props) => {
           value={props.value}
           onChangeText={props.onChangeText}
           onBlur={props.handleBlur}
+          keyboardType={props.type}
+          maxLength={props.length}
+          
         />
       </View>
     </View>
