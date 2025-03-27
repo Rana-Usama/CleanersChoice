@@ -18,7 +18,7 @@ interface Props {
 }
 
 const PasswordField: React.FC<Props> = (props: Props) => {
-  const [visible, setVisible] = useState<boolean>(true);
+  const [visible, setVisible] = useState<boolean>(false);
 
   const togglePasswordVisibility = () => {
     setVisible(!visible);

@@ -5,7 +5,7 @@ import {
   View,
   TouchableWithoutFeedback,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, Icons} from '../../../../constants/Themes';
 import HeaderBack from '../../../../components/HeaderBack';
@@ -14,33 +14,55 @@ import {useNavigation} from '@react-navigation/native';
 import {BlurView} from '@react-native-community/blur';
 import CustomModal from '../../../../components/CustomModal';
 import {useSelector} from 'react-redux';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../../../routers/StackNavigator';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {RootStackParamList} from '../../../../routers/StackNavigator';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 
 const Settings = () => {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList,'Settings'>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList, 'Settings'>>();
   const [modalVisible, setModalVisible] = useState(false);
-  const userFlow = useSelector(state => state.userFlow);
+  const [role, setuserRole] = useState('');
 
   const logOut = async () => {
-    try {   
+    try {
       await AsyncStorage.multiRemove(['email', 'password', 'role']);
       navigation.navigate('SignIn');
-      setModalVisible(false)
-      
+      setModalVisible(false);
+
       Toast.show({
         type: 'success',
         text1: 'Log Out',
         text2: 'Logged out successfully',
         position: 'top',
+        text1Style: {fontFamily: Fonts.fontBold},
+        text2Style: {fontFamily: Fonts.fontRegular},
       });
-  
     } catch (error) {
       console.log('Logout Error:', error);
     }
   };
+
+  const userRole = async () => {
+    const user = auth().currentUser;
+    if (!user) return;
+
+    try {
+      const userDoc = await firestore().collection('Users').doc(user.uid).get();
+      if (userDoc.exists) {
+        const userData = userDoc.data();
+        setuserRole(userData?.role);
+      } else {
+        console.log('User data not found.');
+      }
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+    }
+  };
+  userRole();
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -50,7 +72,7 @@ const Settings = () => {
           <Text style={styles.sectionTitleText}>Help & Security</Text>
         </View>
         <View style={styles.profileFieldsContainer}>
-          {userFlow?.userFlow === 'Cleaner' && (
+          {role === 'Cleaner' && (
             <>
               <ProfileField
                 text="Cancel Subscription"
