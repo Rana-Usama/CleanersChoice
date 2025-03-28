@@ -168,12 +168,8 @@ const SignUp: React.FC = () => {
         translucent
         backgroundColor="transparent"
       />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={
-          Platform.OS === 'android' ? StatusBar.currentHeight : 0
-        }>
-        <ScrollView keyboardShouldPersistTaps="handled">
+      <KeyboardAvoidingView>
+        <ScrollView showsVerticalScrollIndicator={false}>
           <View style={styles.container}>
             <HeaderComponent />
             <View style={styles.titleContainer}>

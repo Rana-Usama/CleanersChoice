@@ -9,7 +9,7 @@ import {
   View,
   Platform,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useState, useRef} from 'react';
 import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import SearchField from '../../../components/SearchField';
@@ -91,7 +91,8 @@ const Home = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, 'Home'>>();
   const [searchQuery, setSearchQuery] = useState('');
-  const [priceRange, setPriceRange] = useState([10, 100]);
+  const [priceRange, setPriceRange] = useState([10, 2000]);
+  const tempValue = useRef(priceRange[0]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -175,9 +176,9 @@ const Home = () => {
               return item.id === 2 ? (
                 <Popable
                   position="top"
-                  style={styles.popableStyle}
+                  style={{width: RFPercentage(24)}}
                   backgroundColor={'rgba(229, 231, 235, 0.3)'}
-                  caretPosition='center'
+                  caretPosition="center"
                   content={
                     <View style={styles.popableContent}>
                       <View style={styles.popableInnerView}>
@@ -185,14 +186,14 @@ const Home = () => {
                           style={styles.sliderStyle}
                           minimumValue={10}
                           maximumValue={2000}
-                          step={1}
+                          step={100}
                           value={priceRange[0]}
-                          onValueChange={value =>
-                            setPriceRange([value, priceRange[1]])
-                          }
-                          onSlidingComplete={value =>
-                            setPriceRange([value, priceRange[1]])
-                          }
+                          onValueChange={value => {
+                            tempValue.current = value;
+                          }}
+                          onSlidingComplete={value => {
+                            setPriceRange([value, priceRange[1]]);
+                          }}
                           minimumTrackTintColor={Colors.gradient1}
                           maximumTrackTintColor="gray"
                           thumbTintColor={Colors.gradient1}
@@ -398,12 +399,11 @@ const styles = StyleSheet.create({
   },
   popableStyle: {
     width: RFPercentage(24),
-    zIndex: 9999,
     borderRadius: 6,
-    backgroundColor: 'rgba(229, 231, 235, 0.2)',
+    backgroundColor: 'transparent',
   },
   popableContent: {
-    backgroundColor: 'rgba(229, 231, 235, 0.2)',
+    backgroundColor: 'transparent',
     alignItems: 'center',
     width: RFPercentage(24),
   },
