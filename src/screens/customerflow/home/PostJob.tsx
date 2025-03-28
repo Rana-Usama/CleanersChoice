@@ -50,26 +50,24 @@ const PostJob = () => {
   const data2 = [
     {
       id: 1,
-      label: '80$',
+      label: '80-30$',
     },
     {
       id: 2,
-      label: '120$',
+      label: '120-150$',
     },
     {
       id: 3,
-      label: '200$',
+      label: '200-400$',
     },
   ];
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{flex: 1}}>
+      <KeyboardAvoidingView>
         <ScrollView
-          contentContainerStyle={styles.scrollContainer}
-          keyboardShouldPersistTaps="handled">
+        showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContainer}>
           <HeaderBack
             title="Post Job"
             textStyle={{fontSize: RFPercentage(1.8)}}

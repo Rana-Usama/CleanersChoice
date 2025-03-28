@@ -59,8 +59,13 @@ const ChangePasswordV2 = () => {
         type: 'error',
         text1: 'User Sign In',
         text2: 'User not found',
-        text1Style: {fontFamily: Fonts.fontBold},
-        text2Style: {fontFamily: Fonts.fontRegular},
+        topOffset: RFPercentage(8),
+        text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
+        text2Style: {
+          fontFamily: Fonts.fontRegular,
+          fontSize: RFPercentage(1.4),
+        },
+        position: 'top',
       });
       setLoading(false);
       return;
@@ -82,8 +87,13 @@ const ChangePasswordV2 = () => {
         type: 'error',
         text1: 'Error',
         text2: `${error?.message}`,
-        text1Style: {fontFamily: Fonts.fontBold},
-        text2Style: {fontFamily: Fonts.fontRegular},
+        topOffset: RFPercentage(8),
+        position: 'top',
+        text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
+        text2Style: {
+          fontFamily: Fonts.fontRegular,
+          fontSize: RFPercentage(1.4),
+        },
       });
     } finally {
       setLoading(false);
@@ -126,7 +136,7 @@ const ChangePasswordV2 = () => {
                     handleBlur={handleBlur('oldPassword')}
                     value={values.oldPassword}
                     customStyle={{
-                      width : '100%',
+                      width: '100%',
                       borderColor:
                         touched.oldPassword && errors.oldPassword
                           ? Colors.error
@@ -157,7 +167,7 @@ const ChangePasswordV2 = () => {
                     handleBlur={handleBlur('password')}
                     value={values.password}
                     customStyle={{
-                      width : '100%',
+                      width: '100%',
                       borderColor:
                         touched.password && errors.password
                           ? Colors.error
@@ -188,7 +198,7 @@ const ChangePasswordV2 = () => {
                     handleBlur={handleBlur('confirmPassword')}
                     value={values.confirmPassword}
                     customStyle={{
-                      width : '100%',
+                      width: '100%',
                       borderColor:
                         touched.confirmPassword && errors.confirmPassword
                           ? Colors.error
@@ -234,9 +244,7 @@ const ChangePasswordV2 = () => {
             />
             <CustomModal
               passwordModal={true}
-              title={
-                'Your password hase been successfuly changed!'
-              }
+              title={'Your password hase been successfuly changed!'}
               onPress3={() => {
                 navigation.navigate('SignIn');
                 setModalVisible(false);

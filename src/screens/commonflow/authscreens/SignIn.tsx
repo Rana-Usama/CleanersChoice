@@ -44,53 +44,58 @@ const SignIn: React.FC = () => {
         values.email,
         values.password,
       );
-
+  
       const user = userCredential?.user;
       if (!user) throw new Error('No user found after sign-in.');
-
+  
       const userDoc = await firestore().collection('Users').doc(user.uid).get();
-
+  
       if (!userDoc.exists) throw new Error('User data not found in Firestore.');
-
+  
       const userData = userDoc.data();
       const userRole = userData?.role;
-
+  
+      console.log('User Role:', userRole);
+      console.log('Selected:', selected);
+  
       Toast.show({
         type: 'success',
         text1: 'Sign In',
-        text2: 'Login successful!',
+        text2: 'Logged in successful!',
         position: 'top',
-        text1Style: {fontFamily: Fonts.fontBold},
-        text2Style: {fontFamily: Fonts.fontRegular},
+        topOffset: RFPercentage(8),
+        text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
+        text2Style: {fontFamily: Fonts.fontRegular, fontSize: RFPercentage(1.4)},
       });
-
+  
       if (selected) {
         await AsyncStorage.setItem('email', values.email);
         await AsyncStorage.setItem('password', values.password);
         await AsyncStorage.setItem('role', userRole);
+        console.log('Stored in AsyncStorage:', values.email, userRole);
       }
-
+  
       if (userRole === 'Customer') {
-        navigation.replace('Home');
+        await navigation.replace('Home');
       } else {
-        navigation.replace('CleanerNavigator');
+        await navigation.replace('CleanerNavigator');
       }
     } catch (error) {
       console.error('Sign In Error:', error);
-      const errorMessage = error?.message || 'An unknown error occurred';
       Toast.show({
         type: 'error',
         text1: 'Sign In Failed',
         text2: 'Invalid credentials',
         position: 'top',
-        text1Style: {fontFamily: Fonts.fontBold},
-        text2Style: {fontFamily: Fonts.fontRegular},
+        topOffset: RFPercentage(8),
+        text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
+        text2Style: {fontFamily: Fonts.fontRegular, fontSize: RFPercentage(1.4)},
       });
     } finally {
       setLoading(false);
     }
   };
-
+  
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar

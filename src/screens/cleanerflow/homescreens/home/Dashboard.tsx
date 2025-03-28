@@ -13,10 +13,13 @@ import HeaderBack from '../../../../components/HeaderBack';
 import ImagePicker from 'react-native-image-crop-picker';
 import GradientButton from '../../../../components/GradientButton';
 import {useNavigation} from '@react-navigation/native';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 
 const Dashboard: React.FC = () => {
   const navigation = useNavigation();
   const [img, setImg] = useState(null);
+  const [profile, setProfile] = useState(null)
 
   const uploadImg = () => {
     ImagePicker.openPicker({
@@ -32,6 +35,26 @@ const Dashboard: React.FC = () => {
       });
   };
 
+ 
+
+  const userData = async () => {
+    const user = auth().currentUser;
+    if (!user) return;
+    try {
+      const userDoc = await firestore().collection('Users').doc(user.uid).get();
+      if (userDoc.exists) {
+        const userData = userDoc.data();
+        setProfile(userData?.profile);
+      } else {
+        console.log('User data not found.');
+      }
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+    }
+  };
+  userData();
+
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <HeaderBack logo={true} title="Dashboard" textStyle={styles.headerText} />
@@ -40,7 +63,7 @@ const Dashboard: React.FC = () => {
           <View>
             <View style={styles.pictureContainer}>
               <Image
-                source={img ? {uri: img?.path} : IMAGES.alpha}
+                source={{uri:profile}}
                 resizeMode="contain"
                 style={styles.imgStyle}
               />

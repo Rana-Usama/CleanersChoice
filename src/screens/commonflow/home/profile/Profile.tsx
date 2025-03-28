@@ -1,13 +1,57 @@
-import { Image, SafeAreaView, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-import React from 'react';
-import { RFPercentage } from 'react-native-responsive-fontsize';
-import { Colors, Fonts, IMAGES, Icons } from '../../../../constants/Themes';
+import {
+  Image,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
+import React, {useState, useEffect, useCallback} from 'react';
+import {RFPercentage} from 'react-native-responsive-fontsize';
+import {Colors, Fonts, IMAGES, Icons} from '../../../../constants/Themes';
 import HeaderBack from '../../../../components/HeaderBack';
 import ProfileField from '../../../../components/ProfileField';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
+import Toast from 'react-native-toast-message';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
+import {useFocusEffect} from '@react-navigation/native';
 
 const Profile = () => {
   const navigation = useNavigation();
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [name, setName] = useState('');
+
+  const userData = useCallback(async () => {
+    setLoading(true);
+    const user = auth().currentUser;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+    try {
+      const userDoc = await firestore().collection('Users').doc(user.uid).get();
+      if (userDoc.exists) {
+        const userData = userDoc.data();
+        setProfile(userData?.profile);
+        setName(userData?.name);
+      } else {
+        console.log('User data not found.');
+      }
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, []); 
+  
+  useFocusEffect(
+    useCallback(() => {
+      userData();
+    }, [userData]) 
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -15,18 +59,30 @@ const Profile = () => {
       <View style={styles.container}>
         <View style={styles.imgContainer}>
           <View style={styles.pictureContainer}>
-
-          <Image source={IMAGES.picture} resizeMode="contain" style={styles.imgStyle} borderRadius={RFPercentage(100)} />
+            {loading ? (
+              <ActivityIndicator
+                size={'large'}
+                color={Colors.inputFieldColor}
+              />
+            ) : (
+              <Image
+                source={profile ? {uri: profile} : IMAGES.defaultPic}
+                resizeMode="contain"
+                style={styles.imgStyle}
+                borderRadius={RFPercentage(100)}
+              />
+            )}
           </View>
-          {/* <TouchableOpacity>
-            <Image source={Icons.edit} resizeMode="contain" style={styles.editIcon} />
-          </TouchableOpacity> */}
         </View>
         <View style={styles.nameContainer}>
-          <Text style={styles.nameText}>Emma Stone</Text>
+          <Text style={styles.nameText}>{name}</Text>
         </View>
         <View style={styles.profileFieldContainer}>
-          <ProfileField text='Edit Profile' icon={Icons.editProfile} onPress={() => navigation.navigate('EditProfile')} />
+          <ProfileField
+            text="Edit Profile"
+            icon={Icons.editProfile}
+            onPress={() => navigation.navigate('EditProfile')}
+          />
         </View>
       </View>
     </SafeAreaView>
@@ -56,12 +112,11 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(1),
   },
   pictureContainer: {
-    width: RFPercentage(13.5),
-    height: RFPercentage(13.5),
+    width: RFPercentage(15.8),
+    height: RFPercentage(15.8),
     borderRadius: RFPercentage(10),
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(243, 244, 246, 1)',
     borderWidth: 1.8,
     borderColor: 'rgba(64, 123, 255, 1)',
     shadowColor: 'rgba(0, 0, 0, 0.15)',
@@ -69,10 +124,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 20,
     elevation: 40,
+    backgroundColor:Colors.inputField
   },
   imgStyle: {
-    width: RFPercentage(13.5),
-    height: RFPercentage(13.5),
+    width: RFPercentage(15),
+    height: RFPercentage(15),
     borderRadius: RFPercentage(100),
   },
   editIcon: {

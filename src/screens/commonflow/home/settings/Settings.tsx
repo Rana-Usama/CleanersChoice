@@ -25,6 +25,7 @@ const Settings = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, 'Settings'>>();
   const [modalVisible, setModalVisible] = useState(false);
+  const [modalVisible2, setModalVisible2] = useState(false);
   const [role, setuserRole] = useState('');
 
   const logOut = async () => {
@@ -38,8 +39,12 @@ const Settings = () => {
         text1: 'Log Out',
         text2: 'Logged out successfully',
         position: 'top',
-        text1Style: {fontFamily: Fonts.fontBold},
-        text2Style: {fontFamily: Fonts.fontRegular},
+        topOffset: RFPercentage(8),
+        text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
+        text2Style: {
+          fontFamily: Fonts.fontRegular,
+          fontSize: RFPercentage(1.4),
+        },
       });
     } catch (error) {
       console.log('Logout Error:', error);
@@ -63,6 +68,41 @@ const Settings = () => {
     }
   };
   userRole();
+
+  const deleteAccount = async () => {
+    try {
+      const user = auth().currentUser;
+      if (!user) return;
+
+      await firestore().collection('Users').doc(user.uid).delete();
+
+      await user.delete();
+
+      await AsyncStorage.multiRemove(['email', 'password', 'role']);
+
+      Toast.show({
+        type: 'success',
+        text1: 'Account Deleted',
+        text2: 'Your account has been permanently deleted.',
+        position: 'top',
+        topOffset: RFPercentage(8),
+        text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
+        text2Style: {
+          fontFamily: Fonts.fontRegular,
+          fontSize: RFPercentage(1.4),
+        },
+      });
+      navigation.navigate('SignUp');
+      setModalVisible2(false);
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to delete account. Please try again.',
+      });
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -102,6 +142,11 @@ const Settings = () => {
             onPress={() => navigation.navigate('FAQS')}
           />
           <ProfileField
+            text={`Account Deactivation`}
+            icon={Icons.remove}
+            onPress={() => setModalVisible2(true)}
+          />
+          <ProfileField
             text={`Logout`}
             icon={Icons.logOut}
             color={'rgba(239, 68, 68, 1)'}
@@ -117,6 +162,19 @@ const Settings = () => {
               title={'Are you sure you want to Logout?'}
               onPress={() => setModalVisible(false)}
               onPress2={logOut}
+            />
+          </View>
+        </TouchableWithoutFeedback>
+      )}
+
+      {modalVisible2 && (
+        <TouchableWithoutFeedback onPress={() => setModalVisible2(false)}>
+          <View style={styles.modalContainer}>
+            <BlurView style={styles.blurView} blurType="light" blurAmount={5} />
+            <CustomModal
+              title={'Are you sure you want to delete your account?'}
+              onPress={() => setModalVisible2(false)}
+              onPress2={deleteAccount}
             />
           </View>
         </TouchableWithoutFeedback>

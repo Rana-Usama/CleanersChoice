@@ -1,4 +1,18 @@
-import {Dimensions, SafeAreaView, StyleSheet, Text, View, TouchableOpacity, Image, KeyboardAvoidingView, ScrollView, TouchableWithoutFeedback, Keyboard, Platform} from 'react-native';
+import {
+  Dimensions,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Image,
+  KeyboardAvoidingView,
+  ScrollView,
+  TouchableWithoutFeedback,
+  Keyboard,
+  Platform,
+  ActivityIndicator,
+} from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {Colors, Icons, Fonts, IMAGES} from '../../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -23,8 +37,9 @@ const EditProfile = () => {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [img, setImg] = useState(null);
-  const [loading, setLoading] = useState(false)
-  const [userData, setUserData] = useState(null)
+  const [loading, setLoading] = useState(false);
+  const [userData, setUserData] = useState(null);
+  const [loading2, setLoading2] = useState(false);
 
   const uploadImg = () => {
     ImagePicker.openPicker({
@@ -40,55 +55,58 @@ const EditProfile = () => {
       });
   };
 
-
-
   useEffect(() => {
+    setLoading2(true);
     const fetchUserData = async () => {
       const user = auth().currentUser;
       if (user) {
         try {
-          const userDoc = await firestore().collection('Users').doc(user.uid).get();
+          const userDoc = await firestore()
+            .collection('Users')
+            .doc(user.uid)
+            .get();
           if (userDoc.exists) {
             const userData = userDoc.data();
-            setUserData(userData)
+            setUserData(userData);
           }
         } catch (error) {
           console.error('Error fetching user data:', error);
         }
       }
-      setLoading(false);
+      setLoading2(false);
     };
-
     fetchUserData();
   }, []);
-
 
   const handleEditProfile = async () => {
     const user = auth().currentUser;
     if (!user) return;
     setLoading(true);
-    
+
     try {
       let imageUrl = userData?.profile;
       if (img && img.path !== userData?.profile) {
-        const imageRef = storage().ref(`user_profiles/${user.uid}.jpg`);
+        const imageRef = storage().ref(`user_profiles/profile_${user.uid}.jpg`);
         await imageRef.putFile(img.path);
         imageUrl = await imageRef.getDownloadURL();
       }
-  
+
       if (
         name !== userData?.name ||
         email !== userData?.email ||
         phone !== userData?.phone ||
         imageUrl !== userData?.profile
       ) {
-        await firestore().collection('Users').doc(user.uid).update({
-          name: name || userData?.name,
-          email: email || userData?.email,
-          phone: phone || userData?.phone,
-          profile: imageUrl,
-        });
-  
+        await firestore()
+          .collection('Users')
+          .doc(user.uid)
+          .update({
+            name: name || userData?.name,
+            email: email || userData?.email,
+            phone: phone || userData?.phone,
+            profile: imageUrl,
+          });
+
         setUserData(prev => ({
           ...prev,
           name: name || prev?.name,
@@ -96,25 +114,35 @@ const EditProfile = () => {
           phone: phone || prev?.phone,
           profile: imageUrl,
         }));
-  
+
         Toast.show({
           type: 'success',
           text1: 'Update Profile',
           text2: 'Profile has been updated successfully',
-          text1Style: { fontFamily: Fonts.fontBold },
-          text2Style: { fontFamily: Fonts.fontRegular },
+          topOffset: RFPercentage(8),
+          text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
+          text2Style: {
+            fontFamily: Fonts.fontRegular,
+            fontSize: RFPercentage(1.4),
+          },
+          position: 'top',
         });
       } else {
         Toast.show({
           type: 'info',
           text1: 'No Changes',
           text2: 'No updates were made to your profile',
-          text1Style: { fontFamily: Fonts.fontBold },
-          text2Style: { fontFamily: Fonts.fontRegular },
+          topOffset: RFPercentage(8),
+          text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
+          text2Style: {
+            fontFamily: Fonts.fontRegular,
+            fontSize: RFPercentage(1.4),
+          },
+          position: 'top',
         });
       }
       setLoading(false);
-      navigation.navigate('Home'); 
+      navigation.goBack();
     } catch (error) {
       console.error('Error updating profile:', error);
       setLoading(false);
@@ -122,12 +150,16 @@ const EditProfile = () => {
         type: 'error',
         text1: 'Error',
         text2: 'Failed to update profile. Please try again.',
-        text1Style: { fontFamily: Fonts.fontBold },
-        text2Style: { fontFamily: Fonts.fontRegular },
+        topOffset: RFPercentage(8),
+        text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
+        text2Style: {
+          fontFamily: Fonts.fontRegular,
+          fontSize: RFPercentage(1.4),
+        },
+        position: 'top',
       });
     }
   };
-  
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -138,19 +170,29 @@ const EditProfile = () => {
           <ScrollView
             contentContainerStyle={styles.scrollContainer}
             keyboardShouldPersistTaps="handled">
-            <HeaderBack
-              title="Edit Profile"
-              textStyle={styles.headerText}
-            />
+            <HeaderBack title="Edit Profile" textStyle={styles.headerText} />
             <View style={styles.container}>
               {/* Profile Image */}
               <View style={styles.imgContainer}>
                 <View style={styles.pictureContainer}>
-                  <Image
-                    source={ img ? {uri : img?.path} : IMAGES.picture}
-                    resizeMode="contain"
-                    style={styles.imgStyle}
-                  />
+                  {loading2 ? (
+                    <ActivityIndicator
+                      size={'large'}
+                      color={Colors.inputFieldColor}
+                    />
+                  ) : (
+                    <Image
+                      source={
+                        img
+                          ? {uri: img.path}
+                          : userData?.profile
+                          ? {uri: userData.profile}
+                          : IMAGES.defaultPic
+                      }
+                      resizeMode="contain"
+                      style={styles.imgStyle}
+                    />
+                  )}
                   <TouchableOpacity onPress={uploadImg}>
                     <Image
                       source={Icons.edit}
@@ -199,7 +241,11 @@ const EditProfile = () => {
 
               {/* Edit Button */}
               <View style={styles.editButtonWrapper}>
-                <GradientButton title={'Edit'}  onPress={handleEditProfile} loading={loading} />
+                <GradientButton
+                  title={'Edit'}
+                  onPress={handleEditProfile}
+                  loading={loading}
+                />
               </View>
             </View>
           </ScrollView>
@@ -242,23 +288,23 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(1),
   },
   pictureContainer: {
-    width: RFPercentage(13.5),
-    height: RFPercentage(13.5),
+    width: RFPercentage(13.6),
+    height: RFPercentage(13.6),
     borderRadius: RFPercentage(10),
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(243, 244, 246, 1)',
-    borderWidth: 1.8,
+    borderWidth: 2,
     borderColor: 'rgba(64, 123, 255, 1)',
     shadowColor: 'rgba(0, 0, 0, 0.15)',
     shadowOffset: {width: 0, height: 0},
     shadowOpacity: 0.5,
     shadowRadius: 20,
     elevation: 40,
+    backgroundColor:Colors.inputField
   },
   imgStyle: {
-    width: RFPercentage(12.5),
-    height: RFPercentage(12.5),
+    width: RFPercentage(13),
+    height: RFPercentage(13),
     borderRadius: RFPercentage(100),
   },
   uploadedImg: {
@@ -293,7 +339,7 @@ const styles = StyleSheet.create({
   },
   inputField: {
     width: '100%',
-    marginVertical : 7
+    marginVertical: 7,
   },
   editButtonWrapper: {
     marginTop: RFPercentage(4.5),

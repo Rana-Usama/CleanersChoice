@@ -8,6 +8,7 @@ import {
   Image,
   Keyboard,
   BackHandler,
+  SafeAreaView,
 } from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {Icons, Colors, Fonts} from '../constants/Themes';
@@ -19,8 +20,6 @@ import Home from '../screens/customerflow/home/Home';
 import Jobs from '../screens/customerflow/jobBoard/Jobs';
 import Profile from '../screens/commonflow/home/profile/Profile';
 import {RFPercentage} from 'react-native-responsive-fontsize';
-
-const {width, height} = Dimensions.get('window');
 
 const Tab = createBottomTabNavigator();
 
@@ -72,7 +71,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
   if (isKeyboardVisible) return null;
 
   return (
-    <View style={styles.tabBarContainer}>
+    <SafeAreaView style={styles.tabBarContainer}>
       <View style={styles.labelContainer}>
         {state.routes.map((route, index) => {
           const {options} = descriptors[route.key];
@@ -88,7 +87,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
               onPress={() => navigation.navigate(route.name)}
               style={[styles.tabButton, isFocused && styles.activeTab]}>
               {route.name === 'Home' ? (
-                <View style={{bottom: RFPercentage(2.5)}}>
+                <View style={{bottom: RFPercentage(2.2)}}>
                   <Image
                     source={isFocused ? Icons.home : Icons.homeInactive}
                     style={styles.middle}
@@ -133,7 +132,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
           );
         })}
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 

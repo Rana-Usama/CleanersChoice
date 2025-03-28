@@ -74,8 +74,12 @@ const SignUp: React.FC = () => {
         text1: 'Terms & Conditions',
         text2: 'Accepting terms and conditions is necessary',
         position: 'top',
-        text1Style: {fontFamily: Fonts.fontBold},
-        text2Style: {fontFamily: Fonts.fontRegular},
+        topOffset: RFPercentage(8),
+        text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
+        text2Style: {
+          fontFamily: Fonts.fontRegular,
+          fontSize: RFPercentage(1.4),
+        },
       });
       return;
     }
@@ -95,7 +99,6 @@ const SignUp: React.FC = () => {
         const uploadUri = img.path.replace('file://', '');
         const fileName = `profile_${user.uid}.jpg`;
         const storageRef = storage().ref(`user_profiles/${fileName}`);
-
         console.log('Storage Path:', `user_profiles/${fileName}`);
 
         const uploadTask = storageRef.putFile(uploadUri);
@@ -121,8 +124,12 @@ const SignUp: React.FC = () => {
         text1: 'Sign Up',
         text2: 'User registered successfully',
         position: 'top',
-        text1Style: {fontFamily: Fonts.fontBold},
-        text2Style: {fontFamily: Fonts.fontRegular},
+        topOffset: RFPercentage(8),
+        text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
+        text2Style: {
+          fontFamily: Fonts.fontRegular,
+          fontSize: RFPercentage(1.4),
+        },
       });
 
       navigation.navigate(
@@ -134,8 +141,12 @@ const SignUp: React.FC = () => {
         text1: 'Sign Up Failed',
         text2: error.message,
         position: 'top',
-        text1Style: {fontFamily: Fonts.fontBold},
-        text2Style: {fontFamily: Fonts.fontRegular},
+        topOffset: RFPercentage(8),
+        text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
+        text2Style: {
+          fontFamily: Fonts.fontRegular,
+          fontSize: RFPercentage(1.4),
+        },
       });
     } finally {
       setLoading(false);
@@ -308,7 +319,7 @@ const SignUp: React.FC = () => {
                       </>
                     )}
                     <InputField
-                      placeholder="Phone Number"
+                      placeholder="e.g. +1 (321) 659-6898"
                       onChangeText={text => {
                         const formatted = formatPhoneNumber(text);
                         handleChange('phone')(formatted);
@@ -455,7 +466,7 @@ const styles = StyleSheet.create({
     height: RFPercentage(3),
     position: 'absolute',
     left: RFPercentage(8.5),
-    bottom: RFPercentage(0.5),
+    bottom: RFPercentage(0.4),
   },
   fieldContainer: {
     alignSelf: 'center',
@@ -491,7 +502,7 @@ const styles = StyleSheet.create({
   buttonInnerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: RFPercentage(4),
+    marginTop: RFPercentage(2),
   },
   bottomText: {
     color: Colors.secondaryText,

@@ -8,6 +8,7 @@ import {
   Image,
   Keyboard,
   BackHandler,
+  SafeAreaView,
 } from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {Icons, Colors, Fonts} from '../constants/Themes';
@@ -70,7 +71,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
   if (isKeyboardVisible) return null;
 
   return (
-    <View style={styles.tabBarContainer}>
+    <SafeAreaView style={styles.tabBarContainer}>
       <View style={styles.labelContainer}>
         {state.routes.map((route, index) => {
           const {options} = descriptors[route.key];
@@ -131,7 +132,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
           );
         })}
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
