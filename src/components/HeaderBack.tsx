@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'center',
-    marginTop: Platform.OS === 'android' ? RFPercentage(6) : RFPercentage(0),
+    marginTop: Platform.OS === 'android' ? RFPercentage(6.5) : RFPercentage(0.5),
   },
   leftContainer: {
     position: 'absolute',

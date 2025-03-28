@@ -71,9 +71,7 @@ const ResetPassword: React.FC = () => {
         translucent
         backgroundColor="transparent"
       />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.flexContainer}>
+      <KeyboardAvoidingView>
         <HeaderBack title={'Reset Password?'} />
 
         <Formik
@@ -164,7 +162,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     width: '90%',
     alignSelf: 'center',
-    marginTop: RFPercentage(3),
+    marginTop: RFPercentage(4),
   },
   headerText: {
     color: Colors.primaryText,
@@ -187,8 +185,9 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     position: 'absolute',
-    bottom: RFPercentage(8),
+    // bottom: RFPercentage(8),
     right: RFPercentage(1.5),
+    top:RFPercentage(70)
   },
   imageStyle: {
     width: RFPercentage(8),

@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     alignItems: 'center',
     width: '90%',
-    marginTop: RFPercentage(12),
+    marginTop: RFPercentage(13),
   },
   image: {
     width: width * 0.8,
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
   },
   starContainer : {
     position: 'absolute',
-    bottom: RFPercentage(14),
+    bottom: RFPercentage(15),
     right: RFPercentage(1.5),
   },
   star : {

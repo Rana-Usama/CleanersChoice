@@ -4,8 +4,8 @@ import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts} from '../constants/Themes';
 
 interface Props {
-  stepTwo : number;
-  stepThree : number
+  stepTwo? : number;
+  stepThree? : number
 }
 
 const TimeLine = (props:Props) => {
@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   container: {
-    width: '95%',
+    width: '90%',
     flexDirection: 'row',
     alignItems: 'center',
   },
@@ -66,9 +66,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.gradient1,
   },
   line: {
-    width: RFPercentage(17.5),
     height: 2,
     backgroundColor: 'rgba(209, 213, 219, 1)',
+    flex:1
   },
   textContainer: {
     width: '90%',

@@ -23,6 +23,6 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: RFPercentage(13),
-    height: RFPercentage(12),
+    height: RFPercentage(13),
   },
 });

@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   titleContainer: {
-    marginTop: RFPercentage(7),
+    marginTop: RFPercentage(9),
     alignSelf: 'center',
     width: '90%',
     justifyContent: 'center',
