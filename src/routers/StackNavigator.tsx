@@ -28,7 +28,6 @@ import ServiceTwo from '../screens/cleanerflow/homescreens/home/ServiceTwo';
 import ServiceThree from '../screens/cleanerflow/homescreens/home/ServiceThree';
 import HomeScreen from '../screens/cleanerflow/homescreens/home/Home';
 import CancelSubscription from '../screens/cleanerflow/premium/CancelSubscription';
-import PriceRangeScreen from '../screens/customerflow/Range';
 import Availability from '../screens/commonflow/home/Availability';
 import Settings from '../screens/commonflow/home/settings/Settings';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -59,7 +58,6 @@ export type RootStackParamList = {
   ServiceThree : undefined;
   HomeScreen : undefined;
   CancelSubscription: undefined;
-  PriceRangeScreen : undefined;
   Availability : undefined;
   Settings: undefined;
 };
@@ -131,7 +129,6 @@ const StackNavigator: React.FC = () => {
           <Stack.Screen name="ServiceDetails" component={ServiceDetails} />
           <Stack.Screen name="PostJob" component={PostJob} />
           <Stack.Screen name="JobPosted" component={JobPosted} />
-          <Stack.Screen name="PriceRangeScreen" component={PriceRangeScreen} />
 
 
           {/* ----------------- Cleaner Flow ---------------- */}

@@ -175,8 +175,7 @@ const Home = () => {
             renderItem={({item}) => {
               return item.id === 2 ? (
                 <Popable
-                  position="top"
-                  style={{width: RFPercentage(24)}}
+                  style={{width: RFPercentage(24), marginBottom:RFPercentage(0.6)}}
                   backgroundColor={'rgba(229, 231, 235, 0.3)'}
                   caretPosition="center"
                   content={
@@ -199,9 +198,9 @@ const Home = () => {
                           thumbTintColor={Colors.gradient1}
                         />
                         <View style={styles.sliderLabelsContainer}>
-                          <Text style={styles.sliderLabel}>0</Text>
-                          <Text style={styles.sliderLabel}>1000</Text>
-                          <Text style={styles.sliderLabel}>2000+</Text>
+                          <Text style={styles.sliderLabel}>0$</Text>
+                          <Text style={styles.sliderLabel}>1000$</Text>
+                          <Text style={styles.sliderLabel}>2000$+</Text>
                         </View>
                       </View>
                     </View>

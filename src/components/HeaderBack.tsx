@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
   },
   rightText: {
     color: Colors.gradient1,
-    fontFamily: Fonts.fontMedium,
+    fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.5),
   },
 });

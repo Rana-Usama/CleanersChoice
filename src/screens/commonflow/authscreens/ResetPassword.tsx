@@ -43,8 +43,13 @@ const ResetPassword: React.FC = () => {
           type: 'success',
           text1: 'Success',
           text2: 'Reset password link sent to your email.',
-          text1Style: {fontFamily: Fonts.fontBold},
-          text2Style: {fontFamily: Fonts.fontRegular},
+          position: 'top',
+          topOffset: RFPercentage(8),
+          text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
+          text2Style: {
+            fontFamily: Fonts.fontRegular,
+            fontSize: RFPercentage(1.4),
+          },
         });
         navigation.navigate('SignIn');
       } catch (error) {
@@ -53,8 +58,13 @@ const ResetPassword: React.FC = () => {
           type: 'error',
           text1: 'Error',
           text2: error?.message,
-          text1Style: {fontFamily: Fonts.fontBold},
-          text2Style: {fontFamily: Fonts.fontRegular},
+          topOffset: RFPercentage(8),
+          text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
+          text2Style: {
+            fontFamily: Fonts.fontRegular,
+            fontSize: RFPercentage(1.4),
+          },
+          position: 'top',
         });
       } finally {
         setLoading(false);
@@ -187,7 +197,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     // bottom: RFPercentage(8),
     right: RFPercentage(1.5),
-    top:RFPercentage(70)
+    top: RFPercentage(70),
   },
   imageStyle: {
     width: RFPercentage(8),

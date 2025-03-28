@@ -43,7 +43,7 @@ export const Icons: {[key: string]: any} = {
   terms: require('../assets/icons/terms.png'),
   dashBoard: require('../assets/icons/dashboard.png'),
   gallery: require('../assets/icons/gallery.png'),
-  all: require('../assets/icons/list.png'),
+  all: require('../assets/icons/menu.png'),
   residential: require('../assets/icons/house.png'),
   pressure: require('../assets/icons/pressure-washer.png'),
   window: require('../assets/icons/window-cleaning.png'),
@@ -51,6 +51,7 @@ export const Icons: {[key: string]: any} = {
   car: require('../assets/icons/car.png'),
   carpet: require('../assets/icons/carpet-cleaner.png'),
   editIcon: require('../assets/icons/message-edit.png'),
+  remove: require('../assets/icons/remove-user.png'),
 };
 
 export const IMAGES: {[key: string]: any} = {
@@ -71,6 +72,7 @@ export const IMAGES: {[key: string]: any} = {
   star: require('../assets/images/star.png'),
   picture: require('../assets/images/picture.png'),
   timeLine: require('../assets/images/timeline1.png'),
+  defaultPic: require('../assets/images/user.png'),
 };
 
 export const Fonts: {[key: string]: string} = {
