@@ -9,6 +9,8 @@ interface props {
   style? : object;
   placeholder : string;
   count : boolean;
+  onChangeText?: (text: string) => void;
+  value?: string;
 }
 
 const DescriptionField = (props: props) => {
@@ -30,7 +32,8 @@ const DescriptionField = (props: props) => {
         style={styles.textInput}
         numberOfLines={20}
         multiline
-        onChangeText={handleTextChange}
+        onChangeText={props.onChangeText}
+        value={props.value}
       />
       {props.count && (
         <Text style={styles.wordCount}>

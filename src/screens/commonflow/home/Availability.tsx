@@ -6,7 +6,7 @@ import {
   View,
   Image,
 } from 'react-native';
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, IMAGES} from '../../../constants/Themes';
 import HeaderBack from '../../../components/HeaderBack';
@@ -14,8 +14,13 @@ import SetAvailablity from '../../../components/SetAvailablity';
 import {useSelector} from 'react-redux';
 import GradientButton from '../../../components/GradientButton';
 import {useNavigation} from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../../routers/StackNavigator';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {RootStackParamList} from '../../../routers/StackNavigator';
+import {useDispatch} from 'react-redux';
+import {cleanerAvailability} from '../../../redux/Availability/Actions';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
+
 
 const days = [
   {
@@ -49,8 +54,64 @@ const days = [
 ];
 
 const Availability = () => {
-  const userFlow = useSelector(state => state.userFlow.userFlow);
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Availability'>>();
+  const [userRole, setUserRole] = useState('')
+  const navigation =
+    useNavigation<
+      NativeStackNavigationProp<RootStackParamList, 'Availability'>
+    >();
+  const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false)
+
+
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const user = auth().currentUser;
+      if (!user) return;
+      try {
+        const userDoc = await firestore()
+          .collection('Users')
+          .doc(user.uid)
+          .get();
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          setUserRole(userData?.role)
+        } else {
+        }
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+
+
+
+
+  const [availabilityData, setAvailabilityData] = useState(
+    days.map(day => ({
+      day: day.name,
+      fromTime: new Date().setHours(9, 0, 0, 0),
+      toTime: new Date().setHours(18, 0, 0, 0),
+    })),
+  );
+
+  const updateAvailability = (day, fromTime, toTime) => {
+    setAvailabilityData(prev =>
+      prev.map(item => (item.day === day ? {...item, fromTime, toTime} : item)),
+    );
+  };
+
+  const handleSetAvailability = () => {
+    setLoading(true)
+    dispatch(cleanerAvailability(availabilityData));
+    setTimeout(() => {
+      setLoading(false)
+      navigation.navigate('ServiceOne');
+    }, 1500);
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -60,9 +121,9 @@ const Availability = () => {
       />
       <View style={styles.container}>
         <View style={{marginTop: RFPercentage(3)}}>
-          {userFlow === 'Customer' ? (
+          {userRole === 'Customer' ? (
             <>
-              <View style={{ alignItems: 'center', justifyContent:'center'}}>
+              <View style={{alignItems: 'center', justifyContent: 'center'}}>
                 <Image
                   source={IMAGES.alpha}
                   style={{width: RFPercentage(10), height: RFPercentage(10)}}
@@ -75,7 +136,7 @@ const Availability = () => {
                     fontFamily: Fonts.fontMedium,
                     fontSize: RFPercentage(1.8),
                     lineHeight: RFPercentage(2.8),
-                    marginTop:RFPercentage(1)
+                    marginTop: RFPercentage(1),
                   }}>
                   Alpha Cleaners
                 </Text>
@@ -85,8 +146,8 @@ const Availability = () => {
                     fontFamily: Fonts.fontMedium,
                     fontSize: RFPercentage(1.5),
                     lineHeight: RFPercentage(2.8),
-                    marginTop:RFPercentage(2.2),
-                    textAlign:'center'
+                    marginTop: RFPercentage(2.2),
+                    textAlign: 'center',
                   }}>
                   Alpha Cleaners are available during these time of the week
                 </Text>
@@ -112,24 +173,36 @@ const Availability = () => {
             data={days}
             keyExtractor={item => item.id.toString()}
             renderItem={({item}) => {
-              return <SetAvailablity day={item.name} />;
+              return (
+                <SetAvailablity
+                  day={item.name}
+                  fromTime={
+                    availabilityData.find(d => d.day === item.name)?.fromTime
+                  }
+                  toTime={
+                    availabilityData.find(d => d.day === item.name)?.toTime
+                  }
+                  onUpdateAvailability={updateAvailability}
+                />
+              );
             }}
           />
         </View>
-        {userFlow === 'Cleaner' && (
+        {userRole === 'Cleaner' && (
           <>
             <View
               style={{
                 alignItems: 'center',
                 justifyContent: 'center',
                 alignSelf: 'center',
-                marginTop: RFPercentage(4.5),
+                marginTop: RFPercentage(4.8),
               }}>
               <GradientButton
                 title="Set Availability"
                 textStyle={{fontSize: RFPercentage(1.5)}}
-                onPress={() => navigation.navigate('ServiceOne')}
-              />
+                onPress={handleSetAvailability}
+                loading={loading}
+                />
             </View>
           </>
         )}
