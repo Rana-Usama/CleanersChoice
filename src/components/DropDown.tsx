@@ -20,12 +20,13 @@ interface Props {
   setValue?: (item: Item) => void;
   icon?: any;
   placeholder: string;
+  placeholderColor? : object;
 }
 
 const CustomDropDown: React.FC<Props> = (props: Props) => {
   const [open, setOpen] = useState(false);
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
-
+ 
   return (
     <View>
       <TouchableOpacity
@@ -36,7 +37,7 @@ const CustomDropDown: React.FC<Props> = (props: Props) => {
         ]}
         onPress={() => setOpen(!open)}>
         <View style={styles.rowContainer}>
-          <Text style={[styles.placeholderText,{color:selectedLabel ? Colors.inputTextColor : Colors.placeholderColor}]}>
+          <Text style={[styles.placeholderText,{color:selectedLabel ? Colors.inputTextColor : props.placeholderColor}]}>
             {selectedLabel || props.placeholder}
           </Text>
           <TouchableOpacity onPress={() => setOpen(!open)}>
@@ -54,6 +55,7 @@ const CustomDropDown: React.FC<Props> = (props: Props) => {
                 onPress={() => {
                   setOpen(false);
                   setSelectedLabel(item.label);
+                  props.setValue && props.setValue(item?.label);
                 }}>
                 <View style={styles.listItem}>
                   <Text style={styles.listItemText}>{item.label}</Text>

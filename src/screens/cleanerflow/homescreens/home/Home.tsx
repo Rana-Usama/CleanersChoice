@@ -8,7 +8,7 @@ import {
   FlatList,
   ScrollView,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {Colors, Fonts, Icons, IMAGES} from '../../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import HeaderBack from '../../../../components/HeaderBack';
@@ -16,7 +16,10 @@ import Package from '../../../../components/Package';
 import Review from '../../../../components/Review';
 import {useNavigation} from '@react-navigation/native';
 import ImagePicker from 'react-native-image-crop-picker';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
+import storage from '@react-native-firebase/storage';
 
 const services = [
   {
@@ -134,24 +137,8 @@ const Packages = [
 
 const HomeScreen: React.FC = () => {
   const navigation = useNavigation();
-
-  const [img, setImg] = useState(null);
-
-  const uploadImg = () => {
-    ImagePicker.openPicker({
-      width: 1000,
-      height: 1000,
-      cropping: true,
-    })
-      .then(image => {
-        setImg(image);
-      })
-      .catch(error => {
-        console.log('Image Picker Error:', error);
-      });
-  };
-
   const [visibleItems, setVisibleItems] = useState(5);
+  const [serviceData, setserviceData] = useState(null);
 
   const handleShowMore = () => {
     setVisibleItems(prev => Math.min(prev + 5, services.length));
@@ -160,40 +147,35 @@ const HomeScreen: React.FC = () => {
   const handleShowLess = () => {
     setVisibleItems(5);
   };
-  return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={{paddingBottom: RFPercentage(10)}}>
-        <HeaderBack
-          logo={true}
-          title="Dashboard"
-          right={true}
-          rightText="Edit Service"
-          textStyle={{fontSize: RFPercentage(1.8)}}
-          onPress={() => navigation.navigate('ServiceOne')}
-        />
-        <View style={styles.container}>
-          <View style={styles.imgContainer}>
-            <View>
-              <View style={styles.pictureContainer}>
-                <Image
-                  source={IMAGES.alpha}
-                  resizeMode="cover"
-                  style={styles.imgStyle}
-                />
-              </View>
 
-              <TouchableOpacity onPress={uploadImg}>
-                <Image
-                  source={Icons.edit}
-                  resizeMode="contain"
-                  style={styles.uploadedImg}
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-          <View style={styles.nameContainer}>
-            <Text style={styles.nameText}>Alpha Cleaning</Text>
-          </View>
+  useEffect(() => {
+    const serviceDetails = async () => {
+      const user = auth().currentUser;
+      if (!user) return;
+      try {
+        const userDoc = await firestore()
+          .collection('CleanerServices')
+          .doc(user.uid)
+          .get();
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          setserviceData(userData);
+        } else {
+          console.log('User data not found.');
+        }
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+      }
+    };
+    serviceDetails();
+  }, []);
+
+  // const sentences = serviceData?.packages?.details.split('. ').filter(sentence => sentence.trim().length > 0);
+
+  return (
+    <View style={styles.safeArea}>
+      <ScrollView contentContainerStyle={{paddingBottom: RFPercentage(10)}}>
+        <View style={styles.container}>
           <View
             style={{
               marginTop: RFPercentage(0.8),
@@ -201,7 +183,7 @@ const HomeScreen: React.FC = () => {
               justifyContent: 'center',
             }}>
             <View style={styles.starContainer}>
-              {Array.from({length: 5}, (_, index) => (
+              {Array.from({length: serviceData?.rating}, (_, index) => (
                 <Image
                   key={index}
                   source={IMAGES.star}
@@ -214,19 +196,14 @@ const HomeScreen: React.FC = () => {
           <View style={{marginTop: RFPercentage(2.1)}}>
             <View>
               <Text style={styles.headeing2}>Description:</Text>
-              <Text style={styles.description}>
-                We provide best cleaning services in the area ranging from
-                Chimney cleaning to copeporate level cleanings with quality like
-                no one else provide. Reach out to us now to get your space
-                cleaned up.
-              </Text>
+              <Text style={styles.description}>{serviceData?.description}</Text>
             </View>
           </View>
           <View style={{marginTop: RFPercentage(2)}}>
             <View>
               <TouchableOpacity
                 activeOpacity={0.6}
-                onPress={()=> navigation.navigate('Availability')}
+                onPress={() => navigation.navigate('Availability')}
                 style={{flexDirection: 'row', alignItems: 'center'}}>
                 <Text style={styles.availability}>Edit Your Availability</Text>
                 <Image
@@ -291,14 +268,14 @@ const HomeScreen: React.FC = () => {
           <View style={{marginTop: RFPercentage(1.5)}}>
             <FlatList
               horizontal
-              data={Packages}
+              data={serviceData?.packages}
               keyExtractor={item => item.id.toString()}
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={{paddingHorizontal: RFPercentage(1.2)}}
               renderItem={({item}) => {
                 return (
                   <Package
-                    name={item.name}
+                    name={`Package 1`}
                     price={item.price}
                     services={item.services}
                   />
@@ -307,35 +284,40 @@ const HomeScreen: React.FC = () => {
             />
           </View>
         </View>
-        <View style={styles.container}>
-          <View>
-            <Text style={[styles.headeing2, {marginTop: RFPercentage(2.5)}]}>
-              Rating & Reviews:
-            </Text>
-          </View>
-          <View style={styles.ratingContainer}>
-            <Text style={[styles.headeing2, {color: Colors.primaryText}]}>
-              Overall Rating
-            </Text>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}>
-              <Image
-                source={IMAGES.star}
-                resizeMode="contain"
-                style={styles.ratingStar}
-              />
-              <Text style={styles.ratingText}>5.0</Text>
+        {serviceData?.rating || serviceData?.reviews.length > 0 ? (
+          <>
+            <View style={styles.container}>
+              <View>
+                <Text
+                  style={[styles.headeing2, {marginTop: RFPercentage(2.5)}]}>
+                  Rating & Reviews:
+                </Text>
+              </View>
+              <View style={styles.ratingContainer}>
+                <Text style={[styles.headeing2, {color: Colors.primaryText}]}>
+                  Overall Rating
+                </Text>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                  }}>
+                  <Image
+                    source={IMAGES.star}
+                    resizeMode="contain"
+                    style={styles.ratingStar}
+                  />
+                  <Text style={styles.ratingText}>5.0</Text>
+                </View>
+              </View>
+              <View style={{marginTop: RFPercentage(2)}}>
+                <Review />
+              </View>
             </View>
-          </View>
-          <View style={{marginTop: RFPercentage(2)}}>
-            <Review />
-          </View>
-        </View>
+          </>
+        ) : null}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -343,7 +325,6 @@ export default HomeScreen;
 
 const styles = StyleSheet.create({
   safeArea: {
-    flex: 1,
     backgroundColor: Colors.background,
   },
   container: {

@@ -9,28 +9,31 @@ interface Props {
   day: string;
 }
 
-const SetAvailability = (props: Props) => {
+const SetAvailability = ({ day, fromTime, toTime, onUpdateAvailability }) => {
   const userFlow = useSelector(state => state.userFlow.userFlow);
-  const [fromTime, setFromTime] = useState(() => {
-    const date = new Date();
-    date.setHours(9, 0, 0, 0);
-    return date;
-  });
+  // const [fromTime, setFromTime] = useState(() => {
+  //   const date = new Date();
+  //   date.setHours(9, 0, 0, 0);
+  //   return date;
+  // });
 
-  const [toTime, setToTime] = useState(() => {
-    const date = new Date();
-    date.setHours(18, 0, 0, 0);
-    return date;
-  });
+  // const [toTime, setToTime] = useState(() => {
+  //   const date = new Date();
+  //   date.setHours(18, 0, 0, 0);
+  //   return date;
+  // });
 
   const [openFromPicker, setOpenFromPicker] = useState(false);
   const [openToPicker, setOpenToPicker] = useState(false);
+
+
+
 
   return (
     <View style={styles.container}>
       {/* Day View */}
       <View style={styles.dayView}>
-        <Text style={styles.dayText}>{props.day}</Text>
+        <Text style={styles.dayText}>{day}</Text>
       </View>
 
       {/* From Time */}
@@ -44,11 +47,7 @@ const SetAvailability = (props: Props) => {
           style={[
             styles.timeText,
           ]}>
-          {fromTime.toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true,
-          })}
+          {new Date(fromTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
         </Text>
       </TouchableOpacity>
 
@@ -60,11 +59,7 @@ const SetAvailability = (props: Props) => {
         disabled={userFlow === 'Customer' ? true : false}
         style={styles.timeView}>
         <Text style={[styles.timeText]}>
-          {toTime.toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true,
-          })}
+        {new Date(toTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
         </Text>
       </TouchableOpacity>
 
@@ -73,9 +68,9 @@ const SetAvailability = (props: Props) => {
         modal
         mode="time"
         open={openFromPicker}
-        date={fromTime}
-        onConfirm={date => {
-          setFromTime(date);
+        date={new Date(fromTime)}
+        onConfirm={(date) => {
+          onUpdateAvailability(day, date, toTime);
           setOpenFromPicker(false);
         }}
         onCancel={() => setOpenFromPicker(false)}
@@ -85,9 +80,9 @@ const SetAvailability = (props: Props) => {
         modal
         mode="time"
         open={openToPicker}
-        date={toTime}
-        onConfirm={date => {
-          setToTime(date);
+        date={new Date(toTime)}
+        onConfirm={(date) => {
+          onUpdateAvailability(day, fromTime, date);
           setOpenToPicker(false);
         }}
         onCancel={() => setOpenToPicker(false)}

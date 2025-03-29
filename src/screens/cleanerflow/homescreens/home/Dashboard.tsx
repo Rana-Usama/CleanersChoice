@@ -5,8 +5,10 @@ import {
   View,
   TouchableOpacity,
   Image,
+  ActivityIndicator,
+  ScrollView,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, Icons, IMAGES} from '../../../../constants/Themes';
 import HeaderBack from '../../../../components/HeaderBack';
@@ -15,97 +17,210 @@ import GradientButton from '../../../../components/GradientButton';
 import {useNavigation} from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import storage from '@react-native-firebase/storage';
+import HomeScreen from './Home';
 
 const Dashboard: React.FC = () => {
   const navigation = useNavigation();
   const [img, setImg] = useState(null);
-  const [profile, setProfile] = useState(null)
+  const [profile, setProfile] = useState(null);
+  const [name, setName] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [loading2, setLoading2] = useState(false);
+  const [service, setService] = useState(null);
 
-  const uploadImg = () => {
-    ImagePicker.openPicker({
-      width: 1000,
-      height: 1000,
-      cropping: true,
-    })
-      .then(image => {
-        setImg(image);
-      })
-      .catch(error => {
-        console.log('Image Picker Error:', error);
-      });
-  };
-
- 
-
-  const userData = async () => {
-    const user = auth().currentUser;
-    if (!user) return;
+  const uploadImg = async () => {
     try {
-      const userDoc = await firestore().collection('Users').doc(user.uid).get();
-      if (userDoc.exists) {
-        const userData = userDoc.data();
-        setProfile(userData?.profile);
-      } else {
-        console.log('User data not found.');
+      setLoading(true);
+
+      const image = await ImagePicker.openPicker({
+        width: 1000,
+        height: 1000,
+        cropping: true,
+      });
+
+      if (!image) {
+        setLoading(false);
+        return;
       }
+
+      const user = auth().currentUser;
+      if (!user) {
+        console.log('No user logged in');
+        setLoading(false);
+        return;
+      }
+
+      const imagePath = `user_profiles/profile_${user.uid}.jpg`;
+      const reference = storage().ref(imagePath);
+
+      await reference.putFile(image.path);
+
+      const downloadURL = await reference.getDownloadURL();
+
+      await firestore().collection('Users').doc(user.uid).update({
+        profile: downloadURL,
+      });
+
+      setImg({uri: downloadURL});
+      setProfile(downloadURL);
+
+      console.log('Profile picture updated successfully');
     } catch (error) {
-      console.error('Error fetching user details:', error);
+      console.log('Error uploading image:', error);
+    } finally {
+      setLoading(false);
     }
   };
-  userData();
 
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const user = auth().currentUser;
+      if (!user) return;
+      try {
+        const userDoc = await firestore()
+          .collection('Users')
+          .doc(user.uid)
+          .get();
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          setProfile(userData?.profile);
+          setName(userData?.name);
+        } else {
+          console.log('User data not found.');
+        }
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+      }
+    };
+    fetchUserData();
+  }, []);
+
+  useEffect(() => {
+    const serviceDetails = async () => {
+      const user = auth().currentUser;
+      if (!user) return;
+      try {
+        const userDoc = await firestore()
+          .collection('CleanerServices')
+          .doc(user.uid)
+          .get();
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          setService(userData);
+        } else {
+          console.log('User data not found.');
+        }
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+      }
+    };
+    serviceDetails();
+  }, []);
+
+  const handleNext = () => {
+    setLoading2(true);
+    setTimeout(() => {
+      setLoading2(false);
+      navigation.navigate('ServiceOne');
+    }, 1500);
+  };
+
+  const profileCompletion =
+    service?.availability?.length > 0 &&
+    service?.description?.length > 0 &&
+    service?.location?.length > 0 &&
+    service?.packages?.length > 0
+      ? '100'
+      : service?.availability?.length > 0 &&
+        service?.description?.length > 0 &&
+        service?.location?.length > 0
+      ? '80'
+      : '50';
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <HeaderBack logo={true} title="Dashboard" textStyle={styles.headerText} />
-      <View style={styles.container}>
-        <View style={styles.imgContainer}>
-          <View>
-            <View style={styles.pictureContainer}>
-              <Image
-                source={{uri:profile}}
-                resizeMode="contain"
-                style={styles.imgStyle}
-              />
-            </View>
+      <ScrollView contentContainerStyle={{paddingBottom: RFPercentage(5)}}>
+        <HeaderBack
+          logo={true}
+          title="Dashboard"
+          textStyle={styles.headerText}
+          right={profileCompletion === '100' ? true : false}
+          rightText='Edit Service'
+          onPress={()=> navigation.navigate('ServiceOne')}
+        />
+        <View style={styles.container}>
+          <View style={styles.imgContainer}>
+            <View>
+              <View style={styles.pictureContainer}>
+                {loading ? (
+                  <ActivityIndicator
+                    size={'large'}
+                    color={Colors.inputFieldColor}
+                  />
+                ) : (
+                  <Image
+                    source={
+                      img
+                        ? {uri: img.path}
+                        : profile
+                        ? {uri: profile}
+                        : IMAGES.defaultPic
+                    }
+                    resizeMode="contain"
+                    style={styles.imgStyle}
+                  />
+                )}
+              </View>
 
-            <TouchableOpacity onPress={uploadImg}>
-              <Image
-                source={Icons.edit}
-                resizeMode="contain"
-                style={styles.uploadedImg}
-              />
-            </TouchableOpacity>
+              <TouchableOpacity onPress={uploadImg}>
+                <Image
+                  source={Icons.edit}
+                  resizeMode="contain"
+                  style={styles.uploadedImg}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+          <View style={styles.nameContainer}>
+            <Text style={styles.nameText}>{name}</Text>
           </View>
         </View>
-        <View style={styles.nameContainer}>
-          <Text style={styles.nameText}>Alpha Cleaning</Text>
-        </View>
-        <View style={styles.profileCompletionContainer}>
-          <Text style={styles.profileCompletionText}>
-            Profile Completion 50%
-          </Text>
-        </View>
-        <View style={styles.noServiceContainer}>
-          <Image
-            source={Icons.dashBoard}
-            resizeMode="contain"
-            style={styles.dashboardIcon}
-          />
-          <Text style={styles.noServiceText}>
-            You haven’t listed any services
-          </Text>
-        </View>
+        {profileCompletion === '100' ? (
+          <HomeScreen />
+        ) : (
+          <>
+            <View style={styles.container}>
+              <View style={styles.profileCompletionContainer}>
+                <Text style={styles.profileCompletionText}>
+                  Profile Completion{' '}
+                  {profileCompletion}%
+                </Text>
+              </View>
+              <View style={styles.noServiceContainer}>
+                <Image
+                  source={Icons.dashBoard}
+                  resizeMode="contain"
+                  style={styles.dashboardIcon}
+                />
+                <Text style={styles.noServiceText}>
+                  You haven’t listed any services
+                </Text>
+              </View>
 
-        <View style={styles.completeProfileContainer}>
-          <GradientButton
-            title="Complete Profile Now"
-            textStyle={styles.buttonText}
-            style={styles.button}
-            onPress={() => navigation.navigate('ServiceOne')}
-          />
-        </View>
-      </View>
+              <View style={styles.completeProfileContainer}>
+                <GradientButton
+                  title="Complete Profile Now"
+                  textStyle={styles.buttonText}
+                  style={styles.button}
+                  onPress={handleNext}
+                  loading={loading2}
+                />
+              </View>
+            </View>
+          </>
+        )}
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -120,7 +235,7 @@ const styles = StyleSheet.create({
   container: {
     width: '90%',
     alignSelf: 'center',
-    flex:1
+    flex: 1,
   },
   imgContainer: {
     alignSelf: 'center',
@@ -201,8 +316,7 @@ const styles = StyleSheet.create({
   completeProfileContainer: {
     position: 'absolute',
     alignSelf: 'center',
-    bottom:RFPercentage(15)
-
+    bottom: RFPercentage(15),
   },
   button: {
     width: RFPercentage(19),
