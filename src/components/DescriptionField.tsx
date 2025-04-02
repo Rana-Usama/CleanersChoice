@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(0.8),
     marginVertical: RFPercentage(1.5),
     paddingHorizontal: RFPercentage(1),
-    paddingVertical: RFPercentage(0.8),
+    paddingVertical: RFPercentage(1),
   },
   textInput: {
     color: Colors.inputTextColor,

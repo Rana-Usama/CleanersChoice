@@ -23,6 +23,7 @@ import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 import auth from '@react-native-firebase/auth';
 import Toast from 'react-native-toast-message';
+import {useSelector} from 'react-redux';
 
 const MAX_PACKAGES = 4;
 
@@ -30,9 +31,10 @@ const ServiceThree: React.FC = () => {
   const navigation = useNavigation();
   const [packages, setPackages] = useState([{id: 1, details: '', price: ''}]);
   const [loading, setLoading] = useState(false);
-
-  console.log('packages........', packages);
-
+  const profileCompletion = useSelector(
+    state => state.profile.profileCompletion,
+  );
+  
   const addPackage = () => {
     if (packages.length < MAX_PACKAGES) {
       setPackages([
@@ -95,7 +97,7 @@ const ServiceThree: React.FC = () => {
           packages,
         });
       }
-      navigation.navigate('HomeScreen');
+      navigation.navigate('CleanerNavigator');
     } catch (error) {
       console.error('Error updating packages: ', error);
     } finally {
@@ -172,8 +174,8 @@ const ServiceThree: React.FC = () => {
                 )}
 
                 <View>
-                  <DescriptionField
-                    placeholder="Package Details"
+                  <DescriptionField 
+                    placeholder={`Chimney Cleaning \n2x Carpet Cleaning \n200 Ft Garden Cleaning`}
                     count={false}
                     value={pkg.details}
                     onChangeText={text =>
@@ -213,10 +215,9 @@ const ServiceThree: React.FC = () => {
 
             <View style={styles.buttonContainer}>
               <GradientButton
-                title="Next"
+                title={profileCompletion === '100' ? 'Edit' : 'Next'}
                 onPress={savePackagesToFirestore}
                 loading={loading}
-                // disabled={(!packages[0].details.trim() || !packages[0].price.trim()) ? true : false}
               />
             </View>
           </View>

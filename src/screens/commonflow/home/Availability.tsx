@@ -10,7 +10,6 @@ import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, IMAGES} from '../../../constants/Themes';
 import HeaderBack from '../../../components/HeaderBack';
-import SetAvailablity from '../../../components/SetAvailablity';
 import {useSelector} from 'react-redux';
 import GradientButton from '../../../components/GradientButton';
 import {useNavigation} from '@react-navigation/native';
@@ -20,6 +19,7 @@ import {useDispatch} from 'react-redux';
 import {cleanerAvailability} from '../../../redux/Availability/Actions';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import SetAvailability from '../../../components/SetAvailablity';
 
 
 const days = [
@@ -54,55 +54,92 @@ const days = [
 ];
 
 const Availability = () => {
-  const [userRole, setUserRole] = useState('')
   const navigation =
     useNavigation<
       NativeStackNavigationProp<RootStackParamList, 'Availability'>
     >();
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false)
-
-
+  const profileData = useSelector(state => state.profile.profileData.role)
+  const [service, setService] = useState(null);
+  const profileCompletion = useSelector(state => state.profile.profileCompletion)
 
   useEffect(() => {
-    const fetchUserData = async () => {
+    const serviceDetails = async () => {
       const user = auth().currentUser;
       if (!user) return;
       try {
         const userDoc = await firestore()
-          .collection('Users')
+          .collection('CleanerServices')
           .doc(user.uid)
           .get();
         if (userDoc.exists) {
           const userData = userDoc.data();
-          setUserRole(userData?.role)
-        } else {
+          setService(userData);
         }
       } catch (error) {
-        console.error('Error fetching user details:', error);
+        console.log( error);
       }
     };
-
-    fetchUserData();
+    serviceDetails();
   }, []);
 
 
-
-
-
   const [availabilityData, setAvailabilityData] = useState(
-    days.map(day => ({
-      day: day.name,
-      fromTime: new Date().setHours(9, 0, 0, 0),
-      toTime: new Date().setHours(18, 0, 0, 0),
-    })),
+    []
   );
 
-  const updateAvailability = (day, fromTime, toTime) => {
-    setAvailabilityData(prev =>
-      prev.map(item => (item.day === day ? {...item, fromTime, toTime} : item)),
+  useEffect(() => {
+  if (service?.availability) {
+    const updatedAvailability = days.map(day => {
+      const found = service.availability.find(item => item.day === day.name);
+      return {
+        day: day.name,
+        fromTime: found
+          ? new Date(
+              found.fromTime?._seconds
+                ? found.fromTime._seconds * 1000
+                : found.fromTime
+            )
+          : new Date(new Date().setHours(9, 0, 0, 0)),
+        toTime: found
+          ? new Date(
+              found.toTime?._seconds
+                ? found.toTime._seconds * 1000
+                : found.toTime
+            )
+          : new Date(new Date().setHours(18, 0, 0, 0)),
+        checked: found ? found.checked : false,
+      };
+    });
+
+    setAvailabilityData(updatedAvailability);
+    dispatch(cleanerAvailability(updatedAvailability));
+
+  }
+}, [service?.availability]);
+
+
+const toggleCheckBox = (day) => {
+  setAvailabilityData(prev => {
+    const updated = prev.map(item =>
+      item.day === day ? {...item, checked: !item.checked} : item
     );
-  };
+    dispatch(cleanerAvailability(updated)); 
+    return updated;
+  });
+};
+
+const updateAvailability = (day, fromTime, toTime) => {
+  setAvailabilityData(prev => {
+    const updated = prev.map(item =>
+      item.day === day ? {...item, fromTime, toTime} : item
+    );
+    dispatch(cleanerAvailability(updated));
+    return updated;
+  });
+};
+
 
   const handleSetAvailability = () => {
     setLoading(true)
@@ -121,7 +158,7 @@ const Availability = () => {
       />
       <View style={styles.container}>
         <View style={{marginTop: RFPercentage(3)}}>
-          {userRole === 'Customer' ? (
+          {profileData === 'Customer' ? (
             <>
               <View style={{alignItems: 'center', justifyContent: 'center'}}>
                 <Image
@@ -170,25 +207,23 @@ const Availability = () => {
         </View>
         <View style={{marginTop: RFPercentage(1.6)}}>
           <FlatList
-            data={days}
-            keyExtractor={item => item.id.toString()}
+            data={availabilityData}
+            keyExtractor={item => item.day}
             renderItem={({item}) => {
               return (
-                <SetAvailablity
-                  day={item.name}
-                  fromTime={
-                    availabilityData.find(d => d.day === item.name)?.fromTime
-                  }
-                  toTime={
-                    availabilityData.find(d => d.day === item.name)?.toTime
-                  }
-                  onUpdateAvailability={updateAvailability}
-                />
+                <SetAvailability
+                day={item.day}
+                fromTime={item.fromTime}
+                toTime={item.toTime}
+                checked={item.checked} 
+                onUpdateAvailability={updateAvailability}
+                onToggleCheckBox={toggleCheckBox}
+              />
               );
             }}
           />
         </View>
-        {userRole === 'Cleaner' && (
+        {profileData === 'Cleaner' && (
           <>
             <View
               style={{
@@ -198,7 +233,7 @@ const Availability = () => {
                 marginTop: RFPercentage(4.8),
               }}>
               <GradientButton
-                title="Set Availability"
+                title= {profileCompletion === '100' ? 'Edit Availability' : "Set Availability"}
                 textStyle={{fontSize: RFPercentage(1.5)}}
                 onPress={handleSetAvailability}
                 loading={loading}
