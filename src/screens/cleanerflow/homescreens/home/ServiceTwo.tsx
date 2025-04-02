@@ -19,24 +19,25 @@ import ImagePicker from 'react-native-image-crop-picker';
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 import auth from '@react-native-firebase/auth';
+import {useSelector} from 'react-redux';
 
 const images = [{id: 0}, {id: 1}, {id: 2}];
 
 const ServiceTwo: React.FC = () => {
   const navigation = useNavigation();
   const [selectedImages, setSelectedImages] = useState([null, null, null]);
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
+  const profileCompletion = useSelector(
+    state => state.profile.profileCompletion,
+  );
 
-  console.log('selectedImages........', selectedImages)
 
   const uploadImageToStorage = async (imageUri, index) => {
     try {
       const user = auth().currentUser;
       if (!user) return null;
 
-      const fileName = `service_images/${
-        user.uid
-      }/image_${index}.jpg`;
+      const fileName = `service_images/${user.uid}/image_${index}.jpg`;
       const reference = storage().ref(fileName);
       await reference.putFile(imageUri);
       const downloadURL = await reference.getDownloadURL();
@@ -65,13 +66,14 @@ const ServiceTwo: React.FC = () => {
     }
   };
 
-
   const saveImagesToFirestore = async () => {
     const user = auth().currentUser;
     if (!user) return;
     try {
       setLoading(true);
-      const serviceRef = firestore().collection('CleanerServices').doc(user.uid);
+      const serviceRef = firestore()
+        .collection('CleanerServices')
+        .doc(user.uid);
       const doc = await serviceRef.get();
 
       if (!doc.exists) {
@@ -84,7 +86,7 @@ const ServiceTwo: React.FC = () => {
             return await uploadImageToStorage(img.uri, index);
           }
           return null;
-        })
+        }),
       );
       const validImages = uploadedImages.filter(url => url !== null);
       await serviceRef.update({
@@ -106,11 +108,13 @@ const ServiceTwo: React.FC = () => {
     const user = auth().currentUser;
     if (!user) return;
     try {
-      const serviceRef = firestore().collection('CleanerServices').doc(user.uid);
+      const serviceRef = firestore()
+        .collection('CleanerServices')
+        .doc(user.uid);
       const doc = await serviceRef.get();
       if (doc.exists) {
         const data = doc.data();
-        const images = data?.serviceImages?.map(url => ({ uri: url })) || [];
+        const images = data?.serviceImages?.map(url => ({uri: url})) || [];
         const filledImages = [...images, null, null, null].slice(0, 3);
         setSelectedImages(filledImages);
       }
@@ -118,7 +122,6 @@ const ServiceTwo: React.FC = () => {
       console.error('Error fetching service data:', error);
     }
   };
-  
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -148,7 +151,7 @@ const ServiceTwo: React.FC = () => {
                   <Image
                     source={
                       selectedImages[index]
-                        ? selectedImages[index] 
+                        ? selectedImages[index]
                         : Icons.gallery
                     }
                     resizeMode="contain"
@@ -171,7 +174,7 @@ const ServiceTwo: React.FC = () => {
         </View>
         <View style={styles.buttonContainer}>
           <GradientButton
-            title="Next"
+            title={profileCompletion === '100' ? 'Edit' : 'Next'}
             onPress={saveImagesToFirestore}
             loading={loading}
           />

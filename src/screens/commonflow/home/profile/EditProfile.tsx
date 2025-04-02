@@ -193,14 +193,14 @@ const EditProfile = () => {
                       style={styles.imgStyle}
                     />
                   )}
-                  <TouchableOpacity onPress={uploadImg}>
-                    <Image
-                      source={Icons.edit}
-                      resizeMode="contain"
-                      style={styles.uploadedImg}
-                    />
-                  </TouchableOpacity>
                 </View>
+                <TouchableOpacity onPress={uploadImg}>
+                  <Image
+                    source={Icons.edit}
+                    resizeMode="contain"
+                    style={styles.uploadedImg}
+                  />
+                </TouchableOpacity>
               </View>
 
               {/* Edit Info Title */}
@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 20,
     elevation: 40,
-    backgroundColor:Colors.inputField
+    backgroundColor: Colors.inputField,
   },
   imgStyle: {
     width: RFPercentage(13),

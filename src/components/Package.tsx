@@ -10,8 +10,9 @@ interface Service {
 
 interface props {
   name : string,
-  services : Service[];
+  services? : Service[];
   price : string;
+  detail : string
 }
 
 const Package = (props:props) => {
@@ -32,6 +33,7 @@ const Package = (props:props) => {
               );
             }}
           />
+          <Text style={styles.serviceText}>{props.detail}</Text>
           <Text style={styles.priceText}>Starts at {props.price}</Text>
         </View>
       </View>
@@ -76,8 +78,10 @@ const styles = StyleSheet.create({
   serviceText: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.2),
-    left: 5,
+    fontSize: RFPercentage(1.4),
+    // textAlign:'center',
+    paddingHorizontal:RFPercentage(1)
+    // left: 5,
   },
   priceText: {
     textAlign: 'center',

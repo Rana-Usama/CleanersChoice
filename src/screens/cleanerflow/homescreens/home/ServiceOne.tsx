@@ -8,8 +8,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  FlatList,
 } from 'react-native';
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Icons, Fonts} from '../../../../constants/Themes';
 import HeaderBack from '../../../../components/HeaderBack';
@@ -18,7 +19,7 @@ import DescriptionField from '../../../../components/DescriptionField';
 import TimeLine from '../../../../components/TimeLine';
 import CustomDropDown from '../../../../components/DropDown';
 import GradientButton from '../../../../components/GradientButton';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import InputField from '../../../../components/InputField';
 import auth from '@react-native-firebase/auth';
@@ -27,16 +28,23 @@ import {useDispatch, useSelector} from 'react-redux';
 import {cleanerDescription} from '../../../../redux/Form/Actions';
 import {cleanerAvailability} from '../../../../redux/Availability/Actions';
 import Toast from 'react-native-toast-message';
+import {RootStackParamList} from '../../../../routers/StackNavigator';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 
 const data1 = [
-  {id: 1, label: 'Washing'},
-  {id: 2, label: 'Cleaning'},
-  {id: 3, label: 'Repairing'},
+  {id: 1, label: 'Window Cleaning'},
+  {id: 2, label: 'Residential Cleaning'},
+  {id: 3, label: 'Pressure CLeaning'},
+  {id: 4, label: 'Chimney Cleaning'},
+  {id: 5, label: 'Carpet Cleaning'},
+  {id: 6, label: 'Vehicle Cleaning'},
 ];
 
 const ServiceOne: React.FC = () => {
-  const navigation = useNavigation();
-  const [userData, setUserData] = useState(null);
+  const navigation =
+    useNavigation<
+      NativeStackNavigationProp<RootStackParamList, 'ServiceOne'>
+    >();
   const available = useSelector(state => state.availablity.availability);
   const [selectedItem, setSelectedItem] = useState(null);
   const [location, setLoaction] = useState('');
@@ -44,33 +52,24 @@ const ServiceOne: React.FC = () => {
   const dispatch = useDispatch();
   const description = useSelector(state => state.form.description);
   const [serviceData, setServiceData] = useState(null);
+  const profileCompletion = useSelector(
+    state => state.profile.profileCompletion,
+  );
+  const profileData = useSelector(state => state.profile.profileData);
+
+  const [selectedItems, setSelectedItems] = useState([]);
+
+  const handleSelection2 = (item: any) => {
+    setSelectedItems(prevItems =>
+      prevItems.includes(item)
+        ? prevItems.filter(i => i !== item)
+        : [...prevItems, item],
+    );
+  };
 
   const handleSelection = item => {
     setSelectedItem(item);
   };
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      const user = auth().currentUser;
-      if (!user) return;
-      try {
-        const userDoc = await firestore()
-          .collection('Users')
-          .doc(user.uid)
-          .get();
-        if (userDoc.exists) {
-          const userData = userDoc.data();
-          setUserData(userData);
-        } else {
-          console.log('User data not found.');
-        }
-      } catch (error) {
-        console.error('Error fetching user details:', error);
-      }
-    };
-
-    fetchUserData();
-  }, []);
 
   useEffect(() => {
     fetchServiceData();
@@ -88,20 +87,19 @@ const ServiceOne: React.FC = () => {
         const data = doc.data();
         dispatch(cleanerDescription(data?.description || ''));
         dispatch(cleanerAvailability(data?.availability || false));
-        setSelectedItem(data?.type || '');
+        setSelectedItems(data?.type || '');
         setLoaction(data?.location || '');
         setServiceData(data);
       }
     } catch (error) {
-      console.error('Error fetching service data:', error);
+      console.error(error);
     }
   };
 
   const addServices = async () => {
     const user = auth().currentUser;
     if (!user) return;
-
-    if (description && location && available && selectedItem) {
+    if (description && location && available && selectedItems) {
       try {
         setLoading(true);
         const serviceRef = await firestore()
@@ -109,11 +107,11 @@ const ServiceOne: React.FC = () => {
           .doc(user.uid)
           .set({
             createdAt: firestore.FieldValue.serverTimestamp(),
-            name: userData?.name,
-            image: userData?.profile,
+            name: profileData?.name,
+            image: profileData?.profile,
             description: description,
             availability: available,
-            type: selectedItem,
+            type: selectedItems,
             location: location,
             serviceImages: serviceData?.serviceImages || [],
             packages: serviceData?.packages || [],
@@ -122,7 +120,7 @@ const ServiceOne: React.FC = () => {
           });
         navigation.navigate('ServiceTwo');
       } catch (error) {
-        console.error('Error adding service: ', error);
+        console.error(error);
       } finally {
         setLoading(false);
       }
@@ -216,7 +214,7 @@ const ServiceOne: React.FC = () => {
               </View>
             </TouchableOpacity>
 
-            <CustomDropDown
+            {/* <CustomDropDown
               placeholder={selectedItem || 'Select services you provide'}
               placeholderColor={{
                 color: selectedItem
@@ -225,7 +223,8 @@ const ServiceOne: React.FC = () => {
               }}
               data={data1}
               setValue={handleSelection}
-            />
+            /> */}
+
             <InputField
               placeholder="e.g. Ohio"
               customStyle={{width: '100%'}}
@@ -233,12 +232,53 @@ const ServiceOne: React.FC = () => {
               onChangeText={setLoaction}
             />
 
+            <View>
+              <Text
+                style={styles.heading}>
+                Select Services you provide
+              </Text>
+            </View>
+
+            <View style={{marginVertical: RFPercentage(2)}}>
+              <FlatList
+                data={data1}
+                keyExtractor={item => item.id.toString()}
+                numColumns={2}
+                contentContainerStyle={{marginLeft: RFPercentage(-1)}}
+                renderItem={({item}) => {
+                  return (
+                    <TouchableOpacity
+                      onPress={() => handleSelection2(item.label)}
+                      style={[
+                        styles.serviceBox,
+                        {
+                          borderColor: selectedItems.includes(item.label)
+                            ? Colors.gradient2
+                            : 'transparent',
+                        },
+                      ]}>
+                      <Text
+                        style={[
+                          styles.serviceLabel,
+                          {
+                            color: selectedItems.includes(item.label)
+                              ? Colors.inputTextColor
+                              : Colors.placeholderColor,
+                          },
+                        ]}>
+                        {item.label}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                }}
+              />
+            </View>
+
             <View style={styles.buttonContainer}>
               <GradientButton
-                title="Next"
+                title={profileCompletion === '100' ? 'Edit' : 'Next'}
                 onPress={addServices}
                 loading={loading}
-                // disabled={(description && location && available && selectedItem) ? false : true}
               />
             </View>
           </View>
@@ -304,4 +344,25 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: RFPercentage(4),
   },
+  serviceBox: {
+    borderRadius: RFPercentage(0.8),
+    marginVertical: RFPercentage(0.6),
+    width: RFPercentage(17),
+    marginHorizontal: RFPercentage(1),
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: RFPercentage(1),
+    backgroundColor: 'rgba(229, 231, 235, 0.3)',
+    borderWidth: 1.2,
+  },
+  serviceLabel: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.4),
+  },
+  heading : {
+    color: Colors.inputTextColor,
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.6),
+    top: RFPercentage(0.6),
+  }
 });
