@@ -29,6 +29,33 @@ import {RootStackParamList} from '../../../../routers/StackNavigator';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import Review from '../../../../components/Review';
 
+const items = [
+  {
+    id: '1',
+    name: 'Window Cleaning',
+  },
+  {
+    id: '2',
+    name: 'Chimney Cleaning',
+  },
+  {
+    id: '3',
+    name: 'Carpet Cleaning',
+  },
+  {
+    id: '4',
+    name: 'Residential Cleaning',
+  },
+  {
+    id: '5',
+    name: 'Pressure Washing',
+  },
+  {
+    id: '6',
+    name: 'Car Washing',
+  },
+];
+
 const Dashboard: React.FC = () => {
   const navigation =
     useNavigation<
@@ -43,8 +70,6 @@ const Dashboard: React.FC = () => {
   const dispatch = useDispatch();
   const [visibleItems, setVisibleItems] = useState(5);
   const [loading3, setLoading3] = useState(false);
-
-  console.log(service);
 
   const uploadImg = async () => {
     try {
@@ -158,9 +183,23 @@ const Dashboard: React.FC = () => {
     setVisibleItems(5);
   };
 
+  const getServiceNames = serviceIds => {
+    return serviceIds
+      ?.map(id => {
+        const serviceItem = items.find(item => item.id === id);
+        return serviceItem ? serviceItem.name : null;
+      })
+      .filter(name => name !== null); // Remove nulls in case no match is found
+  };
+  const serviceNames = getServiceNames(service?.type.slice(0, visibleItems));
+
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={{paddingBottom: RFPercentage(5)}}>
+      <ScrollView
+        contentContainerStyle={{paddingBottom: RFPercentage(15)}}
+        style={{flex: 1}}
+        showsVerticalScrollIndicator={false}
+        >
         <HeaderBack
           logo={true}
           title="Dashboard"
@@ -282,7 +321,7 @@ const Dashboard: React.FC = () => {
                       marginTop: RFPercentage(0.5),
                     }}>
                     <FlatList
-                      data={service?.type.slice(0, visibleItems)}
+                      data={serviceNames}
                       numColumns={2}
                       contentContainerStyle={{
                         paddingHorizontal: RFPercentage(2),
@@ -444,7 +483,7 @@ const styles = StyleSheet.create({
     width: '90%',
     alignSelf: 'center',
     // backgroundColor: 'red',
-    flex: 1,
+    // flex: 1,
   },
   imgContainer: {
     alignSelf: 'center',
@@ -489,7 +528,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.7),
   },
   profileCompletionContainer: {
-    width: '95%',
+    width: '90%',
     height: RFPercentage(3.8),
     borderWidth: 1.4,
     borderColor: Colors.gradient1,

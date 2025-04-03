@@ -1,7 +1,7 @@
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import {FlatList, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
-import { RFPercentage } from 'react-native-responsive-fontsize';
-import { Colors, Fonts } from '../constants/Themes';
+import {RFPercentage} from 'react-native-responsive-fontsize';
+import {Colors, Fonts} from '../constants/Themes';
 
 interface Service {
   id: number;
@@ -9,33 +9,37 @@ interface Service {
 }
 
 interface props {
-  name : string,
-  services? : Service[];
-  price : string;
-  detail : string
+  name: string;
+  services?: Service[];
+  price: string;
+  detail: string;
 }
 
-const Package = (props:props) => {
+const Package = (props: props) => {
   return (
     <View style={styles.container}>
       <Text style={styles.packageName}>{props.name}</Text>
+
       <View style={styles.dividerContainer}>
-        <View>
-          <FlatList
+        <View style={styles.contentContainer}>
+          {/* <FlatList
             data={props.services}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => {
-              return (
-                <View style={styles.serviceItem}>
-                  <View style={styles.bulletPoint}></View>
-                  <Text style={styles.serviceText}>{item.name}</Text>
-                </View>
-              );
-            }}
+            keyExtractor={item => item.id.toString()}
+            renderItem={({item}) => (
+              <View style={styles.serviceItem}>
+                <View style={styles.bulletPoint}></View>
+                <Text style={styles.serviceText}>{item.name}</Text>
+              </View>
+            )}
+            contentContainerStyle={{flexGrow: 1}} // Ensures list fills space
           />
+           */}
           <Text style={styles.serviceText}>{props.detail}</Text>
-          <Text style={styles.priceText}>Starts at {props.price}</Text>
         </View>
+      </View>
+
+      <View style={styles.priceContainer}>
+        <Text style={styles.priceText}>Starts at {props.price}</Text>
       </View>
     </View>
   );
@@ -50,6 +54,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(156, 163, 175, 1)',
     borderRadius: RFPercentage(1),
     marginHorizontal: RFPercentage(1),
+    overflow: 'hidden',
   },
   packageName: {
     textAlign: 'center',
@@ -61,6 +66,10 @@ const styles = StyleSheet.create({
   dividerContainer: {
     borderTopWidth: 1,
     borderTopColor: 'rgba(156, 163, 175, 1)',
+    flex: 1,
+  },
+  contentContainer: {
+    flex: 1,
     paddingVertical: RFPercentage(1),
   },
   serviceItem: {
@@ -78,16 +87,19 @@ const styles = StyleSheet.create({
   serviceText: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.4),
-    // textAlign:'center',
-    paddingHorizontal:RFPercentage(1)
-    // left: 5,
+    fontSize: RFPercentage(1.3),
+    lineHeight: 18,
+    paddingHorizontal: RFPercentage(1),
+  },
+  priceContainer: {
+    paddingVertical: RFPercentage(0.5),
+    alignSelf: 'stretch',
+    alignItems: 'center',
   },
   priceText: {
     textAlign: 'center',
     color: Colors.gradient1,
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontMedium,
-    marginTop: RFPercentage(0.6),
   },
 });

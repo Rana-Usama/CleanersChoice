@@ -20,7 +20,6 @@ import InputField from '../../../../components/InputField';
 import {useNavigation} from '@react-navigation/native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import firestore from '@react-native-firebase/firestore';
-import storage from '@react-native-firebase/storage';
 import auth from '@react-native-firebase/auth';
 import Toast from 'react-native-toast-message';
 import {useSelector} from 'react-redux';
@@ -34,7 +33,10 @@ const ServiceThree: React.FC = () => {
   const profileCompletion = useSelector(
     state => state.profile.profileCompletion,
   );
-  
+  const [errors, setErrors] = useState({});
+
+  console.log(errors)
+
   const addPackage = () => {
     if (packages.length < MAX_PACKAGES) {
       setPackages([
@@ -53,6 +55,17 @@ const ServiceThree: React.FC = () => {
     setPackages(prevPackages =>
       prevPackages.map(pkg => (pkg.id === id ? {...pkg, [field]: value} : pkg)),
     );
+
+    if (field === 'price') {
+      const minPrice = 25 * id;
+      setErrors(prevErrors => ({
+        ...prevErrors,
+        [id]:
+          parseFloat(value) < minPrice
+            ? `Price must be at least ${minPrice}$`
+            : null,
+      }));
+    }
   };
 
   const savePackagesToFirestore = async () => {
@@ -174,23 +187,31 @@ const ServiceThree: React.FC = () => {
                 )}
 
                 <View>
-                  <DescriptionField 
-                    placeholder={`Chimney Cleaning \n2x Carpet Cleaning \n200 Ft Garden Cleaning`}
-                    count={false}
+                  <DescriptionField
+                    placeholder={`Package Details`}
+                    count={true}
                     value={pkg.details}
                     onChangeText={text =>
                       handleInputChange(pkg.id, 'details', text)
                     }
+                    charCount={pkg.details.length}
                   />
 
                   <InputField
-                    placeholder="Enter Starting Price"
-                    customStyle={{width: '100%'}}
+                    placeholder={`Starting Price e.g ${25 * pkg.id}$`} 
+                    customStyle={{
+                      width: '100%',
+                      borderColor: errors?.[pkg.id]
+                        ? Colors.error
+                        : Colors.inputFieldColor,
+                    }}
                     value={pkg.price}
                     onChangeText={text =>
                       handleInputChange(pkg.id, 'price', text)
                     }
+                    type={'numeric'}
                   />
+                  <Text style={styles.errorText}>{errors[pkg.id]}</Text>
                 </View>
               </View>
             ))}
@@ -201,11 +222,7 @@ const ServiceThree: React.FC = () => {
                 <TouchableOpacity onPress={addPackage}>
                   <View>
                     <Text
-                      style={{
-                        color: Colors.gradient1,
-                        fontSize: RFPercentage(1.5),
-                        fontFamily: Fonts.fontMedium,
-                      }}>
+                      style={styles.addText}>
                       + Add Package
                     </Text>
                   </View>
@@ -264,11 +281,18 @@ const styles = StyleSheet.create({
   sectionTitle: {
     color: Colors.secondaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
   },
   buttonContainer: {
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: RFPercentage(4),
   },
+  errorText :
+  {color:Colors.error,fontSize:RFPercentage(1.4), fontFamily:Fonts.fontRegular, bottom:RFPercentage(0.9), left:5},
+  addText : {
+    color: Colors.gradient1,
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontMedium,
+  }
 });

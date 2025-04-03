@@ -3,7 +3,7 @@ import React, {useState} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts} from '../constants/Themes';
 
-const MAX_WORDS = 150;
+const MAX_CHARACTERS = 100;
 
 interface props {
   style? : object;
@@ -11,21 +11,25 @@ interface props {
   count : boolean;
   onChangeText?: (text: string) => void;
   value?: string;
+  charCount? : number
 }
 
 const DescriptionField = (props: props) => {
-  const [wordCount, setWordCount] = useState(0);
+  console.log('charcount........', props.charCount)
+  // const [charCount, setCharCount] = useState(0);
 
-  const handleTextChange = (text : any) => {
-    const words = text
-      .trim()
-      .split(/\s+/)
-      .filter((word : any) => word.length > 0);
-    setWordCount(words.length);
-  };
+  // const handleTextChange = (text : string) => {
+  //   if (text.length <= MAX_CHARACTERS) {
+  //     setCharCount(text.length);
+
+  //     if (props.onChangeText) {
+  //       props.onChangeText(text);
+  //     }
+  //   }
+  // };
 
   return (
-    <View style={[styles.textArea,{...props.style}]}>
+    <View style={[styles.textArea, {...props.style}]}>
       <TextInput
         placeholder={props.placeholder}
         placeholderTextColor={Colors.placeholderColor}
@@ -36,8 +40,8 @@ const DescriptionField = (props: props) => {
         value={props.value}
       />
       {props.count && (
-        <Text style={styles.wordCount}>
-          {wordCount}/{MAX_WORDS}
+        <Text style={[styles.charCount,{ color: props.charCount === MAX_CHARACTERS ? 'red' :  Colors.secondaryText,}]}>
+          {props.charCount}/{MAX_CHARACTERS}
         </Text>
       )}
     </View>
@@ -68,7 +72,7 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
     flex: 1,
   },
-  wordCount: {
+  charCount: {
     position: 'absolute',
     bottom: RFPercentage(0.5),
     right: RFPercentage(1),
