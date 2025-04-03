@@ -27,6 +27,7 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import Toast from 'react-native-toast-message';
 import storage from '@react-native-firebase/storage';
+import {Image as CompressorImage} from 'react-native-compressor';
 
 const EditProfile = () => {
   const navigation =
@@ -86,8 +87,14 @@ const EditProfile = () => {
     try {
       let imageUrl = userData?.profile;
       if (img && img.path !== userData?.profile) {
+        const compressedImage = await CompressorImage.compress(img?.path, {
+          compressionMethod: 'manual',
+          maxWidth: 1000,
+          quality: 0.8,
+        });
+        console.log('Image compression completed successfully');
         const imageRef = storage().ref(`user_profiles/profile_${user.uid}.jpg`);
-        await imageRef.putFile(img.path);
+        await imageRef.putFile(compressedImage);
         imageUrl = await imageRef.getDownloadURL();
       }
 

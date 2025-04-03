@@ -9,13 +9,13 @@ import {
   ScrollView,
   FlatList,
 } from 'react-native';
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, Icons, IMAGES} from '../../../../constants/Themes';
 import HeaderBack from '../../../../components/HeaderBack';
 import ImagePicker from 'react-native-image-crop-picker';
 import GradientButton from '../../../../components/GradientButton';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
@@ -28,6 +28,7 @@ import Package from '../../../../components/Package';
 import {RootStackParamList} from '../../../../routers/StackNavigator';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import Review from '../../../../components/Review';
+import {Image as CompressorImage} from 'react-native-compressor';
 
 const items = [
   {
@@ -83,6 +84,13 @@ const Dashboard: React.FC = () => {
         setLoading(false);
         return;
       }
+      const compressedImage = await CompressorImage.compress(image.path, {
+        compressionMethod: 'manual',
+        maxWidth: 1000,
+        quality: 0.8,
+      });
+      console.log('Image compression completed successfully');
+
       const user = auth().currentUser;
       if (!user) {
         console.log('No user logged in');
@@ -91,7 +99,7 @@ const Dashboard: React.FC = () => {
       }
       const imagePath = `user_profiles/profile_${user.uid}.jpg`;
       const reference = storage().ref(imagePath);
-      await reference.putFile(image.path);
+      await reference.putFile(compressedImage);
       const downloadURL = await reference.getDownloadURL();
       await firestore().collection('Users').doc(user.uid).update({
         profile: downloadURL,
@@ -130,28 +138,31 @@ const Dashboard: React.FC = () => {
     fetchUserData();
   }, []);
 
-  useEffect(() => {
-    const serviceDetails = async () => {
-      const user = auth().currentUser;
-      if (!user) return;
-      setLoading3(true);
-      try {
-        const userDoc = await firestore()
-          .collection('CleanerServices')
-          .doc(user.uid)
-          .get();
-        if (userDoc.exists) {
-          const userData = userDoc.data();
-          setService(userData);
-        }
-      } catch (error) {
-        console.error('Error fetching user details:', error);
-      } finally {
-        setLoading3(false);
+  useFocusEffect(
+    React.useCallback(() => {
+      serviceDetails(); 
+    }, [])
+  );
+
+  const serviceDetails = async () => {
+    const user = auth().currentUser;
+    if (!user) return;
+    setLoading3(true);
+    try {
+      const userDoc = await firestore()
+        .collection('CleanerServices')
+        .doc(user.uid)
+        .get();
+      if (userDoc.exists) {
+        const userData = userDoc.data();
+        setService(userData);
       }
-    };
-    serviceDetails();
-  }, []);
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+    } finally {
+      setLoading3(false);
+    }
+  };
 
   const handleNext = () => {
     setLoading2(true);
@@ -198,8 +209,7 @@ const Dashboard: React.FC = () => {
       <ScrollView
         contentContainerStyle={{paddingBottom: RFPercentage(15)}}
         style={{flex: 1}}
-        showsVerticalScrollIndicator={false}
-        >
+        showsVerticalScrollIndicator={false}>
         <HeaderBack
           logo={true}
           title="Dashboard"

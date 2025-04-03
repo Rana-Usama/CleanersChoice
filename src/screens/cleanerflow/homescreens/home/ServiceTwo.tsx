@@ -21,6 +21,7 @@ import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 import auth from '@react-native-firebase/auth';
 import {useSelector} from 'react-redux';
+import {Image as CompressorImage} from 'react-native-compressor';
 
 const images = [{id: 0}, {id: 1}, {id: 2}];
 
@@ -34,12 +35,18 @@ const ServiceTwo: React.FC = () => {
   );
 
   const uploadImageToStorage = async (imageUri, index) => {
+    const compressedImage = await CompressorImage.compress(imageUri, {
+      compressionMethod: 'manual',
+      maxWidth: 1000,
+      quality: 0.8,
+    });
+    console.log('Image compression completed successfully');
     try {
       const user = auth().currentUser;
       if (!user) return null;
       const fileName = `service_images/${user.uid}/image_${index}.jpg`;
       const reference = storage().ref(fileName);
-      await reference.putFile(imageUri);
+      await reference.putFile(compressedImage);
       const downloadURL = await reference.getDownloadURL();
       return downloadURL;
     } catch (error) {
