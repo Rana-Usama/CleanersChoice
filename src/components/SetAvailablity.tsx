@@ -6,13 +6,9 @@ import DatePicker from 'react-native-date-picker';
 import {useSelector} from 'react-redux';
 import CheckBox from 'react-native-check-box'
 
-interface Props {
-  day: string;
-}
 
 const SetAvailability = ({ day, fromTime, toTime, onUpdateAvailability, checked, onToggleCheckBox }) => {
-  const userFlow = useSelector(state => state.userFlow.userFlow);
-
+  const profileData = useSelector(state => state.profile.profileData.role);
   const [openFromPicker, setOpenFromPicker] = useState(false);
   const [openToPicker, setOpenToPicker] = useState(false);
 
@@ -33,7 +29,7 @@ const SetAvailability = ({ day, fromTime, toTime, onUpdateAvailability, checked,
       <TouchableOpacity
         activeOpacity={0.8}
         onPress={() => setOpenFromPicker(true)}
-        disabled={userFlow === 'Customer' ? true : false}
+        disabled={profileData === 'Customer' ? true : false}
         style={styles.timeView}>
         <Text style={[styles.timeText]}>
           {new Date(fromTime).toLocaleTimeString([], {
@@ -48,7 +44,7 @@ const SetAvailability = ({ day, fromTime, toTime, onUpdateAvailability, checked,
       <TouchableOpacity
         activeOpacity={0.8}
         onPress={() => setOpenToPicker(true)}
-        disabled={userFlow === 'Customer' ? true : false}
+        disabled={profileData === 'Customer' ? true : false}
         style={styles.timeView}>
         <Text style={[styles.timeText]}>
           {new Date(toTime).toLocaleTimeString([], {

@@ -9,8 +9,9 @@ import {
   Platform,
   ScrollView,
   FlatList,
+  Keyboard,
 } from 'react-native';
-import React, {useState, useEffect, useCallback} from 'react';
+import React, {useState, useEffect, useCallback, useRef} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Icons, Fonts} from '../../../../constants/Themes';
 import HeaderBack from '../../../../components/HeaderBack';
@@ -30,14 +31,33 @@ import {cleanerAvailability} from '../../../../redux/Availability/Actions';
 import Toast from 'react-native-toast-message';
 import {RootStackParamList} from '../../../../routers/StackNavigator';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import MultiSelect from 'react-native-multiple-select';
 
-const data1 = [
-  {id: 1, label: 'Window Cleaning'},
-  {id: 2, label: 'Residential Cleaning'},
-  {id: 3, label: 'Pressure CLeaning'},
-  {id: 4, label: 'Chimney Cleaning'},
-  {id: 5, label: 'Carpet Cleaning'},
-  {id: 6, label: 'Vehicle Cleaning'},
+const items = [
+  {
+    id: '1',
+    name: 'Window Cleaning',
+  },
+  {
+    id: '2',
+    name: 'Chimney Cleaning',
+  },
+  {
+    id: '3',
+    name: 'Carpet Cleaning',
+  },
+  {
+    id: '4',
+    name: 'Residential Cleaning',
+  },
+  {
+    id: '5',
+    name: 'Pressure Washing',
+  },
+  {
+    id: '6',
+    name: 'Car Washing',
+  },
 ];
 
 const ServiceOne: React.FC = () => {
@@ -58,22 +78,19 @@ const ServiceOne: React.FC = () => {
   const profileData = useSelector(state => state.profile.profileData);
 
   const [selectedItems, setSelectedItems] = useState([]);
+  const multiSelectRef = useRef(null);
 
-  const handleSelection2 = (item: any) => {
-    setSelectedItems(prevItems =>
-      prevItems.includes(item)
-        ? prevItems.filter(i => i !== item)
-        : [...prevItems, item],
-    );
+  const onSelectedItemsChange = (selectedItems: any) => {
+    setSelectedItems(selectedItems);
   };
 
-  const handleSelection = item => {
-    setSelectedItem(item);
-  };
+  console.log(selectedItems);
 
-  useEffect(() => {
-    fetchServiceData();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchServiceData();
+    }, []),
+  );
 
   const fetchServiceData = async () => {
     const user = auth().currentUser;
@@ -87,7 +104,7 @@ const ServiceOne: React.FC = () => {
         const data = doc.data();
         dispatch(cleanerDescription(data?.description || ''));
         dispatch(cleanerAvailability(data?.availability || false));
-        setSelectedItems(data?.type || '');
+        setSelectedItems(data?.type || []);
         setLoaction(data?.location || '');
         setServiceData(data);
       }
@@ -148,7 +165,7 @@ const ServiceOne: React.FC = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{flex: 1}}>
         <ScrollView
-          contentContainerStyle={{flexGrow: 1}}
+          contentContainerStyle={{flexGrow: 1, paddingBottom: RFPercentage(5)}}
           keyboardShouldPersistTaps="handled">
           <View style={styles.container}>
             <View style={styles.infoHeaderContainer}>
@@ -214,64 +231,62 @@ const ServiceOne: React.FC = () => {
               </View>
             </TouchableOpacity>
 
-            {/* <CustomDropDown
-              placeholder={selectedItem || 'Select services you provide'}
-              placeholderColor={{
-                color: selectedItem
-                  ? Colors.inputTextColor
-                  : Colors.placeholderColor,
-              }}
-              data={data1}
-              setValue={handleSelection}
-            /> */}
-
             <InputField
-              placeholder="e.g. Ohio"
-              customStyle={{width: '100%'}}
+              placeholder="Location"
               value={location}
               onChangeText={setLoaction}
+              customStyle={{width: '100%'}}
             />
 
-            <View>
-              <Text
-                style={styles.heading}>
-                Select Services you provide
-              </Text>
-            </View>
-
-            <View style={{marginVertical: RFPercentage(2)}}>
-              <FlatList
-                data={data1}
-                keyExtractor={item => item.id.toString()}
-                numColumns={2}
-                contentContainerStyle={{marginLeft: RFPercentage(-1)}}
-                renderItem={({item}) => {
-                  return (
-                    <TouchableOpacity
-                      onPress={() => handleSelection2(item.label)}
-                      style={[
-                        styles.serviceBox,
-                        {
-                          borderColor: selectedItems.includes(item.label)
-                            ? Colors.gradient2
-                            : 'transparent',
-                        },
-                      ]}>
-                      <Text
-                        style={[
-                          styles.serviceLabel,
-                          {
-                            color: selectedItems.includes(item.label)
-                              ? Colors.inputTextColor
-                              : Colors.placeholderColor,
-                          },
-                        ]}>
-                        {item.label}
-                      </Text>
-                    </TouchableOpacity>
-                  );
+            <View style={{flex: 1}}>
+              <MultiSelect
+                hideTags={true}
+                items={items}
+                uniqueKey="id"
+                ref={multiSelectRef}
+                onSelectedItemsChange={onSelectedItemsChange}
+                selectedItems={selectedItems}
+                selectText="Select Services you provide"
+                searchInputPlaceholderText="Search Services..."
+                onChangeInput={text => console.log(text)}
+                altFontFamily={Fonts.fontRegular}
+                tagRemoveIconColor={Colors.inputFieldColor}
+                tagBorderColor={Colors.inputFieldColor}
+                tagTextColor={Colors.inputTextColor}
+                selectedItemTextColor={Colors.inputTextColor}
+                selectedItemIconColor={Colors.inputTextColor}
+                itemTextColor={Colors.placeholderColor}
+                displayKey="name"
+                searchInputStyle={{
+                  color: Colors.inputTextColor,
+                  fontFamily: Fonts.fontRegular,
                 }}
+                submitButtonColor={Colors.gradient2}
+                submitButtonText="Save"
+                fontFamily={Fonts.fontRegular}
+                selectedItemFontFamily={Fonts.fontRegular}
+                itemFontFamily={Fonts.fontRegular}
+                itemFontSize={RFPercentage(1.4)}
+                hideSubmitButton
+                styleItemsContainer={{
+                  backgroundColor: 'transparent',
+                  borderRadius: RFPercentage(0.5),
+                }}
+                styleTextDropdownSelected={{
+                  color: Colors.inputTextColor,
+                  fontSize: RFPercentage(1.6),
+                  fontFamily: Fonts.fontRegular,
+                }}
+                styleTextTag={{
+                  fontSize: RFPercentage(1.5),
+                  fontFamily: Fonts.fontRegular,
+                  color: Colors.inputTextColor,
+                }}
+                hideDropdown
               />
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{marginTop:RFPercentage(0.7)}}>
+                {multiSelectRef.current?.getSelectedItemsExt(selectedItems)}
+              </ScrollView>
             </View>
 
             <View style={styles.buttonContainer}>
@@ -342,7 +357,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: RFPercentage(4),
+    marginTop: RFPercentage(5),
   },
   serviceBox: {
     borderRadius: RFPercentage(0.8),
@@ -359,10 +374,10 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.4),
   },
-  heading : {
+  heading: {
     color: Colors.inputTextColor,
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.6),
     top: RFPercentage(0.6),
-  }
+  },
 });

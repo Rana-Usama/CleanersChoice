@@ -6,6 +6,7 @@ import {
   View,
   TouchableOpacity,
   FlatList,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -27,23 +28,22 @@ const ServiceTwo: React.FC = () => {
   const navigation = useNavigation();
   const [selectedImages, setSelectedImages] = useState([null, null, null]);
   const [loading, setLoading] = useState(false);
+  const [loading2, setLoading2] = useState(false);
   const profileCompletion = useSelector(
     state => state.profile.profileCompletion,
   );
-
 
   const uploadImageToStorage = async (imageUri, index) => {
     try {
       const user = auth().currentUser;
       if (!user) return null;
-
       const fileName = `service_images/${user.uid}/image_${index}.jpg`;
       const reference = storage().ref(fileName);
       await reference.putFile(imageUri);
       const downloadURL = await reference.getDownloadURL();
       return downloadURL;
     } catch (error) {
-      console.error('Error uploading image:', error);
+      console.log('Error uploading image:', error);
       return null;
     }
   };
@@ -107,6 +107,7 @@ const ServiceTwo: React.FC = () => {
   const fetchServiceData = async () => {
     const user = auth().currentUser;
     if (!user) return;
+    setLoading2(true);
     try {
       const serviceRef = firestore()
         .collection('CleanerServices')
@@ -120,6 +121,8 @@ const ServiceTwo: React.FC = () => {
       }
     } catch (error) {
       console.error('Error fetching service data:', error);
+    } finally {
+      setLoading2(false);
     }
   };
 
@@ -148,25 +151,36 @@ const ServiceTwo: React.FC = () => {
             renderItem={({item, index}) => (
               <TouchableOpacity onPress={() => uploadImg(index)}>
                 <View style={styles.imageContainer}>
-                  <Image
-                    source={
-                      selectedImages[index]
-                        ? selectedImages[index]
-                        : Icons.gallery
-                    }
-                    resizeMode="contain"
-                    style={[
-                      styles.image,
-                      {
-                        width: selectedImages[index]
-                          ? RFPercentage(13)
-                          : RFPercentage(3),
-                        height: selectedImages[index]
-                          ? RFPercentage(13)
-                          : RFPercentage(3),
-                      },
-                    ]}
-                  />
+                  {loading2 ? (
+                    <>
+                      <ActivityIndicator
+                        size={'large'}
+                        color={Colors.inputFieldColor}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <Image
+                        source={
+                          selectedImages[index]
+                            ? selectedImages[index]
+                            : Icons.gallery
+                        }
+                        resizeMode="contain"
+                        style={[
+                          styles.image,
+                          {
+                            width: selectedImages[index]
+                              ? RFPercentage(13)
+                              : RFPercentage(3),
+                            height: selectedImages[index]
+                              ? RFPercentage(13)
+                              : RFPercentage(3),
+                          },
+                        ]}
+                      />
+                    </>
+                  )}
                 </View>
               </TouchableOpacity>
             )}

@@ -100,7 +100,6 @@ const SignUp: React.FC = () => {
         const fileName = `profile_${user.uid}.jpg`;
         const storageRef = storage().ref(`user_profiles/${fileName}`);
         console.log('Storage Path:', `user_profiles/${fileName}`);
-
         const uploadTask = storageRef.putFile(uploadUri);
         await uploadTask;
         profileUrl = await storageRef.getDownloadURL();
@@ -136,6 +135,7 @@ const SignUp: React.FC = () => {
         userFlow?.userFlow === 'Customer' ? 'Home' : 'Premium',
       );
     } catch (error: any) {
+      console.log(error)
       Toast.show({
         type: 'error',
         text1: 'Sign Up Failed',
