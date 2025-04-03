@@ -30,6 +30,7 @@ import Toast from 'react-native-toast-message';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
+import {Image as CompressorImage} from 'react-native-compressor';
 
 const SignUp: React.FC = () => {
   const navigation =
@@ -95,8 +96,13 @@ const SignUp: React.FC = () => {
       let profileUrl = '';
 
       if (img) {
-        console.log('Image Path:', img.path);
-        const uploadUri = img.path.replace('file://', '');
+        const compressedImage = await CompressorImage.compress(img?.path, {
+          compressionMethod: 'manual',
+          maxWidth: 1000,
+          quality: 0.8,
+        });
+        console.log('Image compression completed successfully');
+        const uploadUri = compressedImage.replace('file://', '');
         const fileName = `profile_${user.uid}.jpg`;
         const storageRef = storage().ref(`user_profiles/${fileName}`);
         console.log('Storage Path:', `user_profiles/${fileName}`);
@@ -135,7 +141,7 @@ const SignUp: React.FC = () => {
         userFlow?.userFlow === 'Customer' ? 'Home' : 'Premium',
       );
     } catch (error: any) {
-      console.log(error)
+      console.log(error);
       Toast.show({
         type: 'error',
         text1: 'Sign Up Failed',

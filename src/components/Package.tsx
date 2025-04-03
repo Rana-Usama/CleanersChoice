@@ -49,7 +49,7 @@ export default Package;
 
 const styles = StyleSheet.create({
   container: {
-    width: RFPercentage(18),
+    width: RFPercentage(18.5),
     borderWidth: 1,
     borderColor: 'rgba(156, 163, 175, 1)',
     borderRadius: RFPercentage(1),
@@ -75,8 +75,8 @@ const styles = StyleSheet.create({
   serviceItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: RFPercentage(0.5),
-    margin: RFPercentage(0.8),
+    paddingHorizontal: RFPercentage(0.6),
+    margin: RFPercentage(0.9),
   },
   bulletPoint: {
     width: 3,

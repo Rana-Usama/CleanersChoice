@@ -98,7 +98,6 @@ const Availability = () => {
   useEffect(() => {
     const updatedAvailability = days.map(day => {
       const found = service?.availability?.find(item => item.day === day.name);
-      
       return {
         day: day.name,
         fromTime: found
@@ -120,7 +119,7 @@ const Availability = () => {
     });
   
     setAvailabilityData(updatedAvailability);
-    dispatch(cleanerAvailability(updatedAvailability));
+    // dispatch(cleanerAvailability(updatedAvailability));
   
   }, [service?.availability, days]);
   
@@ -130,7 +129,7 @@ const Availability = () => {
       const updated = prev.map(item =>
         item.day === day ? {...item, checked: !item.checked} : item,
       );
-      dispatch(cleanerAvailability(updated));
+      // dispatch(cleanerAvailability(updated));
       return updated;
     });
   };
@@ -140,7 +139,7 @@ const Availability = () => {
       const updated = prev.map(item =>
         item.day === day ? {...item, fromTime, toTime} : item,
       );
-      dispatch(cleanerAvailability(updated));
+      // dispatch(cleanerAvailability(updated));
       return updated;
     });
   };
