@@ -21,117 +21,32 @@ import GestureRecognizer from 'react-native-swipe-gestures';
 import {useNavigation} from '@react-navigation/native';
 import {RootStackParamList} from '../../../routers/StackNavigator';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-const services = [
+import moment from 'moment';
+
+const items = [
   {
-    id: 1,
+    id: '1',
     name: 'Window Cleaning',
   },
   {
-    id: 2,
+    id: '2',
+    name: 'Chimney Cleaning',
+  },
+  {
+    id: '3',
+    name: 'Carpet Cleaning',
+  },
+  {
+    id: '4',
     name: 'Residential Cleaning',
   },
   {
-    id: 3,
-    name: 'Pressure CLeaning',
+    id: '5',
+    name: 'Pressure Washing',
   },
   {
-    id: 4,
-    name: 'Carpet Cleaning',
-  },
-  {
-    id: 5,
-    name: 'Chimney Cleaning',
-  },
-  {
-    id: 6,
-    name: 'Pressure CLeaning',
-  },
-  {
-    id: 7,
-    name: 'Carpet Cleaning',
-  },
-  {
-    id: 8,
-    name: 'Chimney Cleaning',
-  },
-];
-
-const Packages = [
-  {
-    id: 1,
-    name: 'Package 1',
-    price: '50$',
-    services: [
-      {
-        id: 1,
-        name: 'Chimney Cleaning',
-      },
-      {
-        id: 2,
-        name: '1x Carpet Cleaning',
-      },
-      {
-        id: 3,
-        name: '100 Ft Garden Cleaning',
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: 'Package 2',
-    price: '100$',
-    services: [
-      {
-        id: 1,
-        name: 'Chimney Cleaning',
-      },
-      {
-        id: 2,
-        name: '1x Carpet Cleaning',
-      },
-      {
-        id: 3,
-        name: '100 Ft Garden Cleaning',
-      },
-    ],
-  },
-  {
-    id: 3,
-    name: 'Package 3',
-    price: '150$',
-    services: [
-      {
-        id: 1,
-        name: 'Chimney Cleaning',
-      },
-      {
-        id: 2,
-        name: '1x Carpet Cleaning',
-      },
-      {
-        id: 3,
-        name: '100 Ft Garden Cleaning',
-      },
-    ],
-  },
-  {
-    id: 4,
-    name: 'Package 4',
-    price: '80$',
-    services: [
-      {
-        id: 1,
-        name: 'Chimney Cleaning',
-      },
-      {
-        id: 2,
-        name: '1x Carpet Cleaning',
-      },
-      {
-        id: 3,
-        name: '100 Ft Garden Cleaning',
-      },
-    ],
+    id: '6',
+    name: 'Car Washing',
   },
 ];
 
@@ -140,9 +55,11 @@ const ServiceDetails: React.FC = ({route}) => {
   const [step, setStep] = useState(0);
   const [visibleItems, setVisibleItems] = useState(5);
   const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList, 'ServiceDetails'>>();
+    useNavigation<
+      NativeStackNavigationProp<RootStackParamList, 'ServiceDetails'>
+    >();
   const onSwipeLeft = () => {
-    if (step < item.cover.length - 1) {
+    if (step < item?.serviceImages?.length - 1) {
       setStep(step + 1);
     }
   };
@@ -154,12 +71,26 @@ const ServiceDetails: React.FC = ({route}) => {
   };
 
   const handleShowMore = () => {
-    setVisibleItems(prev => Math.min(prev + 5, services.length));
+    setVisibleItems(prev => Math.min(prev + 5, item.type.length));
   };
 
   const handleShowLess = () => {
     setVisibleItems(5);
   };
+
+  const getServiceNames = serviceIds => {
+    return serviceIds
+      ?.map(id => {
+        const serviceItem = items.find(item => item.id === id);
+        return serviceItem ? serviceItem.name : null;
+      })
+      .filter(name => name !== null);
+  };
+  const serviceNames = getServiceNames(item?.type.slice(0, visibleItems));
+  console.log(item.createdAt);
+
+  const createdAtDate = new Date(item.createdAt._seconds * 1000);
+  const formattedDate = moment(createdAtDate).format('DD MMMM, YYYY');
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -177,9 +108,9 @@ const ServiceDetails: React.FC = ({route}) => {
               <View>
                 <Image
                   source={
-                    typeof item.cover[step] === 'string'
-                      ? {uri: item.cover[step]}
-                      : item.cover[step]
+                    typeof item.serviceImages[step] === 'string'
+                      ? {uri: item.serviceImages[step]}
+                      : item.serviceImages[step]
                   }
                   resizeMode="cover"
                   style={styles.image}
@@ -188,7 +119,7 @@ const ServiceDetails: React.FC = ({route}) => {
               </View>
 
               <View style={styles.dotsContainer}>
-                {item.cover.map((_, index) => (
+                {item.serviceImages.map((_, index) => (
                   <TouchableOpacity key={index} onPress={() => setStep(index)}>
                     {step === index ? (
                       <LinearGradient
@@ -206,7 +137,7 @@ const ServiceDetails: React.FC = ({route}) => {
           <View style={{marginTop: RFPercentage(2)}}>
             <View style={styles.rowContainer}>
               <Image
-                source={item.icon}
+                source={{uri: item.image}}
                 resizeMode="contain"
                 style={styles.icon}
               />
@@ -215,10 +146,10 @@ const ServiceDetails: React.FC = ({route}) => {
               </Text>
             </View>
             <View style={styles.starContainer}>
-              {Array.from({length: item.rating}, (_, index) => (
+              {Array.from({length: 5}, (_, index) => (
                 <Image
                   key={index}
-                  source={item.star}
+                  source={IMAGES.star}
                   resizeMode="contain"
                   style={styles.star}
                 />
@@ -231,7 +162,7 @@ const ServiceDetails: React.FC = ({route}) => {
                   fontFamily: Fonts.fontRegular,
                   fontSize: RFPercentage(1.2),
                 }}>
-                Joined on : {item.joining}
+                Joined on : {formattedDate}
               </Text>
             </View>
           </View>
@@ -247,10 +178,7 @@ const ServiceDetails: React.FC = ({route}) => {
                   lineHeight: 18,
                   marginTop: RFPercentage(0.5),
                 }}>
-                We provide best cleaning services in the area ranging from
-                Chimney cleaning to copeporate level cleanings with quality like
-                no one else provide. Reach out to us now to get your space
-                cleaned up.
+                {item.description}
               </Text>
             </View>
           </View>
@@ -258,7 +186,7 @@ const ServiceDetails: React.FC = ({route}) => {
             <View>
               <TouchableOpacity
                 activeOpacity={0.6}
-                onPress={() => navigation.navigate('Availability')}
+                onPress={() => navigation.navigate('CheckAvailability', {item : item})}
                 style={{flexDirection: 'row', alignItems: 'center'}}>
                 <Text
                   style={{
@@ -292,9 +220,9 @@ const ServiceDetails: React.FC = ({route}) => {
             <View
               style={{right: RFPercentage(0.7), marginTop: RFPercentage(0.5)}}>
               <FlatList
-                data={services.slice(0, visibleItems)}
+                data={serviceNames}
                 numColumns={2}
-                keyExtractor={item => item.id.toString()}
+                keyExtractor={(item, index) => index.toString()}
                 renderItem={({item, index}) => (
                   <View
                     style={{
@@ -314,17 +242,17 @@ const ServiceDetails: React.FC = ({route}) => {
                         fontSize: RFPercentage(1.3),
                         fontFamily: Fonts.fontRegular,
                       }}>
-                      {item.name}
+                      {item}
                     </Text>
                   </View>
                 )}
               />
 
               {/* Show More / Show Less button */}
-              {services.length > 5 && (
+              {item.type.length > 5 && (
                 <TouchableOpacity
                   onPress={
-                    visibleItems < services.length
+                    visibleItems < item.type.length
                       ? handleShowMore
                       : handleShowLess
                   }>
@@ -337,11 +265,11 @@ const ServiceDetails: React.FC = ({route}) => {
                       bottom: RFPercentage(1.5),
                       position: 'absolute',
                       left:
-                        visibleItems < services.length
+                        visibleItems < item.type.length
                           ? RFPercentage(18.6)
                           : RFPercentage(34.5),
                     }}>
-                    {visibleItems < services.length ? `+5 More` : `See Less`}
+                    {visibleItems < item.type.length ? `+5 More` : `See Less`}
                   </Text>
                 </TouchableOpacity>
               )}
@@ -359,16 +287,16 @@ const ServiceDetails: React.FC = ({route}) => {
           <View style={{marginTop: RFPercentage(1.5)}}>
             <FlatList
               horizontal
-              data={Packages}
+              data={item.packages}
               keyExtractor={item => item.id.toString()}
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={{paddingHorizontal: RFPercentage(1.2)}}
               renderItem={({item}) => {
                 return (
                   <Package
-                    name={item.name}
+                    name={`Package ${item.id}`}
                     price={item.price}
-                    services={item.services}
+                    detail={item.details}
                   />
                 );
               }}
@@ -424,7 +352,7 @@ const ServiceDetails: React.FC = ({route}) => {
           <GradientButton
             title="Get Custom Offer"
             textStyle={{fontSize: RFPercentage(1.4)}}
-            onPress={()=>{}}
+            onPress={() => {}}
           />
         </View>
       </ScrollView>
@@ -465,17 +393,19 @@ const styles = StyleSheet.create({
   },
   image: {
     width: '100%',
-    height: RFPercentage(25),
+    height: RFPercentage(27),
   },
   rowContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   icon: {
-    width: RFPercentage(3.2),
-    height: RFPercentage(3.2),
+    width: RFPercentage(3.5),
+    height: RFPercentage(3.5),
     borderRadius: RFPercentage(100),
     marginRight: RFPercentage(1),
+    borderWidth:2,
+    borderColor:Colors.gradient1
   },
   starContainer: {
     flexDirection: 'row',

@@ -12,7 +12,7 @@ const ServicesCard = ({covers, icon, name, price, rating, star, location, onPres
     <TouchableOpacity activeOpacity={0.6} onPress={onPress}>
       <View style={styles.container}>
         <View style={styles.imageContainer}>
-          <Image source={covers[step]} resizeMode="cover" style={styles.image} />
+          <Image source={{uri : covers[step]}} resizeMode="cover" style={styles.image} />
         </View>
         <View style={styles.dotsContainer}>
           {covers.map((_, index) => (
@@ -27,7 +27,7 @@ const ServicesCard = ({covers, icon, name, price, rating, star, location, onPres
         </View>
         <View style={styles.detailsContainer}>
           <View style={styles.rowContainer}>
-            <Image source={icon} resizeMode="contain" style={styles.icon} />
+            <Image source={{uri : icon}} resizeMode="contain" style={styles.icon} />
             <Text style={styles.nameText}>{name}</Text>
           </View>
           <View style={styles.starContainer}>
@@ -36,13 +36,13 @@ const ServicesCard = ({covers, icon, name, price, rating, star, location, onPres
             ))}
           </View>
           <View style={styles.priceContainer}>
-            <Text style={styles.priceText}>Starts at {price}</Text>
+            <Text style={styles.priceText}>Starts at {price}$</Text>
             <View style={styles.locationContainer}>
               <Text style={styles.fromText}>From :</Text>
               <View style={styles.locationRow}>
                 <EvilIcons name="location" size={RFPercentage(1.3)} style={styles.locationIcon} />
-                <Text style={styles.locationText}>{location}</Text>
-              </View>
+                <Text style={styles.locationText}>{location?.slice(0, 5)}..</Text>
+                </View>
             </View>
           </View>
         </View>
@@ -59,6 +59,8 @@ const styles = StyleSheet.create({
     borderColor: Colors.inputFieldColor,
     borderWidth: 1,
     borderRadius: RFPercentage(1),
+    // backgroundColor:'red', 
+    height:RFPercentage(25)
   },
   imageContainer: {
     width: '100%',
@@ -74,7 +76,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: RFPercentage(2),
+    marginTop: RFPercentage(1.1),
   },
   activeDot: {
     width: RFPercentage(0.8),
@@ -90,17 +92,20 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(209, 213, 219, 1)',
   },
   detailsContainer: {
-    padding: RFPercentage(1.5),
+    padding: RFPercentage(1),
+    // backgroundColor:'red'
   },
   rowContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   icon: {
-    width: RFPercentage(2.8),
-    height: RFPercentage(2.8),
+    width: RFPercentage(2.9),
+    height: RFPercentage(2.9),
     borderRadius: RFPercentage(100),
     marginRight: RFPercentage(1),
+    borderWidth:1.5,
+    borderColor:Colors.gradient1
   },
   nameText: {
     color: Colors.primaryText,
@@ -113,16 +118,16 @@ const styles = StyleSheet.create({
     marginLeft: RFPercentage(3.6),
   },
   star: {
-    width: RFPercentage(1.3),
-    height: RFPercentage(1.3),
+    width: RFPercentage(1.2),
+    height: RFPercentage(1.2),
     marginRight: RFPercentage(0.2),
-    bottom: RFPercentage(0.5),
+    bottom: RFPercentage(0.6),
   },
   priceContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: RFPercentage(1.5),
+    marginTop: RFPercentage(1),
   },
   priceText: {
     color: Colors.primaryText,
@@ -132,6 +137,7 @@ const styles = StyleSheet.create({
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    // marginTop:RFPercentage(0.2)
   },
   fromText: {
     color: Colors.secondaryText,
@@ -141,6 +147,7 @@ const styles = StyleSheet.create({
   locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
+
   },
   locationIcon: {
     bottom: 1.5,
