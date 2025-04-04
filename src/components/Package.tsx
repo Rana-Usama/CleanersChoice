@@ -47,8 +47,8 @@ const styles = StyleSheet.create({
   },
   packageName: {
     textAlign: 'center',
-    color: Colors.placeholderColor,
-    fontFamily: Fonts.fontMedium,
+    color: Colors.primaryText,
+    fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.4),
     paddingVertical: RFPercentage(1),
     
@@ -78,13 +78,15 @@ const styles = StyleSheet.create({
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.3),
-    lineHeight: 18,
+    lineHeight: RFPercentage(2.4),
     paddingHorizontal: RFPercentage(1),
+    marginTop:RFPercentage(0.5)
   },
   priceContainer: {
-    paddingVertical: RFPercentage(0.5),
+    paddingVertical: RFPercentage(0.9),
     alignSelf: 'stretch',
     alignItems: 'center',
+    // backgroundColor:'red'
   },
   priceText: {
     textAlign: 'center',

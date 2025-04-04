@@ -8,19 +8,27 @@ import {
   TouchableOpacity,
   View,
   Platform,
+  TouchableWithoutFeedback,
+  Modal,
+  KeyboardAvoidingView,
 } from 'react-native';
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useCallback} from 'react';
 import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import SearchField from '../../../components/SearchField';
 import ServicesCard from '../../../components/ServicesCard';
 import {useNavigation} from '@react-navigation/native';
 import HeaderBack from '../../../components/HeaderBack';
-import {useSelector} from 'react-redux';
 import {RootStackParamList} from '../../../routers/StackNavigator';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {Popable} from 'react-native-popable';
 import Slider from '@react-native-community/slider';
+import {useFocusEffect} from '@react-navigation/native';
+import firestore from '@react-native-firebase/firestore';
+import {BlurView} from '@react-native-community/blur';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import InputField from '../../../components/InputField';
+import GradientButton from '../../../components/GradientButton';
 
 const categories = [
   {id: 1, name: 'All', icon: Icons.all},
@@ -35,54 +43,6 @@ const categories = [
 const filter = [
   {id: 1, name: 'Location'},
   {id: 2, name: 'Price Range'},
-  {id: 3, name: 'Service Type'},
-];
-
-const services = [
-  {
-    id: 1,
-    name: 'Alpha Cleaning',
-    icon: IMAGES.alpha,
-    cover: [IMAGES.cleaning1, IMAGES.cleaning2, IMAGES.cleaning3],
-    price: '50$',
-    location: 'Ohio',
-    rating: 5,
-    star: IMAGES.star,
-    joining: '26 April, 2024',
-  },
-  {
-    id: 2,
-    name: 'Sophix Cleaning',
-    icon: IMAGES.sophix,
-    cover: [IMAGES.cleaning4, IMAGES.cleaning2, IMAGES.cleaning3],
-    price: '100$',
-    location: 'Ohio',
-    rating: 5,
-    star: IMAGES.star,
-    joining: '26 April, 2024',
-  },
-  {
-    id: 3,
-    name: 'The Cleaners',
-    icon: IMAGES.cleaners,
-    cover: [IMAGES.cleaning2, IMAGES.cleaning1, IMAGES.cleaning3],
-    price: '50$',
-    location: 'Ohio',
-    rating: 5,
-    star: IMAGES.star,
-    joining: '26 April, 2024',
-  },
-  {
-    id: 4,
-    name: 'Clean It',
-    icon: IMAGES.clean,
-    cover: [IMAGES.cleaning3, IMAGES.cleaning1, IMAGES.cleaning2],
-    price: '150$',
-    location: 'Ohio',
-    rating: 5,
-    star: IMAGES.star,
-    joining: '26 April, 2024',
-  },
 ];
 
 const Home = () => {
@@ -93,6 +53,67 @@ const Home = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [priceRange, setPriceRange] = useState([10, 2000]);
   const tempValue = useRef(priceRange[0]);
+  const [servicesData, setServicesData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [rangeSelector, setRangeSelector] = useState(false);
+  const [locations, setLocations] = useState([]);
+  const [query, setQuery] = useState('');
+ const [loctionFilter, setLocationFilter] = useState(false)
+
+
+  useFocusEffect(
+    useCallback(() => {
+      serviceDetails(); 
+    }, []),
+  );
+
+  const serviceDetails = async () => {
+    setLoading(true);
+    try {
+      const querySnapshot = await firestore()
+        .collection('CleanerServices')
+        .get();
+
+      if (!querySnapshot.empty) {
+        const servicesArray = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        setServicesData(servicesArray);
+
+        const locationsArray = servicesArray
+          .map(service => service.location)
+          .filter(location => location !== undefined);
+        setLocations(locationsArray);
+      } else {
+        setServicesData([]);
+        setLocations([]);
+      }
+    } catch (error) {
+      console.error('Error fetching service details:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredServicesData = servicesData.filter(service => {
+    const servicePrice = service?.packages[0]?.price;
+    return servicePrice >= 0 && servicePrice <= priceRange[0];
+  });
+
+ const filteredLocationServices = servicesData.filter(service =>
+    service?.location.toLowerCase().includes(query.toLowerCase()))
+
+
+  const handleSearch = query => {
+    setQuery(query);
+    const filtered = locations.filter(location =>
+      location.toLowerCase().includes(query.toLowerCase()),
+    );
+    setLocations(filtered);
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -173,73 +194,18 @@ const Home = () => {
             data={filter}
             keyExtractor={item => item.id.toString()}
             renderItem={({item}) => {
-              return item.id === 2 ? (
-                <Popable
-                  style={{width: RFPercentage(24), marginBottom:RFPercentage(0.6)}}
-                  backgroundColor={'rgba(229, 231, 235, 0.3)'}
-                  caretPosition="center"
-                  content={
-                    <View style={styles.popableContent}>
-                      <View style={styles.popableInnerView}>
-                        <Slider
-                          style={styles.sliderStyle}
-                          minimumValue={10}
-                          maximumValue={2000}
-                          step={100}
-                          value={priceRange[0]}
-                          onValueChange={value => {
-                            tempValue.current = value;
-                          }}
-                          onSlidingComplete={value => {
-                            setPriceRange([value, priceRange[1]]);
-                          }}
-                          minimumTrackTintColor={Colors.gradient1}
-                          maximumTrackTintColor="gray"
-                          thumbTintColor={Colors.gradient1}
-                        />
-                        <View style={styles.sliderLabelsContainer}>
-                          <Text style={styles.sliderLabel}>0$</Text>
-                          <Text style={styles.sliderLabel}>1000$</Text>
-                          <Text style={styles.sliderLabel}>2000$+</Text>
-                        </View>
-                      </View>
-                    </View>
-                  }>
-                  <View>
-                    <View
-                      style={[
-                        styles.filterBox,
-                        {
-                          borderColor:
-                            Filter === item.id
-                              ? Colors.gradient2
-                              : Colors.inputFieldColor,
-                        },
-                      ]}>
-                      <Text
-                        style={[
-                          styles.filterText,
-                          {
-                            fontFamily:
-                              Filter === item.id
-                                ? Fonts.semiBold
-                                : Fonts.fontRegular,
-                          },
-                        ]}>
-                        {item.name}
-                      </Text>
-                    </View>
-                  </View>
-                </Popable>
-              ) : (
+              return (
                 <View>
                   <TouchableOpacity
-                    onPress={() => setFilter(item?.id)}
+                    onPress={() => {
+                      setFilter(item?.id);
+                      setModalVisible(true);
+                    }}
                     style={[
                       styles.filterBox,
                       {
                         borderColor:
-                          Filter === item.id
+                          Filter === item.id && (priceRange || loctionFilter)
                             ? Colors.gradient2
                             : Colors.inputFieldColor,
                       },
@@ -266,19 +232,19 @@ const Home = () => {
           <Text style={styles.sectionTitle}>Cleaning Services</Text>
           <View style={styles.servicesContainer}>
             <FlatList
-              data={services}
+              data={rangeSelector ? filteredServicesData : loctionFilter ? filteredLocationServices : servicesData}
               keyExtractor={item => item.id.toString()}
               numColumns={2}
               columnWrapperStyle={styles.serviceColumnWrapper}
               renderItem={({item}) => (
                 <View style={styles.serviceItem}>
                   <ServicesCard
-                    covers={item.cover}
+                    covers={item.serviceImages}
                     name={item.name}
-                    icon={item.icon}
-                    price={item.price}
-                    star={item.star}
-                    rating={item.rating}
+                    icon={item.image}
+                    price={item.packages[0].price}
+                    star={IMAGES.star}
+                    rating={5}
                     location={item.location}
                     onPress={() =>
                       navigation.navigate('ServiceDetails', {
@@ -292,6 +258,228 @@ const Home = () => {
           </View>
         </View>
       </ScrollView>
+      {Filter === 1 && modalVisible && (
+        <>
+          <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+            <View style={styles.modalContainer}>
+              <BlurView
+                style={styles.blurView}
+                blurType="light"
+                blurAmount={5}
+              />
+              <Modal
+                visible={modalVisible}
+                transparent={true}
+                onRequestClose={() => setModalVisible(false)}>
+                <KeyboardAvoidingView
+                  behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                  style={{flex: 1}}>
+                  <View
+                    style={{
+                      width: '90%',
+                      height: '50%',
+                      alignSelf: 'center',
+                      backgroundColor: 'rgba(226, 238, 255, 0.8)',
+                      alignItems: 'center',
+                      borderRadius: RFPercentage(2.5),
+                      top: RFPercentage(20),
+                      paddingHorizontal: RFPercentage(1.6),
+                      paddingVertical: RFPercentage(2.5),
+                    }}>
+                    <View
+                      style={{
+                        width: '100%',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
+                      <Text
+                        style={{
+                          color: Colors.secondaryText,
+                          fontFamily: Fonts.fontMedium,
+                          fontSize: RFPercentage(1.6),
+                        }}>
+                        Apply Location
+                      </Text>
+                      <TouchableOpacity
+                        style={{position: 'absolute', right: 0}}
+                        onPress={() => setModalVisible(false)}>
+                        <AntDesign
+                          name="closecircleo"
+                          size={RFPercentage(2.5)}
+                          color={'rgba(184, 184, 184, 1)'}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                    <View style={{width: '100%', marginTop: RFPercentage(2)}}>
+                      <SearchField
+                        placeholder="Search Location"
+                        customStyle={{borderColor: 'rgba(39, 38, 38, 0.29)'}}
+                        value={query}
+                        onChangeText={handleSearch}
+                      />
+                    </View>
+
+                    {query.length > 0 && (
+                      <View
+                        style={{
+                          top: RFPercentage(0.5),
+                          width: '100%',
+                          backgroundColor: 'white',
+                          borderRadius: 5,
+            
+                        }}>
+                        <FlatList
+                          data={locations}
+                          keyExtractor={(item, index) => index.toString()}
+                          renderItem={({item}) => (
+                            <TouchableOpacity
+                              onPress={() => {
+                                setQuery(item); 
+                              }}>
+                              <Text
+                                style={{
+                                  padding: 10,
+                                  fontSize: RFPercentage(1.8),
+                                  borderBottomWidth: 1,
+                                  borderBottomColor: 'rgba(184, 184, 184, 0.8)',
+                                }}>
+                                {item}
+                              </Text>
+                            </TouchableOpacity>
+                          )}
+                        />
+                      </View>
+                    )}
+                    <View
+                      style={{position: 'absolute', bottom: RFPercentage(2)}}>
+                      <GradientButton
+                        title="Apply"
+                        onPress={() => 
+                        {
+                          setLocationFilter(true)
+                          setModalVisible(false)
+                        }
+                        }
+                      />
+                    </View>
+                  </View>
+                </KeyboardAvoidingView>
+              </Modal>
+            </View>
+          </TouchableWithoutFeedback>
+        </>
+      )}
+
+      {Filter === 2 && modalVisible && (
+        <>
+          <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+            <View style={styles.modalContainer}>
+              <BlurView
+                style={styles.blurView}
+                blurType="light"
+                blurAmount={5}
+              />
+              <Modal
+                visible={modalVisible}
+                transparent={true}
+                onRequestClose={() => setModalVisible(false)}>
+                <KeyboardAvoidingView
+                  behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                  style={{flex: 1}}>
+                  <View
+                    style={{
+                      width: '90%',
+                      height: '40%',
+                      alignSelf: 'center',
+                      backgroundColor: 'rgba(228, 238, 253, 0.8)',
+                      alignItems: 'center',
+                      borderRadius: RFPercentage(2.5),
+                      top: RFPercentage(25),
+                      paddingHorizontal: RFPercentage(1.6),
+                      paddingVertical: RFPercentage(2.5),
+                    }}>
+                    <View
+                      style={{
+                        width: '100%',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginTop: RFPercentage(1),
+                      }}>
+                      <Text
+                        style={{
+                          color: Colors.primaryText,
+                          fontFamily: Fonts.fontMedium,
+                          fontSize: RFPercentage(1.6),
+                        }}>
+                        Price Range Selection
+                      </Text>
+                      <TouchableOpacity
+                        style={{position: 'absolute', right: 0}}
+                        onPress={() => setModalVisible(false)}>
+                        <AntDesign
+                          name="closecircleo"
+                          size={RFPercentage(2.5)}
+                          color={'rgba(144, 144, 144, 0.77)'}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                    <View style={{width: '100%', marginTop: RFPercentage(8)}}>
+                      <Slider
+                        style={styles.sliderStyle}
+                        minimumValue={10}
+                        maximumValue={2000}
+                        step={10}
+                        value={priceRange[0]}
+                        onValueChange={value => {
+                          tempValue.current = value;
+                        }}
+                        onSlidingComplete={value => {
+                          setPriceRange([value, priceRange[1]]);
+                        }}
+                        minimumTrackTintColor={Colors.gradient1}
+                        maximumTrackTintColor="gray"
+                        thumbTintColor={Colors.gradient1}
+                      />
+                      <View style={styles.sliderLabelsContainer}>
+                        <Text
+                          style={[styles.sliderLabel, {left: RFPercentage(1)}]}>
+                          0$
+                        </Text>
+                        <Text
+                          style={[styles.sliderLabel, {left: RFPercentage(1)}]}>
+                          1000$
+                        </Text>
+                        <Text style={styles.sliderLabel}>2000$+</Text>
+                      </View>
+                      <View style={{marginTop: RFPercentage(5)}}>
+                        <Text
+                          style={{
+                            textAlign: 'center',
+                            fontFamily: Fonts.fontMedium,
+                            fontSize: RFPercentage(1.5),
+                            color: Colors.primaryText,
+                          }}>
+                          Price Range: {tempValue.current}$
+                        </Text>
+                      </View>
+                    </View>
+                    <View
+                      style={{position: 'absolute', bottom: RFPercentage(2)}}>
+                      <GradientButton
+                        title="Apply"
+                        onPress={() => {
+                          setRangeSelector(true);
+                          setModalVisible(false);
+                        }}
+                      />
+                    </View>
+                  </View>
+                </KeyboardAvoidingView>
+              </Modal>
+            </View>
+          </TouchableWithoutFeedback>
+        </>
+      )}
     </SafeAreaView>
   );
 };
@@ -384,11 +572,12 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.5),
   },
   serviceColumnWrapper: {
-    justifyContent: 'space-between',
+    // justifyContent: 'space-between',
+    // backgroundColor:'red'
   },
   serviceItem: {
-    margin: RFPercentage(1),
-    width: '46%',
+    margin: RFPercentage(0.6),
+    width: '47.5%',
     marginTop: RFPercentage(1),
   },
   servicesContainer: {
@@ -411,23 +600,35 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   sliderStyle: {
-    width: RFPercentage(24),
+    width: '100%',
     height: RFPercentage(3),
   },
   sliderLabelsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: RFPercentage(22),
-    bottom: 5,
+    width: '100%',
+    // bottom: 5,
     // marginTop: -4,
   },
   sliderLabel: {
     color: Colors.secondaryText,
-    fontSize: 8,
+    fontSize: RFPercentage(2),
     fontFamily: Fonts.semiBold,
   },
   flatListContainer: {
     paddingHorizontal: RFPercentage(1.2),
     paddingTop: RFPercentage(1.5),
+  },
+  modalContainer: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  blurView: {
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
   },
 });

@@ -62,7 +62,7 @@ const Profile = () => {
             {loading ? (
               <ActivityIndicator
                 size={'large'}
-                color={Colors.inputFieldColor}
+                color={Colors.placeholderColor}
               />
             ) : (
               <Image

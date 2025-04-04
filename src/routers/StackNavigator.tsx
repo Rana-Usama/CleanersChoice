@@ -31,6 +31,7 @@ import CancelSubscription from '../screens/cleanerflow/premium/CancelSubscriptio
 import Availability from '../screens/commonflow/home/Availability';
 import Settings from '../screens/commonflow/home/settings/Settings';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import CheckAvailability from '../screens/customerflow/home/CheckAvailablity';
 
 export type RootStackParamList = {
   SplashOne: undefined;
@@ -60,6 +61,7 @@ export type RootStackParamList = {
   CancelSubscription: undefined;
   Availability : undefined;
   Settings: undefined;
+  CheckAvailability:{ item: any };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -129,6 +131,7 @@ const StackNavigator: React.FC = () => {
           <Stack.Screen name="ServiceDetails" component={ServiceDetails} />
           <Stack.Screen name="PostJob" component={PostJob} />
           <Stack.Screen name="JobPosted" component={JobPosted} />
+          <Stack.Screen name="CheckAvailability" component={CheckAvailability} />
 
 
           {/* ----------------- Cleaner Flow ---------------- */}
