@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   galleryTextContainer: {
-    marginTop: RFPercentage(2.5),
+    marginTop: RFPercentage(3.5),
   },
   galleryText: {
     color: Colors.secondaryText,
