@@ -32,6 +32,7 @@ import Toast from 'react-native-toast-message';
 import {RootStackParamList} from '../../../../routers/StackNavigator';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import MultiSelect from 'react-native-multiple-select';
+import {date} from 'yup';
 
 const items = [
   {
@@ -76,20 +77,21 @@ const ServiceOne: React.FC = () => {
     state => state.profile.profileCompletion,
   );
   const profileData = useSelector(state => state.profile.profileData);
-
   const [selectedItems, setSelectedItems] = useState([]);
   const multiSelectRef = useRef(null);
-
   const onSelectedItemsChange = (selectedItems: any) => {
     setSelectedItems(selectedItems);
   };
 
-  console.log(selectedItems);
+  const [hasFetchedData, setHasFetchedData] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
-      fetchServiceData();
-    }, []),
+      if (!hasFetchedData) {
+        fetchServiceData();
+        setHasFetchedData(true);
+      }
+    }, [hasFetchedData]),
   );
 
   const fetchServiceData = async () => {
@@ -103,7 +105,9 @@ const ServiceOne: React.FC = () => {
       if (doc.exists) {
         const data = doc.data();
         dispatch(cleanerDescription(data?.description || ''));
-        dispatch(cleanerAvailability(data?.availability || false));
+        // if (data?.availability.length > 0 && (available === null || available !== data?.availability)) {
+        //   dispatch(cleanerAvailability(data?.availability));
+        // }
         setSelectedItems(data?.type || []);
         setLoaction(data?.location || '');
         setServiceData(data);
@@ -127,7 +131,7 @@ const ServiceOne: React.FC = () => {
             name: profileData?.name,
             image: profileData?.profile,
             description: description,
-            availability: available,
+            availability: available.length > 0 ? available  : serviceData?.availability,
             type: selectedItems,
             location: location,
             serviceImages: serviceData?.serviceImages || [],
@@ -157,16 +161,15 @@ const ServiceOne: React.FC = () => {
     }
   };
 
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <HeaderBack title="Service" textStyle={styles.headerText} />
-
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{flex: 1}}>
         <ScrollView
           contentContainerStyle={{flexGrow: 1, paddingBottom: RFPercentage(5)}}
-          keyboardShouldPersistTaps="handled">
+          >
           <View style={styles.container}>
             <View style={styles.infoHeaderContainer}>
               <InfoHeader />
@@ -201,12 +204,13 @@ const ServiceOne: React.FC = () => {
                     styles.dateText,
                     {
                       color:
-                        available.length > 0
+                        available.length > 0 ||
+                        serviceData?.availability.length > 0
                           ? Colors.inputTextColor
                           : Colors.placeholderColor,
                     },
                   ]}>
-                  {available.length > 0
+                  {available.length > 0 || serviceData?.availability.length > 0
                     ? 'Availability Set'
                     : 'Set Availability'}
                 </Text>
@@ -214,7 +218,7 @@ const ServiceOne: React.FC = () => {
               <View style={{position: 'absolute', right: RFPercentage(1)}}>
                 <TouchableOpacity
                   onPress={() => navigation.navigate('Availability')}>
-                  {available.length > 0 ? (
+                  {available.length > 0 || serviceData?.availability.length > 0 ? (
                     <Image
                       source={Icons.timeEdit}
                       style={{width: RFPercentage(2), height: RFPercentage(2)}}
@@ -273,7 +277,7 @@ const ServiceOne: React.FC = () => {
                   borderRadius: RFPercentage(0.5),
                 }}
                 styleTextDropdownSelected={{
-                  color: Colors.inputTextColor,
+                  color: Colors.placeholderColor,
                   fontSize: RFPercentage(1.6),
                   fontFamily: Fonts.fontRegular,
                 }}
@@ -282,9 +286,14 @@ const ServiceOne: React.FC = () => {
                   fontFamily: Fonts.fontRegular,
                   color: Colors.inputTextColor,
                 }}
-                hideDropdown
+                hideDropdown  
+                textInputProps={{autoFocus:false}}  
+                styleDropdownMenu={{height:RFPercentage(6)}}   
               />
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{marginTop:RFPercentage(0.7)}}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={{marginTop: RFPercentage(0.7)}}>
                 {multiSelectRef.current?.getSelectedItemsExt(selectedItems)}
               </ScrollView>
             </View>

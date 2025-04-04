@@ -22,24 +22,13 @@ const Package = (props: props) => {
 
       <View style={styles.dividerContainer}>
         <View style={styles.contentContainer}>
-          {/* <FlatList
-            data={props.services}
-            keyExtractor={item => item.id.toString()}
-            renderItem={({item}) => (
-              <View style={styles.serviceItem}>
-                <View style={styles.bulletPoint}></View>
-                <Text style={styles.serviceText}>{item.name}</Text>
-              </View>
-            )}
-            contentContainerStyle={{flexGrow: 1}} // Ensures list fills space
-          />
-           */}
+          
           <Text style={styles.serviceText}>{props.detail}</Text>
         </View>
       </View>
 
       <View style={styles.priceContainer}>
-        <Text style={styles.priceText}>Starts at {props.price}</Text>
+        <Text style={styles.priceText}>Starts at {props.price}$</Text>
       </View>
     </View>
   );
@@ -61,7 +50,8 @@ const styles = StyleSheet.create({
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.4),
-    paddingVertical: RFPercentage(0.8),
+    paddingVertical: RFPercentage(1),
+    
   },
   dividerContainer: {
     borderTopWidth: 1,
@@ -100,6 +90,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: Colors.gradient1,
     fontSize: RFPercentage(1.4),
-    fontFamily: Fonts.fontMedium,
+    fontFamily: Fonts.semiBold,
   },
 });

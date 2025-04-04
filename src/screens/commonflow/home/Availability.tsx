@@ -6,6 +6,7 @@ import {
   View,
   Image,
   ActivityIndicator,
+  Modal,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -97,8 +98,8 @@ const Availability = () => {
 
   useEffect(() => {
     const updatedAvailability = days.map(day => {
-      const found = service?.availability?.find(item => item.day === day.name);
-      return {
+      const found = service?.availability?.length > 0  && service?.availability?.find(item => item.day === day.name);
+      return { 
         day: day.name,
         fromTime: found
           ? new Date(
@@ -153,10 +154,7 @@ const Availability = () => {
     }, 1500);
   };
   
-  useEffect(() => {
-    dispatch(cleanerAvailability(availabilityData));
-    console.log(availabilityData)
-  }, [availabilityData]); 
+  
   
   return (
     <SafeAreaView style={styles.safeArea}>

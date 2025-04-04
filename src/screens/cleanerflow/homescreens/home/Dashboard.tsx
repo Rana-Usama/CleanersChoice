@@ -72,6 +72,7 @@ const Dashboard: React.FC = () => {
   const [visibleItems, setVisibleItems] = useState(5);
   const [loading3, setLoading3] = useState(false);
 
+
   const uploadImg = async () => {
     try {
       setLoading(true);
@@ -89,11 +90,9 @@ const Dashboard: React.FC = () => {
         maxWidth: 1000,
         quality: 0.8,
       });
-      console.log('Image compression completed successfully');
 
       const user = auth().currentUser;
       if (!user) {
-        console.log('No user logged in');
         setLoading(false);
         return;
       }
@@ -106,7 +105,6 @@ const Dashboard: React.FC = () => {
       });
       setImg({uri: downloadURL});
       setProfile(downloadURL);
-      console.log('Profile picture updated successfully');
     } catch (error) {
       console.log('Error uploading image:', error);
     } finally {
@@ -140,8 +138,8 @@ const Dashboard: React.FC = () => {
 
   useFocusEffect(
     React.useCallback(() => {
-      serviceDetails(); 
-    }, [])
+      serviceDetails();
+    }, []),
   );
 
   const serviceDetails = async () => {
@@ -200,7 +198,7 @@ const Dashboard: React.FC = () => {
         const serviceItem = items.find(item => item.id === id);
         return serviceItem ? serviceItem.name : null;
       })
-      .filter(name => name !== null); // Remove nulls in case no match is found
+      .filter(name => name !== null);
   };
   const serviceNames = getServiceNames(service?.type.slice(0, visibleItems));
 
@@ -231,7 +229,7 @@ const Dashboard: React.FC = () => {
                   <Image
                     source={
                       img
-                        ? {uri: img.path}
+                        ? {uri: img?.uri}
                         : profile
                         ? {uri: profile}
                         : IMAGES.defaultPic
@@ -267,14 +265,7 @@ const Dashboard: React.FC = () => {
           <>
             {profileCompletion === '100' ? (
               <>
-                <View
-                  style={{
-                    marginTop: RFPercentage(0.8),
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '90%',
-                    alignSelf: 'center',
-                  }}>
+                <View style={styles.ratingContainer2}>
                   <View style={styles.starContainer}>
                     {Array.from({length: service?.rating}, (_, index) => (
                       <Image
@@ -351,18 +342,15 @@ const Dashboard: React.FC = () => {
                             : handleShowLess
                         }>
                         <Text
-                          style={{
-                            color: Colors.gradient1,
-                            fontSize: RFPercentage(1.3),
-                            fontFamily: Fonts.fontMedium,
-                            textAlign: 'center',
-                            bottom: RFPercentage(1.5),
-                            position: 'absolute',
-                            left:
-                              visibleItems < service?.type?.length
-                                ? RFPercentage(18.5)
-                                : RFPercentage(35.5),
-                          }}>
+                          style={[
+                            styles.showMore,
+                            {
+                              left:
+                                visibleItems < service?.type?.length
+                                  ? RFPercentage(18.5)
+                                  : RFPercentage(35.5),
+                            },
+                          ]}>
                           {visibleItems < service?.type.length
                             ? `+${service?.type.length - 5} More`
                             : `See Less`}
@@ -396,9 +384,8 @@ const Dashboard: React.FC = () => {
                       renderItem={({item}) => {
                         return (
                           <Package
-                            name={`Package 1`}
+                            name={`Package ${item.id}`}
                             price={item.price}
-                            // services={item.services}
                             detail={item.details}
                           />
                         );
@@ -672,5 +659,20 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.4),
     top: 1,
+  },
+  ratingContainer2: {
+    marginTop: RFPercentage(0.8),
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '90%',
+    alignSelf: 'center',
+  },
+  showMore: {
+    color: Colors.gradient1,
+    fontSize: RFPercentage(1.3),
+    fontFamily: Fonts.fontMedium,
+    textAlign: 'center',
+    bottom: RFPercentage(1.5),
+    position: 'absolute',
   },
 });

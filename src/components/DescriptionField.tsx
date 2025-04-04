@@ -1,47 +1,44 @@
-import {StyleSheet, Text, View, TextInput} from 'react-native';
-import React, {useState} from 'react';
-import {RFPercentage} from 'react-native-responsive-fontsize';
-import {Colors, Fonts} from '../constants/Themes';
+import { StyleSheet, Text, View, TextInput } from 'react-native';
+import React, { useState } from 'react';
+import { RFPercentage } from 'react-native-responsive-fontsize';
+import { Colors, Fonts } from '../constants/Themes';
 
 const MAX_CHARACTERS = 100;
 
-interface props {
-  style? : object;
-  placeholder : string;
-  count : boolean;
+interface Props {
+  style?: object;
+  placeholder: string;
+  count: boolean;
   onChangeText?: (text: string) => void;
   value?: string;
-  charCount? : number
 }
 
-const DescriptionField = (props: props) => {
-  console.log('charcount........', props.charCount)
-  // const [charCount, setCharCount] = useState(0);
-
-  // const handleTextChange = (text : string) => {
-  //   if (text.length <= MAX_CHARACTERS) {
-  //     setCharCount(text.length);
-
-  //     if (props.onChangeText) {
-  //       props.onChangeText(text);
-  //     }
-  //   }
-  // };
+const DescriptionField = (props: Props) => {
+  const handleTextChange = (text: string) => {
+    if (text.length <= MAX_CHARACTERS) {
+      props.onChangeText?.(text);
+    }
+  };
 
   return (
-    <View style={[styles.textArea, {...props.style}]}>
+    <View style={[styles.textArea, { ...props.style }]}>
       <TextInput
         placeholder={props.placeholder}
         placeholderTextColor={Colors.placeholderColor}
         style={styles.textInput}
         numberOfLines={20}
         multiline
-        onChangeText={props.onChangeText}
+        onChangeText={handleTextChange}
         value={props.value}
       />
       {props.count && (
-        <Text style={[styles.charCount,{ color: props.charCount === MAX_CHARACTERS ? 'red' :  Colors.secondaryText,}]}>
-          {props.charCount}/{MAX_CHARACTERS}
+        <Text
+          style={[
+            styles.charCount,
+            { color: (props.value?.length ?? 0) === MAX_CHARACTERS ? 'red' : Colors.secondaryText },
+          ]}
+        >
+          {props.value?.length ?? 0}/{MAX_CHARACTERS}
         </Text>
       )}
     </View>
@@ -76,7 +73,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: RFPercentage(0.5),
     right: RFPercentage(1),
-    color: Colors.secondaryText,
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
   },
