@@ -43,7 +43,7 @@ const categories = [
 ];
 
 const Home = () => {
-  const [categorySelection, setCategorySelection] = useState('All');
+  const [categorySelection, setCategorySelection] = useState('1');
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, 'Home'>>();
   const [priceRange, setPriceRange] = useState([10, 2000]);
@@ -65,6 +65,9 @@ const Home = () => {
   const [loactionLoading, setLocationLoading] = useState(false);
   const [priceLoading, setPriceLoading] = useState(false);
 
+
+  console.log('categoryBasedData.........', categoryBasedData)
+
   useFocusEffect(
     useCallback(() => {
       serviceDetails();
@@ -77,7 +80,6 @@ const Home = () => {
       const querySnapshot = await firestore()
         .collection('CleanerServices')
         .get();
-
       if (!querySnapshot.empty) {
         const servicesArray = querySnapshot.docs.map(doc => ({
           id: doc.id,
@@ -88,6 +90,9 @@ const Home = () => {
           .map(service => service.location)
           .filter(location => location !== undefined);
         setLocations(locationsArray);
+
+       
+
       } else {
         setServicesData([]);
         setLocations([]);
@@ -107,6 +112,12 @@ const Home = () => {
   const filteredLocationServices = servicesData.filter(service =>
     service?.location.toLowerCase().includes(query.toLowerCase()),
   );
+
+
+  const filteredCategories = servicesData.filter(service => 
+    service.type && service.type.includes(categorySelection)
+  );
+
 
   const handleSearch = query => {
     setQuery(query);
@@ -171,15 +182,6 @@ const Home = () => {
     }, 1500);
   };
 
-  // const getServiceNames = serviceIds => {
-  //   return serviceIds
-  //     ?.map(id => {
-  //       const serviceItem = categories.find(item => item.id === id);
-  //       return serviceItem ? serviceItem.name : null;
-  //     })
-  //     .filter(name => name !== null);
-  // };
-  // const serviceNames = getServiceNames(item?.type);
 
 
   return (
@@ -214,13 +216,13 @@ const Home = () => {
             showsHorizontalScrollIndicator={false}
             renderItem={({item}) => (
               <TouchableOpacity
-                onPress={() => setCategorySelection(item?.name)}>
+                onPress={() => setCategorySelection(item?.id)}>
                 <View
                   style={[
                     styles.categoryBox,
                     {
                       borderColor:
-                        categorySelection === item.name
+                        categorySelection === item.id
                           ? Colors.gradient2
                           : Colors.inputFieldColor,
                     },
@@ -243,7 +245,7 @@ const Home = () => {
                       styles.categoryText,
                       {
                         fontFamily:
-                          categorySelection === item.name
+                          categorySelection === item.id
                             ? Fonts.semiBold
                             : Fonts.fontRegular,
                       },
@@ -363,38 +365,56 @@ const Home = () => {
           ) : (
             <>
               <View style={styles.servicesContainer}>
-                <FlatList
-                  data={
-                    rangeSelector
-                      ? filteredServicesData
-                      : loctionFilter
-                      ? filteredLocationServices
-                      : nameQuery
-                      ? filterNameData
-                      : servicesData
-                  }
-                  keyExtractor={item => item.id.toString()}
-                  numColumns={2}
-                  columnWrapperStyle={styles.serviceColumnWrapper}
-                  renderItem={({item}) => (
-                    <View style={styles.serviceItem}>
-                      <ServicesCard
-                        covers={item.serviceImages}
-                        name={item.name}
-                        icon={item.image}
-                        price={item.packages[0].price}
-                        star={IMAGES.star}
-                        rating={5}
-                        location={item.location}
-                        onPress={() =>
-                          navigation.navigate('ServiceDetails', {
-                            item: item,
-                          })
-                        }
-                      />
-                    </View>
-                  )}
-                />
+                {
+                  (rangeSelector || loctionFilter || nameQuery)  &&
+                filteredServicesData.length === 0 ||
+                filteredLocationServices.length === 0 ||
+                filterNameData.length === 0 
+                 ? (
+                  <>
+                  <View style={{alignItems:'center', justifyContent:'center',width:'100%', marginTop:RFPercentage(10)}}>
+                    <Image source={Icons.empty} resizeMode='contain' style={{width:RFPercentage(10), height:RFPercentage(10)}} />
+                    <Text style={{color:Colors.placeholderColor, fontFamily:Fonts.fontMedium, fontSize:RFPercentage(1.8), textAlign:'center', marginTop:RFPercentage(1)}}>No service found</Text>
+                  </View>
+                  </>
+                ) : (
+                  <>
+                    <FlatList
+                      data={
+                        rangeSelector
+                          ? filteredServicesData
+                          : loctionFilter
+                          ? filteredLocationServices
+                          : nameQuery
+                          ? filterNameData 
+                          : categorySelection != '1' ? 
+                          filteredCategories
+                          : servicesData
+                      }
+                      keyExtractor={item => item.id.toString()}
+                      numColumns={2}
+                      columnWrapperStyle={styles.serviceColumnWrapper}
+                      renderItem={({item}) => (
+                        <View style={styles.serviceItem}>
+                          <ServicesCard
+                            covers={item.serviceImages}
+                            name={item.name}
+                            icon={item.image}
+                            price={item.packages[0].price}
+                            star={IMAGES.star}
+                            rating={5}
+                            location={item.location}
+                            onPress={() =>
+                              navigation.navigate('ServiceDetails', {
+                                item: item,
+                              })
+                            }
+                          />
+                        </View>
+                      )}
+                    />
+                  </>
+                )}
               </View>
             </>
           )}

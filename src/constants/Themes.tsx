@@ -53,6 +53,7 @@ export const Icons: {[key: string]: any} = {
   editIcon: require('../assets/icons/message-edit.png'),
   remove: require('../assets/icons/remove-user.png'),
   timeEdit: require('../assets/icons/time-edit.png'),
+  empty: require('../assets/icons/empty.png'),
 
 };
 

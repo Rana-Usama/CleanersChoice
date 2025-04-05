@@ -32,7 +32,6 @@ import Toast from 'react-native-toast-message';
 import {RootStackParamList} from '../../../../routers/StackNavigator';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import MultiSelect from 'react-native-multiple-select';
-import {date} from 'yup';
 
 const items = [
   {
@@ -58,6 +57,10 @@ const items = [
   {
     id: '66',
     name: 'Car Washing',
+  },
+  {
+    id: '77',
+    name: 'Others',
   },
 ];
 
@@ -105,9 +108,6 @@ const ServiceOne: React.FC = () => {
       if (doc.exists) {
         const data = doc.data();
         dispatch(cleanerDescription(data?.description || ''));
-        // if (data?.availability.length > 0 && (available === null || available !== data?.availability)) {
-        //   dispatch(cleanerAvailability(data?.availability));
-        // }
         setSelectedItems(data?.type || []);
         setLoaction(data?.location || '');
         setServiceData(data);
