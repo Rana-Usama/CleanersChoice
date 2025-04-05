@@ -23,50 +23,58 @@ import {RootStackParamList} from '../../../routers/StackNavigator';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import moment from 'moment';
 
+const {width, height} = Dimensions.get('window');
+
 const items = [
   {
-    id: '1',
+    id: '11',
     name: 'Window Cleaning',
   },
   {
-    id: '2',
+    id: '22',
     name: 'Chimney Cleaning',
   },
   {
-    id: '3',
+    id: '33',
     name: 'Carpet Cleaning',
   },
   {
-    id: '4',
+    id: '44',
     name: 'Residential Cleaning',
   },
   {
-    id: '5',
+    id: '55',
     name: 'Pressure Washing',
   },
   {
-    id: '6',
+    id: '66',
     name: 'Car Washing',
   },
 ];
 
 const ServiceDetails: React.FC = ({route}) => {
   const {item} = route.params;
-  const [step, setStep] = useState(0);
   const [visibleItems, setVisibleItems] = useState(5);
   const navigation =
     useNavigation<
       NativeStackNavigationProp<RootStackParamList, 'ServiceDetails'>
     >();
-  const onSwipeLeft = () => {
-    if (step < item?.serviceImages?.length - 1) {
-      setStep(step + 1);
-    }
+
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const toggleDescription = () => {
+    setIsExpanded(prevState => !prevState);
   };
 
-  const onSwipeRight = () => {
-    if (step > 0) {
-      setStep(step - 1);
+  const [step, setStep] = useState(0);
+  const scrollViewRef = useRef(null);
+
+  const onScroll = event => {
+    const contentOffsetX = event.nativeEvent.contentOffset.x;
+    const index = Math.floor(contentOffsetX / width);
+
+    if (index !== step) {
+      setStep(index);
     }
   };
 
@@ -87,8 +95,6 @@ const ServiceDetails: React.FC = ({route}) => {
       .filter(name => name !== null);
   };
   const serviceNames = getServiceNames(item?.type.slice(0, visibleItems));
-  console.log(item.createdAt);
-
   const createdAtDate = new Date(item.createdAt._seconds * 1000);
   const formattedDate = moment(createdAtDate).format('DD MMMM, YYYY');
 
@@ -99,45 +105,59 @@ const ServiceDetails: React.FC = ({route}) => {
           title={'Service Details'}
           textStyle={{fontSize: RFPercentage(1.8)}}
         />
-        <View style={styles.container}>
-          <View>
-            <GestureRecognizer
-              onSwipeLeft={onSwipeLeft}
-              onSwipeRight={onSwipeRight}
-              style={{}}>
-              <View>
+
+        <View style={{width: '100%', marginTop: RFPercentage(2)}}>
+          <ScrollView
+            horizontal
+            onScroll={onScroll}
+            ref={scrollViewRef}
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            scrollEventThrottle={16}
+            style={{
+              width: width,
+              height: RFPercentage(26),
+            }}
+            contentContainerStyle={{
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+            {item.serviceImages.map((image, index) => (
+              <View key={index}>
                 <Image
-                  source={
-                    typeof item.serviceImages[step] === 'string'
-                      ? {uri: item.serviceImages[step]}
-                      : item.serviceImages[step]
-                  }
+                  source={typeof image === 'string' ? {uri: image} : image}
                   resizeMode="cover"
-                  style={styles.image}
+                  style={{
+                    width: width * 0.9,
+                    height: RFPercentage(25),
+                    margin: RFPercentage(2),
+                  }}
                   borderRadius={RFPercentage(1)}
                 />
               </View>
+            ))}
+          </ScrollView>
 
-              <View style={styles.dotsContainer}>
-                {item.serviceImages.map((_, index) => (
-                  <TouchableOpacity key={index} onPress={() => setStep(index)}>
-                    {step === index ? (
-                      <LinearGradient
-                        colors={[Colors.gradient1, Colors.gradient2]}
-                        style={styles.activeDot}
-                      />
-                    ) : (
-                      <View style={styles.inactiveDot} />
-                    )}
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </GestureRecognizer>
+          <View style={styles.dotsContainer}>
+            {item.serviceImages.map((_, index) => (
+              <TouchableOpacity key={index} onPress={() => setStep(index)}>
+                {step === index ? (
+                  <LinearGradient
+                    colors={[Colors.gradient1, Colors.gradient2]}
+                    style={styles.activeDot}
+                  />
+                ) : (
+                  <View style={styles.inactiveDot} />
+                )}
+              </TouchableOpacity>
+            ))}
           </View>
+        </View>
+        <View style={styles.container}>
           <View style={{marginTop: RFPercentage(2)}}>
             <View style={styles.rowContainer}>
               <Image
-                source={{uri: item.image}}
+                source= {item.image ? {uri: item.image} : IMAGES.defaultPic}
                 resizeMode="contain"
                 style={styles.icon}
               />
@@ -168,43 +188,100 @@ const ServiceDetails: React.FC = ({route}) => {
           </View>
           <View style={{marginTop: RFPercentage(2.1)}}>
             <View>
-              <Text style={styles.headeing2}>Description:</Text>
+              <View style={styles.rowAlign}>
+                <Image
+                  source={Icons.bars}
+                  resizeMode="contain"
+                  style={{width: RFPercentage(1.8), height: RFPercentage(1.8)}}
+                />
+                <Text
+                  style={[styles.headeing2, {marginLeft: RFPercentage(0.8)}]}>
+                  Description:
+                </Text>
+              </View>
               <Text
                 style={{
-                  color: 'rgba(75, 85, 99, 1)',
+                  color: Colors.placeholderColor,
                   fontFamily: Fonts.fontRegular,
                   fontSize: RFPercentage(1.4),
                   textAlign: 'justify',
-                  lineHeight: 18,
+                  lineHeight: RFPercentage(1.9),
                   marginTop: RFPercentage(0.5),
-                }}>
+                }}
+                numberOfLines={isExpanded ? undefined : 3}>
                 {item.description}
               </Text>
+              {item.description.length > 150 && (
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={toggleDescription}
+                  style={{width: RFPercentage(10)}}>
+                  <Text
+                    style={{
+                      color: Colors.gradient1,
+                      fontSize: RFPercentage(1.5),
+                      marginTop: RFPercentage(0.8),
+                      fontFamily: Fonts.fontMedium,
+                    }}>
+                    {isExpanded ? 'Read Less' : 'Read More'}
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
+          </View>
+          <View style={{marginTop: RFPercentage(2)}}>
+            <View style={styles.rowAlign}>
+              <Image
+                source={Icons.location}
+                resizeMode="contain"
+                style={{width: RFPercentage(1.8), height: RFPercentage(1.8)}}
+              />
+              <Text style={[styles.headeing2, {marginLeft: RFPercentage(0.8)}]}>
+                Location:
+              </Text>
+            </View>
+            <Text
+              style={{
+                color: Colors.placeholderColor,
+                fontFamily: Fonts.fontRegular,
+                fontSize: RFPercentage(1.4),
+                textAlign: 'justify',
+                lineHeight: RFPercentage(1.9),
+                marginTop: RFPercentage(0.5),
+              }}>
+              {item.location}
+            </Text>
           </View>
           <View style={{marginTop: RFPercentage(2)}}>
             <View>
               <TouchableOpacity
                 activeOpacity={0.6}
-                onPress={() => navigation.navigate('CheckAvailability', {item : item})}
-                style={{flexDirection: 'row', alignItems: 'center'}}>
-                <Text
-                  style={{
-                    color: Colors.gradient1,
-                    fontFamily: Fonts.fontMedium,
-                    fontSize: RFPercentage(1.4),
-                  }}>
-                  Check Availability
-                </Text>
-                <Image
+                onPress={() =>
+                  navigation.navigate('CheckAvailability', {item: item})
+                }
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  width: RFPercentage(16),
+                }}>
+                   <Image
                   source={Icons.availability}
                   resizeMode="contain"
                   style={{
                     width: RFPercentage(1.5),
                     height: RFPercentage(1.4),
-                    left: 3,
                   }}
                 />
+                <Text
+                  style={{
+                    color: Colors.gradient1,
+                    fontFamily: Fonts.semiBold,
+                    fontSize: RFPercentage(1.4),
+                    left:RFPercentage(0.8)
+                  }}>
+                  Check Availability
+                </Text>
+               
               </TouchableOpacity>
             </View>
           </View>
@@ -215,7 +292,17 @@ const ServiceDetails: React.FC = ({route}) => {
                 alignItems: 'center',
                 justifyContent: 'space-between',
               }}>
-              <Text style={styles.headeing2}>Services:</Text>
+              <View style={styles.rowAlign}>
+                <Image
+                  source={Icons.verify}
+                  resizeMode="contain"
+                  style={{width: RFPercentage(1.8), height: RFPercentage(1.8)}}
+                />
+                <Text
+                  style={[styles.headeing2, {marginLeft: RFPercentage(0.8)}]}>
+                  Services:
+                </Text>
+              </View>
             </View>
             <View
               style={{right: RFPercentage(0.7), marginTop: RFPercentage(0.5)}}>
@@ -269,21 +356,35 @@ const ServiceDetails: React.FC = ({route}) => {
                           ? RFPercentage(18.6)
                           : RFPercentage(34.5),
                     }}>
-                    {visibleItems < item.type.length ? `+5 More` : `See Less`}
+                    {visibleItems < item.type.length ? `+${item.type.length - visibleItems} More` : `See Less`}
                   </Text>
                 </TouchableOpacity>
               )}
             </View>
           </View>
         </View>
+
         <View>
-          <Text
-            style={[
-              styles.headeing2,
-              {width: '90%', alignSelf: 'center', marginTop: RFPercentage(2)},
-            ]}>
-            Starting Packages:
-          </Text>
+          <View
+            style={{
+              width: '90%',
+              alignSelf: 'center',
+              marginTop: RFPercentage(2),
+            }}>
+            <View style={styles.rowAlign}>
+              <Image
+                source={Icons.verify}
+                resizeMode="contain"
+                style={{width: RFPercentage(1.8), height: RFPercentage(1.8)}}
+              />
+              <Text style={[styles.headeing2, {marginLeft: RFPercentage(0.8)}]}>
+                Starting Packages:
+              </Text>
+            </View>
+
+            {/* <Text style={[styles.headeing2]}>Starting Packages:</Text> */}
+          </View>
+
           <View style={{marginTop: RFPercentage(1.5)}}>
             <FlatList
               horizontal
@@ -370,7 +471,7 @@ const styles = StyleSheet.create({
   container: {
     width: '90%',
     alignSelf: 'center',
-    paddingTop: RFPercentage(2.5),
+    paddingTop: RFPercentage(1),
   },
   dotsContainer: {
     flexDirection: 'row',
@@ -404,8 +505,8 @@ const styles = StyleSheet.create({
     height: RFPercentage(3.5),
     borderRadius: RFPercentage(100),
     marginRight: RFPercentage(1),
-    borderWidth:2,
-    borderColor:Colors.gradient1
+    borderWidth: 2,
+    borderColor: Colors.gradient1,
   },
   starContainer: {
     flexDirection: 'row',
@@ -421,6 +522,10 @@ const styles = StyleSheet.create({
   headeing2: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
+  },
+  rowAlign: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 });

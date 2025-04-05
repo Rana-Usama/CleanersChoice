@@ -11,8 +11,10 @@ import {
   TouchableWithoutFeedback,
   Modal,
   KeyboardAvoidingView,
+  ActivityIndicator,
+  Animated,
 } from 'react-native';
-import React, {useState, useRef, useCallback} from 'react';
+import React, {useState, useRef, useCallback, useEffect} from 'react';
 import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import SearchField from '../../../components/SearchField';
@@ -31,26 +33,19 @@ import InputField from '../../../components/InputField';
 import GradientButton from '../../../components/GradientButton';
 
 const categories = [
-  {id: 1, name: 'All', icon: Icons.all},
-  {id: 2, name: 'Residential', icon: Icons.residential},
-  {id: 3, name: 'Car Clean..', icon: Icons.car},
-  {id: 4, name: 'Pressure W..', icon: Icons.pressure},
-  {id: 5, name: 'Chimney C..', icon: Icons.chimney},
-  {id: 6, name: 'Carpet Cle..', icon: Icons.carpet},
-  {id: 7, name: 'Window Cl..', icon: Icons.window},
-];
-
-const filter = [
-  {id: 1, name: 'Location'},
-  {id: 2, name: 'Price Range'},
+  {id: '1', name: 'All', icon: Icons.all},
+  {id: '44', name: 'Residential', icon: Icons.residential},
+  {id: '66', name: 'Car Clean..', icon: Icons.car},
+  {id: '55', name: 'Pressure W..', icon: Icons.pressure},
+  {id: '22', name: 'Chimney C..', icon: Icons.chimney},
+  {id: '33', name: 'Carpet Cle..', icon: Icons.carpet},
+  {id: '11', name: 'Window Cl..', icon: Icons.window},
 ];
 
 const Home = () => {
-  const [Filter, setFilter] = useState(null);
-  const [categorySelection, setCategorySelection] = useState(1);
+  const [categorySelection, setCategorySelection] = useState('All');
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, 'Home'>>();
-  const [searchQuery, setSearchQuery] = useState('');
   const [priceRange, setPriceRange] = useState([10, 2000]);
   const tempValue = useRef(priceRange[0]);
   const [servicesData, setServicesData] = useState([]);
@@ -59,12 +54,20 @@ const Home = () => {
   const [rangeSelector, setRangeSelector] = useState(false);
   const [locations, setLocations] = useState([]);
   const [query, setQuery] = useState('');
- const [loctionFilter, setLocationFilter] = useState(false)
-
+  const [loctionFilter, setLocationFilter] = useState(false);
+  const [modalVisible2, setModalVisible2] = useState(false);
+  const [nameQuery, setNameQuery] = useState('');
+  const [filterNameData, setFilteredNameData] = useState([]);
+  const [categoryBasedData, setCategoryBasedData] = useState([]);
+  const scaleAnim = useRef(new Animated.Value(0)).current;
+  const opacityAnim = useRef(new Animated.Value(0)).current;
+  const [selectedLocation, setSelectedLocation] = useState([]);
+  const [loactionLoading, setLocationLoading] = useState(false);
+  const [priceLoading, setPriceLoading] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
-      serviceDetails(); 
+      serviceDetails();
     }, []),
   );
 
@@ -80,9 +83,7 @@ const Home = () => {
           id: doc.id,
           ...doc.data(),
         }));
-
         setServicesData(servicesArray);
-
         const locationsArray = servicesArray
           .map(service => service.location)
           .filter(location => location !== undefined);
@@ -103,9 +104,9 @@ const Home = () => {
     return servicePrice >= 0 && servicePrice <= priceRange[0];
   });
 
- const filteredLocationServices = servicesData.filter(service =>
-    service?.location.toLowerCase().includes(query.toLowerCase()))
-
+  const filteredLocationServices = servicesData.filter(service =>
+    service?.location.toLowerCase().includes(query.toLowerCase()),
+  );
 
   const handleSearch = query => {
     setQuery(query);
@@ -114,6 +115,72 @@ const Home = () => {
     );
     setLocations(filtered);
   };
+
+  useEffect(() => {
+    const nameQueries = servicesData.filter(service =>
+      service?.name.toLowerCase().includes(nameQuery.toLowerCase()),
+    );
+    setFilteredNameData(nameQueries);
+  }, [nameQuery, servicesData]);
+
+  useEffect(() => {
+    if (modalVisible || modalVisible2) {
+      Animated.parallel([
+        Animated.timing(opacityAnim, {
+          toValue: 1,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          friction: 10,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.timing(opacityAnim, {
+          toValue: 0,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 0,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [modalVisible || modalVisible2]);
+
+  const handleLocationApply = () => {
+    setLocationLoading(true);
+    setTimeout(() => {
+      setLocationLoading(false);
+      setModalVisible(false);
+      setLocationFilter(true);
+    }, 1500);
+  };
+
+  const handlePriceRangeApply = () => {
+    setPriceLoading(true);
+    setTimeout(() => {
+      setPriceLoading(false);
+      setModalVisible2(false);
+      setRangeSelector(true);
+    }, 1500);
+  };
+
+  // const getServiceNames = serviceIds => {
+  //   return serviceIds
+  //     ?.map(id => {
+  //       const serviceItem = categories.find(item => item.id === id);
+  //       return serviceItem ? serviceItem.name : null;
+  //     })
+  //     .filter(name => name !== null);
+  // };
+  // const serviceNames = getServiceNames(item?.type);
+
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -133,8 +200,8 @@ const Home = () => {
           <View style={styles.searchContainer}>
             <SearchField
               placeholder="Search"
-              value={searchQuery}
-              onChangeText={setSearchQuery}
+              value={nameQuery}
+              onChangeText={setNameQuery}
             />
           </View>
           <Text style={[styles.sectionTitle, {bottom: RFPercentage(1)}]}>
@@ -142,17 +209,18 @@ const Home = () => {
           </Text>
           <FlatList
             data={categories}
-            keyExtractor={item => item.id.toString()}
+            keyExtractor={item => item.id}
             horizontal
             showsHorizontalScrollIndicator={false}
             renderItem={({item}) => (
-              <TouchableOpacity onPress={() => setCategorySelection(item.id)}>
+              <TouchableOpacity
+                onPress={() => setCategorySelection(item?.name)}>
                 <View
                   style={[
                     styles.categoryBox,
                     {
                       borderColor:
-                        categorySelection === item.id
+                        categorySelection === item.name
                           ? Colors.gradient2
                           : Colors.inputFieldColor,
                     },
@@ -164,9 +232,9 @@ const Home = () => {
                       styles.categoryIcon,
                       {
                         width:
-                          item.id === 1 ? RFPercentage(3.2) : RFPercentage(4),
+                          item.id === '1' ? RFPercentage(3.2) : RFPercentage(4),
                         height:
-                          item.id === 1 ? RFPercentage(3.2) : RFPercentage(4),
+                          item.id === '1' ? RFPercentage(3.2) : RFPercentage(4),
                       },
                     ]}
                   />
@@ -175,7 +243,7 @@ const Home = () => {
                       styles.categoryText,
                       {
                         fontFamily:
-                          categorySelection === item.id
+                          categorySelection === item.name
                             ? Fonts.semiBold
                             : Fonts.fontRegular,
                       },
@@ -189,190 +257,266 @@ const Home = () => {
           />
 
           <Text style={styles.sectionTitle}>Apply Filter</Text>
-          <FlatList
-            horizontal
-            data={filter}
-            keyExtractor={item => item.id.toString()}
-            renderItem={({item}) => {
-              return (
-                <View>
-                  <TouchableOpacity
-                    onPress={() => {
-                      setFilter(item?.id);
-                      setModalVisible(true);
-                    }}
-                    style={[
-                      styles.filterBox,
-                      {
-                        borderColor:
-                          Filter === item.id && (priceRange || loctionFilter)
-                            ? Colors.gradient2
-                            : Colors.inputFieldColor,
-                      },
-                    ]}>
-                    <Text
-                      style={[
-                        styles.filterText,
-                        {
-                          fontFamily:
-                            Filter === item.id
-                              ? Fonts.semiBold
-                              : Fonts.fontRegular,
-                        },
-                      ]}>
-                      {item.name}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              );
-            }}
-            contentContainerStyle={styles.flatListContainer}
-          />
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              width: '90%',
+              alignSelf: 'center',
+            }}>
+            <View>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => setModalVisible(true)}
+                style={[
+                  styles.filterBox,
+                  {
+                    backgroundColor: loctionFilter
+                      ? Colors.gradient2
+                      : 'transparent',
+                  },
+                ]}>
+                <Text
+                  style={[
+                    styles.filterText,
+                    {
+                      fontFamily: loctionFilter
+                        ? Fonts.semiBold
+                        : Fonts.fontRegular,
+                      color: loctionFilter
+                        ? Colors.background
+                        : Colors.primaryText,
+                    },
+                  ]}>
+                  Location
+                </Text>
+              </TouchableOpacity>
+              {loctionFilter && (
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={() => {
+                    setSelectedLocation([]);
+                    setLocationFilter(false);
+                    setQuery('');
+                  }}
+                  style={{position: 'absolute', right: RFPercentage(-0.4)}}>
+                  <AntDesign
+                    name="closecircle"
+                    size={RFPercentage(1.6)}
+                    color={'rgb(206, 211, 219)'}
+                  />
+                </TouchableOpacity>
+              )}
+            </View>
+            <View>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => setModalVisible2(true)}
+                style={[
+                  styles.filterBox,
+                  {
+                    backgroundColor: rangeSelector
+                      ? Colors.gradient2
+                      : 'transparent',
+                    marginLeft: RFPercentage(2),
+                  },
+                ]}>
+                <Text
+                  style={[
+                    styles.filterText,
+                    {
+                      fontFamily: rangeSelector
+                        ? Fonts.semiBold
+                        : Fonts.fontRegular,
+                      color: rangeSelector
+                        ? Colors.background
+                        : Colors.primaryText,
+                    },
+                  ]}>
+                  Price Range
+                </Text>
+              </TouchableOpacity>
+              {rangeSelector && (
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={() => setRangeSelector(false)}
+                  style={{position: 'absolute', right: RFPercentage(-0.4)}}>
+                  <AntDesign
+                    name="closecircle"
+                    size={RFPercentage(1.6)}
+                    color={'rgb(206, 211, 219)'}
+                  />
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
 
           <Text style={styles.sectionTitle}>Cleaning Services</Text>
-          <View style={styles.servicesContainer}>
-            <FlatList
-              data={rangeSelector ? filteredServicesData : loctionFilter ? filteredLocationServices : servicesData}
-              keyExtractor={item => item.id.toString()}
-              numColumns={2}
-              columnWrapperStyle={styles.serviceColumnWrapper}
-              renderItem={({item}) => (
-                <View style={styles.serviceItem}>
-                  <ServicesCard
-                    covers={item.serviceImages}
-                    name={item.name}
-                    icon={item.image}
-                    price={item.packages[0].price}
-                    star={IMAGES.star}
-                    rating={5}
-                    location={item.location}
-                    onPress={() =>
-                      navigation.navigate('ServiceDetails', {
-                        item: item,
-                      })
-                    }
-                  />
-                </View>
-              )}
-            />
-          </View>
+          {loading ? (
+            <>
+              <ActivityIndicator
+                size={'large'}
+                color={Colors.placeholderColor}
+                style={{top: RFPercentage(15)}}
+              />
+            </>
+          ) : (
+            <>
+              <View style={styles.servicesContainer}>
+                <FlatList
+                  data={
+                    rangeSelector
+                      ? filteredServicesData
+                      : loctionFilter
+                      ? filteredLocationServices
+                      : nameQuery
+                      ? filterNameData
+                      : servicesData
+                  }
+                  keyExtractor={item => item.id.toString()}
+                  numColumns={2}
+                  columnWrapperStyle={styles.serviceColumnWrapper}
+                  renderItem={({item}) => (
+                    <View style={styles.serviceItem}>
+                      <ServicesCard
+                        covers={item.serviceImages}
+                        name={item.name}
+                        icon={item.image}
+                        price={item.packages[0].price}
+                        star={IMAGES.star}
+                        rating={5}
+                        location={item.location}
+                        onPress={() =>
+                          navigation.navigate('ServiceDetails', {
+                            item: item,
+                          })
+                        }
+                      />
+                    </View>
+                  )}
+                />
+              </View>
+            </>
+          )}
         </View>
       </ScrollView>
-      {Filter === 1 && modalVisible && (
+      {modalVisible && (
         <>
-          <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-            <View style={styles.modalContainer}>
-              <BlurView
-                style={styles.blurView}
-                blurType="light"
-                blurAmount={5}
-              />
-              <Modal
-                visible={modalVisible}
-                transparent={true}
-                onRequestClose={() => setModalVisible(false)}>
-                <KeyboardAvoidingView
-                  behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-                  style={{flex: 1}}>
+          <View style={styles.modalContainer}>
+            <BlurView style={styles.blurView} blurType="light" blurAmount={5} />
+            <Modal
+              visible={modalVisible}
+              transparent={true}
+              animationType="none"
+              onRequestClose={() => setModalVisible(false)}>
+              <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : null}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 40 : 0}
+                style={{
+                  flex: 1,
+                  // justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                <Animated.View
+                  style={{
+                    opacity: opacityAnim,
+                    transform: [{scale: scaleAnim}],
+                    width: '90%',
+                    height: RFPercentage(50),
+                    // height: '50%',
+                    alignSelf: 'center',
+                    backgroundColor: 'rgba(226, 238, 255, 0.9)',
+                    alignItems: 'center',
+                    borderRadius: RFPercentage(2.5),
+                    paddingHorizontal: RFPercentage(1.6),
+                    paddingVertical: RFPercentage(2.5),
+                    // zIndex:9999999,
+                    top: RFPercentage(20),
+                  }}>
                   <View
                     style={{
-                      width: '90%',
-                      height: '50%',
-                      alignSelf: 'center',
-                      backgroundColor: 'rgba(226, 238, 255, 0.8)',
+                      width: '100%',
                       alignItems: 'center',
-                      borderRadius: RFPercentage(2.5),
-                      top: RFPercentage(20),
-                      paddingHorizontal: RFPercentage(1.6),
-                      paddingVertical: RFPercentage(2.5),
+                      justifyContent: 'center',
                     }}>
+                    <Text
+                      style={{
+                        color: Colors.secondaryText,
+                        fontFamily: Fonts.fontMedium,
+                        fontSize: RFPercentage(1.8),
+                      }}>
+                      Apply Location
+                    </Text>
+                    <TouchableOpacity
+                      style={{position: 'absolute', right: 0}}
+                      onPress={() => setModalVisible(false)}>
+                      <AntDesign
+                        name="closecircleo"
+                        size={RFPercentage(2.5)}
+                        color={Colors.secondaryText}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                  <View style={{width: '100%', marginTop: RFPercentage(2)}}>
+                    <SearchField
+                      placeholder="Search Location"
+                      customStyle={{borderColor: 'rgba(39, 38, 38, 0.29)'}}
+                      value={query}
+                      onChangeText={handleSearch}
+                    />
+                  </View>
+
+                  {query.length > 0 && selectedLocation.length === 0 && (
                     <View
                       style={{
+                        top: RFPercentage(0.5),
                         width: '100%',
-                        alignItems: 'center',
-                        justifyContent: 'center',
+                        backgroundColor: 'white',
+                        borderRadius: RFPercentage(1),
                       }}>
-                      <Text
-                        style={{
-                          color: Colors.secondaryText,
-                          fontFamily: Fonts.fontMedium,
-                          fontSize: RFPercentage(1.6),
-                        }}>
-                        Apply Location
-                      </Text>
-                      <TouchableOpacity
-                        style={{position: 'absolute', right: 0}}
-                        onPress={() => setModalVisible(false)}>
-                        <AntDesign
-                          name="closecircleo"
-                          size={RFPercentage(2.5)}
-                          color={'rgba(184, 184, 184, 1)'}
-                        />
-                      </TouchableOpacity>
-                    </View>
-                    <View style={{width: '100%', marginTop: RFPercentage(2)}}>
-                      <SearchField
-                        placeholder="Search Location"
-                        customStyle={{borderColor: 'rgba(39, 38, 38, 0.29)'}}
-                        value={query}
-                        onChangeText={handleSearch}
-                      />
-                    </View>
-
-                    {query.length > 0 && (
-                      <View
-                        style={{
-                          top: RFPercentage(0.5),
-                          width: '100%',
-                          backgroundColor: 'white',
-                          borderRadius: 5,
-            
-                        }}>
-                        <FlatList
-                          data={locations}
-                          keyExtractor={(item, index) => index.toString()}
-                          renderItem={({item}) => (
-                            <TouchableOpacity
-                              onPress={() => {
-                                setQuery(item); 
+                      <FlatList
+                        data={locations}
+                        keyExtractor={(item, index) => index.toString()}
+                        renderItem={({item}) => (
+                          <TouchableOpacity
+                            onPress={() => {
+                              setQuery(item);
+                              setSelectedLocation(item);
+                            }}>
+                            <Text
+                              style={{
+                                padding: RFPercentage(2),
+                                fontSize: RFPercentage(1.6),
+                                borderBottomWidth: 1,
+                                borderBottomColor: Colors.inputFieldColor,
+                                fontFamily: Fonts.fontRegular,
+                                color: Colors.placeholderColor,
                               }}>
-                              <Text
-                                style={{
-                                  padding: 10,
-                                  fontSize: RFPercentage(1.8),
-                                  borderBottomWidth: 1,
-                                  borderBottomColor: 'rgba(184, 184, 184, 0.8)',
-                                }}>
-                                {item}
-                              </Text>
-                            </TouchableOpacity>
-                          )}
-                        />
-                      </View>
-                    )}
-                    <View
-                      style={{position: 'absolute', bottom: RFPercentage(2)}}>
-                      <GradientButton
-                        title="Apply"
-                        onPress={() => 
-                        {
-                          setLocationFilter(true)
-                          setModalVisible(false)
-                        }
-                        }
+                              {item}
+                            </Text>
+                          </TouchableOpacity>
+                        )}
                       />
                     </View>
+                  )}
+                  <View style={{position: 'absolute', bottom: RFPercentage(3)}}>
+                    <GradientButton
+                      title="Apply"
+                      onPress={handleLocationApply}
+                      loading={loactionLoading}
+                      disabled={query.length > 0 ? false : true}
+                    />
                   </View>
-                </KeyboardAvoidingView>
-              </Modal>
-            </View>
-          </TouchableWithoutFeedback>
+                </Animated.View>
+              </KeyboardAvoidingView>
+            </Modal>
+          </View>
         </>
       )}
 
-      {Filter === 2 && modalVisible && (
+      {modalVisible2 && (
         <>
-          <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+          <TouchableWithoutFeedback onPress={() => setModalVisible2(false)}>
             <View style={styles.modalContainer}>
               <BlurView
                 style={styles.blurView}
@@ -380,21 +524,24 @@ const Home = () => {
                 blurAmount={5}
               />
               <Modal
-                visible={modalVisible}
+                visible={modalVisible2}
                 transparent={true}
-                onRequestClose={() => setModalVisible(false)}>
+                animationType="none"
+                onRequestClose={() => setModalVisible2(false)}>
                 <KeyboardAvoidingView
                   behavior={Platform.OS === 'ios' ? 'padding' : undefined}
                   style={{flex: 1}}>
-                  <View
+                  <Animated.View
                     style={{
+                      opacity: opacityAnim,
+                      transform: [{scale: scaleAnim}],
                       width: '90%',
-                      height: '40%',
+                      height: '50%',
                       alignSelf: 'center',
-                      backgroundColor: 'rgba(228, 238, 253, 0.8)',
+                      backgroundColor: 'rgba(226, 238, 255, 0.9)',
                       alignItems: 'center',
                       borderRadius: RFPercentage(2.5),
-                      top: RFPercentage(25),
+                      top: RFPercentage(20),
                       paddingHorizontal: RFPercentage(1.6),
                       paddingVertical: RFPercentage(2.5),
                     }}>
@@ -409,13 +556,13 @@ const Home = () => {
                         style={{
                           color: Colors.primaryText,
                           fontFamily: Fonts.fontMedium,
-                          fontSize: RFPercentage(1.6),
+                          fontSize: RFPercentage(1.7),
                         }}>
                         Price Range Selection
                       </Text>
                       <TouchableOpacity
                         style={{position: 'absolute', right: 0}}
-                        onPress={() => setModalVisible(false)}>
+                        onPress={() => setModalVisible2(false)}>
                         <AntDesign
                           name="closecircleo"
                           size={RFPercentage(2.5)}
@@ -451,29 +598,27 @@ const Home = () => {
                         </Text>
                         <Text style={styles.sliderLabel}>2000$+</Text>
                       </View>
-                      <View style={{marginTop: RFPercentage(5)}}>
+                      <View style={{marginTop: RFPercentage(8)}}>
                         <Text
                           style={{
                             textAlign: 'center',
                             fontFamily: Fonts.fontMedium,
-                            fontSize: RFPercentage(1.5),
+                            fontSize: RFPercentage(1.7),
                             color: Colors.primaryText,
                           }}>
-                          Price Range: {tempValue.current}$
+                          Price Range: 0$ - {tempValue.current}$
                         </Text>
                       </View>
                     </View>
                     <View
-                      style={{position: 'absolute', bottom: RFPercentage(2)}}>
+                      style={{position: 'absolute', bottom: RFPercentage(4)}}>
                       <GradientButton
                         title="Apply"
-                        onPress={() => {
-                          setRangeSelector(true);
-                          setModalVisible(false);
-                        }}
+                        onPress={handlePriceRangeApply}
+                        loading={priceLoading}
                       />
                     </View>
-                  </View>
+                  </Animated.View>
                 </KeyboardAvoidingView>
               </Modal>
             </View>
@@ -563,12 +708,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: RFPercentage(0.8),
-    marginHorizontal: RFPercentage(1),
-    marginTop: RFPercentage(-0.3),
+    borderRadius: RFPercentage(0.7),
+    marginTop: RFPercentage(1),
+    borderColor: Colors.inputFieldColor,
   },
   filterText: {
-    color: Colors.primaryText,
     fontSize: RFPercentage(1.5),
   },
   serviceColumnWrapper: {
@@ -612,7 +756,7 @@ const styles = StyleSheet.create({
   },
   sliderLabel: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(1.8),
     fontFamily: Fonts.semiBold,
   },
   flatListContainer: {

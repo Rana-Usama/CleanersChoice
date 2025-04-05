@@ -56,9 +56,8 @@ const CheckAvailability = ({route}) => {
       NativeStackNavigationProp<RootStackParamList, 'CheckAvailability'>
     >();
 
-    const availableDays = item.availability.filter((day) => day.checked === true);
-    console.log('check availablity............', availableDays);
-
+  const availableDays = item.availability.filter(day => day.checked === true);
+  console.log('check availablity............', availableDays);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -70,7 +69,7 @@ const CheckAvailability = ({route}) => {
         <View style={{marginTop: RFPercentage(3)}}>
           <View style={{alignItems: 'center', justifyContent: 'center'}}>
             <Image
-              source={{uri: item.image}}
+              source={item.image ? {uri: item.image} : IMAGES.defaultPic}
               style={{
                 width: RFPercentage(12),
                 height: RFPercentage(12),
@@ -104,7 +103,7 @@ const CheckAvailability = ({route}) => {
           </View>
         </View>
         <View style={{marginTop: RFPercentage(1.6)}}>
-           <FlatList
+          <FlatList
             data={availableDays}
             keyExtractor={item => item.day}
             renderItem={({item}) => {

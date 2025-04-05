@@ -1,6 +1,6 @@
 import {Image, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import React, {useState} from 'react';
-import {Colors, Fonts} from '../constants/Themes';
+import {Colors, Fonts, IMAGES} from '../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import LinearGradient from 'react-native-linear-gradient';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
@@ -27,7 +27,7 @@ const ServicesCard = ({covers, icon, name, price, rating, star, location, onPres
         </View>
         <View style={styles.detailsContainer}>
           <View style={styles.rowContainer}>
-            <Image source={{uri : icon}} resizeMode="contain" style={styles.icon} />
+            <Image source={icon ? {uri : icon} : IMAGES.defaultPic} resizeMode="contain" style={styles.icon} />
             <Text style={styles.nameText}>{name}</Text>
           </View>
           <View style={styles.starContainer}>
