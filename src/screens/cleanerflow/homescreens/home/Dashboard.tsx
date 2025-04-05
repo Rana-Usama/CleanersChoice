@@ -32,27 +32,27 @@ import {Image as CompressorImage} from 'react-native-compressor';
 
 const items = [
   {
-    id: '1',
+    id: '11',
     name: 'Window Cleaning',
   },
   {
-    id: '2',
+    id: '22',
     name: 'Chimney Cleaning',
   },
   {
-    id: '3',
+    id: '33',
     name: 'Carpet Cleaning',
   },
   {
-    id: '4',
+    id: '44',
     name: 'Residential Cleaning',
   },
   {
-    id: '5',
+    id: '55',
     name: 'Pressure Washing',
   },
   {
-    id: '6',
+    id: '66',
     name: 'Car Washing',
   },
 ];
@@ -347,7 +347,7 @@ const Dashboard: React.FC = () => {
                             {
                               left:
                                 visibleItems < service?.type?.length
-                                  ? RFPercentage(18.5)
+                                  ? RFPercentage(19.5)
                                   : RFPercentage(35.5),
                             },
                           ]}>
