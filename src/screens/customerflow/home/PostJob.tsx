@@ -113,9 +113,10 @@ const PostJob = () => {
   const [Location, setLocation] = useState('');
   const [Description, setDescription] = useState('');
   const [remarks, setRemarks] = useState('');
-  const [budget, setBudget] = useState('')
+  const [budget, setBudget] = useState('');
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
   const handleSelectedItem = (item: any) => {
     setSelectedType(item);
   };
@@ -139,14 +140,13 @@ const PostJob = () => {
         createdAt: formattedDate,
         title: jobTitle,
         description: Description,
-        type: selectedItems,
+        type: selectedType,
         location: Location,
         priceRange: budget,
         remarks: remarks || '',
         jobId: user.uid,
         status: 'active',
       };
-
       if (jobId) {
         await firestore().collection('Jobs').doc(jobId).update(jobData);
         navigation.navigate('Jobs');
@@ -187,11 +187,10 @@ const PostJob = () => {
       if (docSnapshot.exists) {
         const jobData = docSnapshot.data();
         setJob(jobData);
-
         setJobTitle(jobData.title || '');
         setDescription(jobData.description || '');
         setLocation(jobData.location || '');
-        setSelectedItems(jobData.type || []);
+        setSelectedType(jobData.type || []);
         setBudget(jobData.priceRange || null);
         setRemarks(jobData.remarks || '');
         setDate(moment(jobData.createdAt, 'YYYY-MM-DD  HH:mm A').toDate());
@@ -244,7 +243,16 @@ const PostJob = () => {
                 onChangeText={setLocation}
               />
 
-              <View style={{flex: 1}}>
+              <CustomDropDown
+                placeholder={jobId ? selectedType : 'Service Type'}
+                data={data1}
+                placeholderColor={
+                  jobId ? Colors.inputTextColor : Colors.placeholderColor
+                }
+                setValue={handleSelectedItem}
+              />
+
+              {/* <View style={{flex: 1}}>
                 <MultiSelect
                   hideTags={true}
                   items={items}
@@ -298,7 +306,7 @@ const PostJob = () => {
                   style={{marginTop: RFPercentage(0.7)}}>
                   {multiSelectRef.current?.getSelectedItemsExt(selectedItems)}
                 </ScrollView>
-              </View>
+              </View> */}
 
               <InputField
                 placeholder="Budget"
@@ -306,7 +314,6 @@ const PostJob = () => {
                 value={budget}
                 onChangeText={setBudget}
               />
-
 
               {/* <CustomDropDown
                 placeholder={jobId ? selectedRange : 'Price Range'}
