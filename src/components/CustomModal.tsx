@@ -12,6 +12,7 @@ interface props {
   onPress3?: () => void;
   onPress?: () => void;
   onPress2?: () => void; 
+  loader? : boolean;
 }
 
 const CustomModal = (props : props) => {
@@ -40,6 +41,7 @@ const CustomModal = (props : props) => {
             title="Yes"
             onPress={props.onPress2}
             style={styles.buttonWidth}
+            loading={props.loader}
           />
         </View>
       )}

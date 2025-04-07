@@ -29,6 +29,9 @@ import firestore from '@react-native-firebase/firestore';
 import {BlurView} from '@react-native-community/blur';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import GradientButton from '../../../components/GradientButton';
+import auth from '@react-native-firebase/auth';
+import {useDispatch} from 'react-redux';
+import {setProfileData} from '../../../redux/ProfileData/Actions';
 
 const categories = [
   {id: '1', name: 'All', icon: Icons.all},
@@ -200,8 +203,26 @@ const Home = () => {
     }
   }, [query, locations]);
 
-  console.log('filteredLocationServices...........', filteredLocationServices);
-  console.log('selectedLocation...........', selectedLocation);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  const fetchUserData = async () => {
+    const user = auth().currentUser;
+    if (!user) return;
+
+    try {
+      const userDoc = await firestore().collection('Users').doc(user.uid).get();
+      if (userDoc.exists) {
+        const userData = userDoc.data();
+        dispatch(setProfileData(userData));
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -490,7 +511,9 @@ const Home = () => {
                     <View style={styles.queryContainer}>
                       {filteredLocations.length === 0 ? (
                         <>
-                          <Text style={styles.queryText}>No Location exist</Text>
+                          <Text style={styles.queryText}>
+                            No Location exist
+                          </Text>
                         </>
                       ) : (
                         <>
@@ -516,7 +539,11 @@ const Home = () => {
                       title="Apply"
                       onPress={handleLocationApply}
                       loading={loactionLoading}
-                      disabled={query.length > 0 && filteredLocations.length != 0 ? false : true}
+                      disabled={
+                        query.length > 0 && filteredLocations.length != 0
+                          ? false
+                          : true
+                      }
                     />
                   </View>
                 </Animated.View>

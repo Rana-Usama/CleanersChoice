@@ -3,12 +3,14 @@ import { userFlowReducer } from './Reducer';
 import { cleanerAvailablityReducer } from './Availability/Reducer';
 import { formReducer } from './Form/Reducer';
 import { userDataReducer } from './ProfileData/Rducer';
+import { jobReducer } from './Job/Reducers';
 
 const rootReducer = combineReducers({
   userFlow: userFlowReducer,
   availablity : cleanerAvailablityReducer,
   form : formReducer,
-  profile : userDataReducer
+  profile : userDataReducer,
+  job : jobReducer
 });
 
 const store = createStore(rootReducer);

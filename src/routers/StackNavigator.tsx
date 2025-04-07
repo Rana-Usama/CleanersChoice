@@ -32,6 +32,7 @@ import Availability from '../screens/commonflow/home/Availability';
 import Settings from '../screens/commonflow/home/settings/Settings';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CheckAvailability from '../screens/customerflow/home/CheckAvailablity';
+import Jobs from '../screens/customerflow/jobBoard/Jobs';
 
 export type RootStackParamList = {
   SplashOne: undefined;
@@ -46,7 +47,7 @@ export type RootStackParamList = {
   ServiceDetails: { item: any };
   PostJob: undefined;
   JobPosted: undefined;
-  JobDetails: undefined;
+  JobDetails: { item: any };
   EditProfile: undefined;
   ChangePasswordV2: undefined;
   FAQS: undefined;
@@ -62,6 +63,7 @@ export type RootStackParamList = {
   Availability : undefined;
   Settings: undefined;
   CheckAvailability:{ item: any };
+  Jobs : undefined
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -93,10 +95,6 @@ const StackNavigator: React.FC = () => {
 
   console.log('Stored Credentials:', email, password, user);
   if (isLoading) return null;
-
-  
-
- 
 
 
   return (
@@ -132,6 +130,8 @@ const StackNavigator: React.FC = () => {
           <Stack.Screen name="PostJob" component={PostJob} />
           <Stack.Screen name="JobPosted" component={JobPosted} />
           <Stack.Screen name="CheckAvailability" component={CheckAvailability} />
+          <Stack.Screen name="Jobs" component={Jobs} />
+
 
 
           {/* ----------------- Cleaner Flow ---------------- */}
