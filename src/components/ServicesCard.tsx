@@ -5,34 +5,63 @@ import {RFPercentage} from 'react-native-responsive-fontsize';
 import LinearGradient from 'react-native-linear-gradient';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 
-const ServicesCard = ({covers, icon, name, price, rating, star, location, onPress}) => {
+const ServicesCard = ({
+  covers,
+  icon,
+  name,
+  price,
+  rating,
+  star,
+  location,
+  onPress,
+}) => {
   const [step, setStep] = useState(0);
 
   return (
     <TouchableOpacity activeOpacity={0.6} onPress={onPress}>
       <View style={styles.container}>
         <View style={styles.imageContainer}>
-          <Image source={{uri : covers[step]}} resizeMode="cover" style={styles.image} />
+          <Image
+            source={{uri: covers[step]}}
+            resizeMode="cover"
+            style={styles.image}
+          />
         </View>
         <View style={styles.dotsContainer}>
-          {covers.map((_, index) => (
-            <TouchableOpacity key={index} onPress={() => setStep(index)}>
-              {step === index ? (
-                <LinearGradient colors={[Colors.gradient1, Colors.gradient2]} style={styles.activeDot} />
-              ) : (
-                <View style={styles.inactiveDot} />
-              )}
-            </TouchableOpacity>
-          ))}
+          {covers.length === 1 ? null : (
+            <>
+              {covers.map((_, index) => (
+                <TouchableOpacity key={index} onPress={() => setStep(index)}>
+                  {step === index ? (
+                    <LinearGradient
+                      colors={[Colors.gradient1, Colors.gradient2]}
+                      style={styles.activeDot}
+                    />
+                  ) : (
+                    <View style={styles.inactiveDot} />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </>
+          )}
         </View>
         <View style={styles.detailsContainer}>
           <View style={styles.rowContainer}>
-            <Image source={icon ? {uri : icon} : IMAGES.defaultPic} resizeMode="contain" style={styles.icon} />
+            <Image
+              source={icon ? {uri: icon} : IMAGES.defaultPic}
+              resizeMode="contain"
+              style={styles.icon}
+            />
             <Text style={styles.nameText}>{name}</Text>
           </View>
           <View style={styles.starContainer}>
             {Array.from({length: rating}, (_, index) => (
-              <Image key={index} source={star} resizeMode="contain" style={styles.star} />
+              <Image
+                key={index}
+                source={star}
+                resizeMode="contain"
+                style={styles.star}
+              />
             ))}
           </View>
           <View style={styles.priceContainer}>
@@ -40,9 +69,15 @@ const ServicesCard = ({covers, icon, name, price, rating, star, location, onPres
             <View style={styles.locationContainer}>
               <Text style={styles.fromText}>From :</Text>
               <View style={styles.locationRow}>
-                <EvilIcons name="location" size={RFPercentage(1.3)} style={styles.locationIcon} />
-                <Text style={styles.locationText}>{location?.slice(0, 5)}..</Text>
-                </View>
+                <EvilIcons
+                  name="location"
+                  size={RFPercentage(1.3)}
+                  style={styles.locationIcon}
+                />
+                <Text style={styles.locationText}>
+                  {location?.slice(0, 5)}..
+                </Text>
+              </View>
             </View>
           </View>
         </View>
@@ -59,8 +94,8 @@ const styles = StyleSheet.create({
     borderColor: Colors.inputFieldColor,
     borderWidth: 1,
     borderRadius: RFPercentage(1),
-    // backgroundColor:'red', 
-    height:RFPercentage(25)
+    // backgroundColor:'red',
+    height: RFPercentage(25),
   },
   imageContainer: {
     width: '100%',
@@ -104,8 +139,8 @@ const styles = StyleSheet.create({
     height: RFPercentage(2.9),
     borderRadius: RFPercentage(100),
     marginRight: RFPercentage(1),
-    borderWidth:1.5,
-    borderColor:Colors.gradient1
+    borderWidth: 1.5,
+    borderColor: Colors.gradient1,
   },
   nameText: {
     color: Colors.primaryText,
@@ -147,7 +182,6 @@ const styles = StyleSheet.create({
   locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
-
   },
   locationIcon: {
     bottom: 1.5,

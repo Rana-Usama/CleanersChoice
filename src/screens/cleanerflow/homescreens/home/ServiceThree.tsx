@@ -191,6 +191,7 @@ const ServiceThree: React.FC = () => {
                     placeholder={`Package Details`}
                     count={true}
                     value={pkg.details}
+                    maxLength={100}
                     onChangeText={text =>
                       handleInputChange(pkg.id, 'details', text)
                     }

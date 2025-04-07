@@ -68,9 +68,6 @@ const Availability = () => {
   );
   const [loading2, setLoading2] = useState(false);
 
-    const available = useSelector(state => state.availablity.availability);
-  console.log('available.........', available)
-
   useEffect(() => {
     const serviceDetails = async () => {
       const user = auth().currentUser;
@@ -242,8 +239,6 @@ const Availability = () => {
           </>
         )}
       </View>
-      {profileData === 'Cleaner' && (
-          <>
             <View
               style={{
                 alignItems: 'center',
@@ -264,8 +259,6 @@ const Availability = () => {
                 loading={loading}
               />
             </View>
-          </>
-        )}
     </SafeAreaView>
   );
 };

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 import { Colors, Fonts } from '../constants/Themes';
 
-const MAX_CHARACTERS = 100;
+
 
 interface Props {
   style?: object;
@@ -11,14 +11,20 @@ interface Props {
   count: boolean;
   onChangeText?: (text: string) => void;
   value?: string;
+  maxLength? : number
 }
 
+
 const DescriptionField = (props: Props) => {
+  const MAX_CHARACTERS = props.maxLength;
+
+
   const handleTextChange = (text: string) => {
     if (text.length <= MAX_CHARACTERS) {
       props.onChangeText?.(text);
     }
   };
+
 
   return (
     <View style={[styles.textArea, { ...props.style }]}>
