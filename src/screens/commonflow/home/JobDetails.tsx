@@ -21,57 +21,17 @@ import {RootStackParamList} from '../../../routers/StackNavigator';
 import firestore from '@react-native-firebase/firestore';
 import {setJobId} from '../../../redux/Job/Actions';
 
-const items = [
-  {
-    id: '11',
-    name: 'Window Cleaning',
-  },
-  {
-    id: '22',
-    name: 'Chimney Cleaning',
-  },
-  {
-    id: '33',
-    name: 'Carpet Cleaning',
-  },
-  {
-    id: '44',
-    name: 'Residential Cleaning',
-  },
-  {
-    id: '55',
-    name: 'Pressure Washing',
-  },
-  {
-    id: '66',
-    name: 'Car Washing',
-  },
-  {
-    id: '77',
-    name: 'Others',
-  },
-];
-
 const JobDetails = ({route}) => {
   const {item} = route.params;
   const navigation =
     useNavigation<
       NativeStackNavigationProp<RootStackParamList, 'JobDetails'>
     >();
-  const [visibleItems, setVisibleItems] = useState(5);
   const userData = useSelector(state => state.profile.profileData);
   const [loading, setLoading] = useState(false);
   const [loading2, setLoading2] = useState(false);
-  const getServiceNames = serviceIds => {
-    return serviceIds
-      ?.map(id => {
-        const serviceItem = items.find(item => item.id === id);
-        return serviceItem ? serviceItem.name : null;
-      })
-      .filter(name => name !== null);
-  };
-  const serviceNames = getServiceNames(item?.type.slice(0, visibleItems));
-
+ 
+ 
   const markComplete = async (jobId, newStatus) => {
     setLoading(true);
     try {
@@ -86,19 +46,17 @@ const JobDetails = ({route}) => {
       setLoading(false);
     }
   };
-  
 
   const dispatch = useDispatch();
   dispatch(setJobId(item.id));
 
   const handleEditButton = () => {
-    setLoading2(true)
+    setLoading2(true);
     setTimeout(() => {
-      setLoading2(false)
-      navigation.navigate('PostJob')
+      setLoading2(false);
+      navigation.navigate('PostJob');
     }, 1000);
-  }
-  
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -152,19 +110,8 @@ const JobDetails = ({route}) => {
               />
               <Text style={styles.label}>Service Type:</Text>
             </View>
-            <View>
-              <FlatList
-                data={serviceNames}
-                numColumns={2}
-                keyExtractor={(item, index) => index.toString()}
-                contentContainerStyle={{marginLeft: RFPercentage(-1)}}
-                renderItem={({item, index}) => (
-                  <View style={{marginHorizontal: RFPercentage(1)}}>
-                    <Text style={styles.value}>{item}</Text>
-                  </View>
-                )}
-              />
-            </View>
+            <Text style={styles.value}>{item.type}</Text>
+
           </View>
 
           <View style={styles.sectionContainer}>
@@ -199,8 +146,7 @@ const JobDetails = ({route}) => {
                 onPress={handleEditButton}
                 textStyle={styles.buttonText}
                 disabled={loading2}
-                loading={loading2 || loading}
-
+                loading={loading2}
               />
               <View style={styles.buttonSpacing}>
                 <GradientButton
@@ -210,12 +156,24 @@ const JobDetails = ({route}) => {
                     markComplete(item.id, 'completed');
                   }}
                   loading={loading}
-                  disabled={loading || loading2}
+                  disabled={loading}
                 />
               </View>
             </View>
           </>
-        ) : null}
+        ) : (
+          <View style={styles.buttonWrapper}>
+            <GradientButton
+              title="Message Client"
+              textStyle={styles.buttonText}
+              // onPress={() => {
+              //   markComplete(item.id, 'completed');
+              // }}
+              // loading={loading}
+              // disabled={loading || loading2}
+            />
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
