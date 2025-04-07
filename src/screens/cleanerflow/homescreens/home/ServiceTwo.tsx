@@ -22,6 +22,7 @@ import storage from '@react-native-firebase/storage';
 import auth from '@react-native-firebase/auth';
 import {useSelector} from 'react-redux';
 import {Image as CompressorImage} from 'react-native-compressor';
+import Toast from 'react-native-toast-message';
 
 const images = [{id: 0}, {id: 1}, {id: 2}];
 
@@ -76,6 +77,27 @@ const ServiceTwo: React.FC = () => {
   const saveImagesToFirestore = async () => {
     const user = auth().currentUser;
     if (!user) return;
+
+    const hasAtLeastOneImage = selectedImages.some(
+      img => img !== null && img.uri,
+    );
+    if (!hasAtLeastOneImage) {
+      Toast.show({
+        type: 'info',
+        text1: 'Adding Service',
+        text2: 'Please upload at least one picture to proceed',
+        position: 'top',
+        topOffset: RFPercentage(8),
+        text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
+        text2Style: {
+          fontFamily: Fonts.fontRegular,
+          fontSize: RFPercentage(1.4),
+        },
+      });
+
+      return;
+    }
+
     try {
       setLoading(true);
       const serviceRef = firestore()
@@ -87,6 +109,7 @@ const ServiceTwo: React.FC = () => {
         console.error('Service document does not exist!');
         return;
       }
+
       const uploadedImages = await Promise.all(
         selectedImages.map(async (img, index) => {
           if (img && img.uri) {
@@ -96,9 +119,11 @@ const ServiceTwo: React.FC = () => {
         }),
       );
       const validImages = uploadedImages.filter(url => url !== null);
+
       await serviceRef.update({
         serviceImages: firestore.FieldValue.arrayUnion(...validImages),
       });
+
       navigation.navigate('ServiceThree');
     } catch (error) {
       console.error('Error updating service images:', error);
@@ -148,7 +173,7 @@ const ServiceTwo: React.FC = () => {
 
       <View style={styles.container}>
         <View style={styles.galleryTextContainer}>
-          <Text style={styles.galleryText}>Gallery Pictures (Optional)</Text>
+          <Text style={styles.galleryText}>Gallery Pictures (1 Mandatory)</Text>
         </View>
         <View style={styles.flatListContainer}>
           <FlatList

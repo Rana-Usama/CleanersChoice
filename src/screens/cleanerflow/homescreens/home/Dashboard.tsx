@@ -55,6 +55,10 @@ const items = [
     id: '66',
     name: 'Car Washing',
   },
+  {
+    id: '77',
+    name: 'Others',
+  },
 ];
 
 const Dashboard: React.FC = () => {

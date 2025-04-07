@@ -184,9 +184,10 @@ const ServiceOne: React.FC = () => {
             <View style={styles.descriptionContainer}>
               <DescriptionField
                 placeholder="Service Description"
-                count={false}
+                count={true}
                 value={description}
                 onChangeText={text => dispatch(cleanerDescription(text))}
+                maxLength={200}
               />
             </View>
 

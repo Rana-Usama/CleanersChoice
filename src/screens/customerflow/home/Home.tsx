@@ -23,13 +23,11 @@ import {useNavigation} from '@react-navigation/native';
 import HeaderBack from '../../../components/HeaderBack';
 import {RootStackParamList} from '../../../routers/StackNavigator';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {Popable} from 'react-native-popable';
 import Slider from '@react-native-community/slider';
 import {useFocusEffect} from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
 import {BlurView} from '@react-native-community/blur';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import InputField from '../../../components/InputField';
 import GradientButton from '../../../components/GradientButton';
 
 const categories = [
@@ -40,6 +38,11 @@ const categories = [
   {id: '22', name: 'Chimney C..', icon: Icons.chimney},
   {id: '33', name: 'Carpet Cle..', icon: Icons.carpet},
   {id: '11', name: 'Window Cl..', icon: Icons.window},
+  {
+    id: '77',
+    name: 'Others',
+    icon: Icons.others,
+  },
 ];
 
 const Home = () => {
@@ -58,21 +61,21 @@ const Home = () => {
   const [modalVisible2, setModalVisible2] = useState(false);
   const [nameQuery, setNameQuery] = useState('');
   const [filterNameData, setFilteredNameData] = useState([]);
-  const [categoryBasedData, setCategoryBasedData] = useState([]);
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
   const [selectedLocation, setSelectedLocation] = useState([]);
   const [loactionLoading, setLocationLoading] = useState(false);
   const [priceLoading, setPriceLoading] = useState(false);
 
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     serviceDetails();
+  //   }, []),
+  // );
 
-  console.log('categoryBasedData.........', categoryBasedData)
-
-  useFocusEffect(
-    useCallback(() => {
-      serviceDetails();
-    }, []),
-  );
+  useEffect(() => {
+    serviceDetails();
+  }, []);
 
   const serviceDetails = async () => {
     setLoading(true);
@@ -90,9 +93,6 @@ const Home = () => {
           .map(service => service.location)
           .filter(location => location !== undefined);
         setLocations(locationsArray);
-
-       
-
       } else {
         setServicesData([]);
         setLocations([]);
@@ -109,22 +109,28 @@ const Home = () => {
     return servicePrice >= 0 && servicePrice <= priceRange[0];
   });
 
-  const filteredLocationServices = servicesData.filter(service =>
-    service?.location.toLowerCase().includes(query.toLowerCase()),
-  );
+  const filteredLocationServices =
+    selectedLocation.length > 0
+      ? servicesData.filter(service =>
+          service?.location
+            ?.toLowerCase()
+            .includes(selectedLocation.trim().toLowerCase()),
+        )
+      : servicesData;
 
-
-  const filteredCategories = servicesData.filter(service => 
-    service.type && service.type.includes(categorySelection)
-  );
-
+  const filteredCategories =
+    categorySelection === '1'
+      ? servicesData
+      : servicesData.filter(
+          service => service.type && service.type.includes(categorySelection),
+        );
 
   const handleSearch = query => {
     setQuery(query);
     const filtered = locations.filter(location =>
       location.toLowerCase().includes(query.toLowerCase()),
     );
-    setLocations(filtered);
+    setFilteredLocations(filtered);
   };
 
   useEffect(() => {
@@ -182,7 +188,20 @@ const Home = () => {
     }, 1500);
   };
 
+  const [filteredLocations, setFilteredLocations] = useState([]);
+  useEffect(() => {
+    if (query.trim().length > 0) {
+      const filtered = locations.filter(location =>
+        location.toLowerCase().includes(query.toLowerCase()),
+      );
+      setFilteredLocations(filtered);
+    } else {
+      setFilteredLocations([]);
+    }
+  }, [query, locations]);
 
+  console.log('filteredLocationServices...........', filteredLocationServices);
+  console.log('selectedLocation...........', selectedLocation);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -215,8 +234,7 @@ const Home = () => {
             horizontal
             showsHorizontalScrollIndicator={false}
             renderItem={({item}) => (
-              <TouchableOpacity
-                onPress={() => setCategorySelection(item?.id)}>
+              <TouchableOpacity onPress={() => setCategorySelection(item?.id)}>
                 <View
                   style={[
                     styles.categoryBox,
@@ -234,9 +252,13 @@ const Home = () => {
                       styles.categoryIcon,
                       {
                         width:
-                          item.id === '1' ? RFPercentage(3.2) : RFPercentage(4),
+                          item.id === '1' || item.id === '77'
+                            ? RFPercentage(3.2)
+                            : RFPercentage(4),
                         height:
-                          item.id === '1' ? RFPercentage(3.2) : RFPercentage(4),
+                          item.id === '1' || item.id === '77'
+                            ? RFPercentage(3.2)
+                            : RFPercentage(4),
                       },
                     ]}
                   />
@@ -365,17 +387,19 @@ const Home = () => {
           ) : (
             <>
               <View style={styles.servicesContainer}>
-                {
-                  (rangeSelector || loctionFilter || nameQuery)  &&
-                filteredServicesData.length === 0 ||
+                {(rangeSelector && filteredServicesData.length === 0) ||
                 filteredLocationServices.length === 0 ||
-                filterNameData.length === 0 
-                 ? (
+                filterNameData.length === 0 ||
+                filteredCategories.length === 0 ? (
                   <>
-                  <View style={{alignItems:'center', justifyContent:'center',width:'100%', marginTop:RFPercentage(10)}}>
-                    <Image source={Icons.empty} resizeMode='contain' style={{width:RFPercentage(10), height:RFPercentage(10)}} />
-                    <Text style={{color:Colors.placeholderColor, fontFamily:Fonts.fontMedium, fontSize:RFPercentage(1.8), textAlign:'center', marginTop:RFPercentage(1)}}>No service found</Text>
-                  </View>
+                    <View style={styles.noServiceContainer}>
+                      <Image
+                        source={Icons.empty}
+                        resizeMode="contain"
+                        style={styles.noServiceImg}
+                      />
+                      <Text style={styles.noServiceText}>No service found</Text>
+                    </View>
                   </>
                 ) : (
                   <>
@@ -386,9 +410,9 @@ const Home = () => {
                           : loctionFilter
                           ? filteredLocationServices
                           : nameQuery
-                          ? filterNameData 
-                          : categorySelection != '1' ? 
-                          filteredCategories
+                          ? filterNameData
+                          : categorySelection
+                          ? filteredCategories
                           : servicesData
                       }
                       keyExtractor={item => item.id.toString()}
@@ -434,39 +458,15 @@ const Home = () => {
                 keyboardVerticalOffset={Platform.OS === 'ios' ? 40 : 0}
                 style={{
                   flex: 1,
-                  // justifyContent: 'center',
                   alignItems: 'center',
                 }}>
                 <Animated.View
-                  style={{
-                    opacity: opacityAnim,
-                    transform: [{scale: scaleAnim}],
-                    width: '90%',
-                    height: RFPercentage(50),
-                    // height: '50%',
-                    alignSelf: 'center',
-                    backgroundColor: 'rgba(226, 238, 255, 0.9)',
-                    alignItems: 'center',
-                    borderRadius: RFPercentage(2.5),
-                    paddingHorizontal: RFPercentage(1.6),
-                    paddingVertical: RFPercentage(2.5),
-                    // zIndex:9999999,
-                    top: RFPercentage(20),
-                  }}>
-                  <View
-                    style={{
-                      width: '100%',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}>
-                    <Text
-                      style={{
-                        color: Colors.secondaryText,
-                        fontFamily: Fonts.fontMedium,
-                        fontSize: RFPercentage(1.8),
-                      }}>
-                      Apply Location
-                    </Text>
+                  style={[
+                    styles.locationModal,
+                    {opacity: opacityAnim, transform: [{scale: scaleAnim}]},
+                  ]}>
+                  <View style={styles.modalInner}>
+                    <Text style={styles.applyLocation}>Apply Location</Text>
                     <TouchableOpacity
                       style={{position: 'absolute', right: 0}}
                       onPress={() => setModalVisible(false)}>
@@ -487,36 +487,28 @@ const Home = () => {
                   </View>
 
                   {query.length > 0 && selectedLocation.length === 0 && (
-                    <View
-                      style={{
-                        top: RFPercentage(0.5),
-                        width: '100%',
-                        backgroundColor: 'white',
-                        borderRadius: RFPercentage(1),
-                      }}>
-                      <FlatList
-                        data={locations}
-                        keyExtractor={(item, index) => index.toString()}
-                        renderItem={({item}) => (
-                          <TouchableOpacity
-                            onPress={() => {
-                              setQuery(item);
-                              setSelectedLocation(item);
-                            }}>
-                            <Text
-                              style={{
-                                padding: RFPercentage(2),
-                                fontSize: RFPercentage(1.6),
-                                borderBottomWidth: 1,
-                                borderBottomColor: Colors.inputFieldColor,
-                                fontFamily: Fonts.fontRegular,
-                                color: Colors.placeholderColor,
-                              }}>
-                              {item}
-                            </Text>
-                          </TouchableOpacity>
-                        )}
-                      />
+                    <View style={styles.queryContainer}>
+                      {filteredLocations.length === 0 ? (
+                        <>
+                          <Text style={styles.queryText}>No Location exist</Text>
+                        </>
+                      ) : (
+                        <>
+                          <FlatList
+                            data={filteredLocations}
+                            keyExtractor={(item, index) => index.toString()}
+                            renderItem={({item}) => (
+                              <TouchableOpacity
+                                onPress={() => {
+                                  setQuery(item);
+                                  setSelectedLocation(item);
+                                }}>
+                                <Text style={styles.queryText}>{item}</Text>
+                              </TouchableOpacity>
+                            )}
+                          />
+                        </>
+                      )}
                     </View>
                   )}
                   <View style={{position: 'absolute', bottom: RFPercentage(3)}}>
@@ -524,7 +516,7 @@ const Home = () => {
                       title="Apply"
                       onPress={handleLocationApply}
                       loading={loactionLoading}
-                      disabled={query.length > 0 ? false : true}
+                      disabled={query.length > 0 && filteredLocations.length != 0 ? false : true}
                     />
                   </View>
                 </Animated.View>
@@ -552,32 +544,21 @@ const Home = () => {
                   behavior={Platform.OS === 'ios' ? 'padding' : undefined}
                   style={{flex: 1}}>
                   <Animated.View
-                    style={{
-                      opacity: opacityAnim,
-                      transform: [{scale: scaleAnim}],
-                      width: '90%',
-                      height: '50%',
-                      alignSelf: 'center',
-                      backgroundColor: 'rgba(226, 238, 255, 0.9)',
-                      alignItems: 'center',
-                      borderRadius: RFPercentage(2.5),
-                      top: RFPercentage(20),
-                      paddingHorizontal: RFPercentage(1.6),
-                      paddingVertical: RFPercentage(2.5),
-                    }}>
+                    style={[
+                      {
+                        opacity: opacityAnim,
+                        transform: [{scale: scaleAnim}],
+                      },
+                      styles.rangeModal,
+                    ]}>
                     <View
-                      style={{
-                        width: '100%',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        marginTop: RFPercentage(1),
-                      }}>
-                      <Text
-                        style={{
-                          color: Colors.primaryText,
-                          fontFamily: Fonts.fontMedium,
-                          fontSize: RFPercentage(1.7),
-                        }}>
+                      style={[
+                        {
+                          marginTop: RFPercentage(1),
+                        },
+                        styles.modalInner,
+                      ]}>
+                      <Text style={styles.applyLocation}>
                         Price Range Selection
                       </Text>
                       <TouchableOpacity
@@ -619,13 +600,7 @@ const Home = () => {
                         <Text style={styles.sliderLabel}>2000$+</Text>
                       </View>
                       <View style={{marginTop: RFPercentage(8)}}>
-                        <Text
-                          style={{
-                            textAlign: 'center',
-                            fontFamily: Fonts.fontMedium,
-                            fontSize: RFPercentage(1.7),
-                            color: Colors.primaryText,
-                          }}>
+                        <Text style={styles.range}>
                           Price Range: 0$ - {tempValue.current}$
                         </Text>
                       </View>
@@ -661,7 +636,6 @@ const styles = StyleSheet.create({
   },
   container: {
     backgroundColor: Colors.background,
-    // marginTop: Platform.OS === 'android' ? RFPercentage(4) : RFPercentage(-0.8),
   },
   headerContainer: {
     width: '90%',
@@ -683,6 +657,75 @@ const styles = StyleSheet.create({
     color: Colors.gradient1,
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.5),
+  },
+  noServiceContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    marginTop: RFPercentage(10),
+  },
+  noServiceImg: {
+    width: RFPercentage(10),
+    height: RFPercentage(10),
+  },
+  noServiceText: {
+    color: Colors.placeholderColor,
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.8),
+    textAlign: 'center',
+    marginTop: RFPercentage(1),
+  },
+  locationModal: {
+    width: '90%',
+    height: RFPercentage(50),
+    alignSelf: 'center',
+    backgroundColor: 'rgba(226, 238, 255, 0.9)',
+    alignItems: 'center',
+    borderRadius: RFPercentage(2.5),
+    paddingHorizontal: RFPercentage(1.6),
+    paddingVertical: RFPercentage(2.5),
+    top: RFPercentage(20),
+  },
+  modalInner: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  applyLocation: {
+    color: Colors.secondaryText,
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.8),
+  },
+  queryContainer: {
+    top: RFPercentage(0.5),
+    width: '100%',
+    backgroundColor: 'white',
+    borderRadius: RFPercentage(1),
+  },
+  queryText: {
+    padding: RFPercentage(2),
+    fontSize: RFPercentage(1.6),
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.inputFieldColor,
+    fontFamily: Fonts.fontRegular,
+    color: Colors.placeholderColor,
+  },
+  rangeModal: {
+    width: '90%',
+    height: '50%',
+    alignSelf: 'center',
+    backgroundColor: 'rgba(226, 238, 255, 0.9)',
+    alignItems: 'center',
+    borderRadius: RFPercentage(2.5),
+    top: RFPercentage(20),
+    paddingHorizontal: RFPercentage(1.6),
+    paddingVertical: RFPercentage(2.5),
+  },
+  range: {
+    textAlign: 'center',
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.7),
+    color: Colors.primaryText,
   },
   searchContainer: {
     width: '90%',

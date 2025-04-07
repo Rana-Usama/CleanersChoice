@@ -50,6 +50,10 @@ const items = [
     id: '66',
     name: 'Car Washing',
   },
+  {
+    id: '77',
+    name: 'Others',
+  },
 ];
 
 const ServiceDetails: React.FC = ({route}) => {
@@ -98,6 +102,12 @@ const ServiceDetails: React.FC = ({route}) => {
   const createdAtDate = new Date(item.createdAt._seconds * 1000);
   const formattedDate = moment(createdAtDate).format('DD MMMM, YYYY');
 
+  const getTruncatedText = text => {
+    const maxChars = 120;
+    if (text.length <= maxChars) return text;
+    return text.slice(0, maxChars).trim() + '... ';
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={{paddingBottom: RFPercentage(10)}}>
@@ -139,25 +149,29 @@ const ServiceDetails: React.FC = ({route}) => {
           </ScrollView>
 
           <View style={styles.dotsContainer}>
-            {item.serviceImages.map((_, index) => (
-              <TouchableOpacity key={index} onPress={() => setStep(index)}>
-                {step === index ? (
-                  <LinearGradient
-                    colors={[Colors.gradient1, Colors.gradient2]}
-                    style={styles.activeDot}
-                  />
-                ) : (
-                  <View style={styles.inactiveDot} />
-                )}
-              </TouchableOpacity>
-            ))}
+            {item.serviceImages.length === 1 ? null : (
+              <>
+                {item.serviceImages.map((_, index) => (
+                  <TouchableOpacity key={index} onPress={() => setStep(index)}>
+                    {step === index ? (
+                      <LinearGradient
+                        colors={[Colors.gradient1, Colors.gradient2]}
+                        style={styles.activeDot}
+                      />
+                    ) : (
+                      <View style={styles.inactiveDot} />
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </>
+            )}
           </View>
         </View>
         <View style={styles.container}>
           <View style={{marginTop: RFPercentage(2)}}>
             <View style={styles.rowContainer}>
               <Image
-                source= {item.image ? {uri: item.image} : IMAGES.defaultPic}
+                source={item.image ? {uri: item.image} : IMAGES.defaultPic}
                 resizeMode="contain"
                 style={styles.icon}
               />
@@ -205,28 +219,24 @@ const ServiceDetails: React.FC = ({route}) => {
                   fontFamily: Fonts.fontRegular,
                   fontSize: RFPercentage(1.4),
                   textAlign: 'justify',
-                  lineHeight: RFPercentage(1.9),
+                  lineHeight: RFPercentage(2),
                   marginTop: RFPercentage(0.5),
-                }}
-                numberOfLines={isExpanded ? undefined : 3}>
-                {item.description}
-              </Text>
-              {item.description.length > 150 && (
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  onPress={toggleDescription}
-                  style={{width: RFPercentage(10)}}>
+                }}>
+                {isExpanded
+                  ? item.description + ' '
+                  : getTruncatedText(item.description)}
+                {item.description.length > 120 && (
                   <Text
+                    onPress={toggleDescription}
                     style={{
                       color: Colors.gradient1,
-                      fontSize: RFPercentage(1.5),
-                      marginTop: RFPercentage(0.8),
+                      fontSize: RFPercentage(1.4),
                       fontFamily: Fonts.fontMedium,
                     }}>
                     {isExpanded ? 'Read Less' : 'Read More'}
                   </Text>
-                </TouchableOpacity>
-              )}
+                )}
+              </Text>
             </View>
           </View>
           <View style={{marginTop: RFPercentage(2)}}>
@@ -264,7 +274,7 @@ const ServiceDetails: React.FC = ({route}) => {
                   alignItems: 'center',
                   width: RFPercentage(16),
                 }}>
-                   <Image
+                <Image
                   source={Icons.availability}
                   resizeMode="contain"
                   style={{
@@ -277,11 +287,10 @@ const ServiceDetails: React.FC = ({route}) => {
                     color: Colors.gradient1,
                     fontFamily: Fonts.semiBold,
                     fontSize: RFPercentage(1.4),
-                    left:RFPercentage(0.8)
+                    left: RFPercentage(0.8),
                   }}>
                   Check Availability
                 </Text>
-               
               </TouchableOpacity>
             </View>
           </View>
@@ -356,7 +365,9 @@ const ServiceDetails: React.FC = ({route}) => {
                           ? RFPercentage(18.6)
                           : RFPercentage(34.5),
                     }}>
-                    {visibleItems < item.type.length ? `+${item.type.length - visibleItems} More` : `See Less`}
+                    {visibleItems < item.type.length
+                      ? `+${item.type.length - visibleItems} More`
+                      : `See Less`}
                   </Text>
                 </TouchableOpacity>
               )}
