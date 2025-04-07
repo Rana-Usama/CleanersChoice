@@ -36,8 +36,8 @@ const JobCard = (props:props) => {
       
       <View style={[styles.innerView, styles.priceContainer]}>
         <Text style={styles.priceText}>
-          Price Range:
-          <Text style={styles.priceHighlight}>{`	`} {props.price}</Text>
+          Budget:
+          <Text style={styles.priceHighlight}>{`	`} {props.price}$</Text>
         </Text>
         <TouchableOpacity onPress={props.onPress}>
           <View style={styles.detailsContainer}>

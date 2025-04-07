@@ -1,5 +1,11 @@
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React from 'react';
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import React, {useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import {Colors, Fonts} from '../../../constants/Themes';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -10,18 +16,42 @@ import {RootStackParamList} from '../../../routers/StackNavigator';
 
 const JobPosted = () => {
   const navigation =
-    useNavigation<
-      NativeStackNavigationProp<RootStackParamList, 'JobPosted'>
-    >();
+    useNavigation<NativeStackNavigationProp<RootStackParamList, 'JobPosted'>>();
+  const [loading, setLoading] = useState(false);
+
+  const handleNext = () => {
+    setLoading(true);
+    setTimeout(() => {
+      navigation.navigate('Jobs');
+    }, 1500);
+  };
+
   return (
-    <LinearGradient colors={[Colors.gradient1, Colors.gradient2]} style={styles.safeArea}>
+    <LinearGradient
+      colors={[Colors.gradient1, Colors.gradient2]}
+      style={styles.safeArea}>
       <View style={styles.centeredView}>
-        <AntDesign name="checkcircleo" color={Colors.background} size={120} />
+        <AntDesign
+          name="checkcircleo"
+          color={Colors.background}
+          size={RFPercentage(10)}
+        />
         <Text style={styles.successText}>Job Posted Successfully!</Text>
       </View>
-      <TouchableOpacity onPress={() => navigation.navigate('Home')}>
+      <TouchableOpacity onPress={handleNext}>
         <View style={styles.homeButton}>
-          <Text style={styles.homeButtonText}>Home</Text>
+          {loading ? (
+            <>
+              <ActivityIndicator
+                size={'small'}
+                color={Colors.placeholderColor}
+              />
+            </>
+          ) : (
+            <>
+              <Text style={styles.homeButtonText}>See Active Jobs</Text>
+            </>
+          )}
         </View>
       </TouchableOpacity>
     </LinearGradient>
@@ -59,6 +89,6 @@ const styles = StyleSheet.create({
   homeButtonText: {
     color: 'rgba(37, 50, 117, 1)',
     fontFamily: Fonts.fontBold,
-    fontSize:RFPercentage(1.7)
+    fontSize: RFPercentage(1.6),
   },
 });

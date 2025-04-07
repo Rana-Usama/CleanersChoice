@@ -10,7 +10,7 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, Icons} from '../../../constants/Themes';
 import HeaderBack from '../../../components/HeaderBack';
@@ -27,6 +27,8 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import MultiSelect from 'react-native-multiple-select';
+import {useSelector} from 'react-redux';
+import Toast from 'react-native-toast-message';
 
 const data1 = [
   {
@@ -111,6 +113,7 @@ const PostJob = () => {
   const [Location, setLocation] = useState('');
   const [Description, setDescription] = useState('');
   const [remarks, setRemarks] = useState('');
+  const [budget, setBudget] = useState('')
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const handleSelectedItem = (item: any) => {
@@ -132,25 +135,79 @@ const PostJob = () => {
     if (!user) return;
     setLoading(true);
     try {
-      const serviceRef = await firestore()
-        .collection('Jobs')
-        .doc(user.uid)
-        .set({
-          createdAt: formattedDate,
-          title: jobTitle,
-          description: Description,
-          type: selectedItems,
-          location: Location,
-          priceRange: selectedRange,
-          remarks: remarks || '',
+      const jobData = {
+        createdAt: formattedDate,
+        title: jobTitle,
+        description: Description,
+        type: selectedItems,
+        location: Location,
+        priceRange: budget,
+        remarks: remarks || '',
+        jobId: user.uid,
+        status: 'active',
+      };
+
+      if (jobId) {
+        await firestore().collection('Jobs').doc(jobId).update(jobData);
+        navigation.navigate('Jobs');
+        Toast.show({
+          type: 'success',
+          text1: 'Job Update',
+          text2: 'Job Updated successfully',
+          position: 'top',
+          topOffset: RFPercentage(8),
+          text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
+          text2Style: {
+            fontFamily: Fonts.fontRegular,
+            fontSize: RFPercentage(1.4),
+          },
         });
-      navigation.navigate('JobPosted');
+      } else {
+        await firestore().collection('Jobs').add(jobData);
+        navigation.navigate('JobPosted');
+      }
     } catch (error) {
-      console.error(error);
+      console.error('Error posting/updating job:', error);
     } finally {
       setLoading(false);
     }
   };
+
+  const jobId = useSelector(state => state.job.jobId);
+
+  const [job, setJob] = useState([]);
+
+  const fetchJob = async () => {
+    const user = auth().currentUser;
+    if (!user || !jobId) return;
+    setLoading(true);
+    try {
+      const docSnapshot = await firestore().collection('Jobs').doc(jobId).get();
+
+      if (docSnapshot.exists) {
+        const jobData = docSnapshot.data();
+        setJob(jobData);
+
+        setJobTitle(jobData.title || '');
+        setDescription(jobData.description || '');
+        setLocation(jobData.location || '');
+        setSelectedItems(jobData.type || []);
+        setBudget(jobData.priceRange || null);
+        setRemarks(jobData.remarks || '');
+        setDate(moment(jobData.createdAt, 'YYYY-MM-DD  HH:mm A').toDate());
+      } else {
+        setJob([]);
+      }
+    } catch (error) {
+      console.error('Error fetching job:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchJob();
+  }, []);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -174,9 +231,10 @@ const PostJob = () => {
               <View>
                 <DescriptionField
                   placeholder="Description of the cleaning job"
-                  count={false}
+                  count={true}
                   value={Description}
                   onChangeText={setDescription}
+                  maxLength={200}
                 />
               </View>
               <InputField
@@ -185,12 +243,6 @@ const PostJob = () => {
                 value={Location}
                 onChangeText={setLocation}
               />
-              {/* <CustomDropDown
-                placeholder="Service Type"
-                data={data1}
-                placeholderColor={Colors.placeholderColor}
-                setValue={handleSelectedItem}
-              /> */}
 
               <View style={{flex: 1}}>
                 <MultiSelect
@@ -248,12 +300,22 @@ const PostJob = () => {
                 </ScrollView>
               </View>
 
-              <CustomDropDown
-                placeholder="Price Range"
-                data={data2}
-                placeholderColor={Colors.placeholderColor}
-                setValue={handleSelectedItem2}
+              <InputField
+                placeholder="Budget"
+                customStyle={{width: '100%'}}
+                value={budget}
+                onChangeText={setBudget}
               />
+
+
+              {/* <CustomDropDown
+                placeholder={jobId ? selectedRange : 'Price Range'}
+                data={data2}
+                placeholderColor={
+                  jobId ? Colors.inputTextColor : Colors.placeholderColor
+                }
+                setValue={handleSelectedItem2}
+              /> */}
               <View style={styles.dateContainer}>
                 <TouchableOpacity
                   onPress={() => setOpen(true)}
@@ -290,15 +352,17 @@ const PostJob = () => {
                   count={false}
                   value={remarks}
                   onChangeText={setRemarks}
+                  maxLength={80}
                 />
               </View>
             </View>
             <View style={{alignSelf: 'center', marginTop: RFPercentage(3)}}>
               <GradientButton
-                title="Make Job Live"
+                title={jobId ? 'Edit Job' : 'Make Job Live'}
                 textStyle={{fontSize: RFPercentage(1.5)}}
                 onPress={postJob}
                 loading={loading}
+                disabled={loading}
               />
             </View>
           </View>

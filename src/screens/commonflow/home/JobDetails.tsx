@@ -5,20 +5,100 @@ import {
   StyleSheet,
   Text,
   View,
+  FlatList,
+  TouchableOpacity,
 } from 'react-native';
-import React from 'react';
+import React, {useState} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, Icons} from '../../../constants/Themes';
 import HeaderBack from '../../../components/HeaderBack';
 import GradientButton from '../../../components/GradientButton';
 import NextButton from '../../../components/NextButton';
 import {useNavigation} from '@react-navigation/native';
-import {useSelector} from 'react-redux';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../../routers/StackNavigator';
-const JobDetails = () => {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'JobDetails'>>();
-  const userFlow = useSelector(state => state.userFlow.userFlow);
+import {useDispatch, useSelector} from 'react-redux';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {RootStackParamList} from '../../../routers/StackNavigator';
+import firestore from '@react-native-firebase/firestore';
+import {setJobId} from '../../../redux/Job/Actions';
+
+const items = [
+  {
+    id: '11',
+    name: 'Window Cleaning',
+  },
+  {
+    id: '22',
+    name: 'Chimney Cleaning',
+  },
+  {
+    id: '33',
+    name: 'Carpet Cleaning',
+  },
+  {
+    id: '44',
+    name: 'Residential Cleaning',
+  },
+  {
+    id: '55',
+    name: 'Pressure Washing',
+  },
+  {
+    id: '66',
+    name: 'Car Washing',
+  },
+  {
+    id: '77',
+    name: 'Others',
+  },
+];
+
+const JobDetails = ({route}) => {
+  const {item} = route.params;
+  const navigation =
+    useNavigation<
+      NativeStackNavigationProp<RootStackParamList, 'JobDetails'>
+    >();
+  const [visibleItems, setVisibleItems] = useState(5);
+  const userData = useSelector(state => state.profile.profileData);
+  const [loading, setLoading] = useState(false);
+  const [loading2, setLoading2] = useState(false);
+  const getServiceNames = serviceIds => {
+    return serviceIds
+      ?.map(id => {
+        const serviceItem = items.find(item => item.id === id);
+        return serviceItem ? serviceItem.name : null;
+      })
+      .filter(name => name !== null);
+  };
+  const serviceNames = getServiceNames(item?.type.slice(0, visibleItems));
+
+  const markComplete = async (jobId, newStatus) => {
+    setLoading(true);
+    try {
+      await firestore().collection('Jobs').doc(jobId).update({
+        status: newStatus,
+        updatedAt: firestore.FieldValue.serverTimestamp(),
+      });
+      navigation.goBack();
+    } catch (error) {
+      console.error('Error updating job status:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+
+  const dispatch = useDispatch();
+  dispatch(setJobId(item.id));
+
+  const handleEditButton = () => {
+    setLoading2(true)
+    setTimeout(() => {
+      setLoading2(false)
+      navigation.navigate('PostJob')
+    }, 1000);
+  }
+  
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -36,7 +116,7 @@ const JobDetails = () => {
               />
               <Text style={styles.label}>Job Title:</Text>
             </View>
-            <Text style={styles.value}>Garden Cleaning</Text>
+            <Text style={styles.value}>{item.title}</Text>
           </View>
 
           <View style={styles.sectionContainer}>
@@ -48,11 +128,7 @@ const JobDetails = () => {
               />
               <Text style={styles.label}>Description:</Text>
             </View>
-            <Text style={styles.description}>
-              My garden is a mess...I want some good cleaning company to pick
-              this job and clean up my garden so I can do further gardening in
-              it.
-            </Text>
+            <Text style={styles.description}>{item.description}</Text>
           </View>
 
           <View style={styles.sectionContainer}>
@@ -64,7 +140,7 @@ const JobDetails = () => {
               />
               <Text style={styles.label}>Location:</Text>
             </View>
-            <Text style={styles.value}>Blumenwag 5, 8008 Zürich, Ohio</Text>
+            <Text style={styles.value}>{item.location}</Text>
           </View>
 
           <View style={styles.sectionContainer}>
@@ -76,7 +152,19 @@ const JobDetails = () => {
               />
               <Text style={styles.label}>Service Type:</Text>
             </View>
-            <Text style={styles.value}>Residential</Text>
+            <View>
+              <FlatList
+                data={serviceNames}
+                numColumns={2}
+                keyExtractor={(item, index) => index.toString()}
+                contentContainerStyle={{marginLeft: RFPercentage(-1)}}
+                renderItem={({item, index}) => (
+                  <View style={{marginHorizontal: RFPercentage(1)}}>
+                    <Text style={styles.value}>{item}</Text>
+                  </View>
+                )}
+              />
+            </View>
           </View>
 
           <View style={styles.sectionContainer}>
@@ -86,9 +174,9 @@ const JobDetails = () => {
                 resizeMode="contain"
                 style={styles.icon}
               />
-              <Text style={styles.label}>Price Range:</Text>
+              <Text style={styles.label}>Budget:</Text>
             </View>
-            <Text style={styles.value}>50$-200$</Text>
+            <Text style={styles.value}>{item.priceRange}$</Text>
           </View>
 
           <View style={styles.sectionContainer}>
@@ -100,25 +188,34 @@ const JobDetails = () => {
               />
               <Text style={styles.label}>Due Date & Time:</Text>
             </View>
-            <Text style={styles.value}>26 April, 2024 | 5PM</Text>
+            <Text style={styles.value}>{item.createdAt}</Text>
           </View>
         </View>
-        {userFlow === 'Customer' && (
-          <View style={styles.buttonWrapper}>
-            <NextButton
-              title="Edit Job Post"
-              onPress={() => navigation.navigate('PostJob')}
-              textStyle={styles.buttonText}
-            />
-            <View style={styles.buttonSpacing}>
-              <GradientButton
-                title="Mark as complete"
+        {item.status === 'active' && userData.role === 'Customer' ? (
+          <>
+            <View style={styles.buttonWrapper}>
+              <NextButton
+                title="Edit Job Post"
+                onPress={handleEditButton}
                 textStyle={styles.buttonText}
-                onPress={() => {}}
+                disabled={loading2}
+                loading={loading2 || loading}
+
               />
+              <View style={styles.buttonSpacing}>
+                <GradientButton
+                  title="Mark as complete"
+                  textStyle={styles.buttonText}
+                  onPress={() => {
+                    markComplete(item.id, 'completed');
+                  }}
+                  loading={loading}
+                  disabled={loading || loading2}
+                />
+              </View>
             </View>
-          </View>
-        )}
+          </>
+        ) : null}
       </ScrollView>
     </SafeAreaView>
   );
