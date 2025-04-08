@@ -103,7 +103,9 @@ const items = [
   },
 ];
 
-const PostJob = () => {
+const PostJob = ({route}) => {
+  const {jobId} = route.params
+
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, 'PostJob'>>();
   const [date, setDate] = useState<Date>(new Date());
@@ -173,7 +175,6 @@ const PostJob = () => {
     }
   };
 
-  const jobId = useSelector(state => state.job.jobId);
 
   const [job, setJob] = useState([]);
 

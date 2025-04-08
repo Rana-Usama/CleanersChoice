@@ -54,7 +54,7 @@ const JobDetails = ({route}) => {
     setLoading2(true);
     setTimeout(() => {
       setLoading2(false);
-      navigation.navigate('PostJob');
+      navigation.navigate('PostJob', {jobId : item.id});
     }, 1000);
   };
 
@@ -161,19 +161,24 @@ const JobDetails = ({route}) => {
               </View>
             </View>
           </>
-        ) : (
+        ) : 
+         userData.role === 'Cleaner' ?
+        (
+
           <View style={styles.buttonWrapper}>
             <GradientButton
               title="Message Client"
               textStyle={styles.buttonText}
-              // onPress={() => {
-              //   markComplete(item.id, 'completed');
-              // }}
+              onPress={() => {
+              }}
               // loading={loading}
               // disabled={loading || loading2}
             />
           </View>
-        )}
+        )
+        :
+        null
+      }
       </ScrollView>
     </SafeAreaView>
   );

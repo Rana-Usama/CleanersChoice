@@ -29,10 +29,16 @@ import GradientButton from '../../../../components/GradientButton';
 import SearchField from '../../../../components/SearchField';
 import Slider from '@react-native-community/slider';
 
-const items = ['Residential', 'Car', 'Window', 'Pressure', 'Carpet', 'Chimney'];
+const items = [
+  'Residential Cleaning',
+  'Car Cleaning',
+  'Window Cleaning',
+  'Pressure Washing',
+  'Carpet Cleaning',
+  'Chimney Cleaning',
+];
 
 const CleanerJobs = () => {
-  const [Filter, setFilter] = useState(null);
   const navigation = useNavigation();
   const [jobsData, setJobsData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -44,8 +50,6 @@ const CleanerJobs = () => {
   const [query, setQuery] = useState('');
   const [loctionFilter, setLocationFilter] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
-  const [nameQuery, setNameQuery] = useState('');
-  const [filterNameData, setFilteredNameData] = useState([]);
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
   const [selectedLocation, setSelectedLocation] = useState([]);
@@ -55,6 +59,8 @@ const CleanerJobs = () => {
   const [modalVisible3, setModalVisible3] = useState(false);
   const [selectedType, setSelectedType] = useState('');
   const [query2, setQuery2] = useState('');
+
+  
 
   const fetchJobs = async () => {
     const user = auth().currentUser;
@@ -87,29 +93,7 @@ const CleanerJobs = () => {
     }, []),
   );
 
-  const filteredLocationServices =
-    selectedLocation.length > 0
-      ? jobsData.filter(service =>
-          service?.location
-            ?.toLowerCase()
-            .includes(selectedLocation.trim().toLowerCase()),
-        )
-      : jobsData;
-
-  const filteredServicesData = jobsData.filter(service => {
-    const servicePrice = service?.priceRange;
-    return servicePrice >= 0 && servicePrice <= priceRange[0];
-  });
-
-
-
-  const filteredServicesType =
-  selectedType
-    ? jobsData.filter(service =>
-        service?.type?.toLowerCase().includes(selectedType.trim().toLowerCase())
-      )
-    : jobsData;
-
+  
 
   const getTruncatedText = text => {
     const maxChars = 15;
@@ -151,7 +135,7 @@ const CleanerJobs = () => {
         }),
       ]).start();
     }
-  }, [modalVisible || modalVisible2]);
+  }, [modalVisible || modalVisible2 || modalVisible3]);
 
   const handleLocationApply = () => {
     setLocationLoading(true);
@@ -205,12 +189,11 @@ const CleanerJobs = () => {
 
   const handleSearch2 = query => {
     setQuery2(query);
-    const filtered = items.filter(location =>
-      location.toLowerCase().includes(query.toLowerCase()),
+    const filtered = items.filter(item =>
+      item.toLowerCase().includes(query.toLowerCase()),
     );
     setServiceTypeFilter(filtered);
   };
-
 
   const handleServiceTypeApply = () => {
     setLocationLoading(true);
@@ -221,6 +204,26 @@ const CleanerJobs = () => {
     }, 1500);
   };
 
+  const finalFilteredJobs = jobsData.filter(job => {
+    const matchesLocation =
+      !loctionFilter ||
+      selectedLocation.length === 0 ||
+      (job.location &&
+        job.location
+          .toLowerCase()
+          .includes(selectedLocation.trim().toLowerCase()));
+
+    const matchesPrice =
+      !rangeSelector ||
+      (job.priceRange >= 0 && job.priceRange <= priceRange[0]);
+
+    const matchesServiceType =
+      !serviceType ||
+      (job.type &&
+        job.type.toLowerCase().includes(selectedType.trim().toLowerCase()));
+
+    return matchesLocation && matchesPrice && matchesServiceType;
+  });
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -397,12 +400,8 @@ const CleanerJobs = () => {
                 <>
                   <FlatList
                     data={
-                      loctionFilter
-                        ? filteredLocationServices
-                        : rangeSelector
-                        ? filteredServicesData
-                        : serviceType ? 
-                        filteredServicesType 
+                      loctionFilter || rangeSelector || serviceType
+                        ? finalFilteredJobs
                         : jobsData
                     }
                     keyExtractor={item => item.id.toString()}
@@ -422,17 +421,11 @@ const CleanerJobs = () => {
                 </>
                 ) : (
                 <>
-                  {rangeSelector && filteredServicesData.length === 0 && (
-                    <>
-                      <View style={styles.noServiceContainer}>
-                        <Image
-                          source={Icons.empty}
-                          resizeMode="contain"
-                          style={styles.noServiceImg}
-                        />
-                        <Text style={styles.noServiceText}>No Jobs found</Text>
-                      </View>
-                    </>
+                  {finalFilteredJobs.length === 0 && (
+                    <View style={styles.noServiceContainer}>
+                      <Image source={Icons.empty} style={styles.noServiceImg} />
+                      <Text style={styles.noServiceText}>No Jobs found</Text>
+                    </View>
                   )}
                 </>
               </>
@@ -660,7 +653,9 @@ const CleanerJobs = () => {
                     onChangeText={handleSearch2}
                   />
                 </View>
-                
+                <View style={styles.queryContainer}>
+                  {Array.isArray(serviceTypeFilter) &&
+                    serviceTypeFilter.length > 0 && (
                       <FlatList
                         data={serviceTypeFilter}
                         keyExtractor={(item, index) => index.toString()}
@@ -674,8 +669,8 @@ const CleanerJobs = () => {
                           </TouchableOpacity>
                         )}
                       />
-                    
-                  
+                    )}
+                </View>
                 <View style={{position: 'absolute', bottom: RFPercentage(3)}}>
                   <GradientButton
                     title="Apply"
