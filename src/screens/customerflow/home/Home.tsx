@@ -63,18 +63,12 @@ const Home = () => {
   const [loctionFilter, setLocationFilter] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
   const [nameQuery, setNameQuery] = useState('');
-  const [filterNameData, setFilteredNameData] = useState([]);
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
   const [selectedLocation, setSelectedLocation] = useState([]);
   const [loactionLoading, setLocationLoading] = useState(false);
   const [priceLoading, setPriceLoading] = useState(false);
 
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     serviceDetails();
-  //   }, []),
-  // );
 
   useEffect(() => {
     serviceDetails();
@@ -107,27 +101,6 @@ const Home = () => {
     }
   };
 
-  const filteredServicesData = servicesData.filter(service => {
-    const servicePrice = service?.packages[0]?.price;
-    return servicePrice >= 0 && servicePrice <= priceRange[0];
-  });
-
-  const filteredLocationServices =
-    selectedLocation.length > 0
-      ? servicesData.filter(service =>
-          service?.location
-            ?.toLowerCase()
-            .includes(selectedLocation.trim().toLowerCase()),
-        )
-      : servicesData;
-
-  const filteredCategories =
-    categorySelection === '1'
-      ? servicesData
-      : servicesData.filter(
-          service => service.type && service.type.includes(categorySelection),
-        );
-
   const handleSearch = query => {
     setQuery(query);
     const filtered = locations.filter(location =>
@@ -136,12 +109,6 @@ const Home = () => {
     setFilteredLocations(filtered);
   };
 
-  useEffect(() => {
-    const nameQueries = servicesData.filter(service =>
-      service?.name.toLowerCase().includes(nameQuery.toLowerCase()),
-    );
-    setFilteredNameData(nameQueries);
-  }, [nameQuery, servicesData]);
 
   useEffect(() => {
     if (modalVisible || modalVisible2) {
@@ -224,6 +191,36 @@ const Home = () => {
     }
   };
 
+  const finalFilteredJobs = servicesData.filter(service => {
+    if (rangeSelector) {
+      const price = service?.packages?.[0]?.price || 0;
+      if (price < 0 || price > priceRange[0]) return false;
+    }
+
+    if (loctionFilter && selectedLocation.trim() !== '') {
+      if (
+        !service.location
+          ?.toLowerCase()
+          .includes(selectedLocation.trim().toLowerCase())
+      ) {
+        return false;
+      }
+    }
+
+    if (nameQuery.trim() !== '') {
+      if (!service.name?.toLowerCase().includes(nameQuery.toLowerCase())) {
+        return false;
+      }
+    }
+
+    if (categorySelection !== '1') {
+      if (!service.type?.includes(categorySelection)) {
+        return false;
+      }
+    }
+    return true;
+  });
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
@@ -236,7 +233,7 @@ const Home = () => {
             right={true}
             rightText="Post Job"
             textStyle={{fontSize: RFPercentage(1.8)}}
-            onPress={() => navigation.navigate('PostJob')}
+            onPress={() => navigation.navigate('PostJob',{jobId:null})}
           />
 
           <View style={styles.searchContainer}>
@@ -408,10 +405,11 @@ const Home = () => {
           ) : (
             <>
               <View style={styles.servicesContainer}>
-                {(rangeSelector && filteredServicesData.length === 0) ||
-                filteredLocationServices.length === 0 ||
-                filterNameData.length === 0 ||
-                filteredCategories.length === 0 ? (
+                {(rangeSelector ||
+                  loctionFilter ||
+                  nameQuery ||
+                  categorySelection !== '1') &&
+                finalFilteredJobs.length === 0 ? (
                   <>
                     <View style={styles.noServiceContainer}>
                       <Image
@@ -426,14 +424,11 @@ const Home = () => {
                   <>
                     <FlatList
                       data={
-                        rangeSelector
-                          ? filteredServicesData
-                          : loctionFilter
-                          ? filteredLocationServices
-                          : nameQuery
-                          ? filterNameData
-                          : categorySelection
-                          ? filteredCategories
+                        rangeSelector ||
+                        loctionFilter ||
+                        nameQuery ||
+                        categorySelection !== '1'
+                          ? finalFilteredJobs
                           : servicesData
                       }
                       keyExtractor={item => item.id.toString()}

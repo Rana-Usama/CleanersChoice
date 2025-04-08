@@ -45,7 +45,7 @@ export type RootStackParamList = {
   ChangePassword: undefined;
   Home: undefined;
   ServiceDetails: { item: any };
-  PostJob: undefined;
+  PostJob: { item: any };
   JobPosted: undefined;
   JobDetails: { item: any };
   EditProfile: undefined;

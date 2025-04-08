@@ -131,7 +131,9 @@ const Jobs = () => {
               />
             </TouchableOpacity>
             <Text style={styles.title}>My Posted Jobs</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('PostJob')}>
+            <TouchableOpacity 
+            onPress={() => navigation.navigate('PostJob',{jobId:null})}
+            >
               <Text style={styles.postJobText}>Post Job</Text>
             </TouchableOpacity>
           </View>
