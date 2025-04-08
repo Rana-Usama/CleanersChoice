@@ -67,8 +67,6 @@ const CleanerMessages = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView>
-
-      
       <HeaderBack title="Messages" textStyle={styles.headerText} />
       <View style={styles.container}>
         <View style={styles.toggleContainer}>

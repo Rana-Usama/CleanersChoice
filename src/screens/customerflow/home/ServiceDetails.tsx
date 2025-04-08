@@ -22,6 +22,7 @@ import {useNavigation} from '@react-navigation/native';
 import {RootStackParamList} from '../../../routers/StackNavigator';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import moment from 'moment';
+import {useSelector} from 'react-redux';
 
 const {width, height} = Dimensions.get('window');
 
@@ -63,6 +64,7 @@ const ServiceDetails: React.FC = ({route}) => {
     useNavigation<
       NativeStackNavigationProp<RootStackParamList, 'ServiceDetails'>
     >();
+  const profileData = useSelector(state => state.profile.profileData);
 
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -107,6 +109,13 @@ const ServiceDetails: React.FC = ({route}) => {
     if (text.length <= maxChars) return text;
     return text.slice(0, maxChars).trim() + '... ';
   };
+
+  const generateChatId = () => {
+   return `${profileData.uid}_${item.id}`
+  }
+  const chatId = generateChatId()
+
+
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -464,7 +473,16 @@ const ServiceDetails: React.FC = ({route}) => {
           <GradientButton
             title="Get Custom Offer"
             textStyle={{fontSize: RFPercentage(1.4)}}
-            onPress={() => {}}
+            onPress={() => {
+              navigation.navigate('Chat', {
+                chatId : chatId,
+                senderId : profileData.uid,
+                senderName : profileData.name,
+                receiver : item.id,
+                receiverName : item.name,
+                receiverProfile : item.image 
+              });
+            }}
           />
         </View>
       </ScrollView>

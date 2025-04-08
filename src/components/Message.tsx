@@ -1,17 +1,19 @@
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import React from 'react';
 import { IMAGES, Fonts, Colors } from '../constants/Themes';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 
 interface props {
   message : string;
-  name : string
+  name : string;
+  onPress: () => void;
+  image : any
 }
 
 const Message = (props:props) => {
   return (
-    <View style={styles.container}>
-      <Image source={IMAGES.picture} resizeMode="contain" style={styles.image} borderRadius={RFPercentage(100)} />
+    <TouchableOpacity activeOpacity={0.8} onPress={props.onPress} style={styles.container}>
+      <Image source={{uri : props.image}} resizeMode="contain" style={styles.image} borderRadius={RFPercentage(100)} />
       <View style={styles.messageContainer}>
         <View style={styles.textContainer}>
           <Text style={styles.nameText}>{props.name}</Text>
@@ -21,7 +23,7 @@ const Message = (props:props) => {
           <Text style={styles.timeText}>9:17 PM</Text>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
