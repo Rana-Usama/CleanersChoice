@@ -58,6 +58,13 @@ const JobDetails = ({route}) => {
     }, 1000);
   };
 
+
+  const generateChatId = () => {
+    return `${item.jobId}_${userData.uid}`
+   }
+ 
+   const chatId = generateChatId()
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
@@ -170,6 +177,17 @@ const JobDetails = ({route}) => {
               title="Message Client"
               textStyle={styles.buttonText}
               onPress={() => {
+
+                navigation.navigate('Chat', {
+                  chatId : chatId,
+                  senderId : userData.uid,
+                  senderName : userData.name,
+                  receiver : item.jobId,
+                  receiverName : 'receiver',
+                  receiverProfile : '' 
+                });
+
+
               }}
               // loading={loading}
               // disabled={loading || loading2}
