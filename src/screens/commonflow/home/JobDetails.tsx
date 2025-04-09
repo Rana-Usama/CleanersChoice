@@ -8,7 +8,7 @@ import {
   FlatList,
   TouchableOpacity,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, Icons} from '../../../constants/Themes';
 import HeaderBack from '../../../components/HeaderBack';
@@ -20,6 +20,7 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../../routers/StackNavigator';
 import firestore from '@react-native-firebase/firestore';
 import {setJobId} from '../../../redux/Job/Actions';
+import auth from '@react-native-firebase/auth';
 
 const JobDetails = ({route}) => {
   const {item} = route.params;
@@ -30,8 +31,7 @@ const JobDetails = ({route}) => {
   const userData = useSelector(state => state.profile.profileData);
   const [loading, setLoading] = useState(false);
   const [loading2, setLoading2] = useState(false);
- 
- 
+
   const markComplete = async (jobId, newStatus) => {
     setLoading(true);
     try {
@@ -54,16 +54,58 @@ const JobDetails = ({route}) => {
     setLoading2(true);
     setTimeout(() => {
       setLoading2(false);
-      navigation.navigate('PostJob', {jobId : item.id});
+      navigation.navigate('PostJob', {jobId: item.id});
     }, 1000);
   };
 
+  const user = auth().currentUser;
+  const userId = user?.uid;
 
   const generateChatId = () => {
-    return `${item.jobId}_${userData.uid}`
-   }
- 
-   const chatId = generateChatId()
+    return `${userId}_${item.id}`;
+  };
+  const chatId = generateChatId();
+
+
+  const [userInfo, setUserInfo] = useState([])
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  const fetchUserData = async () => {
+    const user = auth().currentUser;
+    if (!user) return;
+    try {
+      const userDoc = await firestore().collection('Users').doc(user.uid).get();
+      if (userDoc.exists) {
+        const userData = userDoc.data();
+        setUserInfo(userData)
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
+
+
+  const [otherUser, setOtherUser] = useState([])
+
+useEffect(() => {
+  otherUserData();
+  }, []);
+
+  const otherUserData = async () => {
+    try {
+      const userDoc = await firestore().collection('Users').doc(item.jobId).get();
+      if (userDoc.exists) {
+        const userData = userDoc.data();
+        setOtherUser(userData)
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
+
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -118,7 +160,6 @@ const JobDetails = ({route}) => {
               <Text style={styles.label}>Service Type:</Text>
             </View>
             <Text style={styles.value}>{item.type}</Text>
-
           </View>
 
           <View style={styles.sectionContainer}>
@@ -168,35 +209,26 @@ const JobDetails = ({route}) => {
               </View>
             </View>
           </>
-        ) : 
-         userData.role === 'Cleaner' ?
-        (
-
+        ) : userData.role === 'Cleaner' ? (
           <View style={styles.buttonWrapper}>
             <GradientButton
               title="Message Client"
               textStyle={styles.buttonText}
               onPress={() => {
-
                 navigation.navigate('Chat', {
-                  chatId : chatId,
-                  senderId : userData.uid,
-                  senderName : userData.name,
-                  receiver : item.jobId,
-                  receiverName : 'receiver',
-                  receiverProfile : '' 
+                  chatId: chatId,
+                  senderId: userId,
+                  senderName: userInfo?.name,
+                  receiver: item.jobId,
+                  receiverName: otherUser?.name,
+                  receiverProfile: otherUser?.profile,
                 });
-
-
               }}
               // loading={loading}
               // disabled={loading || loading2}
             />
           </View>
-        )
-        :
-        null
-      }
+        ) : null}
       </ScrollView>
     </SafeAreaView>
   );

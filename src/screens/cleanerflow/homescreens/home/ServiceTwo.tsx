@@ -29,6 +29,7 @@ const images = [{id: 0}, {id: 1}, {id: 2}];
 const ServiceTwo: React.FC = () => {
   const navigation = useNavigation();
   const [selectedImages, setSelectedImages] = useState([null, null, null]);
+  const [originalImages, setOriginalImages] = useState([null, null, null]);
   const [loading, setLoading] = useState(false);
   const [loading2, setLoading2] = useState(false);
   const profileCompletion = useSelector(
@@ -94,7 +95,12 @@ const ServiceTwo: React.FC = () => {
           fontSize: RFPercentage(1.4),
         },
       });
+      return;
+    }
 
+    if (!haveImagesChanged()) {
+      // No changes, go to next screen
+      navigation.navigate('ServiceThree');
       return;
     }
 
@@ -103,25 +109,18 @@ const ServiceTwo: React.FC = () => {
       const serviceRef = firestore()
         .collection('CleanerServices')
         .doc(user.uid);
-      const doc = await serviceRef.get();
-
-      if (!doc.exists) {
-        console.error('Service document does not exist!');
-        return;
-      }
-
       const uploadedImages = await Promise.all(
         selectedImages.map(async (img, index) => {
-          if (img && img.uri) {
+          if (img && img.uri && img.uri !== originalImages[index]?.uri) {
             return await uploadImageToStorage(img.uri, index);
           }
-          return null;
+          return originalImages[index]?.uri || null;
         }),
       );
       const validImages = uploadedImages.filter(url => url !== null);
 
       await serviceRef.update({
-        serviceImages: firestore.FieldValue.arrayUnion(...validImages),
+        serviceImages: validImages,
       });
 
       navigation.navigate('ServiceThree');
@@ -150,12 +149,24 @@ const ServiceTwo: React.FC = () => {
         const images = data?.serviceImages?.map(url => ({uri: url})) || [];
         const filledImages = [...images, null, null, null].slice(0, 3);
         setSelectedImages(filledImages);
+        setOriginalImages(filledImages); // <-- Track originals
       }
     } catch (error) {
       console.error('Error fetching service data:', error);
     } finally {
       setLoading2(false);
     }
+  };
+
+  const haveImagesChanged = () => {
+    for (let i = 0; i < selectedImages.length; i++) {
+      const selected = selectedImages[i]?.uri || null;
+      const original = originalImages[i]?.uri || null;
+      if (selected !== original) {
+        return true;
+      }
+    }
+    return false;
   };
 
   return (

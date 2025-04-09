@@ -23,6 +23,7 @@ import {RootStackParamList} from '../../../routers/StackNavigator';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import moment from 'moment';
 import {useSelector} from 'react-redux';
+import auth from '@react-native-firebase/auth';
 
 const {width, height} = Dimensions.get('window');
 
@@ -110,12 +111,13 @@ const ServiceDetails: React.FC = ({route}) => {
     return text.slice(0, maxChars).trim() + '... ';
   };
 
+  const user = auth().currentUser;
+  const userId = user?.uid;
+
   const generateChatId = () => {
-   return `${profileData.uid}_${item.id}`
-  }
-  const chatId = generateChatId()
-
-
+    return `${userId}_${item.id}`;
+  };
+  const chatId = generateChatId();
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -475,12 +477,12 @@ const ServiceDetails: React.FC = ({route}) => {
             textStyle={{fontSize: RFPercentage(1.4)}}
             onPress={() => {
               navigation.navigate('Chat', {
-                chatId : chatId,
-                senderId : profileData.uid,
-                senderName : profileData.name,
-                receiver : item.id,
-                receiverName : item.name,
-                receiverProfile : item.image 
+                chatId: chatId,
+                senderId: profileData.uid,
+                senderName: profileData.name,
+                receiver: item.id,
+                receiverName: item.name,
+                receiverProfile: item.image,
               });
             }}
           />

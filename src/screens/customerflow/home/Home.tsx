@@ -179,7 +179,6 @@ const Home = () => {
   const fetchUserData = async () => {
     const user = auth().currentUser;
     if (!user) return;
-
     try {
       const userDoc = await firestore().collection('Users').doc(user.uid).get();
       if (userDoc.exists) {
