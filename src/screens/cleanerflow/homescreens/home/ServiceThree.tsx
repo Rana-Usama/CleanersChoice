@@ -71,12 +71,18 @@ const ServiceThree: React.FC = () => {
   const savePackagesToFirestore = async () => {
     const user = auth().currentUser;
     if (!user) return;
-
-    if (!packages[0].details.trim() || !packages[0].price.trim()) {
+  
+    // Filter valid packages
+    const validPackages = packages.filter(
+      pkg => pkg.details.trim() !== '' && pkg.price.trim() !== '',
+    );
+  
+    // Require exactly 3 packages
+    if (validPackages.length < 3) {
       Toast.show({
-        type: 'info',
-        text1: 'Add Package',
-        text2: 'Fill the required data',
+        type: 'error',
+        text1: 'Add at least 3 packages',
+        text2: 'Please fill in 3 packages before continuing.',
         position: 'top',
         topOffset: RFPercentage(8),
         text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
@@ -87,13 +93,12 @@ const ServiceThree: React.FC = () => {
       });
       return;
     }
-
+  
     try {
       setLoading(true);
-      const serviceRef = firestore()
-        .collection('CleanerServices')
-        .doc(user.uid);
+      const serviceRef = firestore().collection('CleanerServices').doc(user.uid);
       const doc = await serviceRef.get();
+  
       if (doc.exists) {
         const existingData = doc.data();
         let existingPackages = existingData?.packages || [];
@@ -101,7 +106,7 @@ const ServiceThree: React.FC = () => {
           const existingPkg = existingPackages.find(p => p.id === pkg.id);
           return existingPkg ? {...existingPkg, ...pkg} : pkg;
         });
-
+  
         await serviceRef.update({
           packages: updatedPackages,
         });
@@ -110,6 +115,7 @@ const ServiceThree: React.FC = () => {
           packages,
         });
       }
+  
       navigation.navigate('CleanerNavigator');
     } catch (error) {
       console.error('Error updating packages: ', error);
@@ -117,7 +123,7 @@ const ServiceThree: React.FC = () => {
       setLoading(false);
     }
   };
-
+  
   useEffect(() => {
     fetchServiceData();
   }, []);

@@ -12,7 +12,7 @@ export const Colors: {[key: string]: string} = {
   error: 'rgba(248, 113, 113, 0.8)',
 };
 
-export const Icons: {[key: string]: any} = {
+export const Icons: {[key: string]: any} = {       
   customer: require('../assets/icons/customer.png'),
   owner: require('../assets/icons/owner.png'),
   edit: require('../assets/icons/Edit-Icon.png'),

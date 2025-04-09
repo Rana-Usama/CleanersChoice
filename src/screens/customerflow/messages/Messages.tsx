@@ -7,29 +7,35 @@ import {
   StyleSheet,
   SafeAreaView,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import firestore from '@react-native-firebase/firestore';
 import {useNavigation} from '@react-navigation/native';
-import {useSelector} from 'react-redux';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import HeaderBack from '../../../components/HeaderBack';
 import {Colors, Fonts, Icons} from '../../../constants/Themes';
 import Message from '../../../components/Message';
+import moment from 'moment';
+import {RootStackParamList} from '../../../routers/StackNavigator';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {useFocusEffect} from '@react-navigation/native';
+import auth from '@react-native-firebase/auth';
 
 const Messages = () => {
-  const userId = useSelector(state => state.profile.profileData.uid);
-  const navigation = useNavigation();
+
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList, 'Messages'>>();
   const [chats, setChats] = useState([]);
   const [loading, setLoading] = useState(false);
   const [lastVisible, setLastVisible] = useState(null);
   const pageSize = 10;
-
-
-  console.log('chats...........', chats)
-
+  const [loading2, setLoading2] = useState(false);
   const [all, setAll] = useState(true);
   const [unread, setUnread] = useState(false);
+
+  const user = auth().currentUser;
+  const userId = user?.uid
 
   const toggle1 = () => {
     setAll(true);
@@ -40,72 +46,125 @@ const Messages = () => {
     setUnread(true);
   };
 
-  useEffect(() => {
-    if (userId) {
-      const unsubscribe = firestore()
-        .collection('chats')
-        .where('participants', 'array-contains', userId) 
-        .onSnapshot(
-          snapshot => {
-            const chatData = [];
-            snapshot.docs.forEach(doc => {
-              const data = getChatData(doc);
-              chatData.push(data);
-            });
+  useFocusEffect(
+    useCallback(() => {
+      let unsubscribe;
+      setLoading2(true);
+      setChats([]);
   
-            setChats(chatData); 
+      if (userId) {
+        let query = firestore()
+          .collection('Chats')
+          .where('participants', 'array-contains', userId)
+          .orderBy('lastMessageTimestamp', 'desc')
+          .limit(pageSize);
+  
+        unsubscribe = query.onSnapshot(
+          async snapshot => {
+            try {
+              const allChats = await Promise.all(
+                snapshot.docs.map(async doc => await getChatData(doc))
+              );
+
+
+              console.log('all chats..................',allChats )
+
+  
+              // Filter for unread if needed
+              const filteredChats = unread
+                ? allChats.filter(chat =>
+                    chat.message.some(
+                      message => !message.read && message.receiverId === userId
+                    )
+                  )
+                : allChats;
+  
+              setChats(filteredChats);
+              setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+            } catch (error) {
+              console.log('Error processing chat snapshot:', error);
+            } finally {
+              setLoading2(false);
+            }
           },
           error => {
-            console.log("Error fetching chats in real-time: ", error);
+            console.log('Error fetching chats in real-time: ', error);
+            setLoading2(false);
           }
         );
+      } else {
+        setLoading2(false);
+      }
   
-      return () => unsubscribe(); 
-    }
-  }, [userId]);
-  
+      return () => {
+        if (unsubscribe) unsubscribe();
+      };
+    }, [userId, unread])
+  );
   
   const fetchMoreChats = async () => {
-    if (!lastVisible) return;
+    if (!lastVisible || loading) return;
     setLoading(true);
-  
     try {
       const snapshot = await firestore()
-        .collection('chats')
+        .collection('Chats')
         .where('participants', 'array-contains', userId)
         .orderBy('lastMessageTimestamp', 'desc')
         .startAfter(lastVisible)
         .limit(pageSize)
         .get();
-  
-      const chatData = [];
-      for (const doc of snapshot.docs) {
-        const data = await getChatData(doc);
-        chatData.push(data);
+
+      const newChatData = await Promise.all(
+        snapshot.docs.map(async doc => await getChatData(doc)),
+      );
+
+      setChats(prev => [...prev, ...newChatData]);
+
+      if (snapshot.docs.length > 0) {
+        setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
       }
-  
-      setChats(prevChats => [...prevChats, ...chatData]);
-      setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
     } catch (e) {
       console.log('Chat Error: ', e);
     } finally {
       setLoading(false);
     }
   };
-  
 
   const getChatData = async doc => {
     const chat = doc.data();
     const otherUser = chat.participants.find(p => p !== userId);
-    const userDoc = await firestore().collection('users').doc(otherUser).get();
-    const userData = userDoc.data();
-    return {
-      id: doc.id,
-      name: userData?.userName,
-      image: userData?.profileImage,
-      lastMessage: chat.lastMessage,
-    };
+
+    try {
+      const userDoc = await firestore()
+        .collection('Users')
+        .doc(otherUser)
+        .get();
+      const userData = userDoc.data();
+      return {
+        id: doc.id,
+        name: userData?.name || 'Unknown',
+        image: userData?.profile || null,
+        lastMessage: chat.lastMessage || '',
+        lastMessageTimestamp: chat.lastMessageTimestamp,
+        receiverId: userData?.uid,
+        unread: chat.lastMessage.unread   , 
+      };
+    } catch (error) {
+      console.log('Error fetching user data: ', error);
+      return {
+        id: doc.id,
+        name: 'Unknown',
+        image: null,
+        lastMessage: chat.lastMessage || '',
+        lastMessageTimestamp: chat.lastMessageTimestamp,
+        receiverId: '',
+        unread: false, 
+      };
+    }
   };
+
+
+
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -115,58 +174,109 @@ const Messages = () => {
           <View style={styles.toggleContainer}>
             <TouchableOpacity onPress={toggle1}>
               <View
-                style={[styles.toggleButton, {
-                  backgroundColor: all ? Colors.gradient1 : 'transparent',
-                  borderColor: all ? 'transparent' : Colors.inputFieldColor,
-                }]}>
-                <Text style={[styles.toggleText, {
-                  color: all ? Colors.background : Colors.placeholderColor,
-                  fontFamily: all ? Fonts.fontMedium : Fonts.fontRegular,
-                }]}>
+                style={[
+                  styles.toggleButton,
+                  {
+                    backgroundColor: all ? Colors.gradient1 : 'transparent',
+                    borderColor: all ? 'transparent' : Colors.inputFieldColor,
+                  },
+                ]}>
+                <Text
+                  style={[
+                    styles.toggleText,
+                    {
+                      color: all ? Colors.background : Colors.placeholderColor,
+                      fontFamily: all ? Fonts.fontMedium : Fonts.fontRegular,
+                    },
+                  ]}>
                   All
                 </Text>
               </View>
             </TouchableOpacity>
             <TouchableOpacity onPress={toggle2} style={styles.unreadButton}>
               <View
-                style={[styles.toggleButton, {
-                  backgroundColor: unread ? Colors.gradient1 : 'transparent',
-                  borderColor: unread ? 'transparent' : Colors.inputFieldColor,
-                }]}>
-                <Text style={[styles.toggleText, {
-                  color: unread ? Colors.background : Colors.placeholderColor,
-                  fontFamily: unread ? Fonts.fontMedium : Fonts.fontRegular,
-                }]}>
+                style={[
+                  styles.toggleButton,
+                  {
+                    backgroundColor: unread ? Colors.gradient1 : 'transparent',
+                    borderColor: unread
+                      ? 'transparent'
+                      : Colors.inputFieldColor,
+                  },
+                ]}>
+                <Text
+                  style={[
+                    styles.toggleText,
+                    {
+                      color: unread
+                        ? Colors.background
+                        : Colors.placeholderColor,
+                      fontFamily: unread ? Fonts.fontMedium : Fonts.fontRegular,
+                    },
+                  ]}>
                   Unread
                 </Text>
               </View>
             </TouchableOpacity>
           </View>
 
-          {chats.length > 0 ? (
-            <FlatList
-              data={chats}
-              keyExtractor={item => item.id}
-              renderItem={({item}) => (
-                <Message
-                  name={item.name}
-                  message={item.lastMessage}
-                  image={item.image}
-                />
-              )}
-              onEndReached={fetchMoreChats}
-              onEndReachedThreshold={0.5}
-              ListFooterComponent={loading && <Text>Loading...</Text>}
-            />
-          ) : (
-            <View style={styles.noServiceContainer}>
-              <Image
-                source={Icons.empty}
-                resizeMode="contain"
-                style={styles.noServiceImg}
+          {loading2 ? (
+            <>
+              <ActivityIndicator
+                size={'large'}
+                color={Colors.placeholderColor}
+                style={{marginTop: RFPercentage(20)}}
               />
-              <Text style={styles.noServiceText}>No chat found</Text>
-            </View>
+            </>
+          ) : (
+            <>
+              {chats.length > 0 ? (
+                <View style={{marginTop: RFPercentage(2)}}>
+                  <FlatList
+                    data={chats}
+                    keyExtractor={item => item.id}
+                    renderItem={({item}) => 
+                      (
+                      <Message
+                        name={item.name}
+                        unread={item?.unread}
+                        message={item.lastMessage?.text || 'No message'}
+                        image={item.image}
+                        time={
+                          item.lastMessageTimestamp
+                            ? moment(item.lastMessageTimestamp.toDate()).format(
+                                'h:mm A',
+                              )
+                            : ''
+                        }
+                        onPress={() =>
+                          navigation.navigate('Chat', {
+                            chatId: item.lastMessage?.chatId,
+                            senderId: userId,
+                            senderName: item.lastMessage?.senderName,
+                            receiver: item.receiverId,
+                            receiverName: item.name,
+                            receiverProfile: item.image,
+                          })
+                        }
+                      />
+                    )}
+                    onEndReached={fetchMoreChats}
+                    onEndReachedThreshold={0.5}
+                    // ListFooterComponent={loading && <Text>Loading...</Text>}
+                  />
+                </View>
+              ) : (
+                <View style={styles.noServiceContainer}>
+                  <Image
+                    source={Icons.empty}
+                    resizeMode="contain"
+                    style={styles.noServiceImg}
+                  />
+                  <Text style={styles.noServiceText}>No chat found</Text>
+                </View>
+              )}
+            </>
           )}
         </View>
       </ScrollView>

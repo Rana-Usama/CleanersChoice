@@ -34,6 +34,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import CheckAvailability from '../screens/customerflow/home/CheckAvailablity';
 import Jobs from '../screens/customerflow/jobBoard/Jobs';
 import Chat from '../screens/commonflow/home/Chat';
+import Messages from '../screens/customerflow/messages/Messages';
+
 
 export type RootStackParamList = {
   SplashOne: undefined;
@@ -65,7 +67,8 @@ export type RootStackParamList = {
   Settings: undefined;
   CheckAvailability:{ item: any };
   Jobs : undefined,
-  Chat : { item: any }
+  Chat : { item: any };
+  Messages : undefined
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();

@@ -206,6 +206,7 @@ const Dashboard: React.FC = () => {
   };
   const serviceNames = getServiceNames(service?.type.slice(0, visibleItems));
 
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
