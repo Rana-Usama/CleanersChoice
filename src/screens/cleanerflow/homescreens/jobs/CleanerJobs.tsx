@@ -28,6 +28,8 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import GradientButton from '../../../../components/GradientButton';
 import SearchField from '../../../../components/SearchField';
 import Slider from '@react-native-community/slider';
+import NotFound from '../../../../components/NotFound';
+import FilterModal from '../../../../components/FilterModal';
 
 const items = [
   'Residential Cleaning',
@@ -36,6 +38,7 @@ const items = [
   'Pressure Washing',
   'Carpet Cleaning',
   'Chimney Cleaning',
+  'Lawn Care'
 ];
 
 const CleanerJobs = () => {
@@ -59,8 +62,6 @@ const CleanerJobs = () => {
   const [modalVisible3, setModalVisible3] = useState(false);
   const [selectedType, setSelectedType] = useState('');
   const [query2, setQuery2] = useState('');
-
-  
 
   const fetchJobs = async () => {
     const user = auth().currentUser;
@@ -92,8 +93,6 @@ const CleanerJobs = () => {
       fetchJobs();
     }, []),
   );
-
-  
 
   const getTruncatedText = text => {
     const maxChars = 15;
@@ -233,6 +232,8 @@ const CleanerJobs = () => {
           <View style={styles.jobPostedContainer}>
             <Text style={styles.jobPosted}>Recent Job posts by clients</Text>
           </View>
+
+          {/* Filters Container */}
           <View>
             <Text style={styles.sectionTitle}>Apply Filters</Text>
             <View
@@ -255,6 +256,15 @@ const CleanerJobs = () => {
                         : 'transparent',
                     },
                   ]}>
+                  <Image
+                    source={loctionFilter ? Icons.locationWhite : Icons.location}
+                    style={{
+                      width: RFPercentage(1.6),
+                      height: RFPercentage(1.6),
+                      marginRight: RFPercentage(0.5),
+                    }}
+                    resizeMode="contain"
+                  />
                   <Text
                     style={[
                       styles.filterText,
@@ -291,6 +301,7 @@ const CleanerJobs = () => {
                   </TouchableOpacity>
                 )}
               </View>
+
               <View>
                 <TouchableOpacity
                   activeOpacity={0.8}
@@ -304,6 +315,16 @@ const CleanerJobs = () => {
                       marginLeft: RFPercentage(1.5),
                     },
                   ]}>
+                  <Image
+                    source={rangeSelector ? Icons.priceRangeWhite : Icons.priceRange}
+                    style={{
+                      width: RFPercentage(1.6),
+                      height: RFPercentage(1.6),
+                      marginRight: RFPercentage(0.5),
+                    }}
+                    resizeMode="contain"
+                  />
+
                   <Text
                     style={[
                       styles.filterText,
@@ -336,6 +357,7 @@ const CleanerJobs = () => {
                   </TouchableOpacity>
                 )}
               </View>
+
               <View>
                 <TouchableOpacity
                   activeOpacity={0.8}
@@ -349,6 +371,15 @@ const CleanerJobs = () => {
                       marginLeft: RFPercentage(1.5),
                     },
                   ]}>
+                  <Image
+                    source={ serviceType ? Icons.verifyWhite : Icons.verify}
+                    style={{
+                      width: RFPercentage(1.6),
+                      height: RFPercentage(1.6),
+                      marginRight: RFPercentage(0.5),
+                    }}
+                    resizeMode="contain"
+                  />
                   <Text
                     style={[
                       styles.filterText,
@@ -384,6 +415,8 @@ const CleanerJobs = () => {
             </View>
           </View>
         </View>
+
+        {/* Jobs Container */}
         <View>
           <View style={styles.listContainer}>
             {loading ? (
@@ -422,10 +455,7 @@ const CleanerJobs = () => {
                 ) : (
                 <>
                   {finalFilteredJobs.length === 0 && (
-                    <View style={styles.noServiceContainer}>
-                      <Image source={Icons.empty} style={styles.noServiceImg} />
-                      <Text style={styles.noServiceText}>No Jobs found</Text>
-                    </View>
+                    <NotFound text="No Job found" />
                   )}
                 </>
               </>
@@ -434,9 +464,20 @@ const CleanerJobs = () => {
         </View>
       </ScrollView>
 
+      {/* Filter Modals */}
       {modalVisible && (
         <>
-          <View style={styles.modalContainer}>
+          <FilterModal
+            modalVisible={modalVisible}
+            setModalVisible={() => setModalVisible(false)}
+            query={query}
+            handleSearch={handleSearch}
+            selectedLocation={selectedLocation}
+            filteredLocations={filteredLocations}
+            handleLocationApply={handleLocationApply}
+            loactionLoading={loactionLoading}
+          />
+          {/* <View style={styles.modalContainer}>
             <BlurView style={styles.blurView} blurType="light" blurAmount={5} />
             <Modal
               visible={modalVisible}
@@ -517,9 +558,12 @@ const CleanerJobs = () => {
                 </Animated.View>
               </KeyboardAvoidingView>
             </Modal>
-          </View>
+          </View> */}
         </>
       )}
+
+
+      {/* Price Range Modal */}
 
       {modalVisible2 && (
         <>
@@ -616,6 +660,8 @@ const CleanerJobs = () => {
         </>
       )}
 
+      {/* Service Type */}
+
       {modalVisible3 && (
         <View style={styles.modalContainer}>
           <BlurView style={styles.blurView} blurType="light" blurAmount={5} />
@@ -625,7 +671,6 @@ const CleanerJobs = () => {
             animationType="none"
             onRequestClose={() => setModalVisible3(false)}>
             <KeyboardAvoidingView
-              behavior={Platform.OS === 'ios' ? 'padding' : null}
               keyboardVerticalOffset={Platform.OS === 'ios' ? 40 : 0}
               style={{flex: 1, alignItems: 'center'}}>
               <Animated.View
@@ -712,18 +757,18 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.5),
   },
   filterBox: {
-    width: RFPercentage(12.5),
+    width: RFPercentage(13),
     height: RFPercentage(4.3),
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: RFPercentage(0.8),
-    // marginHorizontal: RFPercentage(0.5),
     borderColor: Colors.inputFieldColor,
+    flexDirection: 'row',
   },
   filterText: {
     color: Colors.primaryText,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.4),
   },
   listContainer: {
     marginTop: RFPercentage(0.7),

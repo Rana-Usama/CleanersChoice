@@ -149,7 +149,7 @@ const ServiceTwo: React.FC = () => {
         const images = data?.serviceImages?.map(url => ({uri: url})) || [];
         const filledImages = [...images, null, null, null].slice(0, 3);
         setSelectedImages(filledImages);
-        setOriginalImages(filledImages); // <-- Track originals
+        setOriginalImages(filledImages); //Track originals
       }
     } catch (error) {
       console.error('Error fetching service data:', error);
@@ -171,6 +171,7 @@ const ServiceTwo: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      {/* Header */}
       <HeaderBack title="Service" textStyle={styles.headerText} left={true} />
       <View style={styles.container}>
         <View style={styles.infoHeaderContainer}>
@@ -178,6 +179,7 @@ const ServiceTwo: React.FC = () => {
         </View>
       </View>
 
+      {/* Time Line */}
       <View style={styles.timelineContainer}>
         <TimeLine stepTwo={true} />
       </View>
@@ -229,6 +231,8 @@ const ServiceTwo: React.FC = () => {
             )}
           />
         </View>
+
+        {/* Button Container */}
         <View style={styles.buttonContainer}>
           <GradientButton
             title={profileCompletion === '100' ? 'Edit' : 'Next'}

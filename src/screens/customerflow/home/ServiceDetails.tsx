@@ -54,8 +54,12 @@ const items = [
   },
   {
     id: '77',
-    name: 'Others',
+    name: 'Lawn Care',
   },
+  {
+    id  : '88',
+    name : 'Others'
+  }
 ];
 
 const ServiceDetails: React.FC = ({route}) => {
@@ -66,7 +70,7 @@ const ServiceDetails: React.FC = ({route}) => {
       NativeStackNavigationProp<RootStackParamList, 'ServiceDetails'>
     >();
   const profileData = useSelector(state => state.profile.profileData);
-  const [loading, setloading] = useState(false)
+  const [loading, setloading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
   const toggleDescription = () => {
@@ -160,12 +164,14 @@ const ServiceDetails: React.FC = ({route}) => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={{paddingBottom: RFPercentage(10)}}>
+        {/* Header */}
         <HeaderBack
           title={'Service Details'}
           textStyle={{fontSize: RFPercentage(1.8)}}
           left={true}
         />
 
+        {/* Main Container */}
         <View style={{width: '100%', marginTop: RFPercentage(2)}}>
           <ScrollView
             horizontal
@@ -217,7 +223,9 @@ const ServiceDetails: React.FC = ({route}) => {
             )}
           </View>
         </View>
+
         <View style={styles.container}>
+          {/* Service Info */}
           <View style={{marginTop: RFPercentage(2)}}>
             <View style={styles.rowContainer}>
               <Image
@@ -250,6 +258,8 @@ const ServiceDetails: React.FC = ({route}) => {
               </Text>
             </View>
           </View>
+
+          {/* Description */}
           <View style={{marginTop: RFPercentage(2.1)}}>
             <View>
               <View style={styles.rowAlign}>
@@ -289,6 +299,8 @@ const ServiceDetails: React.FC = ({route}) => {
               </Text>
             </View>
           </View>
+
+          {/* Location */}
           <View style={{marginTop: RFPercentage(2)}}>
             <View style={styles.rowAlign}>
               <Image
@@ -312,6 +324,8 @@ const ServiceDetails: React.FC = ({route}) => {
               {item.location}
             </Text>
           </View>
+
+          {/* Availability */}
           <View style={{marginTop: RFPercentage(2)}}>
             <View>
               <TouchableOpacity
@@ -344,6 +358,8 @@ const ServiceDetails: React.FC = ({route}) => {
               </TouchableOpacity>
             </View>
           </View>
+
+          {/* Services */}
           <View style={{marginTop: RFPercentage(2)}}>
             <View
               style={{
@@ -425,6 +441,7 @@ const ServiceDetails: React.FC = ({route}) => {
           </View>
         </View>
 
+        {/* Messages */}
         <View>
           <View
             style={{
@@ -465,6 +482,8 @@ const ServiceDetails: React.FC = ({route}) => {
             />
           </View>
         </View>
+
+        {/* Rating and Reviews */}
         <View style={styles.container}>
           <View>
             <Text style={[styles.headeing2, {marginTop: RFPercentage(0.9)}]}>
@@ -510,14 +529,16 @@ const ServiceDetails: React.FC = ({route}) => {
             <Review />
           </View>
         </View>
+
+        {/* Button Container */}
         <View style={{alignSelf: 'center', marginTop: RFPercentage(7)}}>
           <GradientButton
             title="Get Custom Offer"
             textStyle={{fontSize: RFPercentage(1.4)}}
             onPress={() => {
-              setloading(true)
+              setloading(true);
               setTimeout(() => {
-                setloading(false)
+                setloading(false);
                 navigation.navigate('Chat', {
                   chatId: existingChatId ? existingChatId : chatId,
                   senderId: profileData.uid,

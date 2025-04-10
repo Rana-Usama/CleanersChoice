@@ -27,13 +27,14 @@ const Settings = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
   const [role, setuserRole] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const logOut = async () => {
+    setLoading(true)
     try {
       await AsyncStorage.multiRemove(['email', 'password', 'role']);
       navigation.navigate('SignIn');
       setModalVisible(false);
-
       Toast.show({
         type: 'success',
         text1: 'Log Out',
@@ -48,6 +49,9 @@ const Settings = () => {
       });
     } catch (error) {
       console.log('Logout Error:', error);
+    }
+    finally {
+      setLoading(false)
     }
   };
 
@@ -162,6 +166,7 @@ const Settings = () => {
               title={'Are you sure you want to Logout?'}
               onPress={() => setModalVisible(false)}
               onPress2={logOut}
+              loader={loading}
             />
           </View>
         </TouchableWithoutFeedback>

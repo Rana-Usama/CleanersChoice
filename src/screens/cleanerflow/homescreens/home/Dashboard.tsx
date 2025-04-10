@@ -57,8 +57,12 @@ const items = [
   },
   {
     id: '77',
-    name: 'Others',
+    name: 'Lawn Care',
   },
+  {
+    id : '88',
+    name : 'Others'
+  }
 ];
 
 const Dashboard: React.FC = () => {
@@ -75,7 +79,6 @@ const Dashboard: React.FC = () => {
   const dispatch = useDispatch();
   const [visibleItems, setVisibleItems] = useState(5);
   const [loading3, setLoading3] = useState(false);
-
 
   const uploadImg = async () => {
     try {
@@ -206,13 +209,13 @@ const Dashboard: React.FC = () => {
   };
   const serviceNames = getServiceNames(service?.type.slice(0, visibleItems));
 
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
         contentContainerStyle={{paddingBottom: RFPercentage(15)}}
         style={{flex: 1}}
         showsVerticalScrollIndicator={false}>
+        {/* Header */}
         <HeaderBack
           logo={true}
           title="Dashboard"
@@ -221,7 +224,9 @@ const Dashboard: React.FC = () => {
           rightText="Edit Service"
           onPress={() => navigation.navigate('ServiceOne')}
         />
+      
         <View style={styles.container}>
+          {/* Profile Image */}
           <View style={styles.imgContainer}>
             <View>
               <View style={styles.pictureContainer}>
@@ -258,6 +263,9 @@ const Dashboard: React.FC = () => {
             <Text style={styles.nameText}>{name}</Text>
           </View>
         </View>
+
+        {/* Service Details */}
+
         {loading3 ? (
           <>
             <ActivityIndicator
@@ -282,6 +290,8 @@ const Dashboard: React.FC = () => {
                     ))}
                   </View>
                 </View>
+
+                {/* Description */}
                 <View
                   style={{
                     marginTop: RFPercentage(2.1),
@@ -295,6 +305,8 @@ const Dashboard: React.FC = () => {
                     </Text>
                   </View>
                 </View>
+
+                {/* Availability */}
                 <View
                   style={{
                     marginTop: RFPercentage(2),
@@ -317,6 +329,8 @@ const Dashboard: React.FC = () => {
                     </TouchableOpacity>
                   </View>
                 </View>
+
+                {/* Services */}
                 <View style={{marginTop: RFPercentage(2)}}>
                   <View style={styles.serviceContainer}>
                     <Text style={styles.headeing2}>Services:</Text>
@@ -365,6 +379,7 @@ const Dashboard: React.FC = () => {
                   </View>
                 </View>
 
+                {/* Packages */}
                 <View>
                   <Text
                     style={[
@@ -398,6 +413,8 @@ const Dashboard: React.FC = () => {
                     />
                   </View>
                 </View>
+
+                {/* Rating and Review */}
                 {service?.rating || service?.reviews.length > 0 ? (
                   <>
                     <View style={{width: '90%', alignSelf: 'center'}}>
@@ -439,6 +456,8 @@ const Dashboard: React.FC = () => {
                 ) : null}
               </>
             ) : (
+
+              // Profile Completion Info Container
               <>
                 <View style={styles.profileCompletionContainer}>
                   <Text style={styles.profileCompletionText}>

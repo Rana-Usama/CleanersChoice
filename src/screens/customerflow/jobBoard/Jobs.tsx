@@ -25,6 +25,7 @@ import firestore from '@react-native-firebase/firestore';
 import {Icons} from '../../../constants/Themes';
 import Toast from 'react-native-toast-message';
 import HeaderBack from '../../../components/HeaderBack';
+import NotFound from '../../../components/NotFound';
 
 const Jobs = () => {
   const navigation = useNavigation();
@@ -104,7 +105,6 @@ const Jobs = () => {
     }
   };
 
-
   const getTruncatedText = text => {
     const maxChars = 15;
     if (text.length <= maxChars) return text;
@@ -144,6 +144,7 @@ const Jobs = () => {
             </TouchableOpacity>
           </View>
         </View>
+
         <View style={styles.listContainer}>
           {loading ? (
             <>
@@ -178,20 +179,14 @@ const Jobs = () => {
                 </>
               ) : (
                 <>
-                  <View style={styles.noServiceContainer}>
-                    <Image
-                      source={Icons.empty}
-                      resizeMode="contain"
-                      style={styles.noServiceImg}
-                    />
-                    <Text style={styles.noServiceText}>No Jobs found</Text>
-                  </View>
+                  <NotFound text='No Jobs found' />
                 </>
               )}
             </>
           )}
         </View>
       </ScrollView>
+      
       {modalVisible && (
         <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
           <View style={styles.modalContainer}>

@@ -30,6 +30,7 @@ import { useNavigation } from '@react-navigation/native';
           <View style={styles.premiumHeader}>
             <Text style={styles.premiumText}>Cancel Premium Subscription</Text>
           </View>
+          
           <View style={styles.subscriptionContainer}>
             <View style={styles.subscriptionBox}>
               <View style={styles.starLeft}>
@@ -61,15 +62,18 @@ import { useNavigation } from '@react-navigation/native';
               </View>
             </View>
           </View>
+
           <View style={styles.buttonContainer}>
             <GradientButton title="Cancel" textStyle={styles.buttonText} 
             onPress={()=> {}}
              style={{width:RFPercentage(18)}} />
           </View>
         </View>
+
         <View style={styles.starContainer}>
           <Image source={IMAGES.stars} resizeMode="contain" style={styles.star} />
         </View>
+
       </SafeAreaView>
     );
   };

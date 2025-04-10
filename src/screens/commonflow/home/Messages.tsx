@@ -21,6 +21,7 @@ import {RootStackParamList} from '../../../routers/StackNavigator';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useFocusEffect} from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
+import NotFound from '../../../components/NotFound';
 
 const Messages = () => {
   const navigation =
@@ -261,14 +262,7 @@ const Messages = () => {
                   />
                 </View>
               ) : (
-                <View style={styles.noServiceContainer}>
-                  <Image
-                    source={Icons.empty}
-                    resizeMode="contain"
-                    style={styles.noServiceImg}
-                  />
-                  <Text style={styles.noServiceText}>No chat found</Text>
-                </View>
+                <NotFound text='No chat found' />
               )}
             </>
           )}

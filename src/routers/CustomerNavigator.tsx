@@ -14,12 +14,12 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {Icons, Colors, Fonts} from '../constants/Themes';
 import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {BottomTabBarProps} from '@react-navigation/bottom-tabs';
-import Messages from '../screens/customerflow/messages/Messages';
 import Settings from '../screens/commonflow/home/settings/Settings';
 import Home from '../screens/customerflow/home/Home';
 import Jobs from '../screens/customerflow/jobBoard/Jobs';
 import Profile from '../screens/commonflow/home/profile/Profile';
 import {RFPercentage} from 'react-native-responsive-fontsize';
+import Messages from '../screens/commonflow/home/Messages';
 
 const Tab = createBottomTabNavigator();
 
