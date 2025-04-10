@@ -52,7 +52,7 @@ const Verify: React.FC = () => {
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.flexOne}>
-        <HeaderBack title={'Reset Password?'} />
+        <HeaderBack title={'Reset Password?'} left={true} />
 
         <Formik
           initialValues={{

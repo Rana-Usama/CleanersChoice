@@ -171,7 +171,7 @@ const ServiceTwo: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <HeaderBack title="Service" textStyle={styles.headerText} />
+      <HeaderBack title="Service" textStyle={styles.headerText} left={true} />
       <View style={styles.container}>
         <View style={styles.infoHeaderContainer}>
           <InfoHeader />

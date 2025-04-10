@@ -9,7 +9,7 @@ import {
   ScrollView,
   Dimensions,
 } from 'react-native';
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import HeaderBack from '../../../components/HeaderBack';
@@ -17,15 +17,15 @@ import LinearGradient from 'react-native-linear-gradient';
 import Package from '../../../components/Package';
 import Review from '../../../components/Review';
 import GradientButton from '../../../components/GradientButton';
-import GestureRecognizer from 'react-native-swipe-gestures';
 import {useNavigation} from '@react-navigation/native';
 import {RootStackParamList} from '../../../routers/StackNavigator';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import moment from 'moment';
 import {useSelector} from 'react-redux';
 import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 
-const {width, height} = Dimensions.get('window');
+const {width} = Dimensions.get('window');
 
 const items = [
   {
@@ -66,7 +66,7 @@ const ServiceDetails: React.FC = ({route}) => {
       NativeStackNavigationProp<RootStackParamList, 'ServiceDetails'>
     >();
   const profileData = useSelector(state => state.profile.profileData);
-
+  const [loading, setloading] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false);
 
   const toggleDescription = () => {
@@ -119,12 +119,51 @@ const ServiceDetails: React.FC = ({route}) => {
   };
   const chatId = generateChatId();
 
+  const [existingChatId, setExistingChatId] = useState(null);
+  const fetchExistingChatId = async (userId1, userId2) => {
+    try {
+      const chatsSnapshot = await firestore()
+        .collection('Chats')
+        .where('participants', 'array-contains', userId1)
+        .get();
+
+      for (const doc of chatsSnapshot.docs) {
+        const chatData = doc.data();
+        const participants = chatData.participants || [];
+
+        if (participants.includes(userId1) && participants.includes(userId2)) {
+          return doc.id;
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error('Error checking chat document:', error);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    const tryToFindChat = async () => {
+      if (user?.uid && item?.jobId) {
+        const chatId = await fetchExistingChatId(userId, item.id);
+        if (chatId) {
+          setExistingChatId(chatId);
+        } else {
+          console.log('No existing chat found');
+        }
+      }
+    };
+
+    tryToFindChat();
+  }, [userId, item?.id]);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={{paddingBottom: RFPercentage(10)}}>
         <HeaderBack
           title={'Service Details'}
           textStyle={{fontSize: RFPercentage(1.8)}}
+          left={true}
         />
 
         <View style={{width: '100%', marginTop: RFPercentage(2)}}>
@@ -476,15 +515,21 @@ const ServiceDetails: React.FC = ({route}) => {
             title="Get Custom Offer"
             textStyle={{fontSize: RFPercentage(1.4)}}
             onPress={() => {
-              navigation.navigate('Chat', {
-                chatId: chatId,
-                senderId: profileData.uid,
-                senderName: profileData.name,
-                receiver: item.id,
-                receiverName: item.name,
-                receiverProfile: item.image,
-              });
+              setloading(true)
+              setTimeout(() => {
+                setloading(false)
+                navigation.navigate('Chat', {
+                  chatId: existingChatId ? existingChatId : chatId,
+                  senderId: profileData.uid,
+                  senderName: profileData.name,
+                  receiver: item.id,
+                  receiverName: item.name,
+                  receiverProfile: item.image,
+                  senderProfile: profileData.profile,
+                });
+              }, 1000);
             }}
+            loading={loading}
           />
         </View>
       </ScrollView>

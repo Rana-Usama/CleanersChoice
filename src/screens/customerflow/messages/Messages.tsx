@@ -14,7 +14,7 @@ import firestore from '@react-native-firebase/firestore';
 import {useNavigation} from '@react-navigation/native';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import HeaderBack from '../../../components/HeaderBack';
-import {Colors, Fonts, Icons} from '../../../constants/Themes';
+import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
 import Message from '../../../components/Message';
 import moment from 'moment';
 import {RootStackParamList} from '../../../routers/StackNavigator';
@@ -23,7 +23,6 @@ import {useFocusEffect} from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 
 const Messages = () => {
-
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, 'Messages'>>();
   const [chats, setChats] = useState([]);
@@ -35,7 +34,7 @@ const Messages = () => {
   const [unread, setUnread] = useState(false);
 
   const user = auth().currentUser;
-  const userId = user?.uid
+  const userId = user?.uid;
 
   const toggle1 = () => {
     setAll(true);
@@ -50,58 +49,53 @@ const Messages = () => {
     useCallback(() => {
       let unsubscribe;
       setLoading2(true);
-      setChats([]);
-  
       if (userId) {
         let query = firestore()
           .collection('Chats')
           .where('participants', 'array-contains', userId)
-          .orderBy('lastMessageTimestamp', 'desc')
-          .limit(pageSize);
-  
+          .orderBy('lastMessageTimestamp', 'desc');
+
         unsubscribe = query.onSnapshot(
           async snapshot => {
             try {
               const allChats = await Promise.all(
-                snapshot.docs.map(async doc => await getChatData(doc))
+                snapshot.docs.map(async doc => await getChatData(doc)),
               );
 
-
-              console.log('all chats..................',allChats )
-
-  
-              // Filter for unread if needed
               const filteredChats = unread
-                ? allChats.filter(chat =>
-                    chat.message.some(
-                      message => !message.read && message.receiverId === userId
-                    )
+                ? allChats.filter(
+                    chat =>
+                      chat.lastMessage?.unread === true &&
+                      chat.lastMessage?.senderId !== userId && 
+                      chat.lastMessage?.receiver === userId,
                   )
                 : allChats;
-  
+
+              console.log('all chats..................', filteredChats);
+
               setChats(filteredChats);
               setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
             } catch (error) {
-              console.log('Error processing chat snapshot:', error);
+              // console.log('Error processing chat snapshot:', error);
             } finally {
               setLoading2(false);
             }
           },
           error => {
-            console.log('Error fetching chats in real-time: ', error);
+            // console.log('Error fetching chats in real-time: ', error);
             setLoading2(false);
-          }
+          },
         );
       } else {
         setLoading2(false);
       }
-  
+
       return () => {
         if (unsubscribe) unsubscribe();
       };
-    }, [userId, unread])
+    }, [userId, unread]),
   );
-  
+
   const fetchMoreChats = async () => {
     if (!lastVisible || loading) return;
     setLoading(true);
@@ -124,7 +118,7 @@ const Messages = () => {
         setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
       }
     } catch (e) {
-      console.log('Chat Error: ', e);
+      // console.log('Chat Error: ', e);
     } finally {
       setLoading(false);
     }
@@ -147,10 +141,9 @@ const Messages = () => {
         lastMessage: chat.lastMessage || '',
         lastMessageTimestamp: chat.lastMessageTimestamp,
         receiverId: userData?.uid,
-        unread: chat.lastMessage.unread   , 
       };
     } catch (error) {
-      console.log('Error fetching user data: ', error);
+      // console.log('Error fetching user data: ', error);
       return {
         id: doc.id,
         name: 'Unknown',
@@ -158,13 +151,9 @@ const Messages = () => {
         lastMessage: chat.lastMessage || '',
         lastMessageTimestamp: chat.lastMessageTimestamp,
         receiverId: '',
-        unread: false, 
       };
     }
   };
-
-
-
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -235,32 +224,37 @@ const Messages = () => {
                   <FlatList
                     data={chats}
                     keyExtractor={item => item.id}
-                    renderItem={({item}) => 
-                      (
-                      <Message
-                        name={item.name}
-                        unread={item?.unread}
-                        message={item.lastMessage?.text || 'No message'}
-                        image={item.image}
-                        time={
-                          item.lastMessageTimestamp
-                            ? moment(item.lastMessageTimestamp.toDate()).format(
-                                'h:mm A',
-                              )
-                            : ''
-                        }
-                        onPress={() =>
-                          navigation.navigate('Chat', {
-                            chatId: item.lastMessage?.chatId,
-                            senderId: userId,
-                            senderName: item.lastMessage?.senderName,
-                            receiver: item.receiverId,
-                            receiverName: item.name,
-                            receiverProfile: item.image,
-                          })
-                        }
-                      />
-                    )}
+                    renderItem={({item}) => {
+                      return (
+                        <Message
+                          name={item.name}
+                          unread={
+                            item?.lastMessage?.unread &&
+                            userId === item?.lastMessage?.receiver
+                          }
+                          message={item.lastMessage?.text || 'No message'}
+                          image={item.image}
+                          noProfile={IMAGES.defaultPic}
+                          time={
+                            item.lastMessageTimestamp
+                              ? moment(
+                                  item.lastMessageTimestamp.toDate(),
+                                ).format('h:mm A')
+                              : ''
+                          }
+                          onPress={() =>
+                            navigation.navigate('Chat', {
+                              chatId: item.lastMessage?.chatId,
+                              senderId: userId,
+                              senderName: item.lastMessage?.senderName,
+                              receiver: item.receiverId,
+                              receiverName: item.name,
+                              receiverProfile: item.image,
+                            })
+                          }
+                        />
+                      );
+                    }}
                     onEndReached={fetchMoreChats}
                     onEndReachedThreshold={0.5}
                     // ListFooterComponent={loading && <Text>Loading...</Text>}
@@ -292,7 +286,7 @@ const styles = StyleSheet.create({
   container: {
     width: '90%',
     alignSelf: 'center',
-    paddingTop: RFPercentage(3),
+    paddingTop: RFPercentage(4),
   },
   headerText: {
     fontSize: RFPercentage(1.8),

@@ -13,11 +13,12 @@ import React, {useCallback, useEffect, useState} from 'react';
 import {GiftedChat, InputToolbar} from 'react-native-gifted-chat';
 import firestore from '@react-native-firebase/firestore';
 import {RFPercentage} from 'react-native-responsive-fontsize';
-import {Colors, Fonts} from '../../../constants/Themes';
+import {Colors, Fonts, IMAGES} from '../../../constants/Themes';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import LinearGradient from 'react-native-linear-gradient';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Feather from 'react-native-vector-icons/Feather';
+import {useFocusEffect} from '@react-navigation/native';
 
 const Chat = ({navigation, route}) => {
   const [messages, setMessages] = useState([]);
@@ -29,60 +30,10 @@ const Chat = ({navigation, route}) => {
     receiver,
     receiverName,
     receiverProfile,
+    senderProfile,
   } = route.params;
 
   const [message, setMessage] = useState('');
-
-  useEffect(() => {
-    const listenForNewMessages = () => {
-      const q = firestore()
-        .collection('Chats')
-        .doc(chatId)
-        .collection('Messages')
-        .orderBy('createdAt', 'desc');
-
-      const unsubscribe = q.onSnapshot(snapshot => {
-        if (snapshot.empty) {
-          console.log('No new messages.');
-          return;
-        }
-
-        const newMessages = snapshot.docs.map(doc => {
-          const firebaseMessage = doc.data();
-          return {
-            _id: doc.id,
-            text: firebaseMessage.text,
-            createdAt: firebaseMessage.createdAt
-              ? firebaseMessage.createdAt.toDate()
-              : new Date(),
-            user: {
-              _id: firebaseMessage.senderId,
-              name: firebaseMessage.senderName,
-            },
-          };
-        });
-
-        console.log('New Messages:', newMessages);
-
-        if (newMessages.length > 0) {
-          setMessages(prevMessages => {
-            const updatedMessages = GiftedChat.append(
-              newMessages,
-              prevMessages,
-            );
-            console.log('Updated Messages:', updatedMessages);
-            return updatedMessages;
-          });
-        }
-      });
-
-      return unsubscribe;
-    };
-
-    if (chatId) {
-      return listenForNewMessages();
-    }
-  }, [chatId]);
 
   useEffect(() => {
     const fetchInitialMessages = async () => {
@@ -165,35 +116,55 @@ const Chat = ({navigation, route}) => {
   };
 
   const onSend = useCallback(
-    async (messages = []) => {
-      const message = messages[0];
+    async (messagesToSend = []) => {
+      const message = messagesToSend[0];
       if (!message.text || message.text.trim() === '') {
         console.log('Message text is empty!');
         return;
       }
+
       const timestamp = firestore.FieldValue.serverTimestamp();
+      const localTimestamp = new Date(); // For UI until server timestamp comes back
+
       const newMessage = {
+        _id: `${Date.now()}`, // temp unique id for UI
+        text: message.text,
+        createdAt: localTimestamp,
+        user: {
+          _id: senderId,
+          name: senderName,
+          avatar: senderProfile,
+        },
+      };
+
+      setMessages(previousMessages =>
+        GiftedChat.append(previousMessages, [newMessage]),
+      );
+
+      const firestoreMessage = {
         text: message.text,
         timestamp,
-        senderId: senderId,
-        senderName: senderName,
+        senderId,
+        senderName,
         unread: true,
-        chatId: chatId,
+        chatId,
+        receiver,
       };
 
       try {
         const chatRef = firestore().collection('Chats').doc(chatId);
-        await chatRef.collection('Messages').add(newMessage);
+        await chatRef.collection('Messages').add(firestoreMessage);
         const participants = [senderId, receiver];
 
         await chatRef.set(
           {
-            lastMessage: newMessage,
+            lastMessage: firestoreMessage,
             lastMessageTimestamp: timestamp,
-            participants: participants,
+            participants,
           },
           {merge: true},
         );
+
         setMessage('');
       } catch (e) {
         console.log('Error sending message:', e);
@@ -202,200 +173,180 @@ const Chat = ({navigation, route}) => {
     [chatId, senderId, senderName, receiver],
   );
 
-  const markMessagesAsRead = async (chatId, receiverId) => {
-    try {
-      const messagesRef = firestore()
-        .collection('Chats')
-        .doc(chatId)
-        .collection('Messages');
-
-      const snapshot = await messagesRef
-        .orderBy('timestamp', 'desc')
-        .limit(1)
-        .get();
-
-      if (!snapshot.empty) {
-        const lastMessageDoc = snapshot.docs[0];
-        const lastMessage = lastMessageDoc.data();
-
-        console.log('lastMessage........', lastMessage);
-        console.log('lastMessage........', receiverId);
-
-        if (lastMessage.senderId !== receiverId && lastMessage.unread) {
-          await lastMessageDoc.ref.update({unread: false});
-          console.log('Last message marked as read');
+  useFocusEffect(
+    useCallback(() => {
+      const markLastMessageAsRead = async () => {
+        try {
+          const chatRef = firestore().collection('Chats').doc(chatId);
+          const chatDoc = await chatRef.get();
+          const lastMessage = chatDoc.data()?.lastMessage;
+          if (lastMessage?.receiver === senderId && lastMessage?.unread) {
+            await chatRef.set(
+              {
+                lastMessage: {
+                  ...lastMessage,
+                  unread: false,
+                },
+              },
+              {merge: true},
+            );
+          }
+        } catch (error) {
+          console.log('Error marking last message as read:', error);
         }
-      }
-    } catch (e) {
-      console.log('Error marking last message as read:', e);
-    }
-  };
+      };
 
-  useEffect(() => {
-    if (chatId && receiver) {
-      markMessagesAsRead(chatId, receiver);
-    }
-  }, [chatId, receiver]);
+      markLastMessageAsRead();
+    }, [chatId, senderId]),
+  );
 
-  const insets = useSafeAreaInsets();
-
-  const [keyboardVisible, setKeyboardVisible] = useState(false);
-
-  useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener(
-      'keyboardDidShow',
-      () => {
-        setKeyboardVisible(true);
-      },
-    );
-    const keyboardDidHideListener = Keyboard.addListener(
-      'keyboardDidHide',
-      () => {
-        setKeyboardVisible(false);
-      },
-    );
-
-    return () => {
-      keyboardDidShowListener.remove();
-      keyboardDidHideListener.remove();
-    };
-  }, []);
-
-  console.log('messages........', messages);
-
-  
-
- 
   return (
-    <KeyboardAvoidingView
-      style={{flex: 1}}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={
-        Platform.OS === 'ios' ? RFPercentage(7.9) : RFPercentage(-25)
-      }>
-      <LinearGradient
-        colors={['rgb(238, 243, 255)', 'rgb(170, 197, 255)']}
-        style={styles.screen}>
+    <LinearGradient
+      colors={['rgb(238, 242, 251)', 'rgb(180, 203, 252)']}
+      style={styles.screen}>
+      <View
+        style={{
+          width: '100%',
+          height: RFPercentage(8),
+          marginTop: RFPercentage(3),
+          justifyContent: 'center',
+          borderBottomWidth: 1,
+          borderBottomColor: 'rgb(190, 193, 199)',
+          alignSelf: 'center',
+          paddingBottom: RFPercentage(1),
+        }}>
         <View
           style={{
-            width: '100%',
-            height: RFPercentage(8),
-            marginTop: RFPercentage(3),
-            justifyContent: 'center',
-            borderBottomWidth: 1,
-            borderBottomColor: 'rgb(190, 193, 199)',
-            alignSelf: 'center',
-            paddingBottom: RFPercentage(1.5),
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingHorizontal: RFPercentage(0.5),
           }}>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              paddingHorizontal: RFPercentage(0.5),
-            }}>
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <AntDesign
-                name="arrowleft"
-                size={RFPercentage(2.5)}
-                color={Colors.placeholderColor}
-              />
-            </TouchableOpacity>
-            <Image
-              source={{uri: receiverProfile ? receiverProfile : null}}
-              resizeMode="contain"
-              style={{
-                width: RFPercentage(6),
-                height: RFPercentage(6),
-                marginLeft: RFPercentage(2),
-                borderWidth: 2,
-                borderColor: Colors.gradient1,
-              }}
-              borderRadius={RFPercentage(100)}
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <AntDesign
+              name="arrowleft"
+              size={RFPercentage(2.5)}
+              color={Colors.placeholderColor}
             />
-            <Text
-              style={{
-                color: Colors.primaryText,
-                fontFamily: Fonts.fontMedium,
-                fontSize: RFPercentage(1.7),
-                marginLeft: RFPercentage(2),
-              }}>
-              {receiverName}
-            </Text>
-          </View>
-        </View>
-        <View style={styles.messageContainer}>
-          <GiftedChat
-            key={messages.length}
-            messages={messages}
-            onSend={messages => onSend(messages)}
-            user={{
-              _id: senderId,
-              name: senderName,
-            }}
-            loadEarlier={!!lastVisible}
-            onLoadEarlier={fetchMoreMessages}
-            bottomOffset={insets.bottom}
-            renderLoadEarlier={props => (
-              <TouchableOpacity
-                style={styles.loadMessages}
-                onPress={props.onLoadEarlier}>
-                <Text style={{color: Colors.background, fontWeight: 'bold'}}>
-                  Load earlier messages
-                </Text>
-              </TouchableOpacity>
-            )}
-            renderInputToolbar={props => (
-              <InputToolbar
-                {...props}
-                containerStyle={{
-                  backgroundColor: Colors.buttonColor,
-                  borderWidth: 1,
-                  borderColor: Colors.gradient2,
-                  borderRadius: RFPercentage(6),
-                  height: RFPercentage(6),
-                  justifyContent: 'center',
-                  paddingHorizontal: RFPercentage(1.5),
-                  top: keyboardVisible ? RFPercentage(7) : 0,
-                }}
-                renderComposer={() => (
-                  <TextInput
-                    style={styles.customTextInput}
-                    placeholder="Type a message"
-                    placeholderTextColor="#bbb"
-                    multiline
-                    value={message}
-                    onChangeText={setMessage}
-                  />
-                )}
-                renderSend={() => (
-                  <TouchableOpacity
-                    style={styles.sendButton}
-                    onPress={() => {
-                      onSend([
-                        {
-                          text: message,
-                          user: {
-                            _id: senderId,
-                            name: senderName,
-                          },
-                          createdAt: new Date(),
-                        },
-                      ]);
-                      Keyboard.dismiss();
+          </TouchableOpacity>
+          <View>
+            {receiverProfile ? (
+              <>
+                <Image
+                  source={{uri: receiverProfile}}
+                  resizeMode="contain"
+                  style={{
+                    width: RFPercentage(6),
+                    height: RFPercentage(6),
+                    marginLeft: RFPercentage(2),
+                    borderWidth: 2,
+                    borderColor: Colors.gradient1,
+                  }}
+                  borderRadius={RFPercentage(100)}
+                />
+              </>
+            ) : (
+              <>
+                <View style={styles.noProfileContainer}>
+                  <Text
+                    style={{
+                      color: Colors.gradient1,
+                      fontFamily: Fonts.semiBold,
+                      fontSize: RFPercentage(2),
+                      top: RFPercentage(0.2),
                     }}>
-                    <Feather
-                      name="send"
-                      size={RFPercentage(2.3)}
-                      color={Colors.gradient2}
-                    />
-                  </TouchableOpacity>
-                )}
-              />
+                    {receiverName[0]}
+                  </Text>
+                </View>
+              </>
             )}
-          />
+          </View>
+
+          <Text
+            style={{
+              color: Colors.primaryText,
+              fontFamily: Fonts.fontMedium,
+              fontSize: RFPercentage(1.7),
+              marginLeft: RFPercentage(2),
+            }}>
+            {receiverName}
+          </Text>
         </View>
-      </LinearGradient>
-    </KeyboardAvoidingView>
+      </View>
+      <View style={styles.messageContainer}>
+        <GiftedChat
+          messages={messages}
+          onSend={messages => onSend(messages)}
+          user={{
+            _id: senderId,
+            name: senderName,
+            avatar: senderProfile,
+          }}
+          loadEarlier={!!lastVisible}
+          onLoadEarlier={fetchMoreMessages}
+          showAvatarForEveryMessage={true}
+          renderAvatar={props => null}
+          // bottomOffset={RFPercentage(28)}
+          renderLoadEarlier={props => (
+            <TouchableOpacity
+              style={styles.loadMessages}
+              onPress={props.onLoadEarlier}>
+              <Text style={{color: Colors.background, fontWeight: 'bold'}}>
+                Load earlier messages
+              </Text>
+            </TouchableOpacity>
+          )}
+          renderInputToolbar={props => (
+            <InputToolbar
+              {...props}
+              containerStyle={{
+                backgroundColor: Colors.buttonColor,
+                borderWidth: 1,
+                borderColor: Colors.gradient2,
+                borderRadius: RFPercentage(6),
+                height: RFPercentage(6),
+                justifyContent: 'center',
+                paddingHorizontal: RFPercentage(1.5),
+                // bottom: keyboardVisible ? RFPercentage(25) : 0,
+              }}
+              renderComposer={() => (
+                <TextInput
+                  style={styles.customTextInput}
+                  placeholder="Type a message"
+                  placeholderTextColor="#bbb"
+                  multiline
+                  value={message}
+                  onChangeText={setMessage}
+                />
+              )}
+              renderSend={() => (
+                <TouchableOpacity
+                  style={styles.sendButton}
+                  onPress={() => {
+                    onSend([
+                      {
+                        text: message,
+                        user: {
+                          _id: senderId,
+                          name: senderName,
+                          avatar: senderProfile,
+                        },
+                        createdAt: new Date(),
+                      },
+                    ]);
+                    Keyboard.dismiss();
+                  }}>
+                  <Feather
+                    name="send"
+                    size={RFPercentage(2.3)}
+                    color={Colors.gradient2}
+                  />
+                </TouchableOpacity>
+              )}
+            />
+          )}
+        />
+      </View>
+    </LinearGradient>
   );
 };
 
@@ -445,6 +396,17 @@ const styles = StyleSheet.create({
   sendText: {
     color: '#fff',
     fontWeight: 'bold',
+  },
+  noProfileContainer: {
+    width: RFPercentage(6),
+    height: RFPercentage(6),
+    marginLeft: RFPercentage(2),
+    borderWidth: 2,
+    borderColor: Colors.gradient1,
+    borderRadius: RFPercentage(100),
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(229, 231, 235, 0.3)',
   },
 });
 

@@ -128,6 +128,7 @@ const StackNavigator: React.FC = () => {
           <Stack.Screen name="ChangePasswordV2" component={ChangePasswordV2} />
           <Stack.Screen name="Availability" component={Availability} />
           <Stack.Screen name="Chat" component={Chat} />
+          <Stack.Screen name="Messages" component={Messages} />
 
 
           {/* ------------------Customer Flow------------- */}

@@ -55,7 +55,7 @@ const ChangePassword: React.FC = () => {
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}>
-        <HeaderBack title={'Set New Password'} />
+        <HeaderBack title={'Set New Password'} left={true} />
 
         <Formik
           initialValues={{

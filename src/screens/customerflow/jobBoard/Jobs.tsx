@@ -24,6 +24,7 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import {Icons} from '../../../constants/Themes';
 import Toast from 'react-native-toast-message';
+import HeaderBack from '../../../components/HeaderBack';
 
 const Jobs = () => {
   const navigation = useNavigation();
@@ -121,22 +122,8 @@ const Jobs = () => {
       <ScrollView
         contentContainerStyle={styles.scrollView}
         showsVerticalScrollIndicator={false}>
+          <HeaderBack title='My Posted Jobs' right={true} rightText='Post Job' textStyle={{fontSize:RFPercentage(1.8)}} onPress={()=> navigation.navigate('PostJob',{jobId:null})}  />
         <View style={styles.container}>
-          <View style={styles.header}>
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <Entypo
-                name="chevron-thin-left"
-                color={Colors.secondaryText}
-                size={RFPercentage(2)}
-              />
-            </TouchableOpacity>
-            <Text style={styles.title}>My Posted Jobs</Text>
-            <TouchableOpacity 
-            onPress={() => navigation.navigate('PostJob',{jobId:null})}
-            >
-              <Text style={styles.postJobText}>Post Job</Text>
-            </TouchableOpacity>
-          </View>
           <View style={styles.toggleContainer}>
             <TouchableOpacity onPress={toggle1}>
               <View
@@ -234,9 +221,9 @@ const styles = StyleSheet.create({
   },
   container: {
     backgroundColor: Colors.background,
-    marginTop: Platform.OS === 'android' ? RFPercentage(6) : RFPercentage(0),
     width: '90%',
     alignSelf: 'center',
+    marginTop:RFPercentage(4)
   },
   header: {
     flexDirection: 'row',
@@ -257,7 +244,7 @@ const styles = StyleSheet.create({
   toggleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: RFPercentage(3),
+    // marginTop: RFPercentage(3),
   },
   toggleButton: {
     width: RFPercentage(13),

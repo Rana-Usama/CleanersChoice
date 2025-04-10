@@ -108,6 +108,7 @@ const ChangePasswordV2 = () => {
         <HeaderBack
           title={`Change Password`}
           textStyle={{fontSize: RFPercentage(1.8)}}
+          left={true}
         />
 
         <Formik

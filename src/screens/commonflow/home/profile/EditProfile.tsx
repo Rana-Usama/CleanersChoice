@@ -177,7 +177,7 @@ const EditProfile = () => {
           <ScrollView
             contentContainerStyle={styles.scrollContainer}
             keyboardShouldPersistTaps="handled">
-            <HeaderBack title="Edit Profile" textStyle={styles.headerText} />
+            <HeaderBack title="Edit Profile" textStyle={styles.headerText} left={true} />
             <View style={styles.container}>
               {/* Profile Image */}
               <View style={styles.imgContainer}>

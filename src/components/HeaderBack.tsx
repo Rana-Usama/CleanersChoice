@@ -7,18 +7,19 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import React from 'react';
-import { RFPercentage } from 'react-native-responsive-fontsize';
+import {RFPercentage} from 'react-native-responsive-fontsize';
 import Entypo from 'react-native-vector-icons/Entypo';
-import { Colors, Fonts, Icons } from '../constants/Themes';
-import { useNavigation } from '@react-navigation/native';
+import {Colors, Fonts, Icons} from '../constants/Themes';
+import {useNavigation} from '@react-navigation/native';
 
 interface props {
-  logo? : boolean;
-  textStyle? : object;
-  title : string;
-  right? : boolean;
-  rightText? : string;
-  onPress? : ()=> void
+  logo?: boolean;
+  textStyle?: object;
+  title: string;
+  right?: boolean;
+  rightText?: string;
+  onPress?: () => void;
+  left?: boolean;
 }
 
 const HeaderBack = (props: props) => {
@@ -28,12 +29,20 @@ const HeaderBack = (props: props) => {
     <View style={styles.container}>
       <View style={styles.leftContainer}>
         {props.logo ? (
-          <Image source={Icons.homeLogo} resizeMode="contain" style={styles.logo} />
-        ) : (
+          <Image
+            source={Icons.homeLogo}
+            resizeMode="contain"
+            style={styles.logo}
+          />
+        ) : props.left ? (
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Entypo name="chevron-thin-left" color={Colors.secondaryText} size={RFPercentage(2)} />
+            <Entypo
+              name="chevron-thin-left"
+              color={Colors.secondaryText}
+              size={RFPercentage(2)}
+            />
           </TouchableOpacity>
-        )}
+        ) : null}
       </View>
       <Text style={[styles.headerText, props.textStyle]}>{props.title}</Text>
       {props.right && (
@@ -55,7 +64,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'center',
-    marginTop: Platform.OS === 'android' ? RFPercentage(6.5) : RFPercentage(0.5),
+    marginTop:
+      Platform.OS === 'android' ? RFPercentage(6.5) : RFPercentage(0.5),
   },
   leftContainer: {
     position: 'absolute',

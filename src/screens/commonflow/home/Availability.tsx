@@ -158,6 +158,7 @@ const Availability = () => {
       <HeaderBack
         title="Availability"
         textStyle={{fontSize: RFPercentage(1.8)}}
+        left={true}
       />
       <View style={styles.container}>
         {loading2 ? (

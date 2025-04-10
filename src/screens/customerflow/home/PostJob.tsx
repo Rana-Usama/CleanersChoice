@@ -218,6 +218,7 @@ const PostJob = ({route}) => {
           <HeaderBack
             title="Post Job"
             textStyle={{fontSize: RFPercentage(1.8)}}
+            left={true}
           />
           <View style={styles.container}>
             <InfoHeader text="Post your cleaning job by providing following details!" />

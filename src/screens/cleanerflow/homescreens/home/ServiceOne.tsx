@@ -164,7 +164,7 @@ const ServiceOne: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <HeaderBack title="Service" textStyle={styles.headerText} />
+      <HeaderBack title="Service" textStyle={styles.headerText} left={true} />
       <KeyboardAvoidingView
         style={{flex: 1}}>
         <ScrollView

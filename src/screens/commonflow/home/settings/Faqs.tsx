@@ -62,7 +62,7 @@ const FAQS: React.FC = () => {
       <ScrollView
         contentContainerStyle={styles.scrollViewContent}
         showsVerticalScrollIndicator={false}>
-        <HeaderBack title={`FAQ's`} textStyle={styles.headerText} />
+        <HeaderBack title={`FAQ's`} textStyle={styles.headerText} left={true} />
         <View style={styles.container}>
           <FlatList
             data={data}
