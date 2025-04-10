@@ -12,7 +12,7 @@ export const Colors: {[key: string]: string} = {
   error: 'rgba(248, 113, 113, 0.8)',
 };
 
-export const Icons: {[key: string]: any} = {       
+export const Icons: {[key: string]: any} = {
   customer: require('../assets/icons/customer.png'),
   owner: require('../assets/icons/owner.png'),
   edit: require('../assets/icons/Edit-Icon.png'),
@@ -54,8 +54,11 @@ export const Icons: {[key: string]: any} = {
   remove: require('../assets/icons/remove-user.png'),
   timeEdit: require('../assets/icons/time-edit.png'),
   empty: require('../assets/icons/empty.png'),
-  others: require('../assets/icons/others.png'),
-
+  others: require('../assets/icons/more.png'),
+  lawn: require('../assets/icons/lawn.png'),
+  priceRangeWhite: require('../assets/icons/card-white.png'),
+  verifyWhite: require('../assets/icons/verify-white.png'),
+  locationWhite: require('../assets/icons/location-white.png'),
 };
 
 export const IMAGES: {[key: string]: any} = {

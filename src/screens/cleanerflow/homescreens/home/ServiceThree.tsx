@@ -35,7 +35,7 @@ const ServiceThree: React.FC = () => {
   );
   const [errors, setErrors] = useState({});
 
-  console.log(errors)
+  console.log(errors);
 
   const addPackage = () => {
     if (packages.length < MAX_PACKAGES) {
@@ -71,12 +71,12 @@ const ServiceThree: React.FC = () => {
   const savePackagesToFirestore = async () => {
     const user = auth().currentUser;
     if (!user) return;
-  
+
     // Filter valid packages
     const validPackages = packages.filter(
       pkg => pkg.details.trim() !== '' && pkg.price.trim() !== '',
     );
-  
+
     // Require exactly 3 packages
     if (validPackages.length < 3) {
       Toast.show({
@@ -93,12 +93,13 @@ const ServiceThree: React.FC = () => {
       });
       return;
     }
-  
+
     try {
       setLoading(true);
-      const serviceRef = firestore().collection('CleanerServices').doc(user.uid);
+      const serviceRef = firestore()
+        .collection('CleanerServices')
+        .doc(user.uid);
       const doc = await serviceRef.get();
-  
       if (doc.exists) {
         const existingData = doc.data();
         let existingPackages = existingData?.packages || [];
@@ -106,7 +107,6 @@ const ServiceThree: React.FC = () => {
           const existingPkg = existingPackages.find(p => p.id === pkg.id);
           return existingPkg ? {...existingPkg, ...pkg} : pkg;
         });
-  
         await serviceRef.update({
           packages: updatedPackages,
         });
@@ -115,7 +115,6 @@ const ServiceThree: React.FC = () => {
           packages,
         });
       }
-  
       navigation.navigate('CleanerNavigator');
     } catch (error) {
       console.error('Error updating packages: ', error);
@@ -123,7 +122,7 @@ const ServiceThree: React.FC = () => {
       setLoading(false);
     }
   };
-  
+
   useEffect(() => {
     fetchServiceData();
   }, []);
@@ -157,17 +156,25 @@ const ServiceThree: React.FC = () => {
         <ScrollView
           contentContainerStyle={styles.scrollView}
           keyboardShouldPersistTaps="handled">
-          <HeaderBack title="Service" textStyle={styles.headerText} left={true} />
+            
+          {/* Header */}
+          <HeaderBack
+            title="Service"
+            textStyle={styles.headerText}
+            left={true}
+          />
           <View style={styles.container}>
             <View style={styles.infoHeaderContainer}>
               <InfoHeader />
             </View>
           </View>
 
+          {/* Time Line */}
           <View style={styles.timelineContainer}>
             <TimeLine stepTwo={true} stepThree={true} />
           </View>
 
+          {/* Package Details Container */}
           <View style={styles.container}>
             <View style={styles.sectionContainer}>
               <Text style={styles.sectionTitle}>Select General Packages</Text>
@@ -205,7 +212,7 @@ const ServiceThree: React.FC = () => {
                   />
 
                   <InputField
-                    placeholder={`Starting Price e.g ${25 * pkg.id}$`} 
+                    placeholder={`Starting Price e.g ${25 * pkg.id}$`}
                     customStyle={{
                       width: '100%',
                       borderColor: errors?.[pkg.id]
@@ -224,25 +231,22 @@ const ServiceThree: React.FC = () => {
             ))}
 
             {packages.length < MAX_PACKAGES && (
-              <View
-                style={{alignSelf: 'flex-end',bottom:RFPercentage(1.7)}}>
+              <View style={{alignSelf: 'flex-end', bottom: RFPercentage(1.7)}}>
                 <TouchableOpacity onPress={addPackage}>
                   <View>
-                    <Text
-                      style={styles.addText}>
-                      + Add Package
-                    </Text>
+                    <Text style={styles.addText}>+ Add Package</Text>
                   </View>
                 </TouchableOpacity>
               </View>
             )}
 
+            {/* Button Container */}
             <View style={styles.buttonContainer}>
               <GradientButton
                 title={profileCompletion === '100' ? 'Edit' : 'Next'}
                 onPress={savePackagesToFirestore}
                 loading={loading}
-                disabled={Object.values(errors).some(error => error !== null)} 
+                disabled={Object.values(errors).some(error => error !== null)}
               />
             </View>
           </View>
@@ -296,11 +300,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: RFPercentage(4),
   },
-  errorText :
-  {color:Colors.error,fontSize:RFPercentage(1.4), fontFamily:Fonts.fontRegular, bottom:RFPercentage(0.9), left:5},
-  addText : {
+  errorText: {
+    color: Colors.error,
+    fontSize: RFPercentage(1.4),
+    fontFamily: Fonts.fontRegular,
+    bottom: RFPercentage(0.9),
+    left: 5,
+  },
+  addText: {
     color: Colors.gradient1,
     fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
-  }
+  },
 });

@@ -12,7 +12,8 @@ import {
   import HeaderComponent from '../../../components/HeaderComponent';
   import GradientButton from '../../../components/GradientButton';
 import { useNavigation } from '@react-navigation/native';
-  
+import { RootStackParamList } from '../../../routers/StackNavigator';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';  
   const services = [
     { id: 1, name: 'Connect with cleaning customers' },
     { id: 2, name: 'See unlimited Job Listings' },
@@ -21,16 +22,18 @@ import { useNavigation } from '@react-navigation/native';
   ];
   
   const Premium = () => {
-    const navigation = useNavigation()
+    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList,'Premium'>>()
 
     return (
       <SafeAreaView style={styles.safeArea}>
         <HeaderComponent />
         <View style={styles.container}>
+
           <View style={styles.premiumHeader}>
             <Image source={Icons.owner} resizeMode="contain" style={styles.ownerIcon} />
             <Text style={styles.premiumText}>Premium Business Account</Text>
           </View>
+
           <View style={styles.subscriptionContainer}>
             <View style={styles.subscriptionBox}>
               <View style={styles.starLeft}>
@@ -59,10 +62,12 @@ import { useNavigation } from '@react-navigation/native';
               </View>
             </View>
           </View>
+
           <View style={styles.buttonContainer}>
             <GradientButton title="Proceed To Payment" textStyle={styles.buttonText} onPress={()=> navigation.navigate('CleanerNavigator')} style={{width:RFPercentage(19)}} />
           </View>
         </View>
+
         <View style={styles.starContainer}>
           <Image source={IMAGES.stars} resizeMode="contain" style={styles.star} />
         </View>

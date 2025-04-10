@@ -55,6 +55,15 @@ const data1 = [
     id: 6,
     label: 'Pressure Washing',
   },
+  {
+    id: 7,
+    label: 'Lawn Care',
+  },
+  {
+    id : 8,
+    label : 'Others'
+  }
+
 ];
 
 const data2 = [
@@ -99,8 +108,12 @@ const items = [
   },
   {
     id: '77',
-    name: 'Others',
+    name: 'Lawn Care',
   },
+  {
+    id : '88',
+    name : 'Others'
+  }
 ];
 
 const PostJob = ({route}) => {
@@ -215,11 +228,15 @@ const PostJob = ({route}) => {
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContainer}>
+
+            {/* Header */}
           <HeaderBack
             title="Post Job"
             textStyle={{fontSize: RFPercentage(1.8)}}
             left={true}
           />
+
+          {/* Container */}
           <View style={styles.container}>
             <InfoHeader text="Post your cleaning job by providing following details!" />
             <View style={{marginTop: RFPercentage(1.5)}}>
@@ -365,6 +382,8 @@ const PostJob = ({route}) => {
                 />
               </View>
             </View>
+
+            {/* Button Container */}
             <View style={{alignSelf: 'center', marginTop: RFPercentage(3)}}>
               <GradientButton
                 title={jobId ? 'Edit Job' : 'Make Job Live'}

@@ -19,7 +19,7 @@ import CleanerJobs from '../screens/cleanerflow/homescreens/jobs/CleanerJobs';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import Profile from '../screens/commonflow/home/profile/Profile';
 import Settings from '../screens/commonflow/home/settings/Settings';
-import Messages from '../screens/customerflow/messages/Messages';
+import Messages from '../screens/commonflow/home/Messages';
 
 const Tab = createBottomTabNavigator();
 

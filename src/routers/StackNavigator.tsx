@@ -26,7 +26,6 @@ import CleanerNavigator from './CleanerNavigator';
 import ServiceOne from '../screens/cleanerflow/homescreens/home/ServiceOne';
 import ServiceTwo from '../screens/cleanerflow/homescreens/home/ServiceTwo';
 import ServiceThree from '../screens/cleanerflow/homescreens/home/ServiceThree';
-import HomeScreen from '../screens/cleanerflow/homescreens/home/Home';
 import CancelSubscription from '../screens/cleanerflow/premium/CancelSubscription';
 import Availability from '../screens/commonflow/home/Availability';
 import Settings from '../screens/commonflow/home/settings/Settings';
@@ -34,8 +33,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import CheckAvailability from '../screens/customerflow/home/CheckAvailablity';
 import Jobs from '../screens/customerflow/jobBoard/Jobs';
 import Chat from '../screens/commonflow/home/Chat';
-import Messages from '../screens/customerflow/messages/Messages';
-
+import Messages from '../screens/commonflow/home/Messages';
 
 export type RootStackParamList = {
   SplashOne: undefined;
@@ -147,7 +145,6 @@ const StackNavigator: React.FC = () => {
           <Stack.Screen name="ServiceOne" component={ServiceOne} />
           <Stack.Screen name="ServiceTwo" component={ServiceTwo} />
           <Stack.Screen name="ServiceThree" component={ServiceThree} />
-          <Stack.Screen name="HomeScreen" component={HomeScreen} />
           <Stack.Screen name="CancelSubscription" component={CancelSubscription} />
 
         </Stack.Navigator>

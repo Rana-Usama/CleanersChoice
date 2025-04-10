@@ -32,6 +32,7 @@ import GradientButton from '../../../components/GradientButton';
 import auth from '@react-native-firebase/auth';
 import {useDispatch} from 'react-redux';
 import {setProfileData} from '../../../redux/ProfileData/Actions';
+import NotFound from '../../../components/NotFound';
 
 const categories = [
   {id: '1', name: 'All', icon: Icons.all},
@@ -43,6 +44,11 @@ const categories = [
   {id: '11', name: 'Window Cl..', icon: Icons.window},
   {
     id: '77',
+    name: 'Lawn Care',
+    icon: Icons.lawn,
+  },
+  {
+    id: '88',
     name: 'Others',
     icon: Icons.others,
   },
@@ -68,7 +74,6 @@ const Home = () => {
   const [selectedLocation, setSelectedLocation] = useState([]);
   const [loactionLoading, setLocationLoading] = useState(false);
   const [priceLoading, setPriceLoading] = useState(false);
-
 
   useEffect(() => {
     serviceDetails();
@@ -108,7 +113,6 @@ const Home = () => {
     );
     setFilteredLocations(filtered);
   };
-
 
   useEffect(() => {
     if (modalVisible || modalVisible2) {
@@ -226,13 +230,14 @@ const Home = () => {
         contentContainerStyle={styles.scrollView}
         showsVerticalScrollIndicator={false}>
         <View style={styles.container}>
+          {/* Header */}
           <HeaderBack
             logo={true}
             title="Home"
             right={true}
             rightText="Post Job"
             textStyle={{fontSize: RFPercentage(1.8)}}
-            onPress={() => navigation.navigate('PostJob',{jobId:null})}
+            onPress={() => navigation.navigate('PostJob', {jobId: null})}
           />
 
           <View style={styles.searchContainer}>
@@ -242,16 +247,18 @@ const Home = () => {
               onChangeText={setNameQuery}
             />
           </View>
-          <Text style={[styles.sectionTitle, {bottom: RFPercentage(1)}]}>
-            Categories
-          </Text>
+
+          {/* Categories */}
+          <Text style={[styles.sectionTitle, {}]}>Categories</Text>
           <FlatList
             data={categories}
             keyExtractor={item => item.id}
             horizontal
             showsHorizontalScrollIndicator={false}
             renderItem={({item}) => (
-              <TouchableOpacity onPress={() => setCategorySelection(item?.id)}>
+              <TouchableOpacity
+                onPress={() => setCategorySelection(item?.id)}
+                style={{marginTop: RFPercentage(0.5)}}>
                 <View
                   style={[
                     styles.categoryBox,
@@ -269,11 +276,11 @@ const Home = () => {
                       styles.categoryIcon,
                       {
                         width:
-                          item.id === '1' || item.id === '77'
+                          item.id === '1' || item.id === '88'
                             ? RFPercentage(3.2)
                             : RFPercentage(4),
                         height:
-                          item.id === '1' || item.id === '77'
+                          item.id === '1' || item.id === '88'
                             ? RFPercentage(3.2)
                             : RFPercentage(4),
                       },
@@ -297,6 +304,7 @@ const Home = () => {
             contentContainerStyle={styles.flatListPadding}
           />
 
+          {/* Filters */}
           <Text style={styles.sectionTitle}>Apply Filter</Text>
           <View
             style={{
@@ -317,6 +325,15 @@ const Home = () => {
                       : 'transparent',
                   },
                 ]}>
+                <Image
+                  source={loctionFilter ? Icons.locationWhite : Icons.location}
+                  style={{
+                    width: RFPercentage(1.6),
+                    height: RFPercentage(1.6),
+                    marginRight: RFPercentage(0.5),
+                  }}
+                  resizeMode="contain"
+                />
                 <Text
                   style={[
                     styles.filterText,
@@ -362,6 +379,17 @@ const Home = () => {
                     marginLeft: RFPercentage(2),
                   },
                 ]}>
+                <Image
+                  source={
+                    rangeSelector ? Icons.priceRangeWhite : Icons.priceRange
+                  }
+                  style={{
+                    width: RFPercentage(1.6),
+                    height: RFPercentage(1.6),
+                    marginRight: RFPercentage(0.5),
+                  }}
+                  resizeMode="contain"
+                />
                 <Text
                   style={[
                     styles.filterText,
@@ -392,6 +420,7 @@ const Home = () => {
             </View>
           </View>
 
+          {/* Cleaners Services */}
           <Text style={styles.sectionTitle}>Cleaning Services</Text>
           {loading ? (
             <>
@@ -410,14 +439,7 @@ const Home = () => {
                   categorySelection !== '1') &&
                 finalFilteredJobs.length === 0 ? (
                   <>
-                    <View style={styles.noServiceContainer}>
-                      <Image
-                        source={Icons.empty}
-                        resizeMode="contain"
-                        style={styles.noServiceImg}
-                      />
-                      <Text style={styles.noServiceText}>No service found</Text>
-                    </View>
+                    <NotFound text="No service found" />
                   </>
                 ) : (
                   <>
@@ -459,6 +481,8 @@ const Home = () => {
           )}
         </View>
       </ScrollView>
+
+      {/* Filter Modals */}
       {modalVisible && (
         <>
           <View style={styles.modalContainer}>
@@ -547,6 +571,7 @@ const Home = () => {
         </>
       )}
 
+      {/* Price Range Modal */}
       {modalVisible2 && (
         <>
           <TouchableWithoutFeedback onPress={() => setModalVisible2(false)}>
@@ -787,17 +812,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: RFPercentage(1.4),
   },
   filterBox: {
-    width: RFPercentage(12.5),
+    width: RFPercentage(13),
     height: RFPercentage(4.3),
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: RFPercentage(0.7),
-    marginTop: RFPercentage(1),
+    borderRadius: RFPercentage(0.8),
     borderColor: Colors.inputFieldColor,
+    flexDirection: 'row',
+    marginTop: RFPercentage(1),
   },
+
   filterText: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.4),
   },
   serviceColumnWrapper: {
     // justifyContent: 'space-between',

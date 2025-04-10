@@ -60,8 +60,12 @@ const items = [
   },
   {
     id: '77',
-    name: 'Others',
+    name: 'Lawn Care',
   },
+  {
+    id : '88',
+    name : 'Others'
+  }
 ];
 
 const ServiceOne: React.FC = () => {
@@ -131,7 +135,8 @@ const ServiceOne: React.FC = () => {
             name: profileData?.name,
             image: profileData?.profile,
             description: description,
-            availability: available.length > 0 ? available  : serviceData?.availability,
+            availability:
+              available.length > 0 ? available : serviceData?.availability,
             type: selectedItems,
             location: location,
             serviceImages: serviceData?.serviceImages || [],
@@ -161,26 +166,26 @@ const ServiceOne: React.FC = () => {
     }
   };
 
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <HeaderBack title="Service" textStyle={styles.headerText} left={true} />
-      <KeyboardAvoidingView
-        style={{flex: 1}}>
+      <KeyboardAvoidingView style={{flex: 1}}>
         <ScrollView
-          contentContainerStyle={{flexGrow: 1, paddingBottom: RFPercentage(5)}}
-          >
+          contentContainerStyle={{flexGrow: 1, paddingBottom: RFPercentage(5)}}>
+          {/* Header */}
           <View style={styles.container}>
             <View style={styles.infoHeaderContainer}>
               <InfoHeader />
             </View>
           </View>
 
+          {/* Time Line */}
           <View style={styles.timeLineContainer}>
             <TimeLine />
           </View>
 
           <View style={styles.container}>
+            {/* Description */}
             <View style={styles.descriptionContainer}>
               <DescriptionField
                 placeholder="Service Description"
@@ -191,6 +196,7 @@ const ServiceOne: React.FC = () => {
               />
             </View>
 
+            {/* Availability */}
             <TouchableOpacity
               onPress={() => navigation.navigate('Availability')}
               style={styles.dateContainer}>
@@ -219,7 +225,8 @@ const ServiceOne: React.FC = () => {
               <View style={{position: 'absolute', right: RFPercentage(1)}}>
                 <TouchableOpacity
                   onPress={() => navigation.navigate('Availability')}>
-                  {available.length > 0 || serviceData?.availability.length > 0 ? (
+                  {available.length > 0 ||
+                  serviceData?.availability.length > 0 ? (
                     <Image
                       source={Icons.timeEdit}
                       style={{width: RFPercentage(2), height: RFPercentage(2)}}
@@ -236,6 +243,7 @@ const ServiceOne: React.FC = () => {
               </View>
             </TouchableOpacity>
 
+            {/* Location */}
             <InputField
               placeholder="Location"
               value={location}
@@ -243,6 +251,7 @@ const ServiceOne: React.FC = () => {
               customStyle={{width: '100%'}}
             />
 
+            {/* Service Type */}
             <View style={{flex: 1}}>
               <MultiSelect
                 hideTags={true}
@@ -287,9 +296,9 @@ const ServiceOne: React.FC = () => {
                   fontFamily: Fonts.fontRegular,
                   color: Colors.inputTextColor,
                 }}
-                hideDropdown  
-                textInputProps={{autoFocus:false}}  
-                styleDropdownMenu={{height:RFPercentage(6)}}   
+                hideDropdown
+                textInputProps={{autoFocus: false}}
+                styleDropdownMenu={{height: RFPercentage(6)}}
               />
               <ScrollView
                 horizontal
@@ -299,6 +308,7 @@ const ServiceOne: React.FC = () => {
               </ScrollView>
             </View>
 
+            {/* Button Container */}
             <View style={styles.buttonContainer}>
               <GradientButton
                 title={profileCompletion === '100' ? 'Edit' : 'Next'}
