@@ -157,7 +157,7 @@ const ServiceThree: React.FC = () => {
         <ScrollView
           contentContainerStyle={styles.scrollView}
           keyboardShouldPersistTaps="handled">
-          <HeaderBack title="Service" textStyle={styles.headerText} />
+          <HeaderBack title="Service" textStyle={styles.headerText} left={true} />
           <View style={styles.container}>
             <View style={styles.infoHeaderContainer}>
               <InfoHeader />

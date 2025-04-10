@@ -10,29 +10,51 @@ interface props {
   image: any;
   time: string;
   unread: boolean;
+  noProfile: any;
 }
 
 const Message = (props: props) => {
-
-  console.log('unread...........', props.unread)
   return (
     <TouchableOpacity
       activeOpacity={0.8}
       onPress={props.onPress}
       style={styles.container}>
-      <Image
-        source={{uri: props.image}}
-        resizeMode="contain"
-        style={styles.image}
-        borderRadius={RFPercentage(100)}
-      />
+      {props.image ? (
+        <>
+          <Image
+            source={{uri: props.image}}
+            resizeMode="contain"
+            style={styles.image}
+            borderRadius={RFPercentage(100)}
+          />
+        </>
+      ) : (
+        <>
+          <View style={styles.noProfileContainer}>
+            <Text style={{color:Colors.gradient1, fontFamily:Fonts.semiBold, fontSize:RFPercentage(2), top:RFPercentage(0.2)}}>{props.name[0]}</Text>
+          </View>
+        </>
+      )}
+
       <View style={styles.messageContainer}>
         <View style={styles.textContainer}>
           <Text style={styles.nameText}>{props.name}</Text>
-          <Text style={[styles.messageText,{color :props.unread ? Colors.gradient1 : 'rgba(75, 85, 99, 1)'}]}>{props.message}</Text>
+          <Text
+            style={[
+              styles.messageText,
+              {color: props.unread ? Colors.gradient1 : 'rgba(75, 85, 99, 1)'},
+            ]}>
+            {props.message}
+          </Text>
         </View>
         <View>
-          <Text style={[styles.timeText,{color: props.unread ? Colors.gradient1 : 'rgba(75, 85, 99, 1)'}]}>{props.time}</Text>
+          <Text
+            style={[
+              styles.timeText,
+              {color: props.unread ? Colors.gradient1 : 'rgba(75, 85, 99, 1)'},
+            ]}>
+            {props.time}
+          </Text>
           {props.unread && (
             <>
               <View
@@ -69,6 +91,16 @@ const styles = StyleSheet.create({
     height: RFPercentage(5),
     borderWidth: 2,
     borderColor: Colors.gradient1,
+  },
+  noProfileContainer : {
+    width: RFPercentage(5),
+    height: RFPercentage(5),
+    borderWidth: 2,
+    borderColor: Colors.gradient1,
+    borderRadius: RFPercentage(100),
+    alignItems:'center',
+    justifyContent:'center',
+    backgroundColor:'rgba(229, 231, 235, 0.3)'
   },
   messageContainer: {
     flexDirection: 'row',

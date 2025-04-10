@@ -82,7 +82,7 @@ const ResetPassword: React.FC = () => {
         backgroundColor="transparent"
       />
       <KeyboardAvoidingView>
-        <HeaderBack title={'Reset Password?'} />
+        <HeaderBack title={'Reset Password?'} left={true} />
 
         <Formik
           initialValues={{

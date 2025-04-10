@@ -52,6 +52,7 @@ const Privacy: React.FC = () => {
         <HeaderBack
           title={`Privacy Policy`}
           textStyle={{fontSize: RFPercentage(1.8)}}
+          left={true}
         />
         <View style={styles.container}>
           <View style={{marginTop: 15}}>

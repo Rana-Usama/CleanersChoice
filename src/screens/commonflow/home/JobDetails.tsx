@@ -31,6 +31,7 @@ const JobDetails = ({route}) => {
   const userData = useSelector(state => state.profile.profileData);
   const [loading, setLoading] = useState(false);
   const [loading2, setLoading2] = useState(false);
+  const [loading3, setLoading3] = useState(false);
 
   const markComplete = async (jobId, newStatus) => {
     setLoading(true);
@@ -60,14 +61,14 @@ const JobDetails = ({route}) => {
 
   const user = auth().currentUser;
   const userId = user?.uid;
-
   const generateChatId = () => {
     return `${userId}_${item.id}`;
   };
   const chatId = generateChatId();
 
+  const [existingChatId, setExistingChatId] = useState(null);
 
-  const [userInfo, setUserInfo] = useState([])
+  const [userInfo, setUserInfo] = useState([]);
 
   useEffect(() => {
     fetchUserData();
@@ -80,39 +81,77 @@ const JobDetails = ({route}) => {
       const userDoc = await firestore().collection('Users').doc(user.uid).get();
       if (userDoc.exists) {
         const userData = userDoc.data();
-        setUserInfo(userData)
+        setUserInfo(userData);
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
     }
   };
 
+  const [otherUser, setOtherUser] = useState([]);
 
-  const [otherUser, setOtherUser] = useState([])
-
-useEffect(() => {
-  otherUserData();
+  useEffect(() => {
+    otherUserData();
   }, []);
 
   const otherUserData = async () => {
     try {
-      const userDoc = await firestore().collection('Users').doc(item.jobId).get();
+      const userDoc = await firestore()
+        .collection('Users')
+        .doc(item.jobId)
+        .get();
       if (userDoc.exists) {
         const userData = userDoc.data();
-        setOtherUser(userData)
+        setOtherUser(userData);
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
     }
   };
 
+  const fetchExistingChatId = async (userId1, userId2) => {
+    try {
+      const chatsSnapshot = await firestore()
+        .collection('Chats')
+        .where('participants', 'array-contains', userId1)
+        .get();
+
+      for (const doc of chatsSnapshot.docs) {
+        const chatData = doc.data();
+        const participants = chatData.participants || [];
+
+        if (participants.includes(userId1) && participants.includes(userId2)) {
+          return doc.id;
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error('Error checking chat document:', error);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    const tryToFindChat = async () => {
+      if (user?.uid && item?.jobId) {
+        const chatId = await fetchExistingChatId(user.uid, item.jobId);
+        if (chatId) {
+          setExistingChatId(chatId);
+        } else {
+          console.log('No existing chat found');
+        }
+      }
+    };
+
+    tryToFindChat();
+  }, [user?.uid, item?.jobId]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
         contentContainerStyle={styles.scrollViewContent}
         showsVerticalScrollIndicator={false}>
-        <HeaderBack title="Posted Job Details" textStyle={styles.headerText} />
+        <HeaderBack title="Posted Job Details" textStyle={styles.headerText} left={true} />
         <View style={styles.container}>
           <View style={styles.sectionContainer}>
             <View style={styles.rowAlign}>
@@ -215,17 +254,22 @@ useEffect(() => {
               title="Message Client"
               textStyle={styles.buttonText}
               onPress={() => {
-                navigation.navigate('Chat', {
-                  chatId: chatId,
-                  senderId: userId,
-                  senderName: userInfo?.name,
-                  receiver: item.jobId,
-                  receiverName: otherUser?.name,
-                  receiverProfile: otherUser?.profile,
-                });
+                setLoading3(true);
+                setTimeout(() => {
+                  setLoading3(false);
+                  navigation.navigate('Chat', {
+                    chatId: existingChatId ? existingChatId : chatId,
+                    senderId: userId,
+                    senderName: userInfo?.name,
+                    receiver: item.jobId,
+                    receiverName: otherUser?.name,
+                    receiverProfile: otherUser?.profile,
+                    senderProfile : userInfo?.profile
+                  });
+                }, 1000);
               }}
-              // loading={loading}
-              // disabled={loading || loading2}
+              loading={loading3}
+              disabled={loading3}
             />
           </View>
         ) : null}

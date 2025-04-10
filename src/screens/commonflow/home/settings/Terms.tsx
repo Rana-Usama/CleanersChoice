@@ -55,7 +55,7 @@ const Terms: React.FC = () => {
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}>
-        <HeaderBack title={`T&C’s`} textStyle={styles.headerText} />
+        <HeaderBack title={`T&C’s`} textStyle={styles.headerText} left={true} />
         <View style={styles.container}>
           <View style={styles.termsTextContainer}>
             <Text style={styles.termsText}>
