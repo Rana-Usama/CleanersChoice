@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
   modalText: {
     textAlign: 'center',
     fontSize: RFPercentage(1.6),
-    fontFamily: Fonts.fontRegular,
+    fontFamily: Fonts.fontMedium,
     color: '#4B5563',
     marginTop: RFPercentage(1.5),
     marginHorizontal: RFPercentage(2),

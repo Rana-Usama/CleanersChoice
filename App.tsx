@@ -4,13 +4,17 @@ import StackNavigator from './src/routers/StackNavigator';
 import {Provider} from 'react-redux';
 import store from './src/redux/Store';
 import Toast from 'react-native-toast-message';
+import {StripeProvider} from '@stripe/stripe-react-native';
+import {PUBLISHABLE_KEY} from '@env';
 
 const App: React.FC = () => {
   return (
-    <Provider store={store}>
-      <StackNavigator />
-      <Toast />
-    </Provider>
+    <StripeProvider publishableKey={PUBLISHABLE_KEY}>
+      <Provider store={store}>
+        <StackNavigator />
+        <Toast />
+      </Provider>
+    </StripeProvider>
   );
 };
 

@@ -112,17 +112,20 @@ const SignUp: React.FC = () => {
         console.log('Uploaded File URL:', profileUrl);
       }
 
-      await firestore()
-        .collection('Users')
-        .doc(user.uid)
-        .set({
-          name: values.name,
-          email: values.email,
-          phone: values.phone,
-          uid: user.uid,
-          profile: profileUrl || null,
-          role: userFlow?.userFlow,
-        });
+      const userData = {
+        name: values.name,
+        email: values.email,
+        phone: values.phone,
+        uid: user.uid,
+        profile: profileUrl || null,
+        role: userFlow?.userFlow,
+        ...(userFlow?.userFlow === 'cleaner' && {
+          subscription: false,
+          subscriptionId: null,
+        }),
+      };
+
+      await firestore().collection('Users').doc(user.uid).set(userData);
 
       Toast.show({
         type: 'success',
