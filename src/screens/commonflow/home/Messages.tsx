@@ -256,8 +256,8 @@ const Messages = () => {
                         />
                       );
                     }}
-                    onEndReached={fetchMoreChats}
-                    onEndReachedThreshold={0.5}
+                    // onEndReached={fetchMoreChats}
+                    // onEndReachedThreshold={0.5}
                     // ListFooterComponent={loading && <Text>Loading...</Text>}
                   />
                 </View>

@@ -44,20 +44,20 @@ const SignIn: React.FC = () => {
         values.email,
         values.password,
       );
-  
+
       const user = userCredential?.user;
       if (!user) throw new Error('No user found after sign-in.');
-  
+
       const userDoc = await firestore().collection('Users').doc(user.uid).get();
-  
+
       if (!userDoc.exists) throw new Error('User data not found in Firestore.');
-  
+
       const userData = userDoc.data();
       const userRole = userData?.role;
-  
+
       console.log('User Role:', userRole);
       console.log('Selected:', selected);
-  
+
       Toast.show({
         type: 'success',
         text1: 'Sign In',
@@ -65,20 +65,27 @@ const SignIn: React.FC = () => {
         position: 'top',
         topOffset: RFPercentage(8),
         text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
-        text2Style: {fontFamily: Fonts.fontRegular, fontSize: RFPercentage(1.4)},
+        text2Style: {
+          fontFamily: Fonts.fontRegular,
+          fontSize: RFPercentage(1.4),
+        },
       });
-  
+
       if (selected) {
         await AsyncStorage.setItem('email', values.email);
         await AsyncStorage.setItem('password', values.password);
         await AsyncStorage.setItem('role', userRole);
         console.log('Stored in AsyncStorage:', values.email, userRole);
       }
-  
-      if (userRole === 'Customer') {
-        await navigation.replace('Home');
+
+      if (userRole === 'Cleaner') {
+        if (userData?.subscription === true) {
+          await navigation.replace('CleanerNavigator');
+        } else {
+          await navigation.replace('Premium');
+        }
       } else {
-        await navigation.replace('CleanerNavigator');
+        await navigation.replace('Home');
       }
     } catch (error) {
       console.error('Sign In Error:', error);
@@ -89,13 +96,16 @@ const SignIn: React.FC = () => {
         position: 'top',
         topOffset: RFPercentage(8),
         text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
-        text2Style: {fontFamily: Fonts.fontRegular, fontSize: RFPercentage(1.4)},
+        text2Style: {
+          fontFamily: Fonts.fontRegular,
+          fontSize: RFPercentage(1.4),
+        },
       });
     } finally {
       setLoading(false);
     }
   };
-  
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar
@@ -232,14 +242,14 @@ const SignIn: React.FC = () => {
               </>
             )}
           </Formik>
-        
-        <View style={styles.starContainer}>
-          <Image
-            source={IMAGES.stars}
-            resizeMode="contain"
-            style={styles.star}
-          />
-        </View>
+
+          <View style={styles.starContainer}>
+            <Image
+              source={IMAGES.stars}
+              resizeMode="contain"
+              style={styles.star}
+            />
+          </View>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -255,8 +265,7 @@ const styles = StyleSheet.create({
   },
   container: {
     // backgroundColor: 'red',
-    flex:1
-
+    flex: 1,
   },
   radioContainer: {
     alignItems: 'center',
@@ -333,8 +342,8 @@ const styles = StyleSheet.create({
     // position: 'absolute',
     // bottom: RFPercentage(6),
     right: RFPercentage(1.5),
-    top:RFPercentage(15),
-    alignSelf:'flex-end'
+    top: RFPercentage(15),
+    alignSelf: 'flex-end',
   },
   star: {
     width: RFPercentage(8),
