@@ -31,6 +31,8 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 import {Image as CompressorImage} from 'react-native-compressor';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 
 const SignUp: React.FC = () => {
   const navigation =
@@ -119,13 +121,18 @@ const SignUp: React.FC = () => {
         uid: user.uid,
         profile: profileUrl || null,
         role: userFlow?.userFlow,
-        ...(userFlow?.userFlow === 'cleaner' && {
+        ...(userFlow?.userFlow === 'Cleaner' && {
           subscription: false,
           subscriptionId: null,
+          cancelSubscription: false,
         }),
       };
 
       await firestore().collection('Users').doc(user.uid).set(userData);
+
+      await AsyncStorage.setItem('email', values.email);
+      await AsyncStorage.setItem('password', values.password);
+      await AsyncStorage.setItem('role', userFlow?.userFlow);
 
       Toast.show({
         type: 'success',
@@ -191,6 +198,19 @@ const SignUp: React.FC = () => {
       <KeyboardAvoidingView>
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={styles.container}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('UserSelection')}
+              style={{
+                position: 'absolute',
+                top: RFPercentage(7),
+                left: RFPercentage(3),
+              }}>
+              <AntDesign
+                name="arrowleft"
+                color={Colors.secondaryText}
+                size={RFPercentage(3)}
+              />
+            </TouchableOpacity>
             <HeaderComponent />
             <View style={styles.titleContainer}>
               <Text style={styles.title}>Create an account</Text>

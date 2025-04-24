@@ -156,6 +156,22 @@ const Messages = () => {
     }
   };
 
+
+
+  const formatTimestamp = (timestamp) => {
+    const time = moment(timestamp.toDate());
+    const now = moment();
+  
+    if (time.isSame(now, 'day')) {
+      return time.format('h:mm A'); // Today
+    } else if (time.isSame(now.clone().subtract(1, 'day'), 'day')) {
+      return 'Yesterday';
+    } else {
+      return time.format('DD/MM/YYYY'); // Older
+    }
+  };
+  
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView>
@@ -238,9 +254,7 @@ const Messages = () => {
                           noProfile={IMAGES.defaultPic}
                           time={
                             item.lastMessageTimestamp
-                              ? moment(
-                                  item.lastMessageTimestamp.toDate(),
-                                ).format('h:mm A')
+                              ? formatTimestamp(item.lastMessageTimestamp)
                               : ''
                           }
                           onPress={() =>

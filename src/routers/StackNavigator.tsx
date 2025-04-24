@@ -1,4 +1,4 @@
-import {StyleSheet, Text, View} from 'react-native';
+import {ActivityIndicator, StyleSheet, Text, View} from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {DarkTheme, NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
@@ -34,6 +34,8 @@ import CheckAvailability from '../screens/customerflow/home/CheckAvailablity';
 import Jobs from '../screens/customerflow/jobBoard/Jobs';
 import Chat from '../screens/commonflow/home/Chat';
 import Messages from '../screens/commonflow/home/Messages';
+import firestore from '@react-native-firebase/firestore';
+import Decider from './Decider';
 
 export type RootStackParamList = {
   SplashOne: undefined;
@@ -45,10 +47,10 @@ export type RootStackParamList = {
   Verify: undefined;
   ChangePassword: undefined;
   Home: undefined;
-  ServiceDetails: { item: any };
-  PostJob: { item: any };
+  ServiceDetails: {item: any};
+  PostJob: {item: any};
   JobPosted: undefined;
-  JobDetails: { item: any };
+  JobDetails: {item: any};
   EditProfile: undefined;
   ChangePasswordV2: undefined;
   FAQS: undefined;
@@ -56,17 +58,17 @@ export type RootStackParamList = {
   Privacy: undefined;
   Premium: undefined;
   CleanerNavigator: undefined;
-  ServiceOne : undefined;
-  ServiceTwo : undefined;
-  ServiceThree : undefined;
-  HomeScreen : undefined;
+  ServiceOne: undefined;
+  ServiceTwo: undefined;
+  ServiceThree: undefined;
+  HomeScreen: undefined;
   CancelSubscription: undefined;
-  Availability : undefined;
+  Availability: undefined;
   Settings: undefined;
-  CheckAvailability:{ item: any };
-  Jobs : undefined,
-  Chat : { item: any };
-  Messages : undefined
+  CheckAvailability: {item: any};
+  Jobs: undefined;
+  Chat: {item: any};
+  Messages: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -74,31 +76,53 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const StackNavigator: React.FC = () => {
   const [email, setEmail] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
-  const [user, setUser] = useState<string | null> (null)
+  const [user, setUser] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [userData, setUserData] = useState<any>(null);
 
   useEffect(() => {
-    const fetchCredentials = async () => {
+    const fetchCredentialsAndUserData = async () => {
       try {
         const storedEmail = await AsyncStorage.getItem('email');
         const storedPassword = await AsyncStorage.getItem('password');
         const storedUser = await AsyncStorage.getItem('role');
-        
         setEmail(storedEmail);
         setPassword(storedPassword);
         setUser(storedUser);
+
+        if (storedEmail) {
+          const userQuery = await firestore()
+            .collection('Users')
+            .where('email', '==', storedEmail)
+            .get();
+
+          if (!userQuery.empty) {
+            const userDoc = userQuery.docs[0].data();
+            setUserData(userDoc);
+            console.log('Fetched user data:', userDoc);
+          } else {
+            console.log('No user found with that email.');
+          }
+        }
       } catch (error) {
-        console.error('Error fetching credentials:', error);
+        console.error('Error fetching credentials or user data:', error);
       } finally {
-        setIsLoading(false); 
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 1500);
       }
     };
-    fetchCredentials();
+
+    fetchCredentialsAndUserData();
   }, []);
 
-  console.log('Stored Credentials:', email, password, user);
-  if (isLoading) return null;
-
+  if (isLoading) {
+    return (
+      <SafeAreaProvider>
+        <Decider />
+      </SafeAreaProvider>
+    );
+  }
 
   return (
     <SafeAreaProvider>
@@ -107,9 +131,16 @@ const StackNavigator: React.FC = () => {
           screenOptions={{
             headerShown: false,
           }}
-          initialRouteName={(email && password) && user === 'Customer' ? 'Home' : user === 'Cleaner' ? 'CleanerNavigator' : 'SplashOne'}>
-            
-            {/* -------Common Screens----- */}
+          initialRouteName={
+            email && password && user === 'Customer'
+              ? 'Home'
+              : user === 'Cleaner' && userData?.subscription === true
+              ? 'CleanerNavigator'
+              : user === 'Cleaner' && userData?.subscription === false
+              ? 'Premium'
+              : 'SplashOne'
+          }>
+          {/* -------Common Screens----- */}
           <Stack.Screen name="SplashOne" component={Splash} />
           <Stack.Screen name="OnBoarding" component={OnBoarding} />
           <Stack.Screen name="UserSelection" component={UserSelection} />
@@ -128,16 +159,16 @@ const StackNavigator: React.FC = () => {
           <Stack.Screen name="Chat" component={Chat} />
           <Stack.Screen name="Messages" component={Messages} />
 
-
           {/* ------------------Customer Flow------------- */}
           <Stack.Screen name="Home" component={CustomerNavigator} />
           <Stack.Screen name="ServiceDetails" component={ServiceDetails} />
           <Stack.Screen name="PostJob" component={PostJob} />
           <Stack.Screen name="JobPosted" component={JobPosted} />
-          <Stack.Screen name="CheckAvailability" component={CheckAvailability} />
+          <Stack.Screen
+            name="CheckAvailability"
+            component={CheckAvailability}
+          />
           <Stack.Screen name="Jobs" component={Jobs} />
-
-
 
           {/* ----------------- Cleaner Flow ---------------- */}
           <Stack.Screen name="Premium" component={Premium} />
@@ -145,8 +176,10 @@ const StackNavigator: React.FC = () => {
           <Stack.Screen name="ServiceOne" component={ServiceOne} />
           <Stack.Screen name="ServiceTwo" component={ServiceTwo} />
           <Stack.Screen name="ServiceThree" component={ServiceThree} />
-          <Stack.Screen name="CancelSubscription" component={CancelSubscription} />
-
+          <Stack.Screen
+            name="CancelSubscription"
+            component={CancelSubscription}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

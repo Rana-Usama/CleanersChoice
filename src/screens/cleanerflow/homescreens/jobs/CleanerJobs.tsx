@@ -38,7 +38,7 @@ const items = [
   'Pressure Washing',
   'Carpet Cleaning',
   'Chimney Cleaning',
-  'Lawn Care'
+  'Lawn Care',
 ];
 
 const CleanerJobs = () => {
@@ -257,7 +257,9 @@ const CleanerJobs = () => {
                     },
                   ]}>
                   <Image
-                    source={loctionFilter ? Icons.locationWhite : Icons.location}
+                    source={
+                      loctionFilter ? Icons.locationWhite : Icons.location
+                    }
                     style={{
                       width: RFPercentage(1.6),
                       height: RFPercentage(1.6),
@@ -316,7 +318,9 @@ const CleanerJobs = () => {
                     },
                   ]}>
                   <Image
-                    source={rangeSelector ? Icons.priceRangeWhite : Icons.priceRange}
+                    source={
+                      rangeSelector ? Icons.priceRangeWhite : Icons.priceRange
+                    }
                     style={{
                       width: RFPercentage(1.6),
                       height: RFPercentage(1.6),
@@ -372,7 +376,7 @@ const CleanerJobs = () => {
                     },
                   ]}>
                   <Image
-                    source={ serviceType ? Icons.verifyWhite : Icons.verify}
+                    source={serviceType ? Icons.verifyWhite : Icons.verify}
                     style={{
                       width: RFPercentage(1.6),
                       height: RFPercentage(1.6),
@@ -477,7 +481,7 @@ const CleanerJobs = () => {
             handleLocationApply={handleLocationApply}
             loactionLoading={loactionLoading}
           />
-          {/* <View style={styles.modalContainer}>
+          <View style={styles.modalContainer}>
             <BlurView style={styles.blurView} blurType="light" blurAmount={5} />
             <Modal
               visible={modalVisible}
@@ -558,10 +562,9 @@ const CleanerJobs = () => {
                 </Animated.View>
               </KeyboardAvoidingView>
             </Modal>
-          </View> */}
+          </View>
         </>
       )}
-
 
       {/* Price Range Modal */}
 
@@ -698,6 +701,7 @@ const CleanerJobs = () => {
                     onChangeText={handleSearch2}
                   />
                 </View>
+
                 <View style={styles.queryContainer}>
                   {Array.isArray(serviceTypeFilter) &&
                     serviceTypeFilter.length > 0 && (
@@ -716,6 +720,7 @@ const CleanerJobs = () => {
                       />
                     )}
                 </View>
+
                 <View style={{position: 'absolute', bottom: RFPercentage(3)}}>
                   <GradientButton
                     title="Apply"
@@ -856,12 +861,13 @@ const styles = StyleSheet.create({
   queryContainer: {
     top: RFPercentage(0.5),
     width: '100%',
-    backgroundColor: 'white',
-    borderRadius: RFPercentage(1),
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    height: RFPercentage(25),
+    borderRadius: RFPercentage(2),
   },
   queryText: {
     padding: RFPercentage(2),
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.5),
     borderBottomWidth: 1,
     borderBottomColor: Colors.inputFieldColor,
     fontFamily: Fonts.fontRegular,

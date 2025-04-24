@@ -7,6 +7,7 @@ import {
   FlatList,
   Alert,
   TouchableWithoutFeedback,
+  StatusBar,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -17,9 +18,10 @@ import {useNavigation} from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import {BlurView} from '@react-native-community/blur';
-import CustomModal from '../../../components/CustomModal';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import SubscriptionModal from '../../../components/SubscriptionModal';
 import Toast from 'react-native-toast-message';
+import NextButton from '../../../components/NextButton';
 
 const services = [
   {id: 1, name: 'Connect with cleaning customers'},
@@ -33,6 +35,9 @@ const CancelSubscription = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
   const [modalVisible3, setModalVisible3] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading2, setIsLoading2] = useState(false);
+  const [isLoading3, setIsLoading3] = useState(false);
 
   const [subscriptionId, setSubscriptionId] = useState(null);
   const user = auth().currentUser;
@@ -66,31 +71,53 @@ const CancelSubscription = () => {
           fontSize: RFPercentage(1.4),
         },
       });
-
       return;
     }
 
-    const res = await fetch('http://192.168.100.30:3000/cancel-subscription', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        subscriptionId: subscriptionId,
-      }),
-    });
+    try {
+      setIsLoading(true); // Start loader
 
-    const result = await res.json();
+      const res = await fetch(
+        'http://192.168.100.30:3000/cancel-subscription',
+        {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({subscriptionId}),
+        },
+      );
 
-    if (result.success) {
-      if (user?.uid) {
-        await firestore().collection('Users').doc(user.uid).update({
-          subscription: false,
-          subscriptionId: null,
+      const result = await res.json();
+
+      if (result.success) {
+        if (user?.uid) {
+          await firestore().collection('Users').doc(user.uid).update({
+            subscription: false,
+            subscriptionId: null,
+            cancelSubscription: true,
+          });
+        }
+        Toast.show({
+          type: 'success',
+          text1: 'Cancel Subscription',
+          text2: 'Subscription has been canceled successfully!',
+          position: 'top',
+          topOffset: RFPercentage(8),
+          text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.6)},
+          text2Style: {
+            fontFamily: Fonts.fontRegular,
+            fontSize: RFPercentage(1.3),
+          },
         });
+        navigation.navigate('SignIn');
+        // setModalVisible3(true);
+      } else {
+        setModalVisible2(true);
       }
-
-      setModalVisible3(true);
-    } else {
+    } catch (error) {
+      console.error(error);
       setModalVisible2(true);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -157,6 +184,8 @@ const CancelSubscription = () => {
             textStyle={styles.buttonText}
             onPress={() => setModalVisible(true)}
             style={{width: RFPercentage(18)}}
+            loading={isLoading}
+            disabled={isLoading}
           />
         </View>
       </View>
@@ -169,34 +198,71 @@ const CancelSubscription = () => {
         <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
           <View style={styles.modalContainer}>
             <BlurView style={styles.blurView} blurType="light" blurAmount={2} />
-            <CustomModal
-              title={'Are you sure you want to Cancel Subscription?'}
-              onPress={() => setModalVisible(false)}
-              onPress2={cancelSubscription}
-              // loader={loading}
-            />
+            <View style={styles.modalCancel}>
+              <Text style={styles.cancelHeading}>
+                You’ll loose access to all premium features that includes:
+              </Text>
+              <View
+                style={{
+                  marginVertical: RFPercentage(5),
+                  width: RFPercentage(32),
+                }}>
+                <Text style={styles.cancelInfo}>
+                  {`1. Access to Job Portal.`}
+                </Text>
+                <Text
+                  style={[
+                    styles.cancelInfo,
+                    {marginVertical: RFPercentage(2)},
+                  ]}>
+                  {`2. You won’t be able to chat with Customers.`}
+                </Text>
+                <Text style={styles.cancelInfo}>
+                  {`3. You’ll have to active your subscription again to use the app.`}
+                </Text>
+              </View>
+              <View style={styles.buttonWrapper}>
+                <NextButton
+                  title="Cancel"
+                  style={styles.buttonWidth}
+                  onPress={() => setModalVisible(false)}
+                />
+                <GradientButton
+                  title="Yes"
+                  onPress={() => {
+                    setIsLoading2(true);
+                    setTimeout(() => {
+                      setIsLoading2(false);
+                      cancelSubscription();
+                      setModalVisible(false);
+                    }, 1000);
+                  }}
+                  style={styles.buttonWidth}
+                  loading={isLoading2}
+                  disabled={isLoading2}
+                />
+              </View>
+            </View>
           </View>
         </TouchableWithoutFeedback>
       )}
 
       {modalVisible3 && (
         <>
-          <View
-            style={{
-              position: 'absolute',
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'rgba(89, 92, 96, 0.8)',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
+          <View style={styles.modalOverlay}>
             <SubscriptionModal
               text="Subscription cancelled successfully!"
               icon="checkcircle"
               onPress={() => {
-                setModalVisible3(false);
-                setModalVisible(false);
+                setIsLoading3(true);
+                setTimeout(() => {
+                  setIsLoading3(false);
+                  setModalVisible3(false);
+                  setModalVisible(false);
+                  navigation.navigate('SignIn');
+                }, 1000);
               }}
+              loading={isLoading3}
             />
           </View>
         </>
@@ -204,15 +270,7 @@ const CancelSubscription = () => {
 
       {modalVisible2 && (
         <>
-          <View
-            style={{
-              position: 'absolute',
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'rgba(89, 92, 96, 0.8)',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
+          <View style={styles.modalOverlay}>
             <SubscriptionModal
               text="Failed Try again."
               icon="exclamationcircle"
@@ -338,5 +396,47 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     position: 'absolute',
+  },
+  buttonWidth: {
+    width: RFPercentage(15),
+  },
+  modalCancel: {
+    width: '90%',
+    borderRadius: RFPercentage(2),
+    backgroundColor: 'rgb(232, 243, 252)',
+    alignSelf: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
+    paddingHorizontal: RFPercentage(2.5),
+    height: '50%',
+    top: RFPercentage(20),
+    paddingVertical: RFPercentage(3),
+  },
+  cancelHeading: {
+    textAlign: 'center',
+    fontSize: RFPercentage(2),
+    fontFamily: Fonts.fontMedium,
+    color: Colors.primaryText,
+  },
+  cancelInfo: {
+    textAlign: 'left',
+    fontFamily: Fonts.fontMedium,
+    color: Colors.secondaryText,
+    fontSize: RFPercentage(1.6),
+  },
+  buttonWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: RFPercentage(32),
+  },
+  modalOverlay: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(89, 92, 96, 0.8)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

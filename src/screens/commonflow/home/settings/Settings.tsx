@@ -96,7 +96,7 @@ const Settings = () => {
           fontSize: RFPercentage(1.4),
         },
       });
-      navigation.navigate('SignUp');
+      navigation.navigate('UserSelection');
       setModalVisible2(false);
     } catch (error) {
       console.error('Error deleting account:', error);

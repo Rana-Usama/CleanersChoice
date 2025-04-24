@@ -75,7 +75,7 @@ const SignIn: React.FC = () => {
         await AsyncStorage.setItem('email', values.email);
         await AsyncStorage.setItem('password', values.password);
         await AsyncStorage.setItem('role', userRole);
-        console.log('Stored in AsyncStorage:', values.email, userRole);
+        // console.log('Stored in AsyncStorage:', values.email, userRole);
       }
 
       if (userRole === 'Cleaner') {
@@ -234,7 +234,7 @@ const SignIn: React.FC = () => {
                       Don't have an account?
                     </Text>
                     <TouchableOpacity
-                      onPress={() => navigation.navigate('SignUp')}>
+                      onPress={() => navigation.navigate('UserSelection')}>
                       <Text style={styles.signUp}>Signup</Text>
                     </TouchableOpacity>
                   </View>

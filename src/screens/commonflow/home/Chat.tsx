@@ -8,6 +8,7 @@ import {
   View,
   TextInput,
   Keyboard,
+  StatusBar,
 } from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import {GiftedChat, InputToolbar} from 'react-native-gifted-chat';
@@ -204,23 +205,13 @@ const Chat = ({navigation, route}) => {
     <LinearGradient
       colors={['rgb(238, 242, 251)', 'rgb(180, 203, 252)']}
       style={styles.screen}>
-      <View
-        style={{
-          width: '100%',
-          height: RFPercentage(8),
-          marginTop: RFPercentage(3),
-          justifyContent: 'center',
-          borderBottomWidth: 1,
-          borderBottomColor: 'rgb(190, 193, 199)',
-          alignSelf: 'center',
-          paddingBottom: RFPercentage(1),
-        }}>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            paddingHorizontal: RFPercentage(0.5),
-          }}>
+      <StatusBar
+        barStyle={'dark-content'}
+        translucent
+        backgroundColor="transparent"
+      />
+      <View style={styles.profileContainer}>
+        <View style={styles.inner}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <AntDesign
               name="arrowleft"
@@ -234,42 +225,20 @@ const Chat = ({navigation, route}) => {
                 <Image
                   source={{uri: receiverProfile}}
                   resizeMode="contain"
-                  style={{
-                    width: RFPercentage(6),
-                    height: RFPercentage(6),
-                    marginLeft: RFPercentage(2),
-                    borderWidth: 2,
-                    borderColor: Colors.gradient1,
-                  }}
+                  style={styles.profile}
                   borderRadius={RFPercentage(100)}
                 />
               </>
             ) : (
               <>
                 <View style={styles.noProfileContainer}>
-                  <Text
-                    style={{
-                      color: Colors.gradient1,
-                      fontFamily: Fonts.semiBold,
-                      fontSize: RFPercentage(2),
-                      top: RFPercentage(0.2),
-                    }}>
-                    {receiverName[0]}
-                  </Text>
+                  <Text style={styles.noProfile}>{receiverName[0]}</Text>
                 </View>
               </>
             )}
           </View>
 
-          <Text
-            style={{
-              color: Colors.primaryText,
-              fontFamily: Fonts.fontMedium,
-              fontSize: RFPercentage(1.7),
-              marginLeft: RFPercentage(2),
-            }}>
-            {receiverName}
-          </Text>
+          <Text style={styles.receiverName}>{receiverName}</Text>
         </View>
       </View>
       <View style={styles.messageContainer}>
@@ -298,22 +267,12 @@ const Chat = ({navigation, route}) => {
           renderInputToolbar={props => (
             <InputToolbar
               {...props}
-              containerStyle={{
-                backgroundColor: Colors.buttonColor,
-                borderWidth: 1,
-                borderColor: Colors.gradient2,
-                borderRadius: RFPercentage(6),
-                height: RFPercentage(6),
-                justifyContent: 'center',
-                paddingHorizontal: RFPercentage(1.5),
-                // bottom: keyboardVisible ? RFPercentage(25) : 0,
-              }}
+              containerStyle={styles.toolbar}
               renderComposer={() => (
                 <TextInput
                   style={styles.customTextInput}
                   placeholder="Type a message"
                   placeholderTextColor="#bbb"
-                  multiline
                   value={message}
                   onChangeText={setMessage}
                 />
@@ -380,9 +339,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
   },
   customTextInput: {
-    flex: 1,
+    // flex: 1,
     fontSize: RFPercentage(1.8),
     borderRadius: RFPercentage(10),
+    // backgroundColor:'red',
+    width:RFPercentage(36)
   },
   sendButton: {
     justifyContent: 'center',
@@ -407,6 +368,50 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(229, 231, 235, 0.3)',
+  },
+  profileContainer: {
+    width: '100%',
+    height: RFPercentage(8),
+    marginTop: RFPercentage(6),
+    justifyContent: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgb(190, 193, 199)',
+    alignSelf: 'center',
+    paddingBottom: RFPercentage(1),
+  },
+  inner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: RFPercentage(0.5),
+  },
+  profile: {
+    width: RFPercentage(6),
+    height: RFPercentage(6),
+    marginLeft: RFPercentage(2),
+    borderWidth: 2,
+    borderColor: Colors.gradient1,
+  },
+  noProfile: {
+    color: Colors.gradient1,
+    fontFamily: Fonts.semiBold,
+    fontSize: RFPercentage(2),
+    top: RFPercentage(0.2),
+  },
+  receiverName: {
+    color: Colors.primaryText,
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.7),
+    marginLeft: RFPercentage(2),
+  },
+  toolbar: {
+    backgroundColor: Colors.buttonColor,
+    borderWidth: 1,
+    borderColor: Colors.gradient2,
+    borderRadius: RFPercentage(6),
+    height: RFPercentage(6),
+    justifyContent: 'center',
+    paddingHorizontal: RFPercentage(1.5),
+    // bottom: keyboardVisible ? RFPercentage(25) : 0,
   },
 });
 

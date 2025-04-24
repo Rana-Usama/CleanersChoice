@@ -745,8 +745,9 @@ const styles = StyleSheet.create({
   queryContainer: {
     top: RFPercentage(0.5),
     width: '100%',
-    backgroundColor: 'white',
-    borderRadius: RFPercentage(1),
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: RFPercentage(2),
+    height:RFPercentage(24)
   },
   queryText: {
     padding: RFPercentage(2),

@@ -6,6 +6,8 @@ import {
   View,
   FlatList,
   Alert,
+  TouchableOpacity,
+  StatusBar,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -19,7 +21,8 @@ import {useStripe, createPaymentMethod} from '@stripe/stripe-react-native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import SubscriptionModal from '../../../components/SubscriptionModal';
-import {BlurView} from '@react-native-community/blur';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import Toast from 'react-native-toast-message';
 
 const services = [
   {id: 1, name: 'Connect with cleaning customers'},
@@ -36,10 +39,34 @@ const Premium = () => {
   const [customerId, setCustomerId] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  const user = auth().currentUser;
 
   console.log('customerId..............', customerId);
 
-  const user = auth().currentUser;
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (user?.email) {
+        try {
+          const querySnapshot = await firestore()
+            .collection('Users')
+            .where('email', '==', user.email)
+            .limit(1)
+            .get();
+
+          if (!querySnapshot.empty) {
+            const userData = querySnapshot.docs[0].data();
+            setCurrentUser(userData);
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        }
+      }
+    };
+
+    fetchUserData();
+  }, [user?.email]);
 
   const fetchSetupIntent = async () => {
     try {
@@ -53,13 +80,10 @@ const Premium = () => {
       );
       const {setupIntentClientSecret, customerId} = await response.json();
 
-      if (customerId) {
-        setCustomerId(customerId); // Set customer ID here
-      } else {
-        throw new Error('Failed to get customer ID');
+      if (!setupIntentClientSecret || !customerId) {
+        throw new Error('Missing client secret or customer ID');
       }
-
-      return setupIntentClientSecret;
+      return {setupIntentClientSecret, customerId};
     } catch (error) {
       console.error('Error fetching SetupIntent:', error);
       Alert.alert('Error', 'Could not create customer. Please try again.');
@@ -67,73 +91,118 @@ const Premium = () => {
     }
   };
 
-  // Open Payment Sheet if customerId is available
   const openPaymentSheet = async () => {
-    if (!customerId) {
-      Alert.alert('Error', 'Customer ID is missing. Please try again.');
-      return;
-    }
+    setLoading(true);
+    const setupData = await fetchSetupIntent();
+    if (!setupData) return;
 
-    const clientSecret = await fetchSetupIntent();
-
-    if (!clientSecret) return; // If the SetupIntent failed, stop here
+    const {setupIntentClientSecret, customerId} = setupData;
 
     const {error: initError} = await initPaymentSheet({
-      setupIntentClientSecret: clientSecret,
+      setupIntentClientSecret,
       merchantDisplayName: 'Cleaner Choice',
     });
 
     if (initError) {
-      Alert.alert('Error', initError.message);
+      setLoading(false);
       return;
     }
 
     const {error: paymentError} = await presentPaymentSheet();
 
     if (paymentError) {
-      Alert.alert('Failed', paymentError.message);
+      Toast.show({
+        type: 'info',
+        text1: 'Subscription',
+        text2: 'Subscription has not been fullfiled!',
+        position: 'top',
+        topOffset: RFPercentage(8),
+        text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.6)},
+        text2Style: {
+          fontFamily: Fonts.fontRegular,
+          fontSize: RFPercentage(1.3),
+        },
+      });
+      setLoading(false);
       return;
     }
 
     const res = await fetch('http://192.168.100.30:3000/confirm-subscription', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        customerId: customerId,
-      }),
+      body: JSON.stringify({customerId}),
     });
 
     const result = await res.json();
-    console.log(result?.subscriptionId);
 
     if (result.success) {
       if (user?.uid) {
         await firestore().collection('Users').doc(user.uid).update({
           subscription: true,
           subscriptionId: result.subscriptionId,
+          cancelSubscription: false,
         });
       }
-      setModalVisible(true);
+      Toast.show({
+        type: 'success',
+        text1: 'Subscription',
+        text2: 'Subscription has been purchased successfully!',
+        position: 'top',
+        topOffset: RFPercentage(8),
+        text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.6)},
+        text2Style: {
+          fontFamily: Fonts.fontRegular,
+          fontSize: RFPercentage(1.3),
+        },
+      });
+      navigation.navigate('CleanerNavigator');
     } else {
       setModalVisible2(true);
     }
   };
 
-  // useEffect(() => {
-  //   fetchSetupIntent();
-  // }, []);
-
   return (
     <SafeAreaView style={styles.safeArea}>
+      <StatusBar
+        barStyle={'dark-content'}
+        translucent
+        backgroundColor="transparent"
+      />
+      <TouchableOpacity
+        onPress={() => navigation.navigate('SignIn')}
+        style={{
+          position: 'absolute',
+          top: RFPercentage(7),
+          left: RFPercentage(3),
+        }}>
+        <AntDesign
+          name="arrowleft"
+          color={Colors.secondaryText}
+          size={RFPercentage(3)}
+        />
+      </TouchableOpacity>
       <HeaderComponent />
       <View style={styles.container}>
         <View style={styles.premiumHeader}>
-          <Image
-            source={Icons.owner}
-            resizeMode="contain"
-            style={styles.ownerIcon}
-          />
-          <Text style={styles.premiumText}>Premium Business Account</Text>
+          {currentUser?.cancelSubscription === true ? (
+            <>
+              <Image
+                source={Icons.owner}
+                resizeMode="contain"
+                style={styles.ownerIcon}
+              />
+              <Text style={styles.premiumText}>Renew Your Premium Account</Text>
+            </>
+          ) : (
+            <>
+              <Image
+                source={Icons.owner}
+                resizeMode="contain"
+                style={styles.ownerIcon}
+              />
+              <Text style={styles.premiumText}>Premium Business Account</Text>
+            </>
+          )}
         </View>
 
         <View style={styles.subscriptionContainer}>
@@ -175,7 +244,11 @@ const Premium = () => {
 
         <View style={styles.buttonContainer}>
           <GradientButton
-            title="Proceed To Payment"
+            title={
+              currentUser?.cancelSubscription === true
+                ? 'Renew Subscription'
+                : 'Proceed To Payment'
+            }
             textStyle={styles.buttonText}
             onPress={openPaymentSheet}
             style={{width: RFPercentage(19)}}
@@ -190,15 +263,7 @@ const Premium = () => {
 
       {modalVisible && (
         <>
-          <View
-            style={{
-              position: 'absolute',
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'rgba(89, 92, 96, 0.8)',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
+          <View style={styles.modalOverlay}>
             <SubscriptionModal
               text="Subscription Plan Purchased Successfully"
               icon="checkcircle"
@@ -213,15 +278,7 @@ const Premium = () => {
 
       {modalVisible2 && (
         <>
-          <View
-            style={{
-              position: 'absolute',
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'rgba(89, 92, 96, 0.8)',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
+          <View style={styles.modalOverlay}>
             <SubscriptionModal
               text="Subscription Failed Try again."
               icon="exclamationcircle"
@@ -337,5 +394,13 @@ const styles = StyleSheet.create({
   star: {
     width: RFPercentage(8),
     height: RFPercentage(8),
+  },
+  modalOverlay: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(89, 92, 96, 0.8)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

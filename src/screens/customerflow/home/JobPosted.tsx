@@ -22,7 +22,7 @@ const JobPosted = () => {
   const handleNext = () => {
     setLoading(true);
     setTimeout(() => {
-      navigation.navigate('Jobs');
+      navigation.navigate('Home');
     }, 1500);
   };
 
