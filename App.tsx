@@ -1,4 +1,4 @@
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, Text, View, StatusBar} from 'react-native';
 import React from 'react';
 import StackNavigator from './src/routers/StackNavigator';
 import {Provider} from 'react-redux';
@@ -11,6 +11,11 @@ const App: React.FC = () => {
   return (
     <StripeProvider publishableKey={PUBLISHABLE_KEY}>
       <Provider store={store}>
+        <StatusBar
+          barStyle={'dark-content'}
+          translucent
+          backgroundColor="transparent"
+        />
         <StackNavigator />
         <Toast />
       </Provider>

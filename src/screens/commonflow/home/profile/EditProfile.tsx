@@ -100,7 +100,6 @@ const EditProfile = () => {
 
       if (
         name !== userData?.name ||
-        email !== userData?.email ||
         phone !== userData?.phone ||
         imageUrl !== userData?.profile
       ) {
@@ -109,7 +108,6 @@ const EditProfile = () => {
           .doc(user.uid)
           .update({
             name: name || userData?.name,
-            email: email || userData?.email,
             phone: phone || userData?.phone,
             profile: imageUrl,
           });
@@ -117,7 +115,6 @@ const EditProfile = () => {
         setUserData(prev => ({
           ...prev,
           name: name || prev?.name,
-          email: email || prev?.email,
           phone: phone || prev?.phone,
           profile: imageUrl,
         }));
@@ -230,15 +227,7 @@ const EditProfile = () => {
                     customStyle={styles.inputField}
                   />
                 </View>
-                <View style={styles.inputContainer}>
-                  <Text style={styles.label}>Email</Text>
-                  <InputField
-                    placeholder={userData?.email}
-                    value={email}
-                    onChangeText={setEmail}
-                    customStyle={styles.inputField}
-                  />
-                </View>
+               
                 <View style={styles.inputContainer}>
                   <Text style={styles.label}>Phone Number</Text>
                   <InputField

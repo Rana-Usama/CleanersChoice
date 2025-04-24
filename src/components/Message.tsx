@@ -31,7 +31,15 @@ const Message = (props: props) => {
       ) : (
         <>
           <View style={styles.noProfileContainer}>
-            <Text style={{color:Colors.gradient1, fontFamily:Fonts.semiBold, fontSize:RFPercentage(2), top:RFPercentage(0.2)}}>{props.name[0]}</Text>
+            <Text
+              style={{
+                color: Colors.gradient1,
+                fontFamily: Fonts.semiBold,
+                fontSize: RFPercentage(2),
+                top: RFPercentage(0.2),
+              }}>
+              {props.name[0]}
+            </Text>
           </View>
         </>
       )}
@@ -44,7 +52,9 @@ const Message = (props: props) => {
               styles.messageText,
               {color: props.unread ? Colors.gradient1 : 'rgba(75, 85, 99, 1)'},
             ]}>
-            {props.message}
+            {props.message.length > 25
+              ? props.message.substring(0, 25) + '...'
+              : props.message}
           </Text>
         </View>
         <View>
@@ -92,15 +102,15 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: Colors.gradient1,
   },
-  noProfileContainer : {
+  noProfileContainer: {
     width: RFPercentage(5),
     height: RFPercentage(5),
     borderWidth: 2,
     borderColor: Colors.gradient1,
     borderRadius: RFPercentage(100),
-    alignItems:'center',
-    justifyContent:'center',
-    backgroundColor:'rgba(229, 231, 235, 0.3)'
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(229, 231, 235, 0.3)',
   },
   messageContainer: {
     flexDirection: 'row',

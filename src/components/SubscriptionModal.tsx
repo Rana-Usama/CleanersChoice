@@ -8,7 +8,8 @@ import GradientButton from './GradientButton';
 interface Props {
   text: string;
   icon: string;
-  onPress : ()=> void
+  onPress : ()=> void;
+  loading? : boolean
 }
 
 const SubscriptionModal = (props: Props) => {
@@ -35,7 +36,7 @@ const SubscriptionModal = (props: Props) => {
         {props.text}
       </Text>
       <View>
-        <GradientButton title="Ok" onPress={props.onPress}  style={{width:RFPercentage(15)}} />
+        <GradientButton title="Ok" onPress={props.onPress}  style={{width:RFPercentage(15)}} loading={props.loading} />
       </View>
     </View>
   );
