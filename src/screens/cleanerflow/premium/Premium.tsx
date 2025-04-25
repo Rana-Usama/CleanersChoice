@@ -71,7 +71,7 @@ const Premium = () => {
   const fetchSetupIntent = async () => {
     try {
       const response = await fetch(
-        'http://192.168.100.30:3000/create-subscription',
+        'https://cleaners-choice-server.vercel.app/api/create-subscription',
         {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
@@ -127,7 +127,7 @@ const Premium = () => {
       return;
     }
 
-    const res = await fetch('http://192.168.100.30:3000/confirm-subscription', {
+    const res = await fetch('https://cleaners-choice-server.vercel.app/api/confirm-subscription', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({customerId}),

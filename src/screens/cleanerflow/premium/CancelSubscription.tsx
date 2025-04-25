@@ -78,7 +78,7 @@ const CancelSubscription = () => {
       setIsLoading(true); // Start loader
 
       const res = await fetch(
-        'http://192.168.100.30:3000/cancel-subscription',
+        'https://cleaners-choice-server.vercel.app/cancel-subscription',
         {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
