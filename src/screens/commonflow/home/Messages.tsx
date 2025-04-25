@@ -174,7 +174,6 @@ const Messages = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView>
         <HeaderBack title="Messages" textStyle={styles.headerText} />
         <View style={styles.container}>
           <View style={styles.toggleContainer}>
@@ -237,8 +236,8 @@ const Messages = () => {
           ) : (
             <>
               {chats.length > 0 ? (
-                <View style={{marginTop: RFPercentage(2)}}>
                   <FlatList
+                  contentContainerStyle={{paddingTop: RFPercentage(2.5), paddingBottom: 20}}
                     data={chats}
                     keyExtractor={item => item.id}
                     renderItem={({item}) => {
@@ -274,14 +273,13 @@ const Messages = () => {
                     // onEndReachedThreshold={0.5}
                     // ListFooterComponent={loading && <Text>Loading...</Text>}
                   />
-                </View>
+                // </View>
               ) : (
                 <NotFound text='No chat found' />
               )}
             </>
           )}
         </View>
-      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -295,9 +293,10 @@ const styles = StyleSheet.create({
     width: '90%',
     alignSelf: 'center',
     paddingTop: RFPercentage(4),
+    flex:1
   },
   headerText: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(2),
   },
   toggleContainer: {
     flexDirection: 'row',
@@ -312,7 +311,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   toggleText: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
   },
   unreadButton: {
     left: RFPercentage(2.8),

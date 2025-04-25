@@ -39,7 +39,7 @@ const PasswordField: React.FC<Props> = (props: Props) => {
         <TouchableOpacity onPress={togglePasswordVisibility} style={styles.iconWrapper}>
           <Feather
             name={visible ? 'eye' : 'eye-off'}
-            size={RFPercentage(1.5)}
+            size={RFPercentage(1.8)}
             color={Colors.secondaryText}
           />
         </TouchableOpacity>
@@ -53,7 +53,7 @@ export default PasswordField;
 const styles = StyleSheet.create({
   container: {
     width: '90%',
-    height: RFPercentage(5.4),
+    height: RFPercentage(5.6),
     borderWidth: 1,
     borderColor: Colors.inputFieldColor,
     borderRadius: RFPercentage(0.8),
@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
   textInput: {
     color: Colors.inputTextColor,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     paddingVertical: 0,
     marginVertical: 0,
     textAlignVertical: 'center',

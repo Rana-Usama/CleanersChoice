@@ -63,9 +63,9 @@ const items = [
     name: 'Lawn Care',
   },
   {
-    id : '88',
-    name : 'Others'
-  }
+    id: '88',
+    name: 'Others',
+  },
 ];
 
 const ServiceOne: React.FC = () => {
@@ -245,10 +245,10 @@ const ServiceOne: React.FC = () => {
 
             {/* Location */}
             <InputField
-              placeholder="Location"
+              placeholder="City name you provide your services at"
               value={location}
               onChangeText={setLoaction}
-              customStyle={{width: '100%'}}
+              customStyle={{width: '100%', marginBottom:RFPercentage(3)}}
             />
 
             {/* Service Type */}
@@ -256,6 +256,7 @@ const ServiceOne: React.FC = () => {
               <MultiSelect
                 hideTags={true}
                 items={items}
+                styleDropdownMenuSubsection={{ borderWidth:1, borderRadius:RFPercentage(0.8)}}
                 uniqueKey="id"
                 ref={multiSelectRef}
                 onSelectedItemsChange={onSelectedItemsChange}
@@ -290,6 +291,13 @@ const ServiceOne: React.FC = () => {
                   color: Colors.placeholderColor,
                   fontSize: RFPercentage(1.6),
                   fontFamily: Fonts.fontRegular,
+                  marginLeft: RFPercentage(1.3),
+                }}
+                styleTextDropdown={{
+                  color: Colors.placeholderColor,
+                  fontSize: RFPercentage(1.6),
+                  fontFamily: Fonts.fontRegular,
+                  marginLeft: RFPercentage(1.3),
                 }}
                 styleTextTag={{
                   fontSize: RFPercentage(1.5),
@@ -299,6 +307,7 @@ const ServiceOne: React.FC = () => {
                 hideDropdown
                 textInputProps={{autoFocus: false}}
                 styleDropdownMenu={{height: RFPercentage(6)}}
+                
               />
               <ScrollView
                 horizontal
@@ -331,7 +340,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   headerText: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(2),
   },
   container: {
     width: '90%',

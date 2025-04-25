@@ -49,7 +49,7 @@ const JobPosted = () => {
             </>
           ) : (
             <>
-              <Text style={styles.homeButtonText}>See Active Jobs</Text>
+              <Text style={styles.homeButtonText}>Home</Text>
             </>
           )}
         </View>

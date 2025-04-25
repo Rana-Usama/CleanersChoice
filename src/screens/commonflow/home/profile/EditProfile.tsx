@@ -175,7 +175,7 @@ const EditProfile = () => {
             contentContainerStyle={styles.scrollContainer}
             keyboardShouldPersistTaps="handled">
             <HeaderBack
-              title="Edit Profile"
+              title="Edit Your Profile"
               textStyle={styles.headerText}
               left={true}
             />
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   headerText: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(2),
   },
   container: {
     width: '90%',
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
     bottom: RFPercentage(0.5),
   },
   sectionTitle: {
-    marginTop: RFPercentage(2),
+    marginTop: RFPercentage(4),
     borderBottomColor: Colors.inputFieldColor,
     borderBottomWidth: 1,
     paddingBottom: 5,
@@ -330,22 +330,22 @@ const styles = StyleSheet.create({
   sectionTitleText: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
   },
   inputFieldsWrapper: {
     marginTop: RFPercentage(1),
   },
   inputContainer: {
-    marginTop: RFPercentage(1.6),
+    marginTop: RFPercentage(2),
   },
   label: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
   },
   inputField: {
     width: '100%',
-    marginVertical: 7,
+    marginVertical: RFPercentage(1),
   },
   editButtonWrapper: {
     marginTop: RFPercentage(4.5),

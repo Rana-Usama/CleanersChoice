@@ -43,7 +43,7 @@ export default InputField;
 const styles = StyleSheet.create({
   container: {
     width: '90%',
-    height: RFPercentage(5.4),
+    height: RFPercentage(5.6),
     borderWidth: 1,
     borderColor: Colors.inputFieldColor,
     borderRadius: RFPercentage(0.8),

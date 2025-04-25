@@ -87,7 +87,7 @@ const CancelSubscription = () => {
       );
 
       const result = await res.json();
-
+      console.log('cancel...............', result)
       if (result.success) {
         if (user?.uid) {
           await firestore().collection('Users').doc(user.uid).update({
@@ -114,7 +114,7 @@ const CancelSubscription = () => {
         setModalVisible2(true);
       }
     } catch (error) {
-      console.error(error);
+      console.log(error);
       setModalVisible2(true);
     } finally {
       setIsLoading(false);

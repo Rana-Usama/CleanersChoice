@@ -60,9 +60,9 @@ const items = [
     name: 'Lawn Care',
   },
   {
-    id : '88',
-    name : 'Others'
-  }
+    id: '88',
+    name: 'Others',
+  },
 ];
 
 const Dashboard: React.FC = () => {
@@ -119,29 +119,29 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      const user = auth().currentUser;
-      if (!user) return;
-      try {
-        const userDoc = await firestore()
-          .collection('Users')
-          .doc(user.uid)
-          .get();
-        if (userDoc.exists) {
-          const userData = userDoc.data();
-          setProfile(userData?.profile);
-          setName(userData?.name);
-          dispatch(setProfileData(userData));
-        } else {
-          console.log('User data not found.');
-        }
-      } catch (error) {
-        console.error('Error fetching user details:', error);
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchUserData();
+    }, []),
+  );
+
+  const fetchUserData = async () => {
+    const user = auth().currentUser;
+    if (!user) return;
+    try {
+      const userDoc = await firestore().collection('Users').doc(user.uid).get();
+      if (userDoc.exists) {
+        const userData = userDoc.data();
+        setProfile(userData?.profile);
+        setName(userData?.name);
+        dispatch(setProfileData(userData));
+      } else {
+        console.log('User data not found.');
       }
-    };
-    fetchUserData();
-  }, []);
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+    }
+  };
 
   useFocusEffect(
     React.useCallback(() => {
@@ -224,7 +224,7 @@ const Dashboard: React.FC = () => {
           rightText="Edit Service"
           onPress={() => navigation.navigate('ServiceOne')}
         />
-      
+
         <View style={styles.container}>
           {/* Profile Image */}
           <View style={styles.imgContainer}>
@@ -294,7 +294,7 @@ const Dashboard: React.FC = () => {
                 {/* Description */}
                 <View
                   style={{
-                    marginTop: RFPercentage(2.1),
+                    marginTop: RFPercentage(2.5),
                     width: '90%',
                     alignSelf: 'center',
                   }}>
@@ -309,7 +309,7 @@ const Dashboard: React.FC = () => {
                 {/* Availability */}
                 <View
                   style={{
-                    marginTop: RFPercentage(2),
+                    marginTop: RFPercentage(2.5),
                     width: '90%',
                     alignSelf: 'center',
                   }}>
@@ -331,7 +331,7 @@ const Dashboard: React.FC = () => {
                 </View>
 
                 {/* Services */}
-                <View style={{marginTop: RFPercentage(2)}}>
+                <View style={{marginTop: RFPercentage(2.5)}}>
                   <View style={styles.serviceContainer}>
                     <Text style={styles.headeing2}>Services:</Text>
                   </View>
@@ -387,7 +387,7 @@ const Dashboard: React.FC = () => {
                       {
                         width: '90%',
                         alignSelf: 'center',
-                        marginTop: RFPercentage(2),
+                        marginTop: RFPercentage(2.5),
                       },
                     ]}>
                     Starting Packages:
@@ -456,7 +456,6 @@ const Dashboard: React.FC = () => {
                 ) : null}
               </>
             ) : (
-
               // Profile Completion Info Container
               <>
                 <View style={styles.profileCompletionContainer}>
@@ -545,8 +544,8 @@ const styles = StyleSheet.create({
   nameText: {
     textAlign: 'center',
     fontFamily: Fonts.fontMedium,
-    color: Colors.secondaryText,
-    fontSize: RFPercentage(1.7),
+    color: Colors.primaryText,
+    fontSize: RFPercentage(1.8),
   },
   profileCompletionContainer: {
     width: '90%',
@@ -606,7 +605,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.4),
   },
   headerText: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(2),
   },
 
   starContainer: {
@@ -621,7 +620,7 @@ const styles = StyleSheet.create({
   headeing2: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
   },
   description: {
     color: Colors.placeholderColor,

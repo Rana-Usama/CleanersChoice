@@ -167,7 +167,7 @@ const ServiceDetails: React.FC = ({route}) => {
         {/* Header */}
         <HeaderBack
           title={'Service Details'}
-          textStyle={{fontSize: RFPercentage(1.8)}}
+          textStyle={{fontSize: RFPercentage(2)}}
           left={true}
         />
 
@@ -252,7 +252,7 @@ const ServiceDetails: React.FC = ({route}) => {
                 style={{
                   color: Colors.placeholderColor,
                   fontFamily: Fonts.fontRegular,
-                  fontSize: RFPercentage(1.2),
+                  fontSize: RFPercentage(1.3),
                 }}>
                 Joined on : {formattedDate}
               </Text>
@@ -260,7 +260,7 @@ const ServiceDetails: React.FC = ({route}) => {
           </View>
 
           {/* Description */}
-          <View style={{marginTop: RFPercentage(2.1)}}>
+          <View style={{marginTop: RFPercentage(2.5)}}>
             <View>
               <View style={styles.rowAlign}>
                 <Image
@@ -277,7 +277,7 @@ const ServiceDetails: React.FC = ({route}) => {
                 style={{
                   color: Colors.placeholderColor,
                   fontFamily: Fonts.fontRegular,
-                  fontSize: RFPercentage(1.4),
+                  fontSize: RFPercentage(1.5),
                   textAlign: 'justify',
                   lineHeight: RFPercentage(2),
                   marginTop: RFPercentage(0.5),
@@ -301,7 +301,7 @@ const ServiceDetails: React.FC = ({route}) => {
           </View>
 
           {/* Location */}
-          <View style={{marginTop: RFPercentage(2)}}>
+          <View style={{marginTop: RFPercentage(2.5)}}>
             <View style={styles.rowAlign}>
               <Image
                 source={Icons.location}
@@ -316,7 +316,7 @@ const ServiceDetails: React.FC = ({route}) => {
               style={{
                 color: Colors.placeholderColor,
                 fontFamily: Fonts.fontRegular,
-                fontSize: RFPercentage(1.4),
+                fontSize: RFPercentage(1.5),
                 textAlign: 'justify',
                 lineHeight: RFPercentage(1.9),
                 marginTop: RFPercentage(0.5),
@@ -326,7 +326,7 @@ const ServiceDetails: React.FC = ({route}) => {
           </View>
 
           {/* Availability */}
-          <View style={{marginTop: RFPercentage(2)}}>
+          <View style={{marginTop: RFPercentage(2.5)}}>
             <View>
               <TouchableOpacity
                 activeOpacity={0.6}
@@ -350,7 +350,7 @@ const ServiceDetails: React.FC = ({route}) => {
                   style={{
                     color: Colors.gradient1,
                     fontFamily: Fonts.semiBold,
-                    fontSize: RFPercentage(1.4),
+                    fontSize: RFPercentage(1.5),
                     left: RFPercentage(0.8),
                   }}>
                   Check Availability
@@ -360,7 +360,7 @@ const ServiceDetails: React.FC = ({route}) => {
           </View>
 
           {/* Services */}
-          <View style={{marginTop: RFPercentage(2)}}>
+          <View style={{marginTop: RFPercentage(2.5)}}>
             <View
               style={{
                 flexDirection: 'row',
@@ -401,7 +401,7 @@ const ServiceDetails: React.FC = ({route}) => {
                     <Text
                       style={{
                         color: Colors.placeholderColor,
-                        fontSize: RFPercentage(1.3),
+                        fontSize: RFPercentage(1.4),
                         fontFamily: Fonts.fontRegular,
                       }}>
                       {item}
@@ -447,7 +447,7 @@ const ServiceDetails: React.FC = ({route}) => {
             style={{
               width: '90%',
               alignSelf: 'center',
-              marginTop: RFPercentage(2),
+              marginTop: RFPercentage(2.5),
             }}>
             <View style={styles.rowAlign}>
               <Image
@@ -486,7 +486,7 @@ const ServiceDetails: React.FC = ({route}) => {
         {/* Rating and Reviews */}
         <View style={styles.container}>
           <View>
-            <Text style={[styles.headeing2, {marginTop: RFPercentage(0.9)}]}>
+            <Text style={[styles.headeing2, {marginTop: RFPercentage(2)}]}>
               Rating & Reviews:
             </Text>
           </View>
@@ -598,8 +598,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   icon: {
-    width: RFPercentage(3.5),
-    height: RFPercentage(3.5),
+    width: RFPercentage(4),
+    height: RFPercentage(4),
     borderRadius: RFPercentage(100),
     marginRight: RFPercentage(1),
     borderWidth: 2,
@@ -619,7 +619,7 @@ const styles = StyleSheet.create({
   headeing2: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
   },
   rowAlign: {
     flexDirection: 'row',

@@ -157,7 +157,7 @@ const Availability = () => {
     <SafeAreaView style={styles.safeArea}>
       <HeaderBack
         title="Availability"
-        textStyle={{fontSize: RFPercentage(1.8)}}
+        textStyle={{fontSize: RFPercentage(2)}}
         left={true}
       />
       <View style={styles.container}>

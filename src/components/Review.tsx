@@ -49,19 +49,19 @@ const styles = StyleSheet.create({
   name: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
   },
   time: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     bottom: 2,
   },
   reviewText: {
     color: 'rgba(75, 85, 99, 1)',
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.2),
-    marginTop: RFPercentage(0.2),
+    fontSize: RFPercentage(1.3),
+    marginTop: RFPercentage(0.1),
   },
   ratingContainer: {
     flexDirection: 'row',

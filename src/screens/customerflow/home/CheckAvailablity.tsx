@@ -57,13 +57,12 @@ const CheckAvailability = ({route}) => {
     >();
 
   const availableDays = item.availability.filter(day => day.checked === true);
-  console.log('check availablity............', availableDays);
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <HeaderBack
         title="Availability"
-        textStyle={{fontSize: RFPercentage(1.8)}}
+        textStyle={{fontSize: RFPercentage(2)}}
         left={true}
       />
       <View style={styles.container}>
@@ -84,7 +83,7 @@ const CheckAvailability = ({route}) => {
               style={{
                 color: Colors.primaryText,
                 fontFamily: Fonts.fontMedium,
-                fontSize: RFPercentage(1.8),
+                fontSize: RFPercentage(1.9),
                 lineHeight: RFPercentage(2.8),
                 marginTop: RFPercentage(1),
               }}>
@@ -94,7 +93,7 @@ const CheckAvailability = ({route}) => {
               style={{
                 color: Colors.secondaryText,
                 fontFamily: Fonts.fontMedium,
-                fontSize: RFPercentage(1.5),
+                fontSize: RFPercentage(1.6),
                 lineHeight: RFPercentage(2.8),
                 marginTop: RFPercentage(2.2),
                 textAlign: 'center',

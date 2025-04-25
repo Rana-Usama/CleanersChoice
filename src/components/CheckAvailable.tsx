@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
   dayText: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
   },
   label: {
     color: Colors.secondaryText,
@@ -75,6 +75,6 @@ const styles = StyleSheet.create({
   timeText: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
   },
 });

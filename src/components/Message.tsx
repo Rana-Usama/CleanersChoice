@@ -69,8 +69,8 @@ const Message = (props: props) => {
             <>
               <View
                 style={{
-                  width: RFPercentage(0.8),
-                  height: RFPercentage(0.8),
+                  width: RFPercentage(0.9),
+                  height: RFPercentage(0.9),
                   borderRadius: RFPercentage(100),
                   backgroundColor: 'blue',
                   position: 'absolute',
@@ -93,18 +93,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderBottomWidth: 1,
     borderBottomColor: Colors.inputFieldColor,
-    paddingBottom: RFPercentage(2),
-    marginTop: RFPercentage(3),
+    paddingBottom: RFPercentage(1.6),
+    marginTop: RFPercentage(3.5),
   },
   image: {
-    width: RFPercentage(5),
-    height: RFPercentage(5),
+    width: RFPercentage(5.5),
+    height: RFPercentage(5.5),
     borderWidth: 2,
     borderColor: Colors.gradient1,
   },
   noProfileContainer: {
-    width: RFPercentage(5),
-    height: RFPercentage(5),
+    width: RFPercentage(5.5),
+    height: RFPercentage(5.5),
     borderWidth: 2,
     borderColor: Colors.gradient1,
     borderRadius: RFPercentage(100),
@@ -123,16 +123,16 @@ const styles = StyleSheet.create({
   nameText: {
     color: 'rgba(55, 65, 81, 1)',
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
   },
   messageText: {
     color: 'rgba(75, 85, 99, 1)',
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
   },
   timeText: {
     color: Colors.gradient1,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
   },
 });

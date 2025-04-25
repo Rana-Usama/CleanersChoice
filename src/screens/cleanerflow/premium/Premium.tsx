@@ -43,8 +43,6 @@ const Premium = () => {
 
   const user = auth().currentUser;
 
-  console.log('customerId..............', customerId);
-
   useEffect(() => {
     const fetchUserData = async () => {
       if (user?.email) {
@@ -127,13 +125,19 @@ const Premium = () => {
       return;
     }
 
-    const res = await fetch('https://cleaners-choice-server.vercel.app/api/confirm-subscription', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({customerId}),
-    });
+    const setupIntentId = setupIntentClientSecret.split('_secret')[0];
+
+    const res = await fetch(
+      'https://cleaners-choice-server.vercel.app/api/confirm-subscription',
+      {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({customerId, setupIntentId}),
+      },
+    );
 
     const result = await res.json();
+    console.log('result....................', result);
 
     if (result.success) {
       if (user?.uid) {
@@ -282,7 +286,9 @@ const Premium = () => {
             <SubscriptionModal
               text="Subscription Failed Try again."
               icon="exclamationcircle"
-              onPress={() => setModalVisible2(false)}
+              onPress={() => {
+                setModalVisible2(false), setLoading(false);
+              }}
             />
           </View>
         </>

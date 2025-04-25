@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   headerText: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(2),
   },
   container: {
     width: '90%',
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
   sectionTitleText: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
   },
   profileFieldsContainer: {
     marginTop: RFPercentage(1),
