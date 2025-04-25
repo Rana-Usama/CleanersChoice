@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: Colors.primaryText,
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     paddingVertical: RFPercentage(1),
     
   },
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
   serviceText: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.35),
     lineHeight: RFPercentage(2.4),
     paddingHorizontal: RFPercentage(1),
     marginTop:RFPercentage(0.5)
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
   priceText: {
     textAlign: 'center',
     color: Colors.gradient1,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.semiBold,
   },
 });

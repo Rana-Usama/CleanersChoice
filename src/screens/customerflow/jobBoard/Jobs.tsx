@@ -106,13 +106,13 @@ const Jobs = () => {
   };
 
   const getTruncatedText = text => {
-    const maxChars = 15;
+    const maxChars = 12;
     if (text.length <= maxChars) return text;
     return text.slice(0, maxChars).trim() + '... ';
   };
 
   const getTruncatedText2 = text => {
-    const maxChars = 25;
+    const maxChars = 24;
     if (text.length <= maxChars) return text;
     return text.slice(0, maxChars).trim() + '... ';
   };
@@ -122,7 +122,7 @@ const Jobs = () => {
       <ScrollView
         contentContainerStyle={styles.scrollView}
         showsVerticalScrollIndicator={false}>
-          <HeaderBack title='My Posted Jobs' right={true} rightText='Post Job' textStyle={{fontSize:RFPercentage(1.8)}} onPress={()=> navigation.navigate('PostJob',{jobId:null})}  />
+          <HeaderBack title='My Posted Jobs' right={true} rightText='Post Job' textStyle={{fontSize:RFPercentage(2)}} onPress={()=> navigation.navigate('PostJob',{jobId:null})}  />
         <View style={styles.container}>
           <View style={styles.toggleContainer}>
             <TouchableOpacity onPress={toggle1}>
@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
   toggleText: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
   },
   activeText: {
     color: Colors.background,

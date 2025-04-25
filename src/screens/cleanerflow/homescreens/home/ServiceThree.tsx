@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(0.5),
   },
   headerText: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(2),
   },
   infoHeaderContainer: {
     marginTop: RFPercentage(2.5),

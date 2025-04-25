@@ -30,7 +30,7 @@ const JobCard = (props:props) => {
       </View>
       
       <View style={styles.locationContainer}>
-        <EvilIcons name="location" size={RFPercentage(1.8)} style={styles.locationIcon} />
+        <EvilIcons name="location" size={RFPercentage(2)} style={styles.locationIcon} />
         <Text style={styles.locationText}>{props.location}</Text>
       </View>
       
@@ -70,8 +70,8 @@ const styles = StyleSheet.create({
     top: RFPercentage(-1.3),
   },
   deleteIcon: {
-    width: RFPercentage(2.3),
-    height: RFPercentage(2.3),
+    width: RFPercentage(2.4),
+    height: RFPercentage(2.4),
   },
   innerView: {
     flexDirection: 'row',
@@ -81,12 +81,12 @@ const styles = StyleSheet.create({
   nameText: {
     color: 'rgba(55, 65, 81, 1)',
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
   },
   dateText: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.2),
+    fontSize: RFPercentage(1.3),
   },
   locationContainer: {
     flexDirection: 'row',
@@ -94,14 +94,14 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(1),
   },
   locationIcon: {
-    bottom: 1.5,
-    right: 4,
+    bottom: RFPercentage(0.1),
+    right: RFPercentage(0.5),
   },
   locationText: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.4),
-    left: -2,
+    fontSize: RFPercentage(1.5),
+    // left: -2,
   },
   priceContainer: {
     marginTop: RFPercentage(1),
@@ -109,11 +109,13 @@ const styles = StyleSheet.create({
   priceText: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
   },
   priceHighlight: {
     color: Colors.gradient1,
     fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.5),
+
   },
   detailsContainer: {
     flexDirection: 'row',
@@ -122,7 +124,7 @@ const styles = StyleSheet.create({
   detailsText: {
     color: 'rgba(55, 65, 81, 1)',
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     right: 5,
   },
   arrowIcon: {

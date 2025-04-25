@@ -195,8 +195,8 @@ const SignUp: React.FC = () => {
         translucent
         backgroundColor="transparent"
       />
-      <KeyboardAvoidingView>
-        <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <KeyboardAvoidingView>
           <View style={styles.container}>
             <TouchableOpacity
               onPress={() => navigation.navigate('UserSelection')}
@@ -385,8 +385,8 @@ const SignUp: React.FC = () => {
                         buttonOuterColor={
                           selected ? Colors.gradient1 : Colors.inputFieldColor
                         }
-                        buttonSize={9}
-                        buttonOuterSize={16}
+                        buttonSize={RFPercentage(1.4)}
+                        buttonOuterSize={RFPercentage(2.2)}
                       />
                       <Text style={styles.radioLabel}>
                         I agree to terms and conditions
@@ -421,8 +421,8 @@ const SignUp: React.FC = () => {
             />
           </View>
           <View style={{marginBottom: RFPercentage(5)}} />
-        </ScrollView>
-      </KeyboardAvoidingView>
+        </KeyboardAvoidingView>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -455,7 +455,7 @@ const styles = StyleSheet.create({
   title: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.9),
+    fontSize: RFPercentage(2),
     textAlign: 'center',
   },
   imgContainer: {
@@ -517,7 +517,7 @@ const styles = StyleSheet.create({
   },
   radioLabel: {
     color: Colors.primaryText,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
     marginLeft: RFPercentage(0.8),
   },
@@ -535,12 +535,12 @@ const styles = StyleSheet.create({
   },
   bottomText: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontRegular,
   },
   signIn: {
     color: Colors.gradient1,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
     left: 3,
   },

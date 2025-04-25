@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   headerText: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(2),
   },
   infoHeaderContainer: {
     marginTop: RFPercentage(2.5),
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
   galleryText: {
     color: Colors.secondaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
   },
   flatListContainer: {
     marginTop: RFPercentage(2),

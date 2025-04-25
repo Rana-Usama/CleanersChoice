@@ -254,12 +254,11 @@ const Chat = ({navigation, route}) => {
           onLoadEarlier={fetchMoreMessages}
           showAvatarForEveryMessage={true}
           renderAvatar={props => null}
-          // bottomOffset={RFPercentage(28)}
           renderLoadEarlier={props => (
             <TouchableOpacity
               style={styles.loadMessages}
               onPress={props.onLoadEarlier}>
-              <Text style={{color: Colors.background, fontWeight: 'bold'}}>
+              <Text style={{color: Colors.background, fontFamily:Fonts.fontMedium}}>
                 Load earlier messages
               </Text>
             </TouchableOpacity>
@@ -400,7 +399,7 @@ const styles = StyleSheet.create({
   receiverName: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     marginLeft: RFPercentage(2),
   },
   toolbar: {

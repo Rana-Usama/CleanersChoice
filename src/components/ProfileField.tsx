@@ -32,15 +32,15 @@ export default ProfileField
 const styles = StyleSheet.create({
     container: {
         width: '100%',
-        height: RFPercentage(5.4),
+        height: RFPercentage(5.6),
         borderWidth: 1,
         borderColor: Colors.inputFieldColor,
-        borderRadius: 8,
+        borderRadius: RFPercentage(1),
         alignItems: 'center',
         flexDirection: 'row',
         justifyContent: 'space-between',
-        paddingHorizontal: 10,
-        marginVertical: 10,
+        paddingHorizontal: RFPercentage(2),
+        marginVertical: RFPercentage(1.5),
     },
     textContainer: {
         flexDirection: 'row',
@@ -53,8 +53,8 @@ const styles = StyleSheet.create({
     text: {
         color: Colors.brown,
         fontFamily: Fonts.fontRegular,
-        fontSize: RFPercentage(1.5),
-        left: 8,
-        top: 1,
+        fontSize: RFPercentage(1.6),
+        left: RFPercentage(1),
+        top:RFPercentage(0.1)
     }
 })

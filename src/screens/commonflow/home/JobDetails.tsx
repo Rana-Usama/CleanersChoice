@@ -306,16 +306,17 @@ const styles = StyleSheet.create({
     bottom: 0.7,
   },
   label: {
-    color: Colors.placeholderColor,
+    color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
-    left: 5,
+    fontSize: RFPercentage(1.6),
+    left: RFPercentage(0.8),
   },
   value: {
     color: 'rgba(75, 85, 99, 1)',
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.4),
-    marginTop: 4,
+    fontSize: RFPercentage(1.5),
+    marginTop: RFPercentage(1),
+    // left:RFPercentage(1)
   },
   description: {
     color: 'rgba(75, 85, 99, 1)',
@@ -340,6 +341,6 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.4),
   },
   headerText: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(2),
   },
 });

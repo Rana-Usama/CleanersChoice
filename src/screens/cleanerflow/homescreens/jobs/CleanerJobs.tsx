@@ -95,13 +95,13 @@ const CleanerJobs = () => {
   );
 
   const getTruncatedText = text => {
-    const maxChars = 15;
+    const maxChars = 12;
     if (text.length <= maxChars) return text;
     return text.slice(0, maxChars).trim() + '... ';
   };
 
   const getTruncatedText2 = text => {
-    const maxChars = 25;
+    const maxChars = 24;
     if (text.length <= maxChars) return text;
     return text.slice(0, maxChars).trim() + '... ';
   };
@@ -227,7 +227,7 @@ const CleanerJobs = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scrollView}>
-        <HeaderBack title={'Jobs'} textStyle={{fontSize: RFPercentage(1.8)}} />
+        <HeaderBack title={'Jobs'} textStyle={{fontSize: RFPercentage(2)}} />
         <View style={styles.container}>
           <View style={styles.jobPostedContainer}>
             <Text style={styles.jobPosted}>Recent Job posts by clients</Text>
@@ -500,21 +500,27 @@ const CleanerJobs = () => {
                     styles.locationModal,
                     {opacity: opacityAnim, transform: [{scale: scaleAnim}]},
                   ]}>
+                  <TouchableOpacity
+                    style={{
+                      position: 'absolute',
+                      right: RFPercentage(2),
+                      top: RFPercentage(2),
+                    }}
+                    onPress={() => setModalVisible(false)}>
+                    <AntDesign
+                      name="closecircleo"
+                      size={RFPercentage(2.5)}
+                      color={Colors.secondaryText}
+                    />
+                  </TouchableOpacity>
                   <View style={styles.modalInner}>
-                    <Text style={styles.applyLocation}>Apply Location</Text>
-                    <TouchableOpacity
-                      style={{position: 'absolute', right: 0}}
-                      onPress={() => setModalVisible(false)}>
-                      <AntDesign
-                        name="closecircleo"
-                        size={RFPercentage(2.5)}
-                        color={Colors.secondaryText}
-                      />
-                    </TouchableOpacity>
+                    <Text style={styles.applyLocation}>
+                      Apply Location Via City
+                    </Text>
                   </View>
                   <View style={{width: '100%', marginTop: RFPercentage(2)}}>
                     <SearchField
-                      placeholder="Search Location"
+                      placeholder="Search City"
                       customStyle={{borderColor: 'rgba(39, 38, 38, 0.29)'}}
                       value={query}
                       onChangeText={handleSearch}
@@ -593,6 +599,19 @@ const CleanerJobs = () => {
                       },
                       styles.rangeModal,
                     ]}>
+                    <TouchableOpacity
+                      style={{
+                        position: 'absolute',
+                        right: RFPercentage(2),
+                        top: RFPercentage(2),
+                      }}
+                      onPress={() => setModalVisible2(false)}>
+                      <AntDesign
+                        name="closecircleo"
+                        size={RFPercentage(2.5)}
+                        color={Colors.secondaryText}
+                      />
+                    </TouchableOpacity>
                     <View
                       style={[
                         {
@@ -603,15 +622,6 @@ const CleanerJobs = () => {
                       <Text style={styles.applyLocation}>
                         Price Range Selection
                       </Text>
-                      <TouchableOpacity
-                        style={{position: 'absolute', right: 0}}
-                        onPress={() => setModalVisible2(false)}>
-                        <AntDesign
-                          name="closecircleo"
-                          size={RFPercentage(2.5)}
-                          color={'rgba(144, 144, 144, 0.77)'}
-                        />
-                      </TouchableOpacity>
                     </View>
                     <View style={{width: '100%', marginTop: RFPercentage(8)}}>
                       <Slider
@@ -681,17 +691,21 @@ const CleanerJobs = () => {
                   styles.locationModal,
                   {opacity: opacityAnim, transform: [{scale: scaleAnim}]},
                 ]}>
+                <TouchableOpacity
+                  style={{
+                    position: 'absolute',
+                    right: RFPercentage(2),
+                    top: RFPercentage(2),
+                  }}
+                  onPress={() => setModalVisible3(false)}>
+                  <AntDesign
+                    name="closecircleo"
+                    size={RFPercentage(2.5)}
+                    color={Colors.secondaryText}
+                  />
+                </TouchableOpacity>
                 <View style={styles.modalInner}>
                   <Text style={styles.applyLocation}>Apply Service Type</Text>
-                  <TouchableOpacity
-                    style={{position: 'absolute', right: 0}}
-                    onPress={() => setModalVisible3(false)}>
-                    <AntDesign
-                      name="closecircleo"
-                      size={RFPercentage(2.5)}
-                      color={Colors.secondaryText}
-                    />
-                  </TouchableOpacity>
                 </View>
                 <View style={{width: '100%', marginTop: RFPercentage(2)}}>
                   <SearchField
@@ -759,7 +773,7 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(2.5),
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
   },
   filterBox: {
     width: RFPercentage(13),
@@ -783,7 +797,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
   },
   jobPostedContainer: {
     alignItems: 'center',
@@ -852,17 +866,18 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: RFPercentage(3),
   },
   applyLocation: {
-    color: Colors.secondaryText,
+    color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
   },
   queryContainer: {
     top: RFPercentage(0.5),
     width: '100%',
     backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    height: RFPercentage(25),
+    height: RFPercentage(21),
     borderRadius: RFPercentage(2),
   },
   queryText: {
@@ -887,7 +902,7 @@ const styles = StyleSheet.create({
   range: {
     textAlign: 'center',
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.9),
     color: Colors.primaryText,
   },
 });

@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
     paddingBottom: RFPercentage(10),
   },
   headerText: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(2),
   },
   container: {
     width: '90%',
@@ -125,18 +125,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     borderBottomColor: Colors.inputFieldColor,
     borderBottomWidth: 1,
-    paddingBottom: 8,
-    marginTop: RFPercentage(3.5),
+    paddingBottom: RFPercentage(1),
+    marginTop: RFPercentage(5),
   },
   questionText: {
     color: 'rgba(51, 65, 85, 1)',
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
   },
   answerText: {
     color: Colors.secondaryText,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.5),
-    marginTop: 10,
+    fontSize: RFPercentage(1.6),
+    marginTop: RFPercentage(1),
   },
 });

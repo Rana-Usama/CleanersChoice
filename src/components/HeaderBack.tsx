@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignSelf: 'center',
     marginTop:
-      Platform.OS === 'android' ? RFPercentage(6.5) : RFPercentage(0.5),
+      Platform.OS === 'android' ? RFPercentage(7) : RFPercentage(1),
   },
   leftContainer: {
     position: 'absolute',
@@ -88,6 +88,6 @@ const styles = StyleSheet.create({
   rightText: {
     color: Colors.gradient1,
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
   },
 });

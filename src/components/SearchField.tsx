@@ -28,7 +28,7 @@ const SearchField: React.FC<Props> = (props: Props) => {
           onChangeText={props.onChangeText}
         />
         <TouchableOpacity style={styles.iconContainer}>
-          <Feather name={'search'} size={RFPercentage(1.8)} color={Colors.secondaryText} />
+          <Feather name={'search'} size={RFPercentage(1.9)} color={Colors.secondaryText} />
         </TouchableOpacity>
       </View>
     </View>
@@ -40,7 +40,7 @@ export default SearchField;
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    height: RFPercentage(5),
+    height: RFPercentage(5.2),
     borderWidth: 1,
     borderColor: Colors.inputFieldColor,
     borderRadius: RFPercentage(0.9),
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   innerContainer: {
-    width: '95%',
+    width: '94%',
     alignItems: 'center',
     justifyContent: 'flex-start',
     flexDirection: 'row',
@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
   input: {
     color: Colors.inputTextColor,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     paddingVertical: 0,
     marginVertical: 0,
     textAlignVertical: 'center',

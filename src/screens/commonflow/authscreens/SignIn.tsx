@@ -207,8 +207,8 @@ const SignIn: React.FC = () => {
                         buttonOuterColor={
                           selected ? Colors.gradient1 : Colors.inputFieldColor
                         }
-                        buttonSize={8}
-                        buttonOuterSize={14}
+                        buttonSize={RFPercentage(1.4)}
+                        buttonOuterSize={RFPercentage(2)}
                       />
                       <Text style={styles.radioLabel}>Remember me?</Text>
                     </View>
@@ -280,13 +280,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   radioLabel: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     color: Colors.primaryText,
-    marginLeft: 6,
+    marginLeft: RFPercentage(0.8),
     fontFamily: Fonts.fontRegular,
   },
   forgotPassword: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     color: Colors.primaryText,
     fontFamily: Fonts.fontRegular,
     // bottom: 1.5,
@@ -329,12 +329,12 @@ const styles = StyleSheet.create({
   },
   bottomText: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontRegular,
   },
   signUp: {
     color: Colors.gradient1,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
     left: 3,
   },

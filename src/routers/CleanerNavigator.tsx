@@ -87,7 +87,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
               onPress={() => navigation.navigate(route.name)}
               style={[styles.tabButton, isFocused && styles.activeTab]}>
               {route.name === 'Home' ? (
-                <View style={{bottom: RFPercentage(2.5)}}>
+                <View style={{bottom: RFPercentage(2.3)}}>
                   <Image
                     source={isFocused ? Icons.home : Icons.homeInactive}
                     style={styles.middle}
@@ -122,9 +122,9 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
               <Text
                 style={{
                   color: isFocused ? Colors.gradient2 : Colors.secondaryText,
-                  fontSize: RFPercentage(1.2),
-                  top: 5,
-                  fontFamily: Fonts.fontRegular,
+                  fontSize: RFPercentage(1.3),
+                  top: RFPercentage(0.5),
+                  fontFamily: isFocused ? Fonts.fontMedium : Fonts.fontRegular,
                 }}>
                 {route.name === 'Home' ? '' : label}
               </Text>
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   tabBarContainer: {
-    height: RFPercentage(8),
+    height: RFPercentage(8.6),
     backgroundColor: 'rgba(241, 245, 249, 1)',
     borderRadius: RFPercentage(3),
     position: 'absolute',
@@ -182,12 +182,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   imgStyle: {
-    width: RFPercentage(2.5),
-    height: RFPercentage(2.5),
+    width: RFPercentage(2.8),
+    height: RFPercentage(2.8),
   },
   middle: {
-    width: RFPercentage(6.5),
-    height: RFPercentage(6.5),
+    width: RFPercentage(7),
+    height: RFPercentage(7),
   },
   labelContainer: {
     width: '90%',

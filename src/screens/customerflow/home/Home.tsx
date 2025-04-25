@@ -236,13 +236,13 @@ const Home = () => {
             title="Home"
             right={true}
             rightText="Post Job"
-            textStyle={{fontSize: RFPercentage(1.8)}}
+            textStyle={{fontSize: RFPercentage(2)}}
             onPress={() => navigation.navigate('PostJob', {jobId: null})}
           />
 
           <View style={styles.searchContainer}>
             <SearchField
-              placeholder="Search"
+              placeholder="Search Businesses"
               value={nameQuery}
               onChangeText={setNameQuery}
             />
@@ -504,21 +504,27 @@ const Home = () => {
                     styles.locationModal,
                     {opacity: opacityAnim, transform: [{scale: scaleAnim}]},
                   ]}>
+                  <TouchableOpacity
+                    style={{
+                      position: 'absolute',
+                      right: RFPercentage(2),
+                      top: RFPercentage(2),
+                    }}
+                    onPress={() => setModalVisible(false)}>
+                    <AntDesign
+                      name="closecircleo"
+                      size={RFPercentage(2.6)}
+                      color={Colors.secondaryText}
+                    />
+                  </TouchableOpacity>
                   <View style={styles.modalInner}>
-                    <Text style={styles.applyLocation}>Apply Location</Text>
-                    <TouchableOpacity
-                      style={{position: 'absolute', right: 0}}
-                      onPress={() => setModalVisible(false)}>
-                      <AntDesign
-                        name="closecircleo"
-                        size={RFPercentage(2.5)}
-                        color={Colors.secondaryText}
-                      />
-                    </TouchableOpacity>
+                    <Text style={styles.applyLocation}>
+                      Apply Location Via City
+                    </Text>
                   </View>
                   <View style={{width: '100%', marginTop: RFPercentage(2)}}>
                     <SearchField
-                      placeholder="Search Location"
+                      placeholder="Search City"
                       customStyle={{borderColor: 'rgba(39, 38, 38, 0.29)'}}
                       value={query}
                       onChangeText={handleSearch}
@@ -597,25 +603,29 @@ const Home = () => {
                       },
                       styles.rangeModal,
                     ]}>
+                    <TouchableOpacity
+                      style={{
+                        position: 'absolute',
+                        right: RFPercentage(2),
+                        top: RFPercentage(2),
+                      }}
+                      onPress={() => setModalVisible2(false)}>
+                      <AntDesign
+                        name="closecircleo"
+                        size={RFPercentage(2.6)}
+                        color={Colors.secondaryText}
+                      />
+                    </TouchableOpacity>
                     <View
                       style={[
                         {
-                          marginTop: RFPercentage(1),
+                          marginTop: RFPercentage(3),
                         },
                         styles.modalInner,
                       ]}>
                       <Text style={styles.applyLocation}>
                         Price Range Selection
                       </Text>
-                      <TouchableOpacity
-                        style={{position: 'absolute', right: 0}}
-                        onPress={() => setModalVisible2(false)}>
-                        <AntDesign
-                          name="closecircleo"
-                          size={RFPercentage(2.5)}
-                          color={'rgba(144, 144, 144, 0.77)'}
-                        />
-                      </TouchableOpacity>
                     </View>
                     <View style={{width: '100%', marginTop: RFPercentage(8)}}>
                       <Slider
@@ -736,18 +746,20 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
+    // backgroundColor:'red',
+    marginTop: RFPercentage(3),
   },
   applyLocation: {
-    color: Colors.secondaryText,
+    color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
   },
   queryContainer: {
     top: RFPercentage(0.5),
     width: '100%',
     backgroundColor: 'rgba(255, 255, 255, 0.3)',
     borderRadius: RFPercentage(2),
-    height:RFPercentage(24)
+    height: RFPercentage(21),
   },
   queryText: {
     padding: RFPercentage(2),
@@ -771,7 +783,7 @@ const styles = StyleSheet.create({
   range: {
     textAlign: 'center',
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(2),
     color: Colors.primaryText,
   },
   searchContainer: {
@@ -787,13 +799,13 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(3),
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.7),
   },
   categoryBox: {
     width: RFPercentage(9.5),
     height: RFPercentage(9.5),
     borderRadius: RFPercentage(1),
-    borderWidth: 1,
+    borderWidth: 1.2,
     alignItems: 'center',
     justifyContent: 'center',
     marginHorizontal: RFPercentage(1),
@@ -813,7 +825,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: RFPercentage(1.4),
   },
   filterBox: {
-    width: RFPercentage(13),
+    width: RFPercentage(14),
     height: RFPercentage(4.3),
     borderWidth: 1,
     alignItems: 'center',
@@ -825,7 +837,7 @@ const styles = StyleSheet.create({
   },
 
   filterText: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
   },
   serviceColumnWrapper: {
     // justifyContent: 'space-between',

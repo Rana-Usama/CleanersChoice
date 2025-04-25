@@ -55,7 +55,7 @@ const Profile = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <HeaderBack title="Profile" textStyle={styles.headerText} />
+      <HeaderBack title="Your Profile" textStyle={styles.headerText} />
       <View style={styles.container}>
         <View style={styles.imgContainer}>
           <View style={styles.pictureContainer}>
@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
     paddingTop: RFPercentage(4),
   },
   headerText: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(2.2),
   },
   imgContainer: {
     alignSelf: 'center',
@@ -145,6 +145,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
+    fontSize:RFPercentage(2)
   },
   profileFieldContainer: {
     marginTop: RFPercentage(4.5),

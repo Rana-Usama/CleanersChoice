@@ -256,7 +256,7 @@ const PostJob = ({route}) => {
                 />
               </View>
               <InputField
-                placeholder="Enter Location you want service at"
+                placeholder="Enter City you want service at"
                 customStyle={{width: '100%'}}
                 value={Location}
                 onChangeText={setLocation}
@@ -328,10 +328,11 @@ const PostJob = ({route}) => {
               </View> */}
 
               <InputField
-                placeholder="Budget"
+                placeholder="Budget e.g; 120$"
                 customStyle={{width: '100%'}}
                 value={budget}
                 onChangeText={setBudget}
+                type={'numeric'}
               />
 
               {/* <CustomDropDown

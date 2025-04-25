@@ -51,7 +51,7 @@ const Privacy: React.FC = () => {
         showsVerticalScrollIndicator={false}>
         <HeaderBack
           title={`Privacy Policy`}
-          textStyle={{fontSize: RFPercentage(1.8)}}
+          textStyle={{fontSize: RFPercentage(2)}}
           left={true}
         />
         <View style={styles.container}>
@@ -67,9 +67,9 @@ const Privacy: React.FC = () => {
                         style={{
                           color: Colors.brown,
                           fontFamily: Fonts.fontRegular,
-                          fontSize: RFPercentage(1.5),
+                          fontSize: RFPercentage(1.6),
                           textAlign: 'justify',
-                          lineHeight: 23,
+                          lineHeight: RFPercentage(2.8),
                         }}>
                         {item.q}
                       </Text>

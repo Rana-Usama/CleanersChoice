@@ -107,7 +107,7 @@ const ChangePasswordV2 = () => {
         showsVerticalScrollIndicator={false}>
         <HeaderBack
           title={`Change Password`}
-          textStyle={{fontSize: RFPercentage(1.8)}}
+          textStyle={{fontSize: RFPercentage(2)}}
           left={true}
         />
 
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
   label: {
     color: Colors.brown,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
   },
   absolute: {
     position: 'absolute',
