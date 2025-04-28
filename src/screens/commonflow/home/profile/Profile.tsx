@@ -119,11 +119,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1.8,
     borderColor: 'rgba(64, 123, 255, 1)',
-    shadowColor: 'rgba(0, 0, 0, 0.15)',
-    shadowOffset: {width: 0, height: 0},
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    elevation: 40,
     backgroundColor:Colors.inputField
   },
   imgStyle: {

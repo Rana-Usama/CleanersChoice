@@ -8,6 +8,7 @@ import {
   Alert,
   TouchableWithoutFeedback,
   StatusBar,
+  TouchableOpacity,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -22,6 +23,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import SubscriptionModal from '../../../components/SubscriptionModal';
 import Toast from 'react-native-toast-message';
 import NextButton from '../../../components/NextButton';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 
 const services = [
   {id: 1, name: 'Connect with cleaning customers'},
@@ -38,6 +40,7 @@ const CancelSubscription = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoading2, setIsLoading2] = useState(false);
   const [isLoading3, setIsLoading3] = useState(false);
+  const [cancel, setCancel] = useState(null);
 
   const [subscriptionId, setSubscriptionId] = useState(null);
   const user = auth().currentUser;
@@ -51,6 +54,7 @@ const CancelSubscription = () => {
           .get();
         const userData = userDoc.data();
         setSubscriptionId(userData?.subscriptionId);
+        setCancel(userData?.cancelSubscription);
       }
     };
 
@@ -78,7 +82,7 @@ const CancelSubscription = () => {
       setIsLoading(true); // Start loader
 
       const res = await fetch(
-        'https://cleaners-choice-server.vercel.app/cancel-subscription',
+        'https://cleaners-choice-server.vercel.app/api/cancel-subscription',
         {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
@@ -86,36 +90,49 @@ const CancelSubscription = () => {
         },
       );
 
-      const result = await res.json();
-      console.log('cancel...............', result)
-      if (result.success) {
-        if (user?.uid) {
-          await firestore().collection('Users').doc(user.uid).update({
-            subscription: false,
-            subscriptionId: null,
-            cancelSubscription: true,
+      const text = await res.text(); // Read as text first
+      console.log('Response Text:', text);
+
+      try {
+        const result = JSON.parse(text); // Try parsing manually
+        console.log('cancel...............', result);
+
+        if (result.success) {
+          const {currentPeriodEnd} = result;
+          if (user?.uid) {
+            await firestore()
+              .collection('Users')
+              .doc(user.uid)
+              .update({
+                subscription: true,
+                subscriptionEndDate: currentPeriodEnd * 1000,
+                subscriptionId: subscriptionId,
+                cancelSubscription: true,
+              });
+          }
+          Toast.show({
+            type: 'success',
+            text1: 'Cancel Subscription',
+            text2: 'Subscription has been canceled successfully!',
+            position: 'top',
+            topOffset: RFPercentage(8),
+            text1Style: {
+              fontFamily: Fonts.fontBold,
+              fontSize: RFPercentage(1.6),
+            },
+            text2Style: {
+              fontFamily: Fonts.fontRegular,
+              fontSize: RFPercentage(1.3),
+            },
           });
+          navigation.goBack();
+        } else {
+          setModalVisible2(true);
         }
-        Toast.show({
-          type: 'success',
-          text1: 'Cancel Subscription',
-          text2: 'Subscription has been canceled successfully!',
-          position: 'top',
-          topOffset: RFPercentage(8),
-          text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.6)},
-          text2Style: {
-            fontFamily: Fonts.fontRegular,
-            fontSize: RFPercentage(1.3),
-          },
-        });
-        navigation.navigate('SignIn');
-        // setModalVisible3(true);
-      } else {
+      } catch (err) {
+        console.log('JSON Parse error:', err);
         setModalVisible2(true);
       }
-    } catch (error) {
-      console.log(error);
-      setModalVisible2(true);
     } finally {
       setIsLoading(false);
     }
@@ -123,6 +140,19 @@ const CancelSubscription = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <TouchableOpacity
+        onPress={() => navigation.goBack()}
+        style={{
+          position: 'absolute',
+          top: RFPercentage(7),
+          left: RFPercentage(3),
+        }}>
+        <AntDesign
+          name="arrowleft"
+          color={Colors.secondaryText}
+          size={RFPercentage(3)}
+        />
+      </TouchableOpacity>
       <HeaderComponent />
       <View style={styles.container}>
         <View style={styles.premiumHeader}>
@@ -180,12 +210,12 @@ const CancelSubscription = () => {
 
         <View style={styles.buttonContainer}>
           <GradientButton
-            title="Cancel"
+            title={cancel === true ? 'Canceled' : 'Cancel'}
             textStyle={styles.buttonText}
             onPress={() => setModalVisible(true)}
             style={{width: RFPercentage(18)}}
             loading={isLoading}
-            disabled={isLoading}
+            disabled={isLoading || cancel === true ? true : false}
           />
         </View>
       </View>
@@ -200,7 +230,7 @@ const CancelSubscription = () => {
             <BlurView style={styles.blurView} blurType="light" blurAmount={2} />
             <View style={styles.modalCancel}>
               <Text style={styles.cancelHeading}>
-                You’ll loose access to all premium features that includes:
+                You’ll loose access to all premium features after one month that includes:
               </Text>
               <View
                 style={{
@@ -259,7 +289,7 @@ const CancelSubscription = () => {
                   setIsLoading3(false);
                   setModalVisible3(false);
                   setModalVisible(false);
-                  navigation.navigate('SignIn');
+                  navigation.goBack();
                 }, 1000);
               }}
               loading={isLoading3}

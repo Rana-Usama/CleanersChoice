@@ -140,11 +140,13 @@ const Premium = () => {
     console.log('result....................', result);
 
     if (result.success) {
+     const {periodEndTimestamp} = result
       if (user?.uid) {
         await firestore().collection('Users').doc(user.uid).update({
           subscription: true,
           subscriptionId: result.subscriptionId,
           cancelSubscription: false,
+          subscriptionEndDate: periodEndTimestamp,
         });
       }
       Toast.show({
@@ -188,7 +190,8 @@ const Premium = () => {
       <HeaderComponent />
       <View style={styles.container}>
         <View style={styles.premiumHeader}>
-          {currentUser?.cancelSubscription === true ? (
+          {currentUser?.cancelSubscription === true &&
+          currentUser?.subscriptionEndDate < Date.now() ? (
             <>
               <Image
                 source={Icons.owner}
@@ -249,7 +252,8 @@ const Premium = () => {
         <View style={styles.buttonContainer}>
           <GradientButton
             title={
-              currentUser?.cancelSubscription === true
+              currentUser?.cancelSubscription === true &&
+              currentUser?.subscriptionEndDate < Date.now()
                 ? 'Renew Subscription'
                 : 'Proceed To Payment'
             }

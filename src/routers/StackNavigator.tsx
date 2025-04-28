@@ -124,6 +124,8 @@ const StackNavigator: React.FC = () => {
     );
   }
 
+  console.log('date...........', userData?.subscriptionEndDate > Date.now());
+
   return (
     <SafeAreaProvider>
       <NavigationContainer>
@@ -134,9 +136,13 @@ const StackNavigator: React.FC = () => {
           initialRouteName={
             email && password && user === 'Customer'
               ? 'Home'
-              : user === 'Cleaner' && userData?.subscription === true
+              : user === 'Cleaner' &&
+                userData?.subscription === true &&
+                userData.subscriptionEndDate > Date.now() // Valid subscription
               ? 'CleanerNavigator'
-              : user === 'Cleaner' && userData?.subscription === false
+              : user === 'Cleaner' && userData?.subscription === false// No subscription set
+              ? 'Premium'
+              : user === 'Cleaner' && userData.subscriptionEndDate < Date.now() // Subscription expired
               ? 'Premium'
               : 'SplashOne'
           }>
