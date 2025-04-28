@@ -471,16 +471,6 @@ const CleanerJobs = () => {
       {/* Filter Modals */}
       {modalVisible && (
         <>
-          <FilterModal
-            modalVisible={modalVisible}
-            setModalVisible={() => setModalVisible(false)}
-            query={query}
-            handleSearch={handleSearch}
-            selectedLocation={selectedLocation}
-            filteredLocations={filteredLocations}
-            handleLocationApply={handleLocationApply}
-            loactionLoading={loactionLoading}
-          />
           <View style={styles.modalContainer}>
             <BlurView style={styles.blurView} blurType="light" blurAmount={5} />
             <Modal

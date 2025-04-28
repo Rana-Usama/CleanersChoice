@@ -164,7 +164,7 @@ const PostJob = ({route}) => {
       };
       if (jobId) {
         await firestore().collection('Jobs').doc(jobId).update(jobData);
-        navigation.navigate('Jobs');
+        navigation.navigate('Home');
         Toast.show({
           type: 'success',
           text1: 'Job Update',
