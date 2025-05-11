@@ -67,7 +67,14 @@ export type RootStackParamList = {
   Settings: undefined;
   CheckAvailability: {item: any};
   Jobs: undefined;
-  Chat: {item: any};
+  Chat: {
+    chatId: string;
+    senderId?: string;
+    senderName: string;
+    receiver: string;
+    receiverName: string;
+    receiverProfile: string;
+  };
   Messages: undefined;
 };
 
@@ -140,7 +147,7 @@ const StackNavigator: React.FC = () => {
                 userData?.subscription === true &&
                 userData.subscriptionEndDate > Date.now() // Valid subscription
               ? 'CleanerNavigator'
-              : user === 'Cleaner' && userData?.subscription === false// No subscription set
+              : user === 'Cleaner' && userData?.subscription === false // No subscription set
               ? 'Premium'
               : user === 'Cleaner' && userData.subscriptionEndDate < Date.now() // Subscription expired
               ? 'Premium'

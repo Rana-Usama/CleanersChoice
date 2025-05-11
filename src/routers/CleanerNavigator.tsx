@@ -122,7 +122,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
               <Text
                 style={{
                   color: isFocused ? Colors.gradient2 : Colors.secondaryText,
-                  fontSize: RFPercentage(1.3),
+                  fontSize: RFPercentage(1.2),
                   top: RFPercentage(0.5),
                   fontFamily: isFocused ? Fonts.fontMedium : Fonts.fontRegular,
                 }}>

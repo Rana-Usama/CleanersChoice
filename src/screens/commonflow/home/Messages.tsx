@@ -22,13 +22,28 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useFocusEffect} from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import NotFound from '../../../components/NotFound';
+import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
+import {Skeleton} from '@rneui/themed';
 
 const Messages = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, 'Messages'>>();
-  const [chats, setChats] = useState([]);
+  const [chats, setChats] = useState<
+    {
+      id: any;
+      name: any;
+      image: any;
+      lastMessage: any;
+      lastMessageTimestamp: any;
+      receiverId: any;
+    }[]
+  >([]);
+
   const [loading, setLoading] = useState(false);
-  const [lastVisible, setLastVisible] = useState(null);
+  const [lastVisible, setLastVisible] =
+    useState<FirebaseFirestoreTypes.QueryDocumentSnapshot<FirebaseFirestoreTypes.DocumentData> | null>(
+      null,
+    );
   const pageSize = 10;
   const [loading2, setLoading2] = useState(false);
   const [all, setAll] = useState(true);
@@ -46,10 +61,17 @@ const Messages = () => {
     setUnread(true);
   };
 
+  useEffect(() => {
+    setLoading2(true);
+    setTimeout(() => {
+      setLoading2(false);
+    }, 5000);
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
-      let unsubscribe;
-      setLoading2(true);
+      let unsubscribe: any;
+      // setLoading2(true);
 
       const fetchChats = async () => {
         try {
@@ -77,7 +99,7 @@ const Messages = () => {
         } catch (error) {
           console.log('Error fetching chats: ', error);
         } finally {
-          setLoading2(false);
+          // setLoading2(false);
         }
       };
 
@@ -118,37 +140,9 @@ const Messages = () => {
     }, [userId, unread]),
   );
 
-  const fetchMoreChats = async () => {
-    if (!lastVisible || loading) return;
-    setLoading(true);
-    try {
-      const snapshot = await firestore()
-        .collection('Chats')
-        .where('participants', 'array-contains', userId)
-        .orderBy('lastMessageTimestamp', 'desc')
-        .startAfter(lastVisible)
-        .limit(pageSize)
-        .get();
-
-      const newChatData = await Promise.all(
-        snapshot.docs.map(async doc => await getChatData(doc)),
-      );
-
-      setChats(prev => [...prev, ...newChatData]);
-
-      if (snapshot.docs.length > 0) {
-        setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
-      }
-    } catch (e) {
-      // console.log('Chat Error: ', e);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getChatData = async doc => {
+  const getChatData = async (doc: any) => {
     const chat = doc.data();
-    const otherUser = chat.participants.find(p => p !== userId);
+    const otherUser = chat.participants.find((p: any) => p !== userId);
 
     try {
       const userDoc = await firestore()
@@ -177,7 +171,7 @@ const Messages = () => {
     }
   };
 
-  const formatTimestamp = timestamp => {
+  const formatTimestamp = (timestamp: any) => {
     const time = moment(timestamp.toDate());
     const now = moment();
 
@@ -241,11 +235,44 @@ const Messages = () => {
 
         {loading2 ? (
           <>
-            <ActivityIndicator
-              size={'large'}
-              color={Colors.placeholderColor}
-              style={{marginTop: RFPercentage(20)}}
-            />
+            <View style={{marginTop: RFPercentage(4)}}>
+              {[...Array(7)].map((_, index) => (
+                <View
+                  key={index}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginBottom: RFPercentage(2),
+                  }}>
+                  <Skeleton
+                    animation="wave"
+                    circle
+                    width={50}
+                    height={50}
+                    style={{
+                      marginRight: RFPercentage(2),
+                      backgroundColor: 'rgb(187, 199, 215)',
+                    }}
+                  />
+                  <View style={{flex: 1}}>
+                    <Skeleton
+                      animation="wave"
+                      width="85%"
+                      height={15}
+                      style={{
+                        marginBottom: 6,
+                        backgroundColor: 'rgb(187, 199, 215)',
+                      }}
+                    />
+                    <Skeleton
+                      width="50%"
+                      height={12}
+                      style={{backgroundColor: 'rgb(187, 199, 215)'}}
+                    />
+                  </View>
+                </View>
+              ))}
+            </View>
           </>
         ) : (
           <>
@@ -253,7 +280,7 @@ const Messages = () => {
               <FlatList
                 contentContainerStyle={{
                   paddingTop: RFPercentage(2.5),
-                  paddingBottom: 20,
+                  paddingBottom: RFPercentage(8),
                 }}
                 data={chats}
                 keyExtractor={item => item.id}
@@ -286,13 +313,11 @@ const Messages = () => {
                     />
                   );
                 }}
-                // onEndReached={fetchMoreChats}
-                // onEndReachedThreshold={0.5}
-                // ListFooterComponent={loading && <Text>Loading...</Text>}
               />
             ) : (
-              // </View>
-              <NotFound text="No chat found" />
+              <View style={{marginTop:RFPercentage(10)}}>
+                <NotFound text="No chat found" />
+              </View>
             )}
           </>
         )}

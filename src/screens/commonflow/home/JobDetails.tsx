@@ -15,14 +15,14 @@ import HeaderBack from '../../../components/HeaderBack';
 import GradientButton from '../../../components/GradientButton';
 import NextButton from '../../../components/NextButton';
 import {useNavigation} from '@react-navigation/native';
-import {useDispatch, useSelector} from 'react-redux';
+import {useDispatch, useSelector, TypedUseSelectorHook} from 'react-redux';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../../routers/StackNavigator';
 import firestore from '@react-native-firebase/firestore';
 import {setJobId} from '../../../redux/Job/Actions';
 import auth from '@react-native-firebase/auth';
 
-const JobDetails = ({route}) => {
+const JobDetails = ({route} : any) => {
   const {item} = route.params;
   const navigation =
     useNavigation<

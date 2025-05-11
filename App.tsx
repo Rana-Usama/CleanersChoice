@@ -6,19 +6,22 @@ import store from './src/redux/Store';
 import Toast from 'react-native-toast-message';
 import {StripeProvider} from '@stripe/stripe-react-native';
 import {PUBLISHABLE_KEY} from '@env';
+import {ThemeProvider} from '@rneui/themed';
 
 const App: React.FC = () => {
   return (
     <StripeProvider publishableKey={PUBLISHABLE_KEY}>
-      <Provider store={store}>
-        <StatusBar
-          barStyle={'dark-content'}
-          translucent
-          backgroundColor="transparent"
-        />
-        <StackNavigator />
-        <Toast />
-      </Provider>
+      <ThemeProvider>
+        <Provider store={store}>
+          <StatusBar
+            barStyle={'dark-content'}
+            translucent
+            backgroundColor="transparent"
+          />
+          <StackNavigator />
+          <Toast />
+        </Provider>
+      </ThemeProvider>
     </StripeProvider>
   );
 };
