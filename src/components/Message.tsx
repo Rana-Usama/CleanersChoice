@@ -97,14 +97,14 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(3.5),
   },
   image: {
-    width: RFPercentage(5.5),
-    height: RFPercentage(5.5),
+    width: RFPercentage(6.5),
+    height: RFPercentage(6.5),
     borderWidth: 2,
     borderColor: Colors.gradient1,
   },
   noProfileContainer: {
-    width: RFPercentage(5.5),
-    height: RFPercentage(5.5),
+    width: RFPercentage(6.5),
+    height: RFPercentage(6.5),
     borderWidth: 2,
     borderColor: Colors.gradient1,
     borderRadius: RFPercentage(100),
@@ -123,12 +123,12 @@ const styles = StyleSheet.create({
   nameText: {
     color: 'rgba(55, 65, 81, 1)',
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.8),
   },
   messageText: {
     color: 'rgba(75, 85, 99, 1)',
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
   },
   timeText: {
     color: Colors.gradient1,

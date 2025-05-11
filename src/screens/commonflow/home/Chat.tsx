@@ -11,7 +11,7 @@ import {
   StatusBar,
 } from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
-import {GiftedChat, InputToolbar} from 'react-native-gifted-chat';
+import {GiftedChat, InputToolbar, Bubble} from 'react-native-gifted-chat';
 import firestore from '@react-native-firebase/firestore';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, IMAGES} from '../../../constants/Themes';
@@ -20,10 +20,16 @@ import LinearGradient from 'react-native-linear-gradient';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Feather from 'react-native-vector-icons/Feather';
 import {useFocusEffect} from '@react-navigation/native';
+import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
 
-const Chat = ({navigation, route}) => {
-  const [messages, setMessages] = useState([]);
-  const [lastVisible, setLastVisible] = useState(null);
+const Chat = ({navigation, route}: any) => {
+  const [messages, setMessages] = useState<
+    {id: string; text: string; sender: string; timestamp: number}[]
+  >([]);
+  const [lastVisible, setLastVisible] =
+    useState<FirebaseFirestoreTypes.QueryDocumentSnapshot<FirebaseFirestoreTypes.DocumentData> | null>(
+      null,
+    );
   const {
     chatId,
     senderId,
@@ -58,7 +64,6 @@ const Chat = ({navigation, route}) => {
           },
         };
       });
-      console.log('INITIAL CHAT', initialMessages);
       setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
       setMessages(prevMessages => {
         const messagesMap = new Map();
@@ -258,10 +263,39 @@ const Chat = ({navigation, route}) => {
             <TouchableOpacity
               style={styles.loadMessages}
               onPress={props.onLoadEarlier}>
-              <Text style={{color: Colors.background, fontFamily:Fonts.fontMedium}}>
+              <Text
+                style={{
+                  color: Colors.background,
+                  fontFamily: Fonts.fontMedium,
+                }}>
                 Load earlier messages
               </Text>
             </TouchableOpacity>
+          )}
+          renderBubble={props => (
+            <Bubble
+              {...props}
+              wrapperStyle={{
+                left: {
+                  backgroundColor: Colors.background,
+                  padding: RFPercentage(0.6),
+                },
+                right: {
+                  backgroundColor: Colors.gradient1,
+                  padding: RFPercentage(0.6),
+                },
+              }}
+              textStyle={{
+                left: {
+                  color: Colors.inputTextColor,
+                  fontFamily: Fonts.fontRegular,
+                },
+                right: {
+                  color: Colors.background,
+                  fontFamily: Fonts.fontRegular,
+                },
+              }}
+            />
           )}
           renderInputToolbar={props => (
             <InputToolbar
@@ -342,7 +376,8 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.8),
     borderRadius: RFPercentage(10),
     // backgroundColor:'red',
-    width:RFPercentage(36)
+    width: RFPercentage(36),
+    fontFamily: Fonts.fontRegular,
   },
   sendButton: {
     justifyContent: 'center',
@@ -352,6 +387,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(100),
     position: 'absolute',
     right: 0,
+    bottom:RFPercentage(0.5)
   },
   sendText: {
     color: '#fff',

@@ -66,7 +66,7 @@ const CleanerJobs = () => {
   const fetchJobs = async () => {
     const user = auth().currentUser;
     if (!user) return;
-    setLoading(true);
+    // setLoading(true);
     try {
       const snapshot = await firestore()
         .collection('Jobs')
@@ -84,7 +84,7 @@ const CleanerJobs = () => {
     } catch (error) {
       console.error('Error fetching jobs:', error);
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
   };
 
@@ -223,6 +223,14 @@ const CleanerJobs = () => {
 
     return matchesLocation && matchesPrice && matchesServiceType;
   });
+
+
+   useEffect(()=> {
+      setLoading(true)
+      setTimeout(() => {
+        setLoading(false)
+      }, 3000);
+    },[])
 
   return (
     <SafeAreaView style={styles.safeArea}>

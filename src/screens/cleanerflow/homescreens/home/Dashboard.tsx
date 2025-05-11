@@ -119,6 +119,14 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  useEffect(()=> {
+    setLoading3(true)
+    setTimeout(() => {
+      setLoading3(false)
+    }, 3000);
+  },[])
+
+
   useFocusEffect(
     React.useCallback(() => {
       fetchUserData();
@@ -152,7 +160,7 @@ const Dashboard: React.FC = () => {
   const serviceDetails = async () => {
     const user = auth().currentUser;
     if (!user) return;
-    setLoading3(true);
+    // setLoading3(true);
     try {
       const userDoc = await firestore()
         .collection('CleanerServices')
@@ -165,7 +173,7 @@ const Dashboard: React.FC = () => {
     } catch (error) {
       console.error('Error fetching user details:', error);
     } finally {
-      setLoading3(false);
+      // setLoading3(false);
     }
   };
 
