@@ -30,9 +30,10 @@ const Settings = () => {
   const [loading, setLoading] = useState(false);
 
   const logOut = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
       await AsyncStorage.multiRemove(['email', 'password', 'role']);
+      await AsyncStorage.setItem('logout', 'yes');
       navigation.navigate('SignIn');
       setModalVisible(false);
       Toast.show({
@@ -49,9 +50,8 @@ const Settings = () => {
       });
     } catch (error) {
       console.log('Logout Error:', error);
-    }
-    finally {
-      setLoading(false)
+    } finally {
+      setLoading(false);
     }
   };
 

@@ -1,5 +1,12 @@
-import {StyleSheet, Text, View, StatusBar} from 'react-native';
-import React from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  StatusBar,
+  Platform,
+  PermissionsAndroid,
+} from 'react-native';
+import React, {useEffect} from 'react';
 import StackNavigator from './src/routers/StackNavigator';
 import {Provider} from 'react-redux';
 import store from './src/redux/Store';
@@ -7,8 +14,106 @@ import Toast from 'react-native-toast-message';
 import {StripeProvider} from '@stripe/stripe-react-native';
 import {PUBLISHABLE_KEY} from '@env';
 import {ThemeProvider} from '@rneui/themed';
+import messaging from '@react-native-firebase/messaging';
+import notifee from '@notifee/react-native';
+import {UnreadMessagesProvider} from './src/utils/UnreadMessagesContext';
 
 const App: React.FC = () => {
+  useEffect(() => {
+    const requestNotificationPermission = async () => {
+      try {
+        if (Platform.OS === 'android' && Platform.Version >= 33) {
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+          );
+          if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+            console.warn('POST_NOTIFICATIONS permission denied.');
+          }
+        }
+
+        const authStatus = await messaging().requestPermission();
+        const enabled =
+          authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+          authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+        if (enabled) {
+          console.log('Notification permission granted.');
+        } else {
+          console.warn('Notification permission denied.');
+        }
+      } catch (error) {
+        console.error('Error requesting permission:', error);
+      }
+    };
+
+    requestNotificationPermission();
+
+    const unsubscribeOnMessage = messaging().onMessage(async remoteMessage => {
+      try {
+        console.log('Foreground Notification:', remoteMessage);
+        onDisplayNotification(remoteMessage);
+      } catch (error) {
+        console.error('Error handling notification:', error);
+      }
+    });
+
+    return () => {
+      unsubscribeOnMessage();
+    };
+  }, []);
+
+  const displayedMessageIds = new Set();
+  const onDisplayNotification = async (remoteMessage: any) => {
+    const messageId =
+      remoteMessage.messageId || remoteMessage.data?.messageId || null;
+    if (messageId && displayedMessageIds.has(messageId)) {
+      console.log('Duplicate notification skipped', messageId);
+      return; // skip duplicate
+    }
+
+    if (messageId) displayedMessageIds.add(messageId);
+    try {
+      console.log('Received Notification:', remoteMessage);
+
+      if (!remoteMessage || !remoteMessage.notification) {
+        console.warn('Invalid notification format:', remoteMessage);
+        return;
+      }
+
+      await notifee.requestPermission({
+        sound: true,
+      });
+
+      const channelId = await notifee.createChannel({
+        id: 'default',
+        sound: 'default',
+        name: 'Default Channel',
+      });
+
+      if (!channelId) {
+        console.error('Failed to create notification channel.');
+        return;
+      }
+
+      await notifee.cancelAllNotifications();
+
+      const {title, body} = remoteMessage.notification;
+
+      await notifee.displayNotification({
+        id: 'single-notification',
+        title: title || 'No Title',
+        body: body || 'No Body',
+        android: {
+          channelId,
+          smallIcon: 'ic_notification',
+          pressAction: {id: 'default'},
+        },
+      });
+    } catch (error) {
+      console.error('Error displaying notification:', error);
+    }
+  };
+
   return (
     <StripeProvider publishableKey={PUBLISHABLE_KEY}>
       <ThemeProvider>
@@ -18,7 +123,9 @@ const App: React.FC = () => {
             translucent
             backgroundColor="transparent"
           />
-          <StackNavigator />
+          <UnreadMessagesProvider>
+            <StackNavigator />
+          </UnreadMessagesProvider>
           <Toast />
         </Provider>
       </ThemeProvider>

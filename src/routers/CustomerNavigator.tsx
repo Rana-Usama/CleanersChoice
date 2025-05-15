@@ -20,6 +20,7 @@ import Jobs from '../screens/customerflow/jobBoard/Jobs';
 import Profile from '../screens/commonflow/home/profile/Profile';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import Messages from '../screens/commonflow/home/Messages';
+import {useUnreadMessages} from '../utils/UnreadMessagesContext';
 
 const Tab = createBottomTabNavigator();
 
@@ -30,6 +31,13 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
 }) => {
   const [isKeyboardVisible, setKeyboardVisible] = useState<boolean>(false);
   const screenFocused = useIsFocused();
+  const {unreadCount} = useUnreadMessages();
+
+  const [_, forceUpdate] = useState(0);
+
+  useEffect(() => {
+    forceUpdate(n => n + 1);
+  }, [unreadCount]);
 
   useEffect(() => {
     const backAction = () => {
@@ -95,11 +103,26 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                   />
                 </View>
               ) : route.name === 'Messages' ? (
-                <Image
-                  source={isFocused ? Icons.msgActive : Icons.msg}
-                  style={styles.imgStyle}
-                  resizeMode="contain"
-                />
+                <View>
+                  <Image
+                    source={isFocused ? Icons.msgActive : Icons.msg}
+                    style={styles.imgStyle}
+                    resizeMode="contain"
+                  />
+                  {unreadCount > 0 && (
+                    <View
+                      style={{
+                        position: 'absolute',
+                        top: -4,
+                        right: -6,
+                        backgroundColor: Colors.gradient1,
+                        borderRadius: 6,
+                        width: 8,
+                        height: 8,
+                      }}
+                    />
+                  )}
+                </View>
               ) : route.name === 'Job Board' ? (
                 <Image
                   source={isFocused ? Icons.jobActive : Icons.job}
@@ -124,7 +147,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                   color: isFocused ? Colors.gradient2 : Colors.secondaryText,
                   fontSize: RFPercentage(1.3),
                   top: RFPercentage(0.5),
-                  fontFamily: isFocused ?  Fonts.fontMedium : Fonts.fontRegular,
+                  fontFamily: isFocused ? Fonts.fontMedium : Fonts.fontRegular,
                 }}>
                 {route.name === 'Home' ? '' : label}
               </Text>

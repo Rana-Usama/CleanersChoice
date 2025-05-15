@@ -33,6 +33,7 @@ import storage from '@react-native-firebase/storage';
 import {Image as CompressorImage} from 'react-native-compressor';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import messaging from '@react-native-firebase/messaging';
 
 const SignUp: React.FC = () => {
   const navigation =
@@ -114,12 +115,16 @@ const SignUp: React.FC = () => {
         console.log('Uploaded File URL:', profileUrl);
       }
 
+      const fcmToken = await messaging().getToken();
+
       const userData = {
         name: values.name,
         email: values.email,
         phone: values.phone,
         uid: user.uid,
         profile: profileUrl || null,
+        fcmToken: fcmToken || null,
+        createdAt: firestore.FieldValue.serverTimestamp(),
         role: userFlow?.userFlow,
         ...(userFlow?.userFlow === 'Cleaner' && {
           subscription: false,

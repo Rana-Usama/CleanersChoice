@@ -1,4 +1,4 @@
-import {ActivityIndicator, StyleSheet, Text, View} from 'react-native';
+import {ActivityIndicator, StyleSheet, Text, View, Linking} from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {DarkTheme, NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
@@ -74,8 +74,18 @@ export type RootStackParamList = {
     receiver: string;
     receiverName: string;
     receiverProfile: string;
+    fcmToken: string;
   };
   Messages: undefined;
+};
+
+const linking = {
+  prefixes: ['cleanerChoiceApp://'],
+  config: {
+    screens: {
+      Chat: 'chat',
+    },
+  },
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -86,6 +96,7 @@ const StackNavigator: React.FC = () => {
   const [user, setUser] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [userData, setUserData] = useState<any>(null);
+  const [loggedOut, setLoggedOut] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCredentialsAndUserData = async () => {
@@ -93,9 +104,12 @@ const StackNavigator: React.FC = () => {
         const storedEmail = await AsyncStorage.getItem('email');
         const storedPassword = await AsyncStorage.getItem('password');
         const storedUser = await AsyncStorage.getItem('role');
+        const logOut = await AsyncStorage.getItem('logout');
+
         setEmail(storedEmail);
         setPassword(storedPassword);
         setUser(storedUser);
+        setLoggedOut(logOut);
 
         if (storedEmail) {
           const userQuery = await firestore()
@@ -123,77 +137,81 @@ const StackNavigator: React.FC = () => {
     fetchCredentialsAndUserData();
   }, []);
 
-  if (isLoading) {
-    return (
-      <SafeAreaProvider>
-        <Decider />
-      </SafeAreaProvider>
-    );
-  }
-
-  console.log('date...........', userData?.subscriptionEndDate > Date.now());
 
   return (
     <SafeAreaProvider>
-      <NavigationContainer>
-        <Stack.Navigator
-          screenOptions={{
-            headerShown: false,
-          }}
-          initialRouteName={
-            email && password && user === 'Customer'
-              ? 'Home'
-              : user === 'Cleaner' &&
-                userData?.subscription === true &&
-                userData.subscriptionEndDate > Date.now() // Valid subscription
-              ? 'CleanerNavigator'
-              : user === 'Cleaner' && userData?.subscription === false // No subscription set
-              ? 'Premium'
-              : user === 'Cleaner' && userData.subscriptionEndDate < Date.now() // Subscription expired
-              ? 'Premium'
-              : 'SplashOne'
-          }>
-          {/* -------Common Screens----- */}
-          <Stack.Screen name="SplashOne" component={Splash} />
-          <Stack.Screen name="OnBoarding" component={OnBoarding} />
-          <Stack.Screen name="UserSelection" component={UserSelection} />
-          <Stack.Screen name="SignUp" component={SignUp} />
-          <Stack.Screen name="SignIn" component={SignIn} />
-          <Stack.Screen name="ResetPassword" component={ResetPassword} />
-          <Stack.Screen name="Verify" component={Verify} />
-          <Stack.Screen name="ChangePassword" component={ChangePassword} />
-          <Stack.Screen name="EditProfile" component={EditProfile} />
-          <Stack.Screen name="JobDetails" component={JobDetails} />
-          <Stack.Screen name="FAQS" component={FAQS} />
-          <Stack.Screen name="Terms" component={Terms} />
-          <Stack.Screen name="Privacy" component={Privacy} />
-          <Stack.Screen name="ChangePasswordV2" component={ChangePasswordV2} />
-          <Stack.Screen name="Availability" component={Availability} />
-          <Stack.Screen name="Chat" component={Chat} />
-          <Stack.Screen name="Messages" component={Messages} />
+      <NavigationContainer linking={linking}>
+        {isLoading ? (
+          <Decider />
+        ) : (
+          <Stack.Navigator
+            screenOptions={{
+              headerShown: false,
+            }}
+            initialRouteName={
+              email && password && user === 'Customer'
+                ? 'Home'
+                : user === 'Cleaner' &&
+                  userData?.subscription === true &&
+                  userData.subscriptionEndDate > Date.now() // Valid subscription
+                ? 'CleanerNavigator'
+                : user === 'Cleaner' && userData?.subscription === false // No subscription set
+                ? 'Premium'
+                : user === 'Cleaner' &&
+                  userData.subscriptionEndDate < Date.now() // Subscription expired
+                ? 'Premium'
+                : loggedOut === 'yes'
+                ? 'SignIn'
+                : 'SplashOne'
+            }>
+            {/* -------Common Screens----- */}
+            <Stack.Screen name="SplashOne" component={Splash}  />
+            <Stack.Screen name="OnBoarding" component={OnBoarding} />
+            <Stack.Screen name="UserSelection" component={UserSelection} />
+            <Stack.Screen name="SignUp" component={SignUp} />
+            <Stack.Screen name="SignIn" component={SignIn} />
+            <Stack.Screen name="ResetPassword" component={ResetPassword} />
+            <Stack.Screen name="Verify" component={Verify} />
+            <Stack.Screen name="ChangePassword" component={ChangePassword} />
+            <Stack.Screen name="EditProfile" component={EditProfile} />
+            <Stack.Screen name="JobDetails" component={JobDetails} />
+            <Stack.Screen name="FAQS" component={FAQS} />
+            <Stack.Screen name="Terms" component={Terms} />
+            <Stack.Screen name="Privacy" component={Privacy} />
+            <Stack.Screen
+              name="ChangePasswordV2"
+              component={ChangePasswordV2}
+            />
+            <Stack.Screen name="Availability" component={Availability} />
+            <Stack.Screen name="Chat" component={Chat} />
+            <Stack.Screen name="Messages" component={Messages} />
 
-          {/* ------------------Customer Flow------------- */}
-          <Stack.Screen name="Home" component={CustomerNavigator} />
-          <Stack.Screen name="ServiceDetails" component={ServiceDetails} />
-          <Stack.Screen name="PostJob" component={PostJob} />
-          <Stack.Screen name="JobPosted" component={JobPosted} />
-          <Stack.Screen
-            name="CheckAvailability"
-            component={CheckAvailability}
-          />
-          <Stack.Screen name="Jobs" component={Jobs} />
+            {/* ------------------Customer Flow------------- */}
+            <Stack.Screen name="Home" component={CustomerNavigator} />
+            <Stack.Screen name="ServiceDetails" component={ServiceDetails} />
+            <Stack.Screen name="PostJob" component={PostJob} />
+            <Stack.Screen name="JobPosted" component={JobPosted} />
+            <Stack.Screen
+              name="CheckAvailability"
+              component={CheckAvailability}
+            />
+            <Stack.Screen name="Jobs" component={Jobs} />
 
-          {/* ----------------- Cleaner Flow ---------------- */}
-          <Stack.Screen name="Premium" component={Premium} />
-          <Stack.Screen name="CleanerNavigator" component={CleanerNavigator} />
-          <Stack.Screen name="ServiceOne" component={ServiceOne} />
-          <Stack.Screen name="ServiceTwo" component={ServiceTwo} />
-          <Stack.Screen name="ServiceThree" component={ServiceThree} />
-          <Stack.Screen
-            name="CancelSubscription"
-            component={CancelSubscription}
-          />
-        </Stack.Navigator>
+            {/* ----------------- Cleaner Flow ---------------- */}
+            <Stack.Screen name="Premium" component={Premium} />
+            <Stack.Screen
+              name="CleanerNavigator"
+              component={CleanerNavigator}
+            />
+            <Stack.Screen name="ServiceOne" component={ServiceOne} />
+            <Stack.Screen name="ServiceTwo" component={ServiceTwo} />
+            <Stack.Screen name="ServiceThree" component={ServiceThree} />
+            <Stack.Screen
+              name="CancelSubscription"
+              component={CancelSubscription}
+            />
+          </Stack.Navigator>
+        )}
       </NavigationContainer>
     </SafeAreaProvider>
   );

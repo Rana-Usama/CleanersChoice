@@ -224,13 +224,12 @@ const CleanerJobs = () => {
     return matchesLocation && matchesPrice && matchesServiceType;
   });
 
-
-   useEffect(()=> {
-      setLoading(true)
-      setTimeout(() => {
-        setLoading(false)
-      }, 3000);
-    },[])
+  useEffect(() => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 3000);
+  }, []);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -713,25 +712,26 @@ const CleanerJobs = () => {
                     onChangeText={handleSearch2}
                   />
                 </View>
-
-                <View style={styles.queryContainer}>
-                  {Array.isArray(serviceTypeFilter) &&
-                    serviceTypeFilter.length > 0 && (
-                      <FlatList
-                        data={serviceTypeFilter}
-                        keyExtractor={(item, index) => index.toString()}
-                        renderItem={({item}) => (
-                          <TouchableOpacity
-                            onPress={() => {
-                              setQuery2(item);
-                              setSelectedType(item);
-                            }}>
-                            <Text style={styles.queryText}>{item}</Text>
-                          </TouchableOpacity>
-                        )}
-                      />
-                    )}
-                </View>
+                {query2.length > 0 && selectedType.length === 0 && (
+                  <View style={styles.queryContainer}>
+                    {Array.isArray(serviceTypeFilter) &&
+                      serviceTypeFilter.length > 0 && (
+                        <FlatList
+                          data={serviceTypeFilter}
+                          keyExtractor={(item, index) => index.toString()}
+                          renderItem={({item}) => (
+                            <TouchableOpacity
+                              onPress={() => {
+                                setQuery2(item);
+                                setSelectedType(item);
+                              }}>
+                              <Text style={styles.queryText}>{item}</Text>
+                            </TouchableOpacity>
+                          )}
+                        />
+                      )}
+                  </View>
+                )}
 
                 <View style={{position: 'absolute', bottom: RFPercentage(3)}}>
                   <GradientButton
@@ -739,7 +739,7 @@ const CleanerJobs = () => {
                     onPress={handleServiceTypeApply}
                     loading={loactionLoading}
                     disabled={
-                      query2.length === 0 || serviceTypeFilter.length === 0
+                      query2.length === 0
                     }
                   />
                 </View>
@@ -876,7 +876,7 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: 'rgba(255, 255, 255, 0.3)',
     height: RFPercentage(21),
-    borderRadius: RFPercentage(2),
+    borderRadius: RFPercentage(1),
   },
   queryText: {
     padding: RFPercentage(2),

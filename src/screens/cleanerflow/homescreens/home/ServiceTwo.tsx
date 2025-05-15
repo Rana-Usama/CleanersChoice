@@ -212,14 +212,15 @@ const ServiceTwo: React.FC = () => {
                             : Icons.gallery
                         }
                         resizeMode="contain"
+                        borderRadius={RFPercentage(1.5)}
                         style={[
                           styles.image,
                           {
                             width: selectedImages[index]
-                              ? RFPercentage(13)
+                              ? RFPercentage(14)
                               : RFPercentage(3),
                             height: selectedImages[index]
-                              ? RFPercentage(13)
+                              ? RFPercentage(14)
                               : RFPercentage(3),
                           },
                         ]}
@@ -280,18 +281,18 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(2),
   },
   imageContainer: {
-    width: RFPercentage(13),
-    height: RFPercentage(13),
+    width: RFPercentage(14),
+    height: RFPercentage(14),
     backgroundColor: 'rgba(243, 244, 246, 1)',
-    borderRadius: RFPercentage(1),
+    borderRadius: RFPercentage(1.5),
     alignItems: 'center',
     justifyContent: 'center',
-    marginHorizontal: RFPercentage(0.6),
+    marginHorizontal: RFPercentage(0.5),
   },
   image: {
-    width: RFPercentage(3),
-    height: RFPercentage(3),
-    borderRadius: RFPercentage(1),
+    // width: RFPercentage(3),
+    // height: RFPercentage(3),
+    // borderRadius: RFPercentage(1.8),
   },
   buttonContainer: {
     alignItems: 'center',
