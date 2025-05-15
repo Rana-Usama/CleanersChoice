@@ -62,5 +62,14 @@
     <string>Allow access to your camera</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>Allow access to your microphone</string>
+	<key>CFBundleURLTypes</key>
+   <array>
+      <dict>
+        <key>CFBundleURLSchemes</key>
+      <array>
+        <string>cleanerChoiceApp</string>
+      </array>
+      </dict>
+    </array>
 </dict>
 </plist>

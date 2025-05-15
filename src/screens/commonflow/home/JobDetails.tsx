@@ -264,7 +264,9 @@ const JobDetails = ({route} : any) => {
                     receiver: item.jobId,
                     receiverName: otherUser?.name,
                     receiverProfile: otherUser?.profile,
-                    senderProfile : userInfo?.profile
+                    senderProfile : userInfo?.profile,
+                    fcmToken : otherUser.fcmToken
+
                   });
                 }, 1000);
               }}

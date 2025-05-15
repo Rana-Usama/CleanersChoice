@@ -26,6 +26,7 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import messaging from '@react-native-firebase/messaging';
 
 const SignIn: React.FC = () => {
   const navigation =
@@ -54,9 +55,10 @@ const SignIn: React.FC = () => {
 
       const userData = userDoc.data();
       const userRole = userData?.role;
-
-      console.log('User Role:', userRole);
-      console.log('Selected:', selected);
+      const fcmToken = await messaging().getToken();
+      await firestore().collection('Users').doc(user.uid).update({
+        fcmToken: fcmToken,
+      });
 
       Toast.show({
         type: 'success',
@@ -75,7 +77,7 @@ const SignIn: React.FC = () => {
         await AsyncStorage.setItem('email', values.email);
         await AsyncStorage.setItem('password', values.password);
         await AsyncStorage.setItem('role', userRole);
-        // console.log('Stored in AsyncStorage:', values.email, userRole);
+        AsyncStorage.removeItem('logout');
       }
 
       if (userRole === 'Cleaner') {

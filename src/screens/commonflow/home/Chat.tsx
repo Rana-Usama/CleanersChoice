@@ -38,6 +38,7 @@ const Chat = ({navigation, route}: any) => {
     receiverName,
     receiverProfile,
     senderProfile,
+    fcmToken,
   } = route.params;
 
   const [message, setMessage] = useState('');
@@ -170,7 +171,7 @@ const Chat = ({navigation, route}: any) => {
           },
           {merge: true},
         );
-
+        await sendPushNotification(message.text);
         setMessage('');
       } catch (e) {
         console.log('Error sending message:', e);
@@ -206,6 +207,35 @@ const Chat = ({navigation, route}: any) => {
     }, [chatId, senderId]),
   );
 
+  console.log(fcmToken);
+  const sendPushNotification = async (message: any) => {
+    try {
+      const response = await fetch(
+        'https://cleaners-choice-server.vercel.app/api/send-notification',
+        {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            fcmToken: fcmToken,
+            title: senderName,
+            body: message,
+            data: {screen: 'chat'},
+          }),
+        },
+      );
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const result = await response.json();
+        console.log(`Message sent to ${fcmToken}:`, result);
+      } else {
+        const text = await response.text();
+        console.log(`Non-JSON response for ${fcmToken}:`, text);
+      }
+    } catch (err) {
+      console.log(`Error sending to ${fcmToken}:`, err);
+    }
+  };
+
   return (
     <LinearGradient
       colors={['rgb(238, 242, 251)', 'rgb(180, 203, 252)']}
@@ -237,7 +267,7 @@ const Chat = ({navigation, route}: any) => {
             ) : (
               <>
                 <View style={styles.noProfileContainer}>
-                  <Text style={styles.noProfile}>{receiverName[0]}</Text>
+                  <Text style={styles.noProfile}>{receiverName?.[0]}</Text>
                 </View>
               </>
             )}
@@ -255,23 +285,23 @@ const Chat = ({navigation, route}: any) => {
             name: senderName,
             avatar: senderProfile,
           }}
-          loadEarlier={!!lastVisible}
-          onLoadEarlier={fetchMoreMessages}
+          // loadEarlier={!!lastVisible}
+          // onLoadEarlier={fetchMoreMessages}
           showAvatarForEveryMessage={true}
           renderAvatar={props => null}
-          renderLoadEarlier={props => (
-            <TouchableOpacity
-              style={styles.loadMessages}
-              onPress={props.onLoadEarlier}>
-              <Text
-                style={{
-                  color: Colors.background,
-                  fontFamily: Fonts.fontMedium,
-                }}>
-                Load earlier messages
-              </Text>
-            </TouchableOpacity>
-          )}
+          // renderLoadEarlier={props => (
+          //   <TouchableOpacity
+          //     style={styles.loadMessages}
+          //     onPress={props.onLoadEarlier}>
+          //     <Text
+          //       style={{
+          //         color: Colors.background,
+          //         fontFamily: Fonts.fontMedium,
+          //       }}>
+          //       Load earlier messages
+          //     </Text>
+          //   </TouchableOpacity>
+          // )}
           renderBubble={props => (
             <Bubble
               {...props}
@@ -387,7 +417,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(100),
     position: 'absolute',
     right: 0,
-    bottom:RFPercentage(0.5)
+    bottom: RFPercentage(0.5),
   },
   sendText: {
     color: '#fff',

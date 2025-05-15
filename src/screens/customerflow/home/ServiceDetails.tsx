@@ -57,9 +57,9 @@ const items = [
     name: 'Lawn Care',
   },
   {
-    id  : '88',
-    name : 'Others'
-  }
+    id: '88',
+    name: 'Others',
+  },
 ];
 
 const ServiceDetails: React.FC = ({route}) => {
@@ -82,7 +82,7 @@ const ServiceDetails: React.FC = ({route}) => {
 
   const onScroll = event => {
     const contentOffsetX = event.nativeEvent.contentOffset.x;
-    const index = Math.floor(contentOffsetX / width);
+    const index = Math.round(contentOffsetX / width);
 
     if (index !== step) {
       setStep(index);
@@ -161,6 +161,26 @@ const ServiceDetails: React.FC = ({route}) => {
     tryToFindChat();
   }, [userId, item?.id]);
 
+  const [token, setFcmToken] = useState(null);
+
+  useEffect(() => {
+    fetchToken(item.id);
+  }, []);
+
+  const fetchToken = async (id: any) => {
+    try {
+      const userDoc = await firestore().collection('Users').doc(id).get();
+      if (userDoc.exists) {
+        const userData = userDoc.data();
+        setFcmToken(userData.fcmToken);
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
+
+  console.log(token);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={{paddingBottom: RFPercentage(10)}}>
@@ -182,21 +202,20 @@ const ServiceDetails: React.FC = ({route}) => {
             scrollEventThrottle={16}
             style={{
               width: width,
-              height: RFPercentage(26),
+              height: RFPercentage(28),
             }}
             contentContainerStyle={{
               alignItems: 'center',
               justifyContent: 'center',
             }}>
             {item.serviceImages.map((image, index) => (
-              <View key={index}>
+              <View key={index} style={{margin: 20}}>
                 <Image
                   source={typeof image === 'string' ? {uri: image} : image}
                   resizeMode="cover"
                   style={{
                     width: width * 0.9,
-                    height: RFPercentage(25),
-                    margin: RFPercentage(2),
+                    height: RFPercentage(28),
                   }}
                   borderRadius={RFPercentage(1)}
                 />
@@ -237,7 +256,7 @@ const ServiceDetails: React.FC = ({route}) => {
                 {item.name}
               </Text>
             </View>
-            <View style={styles.starContainer}>
+            {/* <View style={styles.starContainer}>
               {Array.from({length: 5}, (_, index) => (
                 <Image
                   key={index}
@@ -246,7 +265,7 @@ const ServiceDetails: React.FC = ({route}) => {
                   style={styles.star}
                 />
               ))}
-            </View>
+            </View> */}
             <View style={{position: 'absolute', right: 0, top: 6}}>
               <Text
                 style={{
@@ -484,7 +503,7 @@ const ServiceDetails: React.FC = ({route}) => {
         </View>
 
         {/* Rating and Reviews */}
-        <View style={styles.container}>
+        {/* <View style={styles.container}>
           <View>
             <Text style={[styles.headeing2, {marginTop: RFPercentage(2)}]}>
               Rating & Reviews:
@@ -528,7 +547,7 @@ const ServiceDetails: React.FC = ({route}) => {
           <View style={{marginTop: RFPercentage(2)}}>
             <Review />
           </View>
-        </View>
+        </View> */}
 
         {/* Button Container */}
         <View style={{alignSelf: 'center', marginTop: RFPercentage(7)}}>
@@ -547,6 +566,7 @@ const ServiceDetails: React.FC = ({route}) => {
                   receiverName: item.name,
                   receiverProfile: item.image,
                   senderProfile: profileData.profile,
+                  fcmToken: token,
                 });
               }, 1000);
             }}
@@ -598,8 +618,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   icon: {
-    width: RFPercentage(4),
-    height: RFPercentage(4),
+    width: RFPercentage(6),
+    height: RFPercentage(6),
     borderRadius: RFPercentage(100),
     marginRight: RFPercentage(1),
     borderWidth: 2,
@@ -607,14 +627,14 @@ const styles = StyleSheet.create({
   },
   starContainer: {
     flexDirection: 'row',
-    marginTop: RFPercentage(0.4),
-    marginLeft: RFPercentage(4.5),
+    // marginTop: RFPercentage(0.4),
+    marginLeft: RFPercentage(7),
+    bottom: RFPercentage(1.5),
   },
   star: {
     width: RFPercentage(1.3),
     height: RFPercentage(1.3),
     marginRight: RFPercentage(0.2),
-    bottom: RFPercentage(0.5),
   },
   headeing2: {
     color: Colors.placeholderColor,

@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   ScrollView,
   ActivityIndicator,
+  StatusBar,
 } from 'react-native';
 import React, {useState, useEffect, useCallback} from 'react';
 import firestore from '@react-native-firebase/firestore';
@@ -65,7 +66,7 @@ const Messages = () => {
     setLoading2(true);
     setTimeout(() => {
       setLoading2(false);
-    }, 5000);
+    }, 3000);
   }, []);
 
   useFocusEffect(
@@ -157,6 +158,7 @@ const Messages = () => {
         lastMessage: chat.lastMessage || '',
         lastMessageTimestamp: chat.lastMessageTimestamp,
         receiverId: userData?.uid,
+        fcmToken: userData?.fcmToken,
       };
     } catch (error) {
       // console.log('Error fetching user data: ', error);
@@ -167,6 +169,7 @@ const Messages = () => {
         lastMessage: chat.lastMessage || '',
         lastMessageTimestamp: chat.lastMessageTimestamp,
         receiverId: '',
+        fcmToken: null,
       };
     }
   };
@@ -186,6 +189,11 @@ const Messages = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <StatusBar
+        barStyle={'dark-content'}
+        translucent
+        backgroundColor="transparent"
+      />
       <HeaderBack title="Messages" textStyle={styles.headerText} />
       <View style={styles.container}>
         <View style={styles.toggleContainer}>
@@ -251,23 +259,23 @@ const Messages = () => {
                     height={50}
                     style={{
                       marginRight: RFPercentage(2),
-                      backgroundColor: 'rgb(187, 199, 215)',
+                      backgroundColor: 'rgb(223, 231, 242)',
                     }}
                   />
                   <View style={{flex: 1}}>
                     <Skeleton
                       animation="wave"
-                      width="85%"
+                      width="90%"
                       height={15}
                       style={{
                         marginBottom: 6,
-                        backgroundColor: 'rgb(187, 199, 215)',
+                        backgroundColor: 'rgb(223, 231, 242)',
                       }}
                     />
                     <Skeleton
-                      width="50%"
+                      width="60%"
                       height={12}
-                      style={{backgroundColor: 'rgb(187, 199, 215)'}}
+                      style={{backgroundColor: 'rgb(223, 231, 242)'}}
                     />
                   </View>
                 </View>
@@ -308,6 +316,7 @@ const Messages = () => {
                           receiver: item.receiverId,
                           receiverName: item.name,
                           receiverProfile: item.image,
+                          fcmToken: item.fcmToken,
                         })
                       }
                     />
@@ -315,7 +324,7 @@ const Messages = () => {
                 }}
               />
             ) : (
-              <View style={{marginTop:RFPercentage(10)}}>
+              <View style={{marginTop: RFPercentage(10)}}>
                 <NotFound text="No chat found" />
               </View>
             )}

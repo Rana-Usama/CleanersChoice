@@ -52,17 +52,19 @@ const ServicesCard = ({
               resizeMode="contain"
               style={styles.icon}
             />
-            <Text style={styles.nameText}>{name}</Text>
+            <Text style={styles.nameText}>
+              {name?.length > 20 ? `${name.slice(0, 20)}...` : name}
+            </Text>
           </View>
           <View style={styles.starContainer}>
-            {Array.from({length: rating}, (_, index) => (
+            {/* {Array.from({length: rating}, (_, index) => (
               <Image
                 key={index}
                 source={star}
                 resizeMode="contain"
                 style={styles.star}
               />
-            ))}
+            ))} */}
           </View>
           <View style={styles.priceContainer}>
             <Text style={styles.priceText}>Starts at {price}$</Text>
@@ -95,11 +97,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: RFPercentage(1),
     // backgroundColor:'red',
-    height: RFPercentage(25),
+    height: RFPercentage(28),
   },
   imageContainer: {
     width: '100%',
-    height: RFPercentage(13),
+    height: RFPercentage(16),
   },
   image: {
     width: '100%',
@@ -135,8 +137,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   icon: {
-    width: RFPercentage(2.9),
-    height: RFPercentage(2.9),
+    width: RFPercentage(4),
+    height: RFPercentage(4),
     borderRadius: RFPercentage(100),
     marginRight: RFPercentage(1),
     borderWidth: 1.5,
@@ -151,6 +153,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginTop: RFPercentage(0.4),
     marginLeft: RFPercentage(3.6),
+    height: RFPercentage(1),
   },
   star: {
     width: RFPercentage(1.2),
@@ -162,7 +165,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: RFPercentage(1),
+    marginTop: RFPercentage(0.5),
   },
   priceText: {
     color: Colors.primaryText,
