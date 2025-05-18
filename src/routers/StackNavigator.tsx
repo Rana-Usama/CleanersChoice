@@ -48,7 +48,7 @@ export type RootStackParamList = {
   ChangePassword: undefined;
   Home: undefined;
   ServiceDetails: {item: any};
-  PostJob: {item: any};
+  PostJob: {jobId: string | null};
   JobPosted: undefined;
   JobDetails: {item: any};
   EditProfile: undefined;
@@ -137,7 +137,7 @@ const StackNavigator: React.FC = () => {
     fetchCredentialsAndUserData();
   }, []);
 
-
+  console.log(email, password, user);
   return (
     <SafeAreaProvider>
       <NavigationContainer linking={linking}>
@@ -151,7 +151,9 @@ const StackNavigator: React.FC = () => {
             initialRouteName={
               email && password && user === 'Customer'
                 ? 'Home'
-                : user === 'Cleaner' &&
+                : email &&
+                  password &&
+                  user === 'Cleaner' &&
                   userData?.subscription === true &&
                   userData.subscriptionEndDate > Date.now() // Valid subscription
                 ? 'CleanerNavigator'
@@ -165,7 +167,7 @@ const StackNavigator: React.FC = () => {
                 : 'SplashOne'
             }>
             {/* -------Common Screens----- */}
-            <Stack.Screen name="SplashOne" component={Splash}  />
+            <Stack.Screen name="SplashOne" component={Splash} />
             <Stack.Screen name="OnBoarding" component={OnBoarding} />
             <Stack.Screen name="UserSelection" component={UserSelection} />
             <Stack.Screen name="SignUp" component={SignUp} />

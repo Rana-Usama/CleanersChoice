@@ -113,12 +113,12 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                     <View
                       style={{
                         position: 'absolute',
-                        top: -4,
-                        right: -6,
+                        top: RFPercentage(-0.5),
+                        right: RFPercentage(-1),
                         backgroundColor: Colors.gradient1,
-                        borderRadius: 6,
-                        width: 8,
-                        height: 8,
+                        borderRadius: RFPercentage(100),
+                        width: RFPercentage(1),
+                        height: RFPercentage(1),
                       }}
                     />
                   )}

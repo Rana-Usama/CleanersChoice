@@ -24,7 +24,6 @@ import HeaderBack from '../../../components/HeaderBack';
 import {RootStackParamList} from '../../../routers/StackNavigator';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import Slider from '@react-native-community/slider';
-import {useFocusEffect} from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
 import {BlurView} from '@react-native-community/blur';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -54,27 +53,44 @@ const categories = [
   },
 ];
 
+interface Service {
+  id: string;
+  createdAt?: any;
+  name?: string;
+  image?: string;
+  description?: string;
+  availability?: any[];
+  type?: any[];
+  location?: any;
+  serviceImages?: any[];
+  packages?: any[];
+  rating?: number | null;
+  reviews?: any[];
+}
+
 const Home = () => {
   const [categorySelection, setCategorySelection] = useState('1');
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, 'Home'>>();
   const [priceRange, setPriceRange] = useState([10, 2000]);
   const tempValue = useRef(priceRange[0]);
-  const [servicesData, setServicesData] = useState([]);
+  const [servicesData, setServicesData] = useState<Service[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [rangeSelector, setRangeSelector] = useState(false);
-  const [locations, setLocations] = useState([]);
+  const [locations, setLocations] = useState<any[]>([]);
   const [query, setQuery] = useState('');
   const [loctionFilter, setLocationFilter] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
-  const [nameQuery, setNameQuery] = useState('');
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
-  const [selectedLocation, setSelectedLocation] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState<string>('');
+  const [nameQuery, setNameQuery] = useState<string>('');
   const [loactionLoading, setLocationLoading] = useState(false);
   const [priceLoading, setPriceLoading] = useState(false);
+  const [filteredLocations, setFilteredLocations] = useState<string[]>([]);
 
+  // Fetching Services
   useEffect(() => {
     serviceDetails();
   }, []);
@@ -86,10 +102,28 @@ const Home = () => {
         .collection('CleanerServices')
         .get();
       if (!querySnapshot.empty) {
-        const servicesArray = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        const servicesArray: Service[] = querySnapshot.docs
+          .map(doc => {
+            const data = doc.data() as Partial<Service>;
+            return {
+              id: doc.id,
+              ...data,
+            };
+          })
+          .filter(
+            (service): service is Service =>
+              !!service.createdAt &&
+              !!service.name &&
+              !!service.image &&
+              !!service.description &&
+              !!service.availability &&
+              !!service.type &&
+              !!service.location &&
+              Array.isArray(service.serviceImages) &&
+              Array.isArray(service.packages),
+            // && service.rating !== undefined
+            // && Array.isArray(service.reviews)
+          );
         setServicesData(servicesArray);
         const locationsArray = servicesArray
           .map(service => service.location)
@@ -106,14 +140,16 @@ const Home = () => {
     }
   };
 
-  const handleSearch = query => {
+  // Location Search
+  const handleSearch = (query: any) => {
     setQuery(query);
     const filtered = locations.filter(location =>
-      location.toLowerCase().includes(query.toLowerCase()),
+      location?.toLowerCase()?.includes(query?.toLowerCase()),
     );
     setFilteredLocations(filtered);
   };
 
+  // Modal Animations
   useEffect(() => {
     if (modalVisible || modalVisible2) {
       Animated.parallel([
@@ -144,6 +180,7 @@ const Home = () => {
     }
   }, [modalVisible || modalVisible2]);
 
+  // Location Apply
   const handleLocationApply = () => {
     setLocationLoading(true);
     setTimeout(() => {
@@ -153,6 +190,7 @@ const Home = () => {
     }, 1500);
   };
 
+  // Price Appply
   const handlePriceRangeApply = () => {
     setPriceLoading(true);
     setTimeout(() => {
@@ -162,7 +200,7 @@ const Home = () => {
     }, 1500);
   };
 
-  const [filteredLocations, setFilteredLocations] = useState([]);
+  // Location Trim
   useEffect(() => {
     if (query.trim().length > 0) {
       const filtered = locations.filter(location =>
@@ -174,12 +212,11 @@ const Home = () => {
     }
   }, [query, locations]);
 
+  // Current User
   const dispatch = useDispatch();
-
   useEffect(() => {
     fetchUserData();
   }, []);
-
   const fetchUserData = async () => {
     const user = auth().currentUser;
     if (!user) return;
@@ -194,6 +231,7 @@ const Home = () => {
     }
   };
 
+  // Filtered Jobs
   const finalFilteredJobs = servicesData.filter(service => {
     if (rangeSelector) {
       const price = service?.packages?.[0]?.price || 0;
@@ -223,6 +261,8 @@ const Home = () => {
     }
     return true;
   });
+
+  
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -353,7 +393,7 @@ const Home = () => {
                 <TouchableOpacity
                   activeOpacity={0.8}
                   onPress={() => {
-                    setSelectedLocation([]);
+                    setSelectedLocation('');
                     setLocationFilter(false);
                     setQuery('');
                   }}
@@ -458,13 +498,13 @@ const Home = () => {
                       renderItem={({item}) => (
                         <View style={styles.serviceItem}>
                           <ServicesCard
-                            covers={item.serviceImages}
-                            name={item.name}
-                            icon={item.image}
-                            price={item.packages[0].price}
-                            star={IMAGES.star}
+                            covers={item?.serviceImages}
+                            name={item?.name}
+                            icon={item?.image}
+                            price={item?.packages?.[0]?.price ?? 0}
+                            star={IMAGES?.star}
                             rating={5}
-                            location={item.location}
+                            location={item?.location}
                             onPress={() =>
                               navigation.navigate('ServiceDetails', {
                                 item: item,
@@ -493,7 +533,6 @@ const Home = () => {
               animationType="none"
               onRequestClose={() => setModalVisible(false)}>
               <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : null}
                 keyboardVerticalOffset={Platform.OS === 'ios' ? 40 : 0}
                 style={{
                   flex: 1,

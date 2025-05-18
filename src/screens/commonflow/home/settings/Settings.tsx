@@ -20,6 +20,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import {showToast} from '../../../../utils/ToastMessage';
 
 const Settings = () => {
   const navigation =
@@ -29,6 +30,7 @@ const Settings = () => {
   const [role, setuserRole] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Log out
   const logOut = async () => {
     setLoading(true);
     try {
@@ -36,36 +38,26 @@ const Settings = () => {
       await AsyncStorage.setItem('logout', 'yes');
       navigation.navigate('SignIn');
       setModalVisible(false);
-      Toast.show({
+      showToast({
         type: 'success',
-        text1: 'Log Out',
-        text2: 'Logged out successfully',
-        position: 'top',
-        topOffset: RFPercentage(8),
-        text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
-        text2Style: {
-          fontFamily: Fonts.fontRegular,
-          fontSize: RFPercentage(1.4),
-        },
+        title: 'Log Out',
+        message: 'Logged out successfully',
       });
     } catch (error) {
-      console.log('Logout Error:', error);
     } finally {
       setLoading(false);
     }
   };
 
+  // User Role
   const userRole = async () => {
     const user = auth().currentUser;
     if (!user) return;
-
     try {
       const userDoc = await firestore().collection('Users').doc(user.uid).get();
       if (userDoc.exists) {
         const userData = userDoc.data();
         setuserRole(userData?.role);
-      } else {
-        console.log('User data not found.');
       }
     } catch (error) {
       console.error('Error fetching user details:', error);
@@ -73,38 +65,22 @@ const Settings = () => {
   };
   userRole();
 
+  // Delete Account
   const deleteAccount = async () => {
     try {
       const user = auth().currentUser;
       if (!user) return;
-
       await firestore().collection('Users').doc(user.uid).delete();
-
       await user.delete();
-
       await AsyncStorage.multiRemove(['email', 'password', 'role']);
-
-      Toast.show({
+      showToast({
         type: 'success',
-        text1: 'Account Deleted',
-        text2: 'Your account has been permanently deleted.',
-        position: 'top',
-        topOffset: RFPercentage(8),
-        text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
-        text2Style: {
-          fontFamily: Fonts.fontRegular,
-          fontSize: RFPercentage(1.4),
-        },
+        title: 'Account Deleted',
+        message: 'Your account has been permanently deleted.',
       });
       navigation.navigate('UserSelection');
       setModalVisible2(false);
     } catch (error) {
-      console.error('Error deleting account:', error);
-      Toast.show({
-        type: 'error',
-        text1: 'Error',
-        text2: 'Failed to delete account. Please try again.',
-      });
     }
   };
 

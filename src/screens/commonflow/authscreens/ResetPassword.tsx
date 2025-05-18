@@ -20,8 +20,8 @@ import GradientButton from '../../../components/GradientButton';
 import HeaderBack from '../../../components/HeaderBack';
 import * as yup from 'yup';
 import {Formik} from 'formik';
-import Toast from 'react-native-toast-message';
 import auth from '@react-native-firebase/auth';
+import {showToast} from '../../../utils/ToastMessage';
 
 const ResetPassword: React.FC = () => {
   const navigation =
@@ -30,47 +30,32 @@ const ResetPassword: React.FC = () => {
     >();
   const [loading, setLoading] = useState(false);
 
+  // Validation Schema
   let validationSchema = yup.object({
     email: yup.string().email('Invalid email').required('Email is required'),
   });
 
+  // Send Email
   const handleNext = async (values: any) => {
     if (values.email) {
       setLoading(true);
       try {
         await auth().sendPasswordResetEmail(values.email);
-        Toast.show({
+        showToast({
           type: 'success',
-          text1: 'Success',
-          text2: 'Reset password link sent to your email.',
-          position: 'top',
-          topOffset: RFPercentage(8),
-          text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
-          text2Style: {
-            fontFamily: Fonts.fontRegular,
-            fontSize: RFPercentage(1.4),
-          },
+          title: 'Success',
+          message: 'Reset password link sent to your email.',
         });
         navigation.navigate('SignIn');
       } catch (error) {
-        console.log('Error sending email:', error);
-        Toast.show({
+        showToast({
           type: 'error',
-          text1: 'Error',
-          text2: error?.message,
-          topOffset: RFPercentage(8),
-          text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
-          text2Style: {
-            fontFamily: Fonts.fontRegular,
-            fontSize: RFPercentage(1.4),
-          },
-          position: 'top',
+          title: 'Error',
+          message: 'Error sending link try again.',
         });
       } finally {
         setLoading(false);
       }
-    } else {
-      console.log('Error: Email is required');
     }
   };
 
@@ -84,6 +69,7 @@ const ResetPassword: React.FC = () => {
       <KeyboardAvoidingView>
         <HeaderBack title={'Reset Password?'} left={true} />
 
+        {/* Field Container */}
         <Formik
           initialValues={{
             email: '',
@@ -135,6 +121,7 @@ const ResetPassword: React.FC = () => {
                     title="Enter Email"
                     onPress={handleSubmit}
                     loading={loading}
+                    disabled={loading}
                   />
                 </View>
               </View>

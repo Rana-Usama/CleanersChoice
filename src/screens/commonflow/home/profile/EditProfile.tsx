@@ -25,9 +25,9 @@ import InputField from '../../../../components/InputField';
 import ImagePicker from 'react-native-image-crop-picker';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
-import Toast from 'react-native-toast-message';
 import storage from '@react-native-firebase/storage';
 import {Image as CompressorImage} from 'react-native-compressor';
+import {showToast} from '../../../../utils/ToastMessage';
 
 const EditProfile = () => {
   const navigation =
@@ -35,13 +35,13 @@ const EditProfile = () => {
       NativeStackNavigationProp<RootStackParamList, 'EditProfile'>
     >();
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [img, setImg] = useState(null);
   const [loading, setLoading] = useState(false);
   const [userData, setUserData] = useState(null);
   const [loading2, setLoading2] = useState(false);
 
+  // Image Picker
   const uploadImg = () => {
     ImagePicker.openPicker({
       width: 1000,
@@ -56,6 +56,7 @@ const EditProfile = () => {
       });
   };
 
+  // Fetching User Data
   useEffect(() => {
     setLoading2(true);
     const fetchUserData = async () => {
@@ -79,11 +80,11 @@ const EditProfile = () => {
     fetchUserData();
   }, []);
 
+  // Edit Profile
   const handleEditProfile = async () => {
     const user = auth().currentUser;
     if (!user) return;
     setLoading(true);
-
     try {
       let imageUrl = userData?.profile;
       if (img && img.path !== userData?.profile) {
@@ -92,12 +93,10 @@ const EditProfile = () => {
           maxWidth: 1000,
           quality: 0.8,
         });
-        console.log('Image compression completed successfully');
         const imageRef = storage().ref(`user_profiles/profile_${user.uid}.jpg`);
         await imageRef.putFile(compressedImage);
         imageUrl = await imageRef.getDownloadURL();
       }
-
       if (
         name !== userData?.name ||
         phone !== userData?.phone ||
@@ -111,56 +110,26 @@ const EditProfile = () => {
             phone: phone || userData?.phone,
             profile: imageUrl,
           });
-
         setUserData(prev => ({
           ...prev,
           name: name || prev?.name,
           phone: phone || prev?.phone,
           profile: imageUrl,
         }));
-
-        Toast.show({
+        showToast({
           type: 'success',
-          text1: 'Update Profile',
-          text2: 'Profile has been updated successfully',
-          topOffset: RFPercentage(8),
-          text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
-          text2Style: {
-            fontFamily: Fonts.fontRegular,
-            fontSize: RFPercentage(1.4),
-          },
-          position: 'top',
-        });
-      } else {
-        Toast.show({
-          type: 'info',
-          text1: 'No Changes',
-          text2: 'No updates were made to your profile',
-          topOffset: RFPercentage(8),
-          text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
-          text2Style: {
-            fontFamily: Fonts.fontRegular,
-            fontSize: RFPercentage(1.4),
-          },
-          position: 'top',
+          title: 'Update Profile',
+          message: 'Profile has been updated successfully',
         });
       }
       setLoading(false);
       navigation.goBack();
     } catch (error) {
-      console.error('Error updating profile:', error);
       setLoading(false);
-      Toast.show({
+      showToast({
         type: 'error',
-        text1: 'Error',
-        text2: 'Failed to update profile. Please try again.',
-        topOffset: RFPercentage(8),
-        text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
-        text2Style: {
-          fontFamily: Fonts.fontRegular,
-          fontSize: RFPercentage(1.4),
-        },
-        position: 'top',
+        title: 'Error',
+        message: 'Failed to update profile. Please try again.',
       });
     }
   };
@@ -227,7 +196,7 @@ const EditProfile = () => {
                     customStyle={styles.inputField}
                   />
                 </View>
-               
+
                 <View style={styles.inputContainer}>
                   <Text style={styles.label}>Phone Number</Text>
                   <InputField
@@ -246,8 +215,8 @@ const EditProfile = () => {
                   onPress={handleEditProfile}
                   loading={loading}
                   disabled={
+                    loading &&
                     name === '' &&
-                    email === '' &&
                     phone === '' &&
                     (!img || img?.path === userData?.profile)
                   }

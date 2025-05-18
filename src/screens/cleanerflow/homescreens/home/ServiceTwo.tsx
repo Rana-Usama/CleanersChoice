@@ -26,8 +26,7 @@ import Toast from 'react-native-toast-message';
 
 const images = [{id: 0}, {id: 1}, {id: 2}];
 
-const ServiceTwo: React.FC = () => {
-  const navigation = useNavigation();
+const ServiceTwo: React.FC = ({navigation} : any) => {
   const [selectedImages, setSelectedImages] = useState([null, null, null]);
   const [originalImages, setOriginalImages] = useState([null, null, null]);
   const [loading, setLoading] = useState(false);
@@ -42,7 +41,6 @@ const ServiceTwo: React.FC = () => {
       maxWidth: 1000,
       quality: 0.8,
     });
-    console.log('Image compression completed successfully');
     try {
       const user = auth().currentUser;
       if (!user) return null;
@@ -52,7 +50,6 @@ const ServiceTwo: React.FC = () => {
       const downloadURL = await reference.getDownloadURL();
       return downloadURL;
     } catch (error) {
-      console.log('Error uploading image:', error);
       return null;
     }
   };
@@ -71,7 +68,6 @@ const ServiceTwo: React.FC = () => {
       newImages[index] = {uri: image.path};
       setSelectedImages(newImages);
     } catch (error) {
-      console.log('Image Picker Error:', error);
     }
   };
 
@@ -87,19 +83,11 @@ const ServiceTwo: React.FC = () => {
         type: 'info',
         text1: 'Adding Service',
         text2: 'Please upload at least one picture to proceed',
-        position: 'top',
-        topOffset: RFPercentage(8),
-        text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
-        text2Style: {
-          fontFamily: Fonts.fontRegular,
-          fontSize: RFPercentage(1.4),
-        },
       });
       return;
     }
 
     if (!haveImagesChanged()) {
-      // No changes, go to next screen
       navigation.navigate('ServiceThree');
       return;
     }
@@ -239,6 +227,7 @@ const ServiceTwo: React.FC = () => {
             title={profileCompletion === '100' ? 'Edit' : 'Next'}
             onPress={saveImagesToFirestore}
             loading={loading}
+            disabled={loading}
           />
         </View>
       </View>

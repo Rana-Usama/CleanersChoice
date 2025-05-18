@@ -10,6 +10,7 @@ import {
   ScrollView,
   FlatList,
   Keyboard,
+  Alert,
 } from 'react-native';
 import React, {useState, useEffect, useCallback, useRef} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -32,6 +33,7 @@ import Toast from 'react-native-toast-message';
 import {RootStackParamList} from '../../../../routers/StackNavigator';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import MultiSelect from 'react-native-multiple-select';
+import { showToast } from '../../../../utils/ToastMessage';
 
 const items = [
   {
@@ -121,6 +123,7 @@ const ServiceOne: React.FC = () => {
     }
   };
 
+
   const addServices = async () => {
     const user = auth().currentUser;
     if (!user) return;
@@ -150,19 +153,13 @@ const ServiceOne: React.FC = () => {
       } finally {
         setLoading(false);
       }
-    } else {
-      Toast.show({
+    }
+    else {
+      showToast({
         type: 'info',
-        text1: 'Adding Service',
-        text2: 'Fill the required fields',
-        position: 'top',
-        topOffset: RFPercentage(8),
-        text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
-        text2Style: {
-          fontFamily: Fonts.fontRegular,
-          fontSize: RFPercentage(1.4),
-        },
-      });
+        title : 'Adding Service Details',
+        message : 'Please fill all the fields!'
+      })
     }
   };
 
@@ -248,7 +245,7 @@ const ServiceOne: React.FC = () => {
               placeholder="City name you provide your services at"
               value={location}
               onChangeText={setLoaction}
-              customStyle={{width: '100%', marginBottom:RFPercentage(3)}}
+              customStyle={{width: '100%', marginBottom: RFPercentage(3)}}
             />
 
             {/* Service Type */}
@@ -256,7 +253,10 @@ const ServiceOne: React.FC = () => {
               <MultiSelect
                 hideTags={true}
                 items={items}
-                styleDropdownMenuSubsection={{ borderWidth:1, borderRadius:RFPercentage(0.8)}}
+                styleDropdownMenuSubsection={{
+                  borderWidth: 1,
+                  borderRadius: RFPercentage(0.8),
+                }}
                 uniqueKey="id"
                 ref={multiSelectRef}
                 onSelectedItemsChange={onSelectedItemsChange}
@@ -307,7 +307,6 @@ const ServiceOne: React.FC = () => {
                 hideDropdown
                 textInputProps={{autoFocus: false}}
                 styleDropdownMenu={{height: RFPercentage(6)}}
-                
               />
               <ScrollView
                 horizontal
@@ -323,6 +322,7 @@ const ServiceOne: React.FC = () => {
                 title={profileCompletion === '100' ? 'Edit' : 'Next'}
                 onPress={addServices}
                 loading={loading}
+                disabled={loading}
               />
             </View>
           </View>

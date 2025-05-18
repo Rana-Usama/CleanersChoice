@@ -12,18 +12,16 @@ import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, IMAGES, Icons} from '../../../../constants/Themes';
 import HeaderBack from '../../../../components/HeaderBack';
 import ProfileField from '../../../../components/ProfileField';
-import {useNavigation} from '@react-navigation/native';
-import Toast from 'react-native-toast-message';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import {useFocusEffect} from '@react-navigation/native';
 
-const Profile = () => {
-  const navigation = useNavigation();
+const Profile = ({navigation}: any) => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState('');
 
+  // Fetching User Data
   const userData = useCallback(async () => {
     setLoading(true);
     const user = auth().currentUser;
@@ -37,20 +35,17 @@ const Profile = () => {
         const userData = userDoc.data();
         setProfile(userData?.profile);
         setName(userData?.name);
-      } else {
-        console.log('User data not found.');
       }
     } catch (error) {
-      console.error('Error fetching user details:', error);
     } finally {
       setLoading(false);
     }
-  }, []); 
-  
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
       userData();
-    }, [userData]) 
+    }, [userData]),
   );
 
   return (
@@ -119,7 +114,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1.8,
     borderColor: 'rgba(64, 123, 255, 1)',
-    backgroundColor:Colors.inputField
+    backgroundColor: Colors.inputField,
   },
   imgStyle: {
     width: RFPercentage(15),
@@ -140,7 +135,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize:RFPercentage(2)
+    fontSize: RFPercentage(2),
   },
   profileFieldContainer: {
     marginTop: RFPercentage(4.5),

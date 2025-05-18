@@ -26,9 +26,9 @@ import {Icons} from '../../../constants/Themes';
 import Toast from 'react-native-toast-message';
 import HeaderBack from '../../../components/HeaderBack';
 import NotFound from '../../../components/NotFound';
+import {showToast} from '../../../utils/ToastMessage';
 
-const Jobs = () => {
-  const navigation = useNavigation();
+const Jobs = ({navigation} : any) => {
   const [active, setActive] = useState(true);
   const [completed, setCompleted] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
@@ -36,7 +36,7 @@ const Jobs = () => {
   const [status, setStatus] = useState('active');
   const [loading, setLoading] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState(null);
-  const [loading2, setLoading2] = useState(false)
+  const [loading2, setLoading2] = useState(false);
 
   const toggle1 = () => {
     setStatus('active');
@@ -80,38 +80,29 @@ const Jobs = () => {
   };
 
   const handleDeleteJob = async () => {
-    setLoading2(true)
+    setLoading2(true);
     try {
       await firestore().collection('Jobs').doc(selectedJobId).delete();
       setModalVisible(false);
       fetchMyJobs();
-      Toast.show({
+      showToast({
         type: 'success',
-        text1: 'Job Deleted',
-        text2: 'Job deleted successfully',
-        position: 'top',
-        topOffset: RFPercentage(8),
-        text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
-        text2Style: {
-          fontFamily: Fonts.fontRegular,
-          fontSize: RFPercentage(1.4),
-        },
+        title: 'Job Deleted',
+        message: 'Job deleted successfully',
       });
     } catch (error) {
-      console.error('Error deleting job:', error);
-    }
-    finally {
-      setLoading2(false)
+    } finally {
+      setLoading2(false);
     }
   };
 
-  const getTruncatedText = text => {
+  const getTruncatedText = (text: any) => {
     const maxChars = 12;
     if (text.length <= maxChars) return text;
     return text.slice(0, maxChars).trim() + '... ';
   };
 
-  const getTruncatedText2 = text => {
+  const getTruncatedText2 = (text: any) => {
     const maxChars = 24;
     if (text.length <= maxChars) return text;
     return text.slice(0, maxChars).trim() + '... ';
@@ -122,7 +113,13 @@ const Jobs = () => {
       <ScrollView
         contentContainerStyle={styles.scrollView}
         showsVerticalScrollIndicator={false}>
-          <HeaderBack title='My Posted Jobs' right={true} rightText='Post Job' textStyle={{fontSize:RFPercentage(2)}} onPress={()=> navigation.navigate('PostJob',{jobId:null})}  />
+        <HeaderBack
+          title="My Posted Jobs"
+          right={true}
+          rightText="Post Job"
+          textStyle={{fontSize: RFPercentage(2)}}
+          onPress={() => navigation.navigate('PostJob', {jobId: null})}
+        />
         <View style={styles.container}>
           <View style={styles.toggleContainer}>
             <TouchableOpacity onPress={toggle1}>
@@ -160,16 +157,18 @@ const Jobs = () => {
                 <>
                   <FlatList
                     data={Jobs}
-                    keyExtractor={item => item.id.toString()}
+                    keyExtractor={item => item?.id.toString()}
                     renderItem={({item}) => (
                       <JobCard
-                        name={getTruncatedText(item.title)}
-                        location={getTruncatedText2(item.location)}
-                        price={item.priceRange}
-                        date={item.createdAt}
-                        onPress={() => navigation.navigate('JobDetails', {item : item})}
+                        name={getTruncatedText(item?.title)}
+                        location={getTruncatedText2(item?.location)}
+                        price={item?.priceRange}
+                        date={item?.createdAt}
+                        onPress={() =>
+                          navigation.navigate('JobDetails', {item: item})
+                        }
                         onPress2={() => {
-                          setSelectedJobId(item.id);
+                          setSelectedJobId(item?.id);
                           setModalVisible(true);
                         }}
                         delete={true}
@@ -179,14 +178,14 @@ const Jobs = () => {
                 </>
               ) : (
                 <>
-                  <NotFound text='No Jobs found' />
+                  <NotFound text="No Jobs found" />
                 </>
               )}
             </>
           )}
         </View>
       </ScrollView>
-      
+
       {modalVisible && (
         <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
           <View style={styles.modalContainer}>
@@ -218,7 +217,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
     width: '90%',
     alignSelf: 'center',
-    marginTop:RFPercentage(4)
+    marginTop: RFPercentage(4),
   },
   header: {
     flexDirection: 'row',

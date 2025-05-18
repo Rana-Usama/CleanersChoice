@@ -22,7 +22,7 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import SubscriptionModal from '../../../components/SubscriptionModal';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import Toast from 'react-native-toast-message';
+import {showToast} from '../../../utils/ToastMessage';
 
 const services = [
   {id: 1, name: 'Connect with cleaning customers'},
@@ -36,7 +36,6 @@ const Premium = () => {
     useNavigation<NativeStackNavigationProp<RootStackParamList, 'Premium'>>();
   const {initPaymentSheet, presentPaymentSheet} = useStripe();
   const [loading, setLoading] = useState(false);
-  const [customerId, setCustomerId] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
@@ -109,17 +108,10 @@ const Premium = () => {
     const {error: paymentError} = await presentPaymentSheet();
 
     if (paymentError) {
-      Toast.show({
+       showToast({
         type: 'info',
-        text1: 'Subscription',
-        text2: 'Subscription has not been fullfiled!',
-        position: 'top',
-        topOffset: RFPercentage(8),
-        text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.6)},
-        text2Style: {
-          fontFamily: Fonts.fontRegular,
-          fontSize: RFPercentage(1.3),
-        },
+        title: 'Subscription',
+        message: 'Subscription has not been fullfiled!',
       });
       setLoading(false);
       return;
@@ -137,10 +129,8 @@ const Premium = () => {
     );
 
     const result = await res.json();
-    console.log('result....................', result);
-
     if (result.success) {
-     const {periodEndTimestamp} = result
+      const {periodEndTimestamp} = result;
       if (user?.uid) {
         await firestore().collection('Users').doc(user.uid).update({
           subscription: true,
@@ -149,17 +139,10 @@ const Premium = () => {
           subscriptionEndDate: periodEndTimestamp,
         });
       }
-      Toast.show({
+      showToast({
         type: 'success',
-        text1: 'Subscription',
-        text2: 'Subscription has been purchased successfully!',
-        position: 'top',
-        topOffset: RFPercentage(8),
-        text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.6)},
-        text2Style: {
-          fontFamily: Fonts.fontRegular,
-          fontSize: RFPercentage(1.3),
-        },
+        title: 'Subscription',
+        message: 'Subscription has been purchased successfully!',
       });
       navigation.navigate('CleanerNavigator');
     } else {
@@ -261,6 +244,7 @@ const Premium = () => {
             onPress={openPaymentSheet}
             style={{width: RFPercentage(19)}}
             loading={loading}
+            disabled={loading}
           />
         </View>
       </View>

@@ -46,6 +46,7 @@ const data: Data[] = [
   },
 ];
 
+
 const Terms: React.FC = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, 'Terms'>>();

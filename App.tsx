@@ -17,6 +17,7 @@ import {ThemeProvider} from '@rneui/themed';
 import messaging from '@react-native-firebase/messaging';
 import notifee from '@notifee/react-native';
 import {UnreadMessagesProvider} from './src/utils/UnreadMessagesContext';
+import { toastConfig } from './src/utils/toastConfig';
 
 const App: React.FC = () => {
   useEffect(() => {
@@ -126,7 +127,7 @@ const App: React.FC = () => {
           <UnreadMessagesProvider>
             <StackNavigator />
           </UnreadMessagesProvider>
-          <Toast />
+          <Toast config={toastConfig} />
         </Provider>
       </ThemeProvider>
     </StripeProvider>
