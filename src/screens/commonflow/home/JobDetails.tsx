@@ -22,7 +22,7 @@ import firestore from '@react-native-firebase/firestore';
 import {setJobId} from '../../../redux/Job/Actions';
 import auth from '@react-native-firebase/auth';
 
-const JobDetails = ({route} : any) => {
+const JobDetails = ({route}: any) => {
   const {item} = route.params;
   const navigation =
     useNavigation<
@@ -33,7 +33,7 @@ const JobDetails = ({route} : any) => {
   const [loading2, setLoading2] = useState(false);
   const [loading3, setLoading3] = useState(false);
 
-  const markComplete = async (jobId, newStatus) => {
+  const markComplete = async (jobId: string, newStatus: string) => {
     setLoading(true);
     try {
       await firestore().collection('Jobs').doc(jobId).update({
@@ -65,15 +65,12 @@ const JobDetails = ({route} : any) => {
     return `${userId}_${item.id}`;
   };
   const chatId = generateChatId();
-
   const [existingChatId, setExistingChatId] = useState(null);
 
   const [userInfo, setUserInfo] = useState([]);
-
   useEffect(() => {
     fetchUserData();
   }, []);
-
   const fetchUserData = async () => {
     const user = auth().currentUser;
     if (!user) return;
@@ -89,11 +86,9 @@ const JobDetails = ({route} : any) => {
   };
 
   const [otherUser, setOtherUser] = useState([]);
-
   useEffect(() => {
     otherUserData();
   }, []);
-
   const otherUserData = async () => {
     try {
       const userDoc = await firestore()
@@ -109,13 +104,12 @@ const JobDetails = ({route} : any) => {
     }
   };
 
-  const fetchExistingChatId = async (userId1, userId2) => {
+  const fetchExistingChatId = async (userId1: any, userId2: any) => {
     try {
       const chatsSnapshot = await firestore()
         .collection('Chats')
         .where('participants', 'array-contains', userId1)
         .get();
-
       for (const doc of chatsSnapshot.docs) {
         const chatData = doc.data();
         const participants = chatData.participants || [];
@@ -126,7 +120,6 @@ const JobDetails = ({route} : any) => {
       }
       return null;
     } catch (error) {
-      console.error('Error checking chat document:', error);
       return null;
     }
   };
@@ -151,7 +144,11 @@ const JobDetails = ({route} : any) => {
       <ScrollView
         contentContainerStyle={styles.scrollViewContent}
         showsVerticalScrollIndicator={false}>
-        <HeaderBack title="Posted Job Details" textStyle={styles.headerText} left={true} />
+        <HeaderBack
+          title="Posted Job Details"
+          textStyle={styles.headerText}
+          left={true}
+        />
         <View style={styles.container}>
           <View style={styles.sectionContainer}>
             <View style={styles.rowAlign}>
@@ -232,7 +229,7 @@ const JobDetails = ({route} : any) => {
                 title="Edit Job Post"
                 onPress={handleEditButton}
                 textStyle={styles.buttonText}
-                disabled={loading2}
+                disabled={loading2 || loading}
                 loading={loading2}
               />
               <View style={styles.buttonSpacing}>
@@ -264,9 +261,8 @@ const JobDetails = ({route} : any) => {
                     receiver: item.jobId,
                     receiverName: otherUser?.name,
                     receiverProfile: otherUser?.profile,
-                    senderProfile : userInfo?.profile,
-                    fcmToken : otherUser.fcmToken
-
+                    senderProfile: userInfo?.profile,
+                    fcmToken: otherUser.fcmToken,
                   });
                 }, 1000);
               }}

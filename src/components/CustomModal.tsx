@@ -11,11 +11,11 @@ interface props {
   passwordModal?: boolean;
   onPress3?: () => void;
   onPress?: () => void;
-  onPress2?: () => void; 
-  loader? : boolean;
+  onPress2?: () => void;
+  loader?: boolean;
 }
 
-const CustomModal = (props : props) => {
+const CustomModal = (props: props) => {
   return (
     <View style={styles.modalContainer}>
       {props.passwordModal && (
@@ -42,6 +42,7 @@ const CustomModal = (props : props) => {
             onPress={props.onPress2}
             style={styles.buttonWidth}
             loading={props.loader}
+            disabled={props.loader}
           />
         </View>
       )}

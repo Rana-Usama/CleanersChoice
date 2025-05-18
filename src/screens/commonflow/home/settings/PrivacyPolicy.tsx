@@ -63,16 +63,7 @@ const Privacy: React.FC = () => {
                 return (
                   <>
                     <View style={{marginTop: RFPercentage(2.5)}}>
-                      <Text
-                        style={{
-                          color: Colors.brown,
-                          fontFamily: Fonts.fontRegular,
-                          fontSize: RFPercentage(1.6),
-                          textAlign: 'justify',
-                          lineHeight: RFPercentage(2.8),
-                        }}>
-                        {item.q}
-                      </Text>
+                      <Text style={styles.q}>{item.q}</Text>
                     </View>
                   </>
                 );
@@ -96,5 +87,12 @@ const styles = StyleSheet.create({
   container: {
     width: '90%',
     alignSelf: 'center',
+  },
+  q: {
+    color: Colors.brown,
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.6),
+    textAlign: 'justify',
+    lineHeight: RFPercentage(2.8),
   },
 });

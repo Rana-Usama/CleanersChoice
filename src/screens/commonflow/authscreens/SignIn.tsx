@@ -24,20 +24,23 @@ import * as yup from 'yup';
 import {Formik} from 'formik';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
-import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import messaging from '@react-native-firebase/messaging';
+import {showToast} from '../../../utils/ToastMessage';
 
 const SignIn: React.FC = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, 'SignIn'>>();
   const [selected, setSelected] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
+
+  // Validation Schema
   let validationSchema = yup.object({
     email: yup.string().email('Invalid email').required('Email is required'),
     password: yup.string().required('Password is required'),
   });
 
+  // Sign In
   const handleSignIn = async (values: any) => {
     setLoading(true);
     try {
@@ -45,14 +48,8 @@ const SignIn: React.FC = () => {
         values.email,
         values.password,
       );
-
       const user = userCredential?.user;
-      if (!user) throw new Error('No user found after sign-in.');
-
       const userDoc = await firestore().collection('Users').doc(user.uid).get();
-
-      if (!userDoc.exists) throw new Error('User data not found in Firestore.');
-
       const userData = userDoc.data();
       const userRole = userData?.role;
       const fcmToken = await messaging().getToken();
@@ -60,24 +57,16 @@ const SignIn: React.FC = () => {
         fcmToken: fcmToken,
       });
 
-      Toast.show({
+      showToast({
         type: 'success',
-        text1: 'Sign In',
-        text2: 'Logged in successful!',
-        position: 'top',
-        topOffset: RFPercentage(8),
-        text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
-        text2Style: {
-          fontFamily: Fonts.fontRegular,
-          fontSize: RFPercentage(1.4),
-        },
+        title: 'Sign In',
+        message: 'Logged in successful!',
       });
-
       if (selected) {
         await AsyncStorage.setItem('email', values.email);
         await AsyncStorage.setItem('password', values.password);
         await AsyncStorage.setItem('role', userRole);
-        AsyncStorage.removeItem('logout');
+        await AsyncStorage.setItem('logout', 'no');
       }
 
       if (userRole === 'Cleaner') {
@@ -90,18 +79,10 @@ const SignIn: React.FC = () => {
         await navigation.replace('Home');
       }
     } catch (error) {
-      console.error('Sign In Error:', error);
-      Toast.show({
+      showToast({
         type: 'error',
-        text1: 'Sign In Failed',
-        text2: 'Invalid credentials',
-        position: 'top',
-        topOffset: RFPercentage(8),
-        text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
-        text2Style: {
-          fontFamily: Fonts.fontRegular,
-          fontSize: RFPercentage(1.4),
-        },
+        title: 'Sign In Failed',
+        message: 'Invalid credentials',
       });
     } finally {
       setLoading(false);
@@ -124,6 +105,7 @@ const SignIn: React.FC = () => {
             <Text style={styles.heading}>Welcome Back</Text>
           </View>
 
+          {/* Field Container */}
           <Formik
             initialValues={{
               email: '',
@@ -196,9 +178,13 @@ const SignIn: React.FC = () => {
                     </>
                   )}
                 </View>
+
+                {/* Remember me */}
                 <View style={styles.radioContainer}>
                   <View style={styles.radioInner}>
-                    <View style={styles.radioButtonRow}>
+                    <TouchableOpacity
+                      onPress={() => setSelected(!selected)}
+                      style={styles.radioButtonRow}>
                       <RadioButtonInput
                         obj={{value: 0}}
                         index={0}
@@ -213,7 +199,7 @@ const SignIn: React.FC = () => {
                         buttonOuterSize={RFPercentage(2)}
                       />
                       <Text style={styles.radioLabel}>Remember me?</Text>
-                    </View>
+                    </TouchableOpacity>
 
                     <TouchableOpacity
                       onPress={() => navigation.navigate('ResetPassword')}
@@ -225,11 +211,13 @@ const SignIn: React.FC = () => {
                   </View>
                 </View>
 
+                {/* Button */}
                 <View style={styles.buttonContainer}>
                   <GradientButton
                     title="Sign In"
                     onPress={handleSubmit}
                     loading={loading}
+                    disabled={loading}
                   />
                   <View style={styles.bottomContainer}>
                     <Text style={styles.bottomText}>

@@ -17,7 +17,6 @@ import TimeLine from '../../../../components/TimeLine';
 import GradientButton from '../../../../components/GradientButton';
 import DescriptionField from '../../../../components/DescriptionField';
 import InputField from '../../../../components/InputField';
-import {useNavigation} from '@react-navigation/native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
@@ -26,8 +25,7 @@ import {useSelector} from 'react-redux';
 
 const MAX_PACKAGES = 4;
 
-const ServiceThree: React.FC = () => {
-  const navigation = useNavigation();
+const ServiceThree: React.FC = ({navigation}: any) => {
   const [packages, setPackages] = useState([{id: 1, details: '', price: ''}]);
   const [loading, setLoading] = useState(false);
   const profileCompletion = useSelector(
@@ -83,13 +81,6 @@ const ServiceThree: React.FC = () => {
         type: 'error',
         text1: 'Add at least 3 packages',
         text2: 'Please fill in 3 packages before continuing.',
-        position: 'top',
-        topOffset: RFPercentage(8),
-        text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
-        text2Style: {
-          fontFamily: Fonts.fontRegular,
-          fontSize: RFPercentage(1.4),
-        },
       });
       return;
     }
@@ -156,7 +147,6 @@ const ServiceThree: React.FC = () => {
         <ScrollView
           contentContainerStyle={styles.scrollView}
           keyboardShouldPersistTaps="handled">
-            
           {/* Header */}
           <HeaderBack
             title="Service"

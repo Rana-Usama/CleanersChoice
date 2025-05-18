@@ -26,7 +26,6 @@ import ImagePicker from 'react-native-image-crop-picker';
 import {useSelector} from 'react-redux';
 import * as yup from 'yup';
 import {Formik} from 'formik';
-import Toast from 'react-native-toast-message';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
@@ -34,6 +33,7 @@ import {Image as CompressorImage} from 'react-native-compressor';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import messaging from '@react-native-firebase/messaging';
+import {showToast} from '../../../utils/ToastMessage';
 
 const SignUp: React.FC = () => {
   const navigation =
@@ -43,6 +43,7 @@ const SignUp: React.FC = () => {
   const userFlow = useSelector(state => state.userFlow);
   const [loading, setLoading] = useState<boolean>(false);
 
+  // Validation Schema
   let validationSchema = yup.object({
     name: yup.string().required('Username is required'),
     email: yup.string().email('Invalid email').required('Email is required'),
@@ -57,6 +58,7 @@ const SignUp: React.FC = () => {
       .required('Passwords must match'),
   });
 
+  // Uploading Image
   const uploadImg = () => {
     ImagePicker.openPicker({
       width: 1000,
@@ -71,23 +73,16 @@ const SignUp: React.FC = () => {
       });
   };
 
+  // Sign Up
   const handleSignUp = async (values: any) => {
     if (!selected) {
-      Toast.show({
+      showToast({
         type: 'info',
-        text1: 'Terms & Conditions',
-        text2: 'Accepting terms and conditions is necessary',
-        position: 'top',
-        topOffset: RFPercentage(8),
-        text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
-        text2Style: {
-          fontFamily: Fonts.fontRegular,
-          fontSize: RFPercentage(1.4),
-        },
+        title: 'Terms & Conditions',
+        message: 'Accepting terms and conditions is necessary',
       });
       return;
     }
-
     setLoading(true);
     try {
       const userCredential = await auth().createUserWithEmailAndPassword(
@@ -95,28 +90,21 @@ const SignUp: React.FC = () => {
         values.password,
       );
       const user = userCredential.user;
-
       let profileUrl = '';
-
       if (img) {
         const compressedImage = await CompressorImage.compress(img?.path, {
           compressionMethod: 'manual',
           maxWidth: 1000,
           quality: 0.8,
         });
-        console.log('Image compression completed successfully');
         const uploadUri = compressedImage.replace('file://', '');
         const fileName = `profile_${user.uid}.jpg`;
         const storageRef = storage().ref(`user_profiles/${fileName}`);
-        console.log('Storage Path:', `user_profiles/${fileName}`);
         const uploadTask = storageRef.putFile(uploadUri);
         await uploadTask;
         profileUrl = await storageRef.getDownloadURL();
-        console.log('Uploaded File URL:', profileUrl);
       }
-
       const fcmToken = await messaging().getToken();
-
       const userData = {
         name: values.name,
         email: values.email,
@@ -134,51 +122,33 @@ const SignUp: React.FC = () => {
       };
 
       await firestore().collection('Users').doc(user.uid).set(userData);
-
       await AsyncStorage.setItem('email', values.email);
       await AsyncStorage.setItem('password', values.password);
       await AsyncStorage.setItem('role', userFlow?.userFlow);
 
-      Toast.show({
+      showToast({
         type: 'success',
-        text1: 'Sign Up',
-        text2: 'User registered successfully',
-        position: 'top',
-        topOffset: RFPercentage(8),
-        text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
-        text2Style: {
-          fontFamily: Fonts.fontRegular,
-          fontSize: RFPercentage(1.4),
-        },
+        title: 'Sign Up',
+        message: 'User registered successfully',
       });
-
       navigation.navigate(
         userFlow?.userFlow === 'Customer' ? 'Home' : 'Premium',
       );
     } catch (error: any) {
-      console.log(error);
-      Toast.show({
+      showToast({
         type: 'error',
-        text1: 'Sign Up Failed',
-        text2: error.message,
-        position: 'top',
-        topOffset: RFPercentage(8),
-        text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
-        text2Style: {
-          fontFamily: Fonts.fontRegular,
-          fontSize: RFPercentage(1.4),
-        },
+        title: 'Sign Up Failed',
+        message: error.message,
       });
     } finally {
       setLoading(false);
     }
   };
 
+  // Phone Validation
   const formatPhoneNumber = (phoneNumber: any) => {
     if (!phoneNumber) return '';
-
     let cleaned = phoneNumber.replace(/\D/g, '');
-
     if (cleaned.startsWith('1')) {
       cleaned = `+${cleaned}`;
     } else if (cleaned.startsWith('0')) {
@@ -186,10 +156,8 @@ const SignUp: React.FC = () => {
     } else if (!cleaned.startsWith('+1')) {
       cleaned = `+1${cleaned}`;
     }
-
     const match = cleaned.match(/^\+1(\d{3})(\d{3})(\d{4})$/);
     if (!match) return cleaned;
-
     return `+1 (${match[1]}) ${match[2]}-${match[3]}`;
   };
 
@@ -202,14 +170,11 @@ const SignUp: React.FC = () => {
       />
       <ScrollView showsVerticalScrollIndicator={false}>
         <KeyboardAvoidingView>
+          {/* Header */}
           <View style={styles.container}>
             <TouchableOpacity
               onPress={() => navigation.navigate('UserSelection')}
-              style={{
-                position: 'absolute',
-                top: RFPercentage(7),
-                left: RFPercentage(3),
-              }}>
+              style={styles.backArrow}>
               <AntDesign
                 name="arrowleft"
                 color={Colors.secondaryText}
@@ -221,6 +186,7 @@ const SignUp: React.FC = () => {
               <Text style={styles.title}>Create an account</Text>
             </View>
 
+            {/* Image Uploader */}
             <View style={styles.imgContainer}>
               <TouchableOpacity activeOpacity={0.5} onPress={uploadImg}>
                 <View style={styles.pictureContainer}>
@@ -252,6 +218,7 @@ const SignUp: React.FC = () => {
               </TouchableOpacity>
             </View>
 
+            {/* Fields Container */}
             <Formik
               initialValues={{
                 name: '',
@@ -272,6 +239,7 @@ const SignUp: React.FC = () => {
               }) => (
                 <>
                   <View style={styles.fieldContainer}>
+                    {/* User Name */}
                     <InputField
                       placeholder="Username"
                       onChangeText={handleChange('name')}
@@ -291,6 +259,8 @@ const SignUp: React.FC = () => {
                         </View>
                       </>
                     )}
+
+                    {/* Email */}
                     <InputField
                       placeholder="Email"
                       onChangeText={handleChange('email')}
@@ -310,6 +280,8 @@ const SignUp: React.FC = () => {
                         </View>
                       </>
                     )}
+
+                    {/* Password */}
                     <PasswordField
                       placeholder="Password"
                       onChangeText={handleChange('password')}
@@ -331,6 +303,8 @@ const SignUp: React.FC = () => {
                         </View>
                       </>
                     )}
+
+                    {/* Confirm Password */}
                     <PasswordField
                       placeholder="Confirm Password"
                       onChangeText={handleChange('confirmPassword')}
@@ -352,6 +326,8 @@ const SignUp: React.FC = () => {
                         </View>
                       </>
                     )}
+
+                    {/* Phone */}
                     <InputField
                       placeholder="e.g. +1 (321) 659-6898"
                       onChangeText={text => {
@@ -378,6 +354,7 @@ const SignUp: React.FC = () => {
                     )}
                   </View>
 
+                  {/* Terms And Conditions */}
                   <View style={styles.radioContainer}>
                     <View style={styles.radioInnerContainer}>
                       <RadioButtonInput
@@ -398,11 +375,14 @@ const SignUp: React.FC = () => {
                       </Text>
                     </View>
                   </View>
+
+                  {/* Bottom Container */}
                   <View style={styles.buttonContainer}>
                     <GradientButton
                       title="Sign Up"
                       onPress={handleSubmit}
                       loading={loading}
+                      disabled={loading}
                     />
                     <View style={styles.buttonInnerContainer}>
                       <Text style={styles.bottomText}>
@@ -418,6 +398,8 @@ const SignUp: React.FC = () => {
               )}
             </Formik>
           </View>
+
+          {/* Bottom Stars */}
           <View style={styles.starContainer}>
             <Image
               source={IMAGES.stars}
@@ -443,7 +425,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   errorContainer: {width: '90%', height: 16, bottom: 8},
-
+  backArrow: {
+    position: 'absolute',
+    top: RFPercentage(7),
+    left: RFPercentage(3),
+  },
   errorText: {
     fontSize: RFPercentage(1.3),
     fontFamily: Fonts.fontRegular,

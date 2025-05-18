@@ -266,7 +266,7 @@ const ServiceDetails: React.FC = ({route}) => {
                 />
               ))}
             </View> */}
-            <View style={{position: 'absolute', right: 0, top: 6}}>
+            <View style={{position: 'absolute', right: 0, top: RFPercentage(1.8)}}>
               <Text
                 style={{
                   color: Colors.placeholderColor,

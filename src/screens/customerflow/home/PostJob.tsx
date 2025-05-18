@@ -26,9 +26,7 @@ import {RootStackParamList} from '../../../routers/StackNavigator';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
-import MultiSelect from 'react-native-multiple-select';
-import {useSelector} from 'react-redux';
-import Toast from 'react-native-toast-message';
+import {showToast} from '../../../utils/ToastMessage';
 
 const data1 = [
   {
@@ -60,64 +58,13 @@ const data1 = [
     label: 'Lawn Care',
   },
   {
-    id : 8,
-    label : 'Others'
-  }
-
-];
-
-const data2 = [
-  {
-    id: 1,
-    label: '30-80$',
-  },
-  {
-    id: 2,
-    label: '120-150$',
-  },
-  {
-    id: 3,
-    label: '200-400$',
+    id: 8,
+    label: 'Others',
   },
 ];
 
-const items = [
-  {
-    id: '11',
-    name: 'Window Cleaning',
-  },
-  {
-    id: '22',
-    name: 'Chimney Cleaning',
-  },
-  {
-    id: '33',
-    name: 'Carpet Cleaning',
-  },
-  {
-    id: '44',
-    name: 'Residential Cleaning',
-  },
-  {
-    id: '55',
-    name: 'Pressure Washing',
-  },
-  {
-    id: '66',
-    name: 'Car Washing',
-  },
-  {
-    id: '77',
-    name: 'Lawn Care',
-  },
-  {
-    id : '88',
-    name : 'Others'
-  }
-];
-
-const PostJob = ({route}) => {
-  const {jobId} = route.params
+const PostJob = ({route}: any) => {
+  const {jobId} = route.params;
 
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, 'PostJob'>>();
@@ -135,17 +82,8 @@ const PostJob = ({route}) => {
   const handleSelectedItem = (item: any) => {
     setSelectedType(item);
   };
-  const [selectedRange, setSelectedRange] = useState<string | null>(null);
-  const handleSelectedItem2 = (item: any) => {
-    setSelectedRange(item);
-  };
 
-  const [selectedItems, setSelectedItems] = useState([]);
-  const multiSelectRef = useRef(null);
-  const onSelectedItemsChange = (selectedItems: any) => {
-    setSelectedItems(selectedItems);
-  };
-
+  // Post Job
   const postJob = async () => {
     const user = auth().currentUser;
     if (!user) return;
@@ -165,31 +103,20 @@ const PostJob = ({route}) => {
       if (jobId) {
         await firestore().collection('Jobs').doc(jobId).update(jobData);
         navigation.navigate('Home');
-        Toast.show({
+        showToast({
           type: 'success',
-          text1: 'Job Update',
-          text2: 'Job Updated successfully',
-          position: 'top',
-          topOffset: RFPercentage(8),
-          text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
-          text2Style: {
-            fontFamily: Fonts.fontRegular,
-            fontSize: RFPercentage(1.4),
-          },
+          title: 'Job Update',
+          message: 'Job Updated successfully',
         });
       } else {
         await firestore().collection('Jobs').add(jobData);
         navigation.navigate('JobPosted');
       }
     } catch (error) {
-      console.error('Error posting/updating job:', error);
     } finally {
       setLoading(false);
     }
   };
-
-
-  const [job, setJob] = useState([]);
 
   const fetchJob = async () => {
     const user = auth().currentUser;
@@ -200,16 +127,14 @@ const PostJob = ({route}) => {
 
       if (docSnapshot.exists) {
         const jobData = docSnapshot.data();
-        setJob(jobData);
-        setJobTitle(jobData.title || '');
-        setDescription(jobData.description || '');
-        setLocation(jobData.location || '');
-        setSelectedType(jobData.type || []);
-        setBudget(jobData.priceRange || null);
-        setRemarks(jobData.remarks || '');
-        setDate(moment(jobData.createdAt, 'YYYY-MM-DD  HH:mm A').toDate());
+        setJobTitle(jobData?.title || '');
+        setDescription(jobData?.description || '');
+        setLocation(jobData?.location || '');
+        setSelectedType(jobData?.type || []);
+        setBudget(jobData?.priceRange || null);
+        setRemarks(jobData?.remarks || '');
+        setDate(moment(jobData?.createdAt, 'YYYY-MM-DD  HH:mm A').toDate());
       } else {
-        setJob([]);
       }
     } catch (error) {
       console.error('Error fetching job:', error);
@@ -228,8 +153,7 @@ const PostJob = ({route}) => {
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContainer}>
-
-            {/* Header */}
+          {/* Header */}
           <HeaderBack
             title="Post Job"
             textStyle={{fontSize: RFPercentage(1.8)}}
@@ -271,62 +195,6 @@ const PostJob = ({route}) => {
                 setValue={handleSelectedItem}
               />
 
-              {/* <View style={{flex: 1}}>
-                <MultiSelect
-                  hideTags={true}
-                  items={items}
-                  uniqueKey="id"
-                  ref={multiSelectRef}
-                  onSelectedItemsChange={onSelectedItemsChange}
-                  selectedItems={selectedItems}
-                  selectText="Select Services you want"
-                  searchInputPlaceholderText="Search Services..."
-                  onChangeInput={text => console.log(text)}
-                  altFontFamily={Fonts.fontRegular}
-                  tagRemoveIconColor={Colors.inputFieldColor}
-                  tagBorderColor={Colors.inputFieldColor}
-                  tagTextColor={Colors.inputTextColor}
-                  selectedItemTextColor={Colors.inputTextColor}
-                  selectedItemIconColor={Colors.inputTextColor}
-                  itemTextColor={Colors.placeholderColor}
-                  displayKey="name"
-                  searchInputStyle={{
-                    color: Colors.inputTextColor,
-                    fontFamily: Fonts.fontRegular,
-                  }}
-                  submitButtonColor={Colors.gradient2}
-                  submitButtonText="Save"
-                  fontFamily={Fonts.fontRegular}
-                  selectedItemFontFamily={Fonts.fontRegular}
-                  itemFontFamily={Fonts.fontRegular}
-                  itemFontSize={RFPercentage(1.4)}
-                  hideSubmitButton
-                  styleItemsContainer={{
-                    backgroundColor: 'transparent',
-                    borderRadius: RFPercentage(0.5),
-                  }}
-                  styleTextDropdownSelected={{
-                    color: Colors.placeholderColor,
-                    fontSize: RFPercentage(1.6),
-                    fontFamily: Fonts.fontRegular,
-                  }}
-                  styleTextTag={{
-                    fontSize: RFPercentage(1.5),
-                    fontFamily: Fonts.fontRegular,
-                    color: Colors.inputTextColor,
-                  }}
-                  hideDropdown
-                  textInputProps={{autoFocus: false}}
-                  styleDropdownMenu={{height: RFPercentage(6)}}
-                />
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  style={{marginTop: RFPercentage(0.7)}}>
-                  {multiSelectRef.current?.getSelectedItemsExt(selectedItems)}
-                </ScrollView>
-              </View> */}
-
               <InputField
                 placeholder="Budget e.g; 120$"
                 customStyle={{width: '100%'}}
@@ -335,14 +203,6 @@ const PostJob = ({route}) => {
                 type={'numeric'}
               />
 
-              {/* <CustomDropDown
-                placeholder={jobId ? selectedRange : 'Price Range'}
-                data={data2}
-                placeholderColor={
-                  jobId ? Colors.inputTextColor : Colors.placeholderColor
-                }
-                setValue={handleSelectedItem2}
-              /> */}
               <View style={styles.dateContainer}>
                 <TouchableOpacity
                   onPress={() => setOpen(true)}

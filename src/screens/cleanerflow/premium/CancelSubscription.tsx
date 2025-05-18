@@ -24,6 +24,7 @@ import SubscriptionModal from '../../../components/SubscriptionModal';
 import Toast from 'react-native-toast-message';
 import NextButton from '../../../components/NextButton';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import {showToast} from '../../../utils/ToastMessage';
 
 const services = [
   {id: 1, name: 'Connect with cleaning customers'},
@@ -63,17 +64,10 @@ const CancelSubscription = () => {
 
   const cancelSubscription = async () => {
     if (!subscriptionId) {
-      Toast.show({
-        text1: 'Error',
-        text2: 'No active subscription found.',
+      showToast({
         type: 'error',
-        position: 'top',
-        topOffset: RFPercentage(8),
-        text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
-        text2Style: {
-          fontFamily: Fonts.fontRegular,
-          fontSize: RFPercentage(1.4),
-        },
+        title: 'Error',
+        message: 'No active subscription found.',
       });
       return;
     }
@@ -91,12 +85,8 @@ const CancelSubscription = () => {
       );
 
       const text = await res.text(); // Read as text first
-      console.log('Response Text:', text);
-
       try {
         const result = JSON.parse(text); // Try parsing manually
-        console.log('cancel...............', result);
-
         if (result.success) {
           const {currentPeriodEnd} = result;
           if (user?.uid) {
@@ -110,27 +100,17 @@ const CancelSubscription = () => {
                 cancelSubscription: true,
               });
           }
-          Toast.show({
+
+          showToast({
             type: 'success',
-            text1: 'Cancel Subscription',
-            text2: 'Subscription has been canceled successfully!',
-            position: 'top',
-            topOffset: RFPercentage(8),
-            text1Style: {
-              fontFamily: Fonts.fontBold,
-              fontSize: RFPercentage(1.6),
-            },
-            text2Style: {
-              fontFamily: Fonts.fontRegular,
-              fontSize: RFPercentage(1.3),
-            },
+            title: 'Cancel Subscription',
+            message: 'Subscription has been canceled successfully!',
           });
           navigation.goBack();
         } else {
           setModalVisible2(true);
         }
       } catch (err) {
-        console.log('JSON Parse error:', err);
         setModalVisible2(true);
       }
     } finally {
@@ -230,7 +210,8 @@ const CancelSubscription = () => {
             <BlurView style={styles.blurView} blurType="light" blurAmount={2} />
             <View style={styles.modalCancel}>
               <Text style={styles.cancelHeading}>
-                You’ll loose access to all premium features after one month that includes:
+                You’ll loose access to all premium features after one month that
+                includes:
               </Text>
               <View
                 style={{

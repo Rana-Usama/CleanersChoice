@@ -113,19 +113,17 @@ const Dashboard: React.FC = () => {
       setImg({uri: downloadURL});
       setProfile(downloadURL);
     } catch (error) {
-      console.log('Error uploading image:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(()=> {
-    setLoading3(true)
+  useEffect(() => {
+    setLoading3(true);
     setTimeout(() => {
-      setLoading3(false)
+      setLoading3(false);
     }, 3000);
-  },[])
-
+  }, []);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -143,12 +141,8 @@ const Dashboard: React.FC = () => {
         setProfile(userData?.profile);
         setName(userData?.name);
         dispatch(setProfileData(userData));
-      } else {
-        console.log('User data not found.');
       }
-    } catch (error) {
-      console.error('Error fetching user details:', error);
-    }
+    } catch (error) {}
   };
 
   useFocusEffect(
@@ -160,7 +154,6 @@ const Dashboard: React.FC = () => {
   const serviceDetails = async () => {
     const user = auth().currentUser;
     if (!user) return;
-    // setLoading3(true);
     try {
       const userDoc = await firestore()
         .collection('CleanerServices')
@@ -170,11 +163,7 @@ const Dashboard: React.FC = () => {
         const userData = userDoc.data();
         setService(userData);
       }
-    } catch (error) {
-      console.error('Error fetching user details:', error);
-    } finally {
-      // setLoading3(false);
-    }
+    } catch (error) {}
   };
 
   const handleNext = () => {
@@ -207,15 +196,15 @@ const Dashboard: React.FC = () => {
     setVisibleItems(5);
   };
 
-  const getServiceNames = serviceIds => {
+  const getServiceNames = (serviceIds: any) => {
     return serviceIds
-      ?.map(id => {
+      ?.map((id: any) => {
         const serviceItem = items.find(item => item.id === id);
         return serviceItem ? serviceItem.name : null;
       })
-      .filter(name => name !== null);
+      .filter((name: any) => name !== null);
   };
-  const serviceNames = getServiceNames(service?.type.slice(0, visibleItems));
+  const serviceNames = getServiceNames(service?.type?.slice(0, visibleItems));
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -273,7 +262,6 @@ const Dashboard: React.FC = () => {
         </View>
 
         {/* Service Details */}
-
         {loading3 ? (
           <>
             <ActivityIndicator
@@ -489,6 +477,7 @@ const Dashboard: React.FC = () => {
                     style={styles.button}
                     onPress={handleNext}
                     loading={loading2}
+                    disabled={loading2}
                   />
                 </View>
               </>

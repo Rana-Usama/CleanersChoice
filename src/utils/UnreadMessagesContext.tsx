@@ -2,20 +2,28 @@ import React, {createContext, useContext, useState, useEffect} from 'react';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 
-const UnreadMessagesContext = createContext({ unreadCount: 0 });
+const UnreadMessagesContext = createContext({unreadCount: 0});
 
 export const useUnreadMessages = () => useContext(UnreadMessagesContext);
 
-export const UnreadMessagesProvider = ({children} : any) => {
+export const UnreadMessagesProvider = ({children}: any) => {
   const [unreadCount, setUnreadCount] = useState(0);
-  const user = auth().currentUser;
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user?.uid) return;
+    const unsubscribeAuth = auth().onAuthStateChanged(user => {
+      setUserId(user?.uid || null);
+    });
+
+    return unsubscribeAuth;
+  }, []);
+
+  useEffect(() => {
+    if (!userId) return;
 
     const unsubscribe = firestore()
       .collection('Chats')
-      .where('participants', 'array-contains', user.uid)
+      .where('participants', 'array-contains', userId)
       .onSnapshot(async snapshot => {
         let count = 0;
         snapshot.forEach(doc => {
@@ -23,8 +31,8 @@ export const UnreadMessagesProvider = ({children} : any) => {
           const msg = data.lastMessage;
           if (
             msg?.unread &&
-            msg?.receiver === user.uid &&
-            msg?.senderId !== user.uid
+            msg?.receiver === userId &&
+            msg?.senderId !== userId
           ) {
             count += 1;
           }
@@ -33,10 +41,10 @@ export const UnreadMessagesProvider = ({children} : any) => {
       });
 
     return () => unsubscribe();
-  }, [user?.uid]);
+  }, [userId]);
 
   return (
-    <UnreadMessagesContext.Provider value={{ unreadCount }}>
+    <UnreadMessagesContext.Provider value={{unreadCount}}>
       {children}
     </UnreadMessagesContext.Provider>
   );

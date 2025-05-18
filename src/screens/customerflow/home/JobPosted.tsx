@@ -38,7 +38,7 @@ const JobPosted = () => {
         />
         <Text style={styles.successText}>Job Posted Successfully!</Text>
       </View>
-      <TouchableOpacity onPress={handleNext}>
+      <TouchableOpacity onPress={handleNext} disabled={loading}>
         <View style={styles.homeButton}>
           {loading ? (
             <>

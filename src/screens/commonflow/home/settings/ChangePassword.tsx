@@ -27,6 +27,7 @@ import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as yup from 'yup';
 import {Formik} from 'formik';
+import {showToast} from '../../../../utils/ToastMessage';
 
 const ChangePasswordV2 = () => {
   const navigation =
@@ -34,11 +35,9 @@ const ChangePasswordV2 = () => {
       NativeStackNavigationProp<RootStackParamList, 'ChangePasswordV2'>
     >();
   const [loading, setLoading] = useState(false);
-  const [oldPassword, setOldPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [modalVisible, setModalVisible] = useState<boolean>(false);
 
+  // Validations
   let validationSchema = yup.object({
     oldPassword: yup.string().required('Password is required'),
     password: yup
@@ -51,21 +50,15 @@ const ChangePasswordV2 = () => {
       .required('Passwords must match'),
   });
 
+  // Change Password
   const handleChangePassword = async (values: any) => {
     setLoading(true);
     const user = auth().currentUser;
     if (!user) {
-      Toast.show({
+      showToast({
         type: 'error',
-        text1: 'User Sign In',
-        text2: 'User not found',
-        topOffset: RFPercentage(8),
-        text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
-        text2Style: {
-          fontFamily: Fonts.fontRegular,
-          fontSize: RFPercentage(1.4),
-        },
-        position: 'top',
+        title: 'User Sign In',
+        message: 'User not found',
       });
       setLoading(false);
       return;
@@ -79,21 +72,11 @@ const ChangePasswordV2 = () => {
       await user.updatePassword(values.password);
       await AsyncStorage.multiRemove(['email', 'password', 'role']);
       setModalVisible(true);
-      setOldPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
     } catch (error) {
-      Toast.show({
+      showToast({
         type: 'error',
-        text1: 'Error',
-        text2: `${error?.message}`,
-        topOffset: RFPercentage(8),
-        position: 'top',
-        text1Style: {fontFamily: Fonts.fontBold, fontSize: RFPercentage(1.7)},
-        text2Style: {
-          fontFamily: Fonts.fontRegular,
-          fontSize: RFPercentage(1.4),
-        },
+        title: 'Password Change',
+        message: 'Password not changed',
       });
     } finally {
       setLoading(false);
@@ -228,6 +211,7 @@ const ChangePasswordV2 = () => {
                     title="Change"
                     onPress={handleSubmit}
                     loading={loading}
+                    disabled={loading}
                   />
                 </View>
               </View>
@@ -235,6 +219,8 @@ const ChangePasswordV2 = () => {
           )}
         </Formik>
       </ScrollView>
+
+      {/* Confirmation Modal */}
       {modalVisible && (
         <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
           <View style={{position: 'absolute', width: '100%', height: '100%'}}>
