@@ -83,10 +83,15 @@ const linking = {
   prefixes: ['cleanerChoiceApp://'],
   config: {
     screens: {
-      Chat: 'chat',
+      BottomNavigator: {
+        screens: {
+          Messages: 'messages',
+        },
+      },
     },
   },
 };
+
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
