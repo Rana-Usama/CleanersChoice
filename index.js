@@ -12,7 +12,7 @@ import notifee from '@notifee/react-native';
 const handleNotificationNavigation = screen => {
   if (!screen) return;
 
-  const supportedScreens = ['chat'];
+  const supportedScreens = ['messages'];
   if (supportedScreens.includes(screen.toLowerCase())) {
     Linking.openURL(`cleanerChoiceApp://${screen.toLowerCase()}`);
   }

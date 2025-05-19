@@ -44,47 +44,32 @@ const Chat = ({navigation, route}: any) => {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    const fetchInitialMessages = async () => {
-      const q = firestore()
-        .collection('Chats')
-        .doc(chatId)
-        .collection('Messages')
-        .orderBy('timestamp', 'desc')
-        .limit(100);
+    const unsubscribe = firestore()
+      .collection('Chats')
+      .doc(chatId)
+      .collection('Messages')
+      .orderBy('timestamp', 'desc')
+      .onSnapshot(snapshot => {
+        const newMessages = snapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            _id: doc.id,
+            text: data.text,
+            createdAt: data.timestamp?.toDate() || new Date(),
+            user: {
+              _id: data.senderId,
+              name: data.senderName,
+            },
+          };
+        });
 
-      const snapshot = await q.get();
-      const initialMessages = snapshot.docs.map(doc => {
-        const firebaseMessage = doc.data();
-        return {
-          _id: doc.id,
-          text: firebaseMessage.text,
-          createdAt: firebaseMessage.timestamp.toDate(),
-          user: {
-            _id: firebaseMessage.senderId,
-            name: firebaseMessage.senderName,
-          },
-        };
+        setMessages(GiftedChat.append([], newMessages).filter(Boolean));
       });
-      setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
-      setMessages(prevMessages => {
-        const messagesMap = new Map();
-        prevMessages.forEach(msg => messagesMap.set(msg._id, msg));
-        initialMessages.forEach(msg => messagesMap.set(msg._id, msg));
-        console.log(
-          Array.from(messagesMap.values()).sort(
-            (a, b) => b.createdAt - a.createdAt,
-          ),
-        );
-        return GiftedChat.append(
-          Array.from(messagesMap.values()).sort(
-            (a, b) => b.createdAt - a.createdAt,
-          ),
-        ).filter(Boolean);
-      });
-    };
-    fetchInitialMessages();
+
+    return () => unsubscribe();
   }, [chatId]);
 
+  
   const fetchMoreMessages = async () => {
     if (!lastVisible) return;
     const q = firestore()
@@ -219,7 +204,7 @@ const Chat = ({navigation, route}: any) => {
             fcmToken: fcmToken,
             title: senderName,
             body: message,
-            data: {screen: 'chat'},
+            data: {screen: 'messages'},
           }),
         },
       );
