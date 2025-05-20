@@ -50,8 +50,14 @@ const Messages = () => {
   const [all, setAll] = useState(true);
   const [unread, setUnread] = useState(false);
 
-  const user = auth().currentUser;
-  const userId = user?.uid;
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const unsubscribeAuth = auth().onAuthStateChanged(user => {
+      setUserId(user?.uid || null);
+    });
+    return unsubscribeAuth;
+  }, []);
 
   const toggle1 = () => {
     setAll(true);

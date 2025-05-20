@@ -39,7 +39,7 @@ const SignUp: React.FC = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, 'SignUp'>>();
   const [selected, setSelected] = useState<boolean>(false);
-  const [img, setImg] = useState(null);
+  const [img, setImg] = useState<any>(null);
   const userFlow = useSelector(state => state.userFlow);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -170,6 +170,7 @@ const SignUp: React.FC = () => {
       />
       <ScrollView showsVerticalScrollIndicator={false}>
         <KeyboardAvoidingView>
+          
           {/* Header */}
           <View style={styles.container}>
             <TouchableOpacity

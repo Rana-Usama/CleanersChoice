@@ -25,13 +25,10 @@ messaging().setBackgroundMessageHandler(async remoteMessage => {
     remoteMessage.messageId || remoteMessage.data?.messageId || null;
 
   if (messageId && displayedMessageIds.has(messageId)) {
-    console.log('Duplicate background notification skipped', messageId);
     return; // skip duplicate
   }
 
   if (messageId) displayedMessageIds.add(messageId);
-
-  console.log('Background Notification:', remoteMessage);
 
   await notifee.requestPermission({sound: true});
 
@@ -57,15 +54,10 @@ messaging().setBackgroundMessageHandler(async remoteMessage => {
     },
   });
 
-  // handleNotificationNavigation(remoteMessage?.data?.screen);
 });
 
 // Foreground/background notification tap handler
 messaging().onNotificationOpenedApp(remoteMessage => {
-  // console.log(
-  //   'Notification caused app to open from background:',
-  //   remoteMessage,
-  // );
   handleNotificationNavigation(remoteMessage?.data?.screen);
 });
 
@@ -74,10 +66,6 @@ messaging()
   .getInitialNotification()
   .then(remoteMessage => {
     if (remoteMessage) {
-      // console.log(
-      //   'Notification caused app to open from quit state:',
-      //   remoteMessage,
-      // );
       handleNotificationNavigation(remoteMessage?.data?.screen);
     }
   });
