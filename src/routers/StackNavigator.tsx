@@ -79,20 +79,6 @@ export type RootStackParamList = {
   Messages: undefined;
 };
 
-const linking = {
-  prefixes: ['cleanerChoiceApp://'],
-  config: {
-    screens: {
-      BottomNavigator: {
-        screens: {
-          Messages: 'messages',
-        },
-      },
-    },
-  },
-};
-
-
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const StackNavigator: React.FC = () => {
@@ -142,7 +128,24 @@ const StackNavigator: React.FC = () => {
     fetchCredentialsAndUserData();
   }, []);
 
-  console.log(email, password, user);
+  const linking = {
+    prefixes: ['cleanerChoiceApp://'],
+    config: {
+      screens: {
+        Home: {
+          screens: {
+            Messages: 'messages',
+          },
+        },
+        CleanerNavigator: {
+          screens: {
+            Messages: 'messages',
+          },
+        },
+      },
+    },
+  };
+
   return (
     <SafeAreaProvider>
       <NavigationContainer linking={linking}>
