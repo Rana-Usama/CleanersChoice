@@ -17,9 +17,10 @@ import {ThemeProvider} from '@rneui/themed';
 import messaging from '@react-native-firebase/messaging';
 import notifee from '@notifee/react-native';
 import {UnreadMessagesProvider} from './src/utils/UnreadMessagesContext';
-import { toastConfig } from './src/utils/toastConfig';
+import {toastConfig} from './src/utils/toastConfig';
 
 const App: React.FC = () => {
+  // Notification Permission
   useEffect(() => {
     const requestNotificationPermission = async () => {
       try {
@@ -28,7 +29,7 @@ const App: React.FC = () => {
             PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
           );
           if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-            console.warn('POST_NOTIFICATIONS permission denied.');
+            console.log('POST_NOTIFICATIONS permission denied.');
           }
         }
 
@@ -40,10 +41,10 @@ const App: React.FC = () => {
         if (enabled) {
           console.log('Notification permission granted.');
         } else {
-          console.warn('Notification permission denied.');
+          console.log('Notification permission denied.');
         }
       } catch (error) {
-        console.error('Error requesting permission:', error);
+        console.log('Error requesting permission:', error);
       }
     };
 
@@ -51,10 +52,9 @@ const App: React.FC = () => {
 
     const unsubscribeOnMessage = messaging().onMessage(async remoteMessage => {
       try {
-        console.log('Foreground Notification:', remoteMessage);
         onDisplayNotification(remoteMessage);
       } catch (error) {
-        console.error('Error handling notification:', error);
+        console.log('Error handling notification:', error);
       }
     });
 
@@ -63,39 +63,30 @@ const App: React.FC = () => {
     };
   }, []);
 
+  // Display foreground Notifications
   const displayedMessageIds = new Set();
   const onDisplayNotification = async (remoteMessage: any) => {
     const messageId =
       remoteMessage.messageId || remoteMessage.data?.messageId || null;
     if (messageId && displayedMessageIds.has(messageId)) {
-      console.log('Duplicate notification skipped', messageId);
       return; // skip duplicate
     }
-
     if (messageId) displayedMessageIds.add(messageId);
     try {
-      console.log('Received Notification:', remoteMessage);
-
       if (!remoteMessage || !remoteMessage.notification) {
-        console.warn('Invalid notification format:', remoteMessage);
         return;
       }
-
       await notifee.requestPermission({
         sound: true,
       });
-
       const channelId = await notifee.createChannel({
         id: 'default',
         sound: 'default',
         name: 'Default Channel',
       });
-
       if (!channelId) {
-        console.error('Failed to create notification channel.');
         return;
       }
-
       await notifee.cancelAllNotifications();
 
       const {title, body} = remoteMessage.notification;
@@ -111,9 +102,10 @@ const App: React.FC = () => {
         },
       });
     } catch (error) {
-      console.error('Error displaying notification:', error);
+      console.log('Error displaying notification:', error);
     }
   };
+
 
   return (
     <StripeProvider publishableKey={PUBLISHABLE_KEY}>
