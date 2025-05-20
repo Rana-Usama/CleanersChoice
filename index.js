@@ -57,15 +57,15 @@ messaging().setBackgroundMessageHandler(async remoteMessage => {
     },
   });
 
-  handleNotificationNavigation(remoteMessage?.data?.screen);
+  // handleNotificationNavigation(remoteMessage?.data?.screen);
 });
 
 // Foreground/background notification tap handler
 messaging().onNotificationOpenedApp(remoteMessage => {
-  console.log(
-    'Notification caused app to open from background:',
-    remoteMessage,
-  );
+  // console.log(
+  //   'Notification caused app to open from background:',
+  //   remoteMessage,
+  // );
   handleNotificationNavigation(remoteMessage?.data?.screen);
 });
 
@@ -74,10 +74,10 @@ messaging()
   .getInitialNotification()
   .then(remoteMessage => {
     if (remoteMessage) {
-      console.log(
-        'Notification caused app to open from quit state:',
-        remoteMessage,
-      );
+      // console.log(
+      //   'Notification caused app to open from quit state:',
+      //   remoteMessage,
+      // );
       handleNotificationNavigation(remoteMessage?.data?.screen);
     }
   });
