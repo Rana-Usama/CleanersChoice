@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
   serviceText: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.35),
+    fontSize: RFPercentage(1.4),
     lineHeight: RFPercentage(2.4),
     paddingHorizontal: RFPercentage(1),
     marginTop:RFPercentage(0.5)

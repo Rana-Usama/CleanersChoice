@@ -131,12 +131,12 @@ const styles = StyleSheet.create({
   questionText: {
     color: 'rgba(51, 65, 85, 1)',
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
   },
   answerText: {
     color: Colors.secondaryText,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     marginTop: RFPercentage(1),
   },
 });

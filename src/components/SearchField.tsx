@@ -40,7 +40,7 @@ export default SearchField;
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    height: RFPercentage(5.2),
+    height: RFPercentage(5.4),
     borderWidth: 1,
     borderColor: Colors.inputFieldColor,
     borderRadius: RFPercentage(0.9),
@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
   input: {
     color: Colors.inputTextColor,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     paddingVertical: 0,
     marginVertical: 0,
     textAlignVertical: 'center',

@@ -241,8 +241,8 @@ const styles = StyleSheet.create({
     // marginTop: RFPercentage(3),
   },
   toggleButton: {
-    width: RFPercentage(13),
-    height: RFPercentage(4),
+    width: RFPercentage(14),
+    height: RFPercentage(4.5),
     borderRadius: RFPercentage(100),
     alignItems: 'center',
     justifyContent: 'center',
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
   toggleText: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
   },
   activeText: {
     color: Colors.background,

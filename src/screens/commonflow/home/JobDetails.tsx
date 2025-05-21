@@ -231,6 +231,7 @@ const JobDetails = ({route}: any) => {
                 textStyle={styles.buttonText}
                 disabled={loading2 || loading}
                 loading={loading2}
+                style={{width:RFPercentage(20)}}
               />
               <View style={styles.buttonSpacing}>
                 <GradientButton
@@ -241,6 +242,7 @@ const JobDetails = ({route}: any) => {
                   }}
                   loading={loading}
                   disabled={loading}
+                   style={{width:RFPercentage(20)}}
                 />
               </View>
             </View>
@@ -306,20 +308,20 @@ const styles = StyleSheet.create({
   label: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.8),
     left: RFPercentage(0.8),
   },
   value: {
     color: 'rgba(75, 85, 99, 1)',
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     marginTop: RFPercentage(1),
     // left:RFPercentage(1)
   },
   description: {
     color: 'rgba(75, 85, 99, 1)',
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.6),
     marginTop: 4,
     textAlign: 'justify',
     lineHeight: 18,
@@ -336,7 +338,7 @@ const styles = StyleSheet.create({
     marginLeft: RFPercentage(2),
   },
   buttonText: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.7),
   },
   headerText: {
     fontSize: RFPercentage(2),

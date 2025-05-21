@@ -9,7 +9,7 @@ export const Colors: {[key: string]: string} = {
   placeholderColor: 'rgba(107, 114, 128, 1)',
   brown: 'rgba(68, 64, 60, 1)',
   inputTextColor: 'rgba(0, 0, 0, 0.8)',
-  error: 'rgba(248, 113, 113, 0.8)',
+  error: 'rgb(246, 98, 98)',
 };
 
 export const Icons: {[key: string]: any} = {
@@ -59,6 +59,7 @@ export const Icons: {[key: string]: any} = {
   priceRangeWhite: require('../assets/icons/card-white.png'),
   verifyWhite: require('../assets/icons/verify-white.png'),
   locationWhite: require('../assets/icons/location-white.png'),
+  slider: require('../assets/icons/cd.png'),
 };
 
 export const IMAGES: {[key: string]: any} = {

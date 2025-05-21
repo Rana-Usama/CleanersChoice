@@ -36,12 +36,15 @@ const Settings = () => {
     try {
       await AsyncStorage.multiRemove(['email', 'password', 'role']);
       await AsyncStorage.setItem('logout', 'yes');
-      navigation.navigate('SignIn');
       setModalVisible(false);
       showToast({
         type: 'success',
         title: 'Log Out',
         message: 'Logged out successfully',
+      });
+      navigation.reset({
+        index: 0,
+        routes: [{name: 'SignIn'}],
       });
     } catch (error) {
     } finally {
@@ -66,21 +69,43 @@ const Settings = () => {
   userRole();
 
   // Delete Account
+
   const deleteAccount = async () => {
     try {
       const user = auth().currentUser;
       if (!user) return;
+
+      const email = await AsyncStorage.getItem('email');
+      const password = await AsyncStorage.getItem('password');
+
+      if (!email || !password) {
+        throw new Error('Re-authentication failed. Please log in again.');
+      }
+
+      const credential = auth.EmailAuthProvider.credential(email, password);
+      await user.reauthenticateWithCredential(credential);
+
       await firestore().collection('Users').doc(user.uid).delete();
       await user.delete();
       await AsyncStorage.multiRemove(['email', 'password', 'role']);
+
       showToast({
         type: 'success',
         title: 'Account Deleted',
         message: 'Your account has been permanently deleted.',
       });
-      navigation.navigate('UserSelection');
       setModalVisible2(false);
+      navigation.reset({
+        index: 0,
+        routes: [{name: 'UserSelection'}],
+      });
     } catch (error) {
+      console.error('Account deletion error:', error);
+      showToast({
+        type: 'danger',
+        title: 'Error',
+        message: error?.message || 'Account deletion failed.',
+      });
     }
   };
 

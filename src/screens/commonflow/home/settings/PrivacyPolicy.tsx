@@ -91,8 +91,8 @@ const styles = StyleSheet.create({
   q: {
     color: Colors.brown,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.8),
     textAlign: 'justify',
-    lineHeight: RFPercentage(2.8),
+    lineHeight: RFPercentage(3),
   },
 });

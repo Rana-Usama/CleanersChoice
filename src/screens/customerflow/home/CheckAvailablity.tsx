@@ -95,14 +95,14 @@ const styles = StyleSheet.create({
   nameText: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.9),
+    fontSize: RFPercentage(2),
     lineHeight: RFPercentage(2.8),
     marginTop: RFPercentage(1),
   },
   descriptionText: {
     color: Colors.secondaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     lineHeight: RFPercentage(2.8),
     marginTop: RFPercentage(2.2),
     textAlign: 'center',

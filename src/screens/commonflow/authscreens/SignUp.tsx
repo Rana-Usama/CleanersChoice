@@ -79,7 +79,7 @@ const SignUp: React.FC = () => {
       showToast({
         type: 'info',
         title: 'Terms & Conditions',
-        message: 'Accepting terms and conditions is necessary',
+        message: 'Please accept terms and conditions in order to proceed',
       });
       return;
     }
@@ -129,7 +129,7 @@ const SignUp: React.FC = () => {
       showToast({
         type: 'success',
         title: 'Sign Up',
-        message: 'User registered successfully',
+        message: 'Signed Up successfully ',
       });
       navigation.navigate(
         userFlow?.userFlow === 'Customer' ? 'Home' : 'Premium',
@@ -138,7 +138,7 @@ const SignUp: React.FC = () => {
       showToast({
         type: 'error',
         title: 'Sign Up Failed',
-        message: error.message,
+        message: 'Email is already in use',
       });
     } finally {
       setLoading(false);
@@ -425,14 +425,14 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.background,
   },
-  errorContainer: {width: '90%', height: 16, bottom: 8},
+  errorContainer: {width: '90%', height: RFPercentage(2), bottom: 8},
   backArrow: {
     position: 'absolute',
     top: RFPercentage(7),
     left: RFPercentage(3),
   },
   errorText: {
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
     color: Colors.error,
     textAlign: 'left',
@@ -447,7 +447,7 @@ const styles = StyleSheet.create({
   title: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.2),
     textAlign: 'center',
   },
   imgContainer: {
@@ -509,7 +509,7 @@ const styles = StyleSheet.create({
   },
   radioLabel: {
     color: Colors.primaryText,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontRegular,
     marginLeft: RFPercentage(0.8),
   },
@@ -527,12 +527,12 @@ const styles = StyleSheet.create({
   },
   bottomText: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontRegular,
   },
   signIn: {
     color: Colors.gradient1,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
     left: 3,
   },
