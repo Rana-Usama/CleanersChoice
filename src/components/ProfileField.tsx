@@ -32,7 +32,7 @@ export default ProfileField
 const styles = StyleSheet.create({
     container: {
         width: '100%',
-        height: RFPercentage(5.6),
+        height: RFPercentage(5.8),
         borderWidth: 1,
         borderColor: Colors.inputFieldColor,
         borderRadius: RFPercentage(1),
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     text: {
         color: Colors.brown,
         fontFamily: Fonts.fontRegular,
-        fontSize: RFPercentage(1.6),
+        fontSize: RFPercentage(1.7),
         left: RFPercentage(1),
         top:RFPercentage(0.1)
     }

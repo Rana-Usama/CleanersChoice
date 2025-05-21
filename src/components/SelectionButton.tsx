@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(249, 252, 255, 1)',
   },
   nextButtonText: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
     color: Colors.primaryText,
   },

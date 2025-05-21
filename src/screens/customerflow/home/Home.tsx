@@ -262,8 +262,6 @@ const Home = () => {
     return true;
   });
 
-  
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
@@ -397,10 +395,14 @@ const Home = () => {
                     setLocationFilter(false);
                     setQuery('');
                   }}
-                  style={{position: 'absolute', right: RFPercentage(-0.4)}}>
+                  style={{
+                    position: 'absolute',
+                    right: RFPercentage(-0.6),
+                    top: RFPercentage(-0.3),
+                  }}>
                   <AntDesign
                     name="closecircle"
-                    size={RFPercentage(1.6)}
+                    size={RFPercentage(2)}
                     color={'rgb(206, 211, 219)'}
                   />
                 </TouchableOpacity>
@@ -449,10 +451,14 @@ const Home = () => {
                 <TouchableOpacity
                   activeOpacity={0.8}
                   onPress={() => setRangeSelector(false)}
-                  style={{position: 'absolute', right: RFPercentage(-0.4)}}>
+                  style={{
+                    position: 'absolute',
+                    right: RFPercentage(-0.6),
+                    top: RFPercentage(-0.3),
+                  }}>
                   <AntDesign
                     name="closecircle"
-                    size={RFPercentage(1.6)}
+                    size={RFPercentage(2)}
                     color={'rgb(206, 211, 219)'}
                   />
                 </TouchableOpacity>
@@ -681,7 +687,10 @@ const Home = () => {
                         }}
                         minimumTrackTintColor={Colors.gradient1}
                         maximumTrackTintColor="gray"
-                        thumbTintColor={Colors.gradient1}
+                        // thumbTintColor={Colors.gradient1}
+                        thumbImage={Icons.slider}
+                      
+                    
                       />
                       <View style={styles.sliderLabelsContainer}>
                         <Text
@@ -695,9 +704,11 @@ const Home = () => {
                         <Text style={styles.sliderLabel}>2000$+</Text>
                       </View>
                       <View style={{marginTop: RFPercentage(8)}}>
-                        <Text style={styles.range}>
-                          Price Range: 0$ - {tempValue.current}$
-                        </Text>
+                        {tempValue.current && (
+                          <Text style={styles.range}>
+                            Price Range: 0$ - {tempValue.current}$
+                          </Text>
+                        )}
                       </View>
                     </View>
                     <View
@@ -791,7 +802,7 @@ const styles = StyleSheet.create({
   applyLocation: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.9),
+    fontSize: RFPercentage(2.2),
   },
   queryContainer: {
     top: RFPercentage(0.5),
@@ -838,7 +849,7 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(3),
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
   },
   categoryBox: {
     width: RFPercentage(9.5),
@@ -919,8 +930,9 @@ const styles = StyleSheet.create({
   },
   sliderLabel: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.semiBold,
+    marginTop:RFPercentage(1)
   },
   flatListContainer: {
     paddingHorizontal: RFPercentage(1.2),

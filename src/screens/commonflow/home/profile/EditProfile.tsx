@@ -118,7 +118,7 @@ const EditProfile = () => {
         }));
         showToast({
           type: 'success',
-          title: 'Update Profile',
+          title: 'Profile updated',
           message: 'Profile has been updated successfully',
         });
       }
@@ -132,6 +132,21 @@ const EditProfile = () => {
         message: 'Failed to update profile. Please try again.',
       });
     }
+  };
+
+  const formatPhoneNumber = (phoneNumber: any) => {
+    if (!phoneNumber) return '';
+    let cleaned = phoneNumber.replace(/\D/g, '');
+    if (cleaned.startsWith('1')) {
+      cleaned = `+${cleaned}`;
+    } else if (cleaned.startsWith('0')) {
+      cleaned = `+1${cleaned.slice(1)}`;
+    } else if (!cleaned.startsWith('+1')) {
+      cleaned = `+1${cleaned}`;
+    }
+    const match = cleaned.match(/^\+1(\d{3})(\d{3})(\d{4})$/);
+    if (!match) return cleaned;
+    return `+1 (${match[1]}) ${match[2]}-${match[3]}`;
   };
 
   return (
@@ -150,7 +165,7 @@ const EditProfile = () => {
             />
             <View style={styles.container}>
               {/* Profile Image */}
-              <View style={styles.imgContainer}>
+              <TouchableOpacity onPress={uploadImg} style={styles.imgContainer}>
                 <View style={styles.pictureContainer}>
                   {loading2 ? (
                     <ActivityIndicator
@@ -178,7 +193,7 @@ const EditProfile = () => {
                     style={styles.uploadedImg}
                   />
                 </TouchableOpacity>
-              </View>
+              </TouchableOpacity>
 
               {/* Edit Info Title */}
               <View style={styles.sectionTitle}>
@@ -202,7 +217,12 @@ const EditProfile = () => {
                   <InputField
                     placeholder={userData?.phone}
                     value={phone}
-                    onChangeText={setPhone}
+                    onChangeText={text => {
+                      const formatted = formatPhoneNumber(text);
+                      setPhone(formatted);
+                    }}
+                    type={'phone-pad'}
+                    length={16}
                     customStyle={styles.inputField}
                   />
                 </View>
@@ -294,7 +314,7 @@ const styles = StyleSheet.create({
   sectionTitleText: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(2),
   },
   inputFieldsWrapper: {
     marginTop: RFPercentage(1),
@@ -305,7 +325,7 @@ const styles = StyleSheet.create({
   label: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
   },
   inputField: {
     width: '100%',

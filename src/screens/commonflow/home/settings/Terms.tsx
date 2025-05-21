@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   headerText: {
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.2),
   },
   termsTextContainer: {
     marginTop: RFPercentage(3),
@@ -109,9 +109,9 @@ const styles = StyleSheet.create({
   termsText: {
     color: Colors.heading,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     textAlign: 'justify',
-    lineHeight: RFPercentage(2.6),
+    lineHeight: RFPercentage(2.9),
   },
   listContainer: {
     marginTop: 10,
@@ -122,14 +122,14 @@ const styles = StyleSheet.create({
   listItemTitle: {
     color: Colors.brown,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(2),
   },
   listItemText: {
     color: Colors.heading,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     marginTop: 5,
     textAlign: 'justify',
-    lineHeight: RFPercentage(2.6),
+    lineHeight: RFPercentage(2.9),
   },
 });

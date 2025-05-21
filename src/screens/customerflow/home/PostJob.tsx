@@ -87,6 +87,14 @@ const PostJob = ({route}: any) => {
   const postJob = async () => {
     const user = auth().currentUser;
     if (!user) return;
+    if (!jobTitle || !Location || !budget || !selectedType) {
+      showToast({
+        type: 'info',
+        title: 'Job Post',
+        message: 'Please fill all the details',
+      });
+      return;
+    }
     setLoading(true);
     try {
       const jobData = {
@@ -147,6 +155,14 @@ const PostJob = ({route}: any) => {
     fetchJob();
   }, []);
 
+  const handleBudgetChange = (text : any) => {
+    // Remove everything that's not a digit
+    const numeric = text.replace(/[^0-9]/g, '');
+
+    // Add dollar sign
+    setBudget(numeric ? `$${numeric}` : '');
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView>
@@ -156,7 +172,7 @@ const PostJob = ({route}: any) => {
           {/* Header */}
           <HeaderBack
             title="Post Job"
-            textStyle={{fontSize: RFPercentage(1.8)}}
+            textStyle={{fontSize: RFPercentage(2)}}
             left={true}
           />
 
@@ -180,7 +196,7 @@ const PostJob = ({route}: any) => {
                 />
               </View>
               <InputField
-                placeholder="Enter City you want service at"
+                placeholder="Enter City/Town you want services at"
                 customStyle={{width: '100%'}}
                 value={Location}
                 onChangeText={setLocation}
@@ -196,10 +212,10 @@ const PostJob = ({route}: any) => {
               />
 
               <InputField
-                placeholder="Budget e.g; 120$"
+                placeholder="Budget e.g; $120"
                 customStyle={{width: '100%'}}
                 value={budget}
-                onChangeText={setBudget}
+                onChangeText={handleBudgetChange}
                 type={'numeric'}
               />
 
@@ -248,7 +264,7 @@ const PostJob = ({route}: any) => {
             <View style={{alignSelf: 'center', marginTop: RFPercentage(3)}}>
               <GradientButton
                 title={jobId ? 'Edit Job' : 'Make Job Live'}
-                textStyle={{fontSize: RFPercentage(1.5)}}
+                textStyle={{fontSize: RFPercentage(1.6)}}
                 onPress={postJob}
                 loading={loading}
                 disabled={loading}
@@ -280,7 +296,7 @@ const styles = StyleSheet.create({
   infoText: {
     color: Colors.gradient1,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     left: 5,
     top: 1,
   },
@@ -316,13 +332,13 @@ const styles = StyleSheet.create({
   dateText: {
     color: Colors.inputTextColor,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     left: 5,
     top: 1.5,
   },
   remarksText: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     color: Colors.primaryText,
   },
 });

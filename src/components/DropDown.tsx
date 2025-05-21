@@ -74,7 +74,7 @@ export default CustomDropDown;
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    height: RFPercentage(5.4),
+    height: RFPercentage(5.6),
     borderRadius: RFPercentage(0.8),
     marginVertical: RFPercentage(1.5),
     justifyContent: 'center',
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
   placeholderText: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
   },
   dropdownContainer: {
     backgroundColor: 'transparent',
@@ -129,6 +129,6 @@ const styles = StyleSheet.create({
   listItemText: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.6),
   },
 });

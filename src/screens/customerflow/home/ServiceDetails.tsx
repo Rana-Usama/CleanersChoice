@@ -8,6 +8,7 @@ import {
   FlatList,
   ScrollView,
   Dimensions,
+  Modal,
 } from 'react-native';
 import React, {useState, useRef, useEffect} from 'react';
 import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
@@ -24,6 +25,7 @@ import moment from 'moment';
 import {useSelector} from 'react-redux';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import AntDesign from 'react-native-vector-icons/AntDesign'
 
 const {width} = Dimensions.get('window');
 
@@ -62,7 +64,7 @@ const items = [
   },
 ];
 
-const ServiceDetails: React.FC = ({route}) => {
+const ServiceDetails: React.FC = ({route}: any) => {
   const {item} = route.params;
   const [visibleItems, setVisibleItems] = useState(5);
   const navigation =
@@ -72,6 +74,7 @@ const ServiceDetails: React.FC = ({route}) => {
   const profileData = useSelector(state => state.profile.profileData);
   const [loading, setloading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const toggleDescription = () => {
     setIsExpanded(prevState => !prevState);
@@ -247,11 +250,14 @@ const ServiceDetails: React.FC = ({route}) => {
           {/* Service Info */}
           <View style={{marginTop: RFPercentage(2)}}>
             <View style={styles.rowContainer}>
-              <Image
-                source={item.image ? {uri: item.image} : IMAGES.defaultPic}
-                resizeMode="contain"
-                style={styles.icon}
-              />
+              <TouchableOpacity onPress={()=> setModalVisible(true)}>
+                <Image
+                  source={item.image ? {uri: item.image} : IMAGES.defaultPic}
+                  resizeMode="contain"
+                  style={styles.icon}
+                />
+              </TouchableOpacity>
+
               <Text style={[styles.headeing2, {color: Colors.primaryText}]}>
                 {item.name}
               </Text>
@@ -266,12 +272,13 @@ const ServiceDetails: React.FC = ({route}) => {
                 />
               ))}
             </View> */}
-            <View style={{position: 'absolute', right: 0, top: RFPercentage(1.8)}}>
+            <View
+              style={{position: 'absolute', right: 0, top: RFPercentage(1.8)}}>
               <Text
                 style={{
                   color: Colors.placeholderColor,
                   fontFamily: Fonts.fontRegular,
-                  fontSize: RFPercentage(1.3),
+                  fontSize: RFPercentage(1.4),
                 }}>
                 Joined on : {formattedDate}
               </Text>
@@ -296,9 +303,9 @@ const ServiceDetails: React.FC = ({route}) => {
                 style={{
                   color: Colors.placeholderColor,
                   fontFamily: Fonts.fontRegular,
-                  fontSize: RFPercentage(1.5),
+                  fontSize: RFPercentage(1.6),
                   textAlign: 'justify',
-                  lineHeight: RFPercentage(2),
+                  lineHeight: RFPercentage(2.5),
                   marginTop: RFPercentage(0.5),
                 }}>
                 {isExpanded
@@ -309,7 +316,7 @@ const ServiceDetails: React.FC = ({route}) => {
                     onPress={toggleDescription}
                     style={{
                       color: Colors.gradient1,
-                      fontSize: RFPercentage(1.4),
+                      fontSize: RFPercentage(1.6),
                       fontFamily: Fonts.fontMedium,
                     }}>
                     {isExpanded ? 'Read Less' : 'Read More'}
@@ -335,7 +342,7 @@ const ServiceDetails: React.FC = ({route}) => {
               style={{
                 color: Colors.placeholderColor,
                 fontFamily: Fonts.fontRegular,
-                fontSize: RFPercentage(1.5),
+                fontSize: RFPercentage(1.6),
                 textAlign: 'justify',
                 lineHeight: RFPercentage(1.9),
                 marginTop: RFPercentage(0.5),
@@ -355,21 +362,21 @@ const ServiceDetails: React.FC = ({route}) => {
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
-                  width: RFPercentage(16),
+                  width: RFPercentage(20),
                 }}>
                 <Image
                   source={Icons.availability}
                   resizeMode="contain"
                   style={{
-                    width: RFPercentage(1.5),
-                    height: RFPercentage(1.4),
+                    width: RFPercentage(1.8),
+                    height: RFPercentage(1.8),
                   }}
                 />
                 <Text
                   style={{
                     color: Colors.gradient1,
                     fontFamily: Fonts.semiBold,
-                    fontSize: RFPercentage(1.5),
+                    fontSize: RFPercentage(1.8),
                     left: RFPercentage(0.8),
                   }}>
                   Check Availability
@@ -420,7 +427,7 @@ const ServiceDetails: React.FC = ({route}) => {
                     <Text
                       style={{
                         color: Colors.placeholderColor,
-                        fontSize: RFPercentage(1.4),
+                        fontSize: RFPercentage(1.5),
                         fontFamily: Fonts.fontRegular,
                       }}>
                       {item}
@@ -440,7 +447,7 @@ const ServiceDetails: React.FC = ({route}) => {
                   <Text
                     style={{
                       color: Colors.gradient1,
-                      fontSize: RFPercentage(1.3),
+                      fontSize: RFPercentage(1.4),
                       fontFamily: Fonts.fontMedium,
                       textAlign: 'center',
                       bottom: RFPercentage(1.5),
@@ -574,6 +581,41 @@ const ServiceDetails: React.FC = ({route}) => {
           />
         </View>
       </ScrollView>
+
+      {modalVisible && (
+        <Modal
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}
+          animationType="fade">
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: '',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+            <TouchableOpacity
+              onPress={() => setModalVisible(false)}
+              style={{
+                position: 'absolute',
+                left: RFPercentage(2),
+                top: RFPercentage(3),
+                zIndex: 2,
+              }}>
+              <AntDesign
+                name="arrowleft"
+                color={Colors.primaryText}
+                size={RFPercentage(3)}
+              />
+            </TouchableOpacity>
+            <Image
+               source={item.image ? {uri: item.image} : IMAGES.defaultPic}
+              resizeMode="contain"
+              style={{width: '100%', height: '100%'}}
+            />
+          </View>
+        </Modal>
+      )}
     </SafeAreaView>
   );
 };
@@ -597,15 +639,15 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(2),
   },
   activeDot: {
-    width: RFPercentage(0.8),
-    height: RFPercentage(0.8),
-    borderRadius: 8,
+    width: RFPercentage(1),
+    height: RFPercentage(1),
+    borderRadius: RFPercentage(2),
     marginHorizontal: 3,
   },
   inactiveDot: {
-    width: RFPercentage(0.8),
-    height: RFPercentage(0.8),
-    borderRadius: 8,
+    width: RFPercentage(1),
+    height: RFPercentage(1),
+    borderRadius: RFPercentage(2),
     marginHorizontal: 3,
     backgroundColor: 'rgba(209, 213, 219, 1)',
   },
@@ -639,7 +681,7 @@ const styles = StyleSheet.create({
   headeing2: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.9),
   },
   rowAlign: {
     flexDirection: 'row',

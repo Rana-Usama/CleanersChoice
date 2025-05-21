@@ -24,23 +24,24 @@ const {width, height} = Dimensions.get('window');
 const stepsData = [
   {
     image: IMAGES.onBoarding1,
-    title: 'List your services',
+    title: 'Offer Your Cleaning Services',
     description:
-      'List your cleaning services with details for customers to contact you',
+      'Create a detailed listing so customers can discover and book your cleaning expertise.',
   },
   {
     image: IMAGES.onBoarding2,
-    title: 'Get your space cleaned',
+    title: 'Book Trusted Cleaners',
     description:
-      'Reach best cleaning businesses to clean up your precious spaces',
+      'Connect with verified cleaning professionals to refresh your home or workspace.',
   },
   {
     image: IMAGES.onBoarding3,
-    title: 'Post Cleaning Jobs',
+    title: 'Post a Cleaning Job',
     description:
-      'Post cleaning jobs for businesses to reach you with custom offers',
+      'Share your cleaning needs and receive personalized offers from nearby businesses.',
   },
 ];
+
 
 const OnBoarding = () => {
   const navigation =
@@ -146,19 +147,17 @@ const OnBoarding = () => {
 
         {/* Buttons */}
         <View style={styles.buttonWrapper}>
-          <NextButton title="Skip" onPress={() => navigation.navigate('UserSelection')} />
+          <NextButton
+            title="Skip"
+            onPress={() => navigation.navigate('UserSelection')}
+          />
           <View style={{marginLeft: RFPercentage(2)}}>
             <NextButton title="Next" onPress={nextPress} />
           </View>
         </View>
       </View>
-      <View
-        style={styles.starContainer}>
-        <Image
-          source={IMAGES.stars}
-          resizeMode="contain"
-          style={styles.star}
-        />
+      <View style={styles.starContainer}>
+        <Image source={IMAGES.stars} resizeMode="contain" style={styles.star} />
       </View>
     </SafeAreaView>
   );
@@ -186,7 +185,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: Colors.primaryText,
-    fontSize: RFPercentage(2.4),
+    fontSize: RFPercentage(2.5),
     fontFamily: Fonts.semiBold,
     textAlign: 'center',
   },
@@ -196,7 +195,7 @@ const styles = StyleSheet.create({
   },
   description: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     fontFamily: Fonts.fontRegular,
     textAlign: 'center',
   },
@@ -206,15 +205,15 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(1),
   },
   activeDot: {
-    width: RFPercentage(0.8),
-    height: RFPercentage(0.8),
-    borderRadius: 8,
+    width: RFPercentage(1),
+    height: RFPercentage(1),
+    borderRadius: RFPercentage(2),
     marginHorizontal: 3,
   },
   inactiveDot: {
-    width: RFPercentage(0.8),
-    height: RFPercentage(0.8),
-    borderRadius: 8,
+    width: RFPercentage(1),
+    height: RFPercentage(1),
+    borderRadius: RFPercentage(2),
     marginHorizontal: 3,
     backgroundColor: 'rgba(209, 213, 219, 1)',
   },
@@ -226,13 +225,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
   },
-  starContainer : {
+  starContainer: {
     position: 'absolute',
     bottom: RFPercentage(15),
     right: RFPercentage(1.5),
   },
-  star : {
+  star: {
     width: RFPercentage(8),
     height: RFPercentage(8),
-  }
+  },
 });

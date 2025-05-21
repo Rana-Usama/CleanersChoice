@@ -331,7 +331,7 @@ const Messages = () => {
               />
             ) : (
               <View style={{marginTop: RFPercentage(10)}}>
-                <NotFound text="No chat found" />
+                <NotFound text="No chats found" />
               </View>
             )}
           </>
@@ -360,15 +360,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   toggleButton: {
-    width: RFPercentage(12),
-    height: RFPercentage(4),
+    width: RFPercentage(14),
+    height: RFPercentage(4.5),
     borderRadius: RFPercentage(100),
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
   },
   toggleText: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.8),
   },
   unreadButton: {
     left: RFPercentage(2.8),

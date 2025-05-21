@@ -270,13 +270,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   radioLabel: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     color: Colors.primaryText,
     marginLeft: RFPercentage(0.8),
     fontFamily: Fonts.fontRegular,
   },
   forgotPassword: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     color: Colors.primaryText,
     fontFamily: Fonts.fontRegular,
     // bottom: 1.5,
@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
   heading: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.2),
     textAlign: 'center',
     marginTop: RFPercentage(1),
   },
@@ -319,12 +319,12 @@ const styles = StyleSheet.create({
   },
   bottomText: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontRegular,
   },
   signUp: {
     color: Colors.gradient1,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
     left: 3,
   },
