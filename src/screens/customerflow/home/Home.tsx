@@ -13,6 +13,7 @@ import {
   KeyboardAvoidingView,
   ActivityIndicator,
   Animated,
+  RefreshControl,
 } from 'react-native';
 import React, {useState, useRef, useCallback, useEffect} from 'react';
 import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
@@ -91,6 +92,18 @@ const Home = () => {
   const [loactionLoading, setLocationLoading] = useState(false);
   const [priceLoading, setPriceLoading] = useState(false);
   const [filteredLocations, setFilteredLocations] = useState<string[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    setLoading(true);
+    serviceDetails();
+    fetchUserData();
+    setTimeout(() => {
+      setRefreshing(false);
+      setLoading(false);
+    }, 2000);
+  };
 
   // Fetching Services
   useEffect(() => {
@@ -267,6 +280,9 @@ const Home = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
         contentContainerStyle={styles.scrollView}
         showsVerticalScrollIndicator={false}>
         <View style={styles.container}>
