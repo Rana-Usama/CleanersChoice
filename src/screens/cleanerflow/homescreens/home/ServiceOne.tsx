@@ -225,7 +225,7 @@ const ServiceOne: React.FC = () => {
                   {available.length > 0 ||
                   serviceData?.availability.length > 0 ? (
                     <Image
-                      source={Icons.timeEdit}
+                      source={Icons.availablityEdit}
                       style={{width: RFPercentage(2), height: RFPercentage(2)}}
                       resizeMode="contain"
                     />
@@ -242,7 +242,7 @@ const ServiceOne: React.FC = () => {
 
             {/* Location */}
             <InputField
-              placeholder="City name you provide your services at"
+              placeholder="Add city/town you provide your services at"
               value={location}
               onChangeText={setLoaction}
               customStyle={{width: '100%', marginBottom: RFPercentage(3)}}
@@ -265,7 +265,7 @@ const ServiceOne: React.FC = () => {
                 searchInputPlaceholderText="Search Services..."
                 onChangeInput={text => console.log(text)}
                 altFontFamily={Fonts.fontRegular}
-                tagRemoveIconColor={Colors.inputFieldColor}
+                tagRemoveIconColor={Colors.placeholderColor}
                 tagBorderColor={Colors.inputFieldColor}
                 tagTextColor={Colors.inputTextColor}
                 selectedItemTextColor={Colors.inputTextColor}
@@ -281,7 +281,7 @@ const ServiceOne: React.FC = () => {
                 fontFamily={Fonts.fontRegular}
                 selectedItemFontFamily={Fonts.fontRegular}
                 itemFontFamily={Fonts.fontRegular}
-                itemFontSize={RFPercentage(1.4)}
+                itemFontSize={RFPercentage(1.6)}
                 hideSubmitButton
                 styleItemsContainer={{
                   backgroundColor: 'transparent',
@@ -289,18 +289,18 @@ const ServiceOne: React.FC = () => {
                 }}
                 styleTextDropdownSelected={{
                   color: Colors.placeholderColor,
-                  fontSize: RFPercentage(1.6),
+                  fontSize: RFPercentage(1.7),
                   fontFamily: Fonts.fontRegular,
                   marginLeft: RFPercentage(1.3),
                 }}
                 styleTextDropdown={{
                   color: Colors.placeholderColor,
-                  fontSize: RFPercentage(1.6),
+                  fontSize: RFPercentage(1.7),
                   fontFamily: Fonts.fontRegular,
                   marginLeft: RFPercentage(1.3),
                 }}
                 styleTextTag={{
-                  fontSize: RFPercentage(1.5),
+                  fontSize: RFPercentage(1.6),
                   fontFamily: Fonts.fontRegular,
                   color: Colors.inputTextColor,
                 }}
@@ -360,7 +360,7 @@ const styles = StyleSheet.create({
   },
   dateContainer: {
     width: '100%',
-    height: RFPercentage(5.4),
+    height: RFPercentage(5.6),
     borderWidth: 1,
     borderColor: Colors.inputFieldColor,
     borderRadius: RFPercentage(0.8),
@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
   dateText: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.7),
     marginLeft: 5,
     top: RFPercentage(0.2),
   },

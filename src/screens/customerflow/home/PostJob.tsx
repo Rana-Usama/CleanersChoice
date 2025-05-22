@@ -103,10 +103,11 @@ const PostJob = ({route}: any) => {
         description: Description,
         type: selectedType,
         location: Location,
-        priceRange: budget,
+        priceRange: budget.replace(/[^0-9]/g, ''),
         remarks: remarks || '',
         jobId: user.uid,
         status: 'active',
+        createdAt2: firestore.FieldValue.serverTimestamp(),
       };
       if (jobId) {
         await firestore().collection('Jobs').doc(jobId).update(jobData);
@@ -155,7 +156,7 @@ const PostJob = ({route}: any) => {
     fetchJob();
   }, []);
 
-  const handleBudgetChange = (text : any) => {
+  const handleBudgetChange = (text: any) => {
     // Remove everything that's not a digit
     const numeric = text.replace(/[^0-9]/g, '');
 

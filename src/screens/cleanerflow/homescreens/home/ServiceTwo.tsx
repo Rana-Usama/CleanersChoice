@@ -174,7 +174,7 @@ const ServiceTwo: React.FC = ({navigation} : any) => {
 
       <View style={styles.container}>
         <View style={styles.galleryTextContainer}>
-          <Text style={styles.galleryText}>Gallery Pictures (1 Mandatory)</Text>
+          <Text style={styles.galleryText}>Please Upload at least one picture to proceed </Text>
         </View>
         <View style={styles.flatListContainer}>
           <FlatList
