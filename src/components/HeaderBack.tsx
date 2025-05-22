@@ -11,6 +11,7 @@ import {RFPercentage} from 'react-native-responsive-fontsize';
 import Entypo from 'react-native-vector-icons/Entypo';
 import {Colors, Fonts, Icons} from '../constants/Themes';
 import {useNavigation} from '@react-navigation/native';
+import AntDesign from 'react-native-vector-icons/AntDesign'
 
 interface props {
   logo?: boolean;
@@ -36,10 +37,10 @@ const HeaderBack = (props: props) => {
           />
         ) : props.left ? (
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Entypo
-              name="chevron-thin-left"
+            <AntDesign
+              name="arrowleft"
               color={Colors.secondaryText}
-              size={RFPercentage(2)}
+              size={RFPercentage(2.8)}
             />
           </TouchableOpacity>
         ) : null}
