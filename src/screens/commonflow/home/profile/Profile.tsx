@@ -4,8 +4,9 @@ import {
   StyleSheet,
   Text,
   View,
-  TouchableOpacity,
+  RefreshControl,
   ActivityIndicator,
+  ScrollView,
 } from 'react-native';
 import React, {useState, useEffect, useCallback} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -15,11 +16,25 @@ import ProfileField from '../../../../components/ProfileField';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import {useFocusEffect} from '@react-navigation/native';
+import { useExitAppOnBack } from '../../../../utils/ExitApp';
 
 const Profile = ({navigation}: any) => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
+
+  useExitAppOnBack();
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    setLoading(true);
+    userData();
+    setTimeout(() => {
+      setRefreshing(false);
+      setLoading(false);
+    }, 1500);
+  };
 
   // Fetching User Data
   const userData = useCallback(async () => {
@@ -50,36 +65,41 @@ const Profile = ({navigation}: any) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <HeaderBack title="Your Profile" textStyle={styles.headerText} />
-      <View style={styles.container}>
-        <View style={styles.imgContainer}>
-          <View style={styles.pictureContainer}>
-            {loading ? (
-              <ActivityIndicator
-                size={'large'}
-                color={Colors.placeholderColor}
-              />
-            ) : (
-              <Image
-                source={profile ? {uri: profile} : IMAGES.defaultPic}
-                resizeMode="contain"
-                style={styles.imgStyle}
-                borderRadius={RFPercentage(100)}
-              />
-            )}
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }>
+        <HeaderBack title="Your Profile" textStyle={styles.headerText} />
+        <View style={styles.container}>
+          <View style={styles.imgContainer}>
+            <View style={styles.pictureContainer}>
+              {loading ? (
+                <ActivityIndicator
+                  size={'large'}
+                  color={Colors.placeholderColor}
+                />
+              ) : (
+                <Image
+                  source={profile ? {uri: profile} : IMAGES.defaultPic}
+                  resizeMode="contain"
+                  style={styles.imgStyle}
+                  borderRadius={RFPercentage(100)}
+                />
+              )}
+            </View>
+          </View>
+          <View style={styles.nameContainer}>
+            <Text style={styles.nameText}>{name}</Text>
+          </View>
+          <View style={styles.profileFieldContainer}>
+            <ProfileField
+              text="Edit Profile"
+              icon={Icons.editProfile}
+              onPress={() => navigation.navigate('EditProfile')}
+            />
           </View>
         </View>
-        <View style={styles.nameContainer}>
-          <Text style={styles.nameText}>{name}</Text>
-        </View>
-        <View style={styles.profileFieldContainer}>
-          <ProfileField
-            text="Edit Profile"
-            icon={Icons.editProfile}
-            onPress={() => navigation.navigate('EditProfile')}
-          />
-        </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };

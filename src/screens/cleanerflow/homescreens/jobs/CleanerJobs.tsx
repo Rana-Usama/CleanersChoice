@@ -13,6 +13,7 @@ import {
   TouchableWithoutFeedback,
   Animated,
   Platform,
+  RefreshControl,
 } from 'react-native';
 import React, {useCallback, useState, useRef, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -29,7 +30,7 @@ import GradientButton from '../../../../components/GradientButton';
 import SearchField from '../../../../components/SearchField';
 import Slider from '@react-native-community/slider';
 import NotFound from '../../../../components/NotFound';
-import FilterModal from '../../../../components/FilterModal';
+import {useExitAppOnBack} from '../../../../utils/ExitApp';
 
 const items = [
   'Residential Cleaning',
@@ -62,6 +63,18 @@ const CleanerJobs = () => {
   const [modalVisible3, setModalVisible3] = useState(false);
   const [selectedType, setSelectedType] = useState('');
   const [query2, setQuery2] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
+  useExitAppOnBack();
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    setLoading(true);
+    fetchJobs();
+    setTimeout(() => {
+      setRefreshing(false);
+      setLoading(false);
+    }, 1500);
+  };
 
   const fetchJobs = async () => {
     const user = auth().currentUser;
@@ -71,7 +84,7 @@ const CleanerJobs = () => {
       const snapshot = await firestore()
         .collection('Jobs')
         .where('status', '==', 'active')
-        .orderBy('createdAt2', 'desc')
+        // .orderBy('createdAt2', 'desc')
         .get();
       const jobs = snapshot.docs.map(doc => ({
         id: doc.id,
@@ -234,7 +247,11 @@ const CleanerJobs = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.scrollView}>
+      <ScrollView
+        contentContainerStyle={styles.scrollView}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }>
         <HeaderBack title={'Jobs'} textStyle={{fontSize: RFPercentage(2.2)}} />
         <View style={styles.container}>
           <View style={styles.jobPostedContainer}>
@@ -740,9 +757,7 @@ const CleanerJobs = () => {
                     title="Apply"
                     onPress={handleServiceTypeApply}
                     loading={loactionLoading}
-                    disabled={
-                      query2.length === 0
-                    }
+                    disabled={query2.length === 0}
                   />
                 </View>
               </Animated.View>

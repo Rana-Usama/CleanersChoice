@@ -32,6 +32,7 @@ import auth from '@react-native-firebase/auth';
 import {useDispatch} from 'react-redux';
 import {setProfileData} from '../../../redux/ProfileData/Actions';
 import NotFound from '../../../components/NotFound';
+import {useExitAppOnBack} from '../../../utils/ExitApp';
 
 const categories = [
   {id: '1', name: 'All', icon: Icons.all},
@@ -69,6 +70,7 @@ interface Service {
 }
 
 const Home = () => {
+  useExitAppOnBack();
   const [categorySelection, setCategorySelection] = useState('1');
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, 'Home'>>();
@@ -689,8 +691,6 @@ const Home = () => {
                         maximumTrackTintColor="gray"
                         // thumbTintColor={Colors.gradient1}
                         thumbImage={Icons.slider}
-                      
-                    
                       />
                       <View style={styles.sliderLabelsContainer}>
                         <Text
@@ -932,7 +932,7 @@ const styles = StyleSheet.create({
     color: Colors.secondaryText,
     fontSize: RFPercentage(1.7),
     fontFamily: Fonts.semiBold,
-    marginTop:RFPercentage(1)
+    marginTop: RFPercentage(1),
   },
   flatListContainer: {
     paddingHorizontal: RFPercentage(1.2),

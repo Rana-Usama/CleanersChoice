@@ -7,7 +7,7 @@ import {
   StyleSheet,
   SafeAreaView,
   ScrollView,
-  ActivityIndicator,
+  RefreshControl,
   StatusBar,
 } from 'react-native';
 import React, {useState, useEffect, useCallback} from 'react';
@@ -25,7 +25,7 @@ import auth from '@react-native-firebase/auth';
 import NotFound from '../../../components/NotFound';
 import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
 import {Skeleton} from '@rneui/themed';
-
+import { useExitAppOnBack } from '../../../utils/ExitApp';
 const Messages = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, 'Messages'>>();
@@ -39,6 +39,8 @@ const Messages = () => {
       receiverId: any;
     }[]
   >([]);
+
+  useExitAppOnBack();
 
   const [loading, setLoading] = useState(false);
   const [lastVisible, setLastVisible] =
@@ -72,43 +74,52 @@ const Messages = () => {
     setLoading2(true);
     setTimeout(() => {
       setLoading2(false);
-    }, 3000);
+    }, 2000);
   }, []);
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchChats = async () => {
+    try {
+      const snapshot = await firestore()
+        .collection('Chats')
+        .where('participants', 'array-contains', userId)
+        .orderBy('lastMessageTimestamp', 'desc')
+        .get();
+
+      const allChats = await Promise.all(
+        snapshot.docs.map(async doc => await getChatData(doc)),
+      );
+
+      const filteredChats = unread
+        ? allChats.filter(
+            chat =>
+              chat.lastMessage?.unread === true &&
+              chat.lastMessage?.senderId !== userId &&
+              chat.lastMessage?.receiver === userId,
+          )
+        : allChats;
+
+      setChats(filteredChats);
+      setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+    } catch (error) {
+      console.log('Error fetching chats: ', error);
+    }
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    setLoading2(true);
+    fetchChats();
+    setTimeout(() => {
+      setRefreshing(false);
+      setLoading2(false);
+    }, 1500);
+  };
 
   useFocusEffect(
     useCallback(() => {
       let unsubscribe: any;
-      // setLoading2(true);
-
-      const fetchChats = async () => {
-        try {
-          const snapshot = await firestore()
-            .collection('Chats')
-            .where('participants', 'array-contains', userId)
-            .orderBy('lastMessageTimestamp', 'desc')
-            .get();
-
-          const allChats = await Promise.all(
-            snapshot.docs.map(async doc => await getChatData(doc)),
-          );
-
-          const filteredChats = unread
-            ? allChats.filter(
-                chat =>
-                  chat.lastMessage?.unread === true &&
-                  chat.lastMessage?.senderId !== userId &&
-                  chat.lastMessage?.receiver === userId,
-              )
-            : allChats;
-
-          setChats(filteredChats);
-          setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
-        } catch (error) {
-          console.log('Error fetching chats: ', error);
-        } finally {
-          // setLoading2(false);
-        }
-      };
 
       fetchChats();
 
@@ -200,143 +211,155 @@ const Messages = () => {
         translucent
         backgroundColor="transparent"
       />
-      <HeaderBack title="Messages" textStyle={styles.headerText} />
-      <View style={styles.container}>
-        <View style={styles.toggleContainer}>
-          <TouchableOpacity onPress={toggle1}>
-            <View
-              style={[
-                styles.toggleButton,
-                {
-                  backgroundColor: all ? Colors.gradient1 : 'transparent',
-                  borderColor: all ? 'transparent' : Colors.inputFieldColor,
-                },
-              ]}>
-              <Text
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        contentContainerStyle={{paddingBottom: RFPercentage(15)}}
+        style={{flex: 1}}
+        showsVerticalScrollIndicator={false}>
+        <HeaderBack title="Messages" textStyle={styles.headerText} />
+        <View style={styles.container}>
+          <View style={styles.toggleContainer}>
+            <TouchableOpacity onPress={toggle1}>
+              <View
                 style={[
-                  styles.toggleText,
+                  styles.toggleButton,
                   {
-                    color: all ? Colors.background : Colors.placeholderColor,
-                    fontFamily: all ? Fonts.fontMedium : Fonts.fontRegular,
+                    backgroundColor: all ? Colors.gradient1 : 'transparent',
+                    borderColor: all ? 'transparent' : Colors.inputFieldColor,
                   },
                 ]}>
-                All
-              </Text>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={toggle2} style={styles.unreadButton}>
-            <View
-              style={[
-                styles.toggleButton,
-                {
-                  backgroundColor: unread ? Colors.gradient1 : 'transparent',
-                  borderColor: unread ? 'transparent' : Colors.inputFieldColor,
-                },
-              ]}>
-              <Text
+                <Text
+                  style={[
+                    styles.toggleText,
+                    {
+                      color: all ? Colors.background : Colors.placeholderColor,
+                      fontFamily: all ? Fonts.fontMedium : Fonts.fontRegular,
+                    },
+                  ]}>
+                  All
+                </Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={toggle2} style={styles.unreadButton}>
+              <View
                 style={[
-                  styles.toggleText,
+                  styles.toggleButton,
                   {
-                    color: unread ? Colors.background : Colors.placeholderColor,
-                    fontFamily: unread ? Fonts.fontMedium : Fonts.fontRegular,
+                    backgroundColor: unread ? Colors.gradient1 : 'transparent',
+                    borderColor: unread
+                      ? 'transparent'
+                      : Colors.inputFieldColor,
                   },
                 ]}>
-                Unread
-              </Text>
-            </View>
-          </TouchableOpacity>
-        </View>
+                <Text
+                  style={[
+                    styles.toggleText,
+                    {
+                      color: unread
+                        ? Colors.background
+                        : Colors.placeholderColor,
+                      fontFamily: unread ? Fonts.fontMedium : Fonts.fontRegular,
+                    },
+                  ]}>
+                  Unread
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
 
-        {loading2 ? (
-          <>
-            <View style={{marginTop: RFPercentage(4)}}>
-              {[...Array(7)].map((_, index) => (
-                <View
-                  key={index}
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    marginBottom: RFPercentage(2),
-                  }}>
-                  <Skeleton
-                    animation="wave"
-                    circle
-                    width={50}
-                    height={50}
+          {loading2 ? (
+            <>
+              <View style={{marginTop: RFPercentage(4)}}>
+                {[...Array(7)].map((_, index) => (
+                  <View
+                    key={index}
                     style={{
-                      marginRight: RFPercentage(2),
-                      backgroundColor: 'rgb(223, 231, 242)',
-                    }}
-                  />
-                  <View style={{flex: 1}}>
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginBottom: RFPercentage(2),
+                    }}>
                     <Skeleton
                       animation="wave"
-                      width="90%"
-                      height={15}
+                      circle
+                      width={50}
+                      height={50}
                       style={{
-                        marginBottom: 6,
+                        marginRight: RFPercentage(2),
                         backgroundColor: 'rgb(223, 231, 242)',
                       }}
                     />
-                    <Skeleton
-                      width="60%"
-                      height={12}
-                      style={{backgroundColor: 'rgb(223, 231, 242)'}}
-                    />
+                    <View style={{flex: 1}}>
+                      <Skeleton
+                        animation="wave"
+                        width="90%"
+                        height={15}
+                        style={{
+                          marginBottom: 6,
+                          backgroundColor: 'rgb(223, 231, 242)',
+                        }}
+                      />
+                      <Skeleton
+                        width="60%"
+                        height={12}
+                        style={{backgroundColor: 'rgb(223, 231, 242)'}}
+                      />
+                    </View>
                   </View>
-                </View>
-              ))}
-            </View>
-          </>
-        ) : (
-          <>
-            {chats.length > 0 ? (
-              <FlatList
-                contentContainerStyle={{
-                  paddingTop: RFPercentage(2.5),
-                  paddingBottom: RFPercentage(8),
-                }}
-                data={chats}
-                keyExtractor={item => item.id}
-                renderItem={({item}) => {
-                  return (
-                    <Message
-                      name={item.name}
-                      unread={
-                        item?.lastMessage?.unread &&
-                        userId === item?.lastMessage?.receiver
-                      }
-                      message={item.lastMessage?.text || 'No message'}
-                      image={item.image}
-                      noProfile={IMAGES.defaultPic}
-                      time={
-                        item.lastMessageTimestamp
-                          ? formatTimestamp(item.lastMessageTimestamp)
-                          : ''
-                      }
-                      onPress={() =>
-                        navigation.navigate('Chat', {
-                          chatId: item.lastMessage?.chatId,
-                          senderId: userId,
-                          senderName: item.lastMessage?.senderName,
-                          receiver: item.receiverId,
-                          receiverName: item.name,
-                          receiverProfile: item.image,
-                          fcmToken: item.fcmToken,
-                        })
-                      }
-                    />
-                  );
-                }}
-              />
-            ) : (
-              <View style={{marginTop: RFPercentage(10)}}>
-                <NotFound text="No chats found" />
+                ))}
               </View>
-            )}
-          </>
-        )}
-      </View>
+            </>
+          ) : (
+            <>
+              {chats.length > 0 ? (
+                <FlatList
+                  contentContainerStyle={{
+                    paddingTop: RFPercentage(2.5),
+                    paddingBottom: RFPercentage(8),
+                  }}
+                  data={chats}
+                  keyExtractor={item => item.id}
+                  renderItem={({item}) => {
+                    return (
+                      <Message
+                        name={item.name}
+                        unread={
+                          item?.lastMessage?.unread &&
+                          userId === item?.lastMessage?.receiver
+                        }
+                        message={item.lastMessage?.text || 'No message'}
+                        image={item.image}
+                        noProfile={IMAGES.defaultPic}
+                        time={
+                          item.lastMessageTimestamp
+                            ? formatTimestamp(item.lastMessageTimestamp)
+                            : ''
+                        }
+                        onPress={() =>
+                          navigation.navigate('Chat', {
+                            chatId: item.lastMessage?.chatId,
+                            senderId: userId,
+                            senderName: item.lastMessage?.senderName,
+                            receiver: item.receiverId,
+                            receiverName: item.name,
+                            receiverProfile: item.image,
+                            fcmToken: item.fcmToken,
+                          })
+                        }
+                      />
+                    );
+                  }}
+                />
+              ) : (
+                <View style={{marginTop: RFPercentage(10)}}>
+                  <NotFound text="No chats found" />
+                </View>
+              )}
+            </>
+          )}
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };

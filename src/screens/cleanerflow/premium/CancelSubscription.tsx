@@ -155,7 +155,7 @@ const CancelSubscription = () => {
                   bottom: 2,
                   fontFamily: Fonts.fontMedium,
                   color: Colors.brown,
-                  fontSize: RFPercentage(1.5),
+                  fontSize: RFPercentage(1.7),
                 }}>
                 Current Plan
               </Text>
@@ -316,7 +316,7 @@ const styles = StyleSheet.create({
   },
   premiumText: {
     color: Colors.brown,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.2),
     fontFamily: Fonts.fontMedium,
     marginLeft: RFPercentage(0.6),
     top: RFPercentage(0.3),
@@ -349,7 +349,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: Colors.brown,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(3.5),
+    fontSize: RFPercentage(3.6),
   },
   priceSubText: {
     fontSize: RFPercentage(1.7),
@@ -378,7 +378,7 @@ const styles = StyleSheet.create({
   listText: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.7),
     marginLeft: 5,
   },
   buttonContainer: {
@@ -386,7 +386,7 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(5),
   },
   buttonText: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.8),
   },
   starContainer: {
     position: 'absolute',
@@ -433,7 +433,7 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     fontFamily: Fonts.fontMedium,
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
   },
   buttonWrapper: {
     flexDirection: 'row',
