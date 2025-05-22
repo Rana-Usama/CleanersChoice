@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
   },
   description: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontRegular,
     textAlign: 'center',
   },

@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   ScrollView,
   FlatList,
+  RefreshControl,
 } from 'react-native';
 import React, {useState, useEffect, useCallback} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -29,6 +30,7 @@ import {RootStackParamList} from '../../../../routers/StackNavigator';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import Review from '../../../../components/Review';
 import {Image as CompressorImage} from 'react-native-compressor';
+import { useExitAppOnBack } from '../../../../utils/ExitApp';
 
 const items = [
   {
@@ -79,6 +81,21 @@ const Dashboard: React.FC = () => {
   const dispatch = useDispatch();
   const [visibleItems, setVisibleItems] = useState(5);
   const [loading3, setLoading3] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  useExitAppOnBack()
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    setLoading3(true)
+    setLoading(true);
+    serviceDetails();
+    fetchUserData();
+    setTimeout(() => {
+      setRefreshing(false);
+      setLoading(false);
+      setLoading3(false)
+    }, 2000);
+  };
 
   const uploadImg = async () => {
     try {
@@ -171,7 +188,7 @@ const Dashboard: React.FC = () => {
     setTimeout(() => {
       setLoading2(false);
       navigation.navigate('ServiceOne');
-    }, 1500);
+    }, 500);
   };
 
   const profileCompletion =
@@ -209,9 +226,13 @@ const Dashboard: React.FC = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
         contentContainerStyle={{paddingBottom: RFPercentage(15)}}
         style={{flex: 1}}
         showsVerticalScrollIndicator={false}>
+
         {/* Header */}
         <HeaderBack
           logo={true}
@@ -223,6 +244,7 @@ const Dashboard: React.FC = () => {
         />
 
         <View style={styles.container}>
+          
           {/* Profile Image */}
           <View style={styles.imgContainer}>
             <TouchableOpacity onPress={uploadImg}>
@@ -575,7 +597,7 @@ const styles = StyleSheet.create({
   availability: {
     color: Colors.gradient1,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.8),
   },
   availabilityIcon: {
     width: RFPercentage(1.5),
@@ -617,14 +639,14 @@ const styles = StyleSheet.create({
   headeing2: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.9),
   },
   description: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.7),
     textAlign: 'justify',
-    lineHeight: RFPercentage(2.1),
+    lineHeight: RFPercentage(2.5),
     marginTop: RFPercentage(0.5),
   },
   serviceContainer: {
@@ -651,12 +673,12 @@ const styles = StyleSheet.create({
   },
   serviceName: {
     color: Colors.placeholderColor,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontRegular,
   },
   moreButton: {
     color: Colors.placeholderColor,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
     textAlign: 'center',
     position: 'absolute',

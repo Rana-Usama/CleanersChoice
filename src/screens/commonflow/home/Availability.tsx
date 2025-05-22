@@ -210,7 +210,7 @@ const Availability = () => {
                     style={{
                       color: Colors.primaryText,
                       fontFamily: Fonts.fontMedium,
-                      fontSize: RFPercentage(1.6),
+                      fontSize: RFPercentage(1.8),
                       textAlign: 'center',
                       lineHeight: RFPercentage(2.8),
                     }}>
@@ -255,7 +255,7 @@ const Availability = () => {
                     ? 'Edit Availability'
                     : 'Set Availability'
                 }
-                textStyle={{fontSize: RFPercentage(1.5)}}
+                textStyle={{fontSize: RFPercentage(1.7)}}
                 onPress={handleSetAvailability}
                 loading={loading}
               />

@@ -10,6 +10,7 @@ import {
   FlatList,
   TouchableWithoutFeedback,
   ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import React, {useState, useCallback} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -27,8 +28,9 @@ import Toast from 'react-native-toast-message';
 import HeaderBack from '../../../components/HeaderBack';
 import NotFound from '../../../components/NotFound';
 import {showToast} from '../../../utils/ToastMessage';
+import {useExitAppOnBack} from '../../../utils/ExitApp';
 
-const Jobs = ({navigation} : any) => {
+const Jobs = ({navigation}: any) => {
   const [active, setActive] = useState(true);
   const [completed, setCompleted] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
@@ -37,6 +39,19 @@ const Jobs = ({navigation} : any) => {
   const [loading, setLoading] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState(null);
   const [loading2, setLoading2] = useState(false);
+  useExitAppOnBack();
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    setLoading(true);
+    fetchMyJobs();
+    setTimeout(() => {
+      setRefreshing(false);
+      setLoading(false);
+    }, 1500);
+  };
 
   const toggle1 = () => {
     setStatus('active');
@@ -111,6 +126,9 @@ const Jobs = ({navigation} : any) => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
         contentContainerStyle={styles.scrollView}
         showsVerticalScrollIndicator={false}>
         <HeaderBack

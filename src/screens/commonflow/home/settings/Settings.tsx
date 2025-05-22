@@ -21,6 +21,7 @@ import Toast from 'react-native-toast-message';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import {showToast} from '../../../../utils/ToastMessage';
+import { useExitAppOnBack } from '../../../../utils/ExitApp';
 
 const Settings = () => {
   const navigation =
@@ -29,14 +30,15 @@ const Settings = () => {
   const [modalVisible2, setModalVisible2] = useState(false);
   const [role, setuserRole] = useState('');
   const [loading, setLoading] = useState(false);
+  useExitAppOnBack()
 
   // Log out
   const logOut = async () => {
+    setModalVisible(false);
     setLoading(true);
     try {
       await AsyncStorage.multiRemove(['email', 'password', 'role']);
       await AsyncStorage.setItem('logout', 'yes');
-      setModalVisible(false);
       showToast({
         type: 'success',
         title: 'Log Out',
@@ -71,6 +73,7 @@ const Settings = () => {
   // Delete Account
 
   const deleteAccount = async () => {
+    setModalVisible2(false);
     try {
       const user = auth().currentUser;
       if (!user) return;
@@ -94,7 +97,7 @@ const Settings = () => {
         title: 'Account Deleted',
         message: 'Your account has been permanently deleted.',
       });
-      setModalVisible2(false);
+
       navigation.reset({
         index: 0,
         routes: [{name: 'UserSelection'}],

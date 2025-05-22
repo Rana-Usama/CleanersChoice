@@ -89,6 +89,6 @@ const styles = StyleSheet.create({
   homeButtonText: {
     color: 'rgba(37, 50, 117, 1)',
     fontFamily: Fonts.fontBold,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.8),
   },
 });

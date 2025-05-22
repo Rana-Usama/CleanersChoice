@@ -60,7 +60,7 @@ const SignIn: React.FC = () => {
       showToast({
         type: 'success',
         title: 'Sign In',
-        message: 'Logged in successful!',
+        message: 'Logged in successfully!',
       });
       if (selected) {
         await AsyncStorage.setItem('email', values.email);
