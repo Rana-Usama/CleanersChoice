@@ -5,64 +5,76 @@ import {Colors, Fonts, Icons} from '../constants/Themes';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 
 interface props {
-  delete? : boolean;
-  onPress2 : ()=> void;
-  name : string;
-  date : string;
-  location : string;
-  price : string;
-  onPress : ()=> void
-
+  delete?: boolean;
+  onPress2: () => void;
+  name: string;
+  date: string;
+  location: string;
+  price: string;
+  onPress: () => void;
 }
 
-const JobCard = (props:props) => {
+const JobCard = (props: props) => {
   return (
-    <TouchableOpacity style={styles.container} onPress={props.onPress}>
-      {props.delete && (
-        <TouchableOpacity onPress={props.onPress2} style={styles.deleteButton}>
-          <Image source={Icons.delete} resizeMode="contain" style={styles.deleteIcon} />
-        </TouchableOpacity>
-      )}
+    <View style={styles.shadowContainer}>
+      <TouchableOpacity  activeOpacity={0.8} style={styles.container} onPress={props.onPress}>
+        {props.delete && (
+          <TouchableOpacity onPress={props.onPress2} style={styles.deleteButton}>
+            <Image source={Icons.delete} resizeMode="contain" style={styles.deleteIcon} />
+          </TouchableOpacity>
+        )}
 
-      <View style={styles.innerView}>
-        <Text style={styles.nameText}>{props.name}</Text>
-        <Text style={styles.dateText}>Due Date & Time: {props.date}</Text>
-      </View>
-      
-      <View style={styles.locationContainer}>
-        <EvilIcons name="location" size={RFPercentage(2)} style={styles.locationIcon} />
-        <Text style={styles.locationText}>{props.location}</Text>
-      </View>
-      
-      <View style={[styles.innerView, styles.priceContainer]}>
-        <Text style={styles.priceText}>
-          Budget:
-          <Text style={styles.priceHighlight}>{`	`} {props.price}$</Text>
-        </Text>
-        <TouchableOpacity onPress={props.onPress}>
-          <View style={styles.detailsContainer}>
-            <Text style={styles.detailsText}>Details</Text>
-            <TouchableOpacity onPress={props.onPress}>
-              <Image source={Icons.arrowRight} resizeMode="contain" style={styles.arrowIcon} />
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      </View>
-    </TouchableOpacity>
+        <View style={styles.innerView}>
+          <Text style={styles.nameText}>{props.name}</Text>
+          <Text style={styles.dateText}>Due Date & Time: {props.date}</Text>
+        </View>
+
+        <View style={styles.locationContainer}>
+          <EvilIcons name="location" size={RFPercentage(2)} style={styles.locationIcon} />
+          <Text style={styles.locationText}>{props.location}</Text>
+        </View>
+
+        <View style={[styles.innerView, styles.priceContainer]}>
+          <Text style={styles.priceText}>
+            Budget:
+            <Text style={styles.priceHighlight}>{` `} {props.price}$</Text>
+          </Text>
+          <TouchableOpacity onPress={props.onPress}>
+            <View style={styles.detailsContainer}>
+              <Text style={styles.detailsText}>Details</Text>
+              <TouchableOpacity onPress={props.onPress}>
+                <Image source={Icons.arrowRight} resizeMode="contain" style={styles.arrowIcon} />
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </View>
+      </TouchableOpacity>
+    </View>
   );
 };
 
 export default JobCard;
 
 const styles = StyleSheet.create({
-  container: {
+  shadowContainer: {
     width: '90%',
-    borderWidth: 1,
-    borderColor: 'rgba(156, 163, 175, 0.5)',
-    borderRadius: RFPercentage(1),
-    padding: RFPercentage(1.3),
+    alignSelf: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 8, // Android shadow
     marginTop: RFPercentage(2.5),
-    alignSelf:'center'
+    borderRadius: RFPercentage(1.5),
+    backgroundColor: 'transparent',
+  },
+  container: {
+    width: '100%',
+    borderWidth: 1,
+    borderColor: 'rgba(199, 212, 234, 0.5)',
+    borderRadius: RFPercentage(1.5),
+    padding: RFPercentage(1.3),
+    backgroundColor: 'white',
   },
   deleteButton: {
     position: 'absolute',
@@ -101,7 +113,6 @@ const styles = StyleSheet.create({
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.5),
-    // left: -2,
   },
   priceContainer: {
     marginTop: RFPercentage(1),
@@ -115,14 +126,13 @@ const styles = StyleSheet.create({
     color: Colors.gradient1,
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.5),
-
   },
   detailsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   detailsText: {
-    color: 'rgba(55, 65, 81, 1)',
+    color: Colors.gradient1,
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.5),
     right: 5,

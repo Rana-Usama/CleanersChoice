@@ -314,14 +314,14 @@ const styles = StyleSheet.create({
   value: {
     color: 'rgba(75, 85, 99, 1)',
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     marginTop: RFPercentage(1),
     // left:RFPercentage(1)
   },
   description: {
     color: 'rgba(75, 85, 99, 1)',
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     marginTop: 4,
     textAlign: 'justify',
     lineHeight: 18,

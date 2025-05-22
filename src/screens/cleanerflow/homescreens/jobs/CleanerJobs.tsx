@@ -261,14 +261,19 @@ const CleanerJobs = () => {
           {/* Filters Container */}
           <View>
             <Text style={styles.sectionTitle}>Apply Filters</Text>
-            <View
-              style={{
+
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{
                 flexDirection: 'row',
                 alignItems: 'center',
-                width: '100%',
-                alignSelf: 'center',
+                // paddingHorizontal: RFPercentage(1), // optional for spacing
                 marginTop: RFPercentage(1),
+                // backgroundColor:'red',
+                height: RFPercentage(6),
               }}>
+              {/* Location Filter */}
               <View>
                 <TouchableOpacity
                   activeOpacity={0.8}
@@ -329,6 +334,7 @@ const CleanerJobs = () => {
                 )}
               </View>
 
+              {/* Price Range Filter */}
               <View>
                 <TouchableOpacity
                   activeOpacity={0.8}
@@ -353,7 +359,6 @@ const CleanerJobs = () => {
                     }}
                     resizeMode="contain"
                   />
-
                   <Text
                     style={[
                       styles.filterText,
@@ -387,6 +392,7 @@ const CleanerJobs = () => {
                 )}
               </View>
 
+              {/* Service Type Filter */}
               <View>
                 <TouchableOpacity
                   activeOpacity={0.8}
@@ -441,7 +447,7 @@ const CleanerJobs = () => {
                   </TouchableOpacity>
                 )}
               </View>
-            </View>
+            </ScrollView>
           </View>
         </View>
 
@@ -654,7 +660,7 @@ const CleanerJobs = () => {
                         minimumTrackTintColor={Colors.gradient1}
                         maximumTrackTintColor="gray"
                         thumbTintColor={Colors.gradient1}
-                        thumbImage={Icons.slider}
+                        // thumbImage={Icons.slider}
                       />
                       <View style={styles.sliderLabelsContainer}>
                         <Text
@@ -790,8 +796,21 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.8),
   },
+  filterWrapper: {
+    position: 'relative',
+  },
+
+  shadowWrapper: {
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 8, // Android shadow
+    borderRadius: RFPercentage(0.8),
+  },
+
   filterBox: {
-    width: RFPercentage(14),
+    width: RFPercentage(13.5),
     height: RFPercentage(4.6),
     borderWidth: 1,
     alignItems: 'center',
@@ -799,7 +818,9 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(0.8),
     borderColor: Colors.inputFieldColor,
     flexDirection: 'row',
+    backgroundColor: 'white', // Or transparent if not selected
   },
+
   filterText: {
     color: Colors.primaryText,
     fontSize: RFPercentage(1.5),

@@ -69,7 +69,6 @@ const Chat = ({navigation, route}: any) => {
     return () => unsubscribe();
   }, [chatId]);
 
-  
   const fetchMoreMessages = async () => {
     if (!lastVisible) return;
     const q = firestore()
@@ -132,7 +131,7 @@ const Chat = ({navigation, route}: any) => {
       setMessages(previousMessages =>
         GiftedChat.append(previousMessages, [newMessage]),
       );
-
+      setMessage('');
       const firestoreMessage = {
         text: message.text,
         timestamp,
@@ -157,7 +156,6 @@ const Chat = ({navigation, route}: any) => {
           {merge: true},
         );
         await sendPushNotification(message.text);
-        setMessage('');
       } catch (e) {
         console.log('Error sending message:', e);
       }
@@ -192,7 +190,6 @@ const Chat = ({navigation, route}: any) => {
     }, [chatId, senderId]),
   );
 
-  console.log(fcmToken);
   const sendPushNotification = async (message: any) => {
     try {
       const response = await fetch(

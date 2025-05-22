@@ -33,7 +33,6 @@ const ServiceThree: React.FC = ({navigation}: any) => {
   );
   const [errors, setErrors] = useState({});
 
-  console.log(errors);
 
   const addPackage = () => {
     if (packages.length < MAX_PACKAGES) {

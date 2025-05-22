@@ -705,8 +705,8 @@ const Home = () => {
                         }}
                         minimumTrackTintColor={Colors.gradient1}
                         maximumTrackTintColor="gray"
-                        // thumbTintColor={Colors.gradient1}
-                        thumbImage={Icons.slider}
+                        thumbTintColor={Colors.gradient1}
+                        // thumbImage={Icons.slider}
                       />
                       <View style={styles.sliderLabelsContainer}>
                         <Text
