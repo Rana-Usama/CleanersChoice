@@ -71,6 +71,7 @@ const CleanerJobs = () => {
       const snapshot = await firestore()
         .collection('Jobs')
         .where('status', '==', 'active')
+        .orderBy('createdAt2', 'desc')
         .get();
       const jobs = snapshot.docs.map(doc => ({
         id: doc.id,
@@ -234,10 +235,10 @@ const CleanerJobs = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scrollView}>
-        <HeaderBack title={'Jobs'} textStyle={{fontSize: RFPercentage(2)}} />
+        <HeaderBack title={'Jobs'} textStyle={{fontSize: RFPercentage(2.2)}} />
         <View style={styles.container}>
           <View style={styles.jobPostedContainer}>
-            <Text style={styles.jobPosted}>Recent Job posts by clients</Text>
+            <Text style={styles.jobPosted}>Recent Jobs posts by clients</Text>
           </View>
 
           {/* Filters Container */}
@@ -299,12 +300,12 @@ const CleanerJobs = () => {
                     }}
                     style={{
                       position: 'absolute',
-                      right: 0,
-                      top: RFPercentage(-0.9),
+                      right: RFPercentage(-0.5),
+                      top: RFPercentage(-1.4),
                     }}>
                     <AntDesign
                       name="closecircle"
-                      size={RFPercentage(1.6)}
+                      size={RFPercentage(2)}
                       color={'rgb(206, 211, 219)'}
                     />
                   </TouchableOpacity>
@@ -357,12 +358,12 @@ const CleanerJobs = () => {
                     onPress={() => setRangeSelector(false)}
                     style={{
                       position: 'absolute',
-                      right: 0,
-                      top: RFPercentage(-0.9),
+                      right: RFPercentage(-0.5),
+                      top: RFPercentage(-1.4),
                     }}>
                     <AntDesign
                       name="closecircle"
-                      size={RFPercentage(1.6)}
+                      size={RFPercentage(2)}
                       color={'rgb(206, 211, 219)'}
                     />
                   </TouchableOpacity>
@@ -412,12 +413,12 @@ const CleanerJobs = () => {
                     onPress={() => setServiceType(false)}
                     style={{
                       position: 'absolute',
-                      right: 0,
-                      top: RFPercentage(-0.9),
+                      right: RFPercentage(-0.5),
+                      top: RFPercentage(-1.4),
                     }}>
                     <AntDesign
                       name="closecircle"
-                      size={RFPercentage(1.6)}
+                      size={RFPercentage(2)}
                       color={'rgb(206, 211, 219)'}
                     />
                   </TouchableOpacity>
@@ -636,6 +637,7 @@ const CleanerJobs = () => {
                         minimumTrackTintColor={Colors.gradient1}
                         maximumTrackTintColor="gray"
                         thumbTintColor={Colors.gradient1}
+                        thumbImage={Icons.slider}
                       />
                       <View style={styles.sliderLabelsContainer}>
                         <Text
@@ -771,11 +773,11 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(2.5),
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.8),
   },
   filterBox: {
-    width: RFPercentage(13),
-    height: RFPercentage(4.3),
+    width: RFPercentage(14),
+    height: RFPercentage(4.6),
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
@@ -785,7 +787,7 @@ const styles = StyleSheet.create({
   },
   filterText: {
     color: Colors.primaryText,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
   },
   listContainer: {
     marginTop: RFPercentage(0.7),
@@ -795,7 +797,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.9),
   },
   jobPostedContainer: {
     alignItems: 'center',
@@ -869,7 +871,7 @@ const styles = StyleSheet.create({
   applyLocation: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.9),
+    fontSize: RFPercentage(2),
   },
   queryContainer: {
     top: RFPercentage(0.5),

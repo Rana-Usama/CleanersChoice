@@ -210,8 +210,7 @@ const CancelSubscription = () => {
             <BlurView style={styles.blurView} blurType="light" blurAmount={2} />
             <View style={styles.modalCancel}>
               <Text style={styles.cancelHeading}>
-                You’ll loose access to all premium features after one month that
-                includes:
+                You’ll lose access to all premium features after one month, including:
               </Text>
               <View
                 style={{
@@ -219,17 +218,17 @@ const CancelSubscription = () => {
                   width: RFPercentage(32),
                 }}>
                 <Text style={styles.cancelInfo}>
-                  {`1. Access to Job Portal.`}
+                  {`1. Access to the Job Portal will be removed.`}
                 </Text>
                 <Text
                   style={[
                     styles.cancelInfo,
                     {marginVertical: RFPercentage(2)},
                   ]}>
-                  {`2. You won’t be able to chat with Customers.`}
+                  {`2. You will no longer be able to chat with customers.`}
                 </Text>
                 <Text style={styles.cancelInfo}>
-                  {`3. You’ll have to active your subscription again to use the app.`}
+                  {`3. You’ll need to reactivate your subscription to continue using the app.`}
                 </Text>
               </View>
               <View style={styles.buttonWrapper}>

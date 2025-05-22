@@ -60,6 +60,7 @@ export const Icons: {[key: string]: any} = {
   verifyWhite: require('../assets/icons/verify-white.png'),
   locationWhite: require('../assets/icons/location-white.png'),
   slider: require('../assets/icons/cd.png'),
+  availablityEdit: require('../assets/icons/avail.png'),
 };
 
 export const IMAGES: {[key: string]: any} = {

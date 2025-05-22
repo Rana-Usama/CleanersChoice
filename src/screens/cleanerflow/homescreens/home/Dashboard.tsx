@@ -225,7 +225,7 @@ const Dashboard: React.FC = () => {
         <View style={styles.container}>
           {/* Profile Image */}
           <View style={styles.imgContainer}>
-            <View>
+            <TouchableOpacity onPress={uploadImg}>
               <View style={styles.pictureContainer}>
                 {loading ? (
                   <ActivityIndicator
@@ -254,7 +254,7 @@ const Dashboard: React.FC = () => {
                   style={styles.uploadedImg}
                 />
               </TouchableOpacity>
-            </View>
+            </TouchableOpacity>
           </View>
           <View style={styles.nameContainer}>
             <Text style={styles.nameText}>{name}</Text>
@@ -546,7 +546,7 @@ const styles = StyleSheet.create({
   },
   profileCompletionContainer: {
     width: '90%',
-    height: RFPercentage(3.8),
+    height: RFPercentage(5),
     borderWidth: 1.4,
     borderColor: Colors.gradient1,
     borderRadius: RFPercentage(0.8),
@@ -560,7 +560,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: Fonts.fontRegular,
     color: 'rgba(0, 0, 0, 1)',
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.7),
     textAlignVertical: 'center',
   },
   noServiceContainer: {
@@ -586,7 +586,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: Fonts.fontRegular,
     color: 'rgba(55, 65, 81, 1)',
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.7),
     marginTop: RFPercentage(1),
   },
   completeProfileContainer: {
@@ -596,10 +596,10 @@ const styles = StyleSheet.create({
     // bottom: 0,
   },
   button: {
-    width: RFPercentage(19),
+    width: RFPercentage(20),
   },
   buttonText: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.6),
   },
   headerText: {
     fontSize: RFPercentage(2),
