@@ -88,7 +88,6 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
               ? options.tabBarLabel
               : route.name;
           const isFocused = state.index === index;
-
           return (
             <TouchableOpacity
               key={index}
@@ -109,19 +108,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                     style={styles.imgStyle}
                     resizeMode="contain"
                   />
-                  {unreadCount > 0 && (
-                    <View
-                      style={{
-                        position: 'absolute',
-                        top: -4,
-                        right: -6,
-                        backgroundColor: Colors.gradient1,
-                        borderRadius: 6,
-                        width: 8,
-                        height: 8,
-                      }}
-                    />
-                  )}
+                  {unreadCount > 0 && <View style={styles.count} />}
                 </View>
               ) : route.name === 'Job Listings' ? (
                 <Image
@@ -217,5 +204,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
+  },
+  count: {
+    position: 'absolute',
+    top: -4,
+    right: -6,
+    backgroundColor: Colors.gradient1,
+    borderRadius: 6,
+    width: 8,
+    height: 8,
   },
 });

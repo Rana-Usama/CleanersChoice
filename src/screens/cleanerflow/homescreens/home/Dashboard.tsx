@@ -84,6 +84,7 @@ const Dashboard: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
   useExitAppOnBack()
 
+  // On Refresh
   const onRefresh = () => {
     setRefreshing(true);
     setLoading3(true)
@@ -97,6 +98,7 @@ const Dashboard: React.FC = () => {
     }, 2000);
   };
 
+  // Upload Image
   const uploadImg = async () => {
     try {
       setLoading(true);
@@ -148,6 +150,7 @@ const Dashboard: React.FC = () => {
     }, []),
   );
 
+  // User data
   const fetchUserData = async () => {
     const user = auth().currentUser;
     if (!user) return;
@@ -168,6 +171,7 @@ const Dashboard: React.FC = () => {
     }, []),
   );
 
+  // Service Details
   const serviceDetails = async () => {
     const user = auth().currentUser;
     if (!user) return;
@@ -191,6 +195,8 @@ const Dashboard: React.FC = () => {
     }, 500);
   };
 
+
+  // Profile Completion
   const profileCompletion =
     service?.availability?.length > 0 &&
     service?.description?.length > 0 &&
@@ -204,7 +210,6 @@ const Dashboard: React.FC = () => {
       : '50';
 
   dispatch(setProfileCompletion(profileCompletion));
-
   const handleShowMore = () => {
     setVisibleItems(prev => Math.min(prev + 5, service?.type.length));
   };
@@ -213,6 +218,7 @@ const Dashboard: React.FC = () => {
     setVisibleItems(5);
   };
 
+  // Service Name
   const getServiceNames = (serviceIds: any) => {
     return serviceIds
       ?.map((id: any) => {
@@ -223,6 +229,7 @@ const Dashboard: React.FC = () => {
   };
   const serviceNames = getServiceNames(service?.type?.slice(0, visibleItems));
 
+  
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView

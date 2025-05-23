@@ -95,8 +95,10 @@ const Availability = () => {
 
   useEffect(() => {
     const updatedAvailability = days.map(day => {
-      const found = service?.availability?.length > 0  && service?.availability?.find(item => item.day === day.name);
-      return { 
+      const found =
+        service?.availability?.length > 0 &&
+        service?.availability?.find(item => item.day === day.name);
+      return {
         day: day.name,
         fromTime: found
           ? new Date(
@@ -104,30 +106,26 @@ const Availability = () => {
                 ? found.fromTime._seconds * 1000
                 : found.fromTime,
             )
-          : new Date(new Date().setHours(9, 0, 0, 0)), 
+          : new Date(new Date().setHours(9, 0, 0, 0)),
         toTime: found
           ? new Date(
               found.toTime?._seconds
                 ? found.toTime._seconds * 1000
                 : found.toTime,
             )
-          : new Date(new Date().setHours(18, 0, 0, 0)), 
-        checked: found ? found.checked : false, 
+          : new Date(new Date().setHours(18, 0, 0, 0)),
+        checked: found ? found.checked : false,
       };
     });
-  
+
     setAvailabilityData(updatedAvailability);
-    // dispatch(cleanerAvailability(updatedAvailability));
-  
   }, [service?.availability, days]);
-  
 
   const toggleCheckBox = day => {
     setAvailabilityData(prev => {
       const updated = prev.map(item =>
         item.day === day ? {...item, checked: !item.checked} : item,
       );
-      // dispatch(cleanerAvailability(updated));
       return updated;
     });
   };
@@ -137,7 +135,6 @@ const Availability = () => {
       const updated = prev.map(item =>
         item.day === day ? {...item, fromTime, toTime} : item,
       );
-      // dispatch(cleanerAvailability(updated));
       return updated;
     });
   };
@@ -148,11 +145,9 @@ const Availability = () => {
     setTimeout(() => {
       setLoading(false);
       navigation.navigate('ServiceOne');
-    }, 1500);
+    }, 800);
   };
-  
-  
-  
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <HeaderBack
@@ -163,7 +158,11 @@ const Availability = () => {
       <View style={styles.container}>
         {loading2 ? (
           <>
-            <ActivityIndicator size={'large'}  color={'rgba(75, 85, 99, 0.5)'} style={{marginTop:RFPercentage(20)}} />
+            <ActivityIndicator
+              size={'large'}
+              color={'rgba(75, 85, 99, 0.5)'}
+              style={{marginTop: RFPercentage(20)}}
+            />
           </>
         ) : (
           <>
@@ -174,46 +173,19 @@ const Availability = () => {
                     style={{alignItems: 'center', justifyContent: 'center'}}>
                     <Image
                       source={IMAGES.alpha}
-                      style={{
-                        width: RFPercentage(10),
-                        height: RFPercentage(10),
-                      }}
+                      style={styles.img}
                       resizeMode="contain"
                       borderRadius={RFPercentage(100)}
                     />
-                    <Text
-                      style={{
-                        color: Colors.primaryText,
-                        fontFamily: Fonts.fontMedium,
-                        fontSize: RFPercentage(1.8),
-                        lineHeight: RFPercentage(2.8),
-                        marginTop: RFPercentage(1),
-                      }}>
-                      Alpha Cleaners
-                    </Text>
-                    <Text
-                      style={{
-                        color: Colors.secondaryText,
-                        fontFamily: Fonts.fontMedium,
-                        fontSize: RFPercentage(1.5),
-                        lineHeight: RFPercentage(2.8),
-                        marginTop: RFPercentage(2.2),
-                        textAlign: 'center',
-                      }}>
+                    <Text style={styles.name}>Alpha Cleaners</Text>
+                    <Text style={styles.description}>
                       Alpha Cleaners are available during these time of the week
                     </Text>
                   </View>
                 </>
               ) : (
                 <>
-                  <Text
-                    style={{
-                      color: Colors.primaryText,
-                      fontFamily: Fonts.fontMedium,
-                      fontSize: RFPercentage(1.8),
-                      textAlign: 'center',
-                      lineHeight: RFPercentage(2.8),
-                    }}>
+                  <Text style={styles.set}>
                     Set your weekly availability. Edit any day if needed
                   </Text>
                 </>
@@ -240,26 +212,18 @@ const Availability = () => {
           </>
         )}
       </View>
-            <View
-              style={{
-                alignItems: 'center',
-                justifyContent: 'center',
-                alignSelf: 'center',
-                position: 'absolute',
-                bottom:RFPercentage(34)
-
-              }}>
-              <GradientButton
-                title={
-                  profileCompletion === '100'
-                    ? 'Edit Availability'
-                    : 'Set Availability'
-                }
-                textStyle={{fontSize: RFPercentage(1.7)}}
-                onPress={handleSetAvailability}
-                loading={loading}
-              />
-            </View>
+      <View style={styles.buttonWrapper}>
+        <GradientButton
+          title={
+            profileCompletion === '100'
+              ? 'Edit Availability'
+              : 'Set Availability'
+          }
+          textStyle={{fontSize: RFPercentage(1.7)}}
+          onPress={handleSetAvailability}
+          loading={loading}
+        />
+      </View>
     </SafeAreaView>
   );
 };
@@ -278,5 +242,38 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
     width: '90%',
     alignSelf: 'center',
+  },
+  name: {
+    color: Colors.primaryText,
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.8),
+    lineHeight: RFPercentage(2.8),
+    marginTop: RFPercentage(1),
+  },
+  description: {
+    color: Colors.secondaryText,
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.5),
+    lineHeight: RFPercentage(2.8),
+    marginTop: RFPercentage(2.2),
+    textAlign: 'center',
+  },
+  set: {
+    color: Colors.primaryText,
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.8),
+    textAlign: 'center',
+    lineHeight: RFPercentage(2.8),
+  },
+  img: {
+    width: RFPercentage(10),
+    height: RFPercentage(10),
+  },
+  buttonWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    position: 'absolute',
+    bottom: RFPercentage(34),
   },
 });

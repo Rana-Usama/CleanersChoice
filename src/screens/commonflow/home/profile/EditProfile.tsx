@@ -36,7 +36,7 @@ const EditProfile = () => {
     >();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
-  const [img, setImg] = useState(null);
+  const [img, setImg] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const [userData, setUserData] = useState(null);
   const [loading2, setLoading2] = useState(false);
@@ -164,6 +164,7 @@ const EditProfile = () => {
               left={true}
             />
             <View style={styles.container}>
+              
               {/* Profile Image */}
               <TouchableOpacity onPress={uploadImg} style={styles.imgContainer}>
                 <View style={styles.pictureContainer}>

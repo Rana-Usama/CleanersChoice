@@ -25,7 +25,7 @@ import auth from '@react-native-firebase/auth';
 import NotFound from '../../../components/NotFound';
 import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
 import {Skeleton} from '@rneui/themed';
-import { useExitAppOnBack } from '../../../utils/ExitApp';
+import {useExitAppOnBack} from '../../../utils/ExitApp';
 const Messages = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, 'Messages'>>();
@@ -79,6 +79,7 @@ const Messages = () => {
 
   const [refreshing, setRefreshing] = useState(false);
 
+  // Fetch chats
   const fetchChats = async () => {
     try {
       const snapshot = await firestore()
@@ -107,6 +108,7 @@ const Messages = () => {
     }
   };
 
+  // On Refresh
   const onRefresh = () => {
     setRefreshing(true);
     setLoading2(true);
@@ -117,12 +119,11 @@ const Messages = () => {
     }, 1500);
   };
 
+  // Filter
   useFocusEffect(
     useCallback(() => {
       let unsubscribe: any;
-
       fetchChats();
-
       if (userId) {
         let query = firestore()
           .collection('Chats')
@@ -151,17 +152,16 @@ const Messages = () => {
           }
         });
       }
-
       return () => {
         if (unsubscribe) unsubscribe();
       };
     }, [userId, unread]),
   );
 
+  // Chats Data
   const getChatData = async (doc: any) => {
     const chat = doc.data();
     const otherUser = chat.participants.find((p: any) => p !== userId);
-
     try {
       const userDoc = await firestore()
         .collection('Users')
@@ -191,10 +191,10 @@ const Messages = () => {
     }
   };
 
+  // Time Format
   const formatTimestamp = (timestamp: any) => {
     const time = moment(timestamp.toDate());
     const now = moment();
-
     if (time.isSame(now, 'day')) {
       return time.format('h:mm A'); // Today
     } else if (time.isSame(now.clone().subtract(1, 'day'), 'day')) {
@@ -271,6 +271,7 @@ const Messages = () => {
 
           {loading2 ? (
             <>
+              {/* Skeleton */}
               <View style={{marginTop: RFPercentage(4)}}>
                 {[...Array(7)].map((_, index) => (
                   <View
@@ -312,6 +313,7 @@ const Messages = () => {
             </>
           ) : (
             <>
+            {/* Chats */}
               {chats.length > 0 ? (
                 <FlatList
                   contentContainerStyle={{
@@ -352,6 +354,7 @@ const Messages = () => {
                   }}
                 />
               ) : (
+                // Not found
                 <View style={{marginTop: RFPercentage(10)}}>
                   <NotFound text="No chats found" />
                 </View>
