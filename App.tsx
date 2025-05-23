@@ -20,6 +20,7 @@ import {UnreadMessagesProvider} from './src/utils/UnreadMessagesContext';
 import {toastConfig} from './src/utils/toastConfig';
 
 const App: React.FC = () => {
+  
   // Notification Permission
   useEffect(() => {
     const requestNotificationPermission = async () => {

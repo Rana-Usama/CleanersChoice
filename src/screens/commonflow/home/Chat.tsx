@@ -43,6 +43,7 @@ const Chat = ({navigation, route}: any) => {
 
   const [message, setMessage] = useState('');
 
+  // Fetch chats
   useEffect(() => {
     const unsubscribe = firestore()
       .collection('Chats')
@@ -69,43 +70,8 @@ const Chat = ({navigation, route}: any) => {
     return () => unsubscribe();
   }, [chatId]);
 
-  const fetchMoreMessages = async () => {
-    if (!lastVisible) return;
-    const q = firestore()
-      .collection('Chats')
-      .doc(chatId)
-      .collection('Messages')
-      .orderBy('timestamp', 'desc')
-      .startAfter(lastVisible)
-      .limit(100);
 
-    const snapshot = await q.get();
-    const newMessages = snapshot.docs.map(doc => {
-      const firebaseMessage = doc.data();
-      return {
-        _id: doc.id,
-        text: firebaseMessage.text,
-        createdAt: firebaseMessage.timestamp.toDate(),
-        user: {
-          _id: firebaseMessage.senderId,
-          name: firebaseMessage.senderName,
-        },
-      };
-    });
-
-    setMessages(prevMessages => {
-      const messagesMap = new Map();
-      prevMessages.forEach(msg => messagesMap.set(msg._id, msg));
-      newMessages.forEach(msg => messagesMap.set(msg._id, msg));
-      setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
-      return GiftedChat.append(
-        Array.from(messagesMap.values()).sort(
-          (a, b) => b.createdAt - a.createdAt,
-        ),
-      ).filter(Boolean);
-    });
-  };
-
+  // Send Message
   const onSend = useCallback(
     async (messagesToSend = []) => {
       const message = messagesToSend[0];
@@ -113,10 +79,8 @@ const Chat = ({navigation, route}: any) => {
         console.log('Message text is empty!');
         return;
       }
-
       const timestamp = firestore.FieldValue.serverTimestamp();
       const localTimestamp = new Date(); // For UI until server timestamp comes back
-
       const newMessage = {
         _id: `${Date.now()}`, // temp unique id for UI
         text: message.text,
@@ -163,6 +127,7 @@ const Chat = ({navigation, route}: any) => {
     [chatId, senderId, senderName, receiver],
   );
 
+  // Mark message as read
   useFocusEffect(
     useCallback(() => {
       const markLastMessageAsRead = async () => {
@@ -190,6 +155,7 @@ const Chat = ({navigation, route}: any) => {
     }, [chatId, senderId]),
   );
 
+  // Push Notifications
   const sendPushNotification = async (message: any) => {
     try {
       const response = await fetch(
@@ -217,6 +183,8 @@ const Chat = ({navigation, route}: any) => {
       console.log(`Error sending to ${fcmToken}:`, err);
     }
   };
+
+
 
   return (
     <LinearGradient

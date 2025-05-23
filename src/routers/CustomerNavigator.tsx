@@ -109,19 +109,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                     style={styles.imgStyle}
                     resizeMode="contain"
                   />
-                  {unreadCount > 0 && (
-                    <View
-                      style={{
-                        position: 'absolute',
-                        top: RFPercentage(-0.5),
-                        right: RFPercentage(-1),
-                        backgroundColor: Colors.gradient1,
-                        borderRadius: RFPercentage(100),
-                        width: RFPercentage(1),
-                        height: RFPercentage(1),
-                      }}
-                    />
-                  )}
+                  {unreadCount > 0 && <View style={styles.count} />}
                 </View>
               ) : route.name === 'Job Board' ? (
                 <Image
@@ -217,5 +205,14 @@ const styles = StyleSheet.create({
   imgStyle: {
     width: RFPercentage(2.8),
     height: RFPercentage(2.8),
+  },
+  count: {
+    position: 'absolute',
+    top: RFPercentage(-0.5),
+    right: RFPercentage(-1),
+    backgroundColor: Colors.gradient1,
+    borderRadius: RFPercentage(100),
+    width: RFPercentage(1),
+    height: RFPercentage(1),
   },
 });

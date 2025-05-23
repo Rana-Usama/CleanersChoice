@@ -174,6 +174,7 @@ const StackNavigator: React.FC = () => {
                 ? 'SignIn'
                 : 'SplashOne'
             }>
+
             {/* -------Common Screens----- */}
             <Stack.Screen name="SplashOne" component={Splash} />
             <Stack.Screen name="OnBoarding" component={OnBoarding} />
@@ -196,6 +197,7 @@ const StackNavigator: React.FC = () => {
             <Stack.Screen name="Chat" component={Chat} />
             <Stack.Screen name="Messages" component={Messages} />
 
+
             {/* ------------------Customer Flow------------- */}
             <Stack.Screen name="Home" component={CustomerNavigator} />
             <Stack.Screen name="ServiceDetails" component={ServiceDetails} />
@@ -206,6 +208,7 @@ const StackNavigator: React.FC = () => {
               component={CheckAvailability}
             />
             <Stack.Screen name="Jobs" component={Jobs} />
+
 
             {/* ----------------- Cleaner Flow ---------------- */}
             <Stack.Screen name="Premium" component={Premium} />

@@ -71,7 +71,6 @@ const Settings = () => {
   userRole();
 
   // Delete Account
-
   const deleteAccount = async () => {
     setModalVisible2(false);
     try {

@@ -33,6 +33,7 @@ const JobDetails = ({route}: any) => {
   const [loading2, setLoading2] = useState(false);
   const [loading3, setLoading3] = useState(false);
 
+  // Mark Complete
   const markComplete = async (jobId: string, newStatus: string) => {
     setLoading(true);
     try {
@@ -51,6 +52,7 @@ const JobDetails = ({route}: any) => {
   const dispatch = useDispatch();
   dispatch(setJobId(item.id));
 
+  // Edit Button
   const handleEditButton = () => {
     setLoading2(true);
     setTimeout(() => {
@@ -59,6 +61,7 @@ const JobDetails = ({route}: any) => {
     }, 1000);
   };
 
+  // Generating Chat Id
   const user = auth().currentUser;
   const userId = user?.uid;
   const generateChatId = () => {
@@ -67,6 +70,7 @@ const JobDetails = ({route}: any) => {
   const chatId = generateChatId();
   const [existingChatId, setExistingChatId] = useState(null);
 
+  // User Data
   const [userInfo, setUserInfo] = useState([]);
   useEffect(() => {
     fetchUserData();
@@ -85,6 +89,7 @@ const JobDetails = ({route}: any) => {
     }
   };
 
+  // Other user
   const [otherUser, setOtherUser] = useState([]);
   useEffect(() => {
     otherUserData();
@@ -104,6 +109,7 @@ const JobDetails = ({route}: any) => {
     }
   };
 
+  // Fetch existing id
   const fetchExistingChatId = async (userId1: any, userId2: any) => {
     try {
       const chatsSnapshot = await firestore()
@@ -124,6 +130,7 @@ const JobDetails = ({route}: any) => {
     }
   };
 
+  // Finding Chat
   useEffect(() => {
     const tryToFindChat = async () => {
       if (user?.uid && item?.jobId) {
@@ -135,10 +142,10 @@ const JobDetails = ({route}: any) => {
         }
       }
     };
-
     tryToFindChat();
   }, [user?.uid, item?.jobId]);
 
+  
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
