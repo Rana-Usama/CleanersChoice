@@ -66,6 +66,7 @@ const CleanerJobs = () => {
   const [refreshing, setRefreshing] = useState(false);
   useExitAppOnBack();
 
+  // On Refresh
   const onRefresh = () => {
     setRefreshing(true);
     setLoading(true);
@@ -76,10 +77,10 @@ const CleanerJobs = () => {
     }, 1500);
   };
 
+  // Fetching jobs
   const fetchJobs = async () => {
     const user = auth().currentUser;
     if (!user) return;
-    // setLoading(true);
     try {
       const snapshot = await firestore()
         .collection('Jobs')
@@ -97,8 +98,6 @@ const CleanerJobs = () => {
       setLocations(locationsArray);
     } catch (error) {
       console.error('Error fetching jobs:', error);
-    } finally {
-      // setLoading(false);
     }
   };
 
@@ -168,6 +167,7 @@ const CleanerJobs = () => {
     }, 1500);
   };
 
+  // Filters
   const [filteredLocations, setFilteredLocations] = useState([]);
   useEffect(() => {
     if (query.trim().length > 0) {
@@ -268,9 +268,7 @@ const CleanerJobs = () => {
               contentContainerStyle={{
                 flexDirection: 'row',
                 alignItems: 'center',
-                // paddingHorizontal: RFPercentage(1), // optional for spacing
                 marginTop: RFPercentage(1),
-                // backgroundColor:'red',
                 height: RFPercentage(6),
               }}>
               {/* Location Filter */}
@@ -290,11 +288,7 @@ const CleanerJobs = () => {
                     source={
                       loctionFilter ? Icons.locationWhite : Icons.location
                     }
-                    style={{
-                      width: RFPercentage(1.6),
-                      height: RFPercentage(1.6),
-                      marginRight: RFPercentage(0.5),
-                    }}
+                    style={styles.locationImg}
                     resizeMode="contain"
                   />
                   <Text
@@ -320,11 +314,7 @@ const CleanerJobs = () => {
                       setLocationFilter(false);
                       setQuery('');
                     }}
-                    style={{
-                      position: 'absolute',
-                      right: RFPercentage(-0.5),
-                      top: RFPercentage(-1.4),
-                    }}>
+                    style={styles.cross}>
                     <AntDesign
                       name="closecircle"
                       size={RFPercentage(2)}
@@ -352,11 +342,7 @@ const CleanerJobs = () => {
                     source={
                       rangeSelector ? Icons.priceRangeWhite : Icons.priceRange
                     }
-                    style={{
-                      width: RFPercentage(1.6),
-                      height: RFPercentage(1.6),
-                      marginRight: RFPercentage(0.5),
-                    }}
+                    style={styles.locationImg}
                     resizeMode="contain"
                   />
                   <Text
@@ -378,11 +364,7 @@ const CleanerJobs = () => {
                   <TouchableOpacity
                     activeOpacity={0.8}
                     onPress={() => setRangeSelector(false)}
-                    style={{
-                      position: 'absolute',
-                      right: RFPercentage(-0.5),
-                      top: RFPercentage(-1.4),
-                    }}>
+                    style={styles.cross}>
                     <AntDesign
                       name="closecircle"
                       size={RFPercentage(2)}
@@ -408,11 +390,7 @@ const CleanerJobs = () => {
                   ]}>
                   <Image
                     source={serviceType ? Icons.verifyWhite : Icons.verify}
-                    style={{
-                      width: RFPercentage(1.6),
-                      height: RFPercentage(1.6),
-                      marginRight: RFPercentage(0.5),
-                    }}
+                    style={styles.locationImg}
                     resizeMode="contain"
                   />
                   <Text
@@ -434,11 +412,7 @@ const CleanerJobs = () => {
                   <TouchableOpacity
                     activeOpacity={0.8}
                     onPress={() => setServiceType(false)}
-                    style={{
-                      position: 'absolute',
-                      right: RFPercentage(-0.5),
-                      top: RFPercentage(-1.4),
-                    }}>
+                    style={styles.cross}>
                     <AntDesign
                       name="closecircle"
                       size={RFPercentage(2)}
@@ -522,11 +496,7 @@ const CleanerJobs = () => {
                     {opacity: opacityAnim, transform: [{scale: scaleAnim}]},
                   ]}>
                   <TouchableOpacity
-                    style={{
-                      position: 'absolute',
-                      right: RFPercentage(2),
-                      top: RFPercentage(2),
-                    }}
+                    style={styles.close}
                     onPress={() => setModalVisible(false)}>
                     <AntDesign
                       name="closecircleo"
@@ -594,7 +564,6 @@ const CleanerJobs = () => {
       )}
 
       {/* Price Range Modal */}
-
       {modalVisible2 && (
         <>
           <TouchableWithoutFeedback onPress={() => setModalVisible2(false)}>
@@ -621,11 +590,7 @@ const CleanerJobs = () => {
                       styles.rangeModal,
                     ]}>
                     <TouchableOpacity
-                      style={{
-                        position: 'absolute',
-                        right: RFPercentage(2),
-                        top: RFPercentage(2),
-                      }}
+                      style={styles.close}
                       onPress={() => setModalVisible2(false)}>
                       <AntDesign
                         name="closecircleo"
@@ -645,6 +610,7 @@ const CleanerJobs = () => {
                       </Text>
                     </View>
                     <View style={{width: '100%', marginTop: RFPercentage(8)}}>
+                      {/* Slider */}
                       <Slider
                         style={styles.sliderStyle}
                         minimumValue={10}
@@ -660,7 +626,6 @@ const CleanerJobs = () => {
                         minimumTrackTintColor={Colors.gradient1}
                         maximumTrackTintColor="gray"
                         thumbTintColor={Colors.gradient1}
-                        // thumbImage={Icons.slider}
                       />
                       <View style={styles.sliderLabelsContainer}>
                         <Text
@@ -696,7 +661,6 @@ const CleanerJobs = () => {
       )}
 
       {/* Service Type */}
-
       {modalVisible3 && (
         <View style={styles.modalContainer}>
           <BlurView style={styles.blurView} blurType="light" blurAmount={5} />
@@ -714,11 +678,7 @@ const CleanerJobs = () => {
                   {opacity: opacityAnim, transform: [{scale: scaleAnim}]},
                 ]}>
                 <TouchableOpacity
-                  style={{
-                    position: 'absolute',
-                    right: RFPercentage(2),
-                    top: RFPercentage(2),
-                  }}
+                  style={styles.close}
                   onPress={() => setModalVisible3(false)}>
                   <AntDesign
                     name="closecircleo"
@@ -757,7 +717,6 @@ const CleanerJobs = () => {
                       )}
                   </View>
                 )}
-
                 <View style={{position: 'absolute', bottom: RFPercentage(3)}}>
                   <GradientButton
                     title="Apply"
@@ -940,5 +899,20 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.9),
     color: Colors.primaryText,
+  },
+  locationImg: {
+    width: RFPercentage(1.6),
+    height: RFPercentage(1.6),
+    marginRight: RFPercentage(0.5),
+  },
+  cross: {
+    position: 'absolute',
+    right: RFPercentage(-0.5),
+    top: RFPercentage(-1.4),
+  },
+  close: {
+    position: 'absolute',
+    right: RFPercentage(2),
+    top: RFPercentage(2),
   },
 });

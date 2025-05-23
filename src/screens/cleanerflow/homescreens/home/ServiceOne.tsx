@@ -103,6 +103,7 @@ const ServiceOne: React.FC = () => {
     }, [hasFetchedData]),
   );
 
+  // Fetching Services
   const fetchServiceData = async () => {
     const user = auth().currentUser;
     if (!user) return;
@@ -124,6 +125,7 @@ const ServiceOne: React.FC = () => {
   };
 
 
+  // Adding Services
   const addServices = async () => {
     const user = auth().currentUser;
     if (!user) return;
@@ -163,12 +165,15 @@ const ServiceOne: React.FC = () => {
     }
   };
 
+
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <HeaderBack title="Service" textStyle={styles.headerText} left={true} />
       <KeyboardAvoidingView style={{flex: 1}}>
         <ScrollView
           contentContainerStyle={{flexGrow: 1, paddingBottom: RFPercentage(5)}}>
+
           {/* Header */}
           <View style={styles.container}>
             <View style={styles.infoHeaderContainer}>
@@ -176,10 +181,12 @@ const ServiceOne: React.FC = () => {
             </View>
           </View>
 
+
           {/* Time Line */}
           <View style={styles.timeLineContainer}>
             <TimeLine />
           </View>
+
 
           <View style={styles.container}>
             {/* Description */}
@@ -192,6 +199,7 @@ const ServiceOne: React.FC = () => {
                 maxLength={200}
               />
             </View>
+
 
             {/* Availability */}
             <TouchableOpacity
@@ -240,6 +248,7 @@ const ServiceOne: React.FC = () => {
               </View>
             </TouchableOpacity>
 
+
             {/* Location */}
             <InputField
               placeholder="Add city/town you provide your services at"
@@ -247,6 +256,7 @@ const ServiceOne: React.FC = () => {
               onChangeText={setLoaction}
               customStyle={{width: '100%', marginBottom: RFPercentage(3)}}
             />
+
 
             {/* Service Type */}
             <View style={{flex: 1}}>
@@ -315,6 +325,7 @@ const ServiceOne: React.FC = () => {
                 {multiSelectRef.current?.getSelectedItemsExt(selectedItems)}
               </ScrollView>
             </View>
+
 
             {/* Button Container */}
             <View style={styles.buttonContainer}>

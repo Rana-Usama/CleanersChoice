@@ -30,7 +30,7 @@ import {RootStackParamList} from '../../../../routers/StackNavigator';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import Review from '../../../../components/Review';
 import {Image as CompressorImage} from 'react-native-compressor';
-import { useExitAppOnBack } from '../../../../utils/ExitApp';
+import {useExitAppOnBack} from '../../../../utils/ExitApp';
 
 const items = [
   {
@@ -82,19 +82,19 @@ const Dashboard: React.FC = () => {
   const [visibleItems, setVisibleItems] = useState(5);
   const [loading3, setLoading3] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  useExitAppOnBack()
+  useExitAppOnBack();
 
   // On Refresh
   const onRefresh = () => {
     setRefreshing(true);
-    setLoading3(true)
+    setLoading3(true);
     setLoading(true);
     serviceDetails();
     fetchUserData();
     setTimeout(() => {
       setRefreshing(false);
       setLoading(false);
-      setLoading3(false)
+      setLoading3(false);
     }, 2000);
   };
 
@@ -116,7 +116,6 @@ const Dashboard: React.FC = () => {
         maxWidth: 1000,
         quality: 0.8,
       });
-
       const user = auth().currentUser;
       if (!user) {
         setLoading(false);
@@ -195,7 +194,6 @@ const Dashboard: React.FC = () => {
     }, 500);
   };
 
-
   // Profile Completion
   const profileCompletion =
     service?.availability?.length > 0 &&
@@ -229,7 +227,6 @@ const Dashboard: React.FC = () => {
   };
   const serviceNames = getServiceNames(service?.type?.slice(0, visibleItems));
 
-  
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
@@ -239,7 +236,7 @@ const Dashboard: React.FC = () => {
         contentContainerStyle={{paddingBottom: RFPercentage(15)}}
         style={{flex: 1}}
         showsVerticalScrollIndicator={false}>
-
+          
         {/* Header */}
         <HeaderBack
           logo={true}
@@ -251,7 +248,7 @@ const Dashboard: React.FC = () => {
         />
 
         <View style={styles.container}>
-          
+
           {/* Profile Image */}
           <View style={styles.imgContainer}>
             <TouchableOpacity onPress={uploadImg}>
@@ -290,6 +287,7 @@ const Dashboard: React.FC = () => {
           </View>
         </View>
 
+
         {/* Service Details */}
         {loading3 ? (
           <>
@@ -316,13 +314,9 @@ const Dashboard: React.FC = () => {
                   </View>
                 </View>
 
+
                 {/* Description */}
-                <View
-                  style={{
-                    marginTop: RFPercentage(2.5),
-                    width: '90%',
-                    alignSelf: 'center',
-                  }}>
+                <View style={styles.section}>
                   <View>
                     <Text style={styles.headeing2}>Description:</Text>
                     <Text style={styles.description}>
@@ -331,13 +325,10 @@ const Dashboard: React.FC = () => {
                   </View>
                 </View>
 
+
                 {/* Availability */}
                 <View
-                  style={{
-                    marginTop: RFPercentage(2.5),
-                    width: '90%',
-                    alignSelf: 'center',
-                  }}>
+                  style={styles.section}>
                   <View>
                     <TouchableOpacity
                       activeOpacity={0.6}
@@ -354,6 +345,7 @@ const Dashboard: React.FC = () => {
                     </TouchableOpacity>
                   </View>
                 </View>
+
 
                 {/* Services */}
                 <View style={{marginTop: RFPercentage(2.5)}}>
@@ -404,6 +396,7 @@ const Dashboard: React.FC = () => {
                   </View>
                 </View>
 
+
                 {/* Packages */}
                 <View>
                   <Text
@@ -439,8 +432,9 @@ const Dashboard: React.FC = () => {
                   </View>
                 </View>
 
+
                 {/* Rating and Review */}
-                {service?.rating || service?.reviews.length > 0 ? (
+                {service?.rating || service?.reviews?.length > 0 ? (
                   <>
                     <View style={{width: '90%', alignSelf: 'center'}}>
                       <View>
@@ -481,6 +475,7 @@ const Dashboard: React.FC = () => {
                 ) : null}
               </>
             ) : (
+
               // Profile Completion Info Container
               <>
                 <View style={styles.profileCompletionContainer}>
@@ -723,5 +718,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     bottom: RFPercentage(1.5),
     position: 'absolute',
+  },
+  section: {
+    marginTop: RFPercentage(2.5),
+    width: '90%',
+    alignSelf: 'center',
   },
 });

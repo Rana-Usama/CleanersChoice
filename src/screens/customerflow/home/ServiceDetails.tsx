@@ -25,7 +25,7 @@ import moment from 'moment';
 import {useSelector} from 'react-redux';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
-import AntDesign from 'react-native-vector-icons/AntDesign'
+import AntDesign from 'react-native-vector-icons/AntDesign';
 
 const {width} = Dimensions.get('window');
 
@@ -83,7 +83,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
   const [step, setStep] = useState(0);
   const scrollViewRef = useRef(null);
 
-  const onScroll = event => {
+  const onScroll = (event: any) => {
     const contentOffsetX = event.nativeEvent.contentOffset.x;
     const index = Math.round(contentOffsetX / width);
 
@@ -100,34 +100,36 @@ const ServiceDetails: React.FC = ({route}: any) => {
     setVisibleItems(5);
   };
 
-  const getServiceNames = serviceIds => {
+  // Services names
+  const getServiceNames = (serviceIds: any) => {
     return serviceIds
-      ?.map(id => {
+      ?.map((id: any) => {
         const serviceItem = items.find(item => item.id === id);
         return serviceItem ? serviceItem.name : null;
       })
-      .filter(name => name !== null);
+      .filter((name: any) => name !== null);
   };
   const serviceNames = getServiceNames(item?.type.slice(0, visibleItems));
   const createdAtDate = new Date(item.createdAt._seconds * 1000);
   const formattedDate = moment(createdAtDate).format('DD MMMM, YYYY');
 
-  const getTruncatedText = text => {
+  const getTruncatedText = (text: any) => {
     const maxChars = 120;
     if (text.length <= maxChars) return text;
     return text.slice(0, maxChars).trim() + '... ';
   };
 
+  // Generating chat id
   const user = auth().currentUser;
   const userId = user?.uid;
-
   const generateChatId = () => {
     return `${userId}_${item.id}`;
   };
   const chatId = generateChatId();
-
   const [existingChatId, setExistingChatId] = useState(null);
-  const fetchExistingChatId = async (userId1, userId2) => {
+
+  // Existing chat id
+  const fetchExistingChatId = async (userId1: any, userId2: any) => {
     try {
       const chatsSnapshot = await firestore()
         .collection('Chats')
@@ -149,6 +151,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
     }
   };
 
+  // Finding chat
   useEffect(() => {
     const tryToFindChat = async () => {
       if (user?.uid && item?.jobId) {
@@ -164,29 +167,27 @@ const ServiceDetails: React.FC = ({route}: any) => {
     tryToFindChat();
   }, [userId, item?.id]);
 
+  // Fetching token
   const [token, setFcmToken] = useState(null);
-
   useEffect(() => {
     fetchToken(item.id);
   }, []);
-
   const fetchToken = async (id: any) => {
     try {
       const userDoc = await firestore().collection('Users').doc(id).get();
       if (userDoc.exists) {
         const userData = userDoc.data();
-        setFcmToken(userData.fcmToken);
+        setFcmToken(userData?.fcmToken);
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
     }
   };
 
-  console.log(token);
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={{paddingBottom: RFPercentage(10)}}>
+        
         {/* Header */}
         <HeaderBack
           title={'Service Details'}
@@ -211,15 +212,12 @@ const ServiceDetails: React.FC = ({route}: any) => {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            {item.serviceImages.map((image, index) => (
+            {item.serviceImages.map((image: any, index: any) => (
               <View key={index} style={{margin: 20}}>
                 <Image
                   source={typeof image === 'string' ? {uri: image} : image}
                   resizeMode="cover"
-                  style={{
-                    width: width * 0.9,
-                    height: RFPercentage(28),
-                  }}
+                  style={styles.cover}
                   borderRadius={RFPercentage(1)}
                 />
               </View>
@@ -229,7 +227,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
           <View style={styles.dotsContainer}>
             {item.serviceImages.length === 1 ? null : (
               <>
-                {item.serviceImages.map((_, index) => (
+                {item.serviceImages.map((_: any, index: any) => (
                   <TouchableOpacity key={index} onPress={() => setStep(index)}>
                     {step === index ? (
                       <LinearGradient
@@ -245,12 +243,12 @@ const ServiceDetails: React.FC = ({route}: any) => {
             )}
           </View>
         </View>
-
         <View style={styles.container}>
+
           {/* Service Info */}
           <View style={{marginTop: RFPercentage(2)}}>
             <View style={styles.rowContainer}>
-              <TouchableOpacity onPress={()=> setModalVisible(true)}>
+              <TouchableOpacity onPress={() => setModalVisible(true)}>
                 <Image
                   source={item.image ? {uri: item.image} : IMAGES.defaultPic}
                   resizeMode="contain"
@@ -262,6 +260,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
                 {item.name}
               </Text>
             </View>
+
             {/* <View style={styles.starContainer}>
               {Array.from({length: 5}, (_, index) => (
                 <Image
@@ -272,18 +271,13 @@ const ServiceDetails: React.FC = ({route}: any) => {
                 />
               ))}
             </View> */}
+
             <View
               style={{position: 'absolute', right: 0, top: RFPercentage(1.8)}}>
-              <Text
-                style={{
-                  color: Colors.placeholderColor,
-                  fontFamily: Fonts.fontRegular,
-                  fontSize: RFPercentage(1.4),
-                }}>
-                Joined on : {formattedDate}
-              </Text>
+              <Text style={styles.joining}>Joined on : {formattedDate}</Text>
             </View>
           </View>
+
 
           {/* Description */}
           <View style={{marginTop: RFPercentage(2.5)}}>
@@ -292,33 +286,19 @@ const ServiceDetails: React.FC = ({route}: any) => {
                 <Image
                   source={Icons.bars}
                   resizeMode="contain"
-                  style={{width: RFPercentage(1.8), height: RFPercentage(1.8)}}
+                  style={styles.icons}
                 />
                 <Text
                   style={[styles.headeing2, {marginLeft: RFPercentage(0.8)}]}>
                   Description:
                 </Text>
               </View>
-              <Text
-                style={{
-                  color: Colors.placeholderColor,
-                  fontFamily: Fonts.fontRegular,
-                  fontSize: RFPercentage(1.6),
-                  textAlign: 'justify',
-                  lineHeight: RFPercentage(2.5),
-                  marginTop: RFPercentage(0.5),
-                }}>
+              <Text style={styles.showMore}>
                 {isExpanded
                   ? item.description + ' '
                   : getTruncatedText(item.description)}
                 {item.description.length > 120 && (
-                  <Text
-                    onPress={toggleDescription}
-                    style={{
-                      color: Colors.gradient1,
-                      fontSize: RFPercentage(1.6),
-                      fontFamily: Fonts.fontMedium,
-                    }}>
+                  <Text onPress={toggleDescription} style={styles.showText}>
                     {isExpanded ? 'Read Less' : 'Read More'}
                   </Text>
                 )}
@@ -326,30 +306,22 @@ const ServiceDetails: React.FC = ({route}: any) => {
             </View>
           </View>
 
+
           {/* Location */}
           <View style={{marginTop: RFPercentage(2.5)}}>
             <View style={styles.rowAlign}>
               <Image
                 source={Icons.location}
                 resizeMode="contain"
-                style={{width: RFPercentage(1.8), height: RFPercentage(1.8)}}
+                style={styles.icons}
               />
               <Text style={[styles.headeing2, {marginLeft: RFPercentage(0.8)}]}>
                 Location:
               </Text>
             </View>
-            <Text
-              style={{
-                color: Colors.placeholderColor,
-                fontFamily: Fonts.fontRegular,
-                fontSize: RFPercentage(1.6),
-                textAlign: 'justify',
-                lineHeight: RFPercentage(1.9),
-                marginTop: RFPercentage(0.5),
-              }}>
-              {item.location}
-            </Text>
+            <Text style={styles.showMore}>{item.location}</Text>
           </View>
+
 
           {/* Availability */}
           <View style={{marginTop: RFPercentage(2.5)}}>
@@ -359,45 +331,26 @@ const ServiceDetails: React.FC = ({route}: any) => {
                 onPress={() =>
                   navigation.navigate('CheckAvailability', {item: item})
                 }
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  width: RFPercentage(20),
-                }}>
+                style={styles.availabilityRow}>
                 <Image
                   source={Icons.availability}
                   resizeMode="contain"
-                  style={{
-                    width: RFPercentage(1.8),
-                    height: RFPercentage(1.8),
-                  }}
+                  style={styles.icons}
                 />
-                <Text
-                  style={{
-                    color: Colors.gradient1,
-                    fontFamily: Fonts.semiBold,
-                    fontSize: RFPercentage(1.8),
-                    left: RFPercentage(0.8),
-                  }}>
-                  Check Availability
-                </Text>
+                <Text style={styles.check}>Check Availability</Text>
               </TouchableOpacity>
             </View>
           </View>
 
+
           {/* Services */}
           <View style={{marginTop: RFPercentage(2.5)}}>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}>
+            <View style={styles.serviceRow}>
               <View style={styles.rowAlign}>
                 <Image
                   source={Icons.verify}
                   resizeMode="contain"
-                  style={{width: RFPercentage(1.8), height: RFPercentage(1.8)}}
+                  style={styles.icons}
                 />
                 <Text
                   style={[styles.headeing2, {marginLeft: RFPercentage(0.8)}]}>
@@ -412,29 +365,12 @@ const ServiceDetails: React.FC = ({route}: any) => {
                 numColumns={2}
                 keyExtractor={(item, index) => index.toString()}
                 renderItem={({item, index}) => (
-                  <View
-                    style={{
-                      height: RFPercentage(4),
-                      borderWidth: 1,
-                      borderColor: Colors.inputFieldColor,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      borderRadius: RFPercentage(0.8),
-                      margin: RFPercentage(0.7),
-                      paddingHorizontal: RFPercentage(2),
-                      alignSelf: 'flex-start',
-                    }}>
-                    <Text
-                      style={{
-                        color: Colors.placeholderColor,
-                        fontSize: RFPercentage(1.5),
-                        fontFamily: Fonts.fontRegular,
-                      }}>
-                      {item}
-                    </Text>
+                  <View style={styles.serviceBox}>
+                    <Text style={styles.serviceText}>{item}</Text>
                   </View>
                 )}
               />
+
 
               {/* Show More / Show Less button */}
               {item.type.length > 5 && (
@@ -445,18 +381,15 @@ const ServiceDetails: React.FC = ({route}: any) => {
                       : handleShowLess
                   }>
                   <Text
-                    style={{
-                      color: Colors.gradient1,
-                      fontSize: RFPercentage(1.4),
-                      fontFamily: Fonts.fontMedium,
-                      textAlign: 'center',
-                      bottom: RFPercentage(1.5),
-                      position: 'absolute',
-                      left:
-                        visibleItems < item.type.length
-                          ? RFPercentage(18.6)
-                          : RFPercentage(34.5),
-                    }}>
+                    style={[
+                      styles.serviceMore,
+                      {
+                        left:
+                          visibleItems < item.type.length
+                            ? RFPercentage(18.6)
+                            : RFPercentage(34.5),
+                      },
+                    ]}>
                     {visibleItems < item.type.length
                       ? `+${item.type.length - visibleItems} More`
                       : `See Less`}
@@ -467,28 +400,21 @@ const ServiceDetails: React.FC = ({route}: any) => {
           </View>
         </View>
 
-        {/* Messages */}
+
+        {/* Packages */}
         <View>
-          <View
-            style={{
-              width: '90%',
-              alignSelf: 'center',
-              marginTop: RFPercentage(2.5),
-            }}>
+          <View style={styles.msg}>
             <View style={styles.rowAlign}>
               <Image
                 source={Icons.verify}
                 resizeMode="contain"
-                style={{width: RFPercentage(1.8), height: RFPercentage(1.8)}}
+                style={styles.icons}
               />
               <Text style={[styles.headeing2, {marginLeft: RFPercentage(0.8)}]}>
                 Starting Packages:
               </Text>
             </View>
-
-            {/* <Text style={[styles.headeing2]}>Starting Packages:</Text> */}
           </View>
-
           <View style={{marginTop: RFPercentage(1.5)}}>
             <FlatList
               horizontal
@@ -582,26 +508,17 @@ const ServiceDetails: React.FC = ({route}: any) => {
         </View>
       </ScrollView>
 
+
+      {/* Full picture */}
       {modalVisible && (
         <Modal
           visible={modalVisible}
           onRequestClose={() => setModalVisible(false)}
           animationType="fade">
-          <View
-            style={{
-              flex: 1,
-              backgroundColor: '',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
+          <View style={styles.modelContent}>
             <TouchableOpacity
               onPress={() => setModalVisible(false)}
-              style={{
-                position: 'absolute',
-                left: RFPercentage(2),
-                top: RFPercentage(3),
-                zIndex: 2,
-              }}>
+              style={styles.arrow}>
               <AntDesign
                 name="arrowleft"
                 color={Colors.primaryText}
@@ -609,9 +526,9 @@ const ServiceDetails: React.FC = ({route}: any) => {
               />
             </TouchableOpacity>
             <Image
-               source={item.image ? {uri: item.image} : IMAGES.defaultPic}
+              source={item.image ? {uri: item.image} : IMAGES.defaultPic}
               resizeMode="contain"
-              style={{width: '100%', height: '100%'}}
+              style={styles.fullImg}
             />
           </View>
         </Modal>
@@ -687,4 +604,85 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  cover: {
+    width: width * 0.9,
+    height: RFPercentage(28),
+  },
+  joining: {
+    color: Colors.placeholderColor,
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.4),
+  },
+  icons: {width: RFPercentage(1.8), height: RFPercentage(1.8)},
+  showMore: {
+    color: Colors.placeholderColor,
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.6),
+    textAlign: 'justify',
+    lineHeight: RFPercentage(2.5),
+    marginTop: RFPercentage(0.5),
+  },
+  showText: {
+    color: Colors.gradient1,
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontMedium,
+  },
+  availabilityRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: RFPercentage(20),
+  },
+  check: {
+    color: Colors.gradient1,
+    fontFamily: Fonts.semiBold,
+    fontSize: RFPercentage(1.8),
+    left: RFPercentage(0.8),
+  },
+  serviceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  serviceBox: {
+    height: RFPercentage(4),
+    borderWidth: 1,
+    borderColor: Colors.inputFieldColor,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: RFPercentage(0.8),
+    margin: RFPercentage(0.7),
+    paddingHorizontal: RFPercentage(2),
+    alignSelf: 'flex-start',
+  },
+  serviceText: {
+    color: Colors.placeholderColor,
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontRegular,
+  },
+  serviceMore: {
+    color: Colors.gradient1,
+    fontSize: RFPercentage(1.4),
+    fontFamily: Fonts.fontMedium,
+    textAlign: 'center',
+    bottom: RFPercentage(1.5),
+    position: 'absolute',
+  },
+  msg: {
+    width: '90%',
+    alignSelf: 'center',
+    marginTop: RFPercentage(2.5),
+  },
+  modelContent: {
+    flex: 1,
+    backgroundColor: '',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  arrow: {
+    position: 'absolute',
+    left: RFPercentage(2),
+    top: RFPercentage(3),
+    zIndex: 2,
+  },
+  fullImg: {width: '100%', height: '100%'},
 });

@@ -8,8 +8,8 @@ import GradientButton from './GradientButton';
 interface Props {
   text: string;
   icon: string;
-  onPress : ()=> void;
-  loading? : boolean
+  onPress: () => void;
+  loading?: boolean;
 }
 
 const SubscriptionModal = (props: Props) => {
@@ -23,20 +23,14 @@ const SubscriptionModal = (props: Props) => {
         />
       </View>
 
-      <Text
-        style={{
-          marginVertical: RFPercentage(4),
-          color: Colors.primaryText,
-          fontFamily: Fonts.fontMedium,
-          fontSize: RFPercentage(2),
-          width: RFPercentage(34),
-          textAlign: 'center',
-          lineHeight: RFPercentage(2.4),
-        }}>
-        {props.text}
-      </Text>
+      <Text style={styles.text}>{props.text}</Text>
       <View>
-        <GradientButton title="Ok" onPress={props.onPress}  style={{width:RFPercentage(15)}} loading={props.loading} />
+        <GradientButton
+          title="Ok"
+          onPress={props.onPress}
+          style={{width: RFPercentage(15)}}
+          loading={props.loading}
+        />
       </View>
     </View>
   );
@@ -52,5 +46,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'rgba(255, 255, 255, 1)',
     borderRadius: RFPercentage(2.5),
+  },
+  text: {
+    marginVertical: RFPercentage(4),
+    color: Colors.primaryText,
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(2),
+    width: RFPercentage(34),
+    textAlign: 'center',
+    lineHeight: RFPercentage(2.4),
   },
 });

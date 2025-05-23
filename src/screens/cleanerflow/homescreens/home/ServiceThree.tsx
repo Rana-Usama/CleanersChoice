@@ -33,7 +33,7 @@ const ServiceThree: React.FC = ({navigation}: any) => {
   );
   const [errors, setErrors] = useState({});
 
-
+  // Add package
   const addPackage = () => {
     if (packages.length < MAX_PACKAGES) {
       setPackages([
@@ -43,126 +43,123 @@ const ServiceThree: React.FC = ({navigation}: any) => {
     }
   };
 
-  const removePackage = id => {
+  // Remove Package
+  const removePackage = (id: any) => {
     if (id === 1) return;
     setPackages(packages.filter(pkg => pkg.id !== id));
   };
 
-  const handleInputChange = (id, field, value) => {
-  // Remove any non-numeric characters from price except dot
- const cleanValue = field === 'price' ? value.replace(/[^0-9]/g, '') : value;
-
-  setPackages(prevPackages =>
-    prevPackages.map(pkg =>
-      pkg.id === id ? {...pkg, [field]: cleanValue} : pkg,
-    ),
-  );
-
-  // Price validation
-  if (field === 'price') {
-    const minPrice = 25 * id;
-    const priceNum = parseFloat(cleanValue);
-    setErrors(prevErrors => ({
-      ...prevErrors,
-      [id]:
-        !cleanValue
+  // Input Field function
+  const handleInputChange = (id: any, field: any, value: any) => {
+    // Remove any non-numeric characters from price except dot
+    const cleanValue = field === 'price' ? value.replace(/[^0-9]/g, '') : value;
+    setPackages(prevPackages =>
+      prevPackages.map(pkg =>
+        pkg.id === id ? {...pkg, [field]: cleanValue} : pkg,
+      ),
+    );
+    // Price validation
+    if (field === 'price') {
+      const minPrice = 25 * id;
+      const priceNum = parseFloat(cleanValue);
+      setErrors(prevErrors => ({
+        ...prevErrors,
+        [id]: !cleanValue
           ? 'Price is required'
           : isNaN(priceNum) || priceNum < minPrice
           ? `Price must be at least ${minPrice}$`
           : null,
-    }));
-  }
+      }));
+    }
+    // Details validation
+    if (field === 'details') {
+      setErrors(prevErrors => ({
+        ...prevErrors,
+        [id]: !cleanValue.trim() ? 'Package details are required' : null,
+      }));
+    }
+  };
 
-  // Details validation
-  if (field === 'details') {
-    setErrors(prevErrors => ({
-      ...prevErrors,
-      [id]: !cleanValue.trim() ? 'Package details are required' : null,
-    }));
-  }
-};
 
+  // Upload data to firestore
+  const savePackagesToFirestore = async () => {
+    const user = auth().currentUser;
+    if (!user) return;
+    // 1. Detect invalid entries (only one field filled)
+    const priceOnlyPackages = packages.filter(
+      pkg => pkg.price.trim() !== '' && pkg.details.trim() === '',
+    );
+    const detailsOnlyPackages = packages.filter(
+      pkg => pkg.details.trim() !== '' && pkg.price.trim() === '',
+    );
 
- const savePackagesToFirestore = async () => {
-  const user = auth().currentUser;
-  if (!user) return;
-
-  // 1. Detect invalid entries (only one field filled)
-  const priceOnlyPackages = packages.filter(
-    pkg => pkg.price.trim() !== '' && pkg.details.trim() === '',
-  );
-  const detailsOnlyPackages = packages.filter(
-    pkg => pkg.details.trim() !== '' && pkg.price.trim() === '',
-  );
-
-  if (priceOnlyPackages.length > 0) {
-    Toast.show({
-      type: 'error',
-      text1: 'Missing package details',
-      text2: 'You entered a price but did not add details.',
-    });
-    return;
-  }
-
-  if (detailsOnlyPackages.length > 0) {
-    Toast.show({
-      type: 'error',
-      text1: 'Missing package price',
-      text2: 'You entered details but did not add a price.',
-    });
-    return;
-  }
-
-  // 2. Filter valid packages
-  const validPackages = packages.filter(
-    pkg => pkg.details.trim() !== '' && pkg.price.trim() !== '',
-  );
-
-  // 3. Require at least 3 complete packages
-  if (validPackages.length < 3) {
-    Toast.show({
-      type: 'error',
-      text1: 'Add at least 3 packages',
-      text2: 'Please complete at least 3 packages before continuing.',
-    });
-    return;
-  }
-
-  // 4. Proceed to Firestore
-  try {
-    setLoading(true);
-    const serviceRef = firestore()
-      .collection('CleanerServices')
-      .doc(user.uid);
-
-    const doc = await serviceRef.get();
-    if (doc.exists) {
-      const existingData = doc.data();
-      let existingPackages = existingData?.packages || [];
-
-      const updatedPackages = packages.map(pkg => {
-        const existingPkg = existingPackages.find(p => p.id === pkg.id);
-        return existingPkg ? {...existingPkg, ...pkg} : pkg;
+    if (priceOnlyPackages.length > 0) {
+      Toast.show({
+        type: 'error',
+        text1: 'Missing package details',
+        text2: 'You entered a price but did not add details.',
       });
-
-      await serviceRef.update({packages: updatedPackages});
-    } else {
-      await serviceRef.set({packages});
+      return;
+    }
+    if (detailsOnlyPackages.length > 0) {
+      Toast.show({
+        type: 'error',
+        text1: 'Missing package price',
+        text2: 'You entered details but did not add a price.',
+      });
+      return;
     }
 
-    navigation.navigate('CleanerNavigator');
-  } catch (error) {
-    console.error('Error updating packages: ', error);
-  } finally {
-    setLoading(false);
-  }
-};
+    // 2. Filter valid packages
+    const validPackages = packages.filter(
+      pkg => pkg.details.trim() !== '' && pkg.price.trim() !== '',
+    );
+
+    // 3. Require at least 3 complete packages
+    if (validPackages.length < 3) {
+      Toast.show({
+        type: 'error',
+        text1: 'Add at least 3 packages',
+        text2: 'Please complete at least 3 packages before continuing.',
+      });
+      return;
+    }
+
+    // 4. Proceed to Firestore
+    try {
+      setLoading(true);
+      const serviceRef = firestore()
+        .collection('CleanerServices')
+        .doc(user.uid);
+
+      const doc = await serviceRef.get();
+      if (doc.exists) {
+        const existingData = doc.data();
+        let existingPackages = existingData?.packages || [];
+
+        const updatedPackages = packages.map(pkg => {
+          const existingPkg = existingPackages.find(p => p.id === pkg.id);
+          return existingPkg ? {...existingPkg, ...pkg} : pkg;
+        });
+
+        await serviceRef.update({packages: updatedPackages});
+      } else {
+        await serviceRef.set({packages});
+      }
+      navigation.navigate('CleanerNavigator');
+    } catch (error) {
+      console.error('Error updating packages: ', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
   useEffect(() => {
     fetchServiceData();
   }, []);
 
+  // Fetching Service Data
   const fetchServiceData = async () => {
     const user = auth().currentUser;
     if (!user) return;
@@ -184,6 +181,7 @@ const ServiceThree: React.FC = ({navigation}: any) => {
     }
   };
 
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
@@ -192,6 +190,7 @@ const ServiceThree: React.FC = ({navigation}: any) => {
         <ScrollView
           contentContainerStyle={styles.scrollView}
           keyboardShouldPersistTaps="handled">
+            
           {/* Header */}
           <HeaderBack
             title="Service"
