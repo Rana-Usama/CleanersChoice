@@ -1,6 +1,6 @@
-import {ActivityIndicator, StyleSheet, Text, View, Linking} from 'react-native';
+import { StyleSheet} from 'react-native';
 import React, {useState, useEffect} from 'react';
-import {DarkTheme, NavigationContainer} from '@react-navigation/native';
+import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Splash from '../screens/commonflow/splashscreens/Splash';
 import OnBoarding from '../screens/commonflow/onboarding/OnBoarding';
@@ -8,8 +8,6 @@ import UserSelection from '../screens/commonflow/onboarding/UserSelection';
 import SignIn from '../screens/commonflow/authscreens/SignIn';
 import SignUp from '../screens/commonflow/authscreens/SignUp';
 import ResetPassword from '../screens/commonflow/authscreens/ResetPassword';
-import Verify from '../screens/commonflow/authscreens/Verify';
-import ChangePassword from '../screens/commonflow/authscreens/ChangePassword';
 import CustomerNavigator from './CustomerNavigator';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import ServiceDetails from '../screens/customerflow/home/ServiceDetails';
@@ -28,7 +26,6 @@ import ServiceTwo from '../screens/cleanerflow/homescreens/home/ServiceTwo';
 import ServiceThree from '../screens/cleanerflow/homescreens/home/ServiceThree';
 import CancelSubscription from '../screens/cleanerflow/premium/CancelSubscription';
 import Availability from '../screens/commonflow/home/Availability';
-import Settings from '../screens/commonflow/home/settings/Settings';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CheckAvailability from '../screens/customerflow/home/CheckAvailablity';
 import Jobs from '../screens/customerflow/jobBoard/Jobs';
@@ -44,8 +41,6 @@ export type RootStackParamList = {
   SignIn: undefined;
   SignUp: undefined;
   ResetPassword: undefined;
-  Verify: undefined;
-  ChangePassword: undefined;
   Home: undefined;
   ServiceDetails: {item: any};
   PostJob: {jobId: string | null};
@@ -111,13 +106,9 @@ const StackNavigator: React.FC = () => {
           if (!userQuery.empty) {
             const userDoc = userQuery.docs[0].data();
             setUserData(userDoc);
-            console.log('Fetched user data:', userDoc);
-          } else {
-            console.log('No user found with that email.');
-          }
+          } 
         }
       } catch (error) {
-        console.error('Error fetching credentials or user data:', error);
       } finally {
         setTimeout(() => {
           setIsLoading(false);
@@ -145,6 +136,8 @@ const StackNavigator: React.FC = () => {
       },
     },
   };
+
+  console.log(email, password, user)
 
   return (
     <SafeAreaProvider>
@@ -182,8 +175,6 @@ const StackNavigator: React.FC = () => {
             <Stack.Screen name="SignUp" component={SignUp} />
             <Stack.Screen name="SignIn" component={SignIn} />
             <Stack.Screen name="ResetPassword" component={ResetPassword} />
-            <Stack.Screen name="Verify" component={Verify} />
-            <Stack.Screen name="ChangePassword" component={ChangePassword} />
             <Stack.Screen name="EditProfile" component={EditProfile} />
             <Stack.Screen name="JobDetails" component={JobDetails} />
             <Stack.Screen name="FAQS" component={FAQS} />

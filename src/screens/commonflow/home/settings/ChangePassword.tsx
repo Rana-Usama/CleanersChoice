@@ -1,39 +1,26 @@
 import {
-  Dimensions,
   SafeAreaView,
   StyleSheet,
   Text,
   View,
-  TouchableOpacity,
-  Image,
-  Alert,
   ScrollView,
-  Modal,
   TouchableWithoutFeedback,
 } from 'react-native';
-import React, {useState, useEffect} from 'react';
-import {Colors, Icons, Fonts} from '../../../../constants/Themes';
+import React, {useState} from 'react';
+import {Colors, Fonts} from '../../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
-import {useNavigation} from '@react-navigation/native';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../../../../routers/StackNavigator';
 import HeaderBack from '../../../../components/HeaderBack';
 import GradientButton from '../../../../components/GradientButton';
 import PasswordField from '../../../../components/PasswordField';
 import {BlurView} from '@react-native-community/blur';
 import CustomModal from '../../../../components/CustomModal';
 import auth from '@react-native-firebase/auth';
-import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as yup from 'yup';
 import {Formik} from 'formik';
 import {showToast} from '../../../../utils/ToastMessage';
 
-const ChangePasswordV2 = () => {
-  const navigation =
-    useNavigation<
-      NativeStackNavigationProp<RootStackParamList, 'ChangePasswordV2'>
-    >();
+const ChangePasswordV2 = ({navigation} : any) => {
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
 

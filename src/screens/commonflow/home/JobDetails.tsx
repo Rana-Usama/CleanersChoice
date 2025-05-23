@@ -5,8 +5,6 @@ import {
   StyleSheet,
   Text,
   View,
-  FlatList,
-  TouchableOpacity,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -14,21 +12,14 @@ import {Colors, Fonts, Icons} from '../../../constants/Themes';
 import HeaderBack from '../../../components/HeaderBack';
 import GradientButton from '../../../components/GradientButton';
 import NextButton from '../../../components/NextButton';
-import {useNavigation} from '@react-navigation/native';
-import {useDispatch, useSelector, TypedUseSelectorHook} from 'react-redux';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../../../routers/StackNavigator';
+import {useDispatch, useSelector} from 'react-redux';
 import firestore from '@react-native-firebase/firestore';
 import {setJobId} from '../../../redux/Job/Actions';
 import auth from '@react-native-firebase/auth';
 
-const JobDetails = ({route}: any) => {
+const JobDetails = ({route, navigation}: any) => {
   const {item} = route.params;
-  const navigation =
-    useNavigation<
-      NativeStackNavigationProp<RootStackParamList, 'JobDetails'>
-    >();
-  const userData = useSelector(state => state.profile.profileData);
+  const userData = useSelector(state => state?.profile?.profileData);
   const [loading, setLoading] = useState(false);
   const [loading2, setLoading2] = useState(false);
   const [loading3, setLoading3] = useState(false);
@@ -43,7 +34,6 @@ const JobDetails = ({route}: any) => {
       });
       navigation.goBack();
     } catch (error) {
-      console.error('Error updating job status:', error);
     } finally {
       setLoading(false);
     }
@@ -85,7 +75,6 @@ const JobDetails = ({route}: any) => {
         setUserInfo(userData);
       }
     } catch (error) {
-      console.error('Error fetching user data:', error);
     }
   };
 
@@ -105,7 +94,6 @@ const JobDetails = ({route}: any) => {
         setOtherUser(userData);
       }
     } catch (error) {
-      console.error('Error fetching user data:', error);
     }
   };
 
@@ -137,8 +125,6 @@ const JobDetails = ({route}: any) => {
         const chatId = await fetchExistingChatId(user.uid, item.jobId);
         if (chatId) {
           setExistingChatId(chatId);
-        } else {
-          console.log('No existing chat found');
         }
       }
     };

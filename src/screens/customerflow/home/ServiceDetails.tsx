@@ -16,7 +16,6 @@ import {RFPercentage} from 'react-native-responsive-fontsize';
 import HeaderBack from '../../../components/HeaderBack';
 import LinearGradient from 'react-native-linear-gradient';
 import Package from '../../../components/Package';
-import Review from '../../../components/Review';
 import GradientButton from '../../../components/GradientButton';
 import {useNavigation} from '@react-navigation/native';
 import {RootStackParamList} from '../../../routers/StackNavigator';
@@ -146,7 +145,6 @@ const ServiceDetails: React.FC = ({route}: any) => {
       }
       return null;
     } catch (error) {
-      console.error('Error checking chat document:', error);
       return null;
     }
   };
@@ -180,7 +178,6 @@ const ServiceDetails: React.FC = ({route}: any) => {
         setFcmToken(userData?.fcmToken);
       }
     } catch (error) {
-      console.error('Error fetching user data:', error);
     }
   };
 

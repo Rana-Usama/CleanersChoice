@@ -10,24 +10,22 @@ import {
   FlatList,
   RefreshControl,
 } from 'react-native';
-import React, {useState, useEffect, useCallback} from 'react';
+import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, Icons, IMAGES} from '../../../../constants/Themes';
 import HeaderBack from '../../../../components/HeaderBack';
 import ImagePicker from 'react-native-image-crop-picker';
 import GradientButton from '../../../../components/GradientButton';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {useFocusEffect} from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
-import {useDispatch, useSelector} from 'react-redux';
+import {useDispatch} from 'react-redux';
 import {
   setProfileData,
   setProfileCompletion,
 } from '../../../../redux/ProfileData/Actions';
 import Package from '../../../../components/Package';
-import {RootStackParamList} from '../../../../routers/StackNavigator';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import Review from '../../../../components/Review';
 import {Image as CompressorImage} from 'react-native-compressor';
 import {useExitAppOnBack} from '../../../../utils/ExitApp';
@@ -67,11 +65,8 @@ const items = [
   },
 ];
 
-const Dashboard: React.FC = () => {
-  const navigation =
-    useNavigation<
-      NativeStackNavigationProp<RootStackParamList, 'CleanerNavigator'>
-    >();
+const Dashboard: React.FC = ({navigation} : any) => {
+ 
   const [img, setImg] = useState(null);
   const [profile, setProfile] = useState(null);
   const [name, setName] = useState('');
@@ -209,7 +204,7 @@ const Dashboard: React.FC = () => {
 
   dispatch(setProfileCompletion(profileCompletion));
   const handleShowMore = () => {
-    setVisibleItems(prev => Math.min(prev + 5, service?.type.length));
+    setVisibleItems(prev => Math.min(prev + 5, service?.type?.length));
   };
 
   const handleShowLess = () => {

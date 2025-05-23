@@ -1,5 +1,4 @@
 import {
-  Dimensions,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -9,12 +8,9 @@ import {
   ScrollView,
 } from 'react-native';
 import React, {useState} from 'react';
-import {Colors, Icons, Fonts, IMAGES} from '../../../../constants/Themes';
+import {Colors, Fonts} from '../../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import Entypo from 'react-native-vector-icons/Entypo';
-import {useNavigation} from '@react-navigation/native';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../../../../routers/StackNavigator';
 import HeaderBack from '../../../../components/HeaderBack';
 
 interface Data {
@@ -52,8 +48,7 @@ const data: Data[] = [
 ];
 
 const FAQS: React.FC = () => {
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList, 'FAQS'>>();
+  
   const [explanation, setExplanation] = useState<number | null>(null);
   const [visible, setVisible] = useState<boolean>(false);
 

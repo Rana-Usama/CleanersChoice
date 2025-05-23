@@ -3,7 +3,6 @@ import {
   Text,
   FlatList,
   TouchableOpacity,
-  Image,
   StyleSheet,
   SafeAreaView,
   ScrollView,
@@ -12,23 +11,18 @@ import {
 } from 'react-native';
 import React, {useState, useEffect, useCallback} from 'react';
 import firestore from '@react-native-firebase/firestore';
-import {useNavigation} from '@react-navigation/native';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import HeaderBack from '../../../components/HeaderBack';
-import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
+import {Colors, Fonts, IMAGES} from '../../../constants/Themes';
 import Message from '../../../components/Message';
 import moment from 'moment';
-import {RootStackParamList} from '../../../routers/StackNavigator';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useFocusEffect} from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import NotFound from '../../../components/NotFound';
-import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
 import {Skeleton} from '@rneui/themed';
 import {useExitAppOnBack} from '../../../utils/ExitApp';
-const Messages = () => {
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList, 'Messages'>>();
+
+const Messages = ({navigation}: any) => {
   const [chats, setChats] = useState<
     {
       id: any;
@@ -42,12 +36,6 @@ const Messages = () => {
 
   useExitAppOnBack();
 
-  const [loading, setLoading] = useState(false);
-  const [lastVisible, setLastVisible] =
-    useState<FirebaseFirestoreTypes.QueryDocumentSnapshot<FirebaseFirestoreTypes.DocumentData> | null>(
-      null,
-    );
-  const pageSize = 10;
   const [loading2, setLoading2] = useState(false);
   const [all, setAll] = useState(true);
   const [unread, setUnread] = useState(false);
@@ -102,9 +90,7 @@ const Messages = () => {
         : allChats;
 
       setChats(filteredChats);
-      setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
     } catch (error) {
-      console.log('Error fetching chats: ', error);
     }
   };
 
@@ -146,9 +132,7 @@ const Messages = () => {
               : allChats;
 
             setChats(filteredChats);
-            setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
           } catch (error) {
-            console.log('Error processing chat snapshot:', error);
           }
         });
       }
@@ -178,7 +162,6 @@ const Messages = () => {
         fcmToken: userData?.fcmToken,
       };
     } catch (error) {
-      // console.log('Error fetching user data: ', error);
       return {
         id: doc.id,
         name: 'Unknown',
@@ -313,7 +296,7 @@ const Messages = () => {
             </>
           ) : (
             <>
-            {/* Chats */}
+              {/* Chats */}
               {chats.length > 0 ? (
                 <FlatList
                   contentContainerStyle={{

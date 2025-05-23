@@ -151,7 +151,6 @@ const Home = () => {
         setLocations([]);
       }
     } catch (error) {
-      console.error('Error fetching service details:', error);
     } finally {
       setLoading(false);
     }
@@ -244,7 +243,6 @@ const Home = () => {
         dispatch(setProfileData(userData));
       }
     } catch (error) {
-      console.error('Error fetching user data:', error);
     }
   };
 

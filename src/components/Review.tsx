@@ -7,7 +7,7 @@ const Review = () => {
   return (
     <View>
       <View style={styles.container}>
-        <Image source={IMAGES.picture} resizeMode="contain" style={styles.image} />
+        <Image source={IMAGES.defaultPic} resizeMode="contain" style={styles.image} />
         <View style={styles.contentContainer}>
           <View style={styles.textContainer}>
             <Text style={styles.name}>Demba</Text>

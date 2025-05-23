@@ -29,7 +29,7 @@ const ServiceThree: React.FC = ({navigation}: any) => {
   const [packages, setPackages] = useState([{id: 1, details: '', price: ''}]);
   const [loading, setLoading] = useState(false);
   const profileCompletion = useSelector(
-    state => state.profile.profileCompletion,
+    state => state?.profile?.profileCompletion,
   );
   const [errors, setErrors] = useState({});
 
@@ -85,7 +85,6 @@ const ServiceThree: React.FC = ({navigation}: any) => {
   const savePackagesToFirestore = async () => {
     const user = auth().currentUser;
     if (!user) return;
-    // 1. Detect invalid entries (only one field filled)
     const priceOnlyPackages = packages.filter(
       pkg => pkg.price.trim() !== '' && pkg.details.trim() === '',
     );
@@ -136,7 +135,6 @@ const ServiceThree: React.FC = ({navigation}: any) => {
       if (doc.exists) {
         const existingData = doc.data();
         let existingPackages = existingData?.packages || [];
-
         const updatedPackages = packages.map(pkg => {
           const existingPkg = existingPackages.find(p => p.id === pkg.id);
           return existingPkg ? {...existingPkg, ...pkg} : pkg;
@@ -148,7 +146,6 @@ const ServiceThree: React.FC = ({navigation}: any) => {
       }
       navigation.navigate('CleanerNavigator');
     } catch (error) {
-      console.error('Error updating packages: ', error);
     } finally {
       setLoading(false);
     }
@@ -177,7 +174,6 @@ const ServiceThree: React.FC = ({navigation}: any) => {
         );
       }
     } catch (error) {
-      console.error('Error fetching service data:', error);
     }
   };
 

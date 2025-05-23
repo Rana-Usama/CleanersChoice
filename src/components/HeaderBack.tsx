@@ -8,7 +8,6 @@ import {
 } from 'react-native';
 import React from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
-import Entypo from 'react-native-vector-icons/Entypo';
 import {Colors, Fonts, Icons} from '../constants/Themes';
 import {useNavigation} from '@react-navigation/native';
 import AntDesign from 'react-native-vector-icons/AntDesign'

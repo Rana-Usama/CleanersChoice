@@ -4,7 +4,6 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  Dimensions,
   Image,
   Keyboard,
   BackHandler,
@@ -12,7 +11,7 @@ import {
 } from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {Icons, Colors, Fonts} from '../constants/Themes';
-import {useIsFocused, useNavigation} from '@react-navigation/native';
+import {useIsFocused} from '@react-navigation/native';
 import {BottomTabBarProps} from '@react-navigation/bottom-tabs';
 import Settings from '../screens/commonflow/home/settings/Settings';
 import Home from '../screens/customerflow/home/Home';
@@ -39,6 +38,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
     forceUpdate(n => n + 1);
   }, [unreadCount]);
 
+  
   useEffect(() => {
     const backAction = () => {
       if (screenFocused) {
@@ -47,14 +47,13 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
       }
       return false;
     };
-
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       backAction,
     );
-
     return () => backHandler.remove();
   }, [screenFocused, navigation]);
+
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(

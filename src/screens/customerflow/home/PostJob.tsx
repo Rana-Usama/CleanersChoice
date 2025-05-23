@@ -3,14 +3,12 @@ import {
   SafeAreaView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
   KeyboardAvoidingView,
-  Platform,
   ScrollView,
 } from 'react-native';
-import React, {useState, useRef, useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, Icons} from '../../../constants/Themes';
 import HeaderBack from '../../../components/HeaderBack';
@@ -147,7 +145,6 @@ const PostJob = ({route}: any) => {
       } else {
       }
     } catch (error) {
-      console.error('Error fetching job:', error);
     } finally {
       setLoading(false);
     }
@@ -158,9 +155,7 @@ const PostJob = ({route}: any) => {
   }, []);
 
   const handleBudgetChange = (text: any) => {
-    // Remove everything that's not a digit
     const numeric = text.replace(/[^0-9]/g, '');
-    // Add dollar sign
     setBudget(numeric ? `$${numeric}` : '');
   };
 

@@ -1,20 +1,14 @@
 import {
-  Dimensions,
   SafeAreaView,
   StyleSheet,
   Text,
   View,
-  TouchableOpacity,
-  Image,
   FlatList,
   ScrollView,
 } from 'react-native';
-import React, {useState} from 'react';
-import {Colors, Icons, Fonts, IMAGES} from '../../../../constants/Themes';
+import React from 'react';
+import {Colors, Fonts} from '../../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
-import {useNavigation} from '@react-navigation/native';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../../../../routers/StackNavigator';
 import HeaderBack from '../../../../components/HeaderBack';
 
 interface Data {
@@ -42,8 +36,7 @@ const data: Data[] = [
 ];
 
 const Privacy: React.FC = () => {
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList, 'Privacy'>>();
+  
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView

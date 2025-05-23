@@ -15,7 +15,6 @@ import HeaderBack from '../../../../components/HeaderBack';
 import InfoHeader from '../../../../components/InfoHeader';
 import TimeLine from '../../../../components/TimeLine';
 import GradientButton from '../../../../components/GradientButton';
-import {useNavigation} from '@react-navigation/native';
 import ImagePicker from 'react-native-image-crop-picker';
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
@@ -113,7 +112,6 @@ const ServiceTwo: React.FC = ({navigation} : any) => {
 
       navigation.navigate('ServiceThree');
     } catch (error) {
-      console.error('Error updating service images:', error);
     } finally {
       setLoading(false);
     }
@@ -140,7 +138,6 @@ const ServiceTwo: React.FC = ({navigation} : any) => {
         setOriginalImages(filledImages); //Track originals
       }
     } catch (error) {
-      console.error('Error fetching service data:', error);
     } finally {
       setLoading2(false);
     }

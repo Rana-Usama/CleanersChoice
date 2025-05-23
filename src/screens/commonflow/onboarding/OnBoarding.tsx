@@ -12,11 +12,8 @@ import {
 import React, {useState, useRef, useEffect} from 'react';
 import NextButton from '../../../components/NextButton';
 import LinearGradient from 'react-native-linear-gradient';
-import {useNavigation} from '@react-navigation/native';
 import {Fonts, IMAGES, Colors} from '../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../../../routers/StackNavigator';
 import HeaderComponent from '../../../components/HeaderComponent';
 
 const {width, height} = Dimensions.get('window');
@@ -42,12 +39,7 @@ const stepsData = [
   },
 ];
 
-
-const OnBoarding = () => {
-  const navigation =
-    useNavigation<
-      NativeStackNavigationProp<RootStackParamList, 'OnBoarding'>
-    >();
+const OnBoarding = ({navigation}: any) => {
   const [step, setStep] = useState(1);
 
   // Animations

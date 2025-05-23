@@ -1,4 +1,4 @@
-import {PROFILE_COMPLETION, PROFILE_DATA, profileCompletion} from './Actions';
+import {PROFILE_COMPLETION, PROFILE_DATA} from './Actions';
 
 const initialState = {
   profileData: [],

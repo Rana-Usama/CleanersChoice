@@ -4,7 +4,6 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  Dimensions,
   Image,
   Keyboard,
   BackHandler,
@@ -12,7 +11,7 @@ import {
 } from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {Icons, Colors, Fonts} from '../constants/Themes';
-import {useIsFocused, useNavigation} from '@react-navigation/native';
+import {useIsFocused} from '@react-navigation/native';
 import {BottomTabBarProps} from '@react-navigation/bottom-tabs';
 import Dashboard from '../screens/cleanerflow/homescreens/home/Dashboard';
 import CleanerJobs from '../screens/cleanerflow/homescreens/jobs/CleanerJobs';

@@ -1,7 +1,7 @@
 import {StyleSheet, Text, View, KeyboardAvoidingView, TouchableOpacity,Modal, Animated,FlatList, Platform} from 'react-native';
 import React, {useEffect, useRef} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
-import {Colors, IMAGES, Icons, Fonts} from '../constants/Themes';
+import {Colors, Fonts} from '../constants/Themes';
 import { BlurView } from '@react-native-community/blur';
 import SearchField from './SearchField';
 import GradientButton from './GradientButton';
