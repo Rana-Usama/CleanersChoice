@@ -42,10 +42,10 @@ const CancelSubscription = () => {
   const [isLoading2, setIsLoading2] = useState(false);
   const [isLoading3, setIsLoading3] = useState(false);
   const [cancel, setCancel] = useState(null);
-
   const [subscriptionId, setSubscriptionId] = useState(null);
   const user = auth().currentUser;
 
+  // Fetching user data
   useEffect(() => {
     const fetchSubscriptionId = async () => {
       if (user?.uid) {
@@ -62,6 +62,7 @@ const CancelSubscription = () => {
     fetchSubscriptionId();
   }, [user?.uid]);
 
+  // Cancel subscription
   const cancelSubscription = async () => {
     if (!subscriptionId) {
       showToast({
@@ -71,7 +72,6 @@ const CancelSubscription = () => {
       });
       return;
     }
-
     try {
       setIsLoading(true); // Start loader
 
@@ -83,7 +83,6 @@ const CancelSubscription = () => {
           body: JSON.stringify({subscriptionId}),
         },
       );
-
       const text = await res.text(); // Read as text first
       try {
         const result = JSON.parse(text); // Try parsing manually
@@ -100,7 +99,6 @@ const CancelSubscription = () => {
                 cancelSubscription: true,
               });
           }
-
           showToast({
             type: 'success',
             title: 'Cancel Subscription',
@@ -120,25 +118,25 @@ const CancelSubscription = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      {/* Back arrow */}
       <TouchableOpacity
         onPress={() => navigation.goBack()}
-        style={{
-          position: 'absolute',
-          top: RFPercentage(7),
-          left: RFPercentage(3),
-        }}>
+        style={styles.arrow}>
         <AntDesign
           name="arrowleft"
           color={Colors.secondaryText}
           size={RFPercentage(3)}
         />
       </TouchableOpacity>
+
+      {/* Header */}
       <HeaderComponent />
+
+      {/* Main Container */}
       <View style={styles.container}>
         <View style={styles.premiumHeader}>
           <Text style={styles.premiumText}>Cancel Premium Subscription</Text>
         </View>
-
         <View style={styles.subscriptionContainer}>
           <View style={styles.subscriptionBox}>
             <View style={styles.starLeft}>
@@ -188,6 +186,7 @@ const CancelSubscription = () => {
           </View>
         </View>
 
+        {/* Buuton */}
         <View style={styles.buttonContainer}>
           <GradientButton
             title={cancel === true ? 'Canceled' : 'Cancel'}
@@ -204,13 +203,15 @@ const CancelSubscription = () => {
         <Image source={IMAGES.stars} resizeMode="contain" style={styles.star} />
       </View>
 
+      {/* Modals */}
       {modalVisible && (
         <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
           <View style={styles.modalContainer}>
             <BlurView style={styles.blurView} blurType="light" blurAmount={2} />
             <View style={styles.modalCancel}>
               <Text style={styles.cancelHeading}>
-                You’ll lose access to all premium features after one month, including:
+                You’ll lose access to all premium features after one month,
+                including:
               </Text>
               <View
                 style={{
@@ -448,5 +449,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(89, 92, 96, 0.8)',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  arrow: {
+    position: 'absolute',
+    top: RFPercentage(7),
+    left: RFPercentage(3),
   },
 });

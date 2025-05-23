@@ -127,6 +127,7 @@ const PostJob = ({route}: any) => {
     }
   };
 
+  // Fetch job
   const fetchJob = async () => {
     const user = auth().currentUser;
     if (!user || !jobId) return;
@@ -159,7 +160,6 @@ const PostJob = ({route}: any) => {
   const handleBudgetChange = (text: any) => {
     // Remove everything that's not a digit
     const numeric = text.replace(/[^0-9]/g, '');
-
     // Add dollar sign
     setBudget(numeric ? `$${numeric}` : '');
   };
@@ -177,16 +177,19 @@ const PostJob = ({route}: any) => {
             left={true}
           />
 
-          {/* Container */}
+          {/* Field Container */}
           <View style={styles.container}>
             <InfoHeader text="Post your cleaning job by providing following details!" />
             <View style={{marginTop: RFPercentage(1.5)}}>
+              {/* Title */}
               <InputField
                 placeholder="Job Title e.g, Garden Cleaning"
                 customStyle={{width: '100%'}}
                 value={jobTitle}
                 onChangeText={setJobTitle}
               />
+
+              {/* Describe */}
               <View>
                 <DescriptionField
                   placeholder="Description of the cleaning job"
@@ -196,6 +199,8 @@ const PostJob = ({route}: any) => {
                   maxLength={200}
                 />
               </View>
+
+              {/* City */}
               <InputField
                 placeholder="Enter City/Town you want services at"
                 customStyle={{width: '100%'}}
@@ -203,6 +208,7 @@ const PostJob = ({route}: any) => {
                 onChangeText={setLocation}
               />
 
+              {/* Service Type */}
               <CustomDropDown
                 placeholder={jobId ? selectedType : 'Service Type'}
                 data={data1}
@@ -212,6 +218,7 @@ const PostJob = ({route}: any) => {
                 setValue={handleSelectedItem}
               />
 
+              {/* Budget */}
               <InputField
                 placeholder="Budget e.g; $120"
                 customStyle={{width: '100%'}}
@@ -220,6 +227,7 @@ const PostJob = ({route}: any) => {
                 type={'numeric'}
               />
 
+              {/* Date Picker */}
               <View style={styles.dateContainer}>
                 <TouchableOpacity
                   onPress={() => setOpen(true)}
@@ -234,6 +242,7 @@ const PostJob = ({route}: any) => {
                   </Text>
                 </TouchableOpacity>
               </View>
+              {/* Calender */}
               <DatePicker
                 modal
                 open={open}
@@ -246,6 +255,8 @@ const PostJob = ({route}: any) => {
                   setOpen(false);
                 }}
               />
+
+              {/* Special Remarks */}
               <View>
                 <Text style={styles.remarksText}>
                   Leave any special remarks (Optional)

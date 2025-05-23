@@ -15,16 +15,12 @@ import {
 import React, {useState, useCallback} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts} from '../../../constants/Themes';
-import {useNavigation} from '@react-navigation/native';
-import Entypo from 'react-native-vector-icons/Entypo';
 import JobCard from '../../../components/JobCard';
 import {BlurView} from '@react-native-community/blur';
 import CustomModal from '../../../components/CustomModal';
 import {useFocusEffect} from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
-import {Icons} from '../../../constants/Themes';
-import Toast from 'react-native-toast-message';
 import HeaderBack from '../../../components/HeaderBack';
 import NotFound from '../../../components/NotFound';
 import {showToast} from '../../../utils/ToastMessage';
@@ -39,10 +35,10 @@ const Jobs = ({navigation}: any) => {
   const [loading, setLoading] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState(null);
   const [loading2, setLoading2] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   useExitAppOnBack();
 
-  const [refreshing, setRefreshing] = useState(false);
-
+  // On Refresh
   const onRefresh = () => {
     setRefreshing(true);
     setLoading(true);
@@ -71,6 +67,7 @@ const Jobs = ({navigation}: any) => {
     }, [status]),
   );
 
+  // Fetching jobs
   const fetchMyJobs = async () => {
     const user = auth().currentUser;
     if (!user) return;
@@ -94,6 +91,7 @@ const Jobs = ({navigation}: any) => {
     }
   };
 
+  // Deleting jobs
   const handleDeleteJob = async () => {
     setLoading2(true);
     try {
@@ -111,6 +109,7 @@ const Jobs = ({navigation}: any) => {
     }
   };
 
+  // Truncations
   const getTruncatedText = (text: any) => {
     const maxChars = 12;
     if (text.length <= maxChars) return text;
@@ -131,6 +130,8 @@ const Jobs = ({navigation}: any) => {
         }
         contentContainerStyle={styles.scrollView}
         showsVerticalScrollIndicator={false}>
+
+        {/* Header */}
         <HeaderBack
           title="My Posted Jobs"
           right={true}
@@ -138,6 +139,8 @@ const Jobs = ({navigation}: any) => {
           textStyle={{fontSize: RFPercentage(2)}}
           onPress={() => navigation.navigate('PostJob', {jobId: null})}
         />
+
+        {/* Filters */}
         <View style={styles.container}>
           <View style={styles.toggleContainer}>
             <TouchableOpacity onPress={toggle1}>
@@ -160,6 +163,7 @@ const Jobs = ({navigation}: any) => {
           </View>
         </View>
 
+        {/* Main Container */}
         <View style={styles.listContainer}>
           {loading ? (
             <>
@@ -204,6 +208,7 @@ const Jobs = ({navigation}: any) => {
         </View>
       </ScrollView>
 
+      {/* Modal */}
       {modalVisible && (
         <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
           <View style={styles.modalContainer}>

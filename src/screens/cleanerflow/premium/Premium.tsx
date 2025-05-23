@@ -42,6 +42,7 @@ const Premium = () => {
 
   const user = auth().currentUser;
 
+  // Fetching user data
   useEffect(() => {
     const fetchUserData = async () => {
       if (user?.email) {
@@ -65,6 +66,7 @@ const Premium = () => {
     fetchUserData();
   }, [user?.email]);
 
+  // Fetching payment intent
   const fetchSetupIntent = async () => {
     try {
       const response = await fetch(
@@ -88,13 +90,12 @@ const Premium = () => {
     }
   };
 
+  // Open payment sheet
   const openPaymentSheet = async () => {
     setLoading(true);
     const setupData = await fetchSetupIntent();
     if (!setupData) return;
-
     const {setupIntentClientSecret, customerId} = setupData;
-
     const {error: initError} = await initPaymentSheet({
       setupIntentClientSecret,
       merchantDisplayName: 'Cleaner Choice',
@@ -104,11 +105,9 @@ const Premium = () => {
       setLoading(false);
       return;
     }
-
     const {error: paymentError} = await presentPaymentSheet();
-
     if (paymentError) {
-       showToast({
+      showToast({
         type: 'info',
         title: 'Subscription',
         message: 'Subscription has not been fullfiled!',
@@ -117,8 +116,8 @@ const Premium = () => {
       return;
     }
 
+    // Payment
     const setupIntentId = setupIntentClientSecret.split('_secret')[0];
-
     const res = await fetch(
       'https://cleaners-choice-server.vercel.app/api/confirm-subscription',
       {
@@ -127,7 +126,6 @@ const Premium = () => {
         body: JSON.stringify({customerId, setupIntentId}),
       },
     );
-
     const result = await res.json();
     if (result.success) {
       const {periodEndTimestamp} = result;
@@ -159,11 +157,7 @@ const Premium = () => {
       />
       <TouchableOpacity
         onPress={() => navigation.navigate('SignIn')}
-        style={{
-          position: 'absolute',
-          top: RFPercentage(7),
-          left: RFPercentage(3),
-        }}>
+        style={styles.arrow}>
         <AntDesign
           name="arrowleft"
           color={Colors.secondaryText}
@@ -253,6 +247,7 @@ const Premium = () => {
         <Image source={IMAGES.stars} resizeMode="contain" style={styles.star} />
       </View>
 
+      {/* Modals */}
       {modalVisible && (
         <>
           <View style={styles.modalOverlay}>
@@ -396,5 +391,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(89, 92, 96, 0.8)',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  arrow: {
+    position: 'absolute',
+    top: RFPercentage(7),
+    left: RFPercentage(3),
   },
 });

@@ -94,6 +94,7 @@ const Home = () => {
   const [filteredLocations, setFilteredLocations] = useState<string[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
+  // On Refresh
   const onRefresh = () => {
     setRefreshing(true);
     setLoading(true);
@@ -110,6 +111,7 @@ const Home = () => {
     serviceDetails();
   }, []);
 
+  // Fetching Service Details
   const serviceDetails = async () => {
     setLoading(true);
     try {
@@ -246,6 +248,7 @@ const Home = () => {
     }
   };
 
+
   // Filtered Jobs
   const finalFilteredJobs = servicesData.filter(service => {
     if (rangeSelector) {
@@ -286,6 +289,7 @@ const Home = () => {
         contentContainerStyle={styles.scrollView}
         showsVerticalScrollIndicator={false}>
         <View style={styles.container}>
+          
           {/* Header */}
           <HeaderBack
             logo={true}
@@ -296,6 +300,7 @@ const Home = () => {
             onPress={() => navigation.navigate('PostJob', {jobId: null})}
           />
 
+          {/* Search Field */}
           <View style={styles.searchContainer}>
             <SearchField
               placeholder="Search Businesses"
@@ -362,13 +367,8 @@ const Home = () => {
 
           {/* Filters */}
           <Text style={styles.sectionTitle}>Apply Filter</Text>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              width: '90%',
-              alignSelf: 'center',
-            }}>
+          <View style={styles.filterWrapper}>
+            {/* Location */}
             <View>
               <TouchableOpacity
                 activeOpacity={0.8}
@@ -383,11 +383,7 @@ const Home = () => {
                 ]}>
                 <Image
                   source={loctionFilter ? Icons.locationWhite : Icons.location}
-                  style={{
-                    width: RFPercentage(1.6),
-                    height: RFPercentage(1.6),
-                    marginRight: RFPercentage(0.5),
-                  }}
+                  style={styles.filterImg}
                   resizeMode="contain"
                 />
                 <Text
@@ -413,11 +409,7 @@ const Home = () => {
                     setLocationFilter(false);
                     setQuery('');
                   }}
-                  style={{
-                    position: 'absolute',
-                    right: RFPercentage(-0.6),
-                    top: RFPercentage(-0.3),
-                  }}>
+                  style={styles.cross}>
                   <AntDesign
                     name="closecircle"
                     size={RFPercentage(2)}
@@ -426,6 +418,8 @@ const Home = () => {
                 </TouchableOpacity>
               )}
             </View>
+
+            {/* Price Range */}
             <View>
               <TouchableOpacity
                 activeOpacity={0.8}
@@ -443,11 +437,7 @@ const Home = () => {
                   source={
                     rangeSelector ? Icons.priceRangeWhite : Icons.priceRange
                   }
-                  style={{
-                    width: RFPercentage(1.6),
-                    height: RFPercentage(1.6),
-                    marginRight: RFPercentage(0.5),
-                  }}
+                  style={styles.filterImg}
                   resizeMode="contain"
                 />
                 <Text
@@ -469,11 +459,7 @@ const Home = () => {
                 <TouchableOpacity
                   activeOpacity={0.8}
                   onPress={() => setRangeSelector(false)}
-                  style={{
-                    position: 'absolute',
-                    right: RFPercentage(-0.6),
-                    top: RFPercentage(-0.3),
-                  }}>
+                  style={styles.cross}>
                   <AntDesign
                     name="closecircle"
                     size={RFPercentage(2)}
@@ -568,11 +554,7 @@ const Home = () => {
                     {opacity: opacityAnim, transform: [{scale: scaleAnim}]},
                   ]}>
                   <TouchableOpacity
-                    style={{
-                      position: 'absolute',
-                      right: RFPercentage(2),
-                      top: RFPercentage(2),
-                    }}
+                    style={styles.close}
                     onPress={() => setModalVisible(false)}>
                     <AntDesign
                       name="closecircleo"
@@ -586,6 +568,7 @@ const Home = () => {
                     </Text>
                   </View>
                   <View style={{width: '100%', marginTop: RFPercentage(2)}}>
+                    {/* Search */}
                     <SearchField
                       placeholder="Search City"
                       customStyle={{borderColor: 'rgba(39, 38, 38, 0.29)'}}
@@ -621,6 +604,7 @@ const Home = () => {
                       )}
                     </View>
                   )}
+                  {/* Apply Button */}
                   <View style={{position: 'absolute', bottom: RFPercentage(3)}}>
                     <GradientButton
                       title="Apply"
@@ -667,11 +651,7 @@ const Home = () => {
                       styles.rangeModal,
                     ]}>
                     <TouchableOpacity
-                      style={{
-                        position: 'absolute',
-                        right: RFPercentage(2),
-                        top: RFPercentage(2),
-                      }}
+                      style={styles.close}
                       onPress={() => setModalVisible2(false)}>
                       <AntDesign
                         name="closecircleo"
@@ -691,6 +671,7 @@ const Home = () => {
                       </Text>
                     </View>
                     <View style={{width: '100%', marginTop: RFPercentage(8)}}>
+                      {/* Slider */}
                       <Slider
                         style={styles.sliderStyle}
                         minimumValue={10}
@@ -706,7 +687,6 @@ const Home = () => {
                         minimumTrackTintColor={Colors.gradient1}
                         maximumTrackTintColor="gray"
                         thumbTintColor={Colors.gradient1}
-                        // thumbImage={Icons.slider}
                       />
                       <View style={styles.sliderLabelsContainer}>
                         <Text
@@ -727,6 +707,7 @@ const Home = () => {
                         )}
                       </View>
                     </View>
+                    {/* Apply Button */}
                     <View
                       style={{position: 'absolute', bottom: RFPercentage(4)}}>
                       <GradientButton
@@ -965,5 +946,26 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     position: 'absolute',
+  },
+  filterWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '90%',
+    alignSelf: 'center',
+  },
+  filterImg: {
+    width: RFPercentage(1.6),
+    height: RFPercentage(1.6),
+    marginRight: RFPercentage(0.5),
+  },
+  cross: {
+    position: 'absolute',
+    right: RFPercentage(-0.6),
+    top: RFPercentage(-0.3),
+  },
+  close: {
+    position: 'absolute',
+    right: RFPercentage(2),
+    top: RFPercentage(2),
   },
 });

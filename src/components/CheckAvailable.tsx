@@ -3,13 +3,17 @@ import React from 'react';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 import { Colors, Fonts } from '../constants/Themes';
 
-const CheckAvailable = ({ day, fromTime, toTime }) => {
-  // Convert from Unix timestamp to Date object
-  const fromDate = new Date(fromTime * 1000); // Multiply by 1000 to convert seconds to milliseconds
-  const toDate = new Date(toTime * 1000); // Multiply by 1000 to convert seconds to milliseconds
+type CheckAvailableProps = {
+  day: string;
+  fromTime: any; // assuming Unix timestamp in seconds
+  toTime: any;   // assuming Unix timestamp in seconds
+};
 
-  // Format the time in 'h:mm AM/PM' format
-  const formatTime = (date) => {
+const CheckAvailable: React.FC<CheckAvailableProps> = ({ day, fromTime, toTime }) => {
+  const fromDate = new Date(fromTime * 1000);
+  const toDate = new Date(toTime * 1000);
+
+  const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], {
       hour: '2-digit',
       minute: '2-digit',
