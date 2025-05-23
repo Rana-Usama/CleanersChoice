@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import React, {useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
-import {Fonts, IMAGES, Colors, Icons} from '../../../constants/Themes';
+import {Fonts, IMAGES, Colors} from '../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../../routers/StackNavigator';

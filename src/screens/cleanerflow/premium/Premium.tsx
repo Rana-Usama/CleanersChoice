@@ -14,10 +14,7 @@ import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
 import HeaderComponent from '../../../components/HeaderComponent';
 import GradientButton from '../../../components/GradientButton';
-import {useNavigation} from '@react-navigation/native';
-import {RootStackParamList} from '../../../routers/StackNavigator';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useStripe, createPaymentMethod} from '@stripe/stripe-react-native';
+import {useStripe} from '@stripe/stripe-react-native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import SubscriptionModal from '../../../components/SubscriptionModal';
@@ -31,12 +28,9 @@ const services = [
   {id: 4, name: 'Cancel any time'},
 ];
 
-const Premium = () => {
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList, 'Premium'>>();
+const Premium = ({navigation} : any) => {
   const {initPaymentSheet, presentPaymentSheet} = useStripe();
   const [loading, setLoading] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
 
@@ -58,7 +52,6 @@ const Premium = () => {
             setCurrentUser(userData);
           }
         } catch (error) {
-          console.error('Error fetching user data:', error);
         }
       }
     };
@@ -84,7 +77,6 @@ const Premium = () => {
       }
       return {setupIntentClientSecret, customerId};
     } catch (error) {
-      console.error('Error fetching SetupIntent:', error);
       Alert.alert('Error', 'Could not create customer. Please try again.');
       return null;
     }
@@ -248,22 +240,7 @@ const Premium = () => {
       </View>
 
       {/* Modals */}
-      {modalVisible && (
-        <>
-          <View style={styles.modalOverlay}>
-            <SubscriptionModal
-              text="Subscription Plan Purchased Successfully"
-              icon="checkcircle"
-              onPress={() => {
-                setModalVisible(false);
-                navigation.navigate('CleanerNavigator');
-              }}
-            />
-          </View>
-        </>
-      )}
-
-      {modalVisible2 && (
+        {modalVisible2 && (
         <>
           <View style={styles.modalOverlay}>
             <SubscriptionModal

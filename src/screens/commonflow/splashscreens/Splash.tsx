@@ -1,14 +1,8 @@
 import {SafeAreaView, StatusBar, StyleSheet, Image} from 'react-native';
 import React, {useEffect} from 'react';
-import {useNavigation} from '@react-navigation/native';
 import {IMAGES, Colors} from '../../../constants/Themes';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../../../routers/StackNavigator';
 
-const Splash: React.FC = () => {
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList, 'SplashOne'>>();
-
+const Splash: React.FC = ({navigation}: any) => {
   useEffect(() => {
     const timeout = setTimeout(() => {
       navigation.navigate('OnBoarding');

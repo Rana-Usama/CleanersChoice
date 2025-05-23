@@ -1,5 +1,5 @@
 import {SafeAreaView, StatusBar, StyleSheet, Image} from 'react-native';
-import React, {useEffect} from 'react';
+import React from 'react';
 
 import {IMAGES, Colors} from '../constants/Themes';
 

@@ -69,18 +69,7 @@ export const IMAGES: {[key: string]: any} = {
   onBoarding3: require('../assets/images/onBoarding3.png'),
   logo: require('../assets/images/logo.png'),
   stars: require('../assets/images/stars.png'),
-  cleaning1: require('../assets/images/cleaning1.png'),
-  cleaning2: require('../assets/images/cleaning2.png'),
-  cleaning3: require('../assets/images/cleaning3.png'),
-  cleaning4: require('../assets/images/cleaning4.png'),
-  alpha: require('../assets/images/alpha.png'),
-  sophix: require('../assets/images/sophix.png'),
-  adam: require('../assets/images/adam.png'),
-  cleaners: require('../assets/images/cleaners.png'),
-  clean: require('../assets/images/clean.png'),
   star: require('../assets/images/star.png'),
-  picture: require('../assets/images/picture.png'),
-  timeLine: require('../assets/images/timeline1.png'),
   defaultPic: require('../assets/images/user.png'),
 };
 

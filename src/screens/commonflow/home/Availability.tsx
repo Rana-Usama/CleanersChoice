@@ -6,7 +6,6 @@ import {
   View,
   Image,
   ActivityIndicator,
-  Modal,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -14,9 +13,6 @@ import {Colors, Fonts, IMAGES} from '../../../constants/Themes';
 import HeaderBack from '../../../components/HeaderBack';
 import {useSelector} from 'react-redux';
 import GradientButton from '../../../components/GradientButton';
-import {useNavigation} from '@react-navigation/native';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../../../routers/StackNavigator';
 import {useDispatch} from 'react-redux';
 import {cleanerAvailability} from '../../../redux/Availability/Actions';
 import auth from '@react-native-firebase/auth';
@@ -54,17 +50,13 @@ const days = [
   },
 ];
 
-const Availability = () => {
-  const navigation =
-    useNavigation<
-      NativeStackNavigationProp<RootStackParamList, 'Availability'>
-    >();
+const Availability = ({navigation} : any) => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
-  const profileData = useSelector(state => state.profile.profileData.role);
+  const profileData = useSelector(state => state?.profile?.profileData?.role);
   const [service, setService] = useState(null);
   const profileCompletion = useSelector(
-    state => state.profile.profileCompletion,
+    state => state?.profile?.profileCompletion,
   );
   const [loading2, setLoading2] = useState(false);
 
@@ -83,7 +75,6 @@ const Availability = () => {
           setService(userData);
         }
       } catch (error) {
-        console.log(error);
       } finally {
         setLoading2(false);
       }

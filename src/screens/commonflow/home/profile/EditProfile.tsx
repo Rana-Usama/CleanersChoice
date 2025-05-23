@@ -1,5 +1,4 @@
 import {
-  Dimensions,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -16,9 +15,6 @@ import {
 import React, {useState, useEffect} from 'react';
 import {Colors, Icons, Fonts, IMAGES} from '../../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
-import {useNavigation} from '@react-navigation/native';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../../../../routers/StackNavigator';
 import HeaderBack from '../../../../components/HeaderBack';
 import GradientButton from '../../../../components/GradientButton';
 import InputField from '../../../../components/InputField';
@@ -29,11 +25,7 @@ import storage from '@react-native-firebase/storage';
 import {Image as CompressorImage} from 'react-native-compressor';
 import {showToast} from '../../../../utils/ToastMessage';
 
-const EditProfile = () => {
-  const navigation =
-    useNavigation<
-      NativeStackNavigationProp<RootStackParamList, 'EditProfile'>
-    >();
+const EditProfile = ({navigation} : any) => {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [img, setImg] = useState<any | null>(null);
@@ -52,7 +44,6 @@ const EditProfile = () => {
         setImg(image);
       })
       .catch(error => {
-        console.log('Image Picker Error:', error);
       });
   };
 
@@ -72,7 +63,6 @@ const EditProfile = () => {
             setUserData(userData);
           }
         } catch (error) {
-          console.error('Error fetching user data:', error);
         }
       }
       setLoading2(false);

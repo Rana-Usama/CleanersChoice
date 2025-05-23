@@ -6,15 +6,10 @@ import {
   Text,
   View,
   KeyboardAvoidingView,
-  Platform,
-  TouchableOpacity,
 } from 'react-native';
 import React, {useState} from 'react';
-import {useNavigation} from '@react-navigation/native';
-import {Fonts, IMAGES, Colors, Icons} from '../../../constants/Themes';
+import {Fonts, IMAGES, Colors} from '../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../../../routers/StackNavigator';
 import InputField from '../../../components/InputField';
 import GradientButton from '../../../components/GradientButton';
 import HeaderBack from '../../../components/HeaderBack';
@@ -23,11 +18,7 @@ import {Formik} from 'formik';
 import auth from '@react-native-firebase/auth';
 import {showToast} from '../../../utils/ToastMessage';
 
-const ResetPassword: React.FC = () => {
-  const navigation =
-    useNavigation<
-      NativeStackNavigationProp<RootStackParamList, 'ResetPassword'>
-    >();
+const ResetPassword: React.FC = ({navigation} : any) => {
   const [loading, setLoading] = useState(false);
 
   // Validation Schema

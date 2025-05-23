@@ -7,7 +7,7 @@ export const useExitAppOnBack = () => {
   useFocusEffect(
     React.useCallback(() => {
       const onBackPress = () => {
-        BackHandler.exitApp(); // 🔥 Immediately exit app
+        BackHandler.exitApp();
         return true;
       };
 

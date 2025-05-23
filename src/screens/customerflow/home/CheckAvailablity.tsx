@@ -10,18 +10,10 @@ import React from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, IMAGES} from '../../../constants/Themes';
 import HeaderBack from '../../../components/HeaderBack';
-import {useNavigation} from '@react-navigation/native';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../../../routers/StackNavigator';
 import CheckAvailable from '../../../components/CheckAvailable';
 
 const CheckAvailability = ({route}: any) => {
   const {item} = route.params;
-  const navigation =
-    useNavigation<
-      NativeStackNavigationProp<RootStackParamList, 'CheckAvailability'>
-    >();
-
   const availableDays = item.availability.filter((day: any) => day.checked === true);
 
   return (

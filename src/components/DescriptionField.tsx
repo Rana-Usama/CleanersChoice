@@ -3,8 +3,6 @@ import React, { useState } from 'react';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 import { Colors, Fonts } from '../constants/Themes';
 
-
-
 interface Props {
   style?: object;
   placeholder: string;

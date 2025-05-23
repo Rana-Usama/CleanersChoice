@@ -1,5 +1,4 @@
 import {
-  Dimensions,
   Image,
   SafeAreaView,
   StatusBar,
@@ -8,33 +7,25 @@ import {
   View,
 } from 'react-native';
 import React from 'react';
-import {useNavigation} from '@react-navigation/native';
 import {Fonts, IMAGES, Colors, Icons} from '../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../../../routers/StackNavigator';
 import SelectionButton from '../../../components/SelectionButton';
 import HeaderComponent from '../../../components/HeaderComponent';
 import {useDispatch} from 'react-redux';
-import { setUserFlow } from '../../../redux/Actions';
+import {setUserFlow} from '../../../redux/Actions';
 
-const UserSelection: React.FC = () => {
-  const navigation =
-    useNavigation<
-      NativeStackNavigationProp<RootStackParamList, 'UserSelection'>
-    >();
-
+const UserSelection: React.FC = ({navigation}: any) => {
   const dispatch = useDispatch();
 
   const handleNext = () => {
-    dispatch(setUserFlow('Customer'))
-    navigation.navigate('SignUp')
-  }
+    dispatch(setUserFlow('Customer'));
+    navigation.navigate('SignUp');
+  };
 
   const handleNext2 = () => {
-    dispatch(setUserFlow('Cleaner'))
-    navigation.navigate('SignUp')
-  }
+    dispatch(setUserFlow('Cleaner'));
+    navigation.navigate('SignUp');
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>

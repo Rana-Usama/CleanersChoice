@@ -1,5 +1,4 @@
 import {
-  Dimensions,
   Image,
   SafeAreaView,
   StatusBar,
@@ -8,15 +7,11 @@ import {
   View,
   ScrollView,
   KeyboardAvoidingView,
-  Platform,
   TouchableOpacity,
 } from 'react-native';
 import React, {useState} from 'react';
-import {useNavigation} from '@react-navigation/native';
 import {Fonts, IMAGES, Colors, Icons} from '../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../../../routers/StackNavigator';
 import {RadioButtonInput} from 'react-native-simple-radio-button';
 import HeaderComponent from '../../../components/HeaderComponent';
 import InputField from '../../../components/InputField';
@@ -35,9 +30,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import messaging from '@react-native-firebase/messaging';
 import {showToast} from '../../../utils/ToastMessage';
 
-const SignUp: React.FC = () => {
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList, 'SignUp'>>();
+const SignUp: React.FC = ({navigation} : any) => {
   const [selected, setSelected] = useState<boolean>(false);
   const [img, setImg] = useState<any>(null);
   const userFlow = useSelector(state => state.userFlow);
@@ -69,7 +62,6 @@ const SignUp: React.FC = () => {
         setImg(image);
       })
       .catch(error => {
-        console.log('Image Picker Error:', error);
       });
   };
 

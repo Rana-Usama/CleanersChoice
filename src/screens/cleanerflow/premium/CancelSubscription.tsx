@@ -5,23 +5,19 @@ import {
   Text,
   View,
   FlatList,
-  Alert,
   TouchableWithoutFeedback,
-  StatusBar,
   TouchableOpacity,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
-import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
+import {Colors, Fonts, IMAGES} from '../../../constants/Themes';
 import HeaderComponent from '../../../components/HeaderComponent';
 import GradientButton from '../../../components/GradientButton';
 import {useNavigation} from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import {BlurView} from '@react-native-community/blur';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import SubscriptionModal from '../../../components/SubscriptionModal';
-import Toast from 'react-native-toast-message';
 import NextButton from '../../../components/NextButton';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {showToast} from '../../../utils/ToastMessage';
@@ -74,7 +70,6 @@ const CancelSubscription = () => {
     }
     try {
       setIsLoading(true); // Start loader
-
       const res = await fetch(
         'https://cleaners-choice-server.vercel.app/api/cancel-subscription',
         {
@@ -256,27 +251,6 @@ const CancelSubscription = () => {
             </View>
           </View>
         </TouchableWithoutFeedback>
-      )}
-
-      {modalVisible3 && (
-        <>
-          <View style={styles.modalOverlay}>
-            <SubscriptionModal
-              text="Subscription cancelled successfully!"
-              icon="checkcircle"
-              onPress={() => {
-                setIsLoading3(true);
-                setTimeout(() => {
-                  setIsLoading3(false);
-                  setModalVisible3(false);
-                  setModalVisible(false);
-                  navigation.goBack();
-                }, 1000);
-              }}
-              loading={isLoading3}
-            />
-          </View>
-        </>
       )}
 
       {modalVisible2 && (

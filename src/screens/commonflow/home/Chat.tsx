@@ -1,7 +1,5 @@
 import {
   Image,
-  KeyboardAvoidingView,
-  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -14,22 +12,16 @@ import React, {useCallback, useEffect, useState} from 'react';
 import {GiftedChat, InputToolbar, Bubble} from 'react-native-gifted-chat';
 import firestore from '@react-native-firebase/firestore';
 import {RFPercentage} from 'react-native-responsive-fontsize';
-import {Colors, Fonts, IMAGES} from '../../../constants/Themes';
+import {Colors, Fonts} from '../../../constants/Themes';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import LinearGradient from 'react-native-linear-gradient';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Feather from 'react-native-vector-icons/Feather';
 import {useFocusEffect} from '@react-navigation/native';
-import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
 
 const Chat = ({navigation, route}: any) => {
   const [messages, setMessages] = useState<
     {id: string; text: string; sender: string; timestamp: number}[]
   >([]);
-  const [lastVisible, setLastVisible] =
-    useState<FirebaseFirestoreTypes.QueryDocumentSnapshot<FirebaseFirestoreTypes.DocumentData> | null>(
-      null,
-    );
   const {
     chatId,
     senderId,
@@ -70,13 +62,11 @@ const Chat = ({navigation, route}: any) => {
     return () => unsubscribe();
   }, [chatId]);
 
-
   // Send Message
   const onSend = useCallback(
     async (messagesToSend = []) => {
       const message = messagesToSend[0];
       if (!message.text || message.text.trim() === '') {
-        console.log('Message text is empty!');
         return;
       }
       const timestamp = firestore.FieldValue.serverTimestamp();
@@ -120,9 +110,7 @@ const Chat = ({navigation, route}: any) => {
           {merge: true},
         );
         await sendPushNotification(message.text);
-      } catch (e) {
-        console.log('Error sending message:', e);
-      }
+      } catch (e) {}
     },
     [chatId, senderId, senderName, receiver],
   );
@@ -146,9 +134,7 @@ const Chat = ({navigation, route}: any) => {
               {merge: true},
             );
           }
-        } catch (error) {
-          console.log('Error marking last message as read:', error);
-        }
+        } catch (error) {}
       };
 
       markLastMessageAsRead();
@@ -173,18 +159,10 @@ const Chat = ({navigation, route}: any) => {
       );
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
-        const result = await response.json();
-        console.log(`Message sent to ${fcmToken}:`, result);
       } else {
-        const text = await response.text();
-        console.log(`Non-JSON response for ${fcmToken}:`, text);
       }
-    } catch (err) {
-      console.log(`Error sending to ${fcmToken}:`, err);
-    }
+    } catch (err) {}
   };
-
-
 
   return (
     <LinearGradient

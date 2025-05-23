@@ -6,32 +6,23 @@ import {
   View,
   TouchableOpacity,
   KeyboardAvoidingView,
-  Platform,
   ScrollView,
-  FlatList,
-  Keyboard,
-  Alert,
 } from 'react-native';
-import React, {useState, useEffect, useCallback, useRef} from 'react';
+import React, {useState, useCallback, useRef} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Icons, Fonts} from '../../../../constants/Themes';
 import HeaderBack from '../../../../components/HeaderBack';
 import InfoHeader from '../../../../components/InfoHeader';
 import DescriptionField from '../../../../components/DescriptionField';
 import TimeLine from '../../../../components/TimeLine';
-import CustomDropDown from '../../../../components/DropDown';
 import GradientButton from '../../../../components/GradientButton';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {useFocusEffect} from '@react-navigation/native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import InputField from '../../../../components/InputField';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import {useDispatch, useSelector} from 'react-redux';
 import {cleanerDescription} from '../../../../redux/Form/Actions';
-import {cleanerAvailability} from '../../../../redux/Availability/Actions';
-import Toast from 'react-native-toast-message';
-import {RootStackParamList} from '../../../../routers/StackNavigator';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import MultiSelect from 'react-native-multiple-select';
 import { showToast } from '../../../../utils/ToastMessage';
 
@@ -70,22 +61,17 @@ const items = [
   },
 ];
 
-const ServiceOne: React.FC = () => {
-  const navigation =
-    useNavigation<
-      NativeStackNavigationProp<RootStackParamList, 'ServiceOne'>
-    >();
-  const available = useSelector(state => state.availablity.availability);
-  const [selectedItem, setSelectedItem] = useState(null);
+const ServiceOne: React.FC = ({navigation} : any) => {
+  const available = useSelector(state => state?.availablity?.availability);
   const [location, setLoaction] = useState('');
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-  const description = useSelector(state => state.form.description);
+  const description = useSelector(state => state?.form?.description);
   const [serviceData, setServiceData] = useState(null);
   const profileCompletion = useSelector(
-    state => state.profile.profileCompletion,
+    state => state?.profile?.profileCompletion,
   );
-  const profileData = useSelector(state => state.profile.profileData);
+  const profileData = useSelector(state => state?.profile?.profileData);
   const [selectedItems, setSelectedItems] = useState([]);
   const multiSelectRef = useRef(null);
   const onSelectedItemsChange = (selectedItems: any) => {
@@ -120,7 +106,6 @@ const ServiceOne: React.FC = () => {
         setServiceData(data);
       }
     } catch (error) {
-      console.error(error);
     }
   };
 
@@ -151,7 +136,6 @@ const ServiceOne: React.FC = () => {
           });
         navigation.navigate('ServiceTwo');
       } catch (error) {
-        console.error(error);
       } finally {
         setLoading(false);
       }

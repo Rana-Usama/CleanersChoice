@@ -97,7 +97,6 @@ const CleanerJobs = () => {
         .filter(location => location !== undefined);
       setLocations(locationsArray);
     } catch (error) {
-      console.error('Error fetching jobs:', error);
     }
   };
 

@@ -5,32 +5,25 @@ import {
   View,
   TouchableWithoutFeedback,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, Icons} from '../../../../constants/Themes';
 import HeaderBack from '../../../../components/HeaderBack';
 import ProfileField from '../../../../components/ProfileField';
-import {useNavigation} from '@react-navigation/native';
 import {BlurView} from '@react-native-community/blur';
 import CustomModal from '../../../../components/CustomModal';
-import {useSelector} from 'react-redux';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../../../../routers/StackNavigator';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Toast from 'react-native-toast-message';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import {showToast} from '../../../../utils/ToastMessage';
-import { useExitAppOnBack } from '../../../../utils/ExitApp';
+import {useExitAppOnBack} from '../../../../utils/ExitApp';
 
-const Settings = () => {
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList, 'Settings'>>();
+const Settings = ({navigation}: any) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
   const [role, setuserRole] = useState('');
   const [loading, setLoading] = useState(false);
-  useExitAppOnBack()
+  useExitAppOnBack();
 
   // Log out
   const logOut = async () => {
@@ -65,7 +58,6 @@ const Settings = () => {
         setuserRole(userData?.role);
       }
     } catch (error) {
-      console.error('Error fetching user details:', error);
     }
   };
   userRole();
@@ -76,17 +68,10 @@ const Settings = () => {
     try {
       const user = auth().currentUser;
       if (!user) return;
-
       const email = await AsyncStorage.getItem('email');
       const password = await AsyncStorage.getItem('password');
-
-      if (!email || !password) {
-        throw new Error('Re-authentication failed. Please log in again.');
-      }
-
       const credential = auth.EmailAuthProvider.credential(email, password);
       await user.reauthenticateWithCredential(credential);
-
       await firestore().collection('Users').doc(user.uid).delete();
       await user.delete();
       await AsyncStorage.multiRemove(['email', 'password', 'role']);
@@ -102,7 +87,6 @@ const Settings = () => {
         routes: [{name: 'UserSelection'}],
       });
     } catch (error) {
-      console.error('Account deletion error:', error);
       showToast({
         type: 'danger',
         title: 'Error',

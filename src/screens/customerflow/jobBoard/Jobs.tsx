@@ -2,11 +2,9 @@ import {
   StyleSheet,
   Text,
   View,
-  Platform,
   SafeAreaView,
   ScrollView,
   TouchableOpacity,
-  Image,
   FlatList,
   TouchableWithoutFeedback,
   ActivityIndicator,
@@ -85,7 +83,6 @@ const Jobs = ({navigation}: any) => {
       }));
       setJobs(jobs);
     } catch (error) {
-      console.error('Error fetching jobs:', error);
     } finally {
       setLoading(false);
     }
@@ -130,7 +127,6 @@ const Jobs = ({navigation}: any) => {
         }
         contentContainerStyle={styles.scrollView}
         showsVerticalScrollIndicator={false}>
-
         {/* Header */}
         <HeaderBack
           title="My Posted Jobs"
@@ -179,22 +175,23 @@ const Jobs = ({navigation}: any) => {
                 <>
                   <FlatList
                     data={Jobs}
+                    contentContainerStyle={{paddingBottom:RFPercentage(5)}}
                     keyExtractor={item => item?.id.toString()}
                     renderItem={({item}) => (
-                      <JobCard
-                        name={getTruncatedText(item?.title)}
-                        location={getTruncatedText2(item?.location)}
-                        price={item?.priceRange}
-                        date={item?.createdAt}
-                        onPress={() =>
-                          navigation.navigate('JobDetails', {item: item})
-                        }
-                        onPress2={() => {
-                          setSelectedJobId(item?.id);
-                          setModalVisible(true);
-                        }}
-                        delete={true}
-                      />
+                        <JobCard
+                          name={getTruncatedText(item?.title)}
+                          location={getTruncatedText2(item?.location)}
+                          price={item?.priceRange}
+                          date={item?.createdAt}
+                          onPress={() =>
+                            navigation.navigate('JobDetails', {item: item})
+                          }
+                          onPress2={() => {
+                            setSelectedJobId(item?.id);
+                            setModalVisible(true);
+                          }}
+                          delete={true}
+                        />
                     )}
                   />
                 </>
