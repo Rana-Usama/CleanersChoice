@@ -156,12 +156,12 @@ const StackNavigator: React.FC = () => {
                   password &&
                   user === 'Cleaner' &&
                   userData?.subscription === true &&
-                  userData.subscriptionEndDate > Date.now() // Valid subscription
+                  userData?.subscriptionEndDate > Date.now() // Valid subscription
                 ? 'CleanerNavigator'
                 : user === 'Cleaner' && userData?.subscription === false // No subscription set
                 ? 'Premium'
                 : user === 'Cleaner' &&
-                  userData.subscriptionEndDate < Date.now() // Subscription expired
+                  userData?.subscriptionEndDate < Date.now() // Subscription expired
                 ? 'Premium'
                 : loggedOut === 'yes'
                 ? 'SignIn'

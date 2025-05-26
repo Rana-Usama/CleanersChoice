@@ -458,21 +458,19 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(243, 244, 246, 1)',
     borderWidth: 1.8,
     borderColor: 'rgba(64, 123, 255, 1)',
-    shadowColor: 'rgba(0, 0, 0, 0.15)',
-    shadowOffset: {width: 0, height: 0},
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    elevation: 40,
+
   },
   imgStyle: {
     width: RFPercentage(12.5),
     height: RFPercentage(12.5),
     borderRadius: RFPercentage(10),
+
   },
   imgText: {
     color: Colors.secondaryText,
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.5),
+    textAlign:'center'
   },
   uploadedImg: {
     width: RFPercentage(3),

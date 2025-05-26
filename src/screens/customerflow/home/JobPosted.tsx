@@ -38,13 +38,12 @@ const JobPosted = () => {
         />
         <Text style={styles.successText}>Job Posted Successfully!</Text>
       </View>
-      <TouchableOpacity onPress={handleNext} disabled={loading}>
-        <View style={styles.homeButton}>
+      <TouchableOpacity onPress={handleNext}  disabled={loading} style={styles.homeButton}>
           {loading ? (
             <>
               <ActivityIndicator
                 size={'small'}
-                color={Colors.placeholderColor}
+                color={Colors.gradient1}
               />
             </>
           ) : (
@@ -52,7 +51,6 @@ const JobPosted = () => {
               <Text style={styles.homeButtonText}>Home</Text>
             </>
           )}
-        </View>
       </TouchableOpacity>
     </LinearGradient>
   );
@@ -78,13 +76,14 @@ const styles = StyleSheet.create({
   },
   homeButton: {
     width: RFPercentage(18),
-    height: RFPercentage(5),
+    height: RFPercentage(5.6),
     backgroundColor: Colors.background,
     borderRadius: RFPercentage(100),
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'center',
     bottom: RFPercentage(10),
+    // backgroundColor:'red'
   },
   homeButtonText: {
     color: 'rgba(37, 50, 117, 1)',

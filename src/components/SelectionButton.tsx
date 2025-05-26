@@ -5,6 +5,7 @@ import {
   Image,
   TouchableOpacity,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import React from 'react';
 import { Fonts, Colors } from '../constants/Themes';
@@ -57,7 +58,7 @@ const styles = StyleSheet.create({
     height: RFPercentage(2.5),
   },
   nextButton: {
-    height: RFPercentage(5.8),
+    height: RFPercentage(6.3),
     borderRadius: RFPercentage(5),
     alignItems: 'center',
     justifyContent: 'center',
@@ -67,7 +68,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(249, 252, 255, 1)',
   },
   nextButtonText: {
-    fontSize: RFPercentage(1.7),
+    fontSize: Platform.OS === 'ios' ? RFPercentage(1.7) : RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
     color: Colors.primaryText,
   },

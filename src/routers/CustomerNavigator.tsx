@@ -8,6 +8,7 @@ import {
   Keyboard,
   BackHandler,
   SafeAreaView,
+  Platform,
 } from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {Icons, Colors, Fonts} from '../constants/Themes';
@@ -173,7 +174,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   tabBarContainer: {
-    height: RFPercentage(8.6),
+    height: Platform.OS === 'ios' ?  RFPercentage(8.6) : RFPercentage(11),
     backgroundColor: 'rgba(241, 245, 249, 1)',
     borderRadius: RFPercentage(3),
     position: 'absolute',
@@ -187,6 +188,7 @@ const styles = StyleSheet.create({
   tabButton: {
     alignItems: 'center',
     width: RFPercentage(8),
+    // backgroundColor:'red'
   },
   activeTab: {
     fontWeight: 'bold',
@@ -196,6 +198,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
+    height:'100%'
   },
   middle: {
     width: RFPercentage(7),
