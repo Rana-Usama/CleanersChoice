@@ -45,7 +45,7 @@ export default GradientButton;
 
 const styles = StyleSheet.create({
   nextButton: {
-    height: RFPercentage(5),
+    height: RFPercentage(5.6),
     borderRadius: RFPercentage(100),
     alignItems: 'center',
     justifyContent: 'center',

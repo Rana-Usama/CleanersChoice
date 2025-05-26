@@ -36,7 +36,7 @@ export default NextButton
 
 const styles = StyleSheet.create({
     nextButton: {
-        height: RFPercentage(5),
+        height: RFPercentage(5.6),
         borderRadius: RFPercentage(5),
         alignItems: 'center',
         justifyContent: 'center',

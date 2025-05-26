@@ -8,6 +8,7 @@ import {
   View,
   Animated,
   TouchableOpacity,
+  ScrollView,
 } from 'react-native';
 import React, {useState, useRef, useEffect} from 'react';
 import NextButton from '../../../components/NextButton';
@@ -87,70 +88,75 @@ const OnBoarding = ({navigation}: any) => {
         translucent
         backgroundColor="transparent"
       />
-      <View style={styles.container}>
-        <HeaderComponent />
+      <ScrollView contentContainerStyle={{paddingBottom:RFPercentage(3)}}>
+        <View style={styles.container}>
+          <HeaderComponent />
+          <View style={styles.content}>
+            {/* Animated Image */}
+            <Animated.Image
+              source={stepsData[step - 1]?.image}
+              resizeMode="contain"
+              style={[
+                styles.image,
+                {
+                  transform: [{translateX: imageAnim}],
+                  opacity: opacityAnim,
+                },
+              ]}
+            />
 
-        <View style={styles.content}>
-          {/* Animated Image */}
-          <Animated.Image
-            source={stepsData[step - 1]?.image}
-            resizeMode="contain"
-            style={[
-              styles.image,
-              {
-                transform: [{translateX: imageAnim}],
+            {/* Animated Text */}
+            <Animated.View
+              style={{
+                marginTop: RFPercentage(2),
+                alignItems: 'center',
+                transform: [{translateY: textAnim}],
                 opacity: opacityAnim,
-              },
-            ]}
-          />
+              }}>
+              <Text style={styles.title}>{stepsData[step - 1]?.title}</Text>
+              <View style={styles.descriptionContainer}>
+                <Text style={styles.description}>
+                  {stepsData[step - 1]?.description}
+                </Text>
+              </View>
+            </Animated.View>
 
-          {/* Animated Text */}
-          <Animated.View
-            style={{
-              marginTop: RFPercentage(2),
-              alignItems: 'center',
-              transform: [{translateY: textAnim}],
-              opacity: opacityAnim,
-            }}>
-            <Text style={styles.title}>{stepsData[step - 1]?.title}</Text>
-            <View style={styles.descriptionContainer}>
-              <Text style={styles.description}>
-                {stepsData[step - 1]?.description}
-              </Text>
+            {/* Dots Indicator */}
+            <View style={styles.dotsContainer}>
+              {[1, 2, 3].map(index => (
+                <TouchableOpacity key={index} onPress={() => setStep(index)}>
+                  {step === index ? (
+                    <LinearGradient
+                      colors={[Colors.gradient1, Colors.gradient2]}
+                      style={styles.activeDot}
+                    />
+                  ) : (
+                    <View style={styles.inactiveDot} />
+                  )}
+                </TouchableOpacity>
+              ))}
             </View>
-          </Animated.View>
+          </View>
 
-          {/* Dots Indicator */}
-          <View style={styles.dotsContainer}>
-            {[1, 2, 3].map(index => (
-              <TouchableOpacity key={index} onPress={() => setStep(index)}>
-                {step === index ? (
-                  <LinearGradient
-                    colors={[Colors.gradient1, Colors.gradient2]}
-                    style={styles.activeDot}
-                  />
-                ) : (
-                  <View style={styles.inactiveDot} />
-                )}
-              </TouchableOpacity>
-            ))}
+          {/* Buttons */}
+          <View style={styles.buttonWrapper}>
+            <NextButton
+              title="Skip"
+              onPress={() => navigation.navigate('UserSelection')}
+            />
+            <View style={{marginLeft: RFPercentage(2)}}>
+              <NextButton title="Next" onPress={nextPress} />
+            </View>
           </View>
         </View>
-
-        {/* Buttons */}
-        <View style={styles.buttonWrapper}>
-          <NextButton
-            title="Skip"
-            onPress={() => navigation.navigate('UserSelection')}
+        <View style={styles.starContainer}>
+          <Image
+            source={IMAGES.stars}
+            resizeMode="contain"
+            style={styles.star}
           />
-          <View style={{marginLeft: RFPercentage(2)}}>
-            <NextButton title="Next" onPress={nextPress} />
-          </View>
         </View>
-      </View>
-      <View style={styles.starContainer}>
-        <Image source={IMAGES.stars} resizeMode="contain" style={styles.star} />
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -177,7 +183,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: Colors.primaryText,
-    fontSize: RFPercentage(2.5),
+    fontSize: RFPercentage(2.1),
     fontFamily: Fonts.semiBold,
     textAlign: 'center',
   },
@@ -187,7 +193,7 @@ const styles = StyleSheet.create({
   },
   description: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontRegular,
     textAlign: 'center',
   },
@@ -213,9 +219,10 @@ const styles = StyleSheet.create({
     width: '100%',
     justifyContent: 'center',
     alignSelf: 'center',
-    marginTop: height * 0.25,
+    marginTop: height*0.85,
     alignItems: 'center',
     flexDirection: 'row',
+    position: 'absolute',
   },
   starContainer: {
     position: 'absolute',
