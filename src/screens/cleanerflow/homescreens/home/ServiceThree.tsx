@@ -31,7 +31,9 @@ const ServiceThree: React.FC = ({navigation}: any) => {
   const profileCompletion = useSelector(
     state => state?.profile?.profileCompletion,
   );
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<{
+    [key: number]: {price?: string; details?: string};
+  }>({});
 
   // Add package
   const addPackage = () => {
@@ -64,22 +66,27 @@ const ServiceThree: React.FC = ({navigation}: any) => {
       const priceNum = parseFloat(cleanValue);
       setErrors(prevErrors => ({
         ...prevErrors,
-        [id]: !cleanValue
-          ? 'Price is required'
-          : isNaN(priceNum) || priceNum < minPrice
-          ? `Price must be at least ${minPrice}$`
-          : null,
+        [id]: {
+          ...(prevErrors[id] || {}),
+          price: !cleanValue
+            ? 'Price is required'
+            : isNaN(priceNum) || priceNum < minPrice
+            ? `Price must be at least ${minPrice}$`
+            : null,
+        },
       }));
     }
-    // Details validation
+
     if (field === 'details') {
       setErrors(prevErrors => ({
         ...prevErrors,
-        [id]: !cleanValue.trim() ? 'Package details are required' : null,
+        [id]: {
+          ...(prevErrors[id] || {}),
+          details: !cleanValue.trim() ? 'Package details are required' : null,
+        },
       }));
     }
   };
-
 
   // Upload data to firestore
   const savePackagesToFirestore = async () => {
@@ -151,7 +158,6 @@ const ServiceThree: React.FC = ({navigation}: any) => {
     }
   };
 
-
   useEffect(() => {
     fetchServiceData();
   }, []);
@@ -173,10 +179,8 @@ const ServiceThree: React.FC = ({navigation}: any) => {
             : [{id: 1, details: '', price: ''}],
         );
       }
-    } catch (error) {
-    }
+    } catch (error) {}
   };
-
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -186,7 +190,6 @@ const ServiceThree: React.FC = ({navigation}: any) => {
         <ScrollView
           contentContainerStyle={styles.scrollView}
           keyboardShouldPersistTaps="handled">
-            
           {/* Header */}
           <HeaderBack
             title="Service"
@@ -240,14 +243,17 @@ const ServiceThree: React.FC = ({navigation}: any) => {
                     }
                     charCount={pkg.details.length}
                   />
+                  {errors[pkg.id]?.details && (
+                    <Text style={styles.errorText}>
+                      {errors[pkg.id].details}
+                    </Text>
+                  )}
 
                   <InputField
                     placeholder={`Starting Price e.g ${25 * pkg.id}$`}
                     customStyle={{
                       width: '100%',
-                      borderColor: errors?.[pkg.id]
-                        ? Colors.error
-                        : Colors.inputFieldColor,
+                       borderColor: Colors.inputFieldColor,
                     }}
                     value={pkg.price ? `$${pkg.price}` : ''}
                     onChangeText={text =>
@@ -255,7 +261,9 @@ const ServiceThree: React.FC = ({navigation}: any) => {
                     }
                     type={'numeric'}
                   />
-                  <Text style={styles.errorText}>{errors[pkg.id]}</Text>
+                  {errors[pkg.id]?.price && (
+                    <Text style={styles.errorText}>{errors[pkg.id].price}</Text>
+                  )}
                 </View>
               </View>
             ))}

@@ -21,6 +21,7 @@ import Profile from '../screens/commonflow/home/profile/Profile';
 import Settings from '../screens/commonflow/home/settings/Settings';
 import Messages from '../screens/commonflow/home/Messages';
 import {useUnreadMessages} from '../utils/UnreadMessagesContext';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const Tab = createBottomTabNavigator();
 
@@ -78,8 +79,10 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
 
   if (isKeyboardVisible) return null;
 
+  const insets = useSafeAreaInsets()
+
   return (
-    <SafeAreaView style={styles.tabBarContainer}>
+    <View style={[styles.tabBarContainer, { paddingBottom: insets.bottom }]}>
       <View style={styles.labelContainer}>
         {state.routes.map((route, index) => {
           const {options} = descriptors[route.key];
@@ -132,7 +135,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
               <Text
                 style={{
                   color: isFocused ? Colors.gradient2 : Colors.secondaryText,
-                  fontSize: RFPercentage(1.2),
+                  fontSize: RFPercentage(1.3),
                   top: RFPercentage(0.5),
                   fontFamily: isFocused ? Fonts.fontMedium : Fonts.fontRegular,
                 }}>
@@ -142,7 +145,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
           );
         })}
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -167,22 +170,11 @@ const CleanerNavigator: React.FC = () => {
 export default CleanerNavigator;
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   tabBarContainer: {
-    height: Platform.OS === 'ios' ?  RFPercentage(8.6) : RFPercentage(10),
     backgroundColor: 'rgba(241, 245, 249, 1)',
-    borderRadius: RFPercentage(3),
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
+    height: Platform.OS === 'ios' ? RFPercentage(8.6) : RFPercentage(11.5),
   },
   tabButton: {
     alignItems: 'center',
@@ -191,27 +183,28 @@ const styles = StyleSheet.create({
   activeTab: {
     fontWeight: 'bold',
   },
-  imgStyle: {
-    width: RFPercentage(2.8),
-    height: RFPercentage(2.8),
-  },
-  middle: {
-    width: RFPercentage(7),
-    height: RFPercentage(7),
-  },
   labelContainer: {
     width: '90%',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
+    height: '100%',
+  },
+  middle: {
+    width: Platform.OS === 'ios' ?  RFPercentage(7.5) : RFPercentage(8),
+    height:Platform.OS === 'ios' ?  RFPercentage(7.5) : RFPercentage(8),
+  },
+  imgStyle: {
+    width: RFPercentage(2.8),
+    height: RFPercentage(2.8),
   },
   count: {
     position: 'absolute',
-    top: -4,
-    right: -6,
+    top: RFPercentage(-0.5),
+    right: RFPercentage(-1),
     backgroundColor: Colors.gradient1,
-    borderRadius: 6,
-    width: 8,
-    height: 8,
+    borderRadius: RFPercentage(100),
+    width: RFPercentage(1),
+    height: RFPercentage(1),
   },
 });

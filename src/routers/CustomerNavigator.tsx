@@ -7,39 +7,34 @@ import {
   Image,
   Keyboard,
   BackHandler,
-  SafeAreaView,
   Platform,
 } from 'react-native';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {Icons, Colors, Fonts} from '../constants/Themes';
+import {createBottomTabNavigator, BottomTabBarProps} from '@react-navigation/bottom-tabs';
 import {useIsFocused} from '@react-navigation/native';
-import {BottomTabBarProps} from '@react-navigation/bottom-tabs';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+
+import {Icons, Colors, Fonts} from '../constants/Themes';
 import Settings from '../screens/commonflow/home/settings/Settings';
 import Home from '../screens/customerflow/home/Home';
 import Jobs from '../screens/customerflow/jobBoard/Jobs';
 import Profile from '../screens/commonflow/home/profile/Profile';
-import {RFPercentage} from 'react-native-responsive-fontsize';
 import Messages from '../screens/commonflow/home/Messages';
 import {useUnreadMessages} from '../utils/UnreadMessagesContext';
+import {RFPercentage} from 'react-native-responsive-fontsize';
 
 const Tab = createBottomTabNavigator();
 
-const CustomTabBar: React.FC<BottomTabBarProps> = ({
-  state,
-  descriptors,
-  navigation,
-}) => {
-  const [isKeyboardVisible, setKeyboardVisible] = useState<boolean>(false);
+const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigation }) => {
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const screenFocused = useIsFocused();
-  const {unreadCount} = useUnreadMessages();
-
+  const { unreadCount } = useUnreadMessages();
   const [_, forceUpdate] = useState(0);
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     forceUpdate(n => n + 1);
   }, [unreadCount]);
 
-  
   useEffect(() => {
     const backAction = () => {
       if (screenFocused) {
@@ -48,28 +43,17 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
       }
       return false;
     };
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      backAction,
-    );
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
     return () => backHandler.remove();
   }, [screenFocused, navigation]);
 
-
   useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener(
-      'keyboardDidShow',
-      () => {
-        setKeyboardVisible(true);
-      },
-    );
-    const keyboardDidHideListener = Keyboard.addListener(
-      'keyboardDidHide',
-      () => {
-        setKeyboardVisible(false);
-      },
-    );
-
+    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
+      setKeyboardVisible(true);
+    });
+    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardVisible(false);
+    });
     return () => {
       keyboardDidShowListener.remove();
       keyboardDidHideListener.remove();
@@ -79,23 +63,31 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
   if (isKeyboardVisible) return null;
 
   return (
-    <SafeAreaView style={styles.tabBarContainer}>
+    <View style={[styles.tabBarContainer, { paddingBottom: insets.bottom }]}>
       <View style={styles.labelContainer}>
         {state.routes.map((route, index) => {
-          const {options} = descriptors[route.key];
-          const label =
-            options.tabBarLabel !== undefined
-              ? options.tabBarLabel
-              : route.name;
+          const { options } = descriptors[route.key];
+          const label = options.tabBarLabel !== undefined ? options.tabBarLabel : route.name;
           const isFocused = state.index === index;
+
+          const onPress = () => {
+            const event = navigation.emit({
+              type: 'tabPress',
+              target: route.key,
+            });
+
+            if (!isFocused && !event.defaultPrevented) {
+              navigation.navigate(route.name);
+            }
+          };
 
           return (
             <TouchableOpacity
               key={index}
-              onPress={() => navigation.navigate(route.name)}
+              onPress={onPress}
               style={[styles.tabButton, isFocused && styles.activeTab]}>
               {route.name === 'Home' ? (
-                <View style={{bottom: RFPercentage(2.3)}}>
+                <View style={{ bottom: RFPercentage(2.3) }}>
                   <Image
                     source={isFocused ? Icons.home : Icons.homeInactive}
                     style={styles.middle}
@@ -143,7 +135,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
           );
         })}
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -168,27 +160,15 @@ const CustomerNavigator: React.FC = () => {
 export default CustomerNavigator;
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   tabBarContainer: {
-    height: Platform.OS === 'ios' ?  RFPercentage(8.6) : RFPercentage(11),
     backgroundColor: 'rgba(241, 245, 249, 1)',
-    borderRadius: RFPercentage(3),
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
+    height: Platform.OS === 'ios' ? RFPercentage(8.6) : RFPercentage(11.5),
   },
   tabButton: {
     alignItems: 'center',
     width: RFPercentage(8),
-    // backgroundColor:'red'
   },
   activeTab: {
     fontWeight: 'bold',
@@ -198,11 +178,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
-    height:'100%'
+    height: '100%',
   },
-  middle: {
-    width: RFPercentage(7),
-    height: RFPercentage(7),
+ middle: {
+    width: Platform.OS === 'ios' ?  RFPercentage(7.5) : RFPercentage(8),
+    height:Platform.OS === 'ios' ?  RFPercentage(7.5) : RFPercentage(8),
   },
   imgStyle: {
     width: RFPercentage(2.8),
