@@ -66,6 +66,9 @@ const CleanerJobs = () => {
   const [refreshing, setRefreshing] = useState(false);
   useExitAppOnBack();
 
+// console.log('temp value......................', tempValue.current)
+
+
   // On Refresh
   const onRefresh = () => {
     setRefreshing(true);
@@ -96,8 +99,7 @@ const CleanerJobs = () => {
         .map(service => service.location)
         .filter(location => location !== undefined);
       setLocations(locationsArray);
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   useFocusEffect(
@@ -440,6 +442,7 @@ const CleanerJobs = () => {
                 (
                 <>
                   <FlatList
+                    contentContainerStyle={{paddingBottom: RFPercentage(3)}}
                     data={
                       loctionFilter || rangeSelector || serviceType
                         ? finalFilteredJobs
@@ -602,10 +605,10 @@ const CleanerJobs = () => {
                         {
                           marginTop: RFPercentage(1),
                         },
-                        styles.modalInner,
+                        // styles.modalInner,
                       ]}>
-                      <Text style={styles.applyLocation}>
-                        Price Range Selection
+                      <Text style={[styles.applyLocation, {top:RFPercentage(2)}]}>
+                        Select Price Range
                       </Text>
                     </View>
                     <View style={{width: '100%', marginTop: RFPercentage(8)}}>
@@ -637,10 +640,12 @@ const CleanerJobs = () => {
                         </Text>
                         <Text style={styles.sliderLabel}>2000$+</Text>
                       </View>
-                      <View style={{marginTop: RFPercentage(8)}}>
-                        <Text style={styles.range}>
-                          Price Range: 0$ - {tempValue.current}$
-                        </Text>
+                      <View style={{marginTop: RFPercentage(6)}}>
+                        {tempValue.current > 10 && (
+                          <Text style={styles.range}>
+                           Selected Price Range: 0 - {tempValue.current}$
+                          </Text>
+                        )}
                       </View>
                     </View>
                     <View
@@ -865,7 +870,7 @@ const styles = StyleSheet.create({
   applyLocation: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.3),
   },
   queryContainer: {
     top: RFPercentage(0.5),
@@ -884,7 +889,7 @@ const styles = StyleSheet.create({
   },
   rangeModal: {
     width: '90%',
-    height: '50%',
+    height: '45%',
     alignSelf: 'center',
     backgroundColor: 'rgba(226, 238, 255, 0.9)',
     alignItems: 'center',
