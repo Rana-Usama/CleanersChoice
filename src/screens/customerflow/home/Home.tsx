@@ -242,10 +242,8 @@ const Home = () => {
         const userData = userDoc.data();
         dispatch(setProfileData(userData));
       }
-    } catch (error) {
-    }
+    } catch (error) {}
   };
-
 
   // Filtered Jobs
   const finalFilteredJobs = servicesData.filter(service => {
@@ -287,7 +285,6 @@ const Home = () => {
         contentContainerStyle={styles.scrollView}
         showsVerticalScrollIndicator={false}>
         <View style={styles.container}>
-          
           {/* Header */}
           <HeaderBack
             logo={true}
@@ -662,10 +659,10 @@ const Home = () => {
                         {
                           marginTop: RFPercentage(3),
                         },
-                        styles.modalInner,
+                        // styles.modalInner,
                       ]}>
-                      <Text style={styles.applyLocation}>
-                        Price Range Selection
+                       <Text style={[styles.applyLocation, {top:RFPercentage(2)}]}>
+                        Select Price Range
                       </Text>
                     </View>
                     <View style={{width: '100%', marginTop: RFPercentage(8)}}>
@@ -697,10 +694,10 @@ const Home = () => {
                         </Text>
                         <Text style={styles.sliderLabel}>2000$+</Text>
                       </View>
-                      <View style={{marginTop: RFPercentage(8)}}>
-                        {tempValue.current && (
+                      <View style={{marginTop: RFPercentage(6)}}>
+                        {tempValue.current > 10 && (
                           <Text style={styles.range}>
-                            Price Range: 0$ - {tempValue.current}$
+                            Selected Price Range: 0 - {tempValue.current}$
                           </Text>
                         )}
                       </View>
@@ -816,7 +813,7 @@ const styles = StyleSheet.create({
   },
   rangeModal: {
     width: '90%',
-    height: '50%',
+    height: '45%',
     alignSelf: 'center',
     backgroundColor: 'rgba(226, 238, 255, 0.9)',
     alignItems: 'center',

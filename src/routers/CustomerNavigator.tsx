@@ -87,7 +87,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
               onPress={onPress}
               style={[styles.tabButton, isFocused && styles.activeTab]}>
               {route.name === 'Home' ? (
-                <View style={{ bottom: RFPercentage(2.3) }}>
+                <View style={{ bottom: RFPercentage(2.6) }}>
                   <Image
                     source={isFocused ? Icons.home : Icons.homeInactive}
                     style={styles.middle}
@@ -125,7 +125,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
               <Text
                 style={{
                   color: isFocused ? Colors.gradient2 : Colors.secondaryText,
-                  fontSize: RFPercentage(1.3),
+                  fontSize: RFPercentage(1.5),
                   top: RFPercentage(0.5),
                   fontFamily: isFocused ? Fonts.fontMedium : Fonts.fontRegular,
                 }}>
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(241, 245, 249, 1)',
     alignItems: 'center',
     justifyContent: 'center',
-    height: Platform.OS === 'ios' ? RFPercentage(8.6) : RFPercentage(11.5),
+    height: Platform.OS === 'ios' ? RFPercentage(8.6) : RFPercentage(11),
   },
   tabButton: {
     alignItems: 'center',
@@ -174,19 +174,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   labelContainer: {
-    width: '90%',
+    width: '95%',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
     height: '100%',
   },
  middle: {
-    width: Platform.OS === 'ios' ?  RFPercentage(7.5) : RFPercentage(8),
-    height:Platform.OS === 'ios' ?  RFPercentage(7.5) : RFPercentage(8),
+    width: Platform.OS === 'ios' ?  RFPercentage(7.5) : RFPercentage(8.5),
+    height:Platform.OS === 'ios' ?  RFPercentage(7.5) : RFPercentage(8.5),
   },
   imgStyle: {
-    width: RFPercentage(2.8),
-    height: RFPercentage(2.8),
+    width: RFPercentage(3),
+    height: RFPercentage(3),
   },
   count: {
     position: 'absolute',

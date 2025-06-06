@@ -30,6 +30,14 @@ const Settings = ({navigation}: any) => {
     setModalVisible(false);
     setLoading(true);
     try {
+      const currentUser = auth().currentUser;
+
+      if (currentUser) {
+        // Remove fcmToken from Firestore (or your DB)
+        await firestore().collection('Users').doc(currentUser.uid).update({
+          fcmToken: firestore.FieldValue.delete(),
+        });
+      }
       await AsyncStorage.multiRemove(['email', 'password', 'role']);
       await AsyncStorage.setItem('logout', 'yes');
       showToast({
@@ -57,8 +65,7 @@ const Settings = ({navigation}: any) => {
         const userData = userDoc.data();
         setuserRole(userData?.role);
       }
-    } catch (error) {
-    }
+    } catch (error) {}
   };
   userRole();
 
