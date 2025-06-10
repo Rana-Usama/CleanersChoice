@@ -22,28 +22,43 @@ interface Data {
 const data: Data[] = [
   {
     id: 1,
-    q: 'What areas do you serve?',
-    e: 'Yes requester have the option to leave a review too for community trust.',
+    q: 'What is Cleaner Choice?',
+    e: 'Cleaner Choice is a mobile app that connects customers seeking cleaning services with professional cleaners offering their services.',
   },
   {
     id: 2,
-    q: 'Can I post my own requests?',
-    e: 'Yes requester have the option to leave a review too for community trust.',
+    q: 'Can users communicate within the app?',
+    e: 'Yes! Cleaner Choice includes a built-in chat feature allowing customers and cleaners to communicate directly, discuss service details, and manage expectations before or after a booking',
   },
   {
     id: 3,
-    q: 'Can I cancel a request after I accept it?',
-    e: 'Yes requester have the option to leave a review too for community trust.',
+    q: 'Can I update my profile and service?',
+    e: 'Absolutely. Both customers and cleaners can update their profile details, including photos, descriptions, locations, and services directly from their account settings.',
   },
   {
     id: 4,
-    q: 'Can I leave a review to requester?',
-    e: 'Yes requester have the option to leave a review too for community trust.',
+    q: 'Can I post a job for a cleaner?',
+    e: 'Yes, customers can post specific job requests with details like location, timing, and type of cleaning. Cleaners will see these jobs and can apply to fulfill them.',
   },
   {
     id: 5,
-    q: 'Can I accept multiple requests?',
-    e: 'Yes requester have the option to leave a review too for community trust.',
+    q: 'Is there a fee for customers to use the app?',
+    e: 'No, customers can use Cleaner Choice for free. You only pay for the cleaning services you book.',
+  },
+  {
+    id: 6,
+    q: 'How do I join as a cleaner?',
+    e: 'To register as a cleaner, choose the "Cleaner" role during sign-up. You’ll be prompted to create a profile, post your services, and complete verification steps.',
+  },
+  {
+    id: 7,
+    q: 'Can I post my own cleaning services?',
+    e: 'Yes. Cleaners can post detailed service listings, including pricing, available times, and specialties (e.g., deep cleaning, office cleaning, move-in/move-out services).',
+  },
+  {
+    id: 8,
+    q: 'How do I get paid for services?',
+    e: 'Payments are arranged directly with the customer. In future updates, we may introduce secure in-app payment options to streamline the process.',
   },
 ];
 
