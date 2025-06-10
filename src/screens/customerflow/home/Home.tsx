@@ -131,7 +131,6 @@ const Home = () => {
             (service): service is Service =>
               !!service.createdAt &&
               !!service.name &&
-              !!service.image &&
               !!service.description &&
               !!service.availability &&
               !!service.type &&
@@ -485,7 +484,7 @@ const Home = () => {
                   loctionFilter ||
                   nameQuery ||
                   categorySelection !== '1') &&
-                finalFilteredJobs.length === 0 ? (
+                finalFilteredJobs.length === 0 || servicesData.length === 0 ? (
                   <>
                     <NotFound text="No service found" />
                   </>

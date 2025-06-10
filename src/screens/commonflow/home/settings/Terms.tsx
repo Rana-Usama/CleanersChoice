@@ -20,23 +20,26 @@ interface Data {
 const data: Data[] = [
   {
     id: 1,
-    q: '1. Service Description',
-    e: 'Our service enables customers to order and receive fuel delivery directly to their specified location.',
+    q: '1. Introduction and Acceptance of Terms',
+    e: 'Cleaner Choice ("Company," "we," "us," "our"), a company registered in Ohio, United States, operates the Cleaner Choice mobile application and related services ("Services"). By accessing or using the Services, you agree to be bound by these legal terms ("Legal Terms"). If you do not agree with all the terms, you are prohibited from using the Services and must stop immediately.',
   },
   {
     id: 2,
-    q: '2. Eligibility',
-    e: 'To use our services, you must be of legal age in your jurisdiction and capable of entering into a binding agreement. By using our services, you represent and warrant that you meet these eligibility requirements.',
+    q: '2. Overview of Services',
+    e: 'Cleaner Choice offers a mobile application and related services designed to assist users in managing and accessing cleaning-related solutions. These services include all features, content, and functionality that refer or link to the Legal Terms.',
   },
   {
     id: 3,
-    q: '3. Ordering',
-    e: 'Customers can place orders for fuel delivery through our App. By placing an order, you agree to provide accurate and complete information about your location, contact details, and payment information.',
+    q: '3. Communication and Modifications',
+    e: 'You can contact Cleaner Choice at harrisonscleaningservice2033s@gmail.com or by mail in Ohio, United States. We reserve the right to make changes to these Legal Terms and will notify you of scheduled changes by email. Continued use of our Services after changes take effect implies your agreement to the new terms.',
   },
   {
     id: 4,
-    q: '4. Delivery',
-    e: 'We will make best efforts to deliver fuel orders within the requested time slot. However, delivery times may vary depending on factors such as weather conditions, traffic, and operational constraints. We do not guarantee specific delivery times and are not liable for any delays.',
+    q: '4. Need Assistance? Contact Us',
+    e: `For any questions, concerns, or to resolve a complaint regarding the Services, you may reach out to us at:
+Cleaner Choice
+Ohio, United States
+📧 harrisonscleaningservice2033s@gmail.com`,
   },
 ];
 
@@ -113,10 +116,10 @@ const styles = StyleSheet.create({
   listItemTitle: {
     color: Colors.brown,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(1.9),
   },
   listItemText: {
-    color: Colors.heading,
+    color: Colors.primaryText,
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.7),
     marginTop: 5,
