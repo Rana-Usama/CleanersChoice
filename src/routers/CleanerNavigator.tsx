@@ -113,7 +113,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                   />
                   {unreadCount > 0 && <View style={styles.count} />}
                 </View>
-              ) : route.name === 'Job Listings' ? (
+              ) : route.name === 'Job List' ? (
                 <Image
                   source={isFocused ? Icons.jobActive : Icons.job}
                   style={styles.imgStyle}
@@ -135,7 +135,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
               <Text
                 style={{
                   color: isFocused ? Colors.gradient2 : Colors.secondaryText,
-                  fontSize: RFPercentage(1.3),
+                  fontSize: RFPercentage(1.5),
                   top: RFPercentage(0.5),
                   fontFamily: isFocused ? Fonts.fontMedium : Fonts.fontRegular,
                 }}>
@@ -159,7 +159,7 @@ const CleanerNavigator: React.FC = () => {
         tabBarHideOnKeyboard: true,
       }}>
       <Tab.Screen name="Messages" component={Messages} />
-      <Tab.Screen name="Job Listings" component={CleanerJobs} />
+      <Tab.Screen name="Job List" component={CleanerJobs} />
       <Tab.Screen name="Home" component={Dashboard} />
       <Tab.Screen name="Settings" component={Settings} />
       <Tab.Screen name="Profile" component={Profile} />
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(241, 245, 249, 1)',
     alignItems: 'center',
     justifyContent: 'center',
-    height: Platform.OS === 'ios' ? RFPercentage(8.6) : RFPercentage(11.5),
+    height: Platform.OS === 'ios' ? RFPercentage(8.6) : RFPercentage(11),
   },
   tabButton: {
     alignItems: 'center',
@@ -184,19 +184,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   labelContainer: {
-    width: '90%',
+    width: '95%',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
     height: '100%',
   },
-  middle: {
-    width: Platform.OS === 'ios' ?  RFPercentage(7.5) : RFPercentage(8),
-    height:Platform.OS === 'ios' ?  RFPercentage(7.5) : RFPercentage(8),
+ middle: {
+    width: Platform.OS === 'ios' ?  RFPercentage(7.5) : RFPercentage(8.5),
+    height:Platform.OS === 'ios' ?  RFPercentage(7.5) : RFPercentage(8.5),
   },
   imgStyle: {
-    width: RFPercentage(2.8),
-    height: RFPercentage(2.8),
+    width: RFPercentage(3),
+    height: RFPercentage(3),
   },
   count: {
     position: 'absolute',

@@ -187,6 +187,34 @@ const Messages = ({navigation}: any) => {
     }
   };
 
+
+  const [senderName, setSenderName] = useState('')
+
+  async function fetchCurrentUserName() {
+  const user = auth().currentUser;
+  if (!user) {
+    console.log('No user is signed in');
+    return null;
+  }
+  const userId = user.uid;
+  try {
+    const userDoc = await firestore()
+      .collection('Users')
+      .doc(userId)
+      .get();
+    if (userDoc.exists) {
+      const userData = userDoc.data();
+      const userName = userData?.name || null;  
+      setSenderName(userName);
+    }
+  } catch (error) {
+    console.log('Error fetching user data:', error);
+    return null;
+  }
+}
+
+fetchCurrentUserName();
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar
@@ -325,7 +353,7 @@ const Messages = ({navigation}: any) => {
                           navigation.navigate('Chat', {
                             chatId: item.lastMessage?.chatId,
                             senderId: userId,
-                            senderName: item.lastMessage?.senderName,
+                            senderName: senderName,
                             receiver: item.receiverId,
                             receiverName: item.name,
                             receiverProfile: item.image,

@@ -269,7 +269,7 @@ const ServiceThree: React.FC = ({navigation}: any) => {
             ))}
 
             {packages.length < MAX_PACKAGES && (
-              <View style={{alignSelf: 'flex-end', bottom: RFPercentage(1.7)}}>
+              <View style={{alignSelf: 'flex-end'}}>
                 <TouchableOpacity onPress={addPackage}>
                   <View>
                     <Text style={styles.addText}>+ Add Package</Text>
@@ -284,7 +284,7 @@ const ServiceThree: React.FC = ({navigation}: any) => {
                 title={profileCompletion === '100' ? 'Edit' : 'Next'}
                 onPress={savePackagesToFirestore}
                 loading={loading}
-                disabled={Object.values(errors).some(error => error !== null)}
+                disabled={loading}
               />
             </View>
           </View>
