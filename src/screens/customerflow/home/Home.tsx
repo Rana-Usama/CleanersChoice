@@ -142,10 +142,13 @@ const Home = () => {
             // && Array.isArray(service.reviews)
           );
         setServicesData(servicesArray);
+
         const locationsArray = servicesArray
           .map(service => service.location)
           .filter(location => location !== undefined);
-        setLocations(locationsArray);
+
+        const uniqueLocations = Array.from(new Set(locationsArray));
+        setLocations(uniqueLocations);
       } else {
         setServicesData([]);
         setLocations([]);
@@ -661,7 +664,8 @@ const Home = () => {
                         },
                         // styles.modalInner,
                       ]}>
-                       <Text style={[styles.applyLocation, {top:RFPercentage(2)}]}>
+                      <Text
+                        style={[styles.applyLocation, {top: RFPercentage(2)}]}>
                         Select Price Range
                       </Text>
                     </View>

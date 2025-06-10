@@ -65,8 +65,7 @@ const items = [
   },
 ];
 
-const Dashboard: React.FC = ({navigation} : any) => {
- 
+const Dashboard: React.FC = ({navigation}: any) => {
   const [img, setImg] = useState(null);
   const [profile, setProfile] = useState(null);
   const [name, setName] = useState('');
@@ -222,6 +221,16 @@ const Dashboard: React.FC = ({navigation} : any) => {
   };
   const serviceNames = getServiceNames(service?.type?.slice(0, visibleItems));
 
+  const [isExpanded, setIsExpanded] = useState(false);
+  const getTruncatedText = (text: any) => {
+    const maxChars = 120;
+    if (text.length <= maxChars) return text;
+    return text.slice(0, maxChars).trim() + '... ';
+  };
+
+  const toggleDescription = () => {
+    setIsExpanded(prevState => !prevState);
+  };
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
@@ -231,7 +240,6 @@ const Dashboard: React.FC = ({navigation} : any) => {
         contentContainerStyle={{paddingBottom: RFPercentage(15)}}
         style={{flex: 1}}
         showsVerticalScrollIndicator={false}>
-          
         {/* Header */}
         <HeaderBack
           logo={true}
@@ -243,7 +251,6 @@ const Dashboard: React.FC = ({navigation} : any) => {
         />
 
         <View style={styles.container}>
-
           {/* Profile Image */}
           <View style={styles.imgContainer}>
             <TouchableOpacity onPress={uploadImg}>
@@ -282,7 +289,6 @@ const Dashboard: React.FC = ({navigation} : any) => {
           </View>
         </View>
 
-
         {/* Service Details */}
         {loading3 ? (
           <>
@@ -309,21 +315,28 @@ const Dashboard: React.FC = ({navigation} : any) => {
                   </View>
                 </View>
 
-
                 {/* Description */}
                 <View style={styles.section}>
                   <View>
                     <Text style={styles.headeing2}>Description:</Text>
-                    <Text style={styles.description}>
-                      {service?.description}
+
+                    <Text style={styles.showMore2}>
+                      {isExpanded
+                        ? service.description + ' '
+                        : getTruncatedText(service.description)}
+                      {service.description.length > 120 && (
+                        <Text
+                          onPress={toggleDescription}
+                          style={styles.showText}>
+                          {isExpanded ? 'Read Less' : 'Read More'}
+                        </Text>
+                      )}
                     </Text>
                   </View>
                 </View>
 
-
                 {/* Availability */}
-                <View
-                  style={styles.section}>
+                <View style={styles.section}>
                   <View>
                     <TouchableOpacity
                       activeOpacity={0.6}
@@ -340,7 +353,6 @@ const Dashboard: React.FC = ({navigation} : any) => {
                     </TouchableOpacity>
                   </View>
                 </View>
-
 
                 {/* Services */}
                 <View style={{marginTop: RFPercentage(2.5)}}>
@@ -391,7 +403,6 @@ const Dashboard: React.FC = ({navigation} : any) => {
                   </View>
                 </View>
 
-
                 {/* Packages */}
                 <View>
                   <Text
@@ -426,7 +437,6 @@ const Dashboard: React.FC = ({navigation} : any) => {
                     />
                   </View>
                 </View>
-
 
                 {/* Rating and Review */}
                 {service?.rating || service?.reviews?.length > 0 ? (
@@ -470,7 +480,6 @@ const Dashboard: React.FC = ({navigation} : any) => {
                 ) : null}
               </>
             ) : (
-
               // Profile Completion Info Container
               <>
                 <View style={styles.profileCompletionContainer}>
@@ -528,8 +537,8 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(4),
   },
   pictureContainer: {
-    width: RFPercentage(13),
-    height: RFPercentage(13),
+    width: RFPercentage(15),
+    height: RFPercentage(15),
     borderRadius: RFPercentage(100),
     alignItems: 'center',
     justifyContent: 'center',
@@ -543,15 +552,15 @@ const styles = StyleSheet.create({
     elevation: 40,
   },
   imgStyle: {
-    width: RFPercentage(12),
-    height: RFPercentage(12),
+    width: RFPercentage(14),
+    height: RFPercentage(14),
     borderRadius: RFPercentage(100),
   },
   uploadedImg: {
     width: RFPercentage(3),
     height: RFPercentage(3),
     position: 'absolute',
-    left: RFPercentage(9.5),
+    left: RFPercentage(10.5),
     bottom: RFPercentage(1),
   },
   nameContainer: {
@@ -581,6 +590,11 @@ const styles = StyleSheet.create({
     color: 'rgba(0, 0, 0, 1)',
     fontSize: RFPercentage(1.7),
     textAlignVertical: 'center',
+  },
+  showText: {
+    color: Colors.gradient1,
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontMedium,
   },
   noServiceContainer: {
     marginTop: RFPercentage(12),
@@ -642,8 +656,8 @@ const styles = StyleSheet.create({
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.7),
-    textAlign: 'justify',
-    lineHeight: RFPercentage(2.5),
+    // textAlign: 'justify',
+    lineHeight: RFPercentage(2.7),
     marginTop: RFPercentage(0.5),
   },
   serviceContainer: {
@@ -713,6 +727,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     bottom: RFPercentage(1.5),
     position: 'absolute',
+  },
+  showMore2: {
+    color: Colors.placeholderColor,
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.7),
+    textAlign: 'justify',
+    lineHeight: RFPercentage(2.5),
+    marginTop: RFPercentage(0.5),
   },
   section: {
     marginTop: RFPercentage(2.5),

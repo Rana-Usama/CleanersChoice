@@ -66,8 +66,7 @@ const CleanerJobs = () => {
   const [refreshing, setRefreshing] = useState(false);
   useExitAppOnBack();
 
-// console.log('temp value......................', tempValue.current)
-
+  // console.log('temp value......................', tempValue.current)
 
   // On Refresh
   const onRefresh = () => {
@@ -90,16 +89,22 @@ const CleanerJobs = () => {
         .where('status', '==', 'active')
         // .orderBy('createdAt2', 'desc')
         .get();
+
       const jobs = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
       }));
       setJobsData(jobs);
+
       const locationsArray = jobs
         .map(service => service.location)
         .filter(location => location !== undefined);
-      setLocations(locationsArray);
-    } catch (error) {}
+
+      const uniqueLocations = Array.from(new Set(locationsArray));
+      setLocations(uniqueLocations);
+    } catch (error) {
+      console.log('Error fetching jobs:', error);
+    }
   };
 
   useFocusEffect(
@@ -245,6 +250,14 @@ const CleanerJobs = () => {
       setLoading(false);
     }, 3000);
   }, []);
+
+  const [showAllJobs, setShowAllJobs] = useState(false);
+
+  const sortedJobs = finalFilteredJobs.sort(
+    (a, b) => b.createdAt?.toDate?.() - a.createdAt?.toDate?.(),
+  );
+
+  const displayedJobs = showAllJobs ? sortedJobs : sortedJobs.slice(0, 10);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -443,11 +456,7 @@ const CleanerJobs = () => {
                 <>
                   <FlatList
                     contentContainerStyle={{paddingBottom: RFPercentage(3)}}
-                    data={
-                      loctionFilter || rangeSelector || serviceType
-                        ? finalFilteredJobs
-                        : jobsData
-                    }
+                    data={displayedJobs}
                     keyExtractor={item => item.id.toString()}
                     renderItem={({item}) => (
                       <JobCard
@@ -462,6 +471,20 @@ const CleanerJobs = () => {
                       />
                     )}
                   />
+                  {sortedJobs.length > 10 && (
+                    <TouchableOpacity
+                      onPress={() => setShowAllJobs(prev => !prev)}
+                      style={{marginTop: RFPercentage(2), alignSelf: 'center'}}>
+                      <Text
+                        style={{
+                          color: Colors.gradient1,
+                          fontSize: RFPercentage(1.7),
+                          fontFamily:Fonts.fontMedium
+                        }}>
+                        {showAllJobs ? 'View Less' : 'View More'}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
                 </>
                 ) : (
                 <>
@@ -607,7 +630,8 @@ const CleanerJobs = () => {
                         },
                         // styles.modalInner,
                       ]}>
-                      <Text style={[styles.applyLocation, {top:RFPercentage(2)}]}>
+                      <Text
+                        style={[styles.applyLocation, {top: RFPercentage(2)}]}>
                         Select Price Range
                       </Text>
                     </View>
@@ -643,7 +667,7 @@ const CleanerJobs = () => {
                       <View style={{marginTop: RFPercentage(6)}}>
                         {tempValue.current > 10 && (
                           <Text style={styles.range}>
-                           Selected Price Range: 0 - {tempValue.current}$
+                            Selected Price Range: 0 - {tempValue.current}$
                           </Text>
                         )}
                       </View>
