@@ -28,7 +28,7 @@ const services = [
   {id: 4, name: 'Cancel any time'},
 ];
 
-const Premium = ({navigation} : any) => {
+const Premium = ({navigation}: any) => {
   const {initPaymentSheet, presentPaymentSheet} = useStripe();
   const [loading, setLoading] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
@@ -51,8 +51,7 @@ const Premium = ({navigation} : any) => {
             const userData = querySnapshot.docs[0].data();
             setCurrentUser(userData);
           }
-        } catch (error) {
-        }
+        } catch (error) {}
       }
     };
 
@@ -70,6 +69,8 @@ const Premium = ({navigation} : any) => {
           body: JSON.stringify({email: user?.email}),
         },
       );
+
+      console.log('sheet..............', response);
       const {setupIntentClientSecret, customerId} = await response.json();
 
       if (!setupIntentClientSecret || !customerId) {
@@ -86,18 +87,28 @@ const Premium = ({navigation} : any) => {
   const openPaymentSheet = async () => {
     setLoading(true);
     const setupData = await fetchSetupIntent();
+    // console.log('setupData.............', setupData);
     if (!setupData) return;
     const {setupIntentClientSecret, customerId} = setupData;
+
     const {error: initError} = await initPaymentSheet({
       setupIntentClientSecret,
       merchantDisplayName: 'Cleaner Choice',
     });
 
+    // console.log('initError.........', initError);
+
     if (initError) {
       setLoading(false);
       return;
     }
+
+    // const presentPaymentSheetRes = await presentPaymentSheet();
+    // console.log('presentPaymentSheetRes................', presentPaymentSheetRes)
+
     const {error: paymentError} = await presentPaymentSheet();
+    // console.log('paymentError.............', paymentError);
+
     if (paymentError) {
       showToast({
         type: 'info',
@@ -108,8 +119,11 @@ const Premium = ({navigation} : any) => {
       return;
     }
 
-    // Payment
     const setupIntentId = setupIntentClientSecret.split('_secret')[0];
+    console.log(
+      'Sending setupIntentId to confirm-subscription:',
+      setupIntentId,
+    );
     const res = await fetch(
       'https://cleaners-choice-server.vercel.app/api/confirm-subscription',
       {
@@ -119,6 +133,7 @@ const Premium = ({navigation} : any) => {
       },
     );
     const result = await res.json();
+    // console.log('result.........', result);
     if (result.success) {
       const {periodEndTimestamp} = result;
       if (user?.uid) {
@@ -240,7 +255,7 @@ const Premium = ({navigation} : any) => {
       </View>
 
       {/* Modals */}
-        {modalVisible2 && (
+      {modalVisible2 && (
         <>
           <View style={styles.modalOverlay}>
             <SubscriptionModal

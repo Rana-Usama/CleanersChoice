@@ -107,6 +107,7 @@ const App: React.FC = () => {
     }
   };
 
+// console.log('PUBLISHABLE_KEY.............', PUBLISHABLE_KEY)
 
   return (
     <StripeProvider publishableKey={PUBLISHABLE_KEY}>
