@@ -225,9 +225,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
   starContainer: {
-    position: 'absolute',
-    bottom: RFPercentage(15),
+    // position: 'absolute',
+    // bottom: RFPercentage(1),
     right: RFPercentage(1.5),
+    // bottom:0,
+    alignSelf:'flex-end',
+    top:RFPercentage(10)
   },
   star: {
     width: RFPercentage(8),
