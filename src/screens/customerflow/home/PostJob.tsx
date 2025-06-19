@@ -271,7 +271,7 @@ const PostJob = ({route}: any) => {
             <View style={{alignSelf: 'center', marginTop: RFPercentage(3)}}>
               <GradientButton
                 title={jobId ? 'Edit Job' : 'Make Job Live'}
-                textStyle={{fontSize: RFPercentage(1.6)}}
+                textStyle={{fontSize: RFPercentage(1.8)}}
                 onPress={postJob}
                 loading={loading}
                 disabled={loading}

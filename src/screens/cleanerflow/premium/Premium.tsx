@@ -66,7 +66,7 @@ const Premium = ({navigation}: any) => {
         {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({email: user?.email}),
+          body: JSON.stringify({email: user?.email, uid: user?.uid}),
         },
       );
 
@@ -87,7 +87,7 @@ const Premium = ({navigation}: any) => {
   const openPaymentSheet = async () => {
     setLoading(true);
     const setupData = await fetchSetupIntent();
-    // console.log('setupData.............', setupData);
+    console.log('setupData.............', setupData);
     if (!setupData) return;
     const {setupIntentClientSecret, customerId} = setupData;
 
@@ -96,7 +96,7 @@ const Premium = ({navigation}: any) => {
       merchantDisplayName: 'Cleaner Choice',
     });
 
-    // console.log('initError.........', initError);
+    console.log('initError.........', initError);
 
     if (initError) {
       setLoading(false);
@@ -107,13 +107,19 @@ const Premium = ({navigation}: any) => {
     // console.log('presentPaymentSheetRes................', presentPaymentSheetRes)
 
     const {error: paymentError} = await presentPaymentSheet();
-    // console.log('paymentError.............', paymentError);
+    console.log('paymentError.............', paymentError);
 
     if (paymentError) {
+      let userFriendlyMessage = 'The payment flow has been canceled';
+      if (paymentError.message?.toLowerCase().includes('insufficient funds')) {
+        userFriendlyMessage =
+          'Your card has insufficient funds. Please use a different card or try again after adding funds.';
+      }
+
       showToast({
         type: 'info',
         title: 'Subscription',
-        message: 'Subscription has not been fullfiled!',
+        message: userFriendlyMessage,
       });
       setLoading(false);
       return;
@@ -133,8 +139,8 @@ const Premium = ({navigation}: any) => {
       },
     );
     const result = await res.json();
-    // console.log('result.........', result);
-    if (result.success) {
+    console.log('result.........', result);
+    if (result.success && result.subscriptionStatus === 'active') {
       const {periodEndTimestamp} = result;
       if (user?.uid) {
         await firestore().collection('Users').doc(user.uid).update({
@@ -151,6 +157,11 @@ const Premium = ({navigation}: any) => {
       });
       navigation.navigate('CleanerNavigator');
     } else {
+      showToast({
+        type: 'info',
+        title: 'Subscription',
+        message: result.message || 'Subscription has not been fulfilled!',
+      });
       setModalVisible2(true);
     }
   };
@@ -243,7 +254,7 @@ const Premium = ({navigation}: any) => {
             }
             textStyle={styles.buttonText}
             onPress={openPaymentSheet}
-            style={{width: RFPercentage(19)}}
+            style={{width: RFPercentage(21)}}
             loading={loading}
             disabled={loading}
           />
@@ -365,7 +376,7 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(5),
   },
   buttonText: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.7),
   },
   starContainer: {
     position: 'absolute',
