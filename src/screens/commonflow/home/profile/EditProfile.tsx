@@ -124,19 +124,26 @@ const EditProfile = ({navigation} : any) => {
     }
   };
 
-  const formatPhoneNumber = (phoneNumber: any) => {
-    if (!phoneNumber) return '';
-    let cleaned = phoneNumber.replace(/\D/g, '');
-    if (cleaned.startsWith('1')) {
-      cleaned = `+${cleaned}`;
-    } else if (cleaned.startsWith('0')) {
-      cleaned = `+1${cleaned.slice(1)}`;
-    } else if (!cleaned.startsWith('+1')) {
-      cleaned = `+1${cleaned}`;
-    }
-    const match = cleaned.match(/^\+1(\d{3})(\d{3})(\d{4})$/);
-    if (!match) return cleaned;
-    return `+1 (${match[1]}) ${match[2]}-${match[3]}`;
+
+ const formatPhoneNumber = (raw: string = ''): string => {
+    // remove everything except 0-9
+    let digits = raw.replace(/\D/g, '');
+
+    // drop a leading country code (1) or trunk code (0)
+    if (digits.startsWith('1')) digits = digits.slice(1);
+    if (digits.startsWith('0')) digits = digits.slice(1);
+
+    // we only ever want 10 NANP digits
+    digits = digits.slice(-10);
+
+    // don't format until we have all 10 digits
+    if (digits.length < 10) return `+1-${digits}`;
+
+    const area = digits.slice(0, 3);
+    const prefix = digits.slice(3, 6);
+    const line = digits.slice(6, 10);
+
+    return `+1-${area}-${prefix}-${line}`; // -> "+1-440-147-6925"
   };
 
   return (
@@ -213,7 +220,7 @@ const EditProfile = ({navigation} : any) => {
                       setPhone(formatted);
                     }}
                     type={'phone-pad'}
-                    length={16}
+                    length={15}
                     customStyle={styles.inputField}
                   />
                 </View>

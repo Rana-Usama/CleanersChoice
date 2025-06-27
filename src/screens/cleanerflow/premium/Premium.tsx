@@ -138,10 +138,13 @@ const Premium = ({navigation}: any) => {
         body: JSON.stringify({customerId, setupIntentId}),
       },
     );
+
     const result = await res.json();
     console.log('result.........', result);
+
     if (result.success && result.subscriptionStatus === 'active') {
       const {periodEndTimestamp} = result;
+      
       if (user?.uid) {
         await firestore().collection('Users').doc(user.uid).update({
           subscription: true,

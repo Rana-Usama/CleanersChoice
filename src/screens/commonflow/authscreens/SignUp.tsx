@@ -30,7 +30,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import messaging from '@react-native-firebase/messaging';
 import {showToast} from '../../../utils/ToastMessage';
 
-const SignUp: React.FC = ({navigation} : any) => {
+const SignUp: React.FC = ({navigation}: any) => {
   const [selected, setSelected] = useState<boolean>(false);
   const [img, setImg] = useState<any>(null);
   const userFlow = useSelector(state => state.userFlow);
@@ -40,7 +40,10 @@ const SignUp: React.FC = ({navigation} : any) => {
   let validationSchema = yup.object({
     name: yup.string().required('Username is required'),
     email: yup.string().email('Invalid email').required('Email is required'),
-    phone: yup.string().required('Phone number is required'),
+    phone: yup
+      .string()
+      .required('Phone is required')
+      .matches(/^\+1-\d{3}-\d{3}-\d{4}$/, 'Enter a valid US phone number'),
     password: yup
       .string()
       .min(6, 'Password must be at least 6 characters long')
@@ -61,8 +64,7 @@ const SignUp: React.FC = ({navigation} : any) => {
       .then(image => {
         setImg(image);
       })
-      .catch(error => {
-      });
+      .catch(error => {});
   };
 
   // Sign Up
@@ -138,19 +140,25 @@ const SignUp: React.FC = ({navigation} : any) => {
   };
 
   // Phone Validation
-  const formatPhoneNumber = (phoneNumber: any) => {
-    if (!phoneNumber) return '';
-    let cleaned = phoneNumber.replace(/\D/g, '');
-    if (cleaned.startsWith('1')) {
-      cleaned = `+${cleaned}`;
-    } else if (cleaned.startsWith('0')) {
-      cleaned = `+1${cleaned.slice(1)}`;
-    } else if (!cleaned.startsWith('+1')) {
-      cleaned = `+1${cleaned}`;
-    }
-    const match = cleaned.match(/^\+1(\d{3})(\d{3})(\d{4})$/);
-    if (!match) return cleaned;
-    return `+1 (${match[1]}) ${match[2]}-${match[3]}`;
+  const formatPhoneNumber = (raw: string = ''): string => {
+    // remove everything except 0-9
+    let digits = raw.replace(/\D/g, '');
+
+    // drop a leading country code (1) or trunk code (0)
+    if (digits.startsWith('1')) digits = digits.slice(1);
+    if (digits.startsWith('0')) digits = digits.slice(1);
+
+    // we only ever want 10 NANP digits
+    digits = digits.slice(-10);
+
+    // don't format until we have all 10 digits
+    if (digits.length < 10) return `+1-${digits}`;
+
+    const area = digits.slice(0, 3);
+    const prefix = digits.slice(3, 6);
+    const line = digits.slice(6, 10);
+
+    return `+1-${area}-${prefix}-${line}`; // -> "+1-440-147-6925"
   };
 
   return (
@@ -162,7 +170,6 @@ const SignUp: React.FC = ({navigation} : any) => {
       />
       <ScrollView showsVerticalScrollIndicator={false}>
         <KeyboardAvoidingView>
-          
           {/* Header */}
           <View style={styles.container}>
             <TouchableOpacity
@@ -328,7 +335,7 @@ const SignUp: React.FC = ({navigation} : any) => {
                         handleChange('phone')(formatted);
                       }}
                       type={'phone-pad'}
-                      length={16}
+                      length={15}
                       handleBlur={handleBlur('phone')}
                       value={values.phone}
                       customStyle={{
@@ -458,19 +465,17 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(243, 244, 246, 1)',
     borderWidth: 1.8,
     borderColor: 'rgba(64, 123, 255, 1)',
-
   },
   imgStyle: {
     width: RFPercentage(12.5),
     height: RFPercentage(12.5),
     borderRadius: RFPercentage(10),
-
   },
   imgText: {
     color: Colors.secondaryText,
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.5),
-    textAlign:'center'
+    textAlign: 'center',
   },
   uploadedImg: {
     width: RFPercentage(3),
