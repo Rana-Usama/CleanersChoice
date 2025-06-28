@@ -220,7 +220,7 @@ const Premium = ({navigation}: any) => {
               />
             </View>
             <Text style={styles.priceText}>
-              $12.
+              $15.
               <Text style={styles.priceSubText}>99/month</Text>
             </Text>
             <View style={styles.divider}>
