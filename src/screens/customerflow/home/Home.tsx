@@ -37,12 +37,12 @@ import {useExitAppOnBack} from '../../../utils/ExitApp';
 
 const categories = [
   {id: '1', name: 'All', icon: Icons.all},
-  {id: '44', name: 'Residential', icon: Icons.residential},
-  {id: '66', name: 'Car Clean..', icon: Icons.car},
-  {id: '55', name: 'Pressure W..', icon: Icons.pressure},
-  {id: '22', name: 'Chimney C..', icon: Icons.chimney},
-  {id: '33', name: 'Carpet Cle..', icon: Icons.carpet},
-  {id: '11', name: 'Window Cl..', icon: Icons.window},
+  {id: '44', name: 'Residential Cleaning', icon: Icons.residential},
+  {id: '66', name: 'Car Cleaning', icon: Icons.car},
+  {id: '55', name: 'Pressure Washing', icon: Icons.pressure},
+  {id: '22', name: 'Chimney Cleaning', icon: Icons.chimney},
+  {id: '33', name: 'Carpet Cleaning', icon: Icons.carpet},
+  {id: '11', name: 'Window Cleaning', icon: Icons.window},
   {
     id: '77',
     name: 'Lawn Care',
@@ -293,7 +293,7 @@ const Home = () => {
             title="Home"
             right={true}
             rightText="Post Job"
-            textStyle={{fontSize: RFPercentage(2)}}
+            textStyle={{fontSize: RFPercentage(2.2)}}
             onPress={() => navigation.navigate('PostJob', {jobId: null})}
           />
 
@@ -313,6 +313,7 @@ const Home = () => {
             keyExtractor={item => item.id}
             horizontal
             showsHorizontalScrollIndicator={false}
+          
             renderItem={({item}) => (
               <TouchableOpacity
                 onPress={() => setCategorySelection(item?.id)}
@@ -354,7 +355,9 @@ const Home = () => {
                             : Fonts.fontRegular,
                       },
                     ]}>
-                    {item.name}
+                    {item.name.length > 8
+                      ? `${item.name.slice(0, 8)}..`
+                      : item.name}
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -480,11 +483,12 @@ const Home = () => {
           ) : (
             <>
               <View style={styles.servicesContainer}>
-                {(rangeSelector ||
+                {((rangeSelector ||
                   loctionFilter ||
                   nameQuery ||
                   categorySelection !== '1') &&
-                finalFilteredJobs.length === 0 || servicesData.length === 0 ? (
+                  finalFilteredJobs.length === 0) ||
+                servicesData.length === 0 ? (
                   <>
                     <NotFound text="No service found" />
                   </>
@@ -844,34 +848,44 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(3),
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
   },
   categoryBox: {
-    width: RFPercentage(9.5),
-    height: RFPercentage(9.5),
+    width: RFPercentage(10),
+    height: RFPercentage(10),
     borderRadius: RFPercentage(1),
     borderWidth: 1.2,
     alignItems: 'center',
     justifyContent: 'center',
     marginHorizontal: RFPercentage(1),
     marginTop: RFPercentage(0.6),
+
+    // Shadow for iOS
+    shadowColor: 'rgb(204, 206, 209)',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    backgroundColor: '#fff', 
   },
+
   categoryIcon: {
     width: RFPercentage(4),
     height: RFPercentage(4),
   },
   categoryText: {
     color: Colors.primaryText,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.6),
     textAlign: 'center',
     top: RFPercentage(0.9),
   },
   flatListPadding: {
     paddingHorizontal: RFPercentage(1.4),
+    paddingBottom:RFPercentage(0.2)
   },
   filterBox: {
     width: RFPercentage(14),
-    height: RFPercentage(4.3),
+    height: RFPercentage(5),
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
@@ -882,7 +896,7 @@ const styles = StyleSheet.create({
   },
 
   filterText: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
   },
   serviceColumnWrapper: {
     // justifyContent: 'space-between',
