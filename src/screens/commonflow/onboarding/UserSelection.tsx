@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
   description: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     textAlign: 'center',
     width: '80%',
   },

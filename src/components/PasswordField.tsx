@@ -53,10 +53,10 @@ export default PasswordField;
 const styles = StyleSheet.create({
   container: {
     width: '90%',
-    height: RFPercentage(5.8),
+    height: RFPercentage(6.5),
     borderWidth: 1,
     borderColor: Colors.inputFieldColor,
-    borderRadius: RFPercentage(0.8),
+    borderRadius: RFPercentage(1),
     marginVertical: RFPercentage(1.5),
     alignItems: 'center',
     justifyContent: 'center',
@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
   textInput: {
     color: Colors.inputTextColor,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     paddingVertical: 0,
     marginVertical: 0,
     textAlignVertical: 'center',
