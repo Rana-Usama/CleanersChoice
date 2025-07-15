@@ -1,10 +1,4 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  FlatList,
-} from 'react-native';
+import {StyleSheet, Text, View, TouchableOpacity, FlatList} from 'react-native';
 import React, {useState} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts} from '../constants/Themes';
@@ -20,13 +14,13 @@ interface Props {
   setValue?: (item: Item) => void;
   icon?: any;
   placeholder: string;
-  placeholderColor? : object;
+  placeholderColor?: object;
 }
 
 const CustomDropDown: React.FC<Props> = (props: Props) => {
   const [open, setOpen] = useState(false);
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
- 
+
   return (
     <View>
       <TouchableOpacity
@@ -37,11 +31,23 @@ const CustomDropDown: React.FC<Props> = (props: Props) => {
         ]}
         onPress={() => setOpen(!open)}>
         <View style={styles.rowContainer}>
-          <Text style={[styles.placeholderText,{color:selectedLabel ? Colors.inputTextColor : props.placeholderColor}]}>
+          <Text
+            style={[
+              styles.placeholderText,
+              {
+                color: selectedLabel
+                  ? Colors.inputTextColor
+                  : props.placeholderColor,
+              },
+            ]}>
             {selectedLabel || props.placeholder}
           </Text>
           <TouchableOpacity onPress={() => setOpen(!open)}>
-            <Entypo name="chevron-small-down" color={Colors.placeholderColor} size={22} />
+            <Entypo
+              name="chevron-small-down"
+              color={Colors.placeholderColor}
+              size={22}
+            />
           </TouchableOpacity>
         </View>
       </TouchableOpacity>
@@ -50,18 +56,25 @@ const CustomDropDown: React.FC<Props> = (props: Props) => {
           <FlatList
             data={props.data}
             keyExtractor={item => item.id.toString()}
-            renderItem={({item}) => (
-              <TouchableOpacity
-                onPress={() => {
-                  setOpen(false);
-                  setSelectedLabel(item.label);
-                  props.setValue && props.setValue(item?.label);
-                }}>
-                <View style={styles.listItem}>
-                  <Text style={styles.listItemText}>{item.label}</Text>
-                </View>
-              </TouchableOpacity>
-            )}
+            renderItem={({item, index}) => {
+              const isLastItem = index === props.data.length - 1;
+              return (
+                <TouchableOpacity
+                  onPress={() => {
+                    setOpen(false);
+                    setSelectedLabel(item.label);
+                    props.setValue && props.setValue(item?.label);
+                  }}>
+                  <View
+                    style={[
+                      styles.listItem,
+                      {borderBottomWidth: isLastItem ? 0 : 1},
+                    ]}>
+                    <Text style={styles.listItemText}>{item.label}</Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            }}
           />
         </View>
       )}
@@ -116,11 +129,11 @@ const styles = StyleSheet.create({
     borderRightWidth: 1,
     borderRightColor: Colors.inputFieldColor,
     borderLeftColor: Colors.inputFieldColor,
-    borderTopWidth:1,
-    borderTopColor:Colors.inputFieldColor
+    borderTopWidth: 1,
+    borderTopColor: Colors.inputFieldColor,
   },
   listItem: {
-    paddingVertical: 8,
+    paddingVertical: 14,
     backgroundColor: 'transparent',
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(244, 244, 245, 1)',

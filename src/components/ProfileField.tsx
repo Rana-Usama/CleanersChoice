@@ -20,7 +20,7 @@ const ProfileField: React.FC<Props> = (props: Props) => {
                     <Text style={[styles.text, props.color && { color: props.color }]}>{props.text}</Text>
                 </View>
                 <TouchableOpacity onPress={props.onPress}>
-                    <Entypo name='chevron-thin-right' size={RFPercentage(1.6)} color={Colors.brown} />
+                    <Entypo name='chevron-thin-right' size={RFPercentage(1.9)} color={Colors.brown} />
                 </TouchableOpacity>
             </View>
         </TouchableOpacity>
@@ -32,7 +32,7 @@ export default ProfileField
 const styles = StyleSheet.create({
     container: {
         width: '100%',
-        height: RFPercentage(5.8),
+        height: RFPercentage(6.5),
         borderWidth: 1,
         borderColor: Colors.inputFieldColor,
         borderRadius: RFPercentage(1),
@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         paddingHorizontal: RFPercentage(2),
-        marginVertical: RFPercentage(1.5),
+        marginVertical: RFPercentage(1.2),
     },
     textContainer: {
         flexDirection: 'row',

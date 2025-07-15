@@ -625,7 +625,7 @@ const styles = StyleSheet.create({
   completeProfileContainer: {
     // position: 'absolute',
     alignSelf: 'center',
-    marginTop: RFPercentage(20),
+    marginTop: RFPercentage(15),
     // bottom: 0,
   },
   button: {
@@ -722,10 +722,10 @@ const styles = StyleSheet.create({
   },
   showMore: {
     color: Colors.gradient1,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
     textAlign: 'center',
-    bottom: RFPercentage(1.5),
+    bottom: RFPercentage(1.2),
     position: 'absolute',
   },
   showMore2: {

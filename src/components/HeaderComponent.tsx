@@ -22,7 +22,7 @@ const styles = StyleSheet.create({
     marginTop: Platform.OS == 'android' ? RFPercentage(4) : RFPercentage(0),
   },
   logo: {
-    width: RFPercentage(13.5),
-    height: RFPercentage(13.5),
+    width: RFPercentage(15),
+    height: RFPercentage(15),
   },
 });

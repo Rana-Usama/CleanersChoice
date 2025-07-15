@@ -316,6 +316,7 @@ const Home = () => {
           
             renderItem={({item}) => (
               <TouchableOpacity
+              activeOpacity={0.8}
                 onPress={() => setCategorySelection(item?.id)}
                 style={{marginTop: RFPercentage(0.5)}}>
                 <View
