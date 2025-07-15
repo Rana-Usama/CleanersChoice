@@ -26,11 +26,11 @@ const JobCard = (props: props) => {
 
         <View style={styles.innerView}>
           <Text style={styles.nameText}>{props.name}</Text>
-          <Text style={styles.dateText}>Due Date & Time: {props.date}</Text>
+          <Text style={styles.dateText}>Date/Time: {props.date}</Text>
         </View>
 
         <View style={styles.locationContainer}>
-          <EvilIcons name="location" size={RFPercentage(2)} style={styles.locationIcon} />
+          <EvilIcons name="location" size={RFPercentage(2.3)} style={styles.locationIcon} />
           <Text style={styles.locationText}>{props.location}</Text>
         </View>
 
@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(199, 212, 234, 0.5)',
     borderRadius: RFPercentage(1.5),
-    padding: RFPercentage(1.3),
+    padding: RFPercentage(1.5),
     backgroundColor: 'white',
   },
   deleteButton: {
@@ -93,12 +93,12 @@ const styles = StyleSheet.create({
   nameText: {
     color: 'rgba(55, 65, 81, 1)',
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.8),
   },
   dateText: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
   },
   locationContainer: {
     flexDirection: 'row',
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   locationText: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.7),
   },
   priceContainer: {
     marginTop: RFPercentage(1),
@@ -120,12 +120,12 @@ const styles = StyleSheet.create({
   priceText: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
   },
   priceHighlight: {
     color: Colors.gradient1,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
   },
   detailsContainer: {
     flexDirection: 'row',
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
   },
   detailsText: {
     color: Colors.gradient1,
-    fontFamily: Fonts.fontRegular,
+    fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.5),
     right: 5,
   },

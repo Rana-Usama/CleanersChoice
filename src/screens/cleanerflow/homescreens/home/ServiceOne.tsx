@@ -280,6 +280,7 @@ const ServiceOne: React.FC = ({navigation} : any) => {
                 styleItemsContainer={{
                   backgroundColor: 'transparent',
                   borderRadius: RFPercentage(0.5),
+                  padding:RFPercentage(1)
                 }}
                 styleTextDropdownSelected={{
                   color: Colors.placeholderColor,
@@ -355,7 +356,7 @@ const styles = StyleSheet.create({
   },
   dateContainer: {
     width: '100%',
-    height: RFPercentage(5.6),
+    height: RFPercentage(6),
     borderWidth: 1,
     borderColor: Colors.inputFieldColor,
     borderRadius: RFPercentage(0.8),

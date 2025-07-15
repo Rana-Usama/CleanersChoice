@@ -83,6 +83,7 @@ const CancelSubscription = () => {
         const result = JSON.parse(text); // Try parsing manually
         if (result.success) {
           const {currentPeriodEnd} = result;
+          console.log('currentPeriodEnd.....', currentPeriodEnd)
           if (user?.uid) {
             await firestore()
               .collection('Users')

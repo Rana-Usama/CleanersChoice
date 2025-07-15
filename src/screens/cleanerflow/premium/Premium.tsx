@@ -371,7 +371,7 @@ const styles = StyleSheet.create({
   listText: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.7),
     marginLeft: 5,
   },
   buttonContainer: {

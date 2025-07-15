@@ -25,7 +25,7 @@ import storage from '@react-native-firebase/storage';
 import {Image as CompressorImage} from 'react-native-compressor';
 import {showToast} from '../../../../utils/ToastMessage';
 
-const EditProfile = ({navigation} : any) => {
+const EditProfile = ({navigation}: any) => {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [img, setImg] = useState<any | null>(null);
@@ -43,8 +43,7 @@ const EditProfile = ({navigation} : any) => {
       .then(image => {
         setImg(image);
       })
-      .catch(error => {
-      });
+      .catch(error => {});
   };
 
   // Fetching User Data
@@ -62,21 +61,21 @@ const EditProfile = ({navigation} : any) => {
             const userData = userDoc.data();
             setUserData(userData);
           }
-        } catch (error) {
-        }
+        } catch (error) {}
       }
       setLoading2(false);
     };
     fetchUserData();
   }, []);
 
-  // Edit Profile
   const handleEditProfile = async () => {
     const user = auth().currentUser;
     if (!user) return;
     setLoading(true);
     try {
       let imageUrl = userData?.profile;
+
+      // Compress & upload image if changed
       if (img && img.path !== userData?.profile) {
         const compressedImage = await CompressorImage.compress(img?.path, {
           compressionMethod: 'manual',
@@ -87,11 +86,13 @@ const EditProfile = ({navigation} : any) => {
         await imageRef.putFile(compressedImage);
         imageUrl = await imageRef.getDownloadURL();
       }
-      if (
-        name !== userData?.name ||
-        phone !== userData?.phone ||
-        imageUrl !== userData?.profile
-      ) {
+
+      // Check if any field has changed
+      const isNameChanged = name !== userData?.name;
+      const isPhoneChanged = phone !== userData?.phone;
+      const isImageChanged = imageUrl !== userData?.profile;
+
+      if (isNameChanged || isPhoneChanged || isImageChanged) {
         await firestore()
           .collection('Users')
           .doc(user.uid)
@@ -100,18 +101,21 @@ const EditProfile = ({navigation} : any) => {
             phone: phone || userData?.phone,
             profile: imageUrl,
           });
+
         setUserData(prev => ({
           ...prev,
           name: name || prev?.name,
           phone: phone || prev?.phone,
           profile: imageUrl,
         }));
+
         showToast({
           type: 'success',
           title: 'Profile updated',
           message: 'Profile has been updated successfully',
         });
       }
+
       setLoading(false);
       navigation.goBack();
     } catch (error) {
@@ -124,19 +128,11 @@ const EditProfile = ({navigation} : any) => {
     }
   };
 
-
- const formatPhoneNumber = (raw: string = ''): string => {
-    // remove everything except 0-9
+  const formatPhoneNumber = (raw: string = ''): string => {
     let digits = raw.replace(/\D/g, '');
-
-    // drop a leading country code (1) or trunk code (0)
     if (digits.startsWith('1')) digits = digits.slice(1);
     if (digits.startsWith('0')) digits = digits.slice(1);
-
-    // we only ever want 10 NANP digits
     digits = digits.slice(-10);
-
-    // don't format until we have all 10 digits
     if (digits.length < 10) return `+1-${digits}`;
 
     const area = digits.slice(0, 3);
@@ -161,7 +157,6 @@ const EditProfile = ({navigation} : any) => {
               left={true}
             />
             <View style={styles.container}>
-              
               {/* Profile Image */}
               <TouchableOpacity onPress={uploadImg} style={styles.imgContainer}>
                 <View style={styles.pictureContainer}>
@@ -232,12 +227,7 @@ const EditProfile = ({navigation} : any) => {
                   title={'Edit'}
                   onPress={handleEditProfile}
                   loading={loading}
-                  disabled={
-                    loading &&
-                    name === '' &&
-                    phone === '' &&
-                    (!img || img?.path === userData?.profile)
-                  }
+                  disabled={loading}
                 />
               </View>
             </View>

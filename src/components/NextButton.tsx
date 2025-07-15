@@ -40,13 +40,13 @@ const styles = StyleSheet.create({
         borderRadius: RFPercentage(5),
         alignItems: 'center',
         justifyContent: 'center',
-        width: RFPercentage(16.5),
+        width: RFPercentage(18),
         borderWidth:1.4,
         borderColor:Colors.gradient2,
         backgroundColor : Colors.buttonColor
     },
     nextButtonText: {
-        fontSize: RFPercentage(1.9),
+        fontSize: RFPercentage(2),
         fontFamily: Fonts.fontMedium,
         color: Colors.primaryText
     },

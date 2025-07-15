@@ -9,7 +9,10 @@ import {
   BackHandler,
   Platform,
 } from 'react-native';
-import {createBottomTabNavigator, BottomTabBarProps} from '@react-navigation/bottom-tabs';
+import {
+  createBottomTabNavigator,
+  BottomTabBarProps,
+} from '@react-navigation/bottom-tabs';
 import {useIsFocused} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
@@ -24,10 +27,14 @@ import {RFPercentage} from 'react-native-responsive-fontsize';
 
 const Tab = createBottomTabNavigator();
 
-const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigation }) => {
+const CustomTabBar: React.FC<BottomTabBarProps> = ({
+  state,
+  descriptors,
+  navigation,
+}) => {
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const screenFocused = useIsFocused();
-  const { unreadCount } = useUnreadMessages();
+  const {unreadCount} = useUnreadMessages();
   const [_, forceUpdate] = useState(0);
   const insets = useSafeAreaInsets();
 
@@ -43,17 +50,26 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
       }
       return false;
     };
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
     return () => backHandler.remove();
   }, [screenFocused, navigation]);
 
   useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
-      setKeyboardVisible(true);
-    });
-    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
-      setKeyboardVisible(false);
-    });
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => {
+        setKeyboardVisible(true);
+      },
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        setKeyboardVisible(false);
+      },
+    );
     return () => {
       keyboardDidShowListener.remove();
       keyboardDidHideListener.remove();
@@ -63,11 +79,14 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
   if (isKeyboardVisible) return null;
 
   return (
-    <View style={[styles.tabBarContainer, { paddingBottom: insets.bottom }]}>
+    <View style={[styles.tabBarContainer, {paddingBottom: insets.bottom}]}>
       <View style={styles.labelContainer}>
         {state.routes.map((route, index) => {
-          const { options } = descriptors[route.key];
-          const label = options.tabBarLabel !== undefined ? options.tabBarLabel : route.name;
+          const {options} = descriptors[route.key];
+          const label =
+            options.tabBarLabel !== undefined
+              ? options.tabBarLabel
+              : route.name;
           const isFocused = state.index === index;
 
           const onPress = () => {
@@ -87,7 +106,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
               onPress={onPress}
               style={[styles.tabButton, isFocused && styles.activeTab]}>
               {route.name === 'Home' ? (
-                <View style={{ bottom: RFPercentage(2.6) }}>
+                <View style={{bottom: RFPercentage(3.5)}}>
                   <Image
                     source={isFocused ? Icons.home : Icons.homeInactive}
                     style={styles.middle}
@@ -126,10 +145,13 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
                 style={{
                   color: isFocused ? Colors.gradient2 : Colors.secondaryText,
                   fontSize: RFPercentage(1.5),
-                  top: RFPercentage(0.5),
+                  top:
+                    route.name === 'Home'
+                      ? RFPercentage(-2.2)
+                      : RFPercentage(0.5),
                   fontFamily: isFocused ? Fonts.fontMedium : Fonts.fontRegular,
                 }}>
-                {route.name === 'Home' ? '' : label}
+                {label}
               </Text>
             </TouchableOpacity>
           );
@@ -180,9 +202,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     height: '100%',
   },
- middle: {
-    width: Platform.OS === 'ios' ?  RFPercentage(7.5) : RFPercentage(8.5),
-    height:Platform.OS === 'ios' ?  RFPercentage(7.5) : RFPercentage(8.5),
+  middle: {
+    width: Platform.OS === 'ios' ? RFPercentage(7.5) : RFPercentage(8.5),
+    height: Platform.OS === 'ios' ? RFPercentage(7.5) : RFPercentage(8.5),
   },
   imgStyle: {
     width: RFPercentage(3),

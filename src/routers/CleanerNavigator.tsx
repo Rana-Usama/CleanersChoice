@@ -21,7 +21,7 @@ import Profile from '../screens/commonflow/home/profile/Profile';
 import Settings from '../screens/commonflow/home/settings/Settings';
 import Messages from '../screens/commonflow/home/Messages';
 import {useUnreadMessages} from '../utils/UnreadMessagesContext';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 const Tab = createBottomTabNavigator();
 
@@ -79,10 +79,10 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
 
   if (isKeyboardVisible) return null;
 
-  const insets = useSafeAreaInsets()
+  const insets = useSafeAreaInsets();
 
   return (
-    <View style={[styles.tabBarContainer, { paddingBottom: insets.bottom }]}>
+    <View style={[styles.tabBarContainer, {paddingBottom: insets.bottom}]}>
       <View style={styles.labelContainer}>
         {state.routes.map((route, index) => {
           const {options} = descriptors[route.key];
@@ -97,7 +97,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
               onPress={() => navigation.navigate(route.name)}
               style={[styles.tabButton, isFocused && styles.activeTab]}>
               {route.name === 'Home' ? (
-                <View style={{bottom: RFPercentage(2.3)}}>
+                <View style={{bottom: RFPercentage(3.5)}}>
                   <Image
                     source={isFocused ? Icons.home : Icons.homeInactive}
                     style={styles.middle}
@@ -136,10 +136,13 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                 style={{
                   color: isFocused ? Colors.gradient2 : Colors.secondaryText,
                   fontSize: RFPercentage(1.5),
-                  top: RFPercentage(0.5),
+                  top:
+                    route.name === 'Home'
+                      ? RFPercentage(-2.2)
+                      : RFPercentage(0.5),
                   fontFamily: isFocused ? Fonts.fontMedium : Fonts.fontRegular,
                 }}>
-                {route.name === 'Home' ? '' : label}
+                {label}
               </Text>
             </TouchableOpacity>
           );
@@ -190,9 +193,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     height: '100%',
   },
- middle: {
-    width: Platform.OS === 'ios' ?  RFPercentage(7.5) : RFPercentage(8.5),
-    height:Platform.OS === 'ios' ?  RFPercentage(7.5) : RFPercentage(8.5),
+  middle: {
+    width: Platform.OS === 'ios' ? RFPercentage(7.5) : RFPercentage(8.5),
+    height: Platform.OS === 'ios' ? RFPercentage(7.5) : RFPercentage(8.5),
   },
   imgStyle: {
     width: RFPercentage(3),
