@@ -17,7 +17,7 @@ interface props {
 const JobCard = (props: props) => {
   return (
     <View style={styles.shadowContainer}>
-      <TouchableOpacity  activeOpacity={0.8} style={styles.container} onPress={props.onPress}>
+      <TouchableOpacity  activeOpacity={0.9} style={styles.container} onPress={props.onPress}>
         {props.delete && (
           <TouchableOpacity onPress={props.onPress2} style={styles.deleteButton}>
             <Image source={Icons.delete} resizeMode="contain" style={styles.deleteIcon} />

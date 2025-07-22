@@ -77,14 +77,33 @@ const EditProfile = ({navigation}: any) => {
 
       // Compress & upload image if changed
       if (img && img.path !== userData?.profile) {
-        const compressedImage = await CompressorImage.compress(img?.path, {
-          compressionMethod: 'manual',
-          maxWidth: 1000,
-          quality: 0.8,
-        });
-        const imageRef = storage().ref(`user_profiles/profile_${user.uid}.jpg`);
-        await imageRef.putFile(compressedImage);
-        imageUrl = await imageRef.getDownloadURL();
+        try {
+          console.log('📷 img.path:', img?.path);
+          console.log('🧾 userData.profile:', userData?.profile);
+          console.log('🆔 user.uid:', user?.uid);
+
+          const compressedImage = await CompressorImage.compress(img?.path, {
+            compressionMethod: 'manual',
+            maxWidth: 1000,
+            quality: 0.8,
+          });
+
+          console.log('compressedImage:', compressedImage);
+
+          const imageRef = storage().ref(
+            `user_profiles/profile_${user.uid}.jpg`,
+          );
+          console.log('imageRef:', imageRef);
+
+          await imageRef.putFile(compressedImage);
+          console.log('✅ Upload successful');
+
+          imageUrl = await imageRef.getDownloadURL();
+          console.log('✅ imageUrl:', imageUrl);
+        } catch (uploadError) {
+          console.log('❌ Image upload failed:', uploadError);
+          throw uploadError;
+        }
       }
 
       // Check if any field has changed

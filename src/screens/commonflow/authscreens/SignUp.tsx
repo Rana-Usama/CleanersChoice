@@ -68,6 +68,78 @@ const SignUp: React.FC = ({navigation}: any) => {
   };
 
   // Sign Up
+  // const handleSignUp = async (values: any) => {
+  //   if (!selected) {
+  //     showToast({
+  //       type: 'info',
+  //       title: 'Terms & Conditions',
+  //       message: 'Please accept terms and conditions in order to proceed',
+  //     });
+  //     return;
+  //   }
+  //   setLoading(true);
+  //   try {
+  //     const userCredential = await auth().createUserWithEmailAndPassword(
+  //       values.email,
+  //       values.password,
+  //     );
+  //     const user = userCredential.user;
+  //     let profileUrl = '';
+  //     if (img) {
+  //       const compressedImage = await CompressorImage.compress(img?.path, {
+  //         compressionMethod: 'manual',
+  //         maxWidth: 1000,
+  //         quality: 0.8,
+  //       });
+  //       const uploadUri = compressedImage.replace('file://', '');
+  //       const fileName = `profile_${user.uid}.jpg`;
+  //       const storageRef = storage().ref(`user_profiles/${fileName}`);
+  //       const uploadTask = storageRef.putFile(uploadUri);
+  //       await uploadTask;
+  //       profileUrl = await storageRef.getDownloadURL();
+  //     }
+  //     const fcmToken = await messaging().getToken();
+  //     const userData = {
+  //       name: values.name,
+  //       email: values.email,
+  //       phone: values.phone,
+  //       uid: user.uid,
+  //       profile: profileUrl || null,
+  //       fcmToken: fcmToken || null,
+  //       createdAt: firestore.FieldValue.serverTimestamp(),
+  //       role: userFlow?.userFlow,
+  //       ...(userFlow?.userFlow === 'Cleaner' && {
+  //         subscription: false,
+  //         subscriptionId: null,
+  //         cancelSubscription: false,
+  //       }),
+  //     };
+
+  //     await firestore().collection('Users').doc(user.uid).set(userData);
+  //     await AsyncStorage.setItem('email', values.email);
+  //     await AsyncStorage.setItem('password', values.password);
+  //     await AsyncStorage.setItem('role', userFlow?.userFlow);
+
+  //     showToast({
+  //       type: 'success',
+  //       title: 'Sign Up',
+  //       message: 'Signed Up successfully ',
+  //     });
+  //     navigation.navigate(
+  //       userFlow?.userFlow === 'Customer' ? 'Home' : 'Premium',
+  //     );
+  //   } catch (error: any) {
+  //     console.log('error..............', error)
+  //     showToast({
+  //       type: 'error',
+  //       title: 'Sign Up Failed',
+  //       message: 'Email is already in use',
+  //     });
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const handleSignUp = async (values: any) => {
     if (!selected) {
       showToast({
@@ -77,27 +149,119 @@ const SignUp: React.FC = ({navigation}: any) => {
       });
       return;
     }
+
     setLoading(true);
+    console.log('[SignUp] Starting signup process...'); // Initial log
+
     try {
+      // 1. Create User Account
+      console.log('[Auth] Creating user account...');
       const userCredential = await auth().createUserWithEmailAndPassword(
         values.email,
         values.password,
       );
       const user = userCredential.user;
+      console.log('[Auth] User created successfully:', user.uid);
+
       let profileUrl = '';
+
+      // 2. Handle Image Upload (if exists)
       if (img) {
-        const compressedImage = await CompressorImage.compress(img?.path, {
-          compressionMethod: 'manual',
-          maxWidth: 1000,
-          quality: 0.8,
-        });
-        const uploadUri = compressedImage.replace('file://', '');
-        const fileName = `profile_${user.uid}.jpg`;
-        const storageRef = storage().ref(`user_profiles/${fileName}`);
-        const uploadTask = storageRef.putFile(uploadUri);
-        await uploadTask;
-        profileUrl = await storageRef.getDownloadURL();
+        try {
+          console.log('[Image] Starting image processing...');
+          console.log('[Image] Original image:', {
+            path: img.path,
+            size: img.size,
+            width: img.width,
+            height: img.height,
+            mime: img.mime,
+          });
+
+          // Compress Image
+          console.log('[Image] Compressing image...');
+          const compressedImage = await CompressorImage.compress(img.path, {
+            compressionMethod: 'manual',
+            maxWidth: 1000,
+            quality: 0.8,
+          });
+          console.log(
+            '[Image] Compression complete. New URI:',
+            compressedImage,
+          );
+
+          const uploadUri =
+            Platform.OS === 'android'
+              ? compressedImage
+              : compressedImage.replace('file://', '');
+
+          console.log('[Storage] Preparing upload...', {
+            uploadUri,
+            platform: Platform.OS,
+          });
+
+          const fileName = `profile_${user.uid}_${Date.now()}.jpg`;
+          const storageRef = storage().ref(`user_profiles/${fileName}`);
+
+          console.log('[Storage] Reference created:', storageRef.fullPath);
+
+          // Upload with Progress Tracking
+          console.log('[Storage] Starting upload...');
+          const uploadTask = storageRef.putFile(uploadUri, {
+            contentType: 'image/jpeg',
+            customMetadata: {
+              userId: user.uid,
+              uploadedAt: new Date().toISOString(),
+            },
+          });
+
+          // Upload State Logging
+          uploadTask.on(
+            'state_changed',
+            snapshot => {
+              const progress =
+                (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              console.log(`[Upload] Progress: ${progress.toFixed(2)}%`, {
+                bytesTransferred: snapshot.bytesTransferred,
+                totalBytes: snapshot.totalBytes,
+                state: snapshot.state,
+              });
+            },
+            error => {
+              console.error('[Upload] Error:', {
+                code: error.code,
+                message: error.message,
+                details: error,
+              });
+            },
+            async () => {
+              console.log('[Upload] Completed successfully');
+              profileUrl = await storageRef.getDownloadURL();
+              console.log('[Storage] Download URL:', profileUrl);
+            },
+          );
+
+          await uploadTask;
+          console.log('[Storage] Upload task finished');
+        } catch (uploadError) {
+          console.error('[Upload] Failed:', {
+            error: uploadError,
+            stack: uploadError.stack,
+          });
+          showToast({
+            type: 'warning',
+            title: 'Profile Image',
+            message: 'Profile image upload failed, continuing without it',
+          });
+        }
+      } else {
+        console.log('[Image] No profile image selected');
       }
+
+      // 3. Save User Data
+      console.log('[Firestore] Preparing user data...');
+      const testRef = storage().ref('test.txt');
+      await testRef.putString('Hello Firebase');
+      console.log('Test upload complete');
       const fcmToken = await messaging().getToken();
       const userData = {
         name: values.name,
@@ -115,26 +279,47 @@ const SignUp: React.FC = ({navigation}: any) => {
         }),
       };
 
+      console.log('[Firestore] Saving user data:', userData);
       await firestore().collection('Users').doc(user.uid).set(userData);
+
+      // 4. Save Local Data
+      console.log('[AsyncStorage] Saving credentials...');
       await AsyncStorage.setItem('email', values.email);
       await AsyncStorage.setItem('password', values.password);
       await AsyncStorage.setItem('role', userFlow?.userFlow);
 
+      console.log('[Navigation] Redirecting user...');
       showToast({
         type: 'success',
         title: 'Sign Up',
-        message: 'Signed Up successfully ',
+        message: 'Signed Up successfully',
       });
       navigation.navigate(
         userFlow?.userFlow === 'Customer' ? 'Home' : 'Premium',
       );
     } catch (error: any) {
+      console.error('[SignUp] Global error:', {
+        code: error.code,
+        message: error.message,
+        fullError: JSON.stringify(error, null, 2),
+        stack: error.stack,
+      });
+
+      let errorMessage = 'Sign Up Failed';
+      if (error.code === 'auth/email-already-in-use') {
+        errorMessage = 'Email is already in use';
+      } else if (error.code === 'storage/retry-limit-exceeded') {
+        errorMessage =
+          'Network issues prevented image upload. Please try again.';
+      }
+
       showToast({
         type: 'error',
         title: 'Sign Up Failed',
-        message: 'Email is already in use',
+        message: errorMessage,
       });
     } finally {
+      console.log('[SignUp] Process completed');
       setLoading(false);
     }
   };
@@ -161,7 +346,9 @@ const SignUp: React.FC = ({navigation}: any) => {
         translucent
         backgroundColor="transparent"
       />
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{paddingBottom: RFPercentage(8)}}>
         <KeyboardAvoidingView>
           {/* Header */}
           <View style={styles.container}>

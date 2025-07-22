@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
-    paddingBottom: RFPercentage(8),
+    paddingBottom: RFPercentage(25),
   },
   container: {
     width: '90%',
