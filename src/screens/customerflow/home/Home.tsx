@@ -94,6 +94,8 @@ const Home = () => {
   const [filteredLocations, setFilteredLocations] = useState<string[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
+  console.log('servicesData...........',servicesData)
+  
   // On Refresh
   const onRefresh = () => {
     setRefreshing(true);
