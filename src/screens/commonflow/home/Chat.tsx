@@ -213,23 +213,9 @@ const Chat = ({navigation, route}: any) => {
             name: senderName,
             avatar: senderProfile,
           }}
-          // loadEarlier={!!lastVisible}
-          // onLoadEarlier={fetchMoreMessages}
+          
           showAvatarForEveryMessage={true}
           renderAvatar={props => null}
-          // renderLoadEarlier={props => (
-          //   <TouchableOpacity
-          //     style={styles.loadMessages}
-          //     onPress={props.onLoadEarlier}>
-          //     <Text
-          //       style={{
-          //         color: Colors.background,
-          //         fontFamily: Fonts.fontMedium,
-          //       }}>
-          //       Load earlier messages
-          //     </Text>
-          //   </TouchableOpacity>
-          // )}
           renderBubble={props => (
             <Bubble
               {...props}
@@ -334,7 +320,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.8),
     borderRadius: RFPercentage(10),
     // backgroundColor:'red',
-    width: RFPercentage(36),
+    width: '90%',
     fontFamily: Fonts.fontRegular,
   },
   sendButton: {

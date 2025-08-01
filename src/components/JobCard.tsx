@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
   shadowContainer: {
     width: '90%',
     alignSelf: 'center',
-    shadowColor: '#000',
+    shadowColor: 'rgba(199, 199, 199, 1)',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 6,
@@ -67,6 +67,7 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(2.5),
     borderRadius: RFPercentage(1.5),
     backgroundColor: 'transparent',
+    
   },
   container: {
     width: '100%',
@@ -75,6 +76,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(1.5),
     padding: RFPercentage(1.5),
     backgroundColor: 'white',
+    borderBottomWidth:RFPercentage(0.4)
   },
   deleteButton: {
     position: 'absolute',

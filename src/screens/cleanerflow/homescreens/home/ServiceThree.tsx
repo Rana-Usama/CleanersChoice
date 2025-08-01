@@ -92,6 +92,45 @@ const ServiceThree: React.FC = ({navigation}: any) => {
   const savePackagesToFirestore = async () => {
     const user = auth().currentUser;
     if (!user) return;
+
+    // Validate all fields again before submitting
+    let newErrors = {};
+    let hasError = false;
+
+    packages.forEach(pkg => {
+      const minPrice = 25 * pkg.id;
+      const priceNum = parseFloat(pkg.price);
+      const pkgErrors: any = {};
+
+      if (!pkg.details.trim()) {
+        pkgErrors.details = 'Package details are required';
+        hasError = true;
+      }
+
+      if (!pkg.price.trim()) {
+        pkgErrors.price = 'Price is required';
+        hasError = true;
+      } else if (isNaN(priceNum) || priceNum < minPrice) {
+        pkgErrors.price = `Price must be at least ${minPrice}$`;
+        hasError = true;
+      }
+
+      if (Object.keys(pkgErrors).length > 0) {
+        newErrors[pkg.id] = pkgErrors;
+      }
+    });
+
+    if (hasError) {
+      setErrors(newErrors); // Update error state to show in UI
+      Toast.show({
+        type: 'error',
+        text1: 'Validation Error',
+        text2: 'Please fix the errors before proceeding.',
+      });
+      return;
+    }
+
+    // Extra: catch mismatched inputs
     const priceOnlyPackages = packages.filter(
       pkg => pkg.price.trim() !== '' && pkg.details.trim() === '',
     );
@@ -107,6 +146,7 @@ const ServiceThree: React.FC = ({navigation}: any) => {
       });
       return;
     }
+
     if (detailsOnlyPackages.length > 0) {
       Toast.show({
         type: 'error',
@@ -116,12 +156,10 @@ const ServiceThree: React.FC = ({navigation}: any) => {
       return;
     }
 
-    // 2. Filter valid packages
     const validPackages = packages.filter(
       pkg => pkg.details.trim() !== '' && pkg.price.trim() !== '',
     );
 
-    // 3. Require at least 3 complete packages
     if (validPackages.length < 3) {
       Toast.show({
         type: 'error',
@@ -131,7 +169,7 @@ const ServiceThree: React.FC = ({navigation}: any) => {
       return;
     }
 
-    // 4. Proceed to Firestore
+    // Proceed to Firestore
     try {
       setLoading(true);
       const serviceRef = firestore()
@@ -153,6 +191,11 @@ const ServiceThree: React.FC = ({navigation}: any) => {
       }
       navigation.navigate('CleanerNavigator');
     } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Upload Failed',
+        text2: 'An error occurred while uploading. Please try again.',
+      });
     } finally {
       setLoading(false);
     }
@@ -253,7 +296,7 @@ const ServiceThree: React.FC = ({navigation}: any) => {
                     placeholder={`Starting Price e.g ${25 * pkg.id}$`}
                     customStyle={{
                       width: '100%',
-                       borderColor: Colors.inputFieldColor,
+                      borderColor: Colors.inputFieldColor,
                     }}
                     value={pkg.price ? `$${pkg.price}` : ''}
                     onChangeText={text =>

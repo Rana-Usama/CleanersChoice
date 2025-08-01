@@ -894,7 +894,7 @@ const styles = StyleSheet.create({
   applyLocation: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(2.3),
+    fontSize: RFPercentage(2.1),
   },
   queryContainer: {
     top: RFPercentage(0.5),
