@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.inputFieldColor,
     borderRadius: RFPercentage(1),
-    marginVertical: RFPercentage(1.5),
+    marginVertical: RFPercentage(1),
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -177,14 +177,12 @@ const ServiceDetails: React.FC = ({route}: any) => {
         const userData = userDoc.data();
         setFcmToken(userData?.fcmToken);
       }
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={{paddingBottom: RFPercentage(10)}}>
-        
         {/* Header */}
         <HeaderBack
           title={'Service Details'}
@@ -241,7 +239,6 @@ const ServiceDetails: React.FC = ({route}: any) => {
           </View>
         </View>
         <View style={styles.container}>
-
           {/* Service Info */}
           <View style={{marginTop: RFPercentage(2)}}>
             <View style={styles.rowContainer}>
@@ -258,23 +255,11 @@ const ServiceDetails: React.FC = ({route}: any) => {
               </Text>
             </View>
 
-            {/* <View style={styles.starContainer}>
-              {Array.from({length: 5}, (_, index) => (
-                <Image
-                  key={index}
-                  source={IMAGES.star}
-                  resizeMode="contain"
-                  style={styles.star}
-                />
-              ))}
-            </View> */}
-
             <View
               style={{position: 'absolute', right: 0, top: RFPercentage(1.8)}}>
               <Text style={styles.joining}>Joined on : {formattedDate}</Text>
             </View>
           </View>
-
 
           {/* Description */}
           <View style={{marginTop: RFPercentage(2.5)}}>
@@ -303,7 +288,6 @@ const ServiceDetails: React.FC = ({route}: any) => {
             </View>
           </View>
 
-
           {/* Location */}
           <View style={{marginTop: RFPercentage(2.5)}}>
             <View style={styles.rowAlign}>
@@ -318,7 +302,6 @@ const ServiceDetails: React.FC = ({route}: any) => {
             </View>
             <Text style={styles.showMore}>{item.location}</Text>
           </View>
-
 
           {/* Availability */}
           <View style={{marginTop: RFPercentage(2.5)}}>
@@ -338,7 +321,6 @@ const ServiceDetails: React.FC = ({route}: any) => {
               </TouchableOpacity>
             </View>
           </View>
-
 
           {/* Services */}
           <View style={{marginTop: RFPercentage(2.5)}}>
@@ -368,7 +350,6 @@ const ServiceDetails: React.FC = ({route}: any) => {
                 )}
               />
 
-
               {/* Show More / Show Less button */}
               {item.type.length > 5 && (
                 <TouchableOpacity
@@ -383,7 +364,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
                       {
                         left:
                           visibleItems < item.type.length
-                            ? RFPercentage(18.6)
+                            ? RFPercentage(20.6)
                             : RFPercentage(34.5),
                       },
                     ]}>
@@ -396,7 +377,6 @@ const ServiceDetails: React.FC = ({route}: any) => {
             </View>
           </View>
         </View>
-
 
         {/* Packages */}
         <View>
@@ -432,58 +412,12 @@ const ServiceDetails: React.FC = ({route}: any) => {
           </View>
         </View>
 
-        {/* Rating and Reviews */}
-        {/* <View style={styles.container}>
-          <View>
-            <Text style={[styles.headeing2, {marginTop: RFPercentage(2)}]}>
-              Rating & Reviews:
-            </Text>
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginTop: RFPercentage(1.8),
-            }}>
-            <Text style={[styles.headeing2, {color: Colors.primaryText}]}>
-              Overall Rating
-            </Text>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}>
-              <Image
-                source={IMAGES.star}
-                resizeMode="contain"
-                style={{
-                  width: RFPercentage(1.8),
-                  height: RFPercentage(1.8),
-                  right: 3,
-                }}
-              />
-              <Text
-                style={{
-                  color: 'rgba(0, 0, 0, 1)',
-                  fontFamily: Fonts.semiBold,
-                  fontSize: RFPercentage(1.4),
-                  top: 1,
-                }}>
-                5.0
-              </Text>
-            </View>
-          </View>
-          <View style={{marginTop: RFPercentage(2)}}>
-            <Review />
-          </View>
-        </View> */}
-
         {/* Button Container */}
         <View style={{alignSelf: 'center', marginTop: RFPercentage(7)}}>
           <GradientButton
             title="Get Custom Offer"
-            textStyle={{fontSize: RFPercentage(1.4)}}
+            style={{width:RFPercentage(20)}}
+            textStyle={{fontSize: RFPercentage(1.7)}}
             onPress={() => {
               setloading(true);
               setTimeout(() => {
@@ -504,7 +438,6 @@ const ServiceDetails: React.FC = ({route}: any) => {
           />
         </View>
       </ScrollView>
-
 
       {/* Full picture */}
       {modalVisible && (

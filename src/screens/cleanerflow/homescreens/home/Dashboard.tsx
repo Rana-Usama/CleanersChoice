@@ -29,6 +29,7 @@ import Package from '../../../../components/Package';
 import Review from '../../../../components/Review';
 import {Image as CompressorImage} from 'react-native-compressor';
 import {useExitAppOnBack} from '../../../../utils/ExitApp';
+import axios from 'axios';
 
 const items = [
   {
@@ -115,10 +116,26 @@ const Dashboard: React.FC = ({navigation}: any) => {
         setLoading(false);
         return;
       }
-      const imagePath = `user_profiles/profile_${user.uid}.jpg`;
-      const reference = storage().ref(imagePath);
-      await reference.putFile(compressedImage);
-      const downloadURL = await reference.getDownloadURL();
+
+      const data = new FormData();
+      data.append('file', {
+        uri: compressedImage,
+        type: 'image/jpeg',
+        name: `profile_${user.uid}.jpg`,
+      });
+      data.append('upload_preset', 'CleanersChoice');
+      data.append('cloud_name', 'dfd65wawq'); 
+
+      const res = await axios.post(
+        'https://api.cloudinary.com/v1_1/dfd65wawq/image/upload',
+        data,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      );
+      const downloadURL = res.data.secure_url;
       await firestore().collection('Users').doc(user.uid).update({
         profile: downloadURL,
       });
