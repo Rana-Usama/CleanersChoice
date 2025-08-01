@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     text: {
         color: Colors.brown,
         fontFamily: Fonts.fontRegular,
-        fontSize: RFPercentage(1.7),
+        fontSize: RFPercentage(1.8),
         left: RFPercentage(1),
         top:RFPercentage(0.1)
     }

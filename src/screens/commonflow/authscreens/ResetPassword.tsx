@@ -92,10 +92,10 @@ const ResetPassword: React.FC = ({navigation} : any) => {
                   />
                   {touched.email && errors.email && (
                     <>
-                      <View style={{width: '90%', height: 16, bottom: 8}}>
+                      <View style={{width: '90%', height: 16, bottom: RFPercentage(0.8)}}>
                         <Text
                           style={{
-                            fontSize: RFPercentage(1.3),
+                            fontSize: RFPercentage(1.5),
                             fontFamily: Fonts.fontRegular,
                             color: Colors.error,
                             textAlign: 'left',

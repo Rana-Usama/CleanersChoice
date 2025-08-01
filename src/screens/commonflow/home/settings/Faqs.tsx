@@ -63,7 +63,6 @@ const data: Data[] = [
 ];
 
 const FAQS: React.FC = () => {
-  
   const [explanation, setExplanation] = useState<number | null>(null);
   const [visible, setVisible] = useState<boolean>(false);
 
@@ -80,7 +79,13 @@ const FAQS: React.FC = () => {
             renderItem={({item}) => {
               return (
                 <>
-                  <View style={styles.questionContainer}>
+                  <TouchableOpacity
+                  activeOpacity={0.8}
+                    style={styles.questionContainer}
+                    onPress={() => {
+                      setVisible(!visible);
+                      setExplanation(item.id);
+                    }}>
                     <Text style={styles.questionText}>{item.q}</Text>
                     <TouchableOpacity
                       onPress={() => {
@@ -97,7 +102,7 @@ const FAQS: React.FC = () => {
                         size={RFPercentage(3)}
                       />
                     </TouchableOpacity>
-                  </View>
+                  </TouchableOpacity>
                   {visible && explanation === item.id && (
                     <Text style={styles.answerText}>{item.e}</Text>
                   )}

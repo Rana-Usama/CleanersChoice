@@ -116,10 +116,11 @@ const ChangePasswordV2 = ({navigation} : any) => {
                   />
                   {touched.oldPassword && errors.oldPassword && (
                     <>
-                      <View style={{width: '90%', height: 16, bottom: 8}}>
+                      <View style={{width: '90%', height: 16, bottom: RFPercentage(0.8)
+                      }}>
                         <Text
                           style={{
-                            fontSize: RFPercentage(1.3),
+                            fontSize: RFPercentage(1.5),
                             fontFamily: Fonts.fontRegular,
                             color: Colors.error,
                             textAlign: 'left',
@@ -147,10 +148,10 @@ const ChangePasswordV2 = ({navigation} : any) => {
                   />
                   {touched.password && errors.password && (
                     <>
-                      <View style={{width: '90%', height: 16, bottom: 8}}>
+                      <View style={{width: '90%', height: 16, bottom: RFPercentage(0.8)}}>
                         <Text
                           style={{
-                            fontSize: RFPercentage(1.3),
+                            fontSize: RFPercentage(1.5),
                             fontFamily: Fonts.fontRegular,
                             color: Colors.error,
                             textAlign: 'left',
@@ -178,10 +179,10 @@ const ChangePasswordV2 = ({navigation} : any) => {
                   />
                   {touched.confirmPassword && errors.confirmPassword && (
                     <>
-                      <View style={{width: '90%', height: 16, bottom: 8}}>
+                      <View style={{width: '90%', height: 16, bottom:RFPercentage(0.8)}}>
                         <Text
                           style={{
-                            fontSize: RFPercentage(1.3),
+                            fontSize: RFPercentage(1.5),
                             fontFamily: Fonts.fontRegular,
                             color: Colors.error,
                             textAlign: 'left',

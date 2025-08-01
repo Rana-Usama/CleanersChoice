@@ -1,7 +1,8 @@
-import {FlatList, StyleSheet, Text, View} from 'react-native';
+import {FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts} from '../constants/Themes';
+import {useNavigation} from '@react-navigation/native';
 
 interface Service {
   id: number;
@@ -16,13 +17,16 @@ interface props {
 }
 
 const Package = (props: props) => {
+  const navigation = useNavigation();
   return (
-    <View style={styles.container}>
+    <TouchableOpacity
+      activeOpacity={0.8}
+      onPress={() => navigation.navigate('ServiceThree')}
+      style={styles.container}>
       <Text style={styles.packageName}>{props.name}</Text>
 
       <View style={styles.dividerContainer}>
         <View style={styles.contentContainer}>
-          
           <Text style={styles.serviceText}>{props.detail}</Text>
         </View>
       </View>
@@ -30,7 +34,7 @@ const Package = (props: props) => {
       <View style={styles.priceContainer}>
         <Text style={styles.priceText}>Starts at {props.price}$</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
@@ -38,7 +42,7 @@ export default Package;
 
 const styles = StyleSheet.create({
   container: {
-    width: RFPercentage(18.5),
+    width: RFPercentage(20),
     borderWidth: 1,
     borderColor: 'rgba(156, 163, 175, 1)',
     borderRadius: RFPercentage(1),
@@ -49,9 +53,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: Colors.primaryText,
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     paddingVertical: RFPercentage(1),
-    
   },
   dividerContainer: {
     borderTopWidth: 1,
@@ -80,7 +83,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.4),
     lineHeight: RFPercentage(2.4),
     paddingHorizontal: RFPercentage(1),
-    marginTop:RFPercentage(0.5)
+    marginTop: RFPercentage(0.5),
   },
   priceContainer: {
     paddingVertical: RFPercentage(0.9),
@@ -91,7 +94,7 @@ const styles = StyleSheet.create({
   priceText: {
     textAlign: 'center',
     color: Colors.gradient1,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.semiBold,
   },
 });

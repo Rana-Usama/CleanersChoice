@@ -403,7 +403,7 @@ const handleSignUp = async (values: any) => {
                       </Text>
                       <TouchableOpacity
                         onPress={() => navigation.navigate('SignIn')}>
-                        <Text style={styles.signIn}>Signin</Text>
+                        <Text style={styles.signIn}>SignIn</Text>
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -437,14 +437,14 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.background,
   },
-  errorContainer: {width: '90%', height: RFPercentage(2), bottom: 8},
+  errorContainer: {width: '90%', height: RFPercentage(2), bottom: RFPercentage(0.8)},
   backArrow: {
     position: 'absolute',
     top: RFPercentage(7),
     left: RFPercentage(3),
   },
   errorText: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
     color: Colors.error,
     textAlign: 'left',
