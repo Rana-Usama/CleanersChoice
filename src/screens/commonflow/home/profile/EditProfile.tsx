@@ -24,6 +24,7 @@ import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 import {Image as CompressorImage} from 'react-native-compressor';
 import {showToast} from '../../../../utils/ToastMessage';
+import axios from 'axios';
 
 const EditProfile = ({navigation}: any) => {
   const [name, setName] = useState('');
@@ -78,31 +79,33 @@ const EditProfile = ({navigation}: any) => {
       // Compress & upload image if changed
       if (img && img.path !== userData?.profile) {
         try {
-          console.log('📷 img.path:', img?.path);
-          console.log('🧾 userData.profile:', userData?.profile);
-          console.log('🆔 user.uid:', user?.uid);
-
           const compressedImage = await CompressorImage.compress(img?.path, {
             compressionMethod: 'manual',
             maxWidth: 1000,
             quality: 0.8,
           });
 
-          console.log('compressedImage:', compressedImage);
+          const data = new FormData();
+          data.append('file', {
+            uri: compressedImage,
+            type: 'image/jpeg',
+            name: `profile_${user.uid}.jpg`,
+          });
+          data.append('upload_preset', 'CleanersChoice'); 
+          data.append('cloud_name', 'dfd65wawq'); 
 
-          const imageRef = storage().ref(
-            `user_profiles/profile_${user.uid}.jpg`,
+          const res = await axios.post(
+            'https://api.cloudinary.com/v1_1/dfd65wawq/image/upload',
+            data,
+            {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+              },
+            },
           );
-          console.log('imageRef:', imageRef);
-
-          await imageRef.putFile(compressedImage);
-          console.log('✅ Upload successful');
-
-          imageUrl = await imageRef.getDownloadURL();
-          console.log('✅ imageUrl:', imageUrl);
-        } catch (uploadError) {
-          console.log('❌ Image upload failed:', uploadError);
-          throw uploadError;
+          imageUrl = res.data.secure_url;
+        } catch (err) {
+          console.log('Compression or upload process failed:', err);
         }
       }
 

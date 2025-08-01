@@ -22,10 +22,11 @@ import auth from '@react-native-firebase/auth';
 import {useSelector} from 'react-redux';
 import {Image as CompressorImage} from 'react-native-compressor';
 import Toast from 'react-native-toast-message';
+import axios from 'axios';
 
 const images = [{id: 0}, {id: 1}, {id: 2}];
 
-const ServiceTwo: React.FC = ({navigation} : any) => {
+const ServiceTwo: React.FC = ({navigation}: any) => {
   const [selectedImages, setSelectedImages] = useState([null, null, null]);
   const [originalImages, setOriginalImages] = useState([null, null, null]);
   const [loading, setLoading] = useState(false);
@@ -43,17 +44,33 @@ const ServiceTwo: React.FC = ({navigation} : any) => {
     try {
       const user = auth().currentUser;
       if (!user) return null;
-      const fileName = `service_images/${user.uid}/image_${index}.jpg`;
-      const reference = storage().ref(fileName);
-      await reference.putFile(compressedImage);
-      const downloadURL = await reference.getDownloadURL();
+
+      const data = new FormData();
+      data.append('file', {
+        uri: compressedImage,
+        type: 'image/jpeg',
+        name: `profile_${user.uid}.jpg`,
+      });
+      data.append('upload_preset', 'CleanersChoice'); 
+      data.append('cloud_name', 'dfd65wawq'); 
+
+      const res = await axios.post(
+        'https://api.cloudinary.com/v1_1/dfd65wawq/image/upload',
+        data,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      );
+      const downloadURL = res.data.secure_url;
       return downloadURL;
     } catch (error) {
       return null;
     }
   };
 
-  const uploadImg = async index => {
+  const uploadImg = async (index: any) => {
     try {
       const image = await ImagePicker.openPicker({
         width: 1000,
@@ -66,8 +83,7 @@ const ServiceTwo: React.FC = ({navigation} : any) => {
       const newImages = [...selectedImages];
       newImages[index] = {uri: image.path};
       setSelectedImages(newImages);
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   const saveImagesToFirestore = async () => {
@@ -171,7 +187,9 @@ const ServiceTwo: React.FC = ({navigation} : any) => {
 
       <View style={styles.container}>
         <View style={styles.galleryTextContainer}>
-          <Text style={styles.galleryText}>Please Upload at least one picture to proceed </Text>
+          <Text style={styles.galleryText}>
+            Please Upload at least one picture to proceed{' '}
+          </Text>
         </View>
         <View style={styles.flatListContainer}>
           <FlatList
