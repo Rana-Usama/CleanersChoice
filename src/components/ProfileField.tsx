@@ -16,11 +16,11 @@ const ProfileField: React.FC<Props> = (props: Props) => {
         <TouchableOpacity onPress={props.onPress}>
             <View style={styles.container}>
                 <View style={styles.textContainer}>
-                    <Image source={props.icon} resizeMode='contain' style={styles.icon} />
+                    <Image source={props.icon} resizeMode='contain' tintColor={props.color? props.color : null} style={styles.icon} />
                     <Text style={[styles.text, props.color && { color: props.color }]}>{props.text}</Text>
                 </View>
                 <TouchableOpacity onPress={props.onPress}>
-                    <Entypo name='chevron-thin-right' size={RFPercentage(1.9)} color={Colors.brown} />
+                    <Entypo name='chevron-thin-right' size={RFPercentage(1.9)} color={props.color ? props.color :  Colors.brown} />
                 </TouchableOpacity>
             </View>
         </TouchableOpacity>

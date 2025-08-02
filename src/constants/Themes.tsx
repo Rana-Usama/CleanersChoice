@@ -5,7 +5,7 @@ export const Colors: {[key: string]: string} = {
   gradient1: 'rgba(64, 123, 255, 1)',
   gradient2: 'rgba(92, 142, 255, 1)',
   buttonColor: 'rgba(235, 245, 255, 1)',
-  inputFieldColor: 'rgba(229, 231, 235, 1)',
+  inputFieldColor: 'rgba(216, 218, 221, 1)',
   placeholderColor: 'rgba(107, 114, 128, 1)',
   brown: 'rgba(68, 64, 60, 1)',
   inputTextColor: 'rgba(0, 0, 0, 0.8)',

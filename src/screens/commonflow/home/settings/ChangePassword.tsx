@@ -131,7 +131,7 @@ const ChangePasswordV2 = ({navigation} : any) => {
                     </>
                   )}
                 </View>
-                <View style={{marginTop: RFPercentage(2)}}>
+                <View style={{marginTop: RFPercentage(1)}}>
                   <Text style={styles.label}>New Password</Text>
                   <PasswordField
                     placeholder="Enter new password"
@@ -162,7 +162,7 @@ const ChangePasswordV2 = ({navigation} : any) => {
                     </>
                   )}
                 </View>
-                <View style={{marginTop: RFPercentage(2)}}>
+                <View style={{marginTop: RFPercentage(1)}}>
                   <Text style={styles.label}>Repeat New Password</Text>
                   <PasswordField
                     placeholder="Re-enter new password"

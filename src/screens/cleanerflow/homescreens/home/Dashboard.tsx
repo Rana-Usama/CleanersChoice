@@ -254,7 +254,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        contentContainerStyle={{paddingBottom: RFPercentage(15)}}
+        contentContainerStyle={{paddingBottom: RFPercentage(4)}}
         style={{flex: 1}}
         showsVerticalScrollIndicator={false}>
         {/* Header */}
@@ -642,7 +642,7 @@ const styles = StyleSheet.create({
   completeProfileContainer: {
     // position: 'absolute',
     alignSelf: 'center',
-    marginTop: RFPercentage(15),
+    marginTop: RFPercentage(13),
     // bottom: 0,
   },
   button: {

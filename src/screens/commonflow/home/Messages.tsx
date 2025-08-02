@@ -360,7 +360,7 @@ const Messages = ({navigation}: any) => {
                 />
               ) : (
                 // Not found
-                <View>
+                <View style={{marginTop:RFPercentage(10)}}>
                   <NotFound text="No chats found" />
                 </View>
               )}

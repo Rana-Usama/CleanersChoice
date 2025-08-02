@@ -144,7 +144,7 @@ const Premium = ({navigation}: any) => {
 
     if (result.success && result.subscriptionStatus === 'active') {
       const {periodEndTimestamp} = result;
-      
+
       if (user?.uid) {
         await firestore().collection('Users').doc(user.uid).update({
           subscription: true,
@@ -320,11 +320,14 @@ const styles = StyleSheet.create({
   subscriptionBox: {
     width: '85%',
     borderWidth: 1,
-    borderColor: 'rgba(209, 213, 219, 1)',
+    borderColor: 'rgba(217, 225, 238, 1)',
     borderRadius: RFPercentage(1.8),
     alignSelf: 'center',
     paddingVertical: RFPercentage(2),
+    borderBottomWidth: RFPercentage(0.5),
+    backgroundColor: '#fff',
   },
+
   starLeft: {
     position: 'absolute',
     left: 0,
@@ -350,7 +353,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     borderTopWidth: 1,
-    borderTopColor: 'rgba(156, 163, 175, 0.8)',
+    borderTopColor: 'rgba(217, 225, 238, 1)',
     marginTop: RFPercentage(1),
   },
   listContainer: {
