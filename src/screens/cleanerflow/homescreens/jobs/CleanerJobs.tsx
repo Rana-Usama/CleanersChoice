@@ -284,12 +284,18 @@ const CleanerJobs = () => {
                 alignItems: 'center',
                 marginTop: RFPercentage(1),
                 height: RFPercentage(6),
+                paddingHorizontal:RFPercentage(3)
               }}>
               {/* Location Filter */}
               <View>
                 <TouchableOpacity
                   activeOpacity={0.8}
-                  onPress={() => setModalVisible(true)}
+                  onPress={() => {
+                    setQuery('');
+                    setFilteredLocations([]);
+                    setSelectedLocation([]);
+                    setModalVisible(true);
+                  }}
                   style={[
                     styles.filterBox,
                     {
@@ -311,7 +317,7 @@ const CleanerJobs = () => {
                       {
                         fontFamily: loctionFilter
                           ? Fonts.semiBold
-                          : Fonts.fontRegular,
+                          : Fonts.fontMedium,
                         color: loctionFilter
                           ? Colors.background
                           : Colors.primaryText,
@@ -365,7 +371,7 @@ const CleanerJobs = () => {
                       {
                         fontFamily: rangeSelector
                           ? Fonts.semiBold
-                          : Fonts.fontRegular,
+                          : Fonts.fontMedium,
                         color: rangeSelector
                           ? Colors.background
                           : Colors.primaryText,
@@ -392,7 +398,12 @@ const CleanerJobs = () => {
               <View>
                 <TouchableOpacity
                   activeOpacity={0.8}
-                  onPress={() => setModalVisible3(true)}
+                  onPress={() => {
+                    setQuery2('');
+                    setServiceTypeFilter([]);
+                    setSelectedType('');
+                    setModalVisible3(true);
+                  }}
                   style={[
                     styles.filterBox,
                     {
@@ -413,7 +424,7 @@ const CleanerJobs = () => {
                       {
                         fontFamily: serviceType
                           ? Fonts.semiBold
-                          : Fonts.fontRegular,
+                          : Fonts.fontMedium,
                         color: serviceType
                           ? Colors.background
                           : Colors.primaryText,
@@ -479,7 +490,7 @@ const CleanerJobs = () => {
                         style={{
                           color: Colors.gradient1,
                           fontSize: RFPercentage(1.7),
-                          fontFamily:Fonts.fontMedium
+                          fontFamily: Fonts.fontMedium,
                         }}>
                         {showAllJobs ? 'View Less' : 'View More'}
                       </Text>
@@ -774,14 +785,16 @@ const styles = StyleSheet.create({
   },
   container: {
     backgroundColor: Colors.background,
-    width: '90%',
+    width: '100%',
     alignSelf: 'center',
+  
   },
   sectionTitle: {
     marginTop: RFPercentage(2.5),
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.8),
+    marginLeft:RFPercentage(3)
   },
   filterWrapper: {
     position: 'relative',
@@ -797,20 +810,22 @@ const styles = StyleSheet.create({
   },
 
   filterBox: {
-    width: RFPercentage(13.5),
-    height: RFPercentage(4.6),
+    width: RFPercentage(15),
+    height: RFPercentage(4.7),
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: RFPercentage(0.8),
+    borderRadius: RFPercentage(100),
     borderColor: Colors.inputFieldColor,
     flexDirection: 'row',
     backgroundColor: 'white', // Or transparent if not selected
+    borderBottomWidth:RFPercentage(0.3)
   },
 
   filterText: {
     color: Colors.primaryText,
     fontSize: RFPercentage(1.5),
+    fontFamily:Fonts.bold
   },
   listContainer: {
     marginTop: RFPercentage(0.7),
@@ -905,7 +920,7 @@ const styles = StyleSheet.create({
   },
   queryText: {
     padding: RFPercentage(2),
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     borderBottomWidth: 1,
     borderBottomColor: Colors.inputFieldColor,
     fontFamily: Fonts.fontRegular,
@@ -935,8 +950,8 @@ const styles = StyleSheet.create({
   },
   cross: {
     position: 'absolute',
-    right: RFPercentage(-0.5),
-    top: RFPercentage(-1.4),
+    right: RFPercentage(-0.7),
+    top: RFPercentage(-0.7),
   },
   close: {
     position: 'absolute',

@@ -31,9 +31,7 @@ const Settings = ({navigation}: any) => {
     setLoading(true);
     try {
       const currentUser = auth().currentUser;
-
       if (currentUser) {
-        // Remove fcmToken from Firestore (or your DB)
         await firestore().collection('Users').doc(currentUser.uid).update({
           fcmToken: firestore.FieldValue.delete(),
         });
@@ -69,36 +67,58 @@ const Settings = ({navigation}: any) => {
   };
   userRole();
 
-  // Delete Account
   const deleteAccount = async () => {
+    setLoading(true);
+    const user = auth().currentUser;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+    const userId = user.uid;
+    const email = user.email;
     setModalVisible2(false);
     try {
-      const user = auth().currentUser;
-      if (!user) return;
-      const email = await AsyncStorage.getItem('email');
       const password = await AsyncStorage.getItem('password');
       const credential = auth.EmailAuthProvider.credential(email, password);
       await user.reauthenticateWithCredential(credential);
-      await firestore().collection('Users').doc(user.uid).delete();
+      await firestore().collection('Users').doc(userId).delete();
+      const querySnapshot = await firestore()
+        .collection('Jobs')
+        .where('jobId', '==', userId)
+        .get();
+      const batch = firestore().batch();
+      querySnapshot.forEach(doc => batch.delete(doc.ref));
+      await batch.commit();
+      const chatSnapshot = await firestore()
+        .collection('Chats')
+        .where('participants', 'array-contains', userId)
+        .get();
+      const chatBatch = firestore().batch();
+      chatSnapshot.forEach(doc => chatBatch.delete(doc.ref));
+      await chatBatch.commit();
+      await firestore().collection('CleanerServices').doc(userId).delete();
       await user.delete();
       await AsyncStorage.multiRemove(['email', 'password', 'role']);
-
       showToast({
         type: 'success',
-        title: 'Account Deleted',
-        message: 'Your account has been permanently deleted.',
+        title: 'Account deleted successfully',
+        message: 'We’re sad to see you go!',
       });
 
-      navigation.reset({
-        index: 0,
-        routes: [{name: 'UserSelection'}],
-      });
+      setTimeout(() => {
+        navigation.reset({
+          index: 0,
+          routes: [{name: 'OnBoarding'}],
+        });
+      }, 1000);
     } catch (error) {
       showToast({
         type: 'danger',
-        title: 'Error',
-        message: error?.message || 'Account deletion failed.',
+        title: 'Delete Failed',
+        message: error?.message || 'Something went wrong.',
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -142,6 +162,7 @@ const Settings = ({navigation}: any) => {
           <ProfileField
             text={`Account Deactivation`}
             icon={Icons.remove}
+            color={'rgba(239, 68, 68, 1)'}
             onPress={() => setModalVisible2(true)}
           />
           <ProfileField

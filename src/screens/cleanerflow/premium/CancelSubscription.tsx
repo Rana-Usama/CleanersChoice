@@ -307,6 +307,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(1.8),
     alignSelf: 'center',
     paddingVertical: RFPercentage(2),
+    borderBottomWidth:RFPercentage(0.4)
   },
   starLeft: {
     position: 'absolute',

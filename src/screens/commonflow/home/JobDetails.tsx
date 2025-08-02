@@ -316,7 +316,6 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.7),
     marginTop: 4,
-    textAlign: 'justify',
     lineHeight: 18,
   },
   buttonWrapper: {

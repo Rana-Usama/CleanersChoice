@@ -24,7 +24,7 @@ import firestore from '@react-native-firebase/firestore';
 import {useDispatch, useSelector} from 'react-redux';
 import {cleanerDescription} from '../../../../redux/Form/Actions';
 import MultiSelect from 'react-native-multiple-select';
-import { showToast } from '../../../../utils/ToastMessage';
+import {showToast} from '../../../../utils/ToastMessage';
 
 const items = [
   {
@@ -61,7 +61,7 @@ const items = [
   },
 ];
 
-const ServiceOne: React.FC = ({navigation} : any) => {
+const ServiceOne: React.FC = ({navigation}: any) => {
   const available = useSelector(state => state?.availablity?.availability);
   const [location, setLoaction] = useState('');
   const [loading, setLoading] = useState(false);
@@ -105,10 +105,8 @@ const ServiceOne: React.FC = ({navigation} : any) => {
         setLoaction(data?.location || '');
         setServiceData(data);
       }
-    } catch (error) {
-    }
+    } catch (error) {}
   };
-
 
   // Adding Services
   const addServices = async () => {
@@ -139,17 +137,14 @@ const ServiceOne: React.FC = ({navigation} : any) => {
       } finally {
         setLoading(false);
       }
-    }
-    else {
+    } else {
       showToast({
         type: 'info',
-        title : 'Adding Service Details',
-        message : 'Please fill all the fields!'
-      })
+        title: 'Adding Service Details',
+        message: 'Please fill all the fields!',
+      });
     }
   };
-
-
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -157,7 +152,6 @@ const ServiceOne: React.FC = ({navigation} : any) => {
       <KeyboardAvoidingView style={{flex: 1}}>
         <ScrollView
           contentContainerStyle={{flexGrow: 1, paddingBottom: RFPercentage(5)}}>
-
           {/* Header */}
           <View style={styles.container}>
             <View style={styles.infoHeaderContainer}>
@@ -165,12 +159,10 @@ const ServiceOne: React.FC = ({navigation} : any) => {
             </View>
           </View>
 
-
           {/* Time Line */}
           <View style={styles.timeLineContainer}>
             <TimeLine />
           </View>
-
 
           <View style={styles.container}>
             {/* Description */}
@@ -183,7 +175,6 @@ const ServiceOne: React.FC = ({navigation} : any) => {
                 maxLength={200}
               />
             </View>
-
 
             {/* Availability */}
             <TouchableOpacity
@@ -232,7 +223,6 @@ const ServiceOne: React.FC = ({navigation} : any) => {
               </View>
             </TouchableOpacity>
 
-
             {/* Location */}
             <InputField
               placeholder="Add city/town you provide your services at"
@@ -240,7 +230,6 @@ const ServiceOne: React.FC = ({navigation} : any) => {
               onChangeText={setLoaction}
               customStyle={{width: '100%', marginBottom: RFPercentage(3)}}
             />
-
 
             {/* Service Type */}
             <View style={{flex: 1}}>
@@ -250,6 +239,7 @@ const ServiceOne: React.FC = ({navigation} : any) => {
                 styleDropdownMenuSubsection={{
                   borderWidth: 1,
                   borderRadius: RFPercentage(0.8),
+                  borderColor: Colors.inputFieldColor,
                 }}
                 uniqueKey="id"
                 ref={multiSelectRef}
@@ -280,7 +270,7 @@ const ServiceOne: React.FC = ({navigation} : any) => {
                 styleItemsContainer={{
                   backgroundColor: 'transparent',
                   borderRadius: RFPercentage(0.5),
-                  padding:RFPercentage(1)
+                  padding: RFPercentage(1),
                 }}
                 styleTextDropdownSelected={{
                   color: Colors.placeholderColor,
@@ -310,7 +300,6 @@ const ServiceOne: React.FC = ({navigation} : any) => {
                 {multiSelectRef.current?.getSelectedItemsExt(selectedItems)}
               </ScrollView>
             </View>
-
 
             {/* Button Container */}
             <View style={styles.buttonContainer}>

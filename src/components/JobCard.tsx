@@ -41,7 +41,7 @@ const JobCard = (props: props) => {
           </Text>
           <TouchableOpacity onPress={props.onPress}>
             <View style={styles.detailsContainer}>
-              <Text style={styles.detailsText}>Details</Text>
+              <Text style={styles.detailsText}>Job Details</Text>
               <TouchableOpacity onPress={props.onPress}>
                 <Image source={Icons.arrowRight} resizeMode="contain" style={styles.arrowIcon} />
               </TouchableOpacity>
@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
   },
   dateText: {
     color: Colors.placeholderColor,
-    fontFamily: Fonts.fontRegular,
+    fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.4),
   },
   locationContainer: {
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
   },
   locationText: {
     color: Colors.placeholderColor,
-    fontFamily: Fonts.fontRegular,
+    fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.7),
   },
   priceContainer: {
@@ -121,13 +121,13 @@ const styles = StyleSheet.create({
   },
   priceText: {
     color: Colors.placeholderColor,
-    fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.7),
   },
   priceHighlight: {
     color: Colors.gradient1,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
   },
   detailsContainer: {
     flexDirection: 'row',
@@ -135,8 +135,8 @@ const styles = StyleSheet.create({
   },
   detailsText: {
     color: Colors.gradient1,
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.semiBold,
+    fontSize: RFPercentage(1.6),
     right: 5,
   },
   arrowIcon: {

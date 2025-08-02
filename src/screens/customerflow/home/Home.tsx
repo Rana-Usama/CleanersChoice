@@ -480,7 +480,7 @@ const Home = () => {
               <ActivityIndicator
                 size={'large'}
                 color={Colors.placeholderColor}
-                style={{top: RFPercentage(15)}}
+                style={{top: RFPercentage(14)}}
               />
             </>
           ) : (
@@ -493,7 +493,10 @@ const Home = () => {
                   finalFilteredJobs.length === 0) ||
                 servicesData.length === 0 ? (
                   <>
+                  <View style={{bottom:RFPercentage(4)}}>
+
                     <NotFound text="No service found" />
+                  </View>
                   </>
                 ) : (
                   <>
