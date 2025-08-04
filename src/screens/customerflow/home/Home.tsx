@@ -94,8 +94,6 @@ const Home = () => {
   const [filteredLocations, setFilteredLocations] = useState<string[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
-  console.log('servicesData...........',servicesData)
-  
   // On Refresh
   const onRefresh = () => {
     setRefreshing(true);
@@ -315,10 +313,9 @@ const Home = () => {
             keyExtractor={item => item.id}
             horizontal
             showsHorizontalScrollIndicator={false}
-          
             renderItem={({item}) => (
               <TouchableOpacity
-              activeOpacity={0.8}
+                activeOpacity={0.8}
                 onPress={() => setCategorySelection(item?.id)}
                 style={{marginTop: RFPercentage(0.5)}}>
                 <View
@@ -355,7 +352,7 @@ const Home = () => {
                         fontFamily:
                           categorySelection === item.id
                             ? Fonts.semiBold
-                            : Fonts.fontRegular,
+                            : Fonts.fontMedium,
                       },
                     ]}>
                     {item.name.length > 8
@@ -375,7 +372,12 @@ const Home = () => {
             <View>
               <TouchableOpacity
                 activeOpacity={0.8}
-                onPress={() => setModalVisible(true)}
+                onPress={() => {
+                  setQuery('');
+                  setFilteredLocations([]);
+                  setSelectedLocation('');
+                  setModalVisible(true);
+                }}
                 style={[
                   styles.filterBox,
                   {
@@ -395,7 +397,7 @@ const Home = () => {
                     {
                       fontFamily: loctionFilter
                         ? Fonts.semiBold
-                        : Fonts.fontRegular,
+                        : Fonts.fontMedium,
                       color: loctionFilter
                         ? Colors.background
                         : Colors.primaryText,
@@ -449,7 +451,7 @@ const Home = () => {
                     {
                       fontFamily: rangeSelector
                         ? Fonts.semiBold
-                        : Fonts.fontRegular,
+                        : Fonts.fontMedium,
                       color: rangeSelector
                         ? Colors.background
                         : Colors.primaryText,
@@ -493,10 +495,9 @@ const Home = () => {
                   finalFilteredJobs.length === 0) ||
                 servicesData.length === 0 ? (
                   <>
-                  <View style={{bottom:RFPercentage(4)}}>
-
-                    <NotFound text="No service found" />
-                  </View>
+                    <View style={{bottom: RFPercentage(4)}}>
+                      <NotFound text="No service found" />
+                    </View>
                   </>
                 ) : (
                   <>
@@ -788,7 +789,7 @@ const styles = StyleSheet.create({
   },
   locationModal: {
     width: '90%',
-    height: RFPercentage(50),
+    height: RFPercentage(52),
     alignSelf: 'center',
     backgroundColor: 'rgba(226, 238, 255, 0.9)',
     alignItems: 'center',
@@ -872,7 +873,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-    backgroundColor: '#fff', 
+    backgroundColor: '#fff',
+    borderBottomWidth: RFPercentage(0.4),
   },
 
   categoryIcon: {
@@ -881,24 +883,25 @@ const styles = StyleSheet.create({
   },
   categoryText: {
     color: Colors.primaryText,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.5),
     textAlign: 'center',
     top: RFPercentage(0.9),
   },
   flatListPadding: {
     paddingHorizontal: RFPercentage(1.4),
-    paddingBottom:RFPercentage(0.2)
+    paddingBottom: RFPercentage(0.2),
   },
   filterBox: {
     width: RFPercentage(14),
     height: RFPercentage(5),
-    borderWidth: 1,
+    borderWidth: RFPercentage(0.1),
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: RFPercentage(0.8),
     borderColor: Colors.inputFieldColor,
     flexDirection: 'row',
     marginTop: RFPercentage(1),
+    borderBottomWidth: RFPercentage(0.4),
   },
 
   filterText: {
@@ -978,7 +981,7 @@ const styles = StyleSheet.create({
   },
   cross: {
     position: 'absolute',
-    right: RFPercentage(-0.6),
+    right: RFPercentage(-0.8),
     top: RFPercentage(-0.3),
   },
   close: {

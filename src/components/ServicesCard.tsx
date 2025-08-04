@@ -56,16 +56,7 @@ const ServicesCard = ({
               {name?.length > 20 ? `${name.slice(0, 20)}...` : name}
             </Text>
           </View>
-          <View style={styles.starContainer}>
-            {/* {Array.from({length: rating}, (_, index) => (
-              <Image
-                key={index}
-                source={star}
-                resizeMode="contain"
-                style={styles.star}
-              />
-            ))} */}
-          </View>
+
           <View style={styles.priceContainer}>
             <Text style={styles.priceText}>Starts at {price}$</Text>
             <View style={styles.locationContainer}>
@@ -96,9 +87,11 @@ const styles = StyleSheet.create({
     borderColor: Colors.inputFieldColor,
     borderWidth: 1,
     borderRadius: RFPercentage(1),
-    // backgroundColor:'red',
+    borderBottomWidth: RFPercentage(0.5),
     height: RFPercentage(28),
+    backgroundColor: '#fff', 
   },
+
   imageContainer: {
     width: '100%',
     height: RFPercentage(16),
