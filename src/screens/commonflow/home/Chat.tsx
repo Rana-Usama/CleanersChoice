@@ -383,13 +383,14 @@ const styles = StyleSheet.create({
     marginLeft: RFPercentage(2),
   },
   toolbar: {
-    backgroundColor: Colors.buttonColor,
+    backgroundColor: 'rgba(241, 242, 254, 0.4)',
     borderWidth: 1,
     borderColor: Colors.gradient2,
     borderRadius: RFPercentage(6),
     height: RFPercentage(6),
     justifyContent: 'center',
     paddingHorizontal: RFPercentage(1.5),
+    borderTopWidth:1
     // bottom: keyboardVisible ? RFPercentage(25) : 0,
   },
 });
