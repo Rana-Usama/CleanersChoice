@@ -51,6 +51,7 @@ const OnBoarding = ({navigation}: any) => {
   const nextPress = () => {
     if (step < 3) {
       setStep(step + 1);
+      console.log('hi.......');
     } else {
       navigation.navigate('UserSelection');
     }
@@ -88,7 +89,7 @@ const OnBoarding = ({navigation}: any) => {
         translucent
         backgroundColor="transparent"
       />
-      <ScrollView contentContainerStyle={{paddingBottom:RFPercentage(3)}}>
+      <ScrollView contentContainerStyle={{paddingBottom: RFPercentage(3)}}>
         <View style={styles.container}>
           <HeaderComponent />
           <View style={styles.content}>
@@ -139,15 +140,6 @@ const OnBoarding = ({navigation}: any) => {
           </View>
 
           {/* Buttons */}
-          <View style={styles.buttonWrapper}>
-            <NextButton
-              title="Skip"
-              onPress={() => navigation.navigate('UserSelection')}
-            />
-            <View style={{marginLeft: RFPercentage(2)}}>
-              <NextButton title="Next" onPress={nextPress} />
-            </View>
-          </View>
         </View>
         <View style={styles.starContainer}>
           <Image
@@ -157,6 +149,15 @@ const OnBoarding = ({navigation}: any) => {
           />
         </View>
       </ScrollView>
+      <View style={styles.buttonWrapper}>
+        <NextButton
+          title="Skip"
+          onPress={() => navigation.navigate('UserSelection')}
+        />
+        <View style={{marginLeft: RFPercentage(2)}}>
+          <NextButton title="Next" onPress={nextPress} />
+        </View>
+      </View>
     </SafeAreaView>
   );
 };
@@ -175,7 +176,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     alignItems: 'center',
     width: '90%',
-    marginTop: RFPercentage(13),
+    marginTop: RFPercentage(10),
   },
   image: {
     width: width * 0.8,
@@ -186,7 +187,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(2.3),
     fontFamily: Fonts.semiBold,
     textAlign: 'center',
-    marginTop:RFPercentage(2)
+    marginTop: RFPercentage(2),
   },
   descriptionContainer: {
     width: '80%',
@@ -220,18 +221,15 @@ const styles = StyleSheet.create({
     width: '100%',
     justifyContent: 'center',
     alignSelf: 'center',
-    marginTop: height*0.85,
     alignItems: 'center',
     flexDirection: 'row',
     position: 'absolute',
+    bottom: RFPercentage(8),
   },
   starContainer: {
-    // position: 'absolute',
-    // bottom: RFPercentage(1),
     right: RFPercentage(1.5),
-    // bottom:0,
-    alignSelf:'flex-end',
-    top:RFPercentage(10)
+    alignSelf: 'flex-end',
+    top: RFPercentage(6),
   },
   star: {
     width: RFPercentage(8),

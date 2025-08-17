@@ -52,26 +52,27 @@ const ServicesCard = ({
               resizeMode="contain"
               style={styles.icon}
             />
-            <Text style={styles.nameText}>
-              {name?.length > 20 ? `${name.slice(0, 20)}...` : name}
-            </Text>
+            <View>
+              <Text style={styles.nameText}>
+                {name?.length > 15 ? `${name.slice(0, 15)}...` : name}
+              </Text>
+              <View style={styles.locationContainer}>
+                <View style={styles.locationRow}>
+                  <EvilIcons
+                    name="location"
+                    size={RFPercentage(1.5)}
+                    style={styles.locationIcon}
+                  />
+                  <Text style={styles.locationText}>
+                   { location.length > 10 ? `${location?.slice(0, 10)}...` : location}
+                  </Text>
+                </View>
+              </View>
+            </View>
           </View>
 
           <View style={styles.priceContainer}>
             <Text style={styles.priceText}>Starts at {price}$</Text>
-            <View style={styles.locationContainer}>
-              <Text style={styles.fromText}>From :</Text>
-              <View style={styles.locationRow}>
-                <EvilIcons
-                  name="location"
-                  size={RFPercentage(1.3)}
-                  style={styles.locationIcon}
-                />
-                <Text style={styles.locationText}>
-                  {location?.slice(0, 5)}..
-                </Text>
-              </View>
-            </View>
           </View>
         </View>
       </View>
@@ -89,7 +90,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(1),
     borderBottomWidth: RFPercentage(0.5),
     height: RFPercentage(28),
-    backgroundColor: '#fff', 
+    backgroundColor: '#fff',
   },
 
   imageContainer: {
@@ -107,6 +108,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: RFPercentage(1.1),
+    height:RFPercentage(1)
   },
   activeDot: {
     width: RFPercentage(0.8),
@@ -139,8 +141,8 @@ const styles = StyleSheet.create({
   },
   nameText: {
     color: Colors.primaryText,
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.4),
+    fontFamily: Fonts.semiBold,
+    fontSize: RFPercentage(1.6),
   },
   starContainer: {
     flexDirection: 'row',
@@ -158,17 +160,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: RFPercentage(0.5),
+    marginTop: RFPercentage(1.3),
   },
   priceText: {
-    color: Colors.primaryText,
-    fontFamily: Fonts.fontMedium,
+    color: Colors.secondaryText,
+    fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.4),
   },
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    // marginTop:RFPercentage(0.2)
+    marginTop:RFPercentage(0.1)
   },
   fromText: {
     color: Colors.secondaryText,
@@ -179,13 +181,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  locationIcon: {
-    bottom: 1.5,
-  },
+  locationIcon: {  },
   locationText: {
     color: Colors.secondaryText,
-    fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.1),
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.3),
     left: 2,
   },
 });

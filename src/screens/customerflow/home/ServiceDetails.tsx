@@ -182,7 +182,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={{paddingBottom: RFPercentage(10)}}>
+      <ScrollView contentContainerStyle={{paddingBottom: RFPercentage(10)}} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <HeaderBack
           title={'Service Details'}
@@ -250,8 +250,8 @@ const ServiceDetails: React.FC = ({route}: any) => {
                 />
               </TouchableOpacity>
 
-              <Text style={[styles.headeing2, {color: Colors.primaryText}]}>
-                {item.name}
+              <Text style={[styles.headeing2, {color: Colors.primaryText, }]}>
+                {item.name?.length > 12 ? `${item.name.slice(0,12)}...` : item.name}
               </Text>
             </View>
 

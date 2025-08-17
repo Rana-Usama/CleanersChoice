@@ -89,7 +89,8 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(2),
     lineHeight: RFPercentage(2.8),
-    marginTop: RFPercentage(1),
+    marginTop: RFPercentage(1.5),
+    textAlign:"center"
   },
   descriptionText: {
     color: Colors.secondaryText,

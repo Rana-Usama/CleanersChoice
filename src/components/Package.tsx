@@ -14,14 +14,15 @@ interface props {
   services?: Service[];
   price: string;
   detail: string;
+  onPress : ()=> void
 }
 
 const Package = (props: props) => {
   const navigation = useNavigation();
   return (
     <TouchableOpacity
-      activeOpacity={0.8}
-      onPress={() => navigation.navigate('ServiceThree')}
+      activeOpacity={1}
+      onPress={props.onPress}
       style={styles.container}>
       <Text style={styles.packageName}>{props.name}</Text>
 

@@ -108,7 +108,6 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(1),
   },
   locationIcon: {
-    bottom: RFPercentage(0.1),
     right: RFPercentage(0.5),
   },
   locationText: {
