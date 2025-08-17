@@ -112,6 +112,7 @@ const styles = StyleSheet.create({
     color: 'rgba(75, 85, 99, 1)',
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.5),
+    marginTop:RFPercentage(0.5)
   },
   timeText: {
     color: Colors.gradient1,

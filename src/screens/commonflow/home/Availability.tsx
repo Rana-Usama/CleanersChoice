@@ -265,6 +265,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignSelf: 'center',
     position: 'absolute',
-    bottom: RFPercentage(34),
+    bottom: RFPercentage(30),
   },
 });

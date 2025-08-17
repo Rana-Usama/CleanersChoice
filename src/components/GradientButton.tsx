@@ -16,28 +16,27 @@ interface Props {
   title: string;
   style?: object;
   loading?: boolean;
-  textStyle? : object
+  textStyle?: object;
 }
 
 const GradientButton: React.FC<Props> = (props: Props) => {
   return (
-    <TouchableOpacity
-      activeOpacity={0.8}
-      onPress={props.onPress}
-      disabled={props.disabled}>
-      <LinearGradient
-        colors={[Colors.gradient1, Colors.gradient2]}
-        style={[styles.nextButton, {...props.style}]}>
-        <Text style={[styles.nextButtonText, {...props.textStyle}]}>
-          {props.loading ? (
-            <ActivityIndicator size={'small'} color={Colors.background} />
-          ) : (
-            props.title
-          )}
-          {/* {props.title} */}
-        </Text>
-      </LinearGradient>
-    </TouchableOpacity>
+    <LinearGradient
+      colors={[Colors.gradient1, Colors.gradient2]}
+      style={[styles.nextButton, {...props.style}]}>
+      <TouchableOpacity
+        activeOpacity={0.8}
+        onPress={props.onPress}
+        disabled={props.disabled}>
+        {props.loading ? (
+          <ActivityIndicator size="small" color={Colors.background} />
+        ) : (
+          <Text style={[styles.nextButtonText, {...props.textStyle}]}>
+            {props.title}
+          </Text>
+        )}
+      </TouchableOpacity>
+    </LinearGradient>
   );
 };
 

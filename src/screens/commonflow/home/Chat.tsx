@@ -201,7 +201,11 @@ const Chat = ({navigation, route}: any) => {
             )}
           </View>
 
-          <Text style={styles.receiverName}>{receiverName}</Text>
+          <Text style={styles.receiverName}>
+            {receiverName?.length > 20
+              ? `${receiverName.slice(0, 20)}...`
+              : receiverName}
+          </Text>
         </View>
       </View>
       <View style={styles.messageContainer}>
@@ -213,7 +217,6 @@ const Chat = ({navigation, route}: any) => {
             name: senderName,
             avatar: senderProfile,
           }}
-          
           showAvatarForEveryMessage={true}
           renderAvatar={props => null}
           renderBubble={props => (
@@ -249,7 +252,7 @@ const Chat = ({navigation, route}: any) => {
                 <TextInput
                   style={styles.customTextInput}
                   placeholder="Type a message"
-                  placeholderTextColor="#bbb"
+                  placeholderTextColor={Colors.gradient2}
                   value={message}
                   onChangeText={setMessage}
                 />
@@ -289,16 +292,12 @@ const Chat = ({navigation, route}: any) => {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    paddingLeft: RFPercentage(1),
-    paddingRight: RFPercentage(1),
-    // backgroundColor: Colors.gradient2,
   },
   messageContainer: {
     flex: 1,
     width: '100%',
-    marginBottom: RFPercentage(1),
-    borderRadius: RFPercentage(1),
     paddingTop: RFPercentage(1),
+    paddingHorizontal: RFPercentage(2),
   },
   loadMessages: {
     backgroundColor: Colors.gradient1,
@@ -308,35 +307,20 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingHorizontal: RFPercentage(2.6),
   },
-  customInputContainer: {
-    flexDirection: 'row',
-    padding: 10,
-    backgroundColor: '#f2f2f2',
-    borderRadius: 20,
-    marginHorizontal: 10,
-  },
   customTextInput: {
-    // flex: 1,
-    fontSize: RFPercentage(1.8),
-    borderRadius: RFPercentage(10),
-    // backgroundColor:'red',
+    fontSize: RFPercentage(1.7),
     width: '90%',
     fontFamily: Fonts.fontRegular,
+    height:RFPercentage(5),
   },
   sendButton: {
     justifyContent: 'center',
     alignItems: 'center',
     width: RFPercentage(4.5),
-    height: RFPercentage(4.5),
+    height: RFPercentage(5),
     borderRadius: RFPercentage(100),
-    position: 'absolute',
-    right: 0,
-    bottom: RFPercentage(0.5),
   },
-  sendText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
+ 
   noProfileContainer: {
     width: RFPercentage(6),
     height: RFPercentage(6),
@@ -361,7 +345,7 @@ const styles = StyleSheet.create({
   inner: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: RFPercentage(0.5),
+    paddingHorizontal: RFPercentage(2),
   },
   profile: {
     width: RFPercentage(6),
@@ -388,10 +372,15 @@ const styles = StyleSheet.create({
     borderColor: Colors.gradient2,
     borderRadius: RFPercentage(6),
     height: RFPercentage(6),
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: RFPercentage(1.5),
-    borderTopWidth:1
-    // bottom: keyboardVisible ? RFPercentage(25) : 0,
+    borderTopWidth: 1,
+    borderTopColor: Colors.gradient2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom:RFPercentage(3),
+    width:"100%",
+    marginTop:RFPercentage(1)
   },
 });
 

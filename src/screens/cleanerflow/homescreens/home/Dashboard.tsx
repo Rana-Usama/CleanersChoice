@@ -448,6 +448,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
                             name={`Package ${item.id}`}
                             price={item.price}
                             detail={item.details}
+                            onPress={()=> navigation.navigate("ServiceThree")}
                           />
                         );
                       }}

@@ -116,14 +116,15 @@ const handleSignUp = async (values: any) => {
       profileUrl = res.data.secure_url;
     }
 
-    const fcmToken = await messaging().getToken();
+    // const fcmToken = await messaging().getToken();
     const userData = {
       name: values.name,
       email: values.email,
       phone: values.phone,
       uid: user.uid,
       profile: profileUrl || null,
-      fcmToken: fcmToken || null,
+      // fcmToken: fcmToken || null,
+      fcmToken:"1234AB",
       createdAt: firestore.FieldValue.serverTimestamp(),
       role: userFlow?.userFlow,
       ...(userFlow?.userFlow === 'Cleaner' && {

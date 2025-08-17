@@ -97,7 +97,13 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
               onPress={() => navigation.navigate(route.name)}
               style={[styles.tabButton, isFocused && styles.activeTab]}>
               {route.name === 'Home' ? (
-                <View style={{bottom: RFPercentage(3.5)}}>
+                <View
+                  style={{
+                    bottom:
+                      Platform.OS === 'android'
+                        ? RFPercentage(3.5)
+                        : RFPercentage(2.5),
+                  }}>
                   <Image
                     source={isFocused ? Icons.home : Icons.homeInactive}
                     style={styles.middle}
@@ -138,7 +144,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                   fontSize: RFPercentage(1.5),
                   top:
                     route.name === 'Home'
-                      ? RFPercentage(-2.2)
+                      ? RFPercentage(-2)
                       : RFPercentage(0.5),
                   fontFamily: isFocused ? Fonts.fontMedium : Fonts.fontRegular,
                 }}>
@@ -177,7 +183,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(241, 245, 249, 1)',
     alignItems: 'center',
     justifyContent: 'center',
-    height: Platform.OS === 'ios' ? RFPercentage(8.6) : RFPercentage(11),
+    height: Platform.OS === 'ios' ? RFPercentage(10) : RFPercentage(11),
   },
   tabButton: {
     alignItems: 'center',
@@ -192,6 +198,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-around',
     height: '100%',
+    top: Platform.OS === 'ios' ? RFPercentage(0.6) : 0,
   },
   middle: {
     width: Platform.OS === 'ios' ? RFPercentage(7.5) : RFPercentage(8.5),
