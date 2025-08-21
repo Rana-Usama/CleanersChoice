@@ -85,25 +85,32 @@ const EditProfile = ({navigation}: any) => {
             quality: 0.8,
           });
 
-          const data = new FormData();
-          data.append('file', {
-            uri: compressedImage,
-            type: 'image/jpeg',
-            name: `profile_${user.uid}.jpg`,
-          });
-          data.append('upload_preset', 'CleanersChoice'); 
-          data.append('cloud_name', 'dfd65wawq'); 
+          // const data = new FormData();
+          // data.append('file', {
+          //   uri: compressedImage,
+          //   type: 'image/jpeg',
+          //   name: `profile_${user.uid}.jpg`,
+          // });
+          // data.append('upload_preset', 'CleanersChoice');
+          // data.append('cloud_name', 'dfd65wawq');
 
-          const res = await axios.post(
-            'https://api.cloudinary.com/v1_1/dfd65wawq/image/upload',
-            data,
-            {
-              headers: {
-                'Content-Type': 'multipart/form-data',
-              },
-            },
+          // const res = await axios.post(
+          //   'https://api.cloudinary.com/v1_1/dfd65wawq/image/upload',
+          //   data,
+          //   {
+          //     headers: {
+          //       'Content-Type': 'multipart/form-data',
+          //     },
+          //   },
+          // );
+          // imageUrl = res.data.secure_url;
+          
+
+          const reference = storage().ref(
+            `profileImages/profile_${user.uid}.jpg`,
           );
-          imageUrl = res.data.secure_url;
+          await reference.putFile(compressedImage);
+          imageUrl = await reference.getDownloadURL();
         } catch (err) {
           console.log('Compression or upload process failed:', err);
         }

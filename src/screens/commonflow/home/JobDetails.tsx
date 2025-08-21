@@ -315,8 +315,8 @@ const styles = StyleSheet.create({
     color: 'rgba(75, 85, 99, 1)',
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.7),
-    marginTop: 4,
-    lineHeight: 18,
+    marginTop: RFPercentage(1.6),
+    lineHeight: RFPercentage(2.2),
   },
   buttonWrapper: {
     width: '100%',

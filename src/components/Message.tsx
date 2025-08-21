@@ -44,8 +44,8 @@ const Message = (props: props) => {
               styles.messageText,
               {color: props.unread ? Colors.gradient1 : 'rgba(75, 85, 99, 1)'},
             ]}>
-            {props.message.length > 25
-              ? props.message.substring(0, 25) + '...'
+            {props.message.length > 30
+              ? props.message.substring(0, 30) + '...'
               : props.message}
           </Text>
         </View>
@@ -111,8 +111,8 @@ const styles = StyleSheet.create({
   messageText: {
     color: 'rgba(75, 85, 99, 1)',
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
-    marginTop:RFPercentage(0.5)
+    fontSize: RFPercentage(1.6),
+    marginTop:RFPercentage(0.3)
   },
   timeText: {
     color: Colors.gradient1,

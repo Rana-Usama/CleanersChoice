@@ -231,6 +231,7 @@ const ServiceThree: React.FC = ({navigation}: any) => {
         behavior={Platform.OS === 'ios' ? 'padding' : null}
         style={styles.keyboardAvoidingView}>
         <ScrollView
+        showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollView}
           keyboardShouldPersistTaps="handled">
           {/* Header */}
@@ -280,7 +281,7 @@ const ServiceThree: React.FC = ({navigation}: any) => {
                     placeholder={`Enter Package details`}
                     count={true}
                     value={pkg.details}
-                    maxLength={100}
+                    maxLength={120}
                     onChangeText={text =>
                       handleInputChange(pkg.id, 'details', text)
                     }

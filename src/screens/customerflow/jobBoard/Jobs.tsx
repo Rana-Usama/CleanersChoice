@@ -175,29 +175,31 @@ const Jobs = ({navigation}: any) => {
                 <>
                   <FlatList
                     data={Jobs}
-                    contentContainerStyle={{paddingBottom:RFPercentage(5)}}
+                    contentContainerStyle={{paddingBottom: RFPercentage(5)}}
                     keyExtractor={item => item?.id.toString()}
                     renderItem={({item}) => (
-                        <JobCard
-                          name={getTruncatedText(item?.title)}
-                          location={getTruncatedText2(item?.location)}
-                          price={item?.priceRange}
-                          date={item?.createdAt}
-                          onPress={() =>
-                            navigation.navigate('JobDetails', {item: item})
-                          }
-                          onPress2={() => {
-                            setSelectedJobId(item?.id);
-                            setModalVisible(true);
-                          }}
-                          delete={true}
-                        />
+                      <JobCard
+                        name={getTruncatedText(item?.title)}
+                        location={getTruncatedText2(item?.location)}
+                        price={item?.priceRange}
+                        date={item?.createdAt}
+                        onPress={() =>
+                          navigation.navigate('JobDetails', {item: item})
+                        }
+                        onPress2={() => {
+                          setSelectedJobId(item?.id);
+                          setModalVisible(true);
+                        }}
+                        delete={true}
+                      />
                     )}
                   />
                 </>
               ) : (
                 <>
-                  <NotFound text="No Jobs found" />
+                  <View style={{marginTop:RFPercentage(8)}}>
+                    <NotFound text="No Jobs found" />
+                  </View>
                 </>
               )}
             </>

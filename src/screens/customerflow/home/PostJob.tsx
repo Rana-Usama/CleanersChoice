@@ -225,7 +225,8 @@ const PostJob = ({route}: any) => {
               {/* Date Picker */}
               <View style={styles.dateContainer}>
                 <TouchableOpacity
-                  onPress={() => setOpen(true)}
+                activeOpacity={1}
+                  // onPress={() => setOpen(true)}
                   style={{flexDirection: 'row', alignItems: 'center'}}>
                   <Image
                     source={Icons.calendar}
@@ -237,7 +238,7 @@ const PostJob = ({route}: any) => {
                   </Text>
                 </TouchableOpacity>
               </View>
-              {/* Calender */}
+              {/* Calender
               <DatePicker
                 modal
                 open={open}
@@ -249,7 +250,7 @@ const PostJob = ({route}: any) => {
                 onCancel={() => {
                   setOpen(false);
                 }}
-              />
+              /> */}
 
               {/* Special Remarks */}
               <View>

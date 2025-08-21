@@ -88,32 +88,45 @@ const handleSignUp = async (values: any) => {
 
     let profileUrl = '';
 
-    if (img) {
+    // if (img) {
+    //   const compressedImage = await CompressorImage.compress(img?.path, {
+    //     compressionMethod: 'manual',
+    //     maxWidth: 1000,
+    //     quality: 0.8,
+    //   });
+
+    //   const data = new FormData();
+    //   data.append('file', {
+    //     uri: compressedImage,
+    //     type: 'image/jpeg',
+    //     name: `profile_${user.uid}.jpg`,
+    //   });
+    //   data.append('upload_preset', 'CleanersChoice');
+    //   data.append('cloud_name', 'dfd65wawq'); 
+
+    //   const res = await axios.post(
+    //     'https://api.cloudinary.com/v1_1/dfd65wawq/image/upload',
+    //     data,
+    //     {
+    //       headers: {
+    //         'Content-Type': 'multipart/form-data',
+    //       },
+    //     },
+    //   );
+    //   profileUrl = res.data.secure_url;
+    // }
+
+
+
+     if (img) {
       const compressedImage = await CompressorImage.compress(img?.path, {
         compressionMethod: 'manual',
         maxWidth: 1000,
         quality: 0.8,
       });
-
-      const data = new FormData();
-      data.append('file', {
-        uri: compressedImage,
-        type: 'image/jpeg',
-        name: `profile_${user.uid}.jpg`,
-      });
-      data.append('upload_preset', 'CleanersChoice');
-      data.append('cloud_name', 'dfd65wawq'); 
-
-      const res = await axios.post(
-        'https://api.cloudinary.com/v1_1/dfd65wawq/image/upload',
-        data,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        },
-      );
-      profileUrl = res.data.secure_url;
+      const reference = storage().ref(`profileImages/profile_${user.uid}.jpg`);
+      await reference.putFile(compressedImage);
+      profileUrl = await reference.getDownloadURL();
     }
 
     // const fcmToken = await messaging().getToken();
