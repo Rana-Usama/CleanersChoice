@@ -9,6 +9,7 @@ import {
   ScrollView,
   Dimensions,
   Modal,
+  Platform,
 } from 'react-native';
 import React, {useState, useRef, useEffect} from 'react';
 import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
@@ -452,7 +453,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
               <AntDesign
                 name="arrowleft"
                 color={Colors.primaryText}
-                size={RFPercentage(3)}
+                size={RFPercentage(2.8)}
               />
             </TouchableOpacity>
             <Image
@@ -611,7 +612,7 @@ const styles = StyleSheet.create({
   arrow: {
     position: 'absolute',
     left: RFPercentage(2),
-    top: RFPercentage(3),
+    top: Platform.OS === 'android' ? RFPercentage(3.6) : RFPercentage(6),
     zIndex: 2,
   },
   fullImg: {width: '100%', height: '100%'},

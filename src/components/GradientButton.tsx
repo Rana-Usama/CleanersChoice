@@ -49,13 +49,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: RFPercentage(18),
-    borderWidth: 1.4,
-    borderColor: Colors.gradient2,
-    backgroundColor: Colors.buttonColor,
   },
   nextButtonText: {
     fontSize: RFPercentage(1.9),
     fontFamily: Fonts.fontMedium,
     color: Colors.background,
+    textAlign:"center"
   },
 });

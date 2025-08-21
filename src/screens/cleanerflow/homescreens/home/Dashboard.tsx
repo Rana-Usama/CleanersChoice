@@ -117,25 +117,30 @@ const Dashboard: React.FC = ({navigation}: any) => {
         return;
       }
 
-      const data = new FormData();
-      data.append('file', {
-        uri: compressedImage,
-        type: 'image/jpeg',
-        name: `profile_${user.uid}.jpg`,
-      });
-      data.append('upload_preset', 'CleanersChoice');
-      data.append('cloud_name', 'dfd65wawq'); 
+      // const data = new FormData();
+      // data.append('file', {
+      //   uri: compressedImage,
+      //   type: 'image/jpeg',
+      //   name: `profile_${user.uid}.jpg`,
+      // });
+      // data.append('upload_preset', 'CleanersChoice');
+      // data.append('cloud_name', 'dfd65wawq');
 
-      const res = await axios.post(
-        'https://api.cloudinary.com/v1_1/dfd65wawq/image/upload',
-        data,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        },
-      );
-      const downloadURL = res.data.secure_url;
+      // const res = await axios.post(
+      //   'https://api.cloudinary.com/v1_1/dfd65wawq/image/upload',
+      //   data,
+      //   {
+      //     headers: {
+      //       'Content-Type': 'multipart/form-data',
+      //     },
+      //   },
+      // );
+      // const downloadURL = res.data.secure_url;
+
+      const fileName = `profile_${user.uid}.jpg`;
+      const reference = storage().ref(`profileImages/profile_${user.uid}.jpg`);
+      await reference.putFile(compressedImage);
+      const downloadURL = await reference.getDownloadURL();
       await firestore().collection('Users').doc(user.uid).update({
         profile: downloadURL,
       });
@@ -448,7 +453,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
                             name={`Package ${item.id}`}
                             price={item.price}
                             detail={item.details}
-                            onPress={()=> navigation.navigate("ServiceThree")}
+                            onPress={() => navigation.navigate('ServiceThree')}
                           />
                         );
                       }}

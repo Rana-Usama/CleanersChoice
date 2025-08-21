@@ -307,7 +307,7 @@ const Home = () => {
           </View>
 
           {/* Categories */}
-          <Text style={[styles.sectionTitle, {}]}>Categories</Text>
+          <Text style={[styles.sectionTitle, {marginTop:RFPercentage(2)}]}>Categories</Text>
           <FlatList
             data={categories}
             keyExtractor={item => item.id}
@@ -694,7 +694,7 @@ const Home = () => {
                           setPriceRange([value, priceRange[1]]);
                         }}
                         minimumTrackTintColor={Colors.gradient1}
-                        maximumTrackTintColor="gray"
+                        maximumTrackTintColor={Colors.borderBottomColor}
                         thumbTintColor={Colors.gradient1}
                       />
                       <View style={styles.sliderLabelsContainer}>
@@ -808,7 +808,7 @@ const styles = StyleSheet.create({
   applyLocation: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(2.2),
+    fontSize: RFPercentage(2),
   },
   queryContainer: {
     top: RFPercentage(0.5),

@@ -45,27 +45,37 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
       const user = auth().currentUser;
       if (!user) return null;
 
-      const data = new FormData();
-      data.append('file', {
-        uri: compressedImage,
-        type: 'image/jpeg',
-        name: `profile_${user.uid}.jpg`,
-      });
-      data.append('upload_preset', 'CleanersChoice'); 
-      data.append('cloud_name', 'dfd65wawq'); 
+      // const data = new FormData();
+      // data.append('file', {
+      //   uri: compressedImage,
+      //   type: 'image/jpeg',
+      //   name: `profile_${user.uid}.jpg`,
+      // });
+      // data.append('upload_preset', 'CleanersChoice');
+      // data.append('cloud_name', 'dfd65wawq');
 
-      const res = await axios.post(
-        'https://api.cloudinary.com/v1_1/dfd65wawq/image/upload',
-        data,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        },
+      // const res = await axios.post(
+      //   'https://api.cloudinary.com/v1_1/dfd65wawq/image/upload',
+      //   data,
+      //   {
+      //     headers: {
+      //       'Content-Type': 'multipart/form-data',
+      //     },
+      //   },
+      // );
+      // const downloadURL = res.data.secure_url;
+      // return downloadURL;
+
+      const reference = storage().ref(
+        `serviceImages/${user.uid}/service_${index}.jpg`,
       );
-      const downloadURL = res.data.secure_url;
+      await reference.putFile(compressedImage);
+      const downloadURL = await reference.getDownloadURL();
+      console.log('downloadURL.....', downloadURL);
+
       return downloadURL;
     } catch (error) {
+      console.log('error.....', error);
       return null;
     }
   };
@@ -89,7 +99,6 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
   const saveImagesToFirestore = async () => {
     const user = auth().currentUser;
     if (!user) return;
-
     const hasAtLeastOneImage = selectedImages.some(
       img => img !== null && img.uri,
     );
@@ -101,12 +110,10 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
       });
       return;
     }
-
     if (!haveImagesChanged()) {
       navigation.navigate('ServiceThree');
       return;
     }
-
     try {
       setLoading(true);
       const serviceRef = firestore()
@@ -121,11 +128,9 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
         }),
       );
       const validImages = uploadedImages.filter(url => url !== null);
-
       await serviceRef.update({
         serviceImages: validImages,
       });
-
       navigation.navigate('ServiceThree');
     } catch (error) {
     } finally {
@@ -174,7 +179,7 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
     <SafeAreaView style={styles.safeArea}>
       {/* Header */}
       <HeaderBack title="Service" textStyle={styles.headerText} left={true} />
-      <View style={styles.container}>
+      <View style={[styles.container, {width: '90%', alignSelf: 'center'}]}>
         <View style={styles.infoHeaderContainer}>
           <InfoHeader />
         </View>
@@ -186,15 +191,22 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
       </View>
 
       <View style={styles.container}>
-        <View style={styles.galleryTextContainer}>
+        <View
+          style={[
+            styles.galleryTextContainer,
+            {width: '90%', alignSelf: 'center'},
+          ]}>
           <Text style={styles.galleryText}>
-            Please Upload at least one picture to proceed{' '}
+            Please Upload at least one picture to proceed
           </Text>
         </View>
         <View style={styles.flatListContainer}>
           <FlatList
-            numColumns={3}
+            // numColumns={3}
             data={images}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{paddingHorizontal: RFPercentage(1.6)}}
             keyExtractor={item => item.id.toString()}
             renderItem={({item, index}) => (
               <TouchableOpacity onPress={() => uploadImg(index)}>
@@ -258,7 +270,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   container: {
-    width: '90%',
+    width: '100%',
     alignSelf: 'center',
   },
   headerText: {
