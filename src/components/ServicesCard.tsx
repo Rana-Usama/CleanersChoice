@@ -60,7 +60,7 @@ const ServicesCard = ({
                 <View style={styles.locationRow}>
                   <EvilIcons
                     name="location"
-                    size={RFPercentage(1.5)}
+                    size={RFPercentage(1.8)}
                     style={styles.locationIcon}
                   />
                   <Text style={styles.locationText}>
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: RFPercentage(1),
     borderBottomWidth: RFPercentage(0.5),
-    height: RFPercentage(28),
+    height: RFPercentage(28.5),
     backgroundColor: '#fff',
   },
 
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: RFPercentage(1.1),
-    height:RFPercentage(1)
+    height:RFPercentage(1),
   },
   activeDot: {
     width: RFPercentage(0.8),
@@ -125,7 +125,6 @@ const styles = StyleSheet.create({
   },
   detailsContainer: {
     padding: RFPercentage(1),
-    // backgroundColor:'red'
   },
   rowContainer: {
     flexDirection: 'row',
@@ -160,7 +159,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: RFPercentage(1.3),
+    marginTop: RFPercentage(0.8),
   },
   priceText: {
     color: Colors.secondaryText,
@@ -170,7 +169,6 @@ const styles = StyleSheet.create({
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop:RFPercentage(0.1)
   },
   fromText: {
     color: Colors.secondaryText,
@@ -181,11 +179,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  locationIcon: {  },
+  locationIcon: {  bottom:1, left:-1},
   locationText: {
     color: Colors.secondaryText,
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.3),
-    left: 2,
+    left: 1,
   },
 });
