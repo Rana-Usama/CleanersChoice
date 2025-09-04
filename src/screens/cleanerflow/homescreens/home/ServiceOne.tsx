@@ -178,6 +178,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
 
             {/* Availability */}
             <TouchableOpacity
+              activeOpacity={0.8}
               onPress={() => navigation.navigate('Availability')}
               style={styles.dateContainer}>
               <View style={styles.dateButton}>
@@ -204,6 +205,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
               </View>
               <View style={{position: 'absolute', right: RFPercentage(1)}}>
                 <TouchableOpacity
+                  activeOpacity={0.8}
                   onPress={() => navigation.navigate('Availability')}>
                   {available.length > 0 ||
                   serviceData?.availability.length > 0 ? (

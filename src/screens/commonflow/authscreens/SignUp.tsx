@@ -224,7 +224,7 @@ const SignUp: React.FC = ({navigation}: any) => {
                 </View>
                 {img && (
                   <>
-                    <TouchableOpacity onPress={uploadImg}>
+                    <TouchableOpacity onPress={uploadImg}   activeOpacity={0.8}>
                       <Image
                         source={Icons.edit}
                         resizeMode="contain"
@@ -410,11 +410,13 @@ const SignUp: React.FC = ({navigation}: any) => {
                         Already have an account?
                       </Text>
                       <TouchableOpacity
+                        activeOpacity={0.8}
                         onPress={() => navigation.navigate('SignIn')}>
                         <Text style={styles.signIn}>SignIn</Text>
                       </TouchableOpacity>
                     </View>
                     <TouchableOpacity
+                      activeOpacity={0.8}
                       onPress={() => navigation.navigate('UserSelection')}
                       style={{
                         flexDirection: 'row',

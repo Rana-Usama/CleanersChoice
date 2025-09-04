@@ -35,7 +35,7 @@ const HeaderBack = (props: props) => {
             style={styles.logo}
           />
         ) : props.left ? (
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+          <TouchableOpacity   activeOpacity={0.8} onPress={() => navigation.goBack()}>
             <AntDesign
               name="arrowleft"
               color={Colors.secondaryText}
@@ -47,7 +47,7 @@ const HeaderBack = (props: props) => {
       <Text style={[styles.headerText, props.textStyle]}>{props.title}</Text>
       {props.right && (
         <View style={styles.rightContainer}>
-          <TouchableOpacity onPress={props.onPress}>
+          <TouchableOpacity   activeOpacity={0.8} onPress={props.onPress}>
             <Text style={styles.rightText}>{props.rightText}</Text>
           </TouchableOpacity>
         </View>

@@ -187,7 +187,7 @@ const EditProfile = ({navigation}: any) => {
             />
             <View style={styles.container}>
               {/* Profile Image */}
-              <TouchableOpacity onPress={uploadImg} style={styles.imgContainer}>
+              <TouchableOpacity   activeOpacity={0.8} onPress={uploadImg} style={styles.imgContainer}>
                 <View style={styles.pictureContainer}>
                   {loading2 ? (
                     <ActivityIndicator
@@ -208,7 +208,7 @@ const EditProfile = ({navigation}: any) => {
                     />
                   )}
                 </View>
-                <TouchableOpacity onPress={uploadImg}>
+                <TouchableOpacity   activeOpacity={0.8} onPress={uploadImg}>
                   <Image
                     source={Icons.edit}
                     resizeMode="contain"

@@ -139,7 +139,7 @@ const Jobs = ({navigation}: any) => {
         {/* Filters */}
         <View style={styles.container}>
           <View style={styles.toggleContainer}>
-            <TouchableOpacity onPress={toggle1}>
+            <TouchableOpacity   activeOpacity={0.8} onPress={toggle1}>
               <View
                 style={[styles.toggleButton, active && styles.activeButton]}>
                 <Text style={[styles.toggleText, active && styles.activeText]}>
@@ -147,7 +147,7 @@ const Jobs = ({navigation}: any) => {
                 </Text>
               </View>
             </TouchableOpacity>
-            <TouchableOpacity onPress={toggle2} style={styles.toggleSpacing}>
+            <TouchableOpacity   activeOpacity={0.8} onPress={toggle2} style={styles.toggleSpacing}>
               <View
                 style={[styles.toggleButton, completed && styles.activeButton]}>
                 <Text

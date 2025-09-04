@@ -36,7 +36,7 @@ const PasswordField: React.FC<Props> = (props: Props) => {
           onChangeText={props.onChangeText}
           onBlur={props.handleBlur}
         />
-        <TouchableOpacity onPress={togglePasswordVisibility} style={styles.iconWrapper}>
+        <TouchableOpacity   activeOpacity={0.8} onPress={togglePasswordVisibility} style={styles.iconWrapper}>
           <Feather
             name={visible ? 'eye' : 'eye-off'}
             size={RFPercentage(1.8)}

@@ -13,13 +13,13 @@ interface Props {
 
 const ProfileField: React.FC<Props> = (props: Props) => {
     return (
-        <TouchableOpacity onPress={props.onPress}>
+        <TouchableOpacity onPress={props.onPress}   activeOpacity={0.8} >
             <View style={styles.container}>
                 <View style={styles.textContainer}>
                     <Image source={props.icon} resizeMode='contain' tintColor={props.color? props.color : null} style={styles.icon} />
                     <Text style={[styles.text, props.color && { color: props.color }]}>{props.text}</Text>
                 </View>
-                <TouchableOpacity onPress={props.onPress}>
+                <TouchableOpacity   activeOpacity={0.8} onPress={props.onPress}>
                     <Entypo name='chevron-thin-right' size={RFPercentage(1.9)} color={props.color ? props.color :  Colors.brown} />
                 </TouchableOpacity>
             </View>

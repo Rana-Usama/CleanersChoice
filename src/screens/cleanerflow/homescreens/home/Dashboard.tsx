@@ -259,7 +259,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        contentContainerStyle={{paddingBottom: RFPercentage(6)}}
+        contentContainerStyle={{paddingBottom: RFPercentage(9)}}
         style={{flex: 1}}
         showsVerticalScrollIndicator={false}>
         {/* Header */}
@@ -275,7 +275,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
         <View style={styles.container}>
           {/* Profile Image */}
           <View style={styles.imgContainer}>
-            <TouchableOpacity onPress={uploadImg}>
+            <TouchableOpacity onPress={uploadImg}   activeOpacity={0.8}>
               <View style={styles.pictureContainer}>
                 {loading ? (
                   <ActivityIndicator
@@ -297,7 +297,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
                 )}
               </View>
 
-              <TouchableOpacity onPress={uploadImg}>
+              <TouchableOpacity   activeOpacity={0.8} onPress={uploadImg}>
                 <Image
                   source={Icons.edit}
                   resizeMode="contain"
@@ -399,10 +399,11 @@ const Dashboard: React.FC = ({navigation}: any) => {
                         </View>
                       )}
                     />
-                    {service?.type.length > 5 && (
+                    {service?.type?.length > 5 && (
                       <TouchableOpacity
+                        activeOpacity={0.8}
                         onPress={
-                          visibleItems < service?.type.length
+                          visibleItems < service?.type?.length
                             ? handleShowMore
                             : handleShowLess
                         }>
