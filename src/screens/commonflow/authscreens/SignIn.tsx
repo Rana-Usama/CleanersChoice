@@ -52,10 +52,10 @@ const SignIn: React.FC = () => {
       const userDoc = await firestore().collection('Users').doc(user.uid).get();
       const userData = userDoc.data();
       const userRole = userData?.role;
-      const fcmToken = await messaging().getToken();
-      await firestore().collection('Users').doc(user.uid).update({
-        fcmToken: fcmToken,
-      });
+      // const fcmToken = await messaging().getToken();
+      // await firestore().collection('Users').doc(user.uid).update({
+      //   fcmToken: fcmToken,
+      // });
 
       showToast({
         type: 'success',

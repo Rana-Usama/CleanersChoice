@@ -7,14 +7,14 @@ import {
   TextInput,
   Keyboard,
   StatusBar,
+  ImageBackground,
 } from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import {GiftedChat, InputToolbar, Bubble} from 'react-native-gifted-chat';
 import firestore from '@react-native-firebase/firestore';
 import {RFPercentage} from 'react-native-responsive-fontsize';
-import {Colors, Fonts} from '../../../constants/Themes';
+import {Colors, Fonts, IMAGES} from '../../../constants/Themes';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import LinearGradient from 'react-native-linear-gradient';
 import Feather from 'react-native-vector-icons/Feather';
 import {useFocusEffect} from '@react-navigation/native';
 
@@ -165,9 +165,7 @@ const Chat = ({navigation, route}: any) => {
   };
 
   return (
-    <LinearGradient
-      colors={['rgb(238, 242, 251)', 'rgb(180, 203, 252)']}
-      style={styles.screen}>
+    <View style={styles.screen}>
       <StatusBar
         barStyle={'dark-content'}
         translucent
@@ -209,95 +207,151 @@ const Chat = ({navigation, route}: any) => {
         </View>
       </View>
       <View style={styles.messageContainer}>
-        <GiftedChat
-          messages={messages}
-          onSend={messages => onSend(messages)}
-          user={{
-            _id: senderId,
-            name: senderName,
-            avatar: senderProfile,
-          }}
-          showAvatarForEveryMessage={true}
-          renderAvatar={props => null}
-          renderBubble={props => (
-            <Bubble
-              {...props}
-              wrapperStyle={{
-                left: {
-                  backgroundColor: Colors.background,
-                  padding: RFPercentage(0.6),
-                },
-                right: {
-                  backgroundColor: Colors.gradient1,
-                  padding: RFPercentage(0.6),
-                },
-              }}
-              textStyle={{
-                left: {
-                  color: Colors.inputTextColor,
-                  fontFamily: Fonts.fontRegular,
-                },
-                right: {
-                  color: Colors.background,
-                  fontFamily: Fonts.fontRegular,
-                },
-              }}
-            />
-          )}
-          renderInputToolbar={props => (
-            <InputToolbar
-              {...props}
-              containerStyle={styles.toolbar}
-              renderComposer={() => (
-                <TextInput
-                  style={styles.customTextInput}
-                  placeholder="Type a message"
-                  placeholderTextColor={Colors.gradient2}
-                  value={message}
-                  onChangeText={setMessage}
+        <ImageBackground
+          source={IMAGES.chat}
+          resizeMode="cover"
+          style={{flex: 1}}>
+          <GiftedChat
+            messages={messages}
+            onSend={messages => onSend(messages)}
+            user={{
+              _id: senderId,
+              name: senderName,
+              avatar: senderProfile,
+            }}
+            showAvatarForEveryMessage={true}
+            renderBubble={props => (
+              <Bubble
+                {...props}
+                wrapperStyle={{
+                  left: {
+                    backgroundColor: 'rgba(232, 235, 238, 1)',
+                    padding: RFPercentage(0.6),
+                  },
+                  right: {
+                    backgroundColor: 'rgba(115, 162, 199, 1)',
+                    padding: RFPercentage(0.6),
+                  },
+                }}
+                textStyle={{
+                  left: {
+                    color: Colors.inputTextColor,
+                    fontFamily: Fonts.fontRegular,
+                    fontSize: RFPercentage(1.8),
+                  },
+                  right: {
+                    color: Colors.background,
+                    fontFamily: Fonts.fontRegular,
+                    fontSize: RFPercentage(1.8),
+                  },
+                }}
+              />
+            )}
+            renderInputToolbar={props => (
+              <View
+                style={{
+                  backgroundColor: 'rgba(248, 248, 248, 1)',
+                  width: '100%',
+                  minHeight: RFPercentage(10),
+                  justifyContent: 'center',
+                  maxHeight: RFPercentage(18),
+                  paddingVertical: RFPercentage(2),
+                }}>
+                <InputToolbar
+                  {...props}
+                  containerStyle={styles.toolbar}
+                  renderComposer={() => (
+                    <TextInput
+                      style={styles.customTextInput}
+                      placeholder="Type a message"
+                      placeholderTextColor={'rgba(178, 177, 177, 1)'}
+                      value={message}
+                      onChangeText={setMessage}
+                      multiline={true}
+                      scrollEnabled={true}
+                      textAlignVertical="top"
+                    />
+                  )}
+                  renderSend={() => (
+                    <TouchableOpacity
+                      style={styles.sendButton}
+                      onPress={() => {
+                        onSend([
+                          {
+                            text: message,
+                            user: {
+                              _id: senderId,
+                              name: senderName,
+                            },
+                            createdAt: new Date(),
+                          },
+                        ]);
+                        Keyboard.dismiss();
+                      }}>
+                      <Feather
+                        name="send"
+                        size={RFPercentage(2.5)}
+                        color={'rgba(135, 133, 133, 1)'}
+                      />
+                    </TouchableOpacity>
+                  )}
                 />
-              )}
-              renderSend={() => (
-                <TouchableOpacity
-                  style={styles.sendButton}
-                  onPress={() => {
-                    onSend([
-                      {
-                        text: message,
-                        user: {
-                          _id: senderId,
-                          name: senderName,
-                          avatar: senderProfile,
-                        },
-                        createdAt: new Date(),
-                      },
-                    ]);
-                    Keyboard.dismiss();
+              </View>
+            )}
+            renderAvatar={props => {
+              const isReceiver = props.currentMessage.user._id !== senderId;
+              if (!isReceiver) return null;
+              return receiverProfile ? (
+                <Image
+                  source={{uri: receiverProfile}}
+                  style={{
+                    width: RFPercentage(4.5),
+                    height: RFPercentage(4.5),
+                    borderRadius: RFPercentage(50),
+                    borderWidth: 1,
+                    borderColor: Colors.primaryText,
+                  }}
+                />
+              ) : (
+                <View
+                  style={{
+                    width: RFPercentage(5),
+                    height: RFPercentage(5),
+                    borderRadius: RFPercentage(50),
+                    backgroundColor: 'rgba(208, 209, 211, 1)',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderWidth: 1,
+                    borderColor: 'rgba(188, 189, 191, 1)',
                   }}>
-                  <Feather
-                    name="send"
-                    size={RFPercentage(2.3)}
-                    color={Colors.gradient2}
-                  />
-                </TouchableOpacity>
-              )}
-            />
-          )}
-        />
+                  <Text
+                    style={{
+                      color: Colors.primaryText,
+                      fontSize: RFPercentage(1.8),
+                      fontFamily: 'Poppins_600SemiBold',
+                    }}>
+                    {receiverName?.[0] || '?'}
+                  </Text>
+                </View>
+              );
+            }}
+          />
+        </ImageBackground>
       </View>
-    </LinearGradient>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+    backgroundColor: Colors.background,
   },
   messageContainer: {
     flex: 1,
     width: '100%',
     paddingTop: RFPercentage(1),
-    paddingHorizontal: RFPercentage(2),
+    // paddingHorizontal: RFPercentage(2),
   },
   loadMessages: {
     backgroundColor: Colors.gradient1,
@@ -308,24 +362,31 @@ const styles = StyleSheet.create({
     paddingHorizontal: RFPercentage(2.6),
   },
   customTextInput: {
-    fontSize: RFPercentage(1.7),
+    color: Colors.white,
+    fontSize: RFPercentage(1.8),
+    fontFamily: 'Poppins_400Regular',
     width: '90%',
-    fontFamily: Fonts.fontRegular,
-    height:RFPercentage(5),
+    marginVertical: 0,
+    paddingVertical: 0,
+    justifyContent: 'center',
+    textAlignVertical: 'top',
   },
   sendButton: {
     justifyContent: 'center',
     alignItems: 'center',
     width: RFPercentage(4.5),
-    height: RFPercentage(5),
+    height: RFPercentage(4.5),
     borderRadius: RFPercentage(100),
+    position: 'absolute',
+    right: RFPercentage(-1),
+    top: RFPercentage(-1),
   },
- 
+
   noProfileContainer: {
     width: RFPercentage(6),
     height: RFPercentage(6),
     marginLeft: RFPercentage(2),
-    borderWidth: 2,
+    borderWidth: RFPercentage(0.2),
     borderColor: Colors.gradient1,
     borderRadius: RFPercentage(100),
     alignItems: 'center',
@@ -358,7 +419,6 @@ const styles = StyleSheet.create({
     color: Colors.gradient1,
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(2),
-    top: RFPercentage(0.2),
   },
   receiverName: {
     color: Colors.primaryText,
@@ -367,20 +427,18 @@ const styles = StyleSheet.create({
     marginLeft: RFPercentage(2),
   },
   toolbar: {
-    backgroundColor: 'rgba(241, 242, 254, 0.4)',
-    borderWidth: 1,
-    borderColor: Colors.gradient2,
-    borderRadius: RFPercentage(6),
-    height: RFPercentage(6),
-    justifyContent: 'space-between',
-    paddingHorizontal: RFPercentage(1.5),
-    borderTopWidth: 1,
-    borderTopColor: Colors.gradient2,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom:RFPercentage(3),
-    width:"100%",
-    marginTop:RFPercentage(1)
+    borderWidth: RFPercentage(0.1),
+    borderRadius: RFPercentage(3),
+    // minHeight: RFPercentage(5.5),
+    maxHeight: RFPercentage(18),
+    justifyContent: 'center',
+    padding: RFPercentage(1.7),
+    borderTopWidth: RFPercentage(0.1),
+    alignSelf: 'center',
+    width: '90%',
+    backgroundColor: 'rgba(234, 232, 232, 0.5)',
+    borderColor: 'rgba(234, 232, 232, 0.9)',
+    borderTopColor: 'rgba(234, 232, 232, 0.9)',
   },
 });
 

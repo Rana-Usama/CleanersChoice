@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
-import {Colors, Fonts, IMAGES} from '../../../constants/Themes';
+import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
 import HeaderComponent from '../../../components/HeaderComponent';
 import GradientButton from '../../../components/GradientButton';
 import {useNavigation} from '@react-navigation/native';
@@ -19,7 +19,7 @@ import auth from '@react-native-firebase/auth';
 import {BlurView} from '@react-native-community/blur';
 import SubscriptionModal from '../../../components/SubscriptionModal';
 import NextButton from '../../../components/NextButton';
-import AntDesign from 'react-native-vector-icons/AntDesign';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import {showToast} from '../../../utils/ToastMessage';
 
 const services = [
@@ -83,7 +83,7 @@ const CancelSubscription = () => {
         const result = JSON.parse(text); // Try parsing manually
         if (result.success) {
           const {currentPeriodEnd} = result;
-          console.log('currentPeriodEnd.....', currentPeriodEnd)
+          console.log('currentPeriodEnd.....', currentPeriodEnd);
           if (user?.uid) {
             await firestore()
               .collection('Users')
@@ -114,23 +114,17 @@ const CancelSubscription = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Back arrow */}
-      <TouchableOpacity
-        onPress={() => navigation.goBack()}
-        style={styles.arrow}>
-        <AntDesign
-          name="arrowleft"
-          color={Colors.secondaryText}
-          size={RFPercentage(3)}
-        />
-      </TouchableOpacity>
-
       {/* Header */}
       <HeaderComponent />
 
       {/* Main Container */}
       <View style={styles.container}>
         <View style={styles.premiumHeader}>
+          <Image
+            source={Icons.owner}
+            resizeMode="contain"
+            style={styles.ownerIcon}
+          />
           <Text style={styles.premiumText}>Cancel Premium Subscription</Text>
         </View>
         <View style={styles.subscriptionContainer}>
@@ -193,6 +187,23 @@ const CancelSubscription = () => {
             disabled={isLoading || cancel === true ? true : false}
           />
         </View>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginTop: RFPercentage(2),
+            justifyContent: 'center',
+          }}>
+          <Ionicons
+            name="chevron-back-circle-sharp"
+            color={'rgba(178, 204, 228, 1)'}
+            size={RFPercentage(2.4)}
+          />
+          <Text style={[styles.signIn, {color: 'rgba(134, 154, 173, 1)'}]}>
+            Back
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.starContainer}>
@@ -279,7 +290,7 @@ const styles = StyleSheet.create({
   container: {
     width: '90%',
     alignSelf: 'center',
-    paddingTop: RFPercentage(11),
+    paddingTop: RFPercentage(8),
   },
   premiumHeader: {
     flexDirection: 'row',
@@ -292,10 +303,9 @@ const styles = StyleSheet.create({
   },
   premiumText: {
     color: Colors.brown,
-    fontSize: RFPercentage(2.2),
+    fontSize: RFPercentage(2),
     fontFamily: Fonts.fontMedium,
     marginLeft: RFPercentage(0.6),
-    top: RFPercentage(0.3),
   },
   subscriptionContainer: {
     marginTop: RFPercentage(4),
@@ -307,7 +317,13 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(1.8),
     alignSelf: 'center',
     paddingVertical: RFPercentage(2),
-    borderBottomWidth:RFPercentage(0.4)
+    borderBottomWidth: RFPercentage(0.4),
+  },
+  signIn: {
+    color: Colors.gradient1,
+    fontSize: RFPercentage(1.7),
+    fontFamily: Fonts.fontMedium,
+    left: 3,
   },
   starLeft: {
     position: 'absolute',

@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   inputWrapper: {
-    width: '95%',
+    width: '92%',
     alignItems: 'center',
     justifyContent: 'flex-start',
     flexDirection: 'row',

@@ -7,7 +7,6 @@ import {
   Image,
   Keyboard,
   BackHandler,
-  SafeAreaView,
   Platform,
 } from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
@@ -22,6 +21,7 @@ import Settings from '../screens/commonflow/home/settings/Settings';
 import Messages from '../screens/commonflow/home/Messages';
 import {useUnreadMessages} from '../utils/UnreadMessagesContext';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
 const Tab = createBottomTabNavigator();
 
@@ -82,79 +82,101 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={[styles.tabBarContainer, {paddingBottom: insets.bottom}]}>
-      <View style={styles.labelContainer}>
-        {state.routes.map((route, index) => {
-          const {options} = descriptors[route.key];
-          const label =
-            options.tabBarLabel !== undefined
-              ? options.tabBarLabel
-              : route.name;
-          const isFocused = state.index === index;
-          return (
-            <TouchableOpacity
-              key={index}
-              onPress={() => navigation.navigate(route.name)}
-              style={[styles.tabButton, isFocused && styles.activeTab]}>
-              {route.name === 'Home' ? (
-                <View
-                  style={{
-                    bottom:
-                      Platform.OS === 'android'
-                        ? RFPercentage(3.5)
-                        : RFPercentage(2.5),
-                  }}>
+    <SafeAreaView
+      edges={['bottom']}
+      style={{backgroundColor: 'rgba(241, 245, 249, 1)'}}>
+      <View style={[styles.tabBarContainer]}>
+        <View style={styles.labelContainer}>
+          {state.routes.map((route, index) => {
+            const {options} = descriptors[route.key];
+            const label =
+              options.tabBarLabel !== undefined
+                ? options.tabBarLabel
+                : route.name;
+            const isFocused = state.index === index;
+            return (
+              <TouchableOpacity
+                key={index}
+                onPress={() => navigation.navigate(route.name)}
+                style={[styles.tabButton, isFocused && styles.activeTab]}>
+                {route.name === 'Home' ? (
+                  <View
+                    style={{
+                      bottom:
+                        Platform.OS === 'android'
+                          ? RFPercentage(3)
+                          : RFPercentage(2.5),
+                    }}>
+                    <Image
+                      source={isFocused ? Icons.home : Icons.homeInactive}
+                      style={styles.middle}
+                      resizeMode="contain"
+                    />
+                  </View>
+                ) : route.name === 'Messages' ? (
+                  <View>
+                    <Image
+                      source={isFocused ? Icons.msgActive : Icons.msg}
+                      style={styles.imgStyle}
+                      resizeMode="contain"
+                    />
+                    {unreadCount > 0 && (
+                      <View
+                        style={[
+                          styles.count,
+                          unreadCount > 9 && {
+                            paddingHorizontal: RFPercentage(0.5),
+                            minWidth: RFPercentage(2.8),
+                          },
+                        ]}>
+                        <Text
+                          style={{
+                            color: 'white',
+                            fontSize: RFPercentage(1.3),
+                            fontFamily: Fonts.fontRegular,
+                          }}>
+                          {unreadCount > 9 ? '9+' : unreadCount}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                ) : route.name === 'Job List' ? (
                   <Image
-                    source={isFocused ? Icons.home : Icons.homeInactive}
-                    style={styles.middle}
-                    resizeMode="contain"
-                  />
-                </View>
-              ) : route.name === 'Messages' ? (
-                <View>
-                  <Image
-                    source={isFocused ? Icons.msgActive : Icons.msg}
+                    source={isFocused ? Icons.jobActive : Icons.job}
                     style={styles.imgStyle}
                     resizeMode="contain"
                   />
-                  {unreadCount > 0 && <View style={styles.count} />}
-                </View>
-              ) : route.name === 'Job List' ? (
-                <Image
-                  source={isFocused ? Icons.jobActive : Icons.job}
-                  style={styles.imgStyle}
-                  resizeMode="contain"
-                />
-              ) : route.name === 'Settings' ? (
-                <Image
-                  source={isFocused ? Icons.settingActive : Icons.settings}
-                  style={styles.imgStyle}
-                  resizeMode="contain"
-                />
-              ) : (
-                <Image
-                  source={isFocused ? Icons.profileActive : Icons.profile}
-                  style={styles.imgStyle}
-                  resizeMode="contain"
-                />
-              )}
-              <Text
-                style={{
-                  color: isFocused ? Colors.gradient2 : Colors.secondaryText,
-                  fontSize: RFPercentage(1.5),
-                  top:
-                    route.name === 'Home'
-                      ? RFPercentage(-2)
-                      : RFPercentage(0.5),
-                  fontFamily: isFocused ? Fonts.fontMedium : Fonts.fontRegular,
-                }}>
-                {label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
+                ) : route.name === 'Settings' ? (
+                  <Image
+                    source={isFocused ? Icons.settingActive : Icons.settings}
+                    style={styles.imgStyle}
+                    resizeMode="contain"
+                  />
+                ) : (
+                  <Image
+                    source={isFocused ? Icons.profileActive : Icons.profile}
+                    style={styles.imgStyle}
+                    resizeMode="contain"
+                  />
+                )}
+                <Text
+                  style={{
+                    color: isFocused ? Colors.gradient2 : Colors.secondaryText,
+                    fontSize: RFPercentage(1.4),
+                    top:
+                      route.name === 'Home'
+                        ? RFPercentage(-2.1)
+                        : RFPercentage(0.5),
+                    fontFamily: Fonts.fontMedium,
+                  }}>
+                  {label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -183,7 +205,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(241, 245, 249, 1)',
     alignItems: 'center',
     justifyContent: 'center',
-    height: Platform.OS === 'ios' ? RFPercentage(10) : RFPercentage(11),
+    height: RFPercentage(9),
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
   },
   tabButton: {
     alignItems: 'center',
@@ -198,15 +223,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-around',
     height: '100%',
-    top: Platform.OS === 'ios' ? RFPercentage(0.6) : 0,
+     bottom:RFPercentage(0.5)
+    // top: RFPercentage(1),
   },
   middle: {
-    width: Platform.OS === 'ios' ? RFPercentage(7.5) : RFPercentage(8.5),
-    height: Platform.OS === 'ios' ? RFPercentage(7.5) : RFPercentage(8.5),
+    width: RFPercentage(7.5),
+    height: RFPercentage(7.5),
   },
   imgStyle: {
-    width: RFPercentage(3),
-    height: RFPercentage(3),
+    width: RFPercentage(2.5),
+    height: RFPercentage(2.5),
   },
   count: {
     position: 'absolute',
@@ -214,7 +240,9 @@ const styles = StyleSheet.create({
     right: RFPercentage(-1),
     backgroundColor: Colors.gradient1,
     borderRadius: RFPercentage(100),
-    width: RFPercentage(1),
-    height: RFPercentage(1),
+    width: RFPercentage(2),
+    height: RFPercentage(2),
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

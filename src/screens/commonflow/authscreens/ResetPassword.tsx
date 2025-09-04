@@ -17,9 +17,11 @@ import * as yup from 'yup';
 import {Formik} from 'formik';
 import auth from '@react-native-firebase/auth';
 import {showToast} from '../../../utils/ToastMessage';
+import firestore from '@react-native-firebase/firestore';
 
-const ResetPassword: React.FC = ({navigation} : any) => {
+const ResetPassword: React.FC = ({navigation}: any) => {
   const [loading, setLoading] = useState(false);
+  const [text, setText] = useState(false);
 
   // Validation Schema
   let validationSchema = yup.object({
@@ -31,18 +33,36 @@ const ResetPassword: React.FC = ({navigation} : any) => {
     if (values.email) {
       setLoading(true);
       try {
-        await auth().sendPasswordResetEmail(values.email);
-        showToast({
-          type: 'success',
-          title: 'Success',
-          message: 'Reset password link sent to your email.',
-        });
-        navigation.navigate('SignIn');
+        // Check if email exists in Users collection
+        const userQuery = await firestore()
+          .collection('Users')
+          .where('email', '==', values.email)
+          .get();
+
+        if (!userQuery.empty) {
+          // Email exists → send reset password
+          await auth().sendPasswordResetEmail(values.email);
+          showToast({
+            type: 'success',
+            title: 'Success',
+            message: 'Reset password link sent to your email.',
+          });
+          setText(true);
+          // navigation.navigate('SignIn');
+        } else {
+          // Email not found
+          showToast({
+            type: 'error',
+            title: 'Error',
+            message: 'Email not found in our records.',
+          });
+        }
       } catch (error) {
+        console.error(error);
         showToast({
           type: 'error',
           title: 'Error',
-          message: 'Error sending link try again.',
+          message: 'Something went wrong. Try again later.',
         });
       } finally {
         setLoading(false);
@@ -92,7 +112,12 @@ const ResetPassword: React.FC = ({navigation} : any) => {
                   />
                   {touched.email && errors.email && (
                     <>
-                      <View style={{width: '90%', height: 16, bottom: RFPercentage(0.8)}}>
+                      <View
+                        style={{
+                          width: '90%',
+                          height: 16,
+                          bottom: RFPercentage(0.8),
+                        }}>
                         <Text
                           style={{
                             fontSize: RFPercentage(1.5),
@@ -106,6 +131,21 @@ const ResetPassword: React.FC = ({navigation} : any) => {
                     </>
                   )}
                 </View>
+                {text && (
+                  <Text
+                    style={{
+                      textAlign: 'center',
+                      marginHorizontal: RFPercentage(3),
+                      fontFamily: Fonts.fontMedium,
+                      color: Colors.secondaryText,
+                      fontSize: RFPercentage(1.5),
+                      marginTop: RFPercentage(2),
+                    }}>
+                    We’ve sent you a password reset link. If it doesn’t appear
+                    in your inbox within a few minutes, please also check your
+                    Spam or Junk folder.
+                  </Text>
+                )}
 
                 <View style={styles.buttonContainer}>
                   <GradientButton

@@ -366,7 +366,7 @@ const Home = () => {
           />
 
           {/* Filters */}
-          <Text style={styles.sectionTitle}>Apply Filter</Text>
+          <Text style={styles.sectionTitle}>Refine Search</Text>
           <View style={styles.filterWrapper}>
             {/* Location */}
             <View>
@@ -744,7 +744,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   scrollView: {
-    paddingBottom: RFPercentage(10),
+    paddingBottom: RFPercentage(12),
   },
   container: {
     backgroundColor: Colors.background,
@@ -855,7 +855,7 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(3),
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.9),
+    fontSize: RFPercentage(1.8),
   },
   categoryBox: {
     width: RFPercentage(10),

@@ -661,7 +661,7 @@ const CleanerJobs = () => {
                           setPriceRange([value, priceRange[1]]);
                         }}
                         minimumTrackTintColor={Colors.gradient1}
-                        maximumTrackTintColor="gray"
+                        maximumTrackTintColor={Colors.borderBottomColor}
                         thumbTintColor={Colors.gradient1}
                       />
                       <View style={styles.sliderLabelsContainer}>
@@ -834,7 +834,7 @@ const styles = StyleSheet.create({
   jobPosted: {
     textAlign: 'center',
     color: Colors.primaryText,
-    fontFamily: Fonts.fontMedium,
+    fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.9),
   },
   jobPostedContainer: {

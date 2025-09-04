@@ -1,5 +1,7 @@
 # Force Firebase to use static frameworks
 $RNFirebaseAsStaticFramework = true
+# Point NODE_BINARY to the correct Node location
+ENV['NODE_BINARY'] = '/usr/local/bin/node' 
 
 # Resolve react_native_pods.rb with node to allow for hoisting
 require Pod::Executable.execute_command('node', ['-p',
@@ -8,39 +10,63 @@ require Pod::Executable.execute_command('node', ['-p',
     {paths: [process.argv[1]]},
   )', __dir__]).strip
 
-platform :ios, min_ios_version_supported
-use_modular_headers!
-prepare_react_native_project!
+platform :ios, '15.1'
 
-# Always use static frameworks for gRPC/Firebase
 use_frameworks! :linkage => :static
+prepare_react_native_project!
 
 target 'CleanersChoice' do
   config = use_native_modules!
 
   use_react_native!(
     :path => config[:reactNativePath],
-    # An absolute path to your application root.
-    :app_path => "#{Pod::Config.instance.installation_root}/.."
+    :app_path => "#{Pod::Config.instance.installation_root}/..",
+    :hermes_enabled => false
   )
 
   # gRPC dependencies
   pod 'gRPC-C++'
   pod 'gRPC-Core'
 
+  # Stripe SDK
+  pod 'Stripe', '~> 24.20.0'
+  pod 'StripePayments', '~> 24.20.0'
+  pod 'StripePaymentsUI', '~> 24.20.0'
+  pod 'StripeApplePay', '~> 24.20.0'
+
   post_install do |installer|
     react_native_post_install(
       installer,
-      config[:reactNativePath],
-      :mac_catalyst_enabled => false
+      mac_catalyst_enabled: false
     )
 
-    # Ensure gRPC-Core modulemap headers are found
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
-        config.build_settings['HEADER_SEARCH_PATHS'] ||= ['$(inherited)']
-        config.build_settings['HEADER_SEARCH_PATHS'] << "${PODS_ROOT}/Headers/Private/grpc"
-        config.build_settings['HEADER_SEARCH_PATHS'] << "${PODS_ROOT}/gRPC-Core/include"
+        # Ensure consistent deployment target
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+
+        # ✅ Fix non-modular include error
+        config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
+      end
+
+      # ✅ Skip aggregate targets that don’t have resources
+      next unless target.respond_to?(:resources_build_phase)
+
+      # ⚡ Remove bogus privacy bundles
+      if target.name == 'leveldb-library'
+        target.resources_build_phase.files.each do |file|
+          if file.display_name == "leveldb_Privacy.bundle"
+            target.resources_build_phase.remove_file_reference(file.file_ref)
+          end
+        end
+      end
+
+      if target.name == 'boost'
+        target.resources_build_phase.files.each do |file|
+          if file.display_name == "boost_privacy.bundle"
+            target.resources_build_phase.remove_file_reference(file.file_ref)
+          end
+        end
       end
     end
   end

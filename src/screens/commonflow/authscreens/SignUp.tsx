@@ -26,7 +26,7 @@ import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 import {Image as CompressorImage} from 'react-native-compressor';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import AntDesign from 'react-native-vector-icons/AntDesign';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import messaging from '@react-native-firebase/messaging';
 import {showToast} from '../../../utils/ToastMessage';
 import axios from 'axios';
@@ -69,106 +69,107 @@ const SignUp: React.FC = ({navigation}: any) => {
   };
 
   // Sign Up
-const handleSignUp = async (values: any) => {
-  if (!selected) {
-    showToast({
-      type: 'info',
-      title: 'Terms & Conditions',
-      message: 'Please accept terms and conditions in order to proceed',
-    });
-    return;
-  }
-  setLoading(true);
-  try {
-    const userCredential = await auth().createUserWithEmailAndPassword(
-      values.email,
-      values.password,
-    );
-    const user = userCredential.user;
-
-    let profileUrl = '';
-
-    // if (img) {
-    //   const compressedImage = await CompressorImage.compress(img?.path, {
-    //     compressionMethod: 'manual',
-    //     maxWidth: 1000,
-    //     quality: 0.8,
-    //   });
-
-    //   const data = new FormData();
-    //   data.append('file', {
-    //     uri: compressedImage,
-    //     type: 'image/jpeg',
-    //     name: `profile_${user.uid}.jpg`,
-    //   });
-    //   data.append('upload_preset', 'CleanersChoice');
-    //   data.append('cloud_name', 'dfd65wawq'); 
-
-    //   const res = await axios.post(
-    //     'https://api.cloudinary.com/v1_1/dfd65wawq/image/upload',
-    //     data,
-    //     {
-    //       headers: {
-    //         'Content-Type': 'multipart/form-data',
-    //       },
-    //     },
-    //   );
-    //   profileUrl = res.data.secure_url;
-    // }
-
-
-
-     if (img) {
-      const compressedImage = await CompressorImage.compress(img?.path, {
-        compressionMethod: 'manual',
-        maxWidth: 1000,
-        quality: 0.8,
+  const handleSignUp = async (values: any) => {
+    if (!selected) {
+      showToast({
+        type: 'info',
+        title: 'Terms & Conditions',
+        message: 'Please accept terms and conditions in order to proceed',
       });
-      const reference = storage().ref(`profileImages/profile_${user.uid}.jpg`);
-      await reference.putFile(compressedImage);
-      profileUrl = await reference.getDownloadURL();
+      return;
     }
+    setLoading(true);
+    try {
+      const userCredential = await auth().createUserWithEmailAndPassword(
+        values.email,
+        values.password,
+      );
+      const user = userCredential.user;
 
-    const fcmToken = await messaging().getToken();
-    const userData = {
-      name: values.name,
-      email: values.email,
-      phone: values.phone,
-      uid: user.uid,
-      profile: profileUrl || null,
-      fcmToken: fcmToken || null,
-      createdAt: firestore.FieldValue.serverTimestamp(),
-      role: userFlow?.userFlow,
-      ...(userFlow?.userFlow === 'Cleaner' && {
-        subscription: false,
-        subscriptionId: null,
-        cancelSubscription: false,
-      }),
-    };
+      let profileUrl = '';
 
-    await firestore().collection('Users').doc(user.uid).set(userData);
-    await AsyncStorage.setItem('email', values.email);
-    await AsyncStorage.setItem('password', values.password);
-    await AsyncStorage.setItem('role', userFlow?.userFlow);
+      // if (img) {
+      //   const compressedImage = await CompressorImage.compress(img?.path, {
+      //     compressionMethod: 'manual',
+      //     maxWidth: 1000,
+      //     quality: 0.8,
+      //   });
 
-    showToast({
-      type: 'success',
-      title: 'Sign Up',
-      message: 'Signed Up successfully',
-    });
-    navigation.navigate(userFlow?.userFlow === 'Customer' ? 'Home' : 'Premium');
-  } catch (error: any) {
-    console.error( error);
-    showToast({
-      type: 'error',
-      title: 'Sign Up Failed',
-      message: 'Email is already in use',
-    });
-  } finally {
-    setLoading(false);
-  }
-};
+      //   const data = new FormData();
+      //   data.append('file', {
+      //     uri: compressedImage,
+      //     type: 'image/jpeg',
+      //     name: `profile_${user.uid}.jpg`,
+      //   });
+      //   data.append('upload_preset', 'CleanersChoice');
+      //   data.append('cloud_name', 'dfd65wawq');
 
+      //   const res = await axios.post(
+      //     'https://api.cloudinary.com/v1_1/dfd65wawq/image/upload',
+      //     data,
+      //     {
+      //       headers: {
+      //         'Content-Type': 'multipart/form-data',
+      //       },
+      //     },
+      //   );
+      //   profileUrl = res.data.secure_url;
+      // }
+
+      if (img) {
+        const compressedImage = await CompressorImage.compress(img?.path, {
+          compressionMethod: 'manual',
+          maxWidth: 1000,
+          quality: 0.8,
+        });
+        const reference = storage().ref(
+          `profileImages/profile_${user.uid}.jpg`,
+        );
+        await reference.putFile(compressedImage);
+        profileUrl = await reference.getDownloadURL();
+      }
+
+      // const fcmToken = await messaging().getToken();
+      const userData = {
+        name: values.name,
+        email: values.email,
+        phone: values.phone,
+        uid: user.uid,
+        profile: profileUrl || null,
+        fcmToken: null,
+        createdAt: firestore.FieldValue.serverTimestamp(),
+        role: userFlow?.userFlow,
+        ...(userFlow?.userFlow === 'Cleaner' && {
+          subscription: false,
+          subscriptionId: null,
+          cancelSubscription: false,
+        }),
+      };
+
+      await firestore().collection('Users').doc(user.uid).set(userData);
+      await AsyncStorage.setItem('email', values.email);
+      await AsyncStorage.setItem('password', values.password);
+      await AsyncStorage.setItem('role', userFlow?.userFlow);
+
+      showToast({
+        type: 'success',
+        title: 'Sign Up',
+        message: 'Signed Up successfully',
+      });
+      navigation.navigate(
+        userFlow?.userFlow === 'Customer' ? 'Home' : 'Premium',
+      );
+    } catch (error: any) {
+      console.error(error);
+      showToast({
+        type: 'error',
+        title: 'Sign Up Failed',
+        message: 'Email is already in use',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Phone Validation
   const formatPhoneNumber = (raw: string = ''): string => {
@@ -198,18 +199,9 @@ const handleSignUp = async (values: any) => {
         <KeyboardAvoidingView>
           {/* Header */}
           <View style={styles.container}>
-            <TouchableOpacity
-              onPress={() => navigation.navigate('UserSelection')}
-              style={styles.backArrow}>
-              <AntDesign
-                name="arrowleft"
-                color={Colors.secondaryText}
-                size={RFPercentage(3)}
-              />
-            </TouchableOpacity>
             <HeaderComponent />
             <View style={styles.titleContainer}>
-              <Text style={styles.title}>Create an account</Text>
+              <Text style={styles.title}>Create An Account</Text>
             </View>
 
             {/* Image Uploader */}
@@ -382,7 +374,10 @@ const handleSignUp = async (values: any) => {
 
                   {/* Terms And Conditions */}
                   <View style={styles.radioContainer}>
-                    <TouchableOpacity activeOpacity={0.8}  onPress={() => setSelected(!selected)} style={styles.radioInnerContainer}>
+                    <TouchableOpacity
+                      activeOpacity={0.8}
+                      onPress={() => setSelected(!selected)}
+                      style={styles.radioInnerContainer}>
                       <RadioButtonInput
                         obj={{value: 0}}
                         index={0}
@@ -419,6 +414,26 @@ const handleSignUp = async (values: any) => {
                         <Text style={styles.signIn}>SignIn</Text>
                       </TouchableOpacity>
                     </View>
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate('UserSelection')}
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        marginTop: RFPercentage(2),
+                      }}>
+                      <Ionicons
+                        name="chevron-back-circle-sharp"
+                        color={'rgba(178, 204, 228, 1)'}
+                        size={RFPercentage(2.4)}
+                      />
+                      <Text
+                        style={[
+                          styles.signIn,
+                          {color: 'rgba(134, 154, 173, 1)'},
+                        ]}>
+                        Back
+                      </Text>
+                    </TouchableOpacity>
                   </View>
                 </>
               )}
@@ -450,7 +465,11 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.background,
   },
-  errorContainer: {width: '90%', height: RFPercentage(2), bottom: RFPercentage(0.8)},
+  errorContainer: {
+    width: '90%',
+    height: RFPercentage(2),
+    bottom: RFPercentage(0.8),
+  },
   backArrow: {
     position: 'absolute',
     top: RFPercentage(7),
@@ -471,8 +490,8 @@ const styles = StyleSheet.create({
   },
   title: {
     color: Colors.primaryText,
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(2.2),
+    fontFamily: Fonts.semiBold,
+    fontSize: RFPercentage(2),
     textAlign: 'center',
   },
   imgContainer: {

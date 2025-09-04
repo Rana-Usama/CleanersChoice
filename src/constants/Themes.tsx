@@ -71,6 +71,7 @@ export const IMAGES: {[key: string]: any} = {
   stars: require('../assets/images/stars.png'),
   star: require('../assets/images/star.png'),
   defaultPic: require('../assets/images/user.png'),
+  chat: require('../assets/images/chat.jpeg'),
 };
 
 export const Fonts: {[key: string]: string} = {
