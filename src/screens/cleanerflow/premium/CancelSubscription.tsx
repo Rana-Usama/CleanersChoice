@@ -188,6 +188,7 @@ const CancelSubscription = () => {
           />
         </View>
         <TouchableOpacity
+          activeOpacity={0.8}
           onPress={() => navigation.goBack()}
           style={{
             flexDirection: 'row',

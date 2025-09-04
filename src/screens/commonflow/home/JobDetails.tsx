@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
     color: 'rgba(75, 85, 99, 1)',
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.7),
-    marginTop: RFPercentage(1),
+    marginTop: RFPercentage(0.5),
     // left:RFPercentage(1)
   },
   description: {

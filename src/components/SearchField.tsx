@@ -27,7 +27,7 @@ const SearchField: React.FC<Props> = (props: Props) => {
           value={props.value}
           onChangeText={props.onChangeText}
         />
-        <TouchableOpacity style={styles.iconContainer}>
+        <TouchableOpacity   activeOpacity={0.8} style={styles.iconContainer}>
           <Feather name={'search'} size={RFPercentage(2.2)} color={Colors.secondaryText} />
         </TouchableOpacity>
       </View>

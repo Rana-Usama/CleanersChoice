@@ -19,7 +19,7 @@ const JobCard = (props: props) => {
     <View style={styles.shadowContainer}>
       <TouchableOpacity  activeOpacity={0.9} style={styles.container} onPress={props.onPress}>
         {props.delete && (
-          <TouchableOpacity onPress={props.onPress2} style={styles.deleteButton}>
+          <TouchableOpacity   activeOpacity={0.8} onPress={props.onPress2} style={styles.deleteButton}>
             <Image source={Icons.delete} resizeMode="contain" style={styles.deleteIcon} />
           </TouchableOpacity>
         )}
@@ -39,10 +39,10 @@ const JobCard = (props: props) => {
             Budget:
             <Text style={styles.priceHighlight}>{` `} {props.price}$</Text>
           </Text>
-          <TouchableOpacity onPress={props.onPress}>
+          <TouchableOpacity   activeOpacity={0.8} onPress={props.onPress}>
             <View style={styles.detailsContainer}>
               <Text style={styles.detailsText}>Job Details</Text>
-              <TouchableOpacity onPress={props.onPress}>
+              <TouchableOpacity   activeOpacity={0.8} onPress={props.onPress}>
                 <Image source={Icons.arrowRight} resizeMode="contain" style={styles.arrowIcon} />
               </TouchableOpacity>
             </View>

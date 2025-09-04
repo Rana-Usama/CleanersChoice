@@ -30,7 +30,7 @@ const ServicesCard = ({
           {covers.length === 1 ? null : (
             <>
               {covers.map((_, index) => (
-                <TouchableOpacity key={index} onPress={() => setStep(index)}>
+                <TouchableOpacity key={index} onPress={() => setStep(index)}   activeOpacity={0.8} >
                   {step === index ? (
                     <LinearGradient
                       colors={[Colors.gradient1, Colors.gradient2]}

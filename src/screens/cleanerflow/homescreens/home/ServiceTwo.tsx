@@ -209,7 +209,7 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
             contentContainerStyle={{paddingHorizontal: RFPercentage(1.6)}}
             keyExtractor={item => item.id.toString()}
             renderItem={({item, index}) => (
-              <TouchableOpacity onPress={() => uploadImg(index)}>
+              <TouchableOpacity   activeOpacity={0.8} onPress={() => uploadImg(index)}>
                 <View style={styles.imageContainer}>
                   {loading2 ? (
                     <>

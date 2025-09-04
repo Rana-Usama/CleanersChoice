@@ -226,7 +226,7 @@ const Messages = ({navigation}: any) => {
         <HeaderBack title="Messages" textStyle={styles.headerText} />
         <View style={styles.container}>
           <View style={styles.toggleContainer}>
-            <TouchableOpacity onPress={toggle1}>
+            <TouchableOpacity   activeOpacity={0.8} onPress={toggle1}>
               <View
                 style={[
                   styles.toggleButton,
@@ -247,7 +247,7 @@ const Messages = ({navigation}: any) => {
                 </Text>
               </View>
             </TouchableOpacity>
-            <TouchableOpacity onPress={toggle2} style={styles.unreadButton}>
+            <TouchableOpacity   activeOpacity={0.8} onPress={toggle2} style={styles.unreadButton}>
               <View
                 style={[
                   styles.toggleButton,

@@ -88,6 +88,7 @@ const FAQS: React.FC = () => {
                     }}>
                     <Text style={styles.questionText}>{item.q}</Text>
                     <TouchableOpacity
+                      activeOpacity={0.8}
                       onPress={() => {
                         setVisible(!visible);
                         setExplanation(item.id);

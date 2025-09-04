@@ -183,6 +183,7 @@ const SignIn: React.FC = () => {
                 <View style={styles.radioContainer}>
                   <View style={styles.radioInner}>
                     <TouchableOpacity
+                      activeOpacity={0.8}
                       onPress={() => setSelected(!selected)}
                       style={styles.radioButtonRow}>
                       <RadioButtonInput
@@ -202,6 +203,7 @@ const SignIn: React.FC = () => {
                     </TouchableOpacity>
 
                     <TouchableOpacity
+                      activeOpacity={0.8}
                       onPress={() => navigation.navigate('ResetPassword')}
                       style={{position: 'absolute', right: 0}}>
                       <Text style={styles.forgotPassword}>
@@ -224,6 +226,7 @@ const SignIn: React.FC = () => {
                       Don't have an account?
                     </Text>
                     <TouchableOpacity
+                      activeOpacity={0.8}
                       onPress={() => navigation.navigate('UserSelection')}>
                       <Text style={styles.signUp}>Signup</Text>
                     </TouchableOpacity>

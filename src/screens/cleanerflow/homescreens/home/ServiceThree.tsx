@@ -314,7 +314,7 @@ const ServiceThree: React.FC = ({navigation}: any) => {
 
             {packages.length < MAX_PACKAGES && (
               <View style={{alignSelf: 'flex-end'}}>
-                <TouchableOpacity onPress={addPackage}>
+                <TouchableOpacity   activeOpacity={0.8} onPress={addPackage}>
                   <View>
                     <Text style={styles.addText}>+ Add Package</Text>
                   </View>

@@ -562,6 +562,7 @@ const Home = () => {
                     {opacity: opacityAnim, transform: [{scale: scaleAnim}]},
                   ]}>
                   <TouchableOpacity
+                    activeOpacity={0.8}
                     style={styles.close}
                     onPress={() => setModalVisible(false)}>
                     <AntDesign
@@ -600,6 +601,7 @@ const Home = () => {
                             keyExtractor={(item, index) => index.toString()}
                             renderItem={({item}) => (
                               <TouchableOpacity
+                                activeOpacity={0.8}
                                 onPress={() => {
                                   setQuery(item);
                                   setSelectedLocation(item);
@@ -659,6 +661,7 @@ const Home = () => {
                       styles.rangeModal,
                     ]}>
                     <TouchableOpacity
+                      activeOpacity={0.8}
                       style={styles.close}
                       onPress={() => setModalVisible2(false)}>
                       <AntDesign

@@ -24,6 +24,7 @@ const CustomDropDown: React.FC<Props> = (props: Props) => {
   return (
     <View>
       <TouchableOpacity
+      activeOpacity={0.8}
         style={[
           styles.container,
           styles.borderStyle,
@@ -42,7 +43,7 @@ const CustomDropDown: React.FC<Props> = (props: Props) => {
             ]}>
             {selectedLabel || props.placeholder}
           </Text>
-          <TouchableOpacity onPress={() => setOpen(!open)}>
+          <TouchableOpacity   activeOpacity={0.8} onPress={() => setOpen(!open)}>
             <Entypo
               name="chevron-small-down"
               color={Colors.placeholderColor}
@@ -60,6 +61,7 @@ const CustomDropDown: React.FC<Props> = (props: Props) => {
               const isLastItem = index === props.data.length - 1;
               return (
                 <TouchableOpacity
+                  activeOpacity={0.8}
                   onPress={() => {
                     setOpen(false);
                     setSelectedLabel(item.label);

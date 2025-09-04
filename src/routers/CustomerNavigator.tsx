@@ -106,6 +106,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
 
             return (
               <TouchableOpacity
+                activeOpacity={0.8}
                 key={index}
                 onPress={onPress}
                 style={[styles.tabButton, isFocused && styles.activeTab]}>

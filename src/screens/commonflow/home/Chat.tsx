@@ -173,7 +173,7 @@ const Chat = ({navigation, route}: any) => {
       />
       <View style={styles.profileContainer}>
         <View style={styles.inner}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+          <TouchableOpacity   activeOpacity={0.8} onPress={() => navigation.goBack()}>
             <AntDesign
               name="arrowleft"
               size={RFPercentage(2.5)}
@@ -274,6 +274,7 @@ const Chat = ({navigation, route}: any) => {
                   )}
                   renderSend={() => (
                     <TouchableOpacity
+                      activeOpacity={0.8}
                       style={styles.sendButton}
                       onPress={() => {
                         onSend([

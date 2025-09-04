@@ -124,7 +124,7 @@ const OnBoarding = ({navigation}: any) => {
             {/* Dots Indicator */}
             <View style={styles.dotsContainer}>
               {[1, 2, 3].map(index => (
-                <TouchableOpacity key={index} onPress={() => setStep(index)}>
+                <TouchableOpacity   activeOpacity={0.8} key={index} onPress={() => setStep(index)}>
                   {step === index ? (
                     <LinearGradient
                       colors={[Colors.gradient1, Colors.gradient2]}

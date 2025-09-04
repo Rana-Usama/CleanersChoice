@@ -227,6 +227,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
                 <>
                   {item.serviceImages.map((_: any, index: any) => (
                     <TouchableOpacity
+                      activeOpacity={0.8}
                       key={index}
                       onPress={() => setStep(index)}>
                       {step === index ? (
@@ -248,7 +249,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
           {/* Service Info */}
           <View style={{marginTop: RFPercentage(2)}}>
             <View style={styles.rowContainer}>
-              <TouchableOpacity onPress={() => setModalVisible(true)}>
+              <TouchableOpacity   activeOpacity={0.8} onPress={() => setModalVisible(true)}>
                 <Image
                   source={item.image ? {uri: item.image} : IMAGES.defaultPic}
                   resizeMode="contain"
@@ -361,6 +362,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
               {/* Show More / Show Less button */}
               {item.type.length > 5 && (
                 <TouchableOpacity
+                  activeOpacity={0.8}
                   onPress={
                     visibleItems < item.type.length
                       ? handleShowMore
@@ -455,6 +457,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
           animationType="fade">
           <View style={styles.modelContent}>
             <TouchableOpacity
+              activeOpacity={0.8}
               onPress={() => setModalVisible(false)}
               style={styles.arrow}>
               <AntDesign

@@ -249,6 +249,7 @@ const Premium = ({navigation}: any) => {
           />
         </View>
         <TouchableOpacity
+          activeOpacity={0.8}
           onPress={() => navigation.navigate('SignIn')}
           style={{
             flexDirection: 'row',

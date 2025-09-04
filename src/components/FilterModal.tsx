@@ -65,6 +65,7 @@ const FilterModal = (props : any) => {
           <View style={styles.modalInner}>
             <Text style={styles.applyLocation}>Apply Location</Text>
             <TouchableOpacity
+              activeOpacity={0.8}
               style={{position: 'absolute', right: 0}}
               onPress={props.setModalVisible}>
               <AntDesign
@@ -97,6 +98,7 @@ const FilterModal = (props : any) => {
                     keyExtractor={(item, index) => index.toString()}
                     renderItem={({item}) => (
                       <TouchableOpacity
+                        activeOpacity={0.8}
                         onPress={() => {
                           props.setQuery(item);
                           props.setSelectedLocation(item);
