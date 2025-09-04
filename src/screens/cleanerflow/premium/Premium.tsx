@@ -18,7 +18,7 @@ import {useStripe} from '@stripe/stripe-react-native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import SubscriptionModal from '../../../components/SubscriptionModal';
-import AntDesign from 'react-native-vector-icons/AntDesign';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import {showToast} from '../../../utils/ToastMessage';
 
 const services = [
@@ -87,7 +87,6 @@ const Premium = ({navigation}: any) => {
   const openPaymentSheet = async () => {
     setLoading(true);
     const setupData = await fetchSetupIntent();
-    console.log('setupData.............', setupData);
     if (!setupData) return;
     const {setupIntentClientSecret, customerId} = setupData;
 
@@ -95,8 +94,6 @@ const Premium = ({navigation}: any) => {
       setupIntentClientSecret,
       merchantDisplayName: 'Cleaner Choice',
     });
-
-    console.log('initError.........', initError);
 
     if (initError) {
       setLoading(false);
@@ -107,7 +104,6 @@ const Premium = ({navigation}: any) => {
     // console.log('presentPaymentSheetRes................', presentPaymentSheetRes)
 
     const {error: paymentError} = await presentPaymentSheet();
-    console.log('paymentError.............', paymentError);
 
     if (paymentError) {
       let userFriendlyMessage = 'The payment flow has been canceled';
@@ -140,8 +136,6 @@ const Premium = ({navigation}: any) => {
     );
 
     const result = await res.json();
-    console.log('result.........', result);
-
     if (result.success && result.subscriptionStatus === 'active') {
       const {periodEndTimestamp} = result;
 
@@ -176,15 +170,7 @@ const Premium = ({navigation}: any) => {
         translucent
         backgroundColor="transparent"
       />
-      <TouchableOpacity
-        onPress={() => navigation.navigate('SignIn')}
-        style={styles.arrow}>
-        <AntDesign
-          name="arrowleft"
-          color={Colors.secondaryText}
-          size={RFPercentage(3)}
-        />
-      </TouchableOpacity>
+
       <HeaderComponent />
       <View style={styles.container}>
         <View style={styles.premiumHeader}>
@@ -257,11 +243,28 @@ const Premium = ({navigation}: any) => {
             }
             textStyle={styles.buttonText}
             onPress={openPaymentSheet}
-            style={{width: RFPercentage(21)}}
+            style={{width: RFPercentage(20)}}
             loading={loading}
             disabled={loading}
           />
         </View>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('SignIn')}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginTop: RFPercentage(3),
+            justifyContent:"center"
+          }}>
+          <Ionicons
+            name="chevron-back-circle-sharp"
+            color={'rgba(178, 204, 228, 1)'}
+            size={RFPercentage(2.4)}
+          />
+          <Text style={[styles.signIn, {color: 'rgba(134, 154, 173, 1)'}]}>
+            SignIn
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.starContainer}>
@@ -296,23 +299,28 @@ const styles = StyleSheet.create({
   container: {
     width: '90%',
     alignSelf: 'center',
-    paddingTop: RFPercentage(11),
+    paddingTop: RFPercentage(5),
   },
   premiumHeader: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
+    alignItems: 'center',
     justifyContent: 'center',
   },
   ownerIcon: {
     width: RFPercentage(3.5),
     height: RFPercentage(3.5),
   },
+  signIn: {
+    color: Colors.gradient1,
+    fontSize: RFPercentage(1.7),
+    fontFamily: Fonts.fontMedium,
+    left: 3,
+  },
   premiumText: {
     color: Colors.brown,
     fontSize: RFPercentage(2),
     fontFamily: Fonts.fontMedium,
     marginLeft: RFPercentage(0.6),
-    top: RFPercentage(0.3),
   },
   subscriptionContainer: {
     marginTop: RFPercentage(4),
@@ -382,7 +390,7 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(5),
   },
   buttonText: {
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.6),
   },
   starContainer: {
     position: 'absolute',

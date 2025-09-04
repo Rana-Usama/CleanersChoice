@@ -183,7 +183,9 @@ const ServiceDetails: React.FC = ({route}: any) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={{paddingBottom: RFPercentage(10)}} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={{paddingBottom: RFPercentage(10)}}
+        showsVerticalScrollIndicator={false}>
         {/* Header */}
         <HeaderBack
           title={'Service Details'}
@@ -219,25 +221,28 @@ const ServiceDetails: React.FC = ({route}: any) => {
               </View>
             ))}
           </ScrollView>
-
-          <View style={styles.dotsContainer}>
-            {item.serviceImages.length === 1 ? null : (
-              <>
-                {item.serviceImages.map((_: any, index: any) => (
-                  <TouchableOpacity key={index} onPress={() => setStep(index)}>
-                    {step === index ? (
-                      <LinearGradient
-                        colors={[Colors.gradient1, Colors.gradient2]}
-                        style={styles.activeDot}
-                      />
-                    ) : (
-                      <View style={styles.inactiveDot} />
-                    )}
-                  </TouchableOpacity>
-                ))}
-              </>
-            )}
-          </View>
+          {item.serviceImages.length > 1 && (
+            <View style={styles.dotsContainer}>
+              {item.serviceImages.length === 1 ? null : (
+                <>
+                  {item.serviceImages.map((_: any, index: any) => (
+                    <TouchableOpacity
+                      key={index}
+                      onPress={() => setStep(index)}>
+                      {step === index ? (
+                        <LinearGradient
+                          colors={[Colors.gradient1, Colors.gradient2]}
+                          style={styles.activeDot}
+                        />
+                      ) : (
+                        <View style={styles.inactiveDot} />
+                      )}
+                    </TouchableOpacity>
+                  ))}
+                </>
+              )}
+            </View>
+          )}
         </View>
         <View style={styles.container}>
           {/* Service Info */}
@@ -251,13 +256,15 @@ const ServiceDetails: React.FC = ({route}: any) => {
                 />
               </TouchableOpacity>
 
-              <Text style={[styles.headeing2, {color: Colors.primaryText, }]}>
-                {item.name?.length > 12 ? `${item.name.slice(0,12)}...` : item.name}
+              <Text style={[styles.headeing2, {color: Colors.primaryText}]}>
+                {item.name?.length > 10
+                  ? `${item.name.slice(0, 10)}...`
+                  : item.name}
               </Text>
             </View>
 
             <View
-              style={{position: 'absolute', right: 0, top: RFPercentage(1.8)}}>
+              style={{position: 'absolute', right: 0, top: RFPercentage(2.1)}}>
               <Text style={styles.joining}>Joined on : {formattedDate}</Text>
             </View>
           </View>
@@ -417,7 +424,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
         <View style={{alignSelf: 'center', marginTop: RFPercentage(7)}}>
           <GradientButton
             title="Get Custom Offer"
-            style={{width:RFPercentage(20)}}
+            style={{width: RFPercentage(20)}}
             textStyle={{fontSize: RFPercentage(1.7)}}
             onPress={() => {
               setloading(true);
@@ -529,7 +536,7 @@ const styles = StyleSheet.create({
   headeing2: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.9),
+    fontSize: RFPercentage(1.8),
   },
   rowAlign: {
     flexDirection: 'row',
@@ -566,7 +573,7 @@ const styles = StyleSheet.create({
   check: {
     color: Colors.gradient1,
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.7),
     left: RFPercentage(0.8),
   },
   serviceRow: {

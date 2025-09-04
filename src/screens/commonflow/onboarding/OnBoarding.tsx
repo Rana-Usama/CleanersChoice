@@ -51,7 +51,6 @@ const OnBoarding = ({navigation}: any) => {
   const nextPress = () => {
     if (step < 3) {
       setStep(step + 1);
-      console.log('hi.......');
     } else {
       navigation.navigate('UserSelection');
     }
@@ -184,7 +183,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: Colors.primaryText,
-    fontSize: RFPercentage(2.3),
+    fontSize: RFPercentage(2),
     fontFamily: Fonts.semiBold,
     textAlign: 'center',
     marginTop: RFPercentage(2),
@@ -195,7 +194,7 @@ const styles = StyleSheet.create({
   },
   description: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontRegular,
     textAlign: 'center',
   },

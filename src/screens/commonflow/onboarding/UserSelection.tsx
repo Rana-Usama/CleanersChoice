@@ -46,7 +46,7 @@ const UserSelection: React.FC = ({navigation}: any) => {
             icon={Icons.customer}
           />
         </View>
-        <View style={styles.selectionContainer}>
+        <View style={[styles.selectionContainer,{marginTop:RFPercentage(2.5)}]}>
           <SelectionButton
             title="Business Owner /Cleaner"
             onPress={handleNext2}

@@ -259,7 +259,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        contentContainerStyle={{paddingBottom: RFPercentage(4)}}
+        contentContainerStyle={{paddingBottom: RFPercentage(6)}}
         style={{flex: 1}}
         showsVerticalScrollIndicator={false}>
         {/* Header */}

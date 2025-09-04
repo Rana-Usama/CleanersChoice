@@ -44,9 +44,15 @@ const Message = (props: props) => {
               styles.messageText,
               {color: props.unread ? Colors.gradient1 : 'rgba(75, 85, 99, 1)'},
             ]}>
-            {props.message.length > 30
-              ? props.message.substring(0, 30) + '...'
-              : props.message}
+            {props.message
+              ? props.message
+                  .replace(/\s+/g, ' ') // replace multiple spaces/newlines with a single space
+                  .trim() // remove leading/trailing spaces
+                  .slice(0, 30) +
+                (props.message.replace(/\s+/g, ' ').trim().length > 30
+                  ? '...'
+                  : '')
+              : ''}
           </Text>
         </View>
         <View>
@@ -88,7 +94,7 @@ const styles = StyleSheet.create({
   noProfileContainer: {
     width: RFPercentage(6.5),
     height: RFPercentage(6.5),
-    borderWidth: 2,
+    borderWidth: RFPercentage(0.2),
     borderColor: Colors.gradient1,
     borderRadius: RFPercentage(100),
     alignItems: 'center',
@@ -112,7 +118,7 @@ const styles = StyleSheet.create({
     color: 'rgba(75, 85, 99, 1)',
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.6),
-    marginTop:RFPercentage(0.3)
+    marginTop: RFPercentage(0.3),
   },
   timeText: {
     color: Colors.gradient1,
@@ -132,6 +138,5 @@ const styles = StyleSheet.create({
     color: Colors.gradient1,
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(2),
-    top: RFPercentage(0.2),
   },
 });

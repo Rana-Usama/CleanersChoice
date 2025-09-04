@@ -30,7 +30,7 @@ const JobCard = (props: props) => {
         </View>
 
         <View style={styles.locationContainer}>
-          <EvilIcons name="location" size={RFPercentage(2.3)} style={styles.locationIcon} />
+          <EvilIcons name="location" size={RFPercentage(2)} style={styles.locationIcon} />
           <Text style={styles.locationText}>{props.location}</Text>
         </View>
 
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 6,
     elevation: 8, // Android shadow
-    marginTop: RFPercentage(2.5),
+    marginTop: RFPercentage(1.7),
     borderRadius: RFPercentage(1.5),
     backgroundColor: 'transparent',
     
@@ -113,7 +113,8 @@ const styles = StyleSheet.create({
   locationText: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.6),
+    right:RFPercentage(0.5)
   },
   priceContainer: {
     marginTop: RFPercentage(1),
@@ -121,7 +122,7 @@ const styles = StyleSheet.create({
   priceText: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.6),
   },
   priceHighlight: {
     color: Colors.gradient1,

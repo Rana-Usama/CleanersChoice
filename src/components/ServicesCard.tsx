@@ -1,9 +1,8 @@
-import {Image, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
+import {Image, StyleSheet, Text, View, TouchableOpacity, Platform} from 'react-native';
 import React, {useState} from 'react';
-import {Colors, Fonts, IMAGES} from '../constants/Themes';
+import {Colors, Fonts, IMAGES, Icons} from '../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import LinearGradient from 'react-native-linear-gradient';
-import EvilIcons from 'react-native-vector-icons/EvilIcons';
 
 const ServicesCard = ({
   covers,
@@ -58,13 +57,15 @@ const ServicesCard = ({
               </Text>
               <View style={styles.locationContainer}>
                 <View style={styles.locationRow}>
-                  <EvilIcons
-                    name="location"
-                    size={RFPercentage(1.8)}
-                    style={styles.locationIcon}
+                  <Image
+                    source={Icons.location}
+                    resizeMode="contain"
+                    style={styles.icons}
                   />
                   <Text style={styles.locationText}>
-                   { location.length > 10 ? `${location?.slice(0, 10)}...` : location}
+                    {location.length > 10
+                      ? `${location?.slice(0, 10)}...`
+                      : location}
                   </Text>
                 </View>
               </View>
@@ -108,7 +109,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: RFPercentage(1.1),
-    height:RFPercentage(1),
+    height: RFPercentage(1),
   },
   activeDot: {
     width: RFPercentage(0.8),
@@ -178,12 +179,14 @@ const styles = StyleSheet.create({
   locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginTop:Platform.OS === 'ios' ? RFPercentage(0.3) : 0
   },
-  locationIcon: {  bottom:1, left:-1},
+  locationIcon: {bottom: 1, left: -1},
   locationText: {
     color: Colors.secondaryText,
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.3),
-    left: 1,
+    left: RFPercentage(0.5),
   },
+  icons: {width: RFPercentage(1.5), height: RFPercentage(1.5)},
 });
