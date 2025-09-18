@@ -35,14 +35,16 @@ const CustomModal = (props: props) => {
           <NextButton
             title="Cancel"
             onPress={props.onPress}
-            style={{width: RFPercentage(15)}}
+            style={{width: RFPercentage(15), height: RFPercentage(5)}}
+            textStyle={{fontSize: RFPercentage(1.8)}}
           />
           <GradientButton
             title="Yes"
             onPress={props.onPress2}
             loading={props.loader}
             disabled={props.loader}
-            style={{width: RFPercentage(15)}}
+            style={{width: RFPercentage(15), height: RFPercentage(5)}}
+            textStyle={{fontSize: RFPercentage(1.8)}}
           />
         </View>
       )}
@@ -54,7 +56,7 @@ export default CustomModal;
 
 const styles = StyleSheet.create({
   modalContainer: {
-    width: RFPercentage(40),
+    width: RFPercentage(38),
     borderRadius: RFPercentage(2.5),
     backgroundColor: 'rgb(232, 243, 252)',
     alignSelf: 'center',
@@ -63,7 +65,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     paddingHorizontal: 16,
     top: RFPercentage(40),
-    paddingVertical: RFPercentage(6),
+    paddingVertical: RFPercentage(4),
   },
   modalText: {
     textAlign: 'center',
@@ -72,7 +74,7 @@ const styles = StyleSheet.create({
     color: '#4B5563',
     marginTop: RFPercentage(1.5),
     marginHorizontal: RFPercentage(2),
-    lineHeight: RFPercentage(2.6),
+    lineHeight: RFPercentage(2.4),
   },
   okButtonContainer: {
     marginTop: RFPercentage(2),

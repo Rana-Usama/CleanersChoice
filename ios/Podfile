@@ -24,6 +24,9 @@ target 'CleanersChoice' do
     :hermes_enabled => false
   )
 
+# Notifee (local notifications)
+ pod 'RNNotifee', :path => '../node_modules/@notifee/react-native'
+
   # gRPC dependencies
   pod 'gRPC-C++'
   pod 'gRPC-Core'

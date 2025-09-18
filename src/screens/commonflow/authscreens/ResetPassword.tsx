@@ -6,6 +6,8 @@ import {
   Text,
   View,
   KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
 import React, {useState} from 'react';
 import {Fonts, IMAGES, Colors} from '../../../constants/Themes';
@@ -71,103 +73,105 @@ const ResetPassword: React.FC = ({navigation}: any) => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar
-        barStyle={'dark-content'}
-        translucent
-        backgroundColor="transparent"
-      />
-      <KeyboardAvoidingView>
-        <HeaderBack title={'Reset Password?'} left={true} />
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar
+          barStyle={'dark-content'}
+          translucent
+          backgroundColor="transparent"
+        />
+        <KeyboardAvoidingView>
+          <HeaderBack title={'Reset Password?'} left={true} />
 
-        {/* Field Container */}
-        <Formik
-          initialValues={{
-            email: '',
-          }}
-          validationSchema={validationSchema}
-          onSubmit={values => handleNext(values)}>
-          {({
-            handleChange,
-            handleBlur,
-            handleSubmit,
-            values,
-            errors,
-            touched,
-          }) => (
-            <>
-              <View style={styles.container}>
-                <View style={styles.inputContainer}>
-                  <InputField
-                    placeholder="Enter Email"
-                    onChangeText={handleChange('email')}
-                    handleBlur={handleBlur('email')}
-                    value={values.email}
-                    customStyle={{
-                      borderColor:
-                        touched.email && errors.email
-                          ? Colors.error
-                          : Colors.inputFieldColor,
-                    }}
-                  />
-                  {touched.email && errors.email && (
-                    <>
-                      <View
-                        style={{
-                          width: '90%',
-                          height: 16,
-                          bottom: RFPercentage(0.8),
-                        }}>
-                        <Text
+          {/* Field Container */}
+          <Formik
+            initialValues={{
+              email: '',
+            }}
+            validationSchema={validationSchema}
+            onSubmit={values => handleNext(values)}>
+            {({
+              handleChange,
+              handleBlur,
+              handleSubmit,
+              values,
+              errors,
+              touched,
+            }) => (
+              <>
+                <View style={styles.container}>
+                  <View style={styles.inputContainer}>
+                    <InputField
+                      placeholder="Enter Email"
+                      onChangeText={handleChange('email')}
+                      handleBlur={handleBlur('email')}
+                      value={values.email}
+                      customStyle={{
+                        borderColor:
+                          touched.email && errors.email
+                            ? Colors.error
+                            : Colors.inputFieldColor,
+                      }}
+                    />
+                    {touched.email && errors.email && (
+                      <>
+                        <View
                           style={{
-                            fontSize: RFPercentage(1.5),
-                            fontFamily: Fonts.fontRegular,
-                            color: Colors.error,
-                            textAlign: 'left',
+                            width: '90%',
+                            height: 16,
+                            bottom: RFPercentage(0.8),
                           }}>
-                          {errors.email}
-                        </Text>
-                      </View>
-                    </>
+                          <Text
+                            style={{
+                              fontSize: RFPercentage(1.5),
+                              fontFamily: Fonts.fontRegular,
+                              color: Colors.error,
+                              textAlign: 'left',
+                            }}>
+                            {errors.email}
+                          </Text>
+                        </View>
+                      </>
+                    )}
+                  </View>
+                  {text && (
+                    <Text
+                      style={{
+                        textAlign: 'center',
+                        marginHorizontal: RFPercentage(3),
+                        fontFamily: Fonts.fontMedium,
+                        color: Colors.secondaryText,
+                        fontSize: RFPercentage(1.5),
+                        marginTop: RFPercentage(2),
+                      }}>
+                      We’ve sent you a password reset link. If it doesn’t appear
+                      in your inbox within a few minutes, please also check your
+                      Spam or Junk folder.
+                    </Text>
                   )}
-                </View>
-                {text && (
-                  <Text
-                    style={{
-                      textAlign: 'center',
-                      marginHorizontal: RFPercentage(3),
-                      fontFamily: Fonts.fontMedium,
-                      color: Colors.secondaryText,
-                      fontSize: RFPercentage(1.5),
-                      marginTop: RFPercentage(2),
-                    }}>
-                    We’ve sent you a password reset link. If it doesn’t appear
-                    in your inbox within a few minutes, please also check your
-                    Spam or Junk folder.
-                  </Text>
-                )}
 
-                <View style={styles.buttonContainer}>
-                  <GradientButton
-                    title="Enter Email"
-                    onPress={handleSubmit}
-                    loading={loading}
-                    disabled={loading}
-                  />
+                  <View style={styles.buttonContainer}>
+                    <GradientButton
+                      title="Enter Email"
+                      onPress={handleSubmit}
+                      loading={loading}
+                      disabled={loading}
+                    />
+                  </View>
                 </View>
-              </View>
-            </>
-          )}
-        </Formik>
-        <View style={styles.imageContainer}>
-          <Image
-            source={IMAGES.stars}
-            resizeMode="contain"
-            style={styles.imageStyle}
-          />
-        </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+              </>
+            )}
+          </Formik>
+          <View style={styles.imageContainer}>
+            <Image
+              source={IMAGES.stars}
+              resizeMode="contain"
+              style={styles.imageStyle}
+            />
+          </View>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 };
 

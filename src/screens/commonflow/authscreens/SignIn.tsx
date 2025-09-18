@@ -8,6 +8,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
 import React, {useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
@@ -52,10 +54,12 @@ const SignIn: React.FC = () => {
       const userDoc = await firestore().collection('Users').doc(user.uid).get();
       const userData = userDoc.data();
       const userRole = userData?.role;
-      // const fcmToken = await messaging().getToken();
-      // await firestore().collection('Users').doc(user.uid).update({
-      //   fcmToken: fcmToken,
-      // });
+      await messaging().requestPermission();
+      await messaging().registerDeviceForRemoteMessages();
+      const fcmToken = await messaging().getToken();
+      await firestore().collection('Users').doc(user.uid).update({
+        fcmToken: fcmToken,
+      });
 
       showToast({
         type: 'success',
@@ -90,162 +94,174 @@ const SignIn: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar
-        barStyle={'dark-content'}
-        translucent
-        backgroundColor="transparent"
-      />
-      <KeyboardAvoidingView
-        style={{flex: 1}}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-        <View style={styles.container}>
-          <HeaderComponent />
-          <View style={styles.headerContainer}>
-            <Text style={styles.heading}>Welcome Back</Text>
-          </View>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar
+          barStyle={'dark-content'}
+          translucent
+          backgroundColor="transparent"
+        />
+        <KeyboardAvoidingView
+          style={{flex: 1}}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <View style={styles.container}>
+            <HeaderComponent />
+            <View style={styles.headerContainer}>
+              <Text style={styles.heading}>Welcome Back</Text>
+            </View>
 
-          {/* Field Container */}
-          <Formik
-            initialValues={{
-              email: '',
-              password: '',
-            }}
-            validationSchema={validationSchema}
-            onSubmit={values => handleSignIn(values)}>
-            {({
-              handleChange,
-              handleBlur,
-              handleSubmit,
-              values,
-              errors,
-              touched,
-            }) => (
-              <>
-                <View style={styles.fieldContainer}>
-                  <InputField
-                    placeholder="Email"
-                    onChangeText={handleChange('email')}
-                    handleBlur={handleBlur('email')}
-                    value={values.email}
-                    customStyle={{
-                      borderColor:
-                        touched.email && errors.email
-                          ? Colors.error
-                          : Colors.inputFieldColor,
-                    }}
-                  />
-                  {touched.email && errors.email && (
-                    <>
-                      <View style={{width: '90%', height: 16, bottom: RFPercentage(0.8)}}>
-                        <Text
+            {/* Field Container */}
+            <Formik
+              initialValues={{
+                email: '',
+                password: '',
+              }}
+              validationSchema={validationSchema}
+              onSubmit={values => handleSignIn(values)}>
+              {({
+                handleChange,
+                handleBlur,
+                handleSubmit,
+                values,
+                errors,
+                touched,
+              }) => (
+                <>
+                  <View style={styles.fieldContainer}>
+                    <InputField
+                      placeholder="Email"
+                      onChangeText={handleChange('email')}
+                      handleBlur={handleBlur('email')}
+                      value={values.email}
+                      customStyle={{
+                        borderColor:
+                          touched.email && errors.email
+                            ? Colors.error
+                            : Colors.inputFieldColor,
+                      }}
+                    />
+                    {touched.email && errors.email && (
+                      <>
+                        <View
                           style={{
-                            fontSize: RFPercentage(1.5),
-                            fontFamily: Fonts.fontRegular,
-                            color: Colors.error,
-                            textAlign: 'left',
+                            width: '90%',
+                            height: 16,
+                            bottom: RFPercentage(0.8),
                           }}>
-                          {errors.email}
-                        </Text>
-                      </View>
-                    </>
-                  )}
-                  <PasswordField
-                    placeholder="Password"
-                    onChangeText={handleChange('password')}
-                    handleBlur={handleBlur('password')}
-                    value={values.password}
-                    customStyle={{
-                      borderColor:
-                        touched.password && errors.password
-                          ? Colors.error
-                          : Colors.inputFieldColor,
-                    }}
-                  />
-                  {touched.password && errors.password && (
-                    <>
-                      <View style={{width: '90%', height: 16, bottom: RFPercentage(0.8)}}>
-                        <Text
+                          <Text
+                            style={{
+                              fontSize: RFPercentage(1.5),
+                              fontFamily: Fonts.fontRegular,
+                              color: Colors.error,
+                              textAlign: 'left',
+                            }}>
+                            {errors.email}
+                          </Text>
+                        </View>
+                      </>
+                    )}
+                    <PasswordField
+                      placeholder="Password"
+                      onChangeText={handleChange('password')}
+                      handleBlur={handleBlur('password')}
+                      value={values.password}
+                      customStyle={{
+                        borderColor:
+                          touched.password && errors.password
+                            ? Colors.error
+                            : Colors.inputFieldColor,
+                      }}
+                    />
+                    {touched.password && errors.password && (
+                      <>
+                        <View
                           style={{
-                            fontSize: RFPercentage(1.5),
-                            fontFamily: Fonts.fontRegular,
-                            color: Colors.error,
-                            textAlign: 'left',
+                            width: '90%',
+                            height: 16,
+                            bottom: RFPercentage(0.8),
                           }}>
-                          {errors.password}
-                        </Text>
-                      </View>
-                    </>
-                  )}
-                </View>
+                          <Text
+                            style={{
+                              fontSize: RFPercentage(1.5),
+                              fontFamily: Fonts.fontRegular,
+                              color: Colors.error,
+                              textAlign: 'left',
+                            }}>
+                            {errors.password}
+                          </Text>
+                        </View>
+                      </>
+                    )}
+                  </View>
 
-                {/* Remember me */}
-                <View style={styles.radioContainer}>
-                  <View style={styles.radioInner}>
-                    <TouchableOpacity
-                      activeOpacity={0.8}
-                      onPress={() => setSelected(!selected)}
-                      style={styles.radioButtonRow}>
-                      <RadioButtonInput
-                        obj={{value: 0}}
-                        index={0}
-                        isSelected={selected}
+                  {/* Remember me */}
+                  <View style={styles.radioContainer}>
+                    <View style={styles.radioInner}>
+                      <TouchableOpacity
+                        activeOpacity={0.8}
                         onPress={() => setSelected(!selected)}
-                        borderWidth={1}
-                        buttonInnerColor={Colors.gradient1}
-                        buttonOuterColor={
-                          selected ? Colors.gradient1 : Colors.inputFieldColor
-                        }
-                        buttonSize={RFPercentage(1.4)}
-                        buttonOuterSize={RFPercentage(2)}
-                      />
-                      <Text style={styles.radioLabel}>Remember me?</Text>
-                    </TouchableOpacity>
+                        style={styles.radioButtonRow}>
+                        <RadioButtonInput
+                          obj={{value: 0}}
+                          index={0}
+                          isSelected={selected}
+                          onPress={() => setSelected(!selected)}
+                          borderWidth={1}
+                          buttonInnerColor={Colors.gradient1}
+                          buttonOuterColor={
+                            selected ? Colors.gradient1 : Colors.inputFieldColor
+                          }
+                          buttonSize={RFPercentage(1.4)}
+                          buttonOuterSize={RFPercentage(2)}
+                        />
+                        <Text style={styles.radioLabel}>Remember me?</Text>
+                      </TouchableOpacity>
 
-                    <TouchableOpacity
-                      activeOpacity={0.8}
-                      onPress={() => navigation.navigate('ResetPassword')}
-                      style={{position: 'absolute', right: 0}}>
-                      <Text style={styles.forgotPassword}>
-                        Forgot Password?
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={() => navigation.navigate('ResetPassword')}
+                        style={{position: 'absolute', right: 0}}>
+                        <Text style={styles.forgotPassword}>
+                          Forgot Password?
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+
+                  {/* Button */}
+                  <View style={styles.buttonContainer}>
+                    <GradientButton
+                      title="Sign In"
+                      onPress={handleSubmit}
+                      loading={loading}
+                      disabled={loading}
+                    />
+                    <View style={styles.bottomContainer}>
+                      <Text style={styles.bottomText}>
+                        Don't have an account?
                       </Text>
-                    </TouchableOpacity>
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={() => navigation.navigate('UserSelection')}>
+                        <Text style={styles.signUp}>Signup</Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
-                </View>
+                </>
+              )}
+            </Formik>
 
-                {/* Button */}
-                <View style={styles.buttonContainer}>
-                  <GradientButton
-                    title="Sign In"
-                    onPress={handleSubmit}
-                    loading={loading}
-                    disabled={loading}
-                  />
-                  <View style={styles.bottomContainer}>
-                    <Text style={styles.bottomText}>
-                      Don't have an account?
-                    </Text>
-                    <TouchableOpacity
-                      activeOpacity={0.8}
-                      onPress={() => navigation.navigate('UserSelection')}>
-                      <Text style={styles.signUp}>Signup</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </>
-            )}
-          </Formik>
-
-          <View style={styles.starContainer}>
-            <Image
-              source={IMAGES.stars}
-              resizeMode="contain"
-              style={styles.star}
-            />
+            <View style={styles.starContainer}>
+              <Image
+                source={IMAGES.stars}
+                resizeMode="contain"
+                style={styles.star}
+              />
+            </View>
           </View>
-        </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 };
 
