@@ -4,20 +4,26 @@ import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts} from '../constants/Themes';
 import DatePicker from 'react-native-date-picker';
 import {useSelector} from 'react-redux';
-import CheckBox from 'react-native-check-box'
+import CheckBox from 'react-native-check-box';
 
-
-const SetAvailability = ({ day, fromTime, toTime, onUpdateAvailability, checked, onToggleCheckBox }) => {
+const SetAvailability = ({
+  day,
+  fromTime,
+  toTime,
+  onUpdateAvailability,
+  checked,
+  onToggleCheckBox,
+}) => {
   const profileData = useSelector(state => state.profile.profileData.role);
   const [openFromPicker, setOpenFromPicker] = useState(false);
   const [openToPicker, setOpenToPicker] = useState(false);
 
   return (
     <View style={styles.container}>
-       <CheckBox
+      <CheckBox
         disabled={false}
-        isChecked={checked} 
-        onClick={() => onToggleCheckBox(day)} 
+        isChecked={checked}
+        onClick={() => onToggleCheckBox(day)}
         checkedCheckBoxColor={Colors.gradient1}
         uncheckedCheckBoxColor={'rgba(164, 172, 188, 1)'}
       />
@@ -65,6 +71,9 @@ const SetAvailability = ({ day, fromTime, toTime, onUpdateAvailability, checked,
           setOpenFromPicker(false);
         }}
         onCancel={() => setOpenFromPicker(false)}
+        theme="light"
+        buttonColor={Colors.gradient1}
+        dividerColor={Colors.gradient1}
       />
 
       <DatePicker
@@ -77,6 +86,9 @@ const SetAvailability = ({ day, fromTime, toTime, onUpdateAvailability, checked,
           setOpenToPicker(false);
         }}
         onCancel={() => setOpenToPicker(false)}
+        theme="light"
+        buttonColor={Colors.gradient1}
+        dividerColor={Colors.gradient1}
       />
     </View>
   );

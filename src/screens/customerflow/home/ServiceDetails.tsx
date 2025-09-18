@@ -265,7 +265,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
             </View>
 
             <View
-              style={{position: 'absolute', right: 0, top: RFPercentage(2.1)}}>
+              style={{position: 'absolute', right: 0, top: RFPercentage(1.9)}}>
               <Text style={styles.joining}>Joined on : {formattedDate}</Text>
             </View>
           </View>

@@ -1,4 +1,11 @@
-import {Image, StyleSheet, Text, View, TouchableOpacity, Platform} from 'react-native';
+import {
+  Image,
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Platform,
+} from 'react-native';
 import React, {useState} from 'react';
 import {Colors, Fonts, IMAGES, Icons} from '../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -26,24 +33,30 @@ const ServicesCard = ({
             style={styles.image}
           />
         </View>
-        <View style={styles.dotsContainer}>
-          {covers.length === 1 ? null : (
-            <>
-              {covers.map((_, index) => (
-                <TouchableOpacity key={index} onPress={() => setStep(index)}   activeOpacity={0.8} >
-                  {step === index ? (
-                    <LinearGradient
-                      colors={[Colors.gradient1, Colors.gradient2]}
-                      style={styles.activeDot}
-                    />
-                  ) : (
-                    <View style={styles.inactiveDot} />
-                  )}
-                </TouchableOpacity>
-              ))}
-            </>
-          )}
-        </View>
+        {covers.length > 1 && (
+          <View style={styles.dotsContainer}>
+            {covers.length === 1 ? null : (
+              <>
+                {covers.map((_, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    onPress={() => setStep(index)}
+                    activeOpacity={0.8}>
+                    {step === index ? (
+                      <LinearGradient
+                        colors={[Colors.gradient1, Colors.gradient2]}
+                        style={styles.activeDot}
+                      />
+                    ) : (
+                      <View style={styles.inactiveDot} />
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </>
+            )}
+          </View>
+        )}
+
         <View style={styles.detailsContainer}>
           <View style={styles.rowContainer}>
             <Image
@@ -90,7 +103,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: RFPercentage(1),
     borderBottomWidth: RFPercentage(0.5),
-    height: RFPercentage(28.5),
+    // height: RFPercentage(28.5),
     backgroundColor: '#fff',
   },
 
@@ -179,7 +192,7 @@ const styles = StyleSheet.create({
   locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop:Platform.OS === 'ios' ? RFPercentage(0.3) : 0
+    marginTop: Platform.OS === 'ios' ? RFPercentage(0.3) : 0,
   },
   locationIcon: {bottom: 1, left: -1},
   locationText: {
