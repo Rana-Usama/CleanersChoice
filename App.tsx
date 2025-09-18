@@ -20,7 +20,6 @@ import {UnreadMessagesProvider} from './src/utils/UnreadMessagesContext';
 import {toastConfig} from './src/utils/toastConfig';
 
 const App: React.FC = () => {
-  
   // Notification Permission
   useEffect(() => {
     const requestNotificationPermission = async () => {
@@ -40,6 +39,8 @@ const App: React.FC = () => {
           authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
         if (enabled) {
+          await messaging().registerDeviceForRemoteMessages();
+          const fcmToken = await messaging().getToken();
           console.log('Notification permission granted.');
         } else {
           console.log('Notification permission denied.');
@@ -107,7 +108,7 @@ const App: React.FC = () => {
     }
   };
 
-// console.log('PUBLISHABLE_KEY.............', PUBLISHABLE_KEY)
+  // console.log('PUBLISHABLE_KEY.............', PUBLISHABLE_KEY)
 
   return (
     <StripeProvider publishableKey={PUBLISHABLE_KEY}>

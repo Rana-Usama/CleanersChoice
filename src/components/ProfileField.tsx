@@ -14,13 +14,13 @@ interface Props {
 const ProfileField: React.FC<Props> = (props: Props) => {
     return (
         <TouchableOpacity onPress={props.onPress}   activeOpacity={0.8} >
-            <View style={styles.container}>
+            <View style={[styles.container]}>
                 <View style={styles.textContainer}>
                     <Image source={props.icon} resizeMode='contain' tintColor={props.color? props.color : null} style={styles.icon} />
                     <Text style={[styles.text, props.color && { color: props.color }]}>{props.text}</Text>
                 </View>
                 <TouchableOpacity   activeOpacity={0.8} onPress={props.onPress}>
-                    <Entypo name='chevron-thin-right' size={RFPercentage(1.9)} color={props.color ? props.color :  Colors.brown} />
+                    <Entypo name='chevron-thin-right' size={RFPercentage(1.6)} color={props.color ? props.color :  Colors.brown} />
                 </TouchableOpacity>
             </View>
         </TouchableOpacity>
@@ -32,15 +32,15 @@ export default ProfileField
 const styles = StyleSheet.create({
     container: {
         width: '100%',
-        height: RFPercentage(6.5),
+        height: RFPercentage(6.3),
         borderWidth: 1,
         borderColor: Colors.inputFieldColor,
-        borderRadius: RFPercentage(1),
+        borderRadius: RFPercentage(1.3),
         alignItems: 'center',
         flexDirection: 'row',
         justifyContent: 'space-between',
         paddingHorizontal: RFPercentage(2),
-        marginVertical: RFPercentage(1.2),
+        marginVertical: RFPercentage(1),
     },
     textContainer: {
         flexDirection: 'row',

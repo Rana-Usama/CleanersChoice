@@ -8,6 +8,8 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   TouchableOpacity,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
 import React, {useState} from 'react';
 import {Fonts, IMAGES, Colors, Icons} from '../../../constants/Themes';
@@ -129,14 +131,16 @@ const SignUp: React.FC = ({navigation}: any) => {
         profileUrl = await reference.getDownloadURL();
       }
 
-      // const fcmToken = await messaging().getToken();
+      await messaging().requestPermission();
+      await messaging().registerDeviceForRemoteMessages();
+      const fcmToken = await messaging().getToken();
       const userData = {
         name: values.name,
         email: values.email,
         phone: values.phone,
         uid: user.uid,
         profile: profileUrl || null,
-        fcmToken: null,
+        fcmToken: fcmToken || null,
         createdAt: firestore.FieldValue.serverTimestamp(),
         role: userFlow?.userFlow,
         ...(userFlow?.userFlow === 'Cleaner' && {
@@ -178,282 +182,283 @@ const SignUp: React.FC = ({navigation}: any) => {
     if (digits.startsWith('0')) digits = digits.slice(1);
     digits = digits.slice(-10);
     if (digits.length < 10) return `+1-${digits}`;
-
     const area = digits.slice(0, 3);
     const prefix = digits.slice(3, 6);
     const line = digits.slice(6, 10);
-
-    return `+1-${area}-${prefix}-${line}`; // -> "+1-440-147-6925"
+    return `+1-${area}-${prefix}-${line}`;
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar
-        barStyle={'dark-content'}
-        translucent
-        backgroundColor="transparent"
-      />
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{paddingBottom: RFPercentage(8)}}>
-        <KeyboardAvoidingView>
-          {/* Header */}
-          <View style={styles.container}>
-            <HeaderComponent />
-            <View style={styles.titleContainer}>
-              <Text style={styles.title}>Create An Account</Text>
-            </View>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar
+          barStyle={'dark-content'}
+          translucent
+          backgroundColor="transparent"
+        />
+        <ScrollView
+          keyboardShouldPersistTaps="always"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{paddingBottom: RFPercentage(8)}}>
+          <KeyboardAvoidingView>
+            {/* Header */}
+            <View style={styles.container}>
+              <HeaderComponent />
+              <View style={styles.titleContainer}>
+                <Text style={styles.title}>Create An Account</Text>
+              </View>
 
-            {/* Image Uploader */}
-            <View style={styles.imgContainer}>
-              <TouchableOpacity activeOpacity={0.5} onPress={uploadImg}>
-                <View style={styles.pictureContainer}>
-                  {img ? (
+              {/* Image Uploader */}
+              <View style={styles.imgContainer}>
+                <TouchableOpacity activeOpacity={0.5} onPress={uploadImg}>
+                  <View style={styles.pictureContainer}>
+                    {img ? (
+                      <>
+                        <Image
+                          source={{uri: img?.path}}
+                          resizeMode="cover"
+                          style={styles.imgStyle}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <Text style={styles.imgText}>Upload Picture</Text>
+                      </>
+                    )}
+                  </View>
+                  {img && (
                     <>
-                      <Image
-                        source={{uri: img?.path}}
-                        resizeMode="cover"
-                        style={styles.imgStyle}
-                      />
-                    </>
-                  ) : (
-                    <>
-                      <Text style={styles.imgText}>Upload Picture</Text>
+                      <TouchableOpacity onPress={uploadImg} activeOpacity={0.8}>
+                        <Image
+                          source={Icons.edit}
+                          resizeMode="contain"
+                          style={styles.uploadedImg}
+                        />
+                      </TouchableOpacity>
                     </>
                   )}
-                </View>
-                {img && (
+                </TouchableOpacity>
+              </View>
+
+              {/* Fields Container */}
+              <Formik
+                initialValues={{
+                  name: '',
+                  email: '',
+                  phone: '',
+                  password: '',
+                  confirmPassword: '',
+                }}
+                validationSchema={validationSchema}
+                onSubmit={values => handleSignUp(values)}>
+                {({
+                  handleChange,
+                  handleBlur,
+                  handleSubmit,
+                  values,
+                  errors,
+                  touched,
+                }) => (
                   <>
-                    <TouchableOpacity onPress={uploadImg}   activeOpacity={0.8}>
-                      <Image
-                        source={Icons.edit}
-                        resizeMode="contain"
-                        style={styles.uploadedImg}
+                    <View style={styles.fieldContainer}>
+                      {/* User Name */}
+                      <InputField
+                        placeholder="Username"
+                        onChangeText={handleChange('name')}
+                        handleBlur={handleBlur('name')}
+                        value={values.name}
+                        customStyle={{
+                          borderColor:
+                            touched.name && errors.name
+                              ? Colors.error
+                              : Colors.inputFieldColor,
+                        }}
                       />
-                    </TouchableOpacity>
-                  </>
-                )}
-              </TouchableOpacity>
-            </View>
+                      {touched.name && errors.name && (
+                        <>
+                          <View style={styles.errorContainer}>
+                            <Text style={styles.errorText}>{errors.name}</Text>
+                          </View>
+                        </>
+                      )}
 
-            {/* Fields Container */}
-            <Formik
-              initialValues={{
-                name: '',
-                email: '',
-                phone: '',
-                password: '',
-                confirmPassword: '',
-              }}
-              validationSchema={validationSchema}
-              onSubmit={values => handleSignUp(values)}>
-              {({
-                handleChange,
-                handleBlur,
-                handleSubmit,
-                values,
-                errors,
-                touched,
-              }) => (
-                <>
-                  <View style={styles.fieldContainer}>
-                    {/* User Name */}
-                    <InputField
-                      placeholder="Username"
-                      onChangeText={handleChange('name')}
-                      handleBlur={handleBlur('name')}
-                      value={values.name}
-                      customStyle={{
-                        borderColor:
-                          touched.name && errors.name
-                            ? Colors.error
-                            : Colors.inputFieldColor,
-                      }}
-                    />
-                    {touched.name && errors.name && (
-                      <>
-                        <View style={styles.errorContainer}>
-                          <Text style={styles.errorText}>{errors.name}</Text>
-                        </View>
-                      </>
-                    )}
-
-                    {/* Email */}
-                    <InputField
-                      placeholder="Email"
-                      onChangeText={handleChange('email')}
-                      handleBlur={handleBlur('email')}
-                      value={values.email}
-                      customStyle={{
-                        borderColor:
-                          touched.email && errors.email
-                            ? Colors.error
-                            : Colors.inputFieldColor,
-                      }}
-                    />
-                    {touched.email && errors.email && (
-                      <>
-                        <View style={styles.errorContainer}>
-                          <Text style={styles.errorText}>{errors.email}</Text>
-                        </View>
-                      </>
-                    )}
-
-                    {/* Password */}
-                    <PasswordField
-                      placeholder="Password"
-                      onChangeText={handleChange('password')}
-                      handleBlur={handleBlur('password')}
-                      value={values.password}
-                      customStyle={{
-                        borderColor:
-                          touched.password && errors.password
-                            ? Colors.error
-                            : Colors.inputFieldColor,
-                      }}
-                    />
-                    {touched.password && errors.password && (
-                      <>
-                        <View style={styles.errorContainer}>
-                          <Text style={styles.errorText}>
-                            {errors.password}
-                          </Text>
-                        </View>
-                      </>
-                    )}
-
-                    {/* Confirm Password */}
-                    <PasswordField
-                      placeholder="Confirm Password"
-                      onChangeText={handleChange('confirmPassword')}
-                      handleBlur={handleBlur('confirmPassword')}
-                      value={values.confirmPassword}
-                      customStyle={{
-                        borderColor:
-                          touched.confirmPassword && errors.confirmPassword
-                            ? Colors.error
-                            : Colors.inputFieldColor,
-                      }}
-                    />
-                    {touched.confirmPassword && errors.confirmPassword && (
-                      <>
-                        <View style={styles.errorContainer}>
-                          <Text style={styles.errorText}>
-                            {errors.confirmPassword}
-                          </Text>
-                        </View>
-                      </>
-                    )}
-
-                    {/* Phone */}
-                    <InputField
-                      placeholder="e.g. +1 (321) 659-6898"
-                      onChangeText={text => {
-                        const formatted = formatPhoneNumber(text);
-                        handleChange('phone')(formatted);
-                      }}
-                      type={'phone-pad'}
-                      length={15}
-                      handleBlur={handleBlur('phone')}
-                      value={values.phone}
-                      customStyle={{
-                        borderColor:
-                          touched.phone && errors.phone
-                            ? Colors.error
-                            : Colors.inputFieldColor,
-                      }}
-                    />
-                    {touched.phone && errors.phone && (
-                      <>
-                        <View style={styles.errorContainer}>
-                          <Text style={styles.errorText}>{errors.phone}</Text>
-                        </View>
-                      </>
-                    )}
-                  </View>
-
-                  {/* Terms And Conditions */}
-                  <View style={styles.radioContainer}>
-                    <TouchableOpacity
-                      activeOpacity={0.8}
-                      onPress={() => setSelected(!selected)}
-                      style={styles.radioInnerContainer}>
-                      <RadioButtonInput
-                        obj={{value: 0}}
-                        index={0}
-                        isSelected={selected}
-                        onPress={() => setSelected(!selected)}
-                        borderWidth={1}
-                        buttonInnerColor={Colors.gradient1}
-                        buttonOuterColor={
-                          selected ? Colors.gradient1 : Colors.inputFieldColor
-                        }
-                        buttonSize={RFPercentage(1.4)}
-                        buttonOuterSize={RFPercentage(2.2)}
+                      {/* Email */}
+                      <InputField
+                        placeholder="Email"
+                        onChangeText={handleChange('email')}
+                        handleBlur={handleBlur('email')}
+                        value={values.email}
+                        customStyle={{
+                          borderColor:
+                            touched.email && errors.email
+                              ? Colors.error
+                              : Colors.inputFieldColor,
+                        }}
                       />
-                      <Text style={styles.radioLabel}>
-                        I agree to terms and conditions
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
+                      {touched.email && errors.email && (
+                        <>
+                          <View style={styles.errorContainer}>
+                            <Text style={styles.errorText}>{errors.email}</Text>
+                          </View>
+                        </>
+                      )}
 
-                  {/* Bottom Container */}
-                  <View style={styles.buttonContainer}>
-                    <GradientButton
-                      title="Sign Up"
-                      onPress={handleSubmit}
-                      loading={loading}
-                      disabled={loading}
-                    />
-                    <View style={styles.buttonInnerContainer}>
-                      <Text style={styles.bottomText}>
-                        Already have an account?
-                      </Text>
+                      {/* Password */}
+                      <PasswordField
+                        placeholder="Password"
+                        onChangeText={handleChange('password')}
+                        handleBlur={handleBlur('password')}
+                        value={values.password}
+                        customStyle={{
+                          borderColor:
+                            touched.password && errors.password
+                              ? Colors.error
+                              : Colors.inputFieldColor,
+                        }}
+                      />
+                      {touched.password && errors.password && (
+                        <>
+                          <View style={styles.errorContainer}>
+                            <Text style={styles.errorText}>
+                              {errors.password}
+                            </Text>
+                          </View>
+                        </>
+                      )}
+
+                      {/* Confirm Password */}
+                      <PasswordField
+                        placeholder="Confirm Password"
+                        onChangeText={handleChange('confirmPassword')}
+                        handleBlur={handleBlur('confirmPassword')}
+                        value={values.confirmPassword}
+                        customStyle={{
+                          borderColor:
+                            touched.confirmPassword && errors.confirmPassword
+                              ? Colors.error
+                              : Colors.inputFieldColor,
+                        }}
+                      />
+                      {touched.confirmPassword && errors.confirmPassword && (
+                        <>
+                          <View style={styles.errorContainer}>
+                            <Text style={styles.errorText}>
+                              {errors.confirmPassword}
+                            </Text>
+                          </View>
+                        </>
+                      )}
+
+                      {/* Phone */}
+                      <InputField
+                        placeholder="e.g. +1 (321) 659-6898"
+                        onChangeText={text => {
+                          const formatted = formatPhoneNumber(text);
+                          handleChange('phone')(formatted);
+                        }}
+                        type={'phone-pad'}
+                        length={15}
+                        handleBlur={handleBlur('phone')}
+                        value={values.phone}
+                        customStyle={{
+                          borderColor:
+                            touched.phone && errors.phone
+                              ? Colors.error
+                              : Colors.inputFieldColor,
+                        }}
+                      />
+                      {touched.phone && errors.phone && (
+                        <>
+                          <View style={styles.errorContainer}>
+                            <Text style={styles.errorText}>{errors.phone}</Text>
+                          </View>
+                        </>
+                      )}
+                    </View>
+
+                    {/* Terms And Conditions */}
+                    <View style={styles.radioContainer}>
                       <TouchableOpacity
                         activeOpacity={0.8}
-                        onPress={() => navigation.navigate('SignIn')}>
-                        <Text style={styles.signIn}>SignIn</Text>
+                        onPress={() => setSelected(!selected)}
+                        style={styles.radioInnerContainer}>
+                        <RadioButtonInput
+                          obj={{value: 0}}
+                          index={0}
+                          isSelected={selected}
+                          onPress={() => setSelected(!selected)}
+                          borderWidth={1}
+                          buttonInnerColor={Colors.gradient1}
+                          buttonOuterColor={
+                            selected ? Colors.gradient1 : Colors.inputFieldColor
+                          }
+                          buttonSize={RFPercentage(1.4)}
+                          buttonOuterSize={RFPercentage(2.2)}
+                        />
+                        <Text style={styles.radioLabel}>
+                          I agree to terms and conditions
+                        </Text>
                       </TouchableOpacity>
                     </View>
-                    <TouchableOpacity
-                      activeOpacity={0.8}
-                      onPress={() => navigation.navigate('UserSelection')}
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        marginTop: RFPercentage(2),
-                      }}>
-                      <Ionicons
-                        name="chevron-back-circle-sharp"
-                        color={'rgba(178, 204, 228, 1)'}
-                        size={RFPercentage(2.4)}
-                      />
-                      <Text
-                        style={[
-                          styles.signIn,
-                          {color: 'rgba(134, 154, 173, 1)'},
-                        ]}>
-                        Back
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </>
-              )}
-            </Formik>
-          </View>
 
-          {/* Bottom Stars */}
-          <View style={styles.starContainer}>
-            <Image
-              source={IMAGES.stars}
-              resizeMode="contain"
-              style={styles.star}
-            />
-          </View>
-          <View style={{marginBottom: RFPercentage(5)}} />
-        </KeyboardAvoidingView>
-      </ScrollView>
-    </SafeAreaView>
+                    {/* Bottom Container */}
+                    <View style={styles.buttonContainer}>
+                      <GradientButton
+                        title="Sign Up"
+                        onPress={handleSubmit}
+                        loading={loading}
+                        disabled={loading}
+                      />
+                      <View style={styles.buttonInnerContainer}>
+                        <Text style={styles.bottomText}>
+                          Already have an account?
+                        </Text>
+                        <TouchableOpacity
+                          activeOpacity={0.8}
+                          onPress={() => navigation.navigate('SignIn')}>
+                          <Text style={styles.signIn}>SignIn</Text>
+                        </TouchableOpacity>
+                      </View>
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={() => navigation.navigate('UserSelection')}
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          marginTop: RFPercentage(2),
+                        }}>
+                        <Ionicons
+                          name="chevron-back-circle-sharp"
+                          color={'rgba(178, 204, 228, 1)'}
+                          size={RFPercentage(2.4)}
+                        />
+                        <Text
+                          style={[
+                            styles.signIn,
+                            {color: 'rgba(134, 154, 173, 1)'},
+                          ]}>
+                          Back
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </>
+                )}
+              </Formik>
+            </View>
+
+            {/* Bottom Stars */}
+            <View style={styles.starContainer}>
+              <Image
+                source={IMAGES.stars}
+                resizeMode="contain"
+                style={styles.star}
+              />
+            </View>
+            <View style={{marginBottom: RFPercentage(5)}} />
+          </KeyboardAvoidingView>
+        </ScrollView>
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 };
 

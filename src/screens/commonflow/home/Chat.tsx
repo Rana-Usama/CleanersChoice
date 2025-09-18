@@ -256,7 +256,7 @@ const Chat = ({navigation, route}: any) => {
                   style={{
                     backgroundColor: 'rgba(248, 248, 248, 1)',
                     width: '100%',
-                    minHeight: RFPercentage(10),
+                    minHeight: RFPercentage(12),
                     justifyContent: 'center',
                     maxHeight: RFPercentage(18),
                     paddingVertical: RFPercentage(2),
@@ -369,22 +369,18 @@ const styles = StyleSheet.create({
   customTextInput: {
     color: Colors.white,
     fontSize: RFPercentage(1.8),
-    fontFamily: 'Poppins_400Regular',
     width: '90%',
-    marginVertical: 0,
-    paddingVertical: 0,
-    justifyContent: 'center',
     textAlignVertical: 'top',
+    fontFamily: Fonts.fontRegular,
+    bottom:2
   },
   sendButton: {
     justifyContent: 'center',
     alignItems: 'center',
-    width: RFPercentage(4.5),
-    height: RFPercentage(4.5),
     borderRadius: RFPercentage(100),
     position: 'absolute',
-    right: RFPercentage(-1),
-    top: RFPercentage(-1),
+    right: RFPercentage(0),
+    top: RFPercentage(0.3),
   },
 
   noProfileContainer: {
@@ -404,7 +400,7 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(6),
     justifyContent: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: 'rgb(190, 193, 199)',
+    borderBottomColor: 'rgba(226, 227, 230, 1)',
     alignSelf: 'center',
     paddingBottom: RFPercentage(1),
   },
@@ -437,13 +433,15 @@ const styles = StyleSheet.create({
     // minHeight: RFPercentage(5.5),
     maxHeight: RFPercentage(18),
     justifyContent: 'center',
-    padding: RFPercentage(1.7),
+    paddingHorizontal: RFPercentage(1.7),
     borderTopWidth: RFPercentage(0.1),
     alignSelf: 'center',
     width: '90%',
-    backgroundColor: 'rgba(234, 232, 232, 0.5)',
+    backgroundColor: 'rgba(219, 221, 222, 0.5)',
     borderColor: 'rgba(234, 232, 232, 0.9)',
     borderTopColor: 'rgba(234, 232, 232, 0.9)',
+    bottom: RFPercentage(1),
+    paddingVertical: RFPercentage(1.4),
   },
 });
 

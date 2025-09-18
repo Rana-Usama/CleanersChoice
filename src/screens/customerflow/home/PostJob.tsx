@@ -7,6 +7,8 @@ import {
   View,
   KeyboardAvoidingView,
   ScrollView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -160,11 +162,14 @@ const PostJob = ({route}: any) => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContainer}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContainer}
+        keyboardShouldPersistTaps="always"
+        style={{backgroundColor:Colors.background}}
+        >
+        <View style={styles.safeArea}>
           {/* Header */}
           <HeaderBack
             title="Post Job"
@@ -225,8 +230,8 @@ const PostJob = ({route}: any) => {
               {/* Date Picker */}
               <View style={styles.dateContainer}>
                 <TouchableOpacity
-                activeOpacity={1}
-                  // onPress={() => setOpen(true)}
+                  activeOpacity={1}
+                  onPress={() => setOpen(true)}
                   style={{flexDirection: 'row', alignItems: 'center'}}>
                   <Image
                     source={Icons.calendar}
@@ -238,7 +243,6 @@ const PostJob = ({route}: any) => {
                   </Text>
                 </TouchableOpacity>
               </View>
-              {/* Calender
               <DatePicker
                 modal
                 open={open}
@@ -250,7 +254,7 @@ const PostJob = ({route}: any) => {
                 onCancel={() => {
                   setOpen(false);
                 }}
-              /> */}
+              />
 
               {/* Special Remarks */}
               <View>
@@ -279,9 +283,9 @@ const PostJob = ({route}: any) => {
               />
             </View>
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+        </View>
+      </ScrollView>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -291,10 +295,11 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: Colors.background,
+    paddingTop:RFPercentage(8)
   },
   scrollContainer: {
     flexGrow: 1,
-    paddingBottom: RFPercentage(15),
+    paddingBottom: RFPercentage(12),
   },
   container: {
     width: '90%',

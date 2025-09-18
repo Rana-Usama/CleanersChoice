@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
     height: RFPercentage(6.5),
     borderWidth: 1,
     borderColor: Colors.inputFieldColor,
-    borderRadius: RFPercentage(1),
+    borderRadius: RFPercentage(1.3),
     marginVertical: RFPercentage(1),
     alignItems: 'center',
     justifyContent: 'center',

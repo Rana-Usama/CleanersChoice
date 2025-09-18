@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   ScrollView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
 import React, {useState, useCallback, useRef} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -147,175 +149,185 @@ const ServiceOne: React.FC = ({navigation}: any) => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <HeaderBack title="Service" textStyle={styles.headerText} left={true} />
-      <KeyboardAvoidingView style={{flex: 1}}>
-        <ScrollView
-          contentContainerStyle={{flexGrow: 1, paddingBottom: RFPercentage(5)}}>
-          {/* Header */}
-          <View style={styles.container}>
-            <View style={styles.infoHeaderContainer}>
-              <InfoHeader />
-            </View>
-          </View>
-
-          {/* Time Line */}
-          <View style={styles.timeLineContainer}>
-            <TimeLine />
-          </View>
-
-          <View style={styles.container}>
-            {/* Description */}
-            <View style={styles.descriptionContainer}>
-              <DescriptionField
-                placeholder="Service Description"
-                count={true}
-                value={description}
-                onChangeText={text => dispatch(cleanerDescription(text))}
-                maxLength={200}
-              />
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <SafeAreaView style={styles.safeArea}>
+        <HeaderBack title="Service" textStyle={styles.headerText} left={true} />
+        <KeyboardAvoidingView style={{flex: 1}}>
+          <ScrollView
+            contentContainerStyle={{
+              flexGrow: 1,
+              paddingBottom: RFPercentage(5),
+            }}
+            keyboardShouldPersistTaps="always">
+            {/* Header */}
+            <View style={styles.container}>
+              <View style={styles.infoHeaderContainer}>
+                <InfoHeader />
+              </View>
             </View>
 
-            {/* Availability */}
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={() => navigation.navigate('Availability')}
-              style={styles.dateContainer}>
-              <View style={styles.dateButton}>
-                <Image
-                  source={Icons.calendar}
-                  resizeMode="contain"
-                  style={styles.dateIcon}
+            {/* Time Line */}
+            <View style={styles.timeLineContainer}>
+              <TimeLine />
+            </View>
+
+            <View style={styles.container}>
+              {/* Description */}
+              <View style={styles.descriptionContainer}>
+                <DescriptionField
+                  placeholder="Service Description"
+                  count={true}
+                  value={description}
+                  onChangeText={text => dispatch(cleanerDescription(text))}
+                  maxLength={200}
                 />
-                <Text
-                  style={[
-                    styles.dateText,
-                    {
-                      color:
-                        available.length > 0 ||
-                        serviceData?.availability.length > 0
-                          ? Colors.inputTextColor
-                          : Colors.placeholderColor,
-                    },
-                  ]}>
-                  {available.length > 0 || serviceData?.availability.length > 0
-                    ? 'Availability Set'
-                    : 'Set Availability'}
-                </Text>
               </View>
-              <View style={{position: 'absolute', right: RFPercentage(1)}}>
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  onPress={() => navigation.navigate('Availability')}>
-                  {available.length > 0 ||
-                  serviceData?.availability.length > 0 ? (
-                    <Image
-                      source={Icons.availablityEdit}
-                      style={{width: RFPercentage(2), height: RFPercentage(2)}}
-                      resizeMode="contain"
-                    />
-                  ) : (
-                    <AntDesign
-                      name="right"
-                      size={RFPercentage(1.5)}
-                      color={Colors.placeholderColor}
-                    />
-                  )}
-                </TouchableOpacity>
+
+              {/* Availability */}
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => navigation.navigate('Availability')}
+                style={styles.dateContainer}>
+                <View style={styles.dateButton}>
+                  <Image
+                    source={Icons.calendar}
+                    resizeMode="contain"
+                    style={styles.dateIcon}
+                  />
+                  <Text
+                    style={[
+                      styles.dateText,
+                      {
+                        color:
+                          available.length > 0 ||
+                          serviceData?.availability.length > 0
+                            ? Colors.inputTextColor
+                            : Colors.placeholderColor,
+                      },
+                    ]}>
+                    {available.length > 0 ||
+                    serviceData?.availability.length > 0
+                      ? 'Availability Set'
+                      : 'Set Availability'}
+                  </Text>
+                </View>
+                <View style={{position: 'absolute', right: RFPercentage(1)}}>
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={() => navigation.navigate('Availability')}>
+                    {available.length > 0 ||
+                    serviceData?.availability.length > 0 ? (
+                      <Image
+                        source={Icons.availablityEdit}
+                        style={{
+                          width: RFPercentage(2),
+                          height: RFPercentage(2),
+                        }}
+                        resizeMode="contain"
+                      />
+                    ) : (
+                      <AntDesign
+                        name="right"
+                        size={RFPercentage(1.5)}
+                        color={Colors.placeholderColor}
+                      />
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </TouchableOpacity>
+
+              {/* Location */}
+              <InputField
+                placeholder="Add city/town you provide your services at"
+                value={location}
+                onChangeText={setLoaction}
+                customStyle={{width: '100%', marginBottom: RFPercentage(3)}}
+              />
+
+              {/* Service Type */}
+              <View style={{flex: 1}}>
+                <MultiSelect
+                  hideTags={true}
+                  items={items}
+                  styleDropdownMenuSubsection={{
+                    borderWidth: 1,
+                    borderRadius: RFPercentage(0.8),
+                    borderColor: Colors.inputFieldColor,
+                  }}
+                  uniqueKey="id"
+                  ref={multiSelectRef}
+                  onSelectedItemsChange={onSelectedItemsChange}
+                  selectedItems={selectedItems}
+                  selectText="Select Services you provide"
+                  searchInputPlaceholderText="Search Services..."
+                  onChangeInput={text => console.log(text)}
+                  altFontFamily={Fonts.fontRegular}
+                  tagRemoveIconColor={Colors.placeholderColor}
+                  tagBorderColor={Colors.inputFieldColor}
+                  tagTextColor={Colors.inputTextColor}
+                  selectedItemTextColor={Colors.inputTextColor}
+                  selectedItemIconColor={Colors.inputTextColor}
+                  itemTextColor={Colors.placeholderColor}
+                  displayKey="name"
+                  searchInputStyle={{
+                    color: Colors.inputTextColor,
+                    fontFamily: Fonts.fontRegular,
+                  }}
+                  submitButtonColor={Colors.gradient2}
+                  submitButtonText="Save"
+                  fontFamily={Fonts.fontRegular}
+                  selectedItemFontFamily={Fonts.fontRegular}
+                  itemFontFamily={Fonts.fontRegular}
+                  itemFontSize={RFPercentage(1.6)}
+                  hideSubmitButton
+                  styleItemsContainer={{
+                    backgroundColor: 'transparent',
+                    borderRadius: RFPercentage(0.5),
+                    padding: RFPercentage(1),
+                  }}
+                  styleTextDropdownSelected={{
+                    color: Colors.placeholderColor,
+                    fontSize: RFPercentage(1.7),
+                    fontFamily: Fonts.fontRegular,
+                    marginLeft: RFPercentage(1.3),
+                  }}
+                  styleTextDropdown={{
+                    color: Colors.placeholderColor,
+                    fontSize: RFPercentage(1.7),
+                    fontFamily: Fonts.fontRegular,
+                    marginLeft: RFPercentage(1.3),
+                  }}
+                  styleTextTag={{
+                    fontSize: RFPercentage(1.6),
+                    fontFamily: Fonts.fontRegular,
+                    color: Colors.inputTextColor,
+                  }}
+                  hideDropdown
+                  textInputProps={{autoFocus: false}}
+                  styleDropdownMenu={{height: RFPercentage(6)}}
+                />
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={{marginTop: RFPercentage(0.7)}}>
+                  {multiSelectRef.current?.getSelectedItemsExt(selectedItems)}
+                </ScrollView>
               </View>
-            </TouchableOpacity>
 
-            {/* Location */}
-            <InputField
-              placeholder="Add city/town you provide your services at"
-              value={location}
-              onChangeText={setLoaction}
-              customStyle={{width: '100%', marginBottom: RFPercentage(3)}}
-            />
-
-            {/* Service Type */}
-            <View style={{flex: 1}}>
-              <MultiSelect
-                hideTags={true}
-                items={items}
-                styleDropdownMenuSubsection={{
-                  borderWidth: 1,
-                  borderRadius: RFPercentage(0.8),
-                  borderColor: Colors.inputFieldColor,
-                }}
-                uniqueKey="id"
-                ref={multiSelectRef}
-                onSelectedItemsChange={onSelectedItemsChange}
-                selectedItems={selectedItems}
-                selectText="Select Services you provide"
-                searchInputPlaceholderText="Search Services..."
-                onChangeInput={text => console.log(text)}
-                altFontFamily={Fonts.fontRegular}
-                tagRemoveIconColor={Colors.placeholderColor}
-                tagBorderColor={Colors.inputFieldColor}
-                tagTextColor={Colors.inputTextColor}
-                selectedItemTextColor={Colors.inputTextColor}
-                selectedItemIconColor={Colors.inputTextColor}
-                itemTextColor={Colors.placeholderColor}
-                displayKey="name"
-                searchInputStyle={{
-                  color: Colors.inputTextColor,
-                  fontFamily: Fonts.fontRegular,
-                }}
-                submitButtonColor={Colors.gradient2}
-                submitButtonText="Save"
-                fontFamily={Fonts.fontRegular}
-                selectedItemFontFamily={Fonts.fontRegular}
-                itemFontFamily={Fonts.fontRegular}
-                itemFontSize={RFPercentage(1.6)}
-                hideSubmitButton
-                styleItemsContainer={{
-                  backgroundColor: 'transparent',
-                  borderRadius: RFPercentage(0.5),
-                  padding: RFPercentage(1),
-                }}
-                styleTextDropdownSelected={{
-                  color: Colors.placeholderColor,
-                  fontSize: RFPercentage(1.7),
-                  fontFamily: Fonts.fontRegular,
-                  marginLeft: RFPercentage(1.3),
-                }}
-                styleTextDropdown={{
-                  color: Colors.placeholderColor,
-                  fontSize: RFPercentage(1.7),
-                  fontFamily: Fonts.fontRegular,
-                  marginLeft: RFPercentage(1.3),
-                }}
-                styleTextTag={{
-                  fontSize: RFPercentage(1.6),
-                  fontFamily: Fonts.fontRegular,
-                  color: Colors.inputTextColor,
-                }}
-                hideDropdown
-                textInputProps={{autoFocus: false}}
-                styleDropdownMenu={{height: RFPercentage(6)}}
-              />
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={{marginTop: RFPercentage(0.7)}}>
-                {multiSelectRef.current?.getSelectedItemsExt(selectedItems)}
-              </ScrollView>
+              {/* Button Container */}
+              <View style={styles.buttonContainer}>
+                <GradientButton
+                  title={profileCompletion === '100' ? 'Edit' : 'Next'}
+                  onPress={addServices}
+                  loading={loading}
+                  disabled={loading}
+                />
+              </View>
             </View>
-
-            {/* Button Container */}
-            <View style={styles.buttonContainer}>
-              <GradientButton
-                title={profileCompletion === '100' ? 'Edit' : 'Next'}
-                onPress={addServices}
-                loading={loading}
-                disabled={loading}
-              />
-            </View>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 };
 
