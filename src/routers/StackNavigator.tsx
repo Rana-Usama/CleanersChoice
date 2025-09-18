@@ -1,4 +1,4 @@
-import { StyleSheet} from 'react-native';
+import {StyleSheet} from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
@@ -106,7 +106,7 @@ const StackNavigator: React.FC = () => {
           if (!userQuery.empty) {
             const userDoc = userQuery.docs[0].data();
             setUserData(userDoc);
-          } 
+          }
         }
       } catch (error) {
       } finally {
@@ -137,7 +137,24 @@ const StackNavigator: React.FC = () => {
     },
   };
 
-  console.log(email, password, user)
+  console.log(email, password, user);
+
+  const now = Date.now();
+  const expiry = userData?.subscriptionEndDate;
+
+  const hasActiveSub = expiry && expiry > now;
+
+  let initialRoute: keyof RootStackParamList = 'SplashOne';
+
+  if (email && password && user === 'Customer') {
+    initialRoute = 'Home';
+  } else if (email && password && user === 'Cleaner' && hasActiveSub) {
+    initialRoute = 'CleanerNavigator';
+  } else if (user === 'Cleaner') {
+    initialRoute = 'Premium'; // covers both expired and never-subscribed
+  } else if (loggedOut === 'yes') {
+    initialRoute = 'SignIn';
+  }
 
   return (
     <SafeAreaProvider>
@@ -149,25 +166,7 @@ const StackNavigator: React.FC = () => {
             screenOptions={{
               headerShown: false,
             }}
-            initialRouteName={
-              email && password && user === 'Customer'
-                ? 'Home'
-                : email &&
-                  password &&
-                  user === 'Cleaner' &&
-                  userData?.subscription === true &&
-                  userData?.subscriptionEndDate > Date.now() // Valid subscription
-                ? 'CleanerNavigator'
-                : user === 'Cleaner' && userData?.subscription === false // No subscription set
-                ? 'Premium'
-                : user === 'Cleaner' &&
-                  userData?.subscriptionEndDate < Date.now() // Subscription expired
-                ? 'Premium'
-                : loggedOut === 'yes'
-                ? 'SignIn'
-                : 'SplashOne'
-            }>
-
+            initialRouteName={initialRoute}>
             {/* -------Common Screens----- */}
             <Stack.Screen name="SplashOne" component={Splash} />
             <Stack.Screen name="OnBoarding" component={OnBoarding} />
@@ -188,7 +187,6 @@ const StackNavigator: React.FC = () => {
             <Stack.Screen name="Chat" component={Chat} />
             <Stack.Screen name="Messages" component={Messages} />
 
-
             {/* ------------------Customer Flow------------- */}
             <Stack.Screen name="Home" component={CustomerNavigator} />
             <Stack.Screen name="ServiceDetails" component={ServiceDetails} />
@@ -199,7 +197,6 @@ const StackNavigator: React.FC = () => {
               component={CheckAvailability}
             />
             <Stack.Screen name="Jobs" component={Jobs} />
-
 
             {/* ----------------- Cleaner Flow ---------------- */}
             <Stack.Screen name="Premium" component={Premium} />

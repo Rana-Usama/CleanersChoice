@@ -8,6 +8,7 @@ import {
   Keyboard,
   StatusBar,
   ImageBackground,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import {GiftedChat, InputToolbar, Bubble} from 'react-native-gifted-chat';
@@ -165,181 +166,184 @@ const Chat = ({navigation, route}: any) => {
   };
 
   return (
-    <View style={styles.screen}>
-      <StatusBar
-        barStyle={'dark-content'}
-        translucent
-        backgroundColor="transparent"
-      />
-      <View style={styles.profileContainer}>
-        <View style={styles.inner}>
-          <TouchableOpacity   activeOpacity={0.8} onPress={() => navigation.goBack()}>
-            <AntDesign
-              name="arrowleft"
-              size={RFPercentage(2.5)}
-              color={Colors.placeholderColor}
-            />
-          </TouchableOpacity>
-          <View>
-            {receiverProfile ? (
-              <>
-                <Image
-                  source={{uri: receiverProfile}}
-                  resizeMode="contain"
-                  style={styles.profile}
-                  borderRadius={RFPercentage(100)}
-                />
-              </>
-            ) : (
-              <>
-                <View style={styles.noProfileContainer}>
-                  <Text style={styles.noProfile}>{receiverName?.[0]}</Text>
-                </View>
-              </>
-            )}
-          </View>
-
-          <Text style={styles.receiverName}>
-            {receiverName?.length > 20
-              ? `${receiverName.slice(0, 20)}...`
-              : receiverName}
-          </Text>
-        </View>
-      </View>
-      <View style={styles.messageContainer}>
-        <ImageBackground
-          source={IMAGES.chat}
-          resizeMode="cover"
-          style={{flex: 1}}>
-          <GiftedChat
-            messages={messages}
-            onSend={messages => onSend(messages)}
-            user={{
-              _id: senderId,
-              name: senderName,
-              avatar: senderProfile,
-            }}
-            showAvatarForEveryMessage={true}
-            renderBubble={props => (
-              <Bubble
-                {...props}
-                wrapperStyle={{
-                  left: {
-                    backgroundColor: 'rgba(232, 235, 238, 1)',
-                    padding: RFPercentage(0.6),
-                  },
-                  right: {
-                    backgroundColor: 'rgba(115, 162, 199, 1)',
-                    padding: RFPercentage(0.6),
-                  },
-                }}
-                textStyle={{
-                  left: {
-                    color: Colors.inputTextColor,
-                    fontFamily: Fonts.fontRegular,
-                    fontSize: RFPercentage(1.8),
-                  },
-                  right: {
-                    color: Colors.background,
-                    fontFamily: Fonts.fontRegular,
-                    fontSize: RFPercentage(1.8),
-                  },
-                }}
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.screen}>
+        <StatusBar
+          barStyle={'dark-content'}
+          translucent
+          backgroundColor="transparent"
+        />
+        <View style={styles.profileContainer}>
+          <View style={styles.inner}>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => navigation.goBack()}>
+              <AntDesign
+                name="arrowleft"
+                size={RFPercentage(2.5)}
+                color={Colors.placeholderColor}
               />
-            )}
-            renderInputToolbar={props => (
-              <View
-                style={{
-                  backgroundColor: 'rgba(248, 248, 248, 1)',
-                  width: '100%',
-                  minHeight: RFPercentage(10),
-                  justifyContent: 'center',
-                  maxHeight: RFPercentage(18),
-                  paddingVertical: RFPercentage(2),
-                }}>
-                <InputToolbar
+            </TouchableOpacity>
+            <View>
+              {receiverProfile ? (
+                <>
+                  <Image
+                    source={{uri: receiverProfile}}
+                    resizeMode="contain"
+                    style={styles.profile}
+                    borderRadius={RFPercentage(100)}
+                  />
+                </>
+              ) : (
+                <>
+                  <View style={styles.noProfileContainer}>
+                    <Text style={styles.noProfile}>{receiverName?.[0]}</Text>
+                  </View>
+                </>
+              )}
+            </View>
+
+            <Text style={styles.receiverName}>
+              {receiverName?.length > 20
+                ? `${receiverName.slice(0, 20)}...`
+                : receiverName}
+            </Text>
+          </View>
+        </View>
+        <View style={styles.messageContainer}>
+          <ImageBackground
+            source={IMAGES.chat}
+            resizeMode="cover"
+            style={{flex: 1}}>
+            <GiftedChat
+              messages={messages}
+              onSend={messages => onSend(messages)}
+              user={{
+                _id: senderId,
+                name: senderName,
+                avatar: senderProfile,
+              }}
+              showAvatarForEveryMessage={true}
+              renderBubble={props => (
+                <Bubble
                   {...props}
-                  containerStyle={styles.toolbar}
-                  renderComposer={() => (
-                    <TextInput
-                      style={styles.customTextInput}
-                      placeholder="Type a message"
-                      placeholderTextColor={'rgba(178, 177, 177, 1)'}
-                      value={message}
-                      onChangeText={setMessage}
-                      multiline={true}
-                      scrollEnabled={true}
-                      textAlignVertical="top"
-                    />
-                  )}
-                  renderSend={() => (
-                    <TouchableOpacity
-                      activeOpacity={0.8}
-                      style={styles.sendButton}
-                      onPress={() => {
-                        onSend([
-                          {
-                            text: message,
-                            user: {
-                              _id: senderId,
-                              name: senderName,
-                            },
-                            createdAt: new Date(),
-                          },
-                        ]);
-                        Keyboard.dismiss();
-                      }}>
-                      <Feather
-                        name="send"
-                        size={RFPercentage(2.5)}
-                        color={'rgba(135, 133, 133, 1)'}
-                      />
-                    </TouchableOpacity>
-                  )}
-                />
-              </View>
-            )}
-            renderAvatar={props => {
-              const isReceiver = props.currentMessage.user._id !== senderId;
-              if (!isReceiver) return null;
-              return receiverProfile ? (
-                <Image
-                  source={{uri: receiverProfile}}
-                  style={{
-                    width: RFPercentage(4.5),
-                    height: RFPercentage(4.5),
-                    borderRadius: RFPercentage(50),
-                    borderWidth: 1,
-                    borderColor: Colors.primaryText,
+                  wrapperStyle={{
+                    left: {
+                      backgroundColor: 'rgba(232, 235, 238, 1)',
+                      padding: RFPercentage(0.6),
+                    },
+                    right: {
+                      backgroundColor: 'rgba(115, 162, 199, 1)',
+                      padding: RFPercentage(0.6),
+                    },
+                  }}
+                  textStyle={{
+                    left: {
+                      color: Colors.inputTextColor,
+                      fontFamily: Fonts.fontRegular,
+                      fontSize: RFPercentage(1.8),
+                    },
+                    right: {
+                      color: Colors.background,
+                      fontFamily: Fonts.fontRegular,
+                      fontSize: RFPercentage(1.8),
+                    },
                   }}
                 />
-              ) : (
+              )}
+              renderInputToolbar={props => (
                 <View
                   style={{
-                    width: RFPercentage(5),
-                    height: RFPercentage(5),
-                    borderRadius: RFPercentage(50),
-                    backgroundColor: 'rgba(208, 209, 211, 1)',
-                    alignItems: 'center',
+                    backgroundColor: 'rgba(248, 248, 248, 1)',
+                    width: '100%',
+                    minHeight: RFPercentage(10),
                     justifyContent: 'center',
-                    borderWidth: 1,
-                    borderColor: 'rgba(188, 189, 191, 1)',
+                    maxHeight: RFPercentage(18),
+                    paddingVertical: RFPercentage(2),
                   }}>
-                  <Text
-                    style={{
-                      color: Colors.primaryText,
-                      fontSize: RFPercentage(1.8),
-                      fontFamily: 'Poppins_600SemiBold',
-                    }}>
-                    {receiverName?.[0] || '?'}
-                  </Text>
+                  <InputToolbar
+                    {...props}
+                    containerStyle={styles.toolbar}
+                    renderComposer={() => (
+                      <TextInput
+                        style={styles.customTextInput}
+                        placeholder="Type a message"
+                        placeholderTextColor={'rgba(178, 177, 177, 1)'}
+                        value={message}
+                        onChangeText={setMessage}
+                        multiline={true}
+                        scrollEnabled={true}
+                        textAlignVertical="top"
+                      />
+                    )}
+                    renderSend={() => (
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        style={styles.sendButton}
+                        onPress={() => {
+                          onSend([
+                            {
+                              text: message,
+                              user: {
+                                _id: senderId,
+                                name: senderName,
+                              },
+                              createdAt: new Date(),
+                            },
+                          ]);
+                        }}>
+                        <Feather
+                          name="send"
+                          size={RFPercentage(2.5)}
+                          color={'rgba(135, 133, 133, 1)'}
+                        />
+                      </TouchableOpacity>
+                    )}
+                  />
                 </View>
-              );
-            }}
-          />
-        </ImageBackground>
+              )}
+              renderAvatar={props => {
+                const isReceiver = props.currentMessage.user._id !== senderId;
+                if (!isReceiver) return null;
+                return receiverProfile ? (
+                  <Image
+                    source={{uri: receiverProfile}}
+                    style={{
+                      width: RFPercentage(4.5),
+                      height: RFPercentage(4.5),
+                      borderRadius: RFPercentage(50),
+                      borderWidth: 1,
+                      borderColor: Colors.primaryText,
+                    }}
+                  />
+                ) : (
+                  <View
+                    style={{
+                      width: RFPercentage(5),
+                      height: RFPercentage(5),
+                      borderRadius: RFPercentage(50),
+                      backgroundColor: 'rgba(208, 209, 211, 1)',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderWidth: 1,
+                      borderColor: 'rgba(188, 189, 191, 1)',
+                    }}>
+                    <Text
+                      style={{
+                        color: Colors.primaryText,
+                        fontSize: RFPercentage(1.8),
+                        fontFamily: 'Poppins_600SemiBold',
+                      }}>
+                      {receiverName?.[0] || '?'}
+                    </Text>
+                  </View>
+                );
+              }}
+            />
+          </ImageBackground>
+        </View>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 };
 
