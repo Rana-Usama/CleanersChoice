@@ -88,66 +88,65 @@ const OnBoarding = ({navigation}: any) => {
         translucent
         backgroundColor="transparent"
       />
-      <ScrollView contentContainerStyle={{paddingBottom: RFPercentage(3)}}>
-        <View style={styles.container}>
-          <HeaderComponent />
-          <View style={styles.content}>
-            {/* Animated Image */}
-            <Animated.Image
-              source={stepsData[step - 1]?.image}
-              resizeMode="contain"
-              style={[
-                styles.image,
-                {
-                  transform: [{translateX: imageAnim}],
-                  opacity: opacityAnim,
-                },
-              ]}
-            />
-
-            {/* Animated Text */}
-            <Animated.View
-              style={{
-                marginTop: RFPercentage(2),
-                alignItems: 'center',
-                transform: [{translateY: textAnim}],
-                opacity: opacityAnim,
-              }}>
-              <Text style={styles.title}>{stepsData[step - 1]?.title}</Text>
-              <View style={styles.descriptionContainer}>
-                <Text style={styles.description}>
-                  {stepsData[step - 1]?.description}
-                </Text>
-              </View>
-            </Animated.View>
-
-            {/* Dots Indicator */}
-            <View style={styles.dotsContainer}>
-              {[1, 2, 3].map(index => (
-                <TouchableOpacity   activeOpacity={0.8} key={index} onPress={() => setStep(index)}>
-                  {step === index ? (
-                    <LinearGradient
-                      colors={[Colors.gradient1, Colors.gradient2]}
-                      style={styles.activeDot}
-                    />
-                  ) : (
-                    <View style={styles.inactiveDot} />
-                  )}
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-
-          {/* Buttons */}
-        </View>
-        <View style={styles.starContainer}>
-          <Image
-            source={IMAGES.stars}
+      {/* <ScrollView contentContainerStyle={{paddingBottom: RFPercentage(3)}}> */}
+      <View style={styles.container}>
+        <HeaderComponent />
+        <View style={styles.content}>
+          {/* Animated Image */}
+          <Animated.Image
+            source={stepsData[step - 1]?.image}
             resizeMode="contain"
-            style={styles.star}
+            style={[
+              styles.image,
+              {
+                transform: [{translateX: imageAnim}],
+                opacity: opacityAnim,
+              },
+            ]}
           />
+
+          {/* Animated Text */}
+          <Animated.View
+            style={{
+              marginTop: RFPercentage(2),
+              alignItems: 'center',
+              transform: [{translateY: textAnim}],
+              opacity: opacityAnim,
+            }}>
+            <Text style={styles.title}>{stepsData[step - 1]?.title}</Text>
+            <View style={styles.descriptionContainer}>
+              <Text style={styles.description}>
+                {stepsData[step - 1]?.description}
+              </Text>
+            </View>
+          </Animated.View>
+
+          {/* Dots Indicator */}
+          <View style={styles.dotsContainer}>
+            {[1, 2, 3].map(index => (
+              <TouchableOpacity
+                activeOpacity={0.8}
+                key={index}
+                onPress={() => setStep(index)}>
+                {step === index ? (
+                  <LinearGradient
+                    colors={[Colors.gradient1, Colors.gradient2]}
+                    style={styles.activeDot}
+                  />
+                ) : (
+                  <View style={styles.inactiveDot} />
+                )}
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
-      </ScrollView>
+
+        {/* Buttons */}
+      </View>
+      <View style={styles.starContainer}>
+        <Image source={IMAGES.stars} resizeMode="contain" style={styles.star} />
+      </View>
+      {/* </ScrollView> */}
       <View style={styles.buttonWrapper}>
         <NextButton
           title="Skip"

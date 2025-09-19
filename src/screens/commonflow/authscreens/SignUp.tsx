@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   Keyboard,
+  Platform,
 } from 'react-native';
 import React, {useState} from 'react';
 import {Fonts, IMAGES, Colors, Icons} from '../../../constants/Themes';
@@ -32,6 +33,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import messaging from '@react-native-firebase/messaging';
 import {showToast} from '../../../utils/ToastMessage';
 import axios from 'axios';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 const SignUp: React.FC = ({navigation}: any) => {
   const [selected, setSelected] = useState<boolean>(false);
@@ -90,34 +92,6 @@ const SignUp: React.FC = ({navigation}: any) => {
 
       let profileUrl = '';
 
-      // if (img) {
-      //   const compressedImage = await CompressorImage.compress(img?.path, {
-      //     compressionMethod: 'manual',
-      //     maxWidth: 1000,
-      //     quality: 0.8,
-      //   });
-
-      //   const data = new FormData();
-      //   data.append('file', {
-      //     uri: compressedImage,
-      //     type: 'image/jpeg',
-      //     name: `profile_${user.uid}.jpg`,
-      //   });
-      //   data.append('upload_preset', 'CleanersChoice');
-      //   data.append('cloud_name', 'dfd65wawq');
-
-      //   const res = await axios.post(
-      //     'https://api.cloudinary.com/v1_1/dfd65wawq/image/upload',
-      //     data,
-      //     {
-      //       headers: {
-      //         'Content-Type': 'multipart/form-data',
-      //       },
-      //     },
-      //   );
-      //   profileUrl = res.data.secure_url;
-      // }
-
       if (img) {
         const compressedImage = await CompressorImage.compress(img?.path, {
           compressionMethod: 'manual',
@@ -130,17 +104,17 @@ const SignUp: React.FC = ({navigation}: any) => {
         await reference.putFile(compressedImage);
         profileUrl = await reference.getDownloadURL();
       }
-
       await messaging().requestPermission();
       await messaging().registerDeviceForRemoteMessages();
       const fcmToken = await messaging().getToken();
+      console.log("fcmToken......", fcmToken)
       const userData = {
         name: values.name,
         email: values.email,
         phone: values.phone,
         uid: user.uid,
         profile: profileUrl || null,
-        fcmToken: fcmToken || null,
+        fcmToken:  null,
         createdAt: firestore.FieldValue.serverTimestamp(),
         role: userFlow?.userFlow,
         ...(userFlow?.userFlow === 'Cleaner' && {
@@ -149,12 +123,10 @@ const SignUp: React.FC = ({navigation}: any) => {
           cancelSubscription: false,
         }),
       };
-
       await firestore().collection('Users').doc(user.uid).set(userData);
       await AsyncStorage.setItem('email', values.email);
       await AsyncStorage.setItem('password', values.password);
       await AsyncStorage.setItem('role', userFlow?.userFlow);
-
       showToast({
         type: 'success',
         title: 'Sign Up',
@@ -164,16 +136,17 @@ const SignUp: React.FC = ({navigation}: any) => {
         userFlow?.userFlow === 'Customer' ? 'Home' : 'Premium',
       );
     } catch (error: any) {
-      console.error(error);
+      console.log(error);
       showToast({
         type: 'error',
         title: 'Sign Up Failed',
-        message: 'Email is already in use',
+        message: error.message,
       });
     } finally {
       setLoading(false);
     }
   };
+
 
   // Phone Validation
   const formatPhoneNumber = (raw: string = ''): string => {
@@ -190,274 +163,270 @@ const SignUp: React.FC = ({navigation}: any) => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <SafeAreaView style={styles.safeArea}>
-        <StatusBar
-          barStyle={'dark-content'}
-          translucent
-          backgroundColor="transparent"
-        />
-        <ScrollView
-          keyboardShouldPersistTaps="always"
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{paddingBottom: RFPercentage(8)}}>
-          <KeyboardAvoidingView>
-            {/* Header */}
-            <View style={styles.container}>
-              <HeaderComponent />
-              <View style={styles.titleContainer}>
-                <Text style={styles.title}>Create An Account</Text>
-              </View>
+      
+        <KeyboardAwareScrollView
+          contentContainerStyle={{paddingVertical: RFPercentage(8)}}
+          style={{backgroundColor:Colors.background}}
+          keyboardShouldPersistTaps="handled"
+          enableOnAndroid
+          extraHeight={Platform.OS === 'ios' ? 80 : 120}
+          showsVerticalScrollIndicator={false}>
+          {/* Header */}
+          <View style={styles.container}>
+            <HeaderComponent />
+            <View style={styles.titleContainer}>
+              <Text style={styles.title}>Create An Account</Text>
+            </View>
 
-              {/* Image Uploader */}
-              <View style={styles.imgContainer}>
-                <TouchableOpacity activeOpacity={0.5} onPress={uploadImg}>
-                  <View style={styles.pictureContainer}>
-                    {img ? (
+            {/* Image Uploader */}
+            <View style={styles.imgContainer}>
+              <TouchableOpacity activeOpacity={0.5} onPress={uploadImg}>
+                <View style={styles.pictureContainer}>
+                  {img ? (
+                    <>
+                      <Image
+                        source={{uri: img?.path}}
+                        resizeMode="cover"
+                        style={styles.imgStyle}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <Text style={styles.imgText}>Upload Picture</Text>
+                    </>
+                  )}
+                </View>
+                {img && (
+                  <>
+                    <TouchableOpacity onPress={uploadImg} activeOpacity={0.8}>
+                      <Image
+                        source={Icons.edit}
+                        resizeMode="contain"
+                        style={styles.uploadedImg}
+                      />
+                    </TouchableOpacity>
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
+
+            {/* Fields Container */}
+            <Formik
+              initialValues={{
+                name: '',
+                email: '',
+                phone: '',
+                password: '',
+                confirmPassword: '',
+              }}
+              validationSchema={validationSchema}
+              onSubmit={values => handleSignUp(values)}>
+              {({
+                handleChange,
+                handleBlur,
+                handleSubmit,
+                values,
+                errors,
+                touched,
+              }) => (
+                <>
+                  <View style={styles.fieldContainer}>
+                    {/* User Name */}
+                    <InputField
+                      placeholder="Username"
+                      onChangeText={handleChange('name')}
+                      handleBlur={handleBlur('name')}
+                      value={values.name}
+                      customStyle={{
+                        borderColor:
+                          touched.name && errors.name
+                            ? Colors.error
+                            : Colors.inputFieldColor,
+                      }}
+                    />
+                    {touched.name && errors.name && (
                       <>
-                        <Image
-                          source={{uri: img?.path}}
-                          resizeMode="cover"
-                          style={styles.imgStyle}
-                        />
+                        <View style={styles.errorContainer}>
+                          <Text style={styles.errorText}>{errors.name}</Text>
+                        </View>
                       </>
-                    ) : (
+                    )}
+
+                    {/* Email */}
+                    <InputField
+                      placeholder="Email"
+                      onChangeText={handleChange('email')}
+                      handleBlur={handleBlur('email')}
+                      value={values.email}
+                      customStyle={{
+                        borderColor:
+                          touched.email && errors.email
+                            ? Colors.error
+                            : Colors.inputFieldColor,
+                      }}
+                    />
+                    {touched.email && errors.email && (
                       <>
-                        <Text style={styles.imgText}>Upload Picture</Text>
+                        <View style={styles.errorContainer}>
+                          <Text style={styles.errorText}>{errors.email}</Text>
+                        </View>
+                      </>
+                    )}
+
+                    {/* Password */}
+                    <PasswordField
+                      placeholder="Password"
+                      onChangeText={handleChange('password')}
+                      handleBlur={handleBlur('password')}
+                      value={values.password}
+                      customStyle={{
+                        borderColor:
+                          touched.password && errors.password
+                            ? Colors.error
+                            : Colors.inputFieldColor,
+                      }}
+                    />
+                    {touched.password && errors.password && (
+                      <>
+                        <View style={styles.errorContainer}>
+                          <Text style={styles.errorText}>
+                            {errors.password}
+                          </Text>
+                        </View>
+                      </>
+                    )}
+
+                    {/* Confirm Password */}
+                    <PasswordField
+                      placeholder="Confirm Password"
+                      onChangeText={handleChange('confirmPassword')}
+                      handleBlur={handleBlur('confirmPassword')}
+                      value={values.confirmPassword}
+                      customStyle={{
+                        borderColor:
+                          touched.confirmPassword && errors.confirmPassword
+                            ? Colors.error
+                            : Colors.inputFieldColor,
+                      }}
+                    />
+                    {touched.confirmPassword && errors.confirmPassword && (
+                      <>
+                        <View style={styles.errorContainer}>
+                          <Text style={styles.errorText}>
+                            {errors.confirmPassword}
+                          </Text>
+                        </View>
+                      </>
+                    )}
+
+                    {/* Phone */}
+                    <InputField
+                      placeholder="e.g. +1 (321) 659-6898"
+                      onChangeText={text => {
+                        const formatted = formatPhoneNumber(text);
+                        handleChange('phone')(formatted);
+                      }}
+                      type={'phone-pad'}
+                      length={15}
+                      handleBlur={handleBlur('phone')}
+                      value={values.phone}
+                      customStyle={{
+                        borderColor:
+                          touched.phone && errors.phone
+                            ? Colors.error
+                            : Colors.inputFieldColor,
+                      }}
+                    />
+                    {touched.phone && errors.phone && (
+                      <>
+                        <View style={styles.errorContainer}>
+                          <Text style={styles.errorText}>{errors.phone}</Text>
+                        </View>
                       </>
                     )}
                   </View>
-                  {img && (
-                    <>
-                      <TouchableOpacity onPress={uploadImg} activeOpacity={0.8}>
-                        <Image
-                          source={Icons.edit}
-                          resizeMode="contain"
-                          style={styles.uploadedImg}
-                        />
-                      </TouchableOpacity>
-                    </>
-                  )}
-                </TouchableOpacity>
-              </View>
 
-              {/* Fields Container */}
-              <Formik
-                initialValues={{
-                  name: '',
-                  email: '',
-                  phone: '',
-                  password: '',
-                  confirmPassword: '',
-                }}
-                validationSchema={validationSchema}
-                onSubmit={values => handleSignUp(values)}>
-                {({
-                  handleChange,
-                  handleBlur,
-                  handleSubmit,
-                  values,
-                  errors,
-                  touched,
-                }) => (
-                  <>
-                    <View style={styles.fieldContainer}>
-                      {/* User Name */}
-                      <InputField
-                        placeholder="Username"
-                        onChangeText={handleChange('name')}
-                        handleBlur={handleBlur('name')}
-                        value={values.name}
-                        customStyle={{
-                          borderColor:
-                            touched.name && errors.name
-                              ? Colors.error
-                              : Colors.inputFieldColor,
-                        }}
-                      />
-                      {touched.name && errors.name && (
-                        <>
-                          <View style={styles.errorContainer}>
-                            <Text style={styles.errorText}>{errors.name}</Text>
-                          </View>
-                        </>
-                      )}
-
-                      {/* Email */}
-                      <InputField
-                        placeholder="Email"
-                        onChangeText={handleChange('email')}
-                        handleBlur={handleBlur('email')}
-                        value={values.email}
-                        customStyle={{
-                          borderColor:
-                            touched.email && errors.email
-                              ? Colors.error
-                              : Colors.inputFieldColor,
-                        }}
-                      />
-                      {touched.email && errors.email && (
-                        <>
-                          <View style={styles.errorContainer}>
-                            <Text style={styles.errorText}>{errors.email}</Text>
-                          </View>
-                        </>
-                      )}
-
-                      {/* Password */}
-                      <PasswordField
-                        placeholder="Password"
-                        onChangeText={handleChange('password')}
-                        handleBlur={handleBlur('password')}
-                        value={values.password}
-                        customStyle={{
-                          borderColor:
-                            touched.password && errors.password
-                              ? Colors.error
-                              : Colors.inputFieldColor,
-                        }}
-                      />
-                      {touched.password && errors.password && (
-                        <>
-                          <View style={styles.errorContainer}>
-                            <Text style={styles.errorText}>
-                              {errors.password}
-                            </Text>
-                          </View>
-                        </>
-                      )}
-
-                      {/* Confirm Password */}
-                      <PasswordField
-                        placeholder="Confirm Password"
-                        onChangeText={handleChange('confirmPassword')}
-                        handleBlur={handleBlur('confirmPassword')}
-                        value={values.confirmPassword}
-                        customStyle={{
-                          borderColor:
-                            touched.confirmPassword && errors.confirmPassword
-                              ? Colors.error
-                              : Colors.inputFieldColor,
-                        }}
-                      />
-                      {touched.confirmPassword && errors.confirmPassword && (
-                        <>
-                          <View style={styles.errorContainer}>
-                            <Text style={styles.errorText}>
-                              {errors.confirmPassword}
-                            </Text>
-                          </View>
-                        </>
-                      )}
-
-                      {/* Phone */}
-                      <InputField
-                        placeholder="e.g. +1 (321) 659-6898"
-                        onChangeText={text => {
-                          const formatted = formatPhoneNumber(text);
-                          handleChange('phone')(formatted);
-                        }}
-                        type={'phone-pad'}
-                        length={15}
-                        handleBlur={handleBlur('phone')}
-                        value={values.phone}
-                        customStyle={{
-                          borderColor:
-                            touched.phone && errors.phone
-                              ? Colors.error
-                              : Colors.inputFieldColor,
-                        }}
-                      />
-                      {touched.phone && errors.phone && (
-                        <>
-                          <View style={styles.errorContainer}>
-                            <Text style={styles.errorText}>{errors.phone}</Text>
-                          </View>
-                        </>
-                      )}
-                    </View>
-
-                    {/* Terms And Conditions */}
-                    <View style={styles.radioContainer}>
-                      <TouchableOpacity
-                        activeOpacity={0.8}
+                  {/* Terms And Conditions */}
+                  <View style={styles.radioContainer}>
+                    <TouchableOpacity
+                      activeOpacity={0.8}
+                      onPress={() => setSelected(!selected)}
+                      style={styles.radioInnerContainer}>
+                      <RadioButtonInput
+                        obj={{value: 0}}
+                        index={0}
+                        isSelected={selected}
                         onPress={() => setSelected(!selected)}
-                        style={styles.radioInnerContainer}>
-                        <RadioButtonInput
-                          obj={{value: 0}}
-                          index={0}
-                          isSelected={selected}
-                          onPress={() => setSelected(!selected)}
-                          borderWidth={1}
-                          buttonInnerColor={Colors.gradient1}
-                          buttonOuterColor={
-                            selected ? Colors.gradient1 : Colors.inputFieldColor
-                          }
-                          buttonSize={RFPercentage(1.4)}
-                          buttonOuterSize={RFPercentage(2.2)}
-                        />
-                        <Text style={styles.radioLabel}>
-                          I agree to terms and conditions
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-
-                    {/* Bottom Container */}
-                    <View style={styles.buttonContainer}>
-                      <GradientButton
-                        title="Sign Up"
-                        onPress={handleSubmit}
-                        loading={loading}
-                        disabled={loading}
+                        borderWidth={1}
+                        buttonInnerColor={Colors.gradient1}
+                        buttonOuterColor={
+                          selected ? Colors.gradient1 : Colors.inputFieldColor
+                        }
+                        buttonSize={RFPercentage(1.4)}
+                        buttonOuterSize={RFPercentage(2.2)}
                       />
-                      <View style={styles.buttonInnerContainer}>
-                        <Text style={styles.bottomText}>
-                          Already have an account?
-                        </Text>
-                        <TouchableOpacity
-                          activeOpacity={0.8}
-                          onPress={() => navigation.navigate('SignIn')}>
-                          <Text style={styles.signIn}>SignIn</Text>
-                        </TouchableOpacity>
-                      </View>
+                      <Text style={styles.radioLabel}>
+                        I agree to terms and conditions
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* Bottom Container */}
+                  <View style={styles.buttonContainer}>
+                    <GradientButton
+                      title="Sign Up"
+                      onPress={handleSubmit}
+                      loading={loading}
+                      disabled={loading}
+                    />
+                    <View style={styles.buttonInnerContainer}>
+                      <Text style={styles.bottomText}>
+                        Already have an account?
+                      </Text>
                       <TouchableOpacity
                         activeOpacity={0.8}
-                        onPress={() => navigation.navigate('UserSelection')}
-                        style={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          marginTop: RFPercentage(2),
-                        }}>
-                        <Ionicons
-                          name="chevron-back-circle-sharp"
-                          color={'rgba(178, 204, 228, 1)'}
-                          size={RFPercentage(2.4)}
-                        />
-                        <Text
-                          style={[
-                            styles.signIn,
-                            {color: 'rgba(134, 154, 173, 1)'},
-                          ]}>
-                          Back
-                        </Text>
+                        onPress={() => navigation.navigate('SignIn')}>
+                        <Text style={styles.signIn}>SignIn</Text>
                       </TouchableOpacity>
                     </View>
-                  </>
-                )}
-              </Formik>
-            </View>
+                    <TouchableOpacity
+                      activeOpacity={0.8}
+                      onPress={() => navigation.navigate('UserSelection')}
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        marginTop: RFPercentage(2),
+                      }}>
+                      <Ionicons
+                        name="chevron-back-circle-sharp"
+                        color={'rgba(178, 204, 228, 1)'}
+                        size={RFPercentage(2.4)}
+                      />
+                      <Text
+                        style={[
+                          styles.signIn,
+                          {color: 'rgba(134, 154, 173, 1)'},
+                        ]}>
+                        Back
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </>
+              )}
+            </Formik>
+          </View>
 
-            {/* Bottom Stars */}
-            <View style={styles.starContainer}>
-              <Image
-                source={IMAGES.stars}
-                resizeMode="contain"
-                style={styles.star}
-              />
-            </View>
-            <View style={{marginBottom: RFPercentage(5)}} />
-          </KeyboardAvoidingView>
-        </ScrollView>
-      </SafeAreaView>
+          {/* Bottom Stars */}
+          <View style={styles.starContainer}>
+            <Image
+              source={IMAGES.stars}
+              resizeMode="contain"
+              style={styles.star}
+            />
+          </View>
+          <View style={{marginBottom: RFPercentage(5)}} />
+        </KeyboardAwareScrollView>
+      {/* </SafeAreaView> */}
     </TouchableWithoutFeedback>
   );
 };
@@ -585,7 +554,7 @@ const styles = StyleSheet.create({
   },
   starContainer: {
     position: 'absolute',
-    bottom: RFPercentage(14),
+    bottom: RFPercentage(25),
     right: RFPercentage(1.5),
   },
   star: {
