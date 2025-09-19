@@ -45,6 +45,8 @@ class AppDelegate: RCTAppDelegate,
   override func application(_ application: UIApplication,
   didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
     Messaging.messaging().apnsToken = deviceToken
+    print("📌 APNs token received: \(deviceToken.map { String(format: "%02.2hhx", $0) }.joined())")
+
   }
 
   // MARK: - Foreground push handling

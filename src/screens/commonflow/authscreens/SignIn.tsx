@@ -82,11 +82,11 @@ const SignIn: React.FC = () => {
       } else {
         await navigation.replace('Home');
       }
-    } catch (error) {
+    } catch (error: any) {
       showToast({
         type: 'error',
         title: 'Sign In Failed',
-        message: 'Invalid credentials',
+        message: error.message,
       });
     } finally {
       setLoading(false);
