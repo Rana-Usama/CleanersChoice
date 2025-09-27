@@ -24,12 +24,13 @@ target 'CleanersChoice' do
     :hermes_enabled => false
   )
 
-# Notifee (local notifications)
- pod 'RNNotifee', :path => '../node_modules/@notifee/react-native'
+  # Notifee (local notifications)
+  pod 'RNNotifee', :path => '../node_modules/@notifee/react-native'
 
   # gRPC dependencies
-  pod 'gRPC-C++'
-  pod 'gRPC-Core'
+ pod 'glog', :podspec => '../node_modules/react-native/third-party-podspecs/glog.podspec'
+pod 'gRPC-Core'
+pod 'gRPC-C++'
 
   # Stripe SDK
   pod 'Stripe', '~> 24.20.0'
@@ -38,6 +39,7 @@ target 'CleanersChoice' do
   pod 'StripeApplePay', '~> 24.20.0'
 
   post_install do |installer|
+    # 👇 React Native’s default post-install
     react_native_post_install(
       installer,
       mac_catalyst_enabled: false
@@ -50,6 +52,12 @@ target 'CleanersChoice' do
 
         # ✅ Fix non-modular include error
         config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
+
+        # ✅ Fix gRPC missing UPB headers
+        if target.name == 'gRPC-C++'
+          config.build_settings['HEADER_SEARCH_PATHS'] ||= ['$(inherited)']
+          config.build_settings['HEADER_SEARCH_PATHS'] << '$(PODS_ROOT)/gRPC-C++/third_party/upb'
+        end
       end
 
       # ✅ Skip aggregate targets that don’t have resources

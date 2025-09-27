@@ -18,22 +18,25 @@ import messaging from '@react-native-firebase/messaging';
 import notifee from '@notifee/react-native';
 import {UnreadMessagesProvider} from './src/utils/UnreadMessagesContext';
 import {toastConfig} from './src/utils/toastConfig';
+import {__DEV__} from 'react-native';
 
 const App: React.FC = () => {
+  console.log('Running in', __DEV__ ? 'DEBUG' : 'RELEASE');
+
   useEffect(() => {
     const requestNotificationPermission = async () => {
       try {
-        console.log('🔔 Requesting notification permission...'); 
+        console.log('🔔 Requesting notification permission...');
 
         if (Platform.OS === 'android' && Platform.Version >= 33) {
           const granted = await PermissionsAndroid.request(
             PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
           );
-          console.log('Android POST_NOTIFICATIONS result:', granted); 
+          console.log('Android POST_NOTIFICATIONS result:', granted);
         }
 
         const authStatus = await messaging().requestPermission();
-        console.log('messaging().requestPermission result:', authStatus); 
+        console.log('messaging().requestPermission result:', authStatus);
 
         const enabled =
           authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
@@ -42,7 +45,7 @@ const App: React.FC = () => {
         if (enabled) {
           console.log('✅ Notification permission granted');
           await messaging().registerDeviceForRemoteMessages();
-          console.log('📲 registerDeviceForRemoteMessages done'); 
+          console.log('📲 registerDeviceForRemoteMessages done');
 
           // Wait a bit for APNs token → FCM mapping
           const fcmToken = await messaging().getToken();
