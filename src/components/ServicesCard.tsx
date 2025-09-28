@@ -33,7 +33,7 @@ const ServicesCard = ({
             style={styles.image}
           />
         </View>
-        {covers.length > 1 && (
+        {/* {covers.length > 1 && (
           <View style={styles.dotsContainer}>
             {covers.length === 1 ? null : (
               <>
@@ -55,7 +55,7 @@ const ServicesCard = ({
               </>
             )}
           </View>
-        )}
+        )} */}
 
         <View style={styles.detailsContainer}>
           <View style={styles.rowContainer}>
@@ -102,9 +102,14 @@ const styles = StyleSheet.create({
     borderColor: Colors.inputFieldColor,
     borderWidth: 1,
     borderRadius: RFPercentage(1),
-    borderBottomWidth: RFPercentage(0.5),
-    // height: RFPercentage(28.5),
+
     backgroundColor: '#fff',
+    // Shadow (iOS) + Elevation (Android)
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
   },
 
   imageContainer: {
@@ -139,6 +144,7 @@ const styles = StyleSheet.create({
   },
   detailsContainer: {
     padding: RFPercentage(1),
+    marginTop: RFPercentage(0.5),
   },
   rowContainer: {
     flexDirection: 'row',
@@ -173,7 +179,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: RFPercentage(0.8),
+    marginTop: RFPercentage(1.5),
   },
   priceText: {
     color: Colors.secondaryText,

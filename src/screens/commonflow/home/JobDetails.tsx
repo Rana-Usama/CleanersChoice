@@ -74,8 +74,7 @@ const JobDetails = ({route, navigation}: any) => {
         const userData = userDoc.data();
         setUserInfo(userData);
       }
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   // Other user
@@ -93,8 +92,7 @@ const JobDetails = ({route, navigation}: any) => {
         const userData = userDoc.data();
         setOtherUser(userData);
       }
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   // Fetch existing id
@@ -131,25 +129,35 @@ const JobDetails = ({route, navigation}: any) => {
     tryToFindChat();
   }, [user?.uid, item?.jobId]);
 
-  
   return (
     <SafeAreaView style={styles.safeArea}>
+      <HeaderBack
+        title="Posted Job Details"
+        textStyle={styles.headerText}
+        left={true}
+      />
       <ScrollView
         contentContainerStyle={styles.scrollViewContent}
         showsVerticalScrollIndicator={false}>
-        <HeaderBack
-          title="Posted Job Details"
-          textStyle={styles.headerText}
-          left={true}
-        />
         <View style={styles.container}>
           <View style={styles.sectionContainer}>
             <View style={styles.rowAlign}>
-              <Image
-                source={Icons.verify}
-                resizeMode="contain"
-                style={styles.icon}
-              />
+              <View
+                style={{
+                  width: RFPercentage(3.3),
+                  height: RFPercentage(3.3),
+                  borderRadius: RFPercentage(100),
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: 'rgba(222, 243, 255, 1)',
+                }}>
+                <Image
+                  source={Icons.verify}
+                  resizeMode="contain"
+                  style={styles.icon}
+                  tintColor={Colors.gradient1}
+                />
+              </View>
               <Text style={styles.label}>Job Title:</Text>
             </View>
             <Text style={styles.value}>{item.title}</Text>
@@ -157,11 +165,22 @@ const JobDetails = ({route, navigation}: any) => {
 
           <View style={styles.sectionContainer}>
             <View style={styles.rowAlign}>
-              <Image
-                source={Icons.bars}
-                resizeMode="contain"
-                style={styles.icon}
-              />
+              <View
+                style={{
+                  width: RFPercentage(3.3),
+                  height: RFPercentage(3.3),
+                  borderRadius: RFPercentage(100),
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: 'rgba(222, 243, 255, 1)',
+                }}>
+                <Image
+                  source={Icons.bars}
+                  resizeMode="contain"
+                  style={styles.icon}
+                  tintColor={Colors.gradient1}
+                />
+              </View>
               <Text style={styles.label}>Description:</Text>
             </View>
             <Text style={styles.description}>{item.description}</Text>
@@ -169,11 +188,22 @@ const JobDetails = ({route, navigation}: any) => {
 
           <View style={styles.sectionContainer}>
             <View style={styles.rowAlign}>
-              <Image
-                source={Icons.location}
-                resizeMode="contain"
-                style={styles.icon}
-              />
+              <View
+                style={{
+                  width: RFPercentage(3.3),
+                  height: RFPercentage(3.3),
+                  borderRadius: RFPercentage(100),
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: 'rgba(222, 243, 255, 1)',
+                }}>
+                <Image
+                  source={Icons.location}
+                  resizeMode="contain"
+                  style={styles.icon}
+                  tintColor={Colors.gradient1}
+                />
+              </View>
               <Text style={styles.label}>Location:</Text>
             </View>
             <Text style={styles.value}>{item.location}</Text>
@@ -181,11 +211,22 @@ const JobDetails = ({route, navigation}: any) => {
 
           <View style={styles.sectionContainer}>
             <View style={styles.rowAlign}>
-              <Image
-                source={Icons.verify}
-                resizeMode="contain"
-                style={styles.icon}
-              />
+              <View
+                style={{
+                  width: RFPercentage(3.3),
+                  height: RFPercentage(3.3),
+                  borderRadius: RFPercentage(100),
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: 'rgba(222, 243, 255, 1)',
+                }}>
+                <Image
+                  source={Icons.verify}
+                  resizeMode="contain"
+                  style={styles.icon}
+                  tintColor={Colors.gradient1}
+                />
+              </View>
               <Text style={styles.label}>Service Type:</Text>
             </View>
             <Text style={styles.value}>{item.type}</Text>
@@ -193,11 +234,22 @@ const JobDetails = ({route, navigation}: any) => {
 
           <View style={styles.sectionContainer}>
             <View style={styles.rowAlign}>
-              <Image
-                source={Icons.priceRange}
-                resizeMode="contain"
-                style={styles.icon}
-              />
+              <View
+                style={{
+                  width: RFPercentage(3.3),
+                  height: RFPercentage(3.3),
+                  borderRadius: RFPercentage(100),
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: 'rgba(222, 243, 255, 1)',
+                }}>
+                <Image
+                  source={Icons.priceRange}
+                  resizeMode="contain"
+                  style={styles.icon}
+                  tintColor={Colors.gradient1}
+                />
+              </View>
               <Text style={styles.label}>Budget:</Text>
             </View>
             <Text style={styles.value}>{item.priceRange}$</Text>
@@ -205,11 +257,22 @@ const JobDetails = ({route, navigation}: any) => {
 
           <View style={styles.sectionContainer}>
             <View style={styles.rowAlign}>
-              <Image
-                source={Icons.calendar}
-                resizeMode="contain"
-                style={styles.icon}
-              />
+              <View
+                style={{
+                  width: RFPercentage(3.3),
+                  height: RFPercentage(3.3),
+                  borderRadius: RFPercentage(100),
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: 'rgba(222, 243, 255, 1)',
+                }}>
+                <Image
+                  source={Icons.calendar}
+                  resizeMode="contain"
+                  style={styles.icon}
+                  tintColor={Colors.gradient1}
+                />
+              </View>
               <Text style={styles.label}>Due Date & Time:</Text>
             </View>
             <Text style={styles.value}>{item.createdAt}</Text>
@@ -224,7 +287,7 @@ const JobDetails = ({route, navigation}: any) => {
                 textStyle={styles.buttonText}
                 disabled={loading2 || loading}
                 loading={loading2}
-                style={{width:RFPercentage(20)}}
+                style={{width: RFPercentage(20)}}
               />
               <View style={styles.buttonSpacing}>
                 <GradientButton
@@ -235,7 +298,7 @@ const JobDetails = ({route, navigation}: any) => {
                   }}
                   loading={loading}
                   disabled={loading}
-                   style={{width:RFPercentage(20)}}
+                  style={{width: RFPercentage(20)}}
                 />
               </View>
             </View>
@@ -294,8 +357,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   icon: {
-    width: RFPercentage(2.1),
-    height: RFPercentage(2.1),
+    width: RFPercentage(2),
+    height: RFPercentage(2),
     bottom: 0.7,
   },
   label: {

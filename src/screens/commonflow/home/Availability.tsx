@@ -184,6 +184,7 @@ const Availability = ({navigation} : any) => {
             </View>
             <View style={{marginTop: RFPercentage(1.6)}}>
               <FlatList
+              scrollEnabled={false}
                 data={availabilityData}
                 keyExtractor={item => item.day}
                 renderItem={({item}) => {
@@ -265,6 +266,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignSelf: 'center',
     position: 'absolute',
-    bottom: RFPercentage(30),
+    bottom: RFPercentage(23),
   },
 });

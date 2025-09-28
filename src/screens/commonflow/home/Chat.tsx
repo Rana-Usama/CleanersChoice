@@ -397,7 +397,7 @@ const styles = StyleSheet.create({
   profileContainer: {
     width: '100%',
     height: RFPercentage(8),
-    marginTop: RFPercentage(6),
+    marginTop: RFPercentage(7),
     justifyContent: 'center',
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(226, 227, 230, 1)',

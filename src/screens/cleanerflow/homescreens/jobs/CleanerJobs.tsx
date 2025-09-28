@@ -87,7 +87,7 @@ const CleanerJobs = () => {
       const snapshot = await firestore()
         .collection('Jobs')
         .where('status', '==', 'active')
-        // .orderBy('createdAt2', 'desc')
+        .orderBy('createdAt2', 'desc')
         .get();
 
       const jobs = snapshot.docs.map(doc => ({
@@ -261,17 +261,18 @@ const CleanerJobs = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <HeaderBack
+        title={'Recent Jobs posts by clients'}
+        textStyle={{fontSize: RFPercentage(2)}}
+        left
+      />
       <ScrollView
         contentContainerStyle={styles.scrollView}
+        showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }>
-        <HeaderBack title={'Jobs'} textStyle={{fontSize: RFPercentage(2.2)}} />
         <View style={styles.container}>
-          <View style={styles.jobPostedContainer}>
-            <Text style={styles.jobPosted}>Recent Jobs posts by clients</Text>
-          </View>
-
           {/* Filters Container */}
           <View>
             <Text style={styles.sectionTitle}>Apply Filters</Text>
@@ -284,7 +285,7 @@ const CleanerJobs = () => {
                 alignItems: 'center',
                 marginTop: RFPercentage(1),
                 height: RFPercentage(6),
-                paddingHorizontal:RFPercentage(3)
+                paddingHorizontal: RFPercentage(3),
               }}>
               {/* Location Filter */}
               <View>
@@ -787,14 +788,13 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
     width: '100%',
     alignSelf: 'center',
-  
   },
   sectionTitle: {
     marginTop: RFPercentage(2.5),
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.8),
-    marginLeft:RFPercentage(3)
+    marginLeft: RFPercentage(3),
   },
   filterWrapper: {
     position: 'relative',
@@ -819,13 +819,13 @@ const styles = StyleSheet.create({
     borderColor: Colors.inputFieldColor,
     flexDirection: 'row',
     backgroundColor: 'white', // Or transparent if not selected
-    borderBottomWidth:RFPercentage(0.3)
+    borderBottomWidth: RFPercentage(0.3),
   },
 
   filterText: {
     color: Colors.primaryText,
     fontSize: RFPercentage(1.5),
-    fontFamily:Fonts.bold
+    fontFamily: Fonts.bold,
   },
   listContainer: {
     marginTop: RFPercentage(0.7),

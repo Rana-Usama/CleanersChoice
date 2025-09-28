@@ -230,6 +230,8 @@ const ServiceThree: React.FC = ({navigation}: any) => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.safeArea}>
+        {/* Header */}
+        <HeaderBack title="Service" textStyle={styles.headerText} left={true} />
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : null}
           style={styles.keyboardAvoidingView}>
@@ -237,12 +239,6 @@ const ServiceThree: React.FC = ({navigation}: any) => {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.scrollView}
             keyboardShouldPersistTaps="handled">
-            {/* Header */}
-            <HeaderBack
-              title="Service"
-              textStyle={styles.headerText}
-              left={true}
-            />
             <View style={styles.container}>
               <View style={styles.infoHeaderContainer}>
                 <InfoHeader />

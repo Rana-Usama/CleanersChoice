@@ -68,10 +68,10 @@ const FAQS: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <HeaderBack title={`FAQ's`} textStyle={styles.headerText} left={true} />
       <ScrollView
         contentContainerStyle={styles.scrollViewContent}
         showsVerticalScrollIndicator={false}>
-        <HeaderBack title={`FAQ's`} textStyle={styles.headerText} left={true} />
         <View style={styles.container}>
           <FlatList
             data={data}
@@ -80,7 +80,7 @@ const FAQS: React.FC = () => {
               return (
                 <>
                   <TouchableOpacity
-                  activeOpacity={0.8}
+                    activeOpacity={0.8}
                     style={styles.questionContainer}
                     onPress={() => {
                       setVisible(!visible);

@@ -158,7 +158,8 @@ const ServiceOne: React.FC = ({navigation}: any) => {
               flexGrow: 1,
               paddingBottom: RFPercentage(5),
             }}
-            keyboardShouldPersistTaps="always">
+            keyboardShouldPersistTaps="always"
+            showsVerticalScrollIndicator={false}>
             {/* Header */}
             <View style={styles.container}>
               <View style={styles.infoHeaderContainer}>

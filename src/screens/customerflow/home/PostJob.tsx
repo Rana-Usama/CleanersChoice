@@ -163,128 +163,128 @@ const PostJob = ({route}: any) => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContainer}
-        keyboardShouldPersistTaps="always"
-        style={{backgroundColor:Colors.background}}
-        >
+      <>
         <View style={styles.safeArea}>
-          {/* Header */}
           <HeaderBack
             title="Post Job"
             textStyle={{fontSize: RFPercentage(2)}}
             left={true}
           />
 
-          {/* Field Container */}
-          <View style={styles.container}>
-            <InfoHeader text="Post your cleaning job by providing following details!" />
-            <View style={{marginTop: RFPercentage(1.5)}}>
-              {/* Title */}
-              <InputField
-                placeholder="Job Title e.g, Garden Cleaning"
-                customStyle={{width: '100%'}}
-                value={jobTitle}
-                onChangeText={setJobTitle}
-              />
-
-              {/* Describe */}
-              <View>
-                <DescriptionField
-                  placeholder="Description of the cleaning job"
-                  count={true}
-                  value={Description}
-                  onChangeText={setDescription}
-                  maxLength={200}
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.scrollContainer}
+            keyboardShouldPersistTaps="always"
+            style={{backgroundColor: Colors.background}}>
+            {/* Field Container */}
+            <View style={styles.container}>
+              <InfoHeader text="Post your cleaning job by providing following details!" />
+              <View style={{marginTop: RFPercentage(1.5)}}>
+                {/* Title */}
+                <InputField
+                  placeholder="Job Title e.g, Garden Cleaning"
+                  customStyle={{width: '100%'}}
+                  value={jobTitle}
+                  onChangeText={setJobTitle}
                 />
-              </View>
 
-              {/* City */}
-              <InputField
-                placeholder="Enter City/Town you want services at"
-                customStyle={{width: '100%'}}
-                value={Location}
-                onChangeText={setLocation}
-              />
-
-              {/* Service Type */}
-              <CustomDropDown
-                placeholder={jobId ? selectedType : 'Service Type'}
-                data={data1}
-                placeholderColor={
-                  jobId ? Colors.inputTextColor : Colors.placeholderColor
-                }
-                setValue={handleSelectedItem}
-              />
-
-              {/* Budget */}
-              <InputField
-                placeholder="Budget e.g; $120"
-                customStyle={{width: '100%'}}
-                value={budget}
-                onChangeText={handleBudgetChange}
-                type={'numeric'}
-              />
-
-              {/* Date Picker */}
-              <View style={styles.dateContainer}>
-                <TouchableOpacity
-                  activeOpacity={1}
-                  onPress={() => setOpen(true)}
-                  style={{flexDirection: 'row', alignItems: 'center'}}>
-                  <Image
-                    source={Icons.calendar}
-                    resizeMode="contain"
-                    style={{width: RFPercentage(2), height: RFPercentage(2)}}
+                {/* Describe */}
+                <View>
+                  <DescriptionField
+                    placeholder="Description of the cleaning job"
+                    count={true}
+                    value={Description}
+                    onChangeText={setDescription}
+                    maxLength={200}
                   />
-                  <Text style={styles.dateText}>
-                    {formattedDate || 'Job Due Date and Time'}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-              <DatePicker
-                modal
-                open={open}
-                date={date}
-                onConfirm={date => {
-                  setOpen(false);
-                  setDate(date);
-                }}
-                onCancel={() => {
-                  setOpen(false);
-                }}
-              />
+                </View>
 
-              {/* Special Remarks */}
-              <View>
-                <Text style={styles.remarksText}>
-                  Leave any special remarks (Optional)
-                </Text>
-                <DescriptionField
-                  placeholder="Any Special Remarks"
-                  style={{height: RFPercentage(11)}}
-                  count={false}
-                  value={remarks}
-                  onChangeText={setRemarks}
-                  maxLength={80}
+                {/* City */}
+                <InputField
+                  placeholder="Enter City/Town you want services at"
+                  customStyle={{width: '100%'}}
+                  value={Location}
+                  onChangeText={setLocation}
+                />
+
+                {/* Service Type */}
+                <CustomDropDown
+                  placeholder={jobId ? selectedType : 'Service Type'}
+                  data={data1}
+                  placeholderColor={
+                    jobId ? Colors.inputTextColor : Colors.placeholderColor
+                  }
+                  setValue={handleSelectedItem}
+                />
+
+                {/* Budget */}
+                <InputField
+                  placeholder="Budget e.g; $120"
+                  customStyle={{width: '100%'}}
+                  value={budget}
+                  onChangeText={handleBudgetChange}
+                  type={'numeric'}
+                />
+
+                {/* Date Picker */}
+                <View style={styles.dateContainer}>
+                  <TouchableOpacity
+                    activeOpacity={1}
+                    onPress={() => setOpen(true)}
+                    style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <Image
+                      source={Icons.calendar}
+                      resizeMode="contain"
+                      style={{width: RFPercentage(2), height: RFPercentage(2)}}
+                    />
+                    <Text style={styles.dateText}>
+                      {formattedDate || 'Job Due Date and Time'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                <DatePicker
+                  modal
+                  open={open}
+                  date={date}
+                  onConfirm={date => {
+                    setOpen(false);
+                    setDate(date);
+                  }}
+                  onCancel={() => {
+                    setOpen(false);
+                  }}
+                />
+
+                {/* Special Remarks */}
+                <View>
+                  <Text style={styles.remarksText}>
+                    Leave any special remarks (Optional)
+                  </Text>
+                  <DescriptionField
+                    placeholder="Any Special Remarks"
+                    style={{height: RFPercentage(11)}}
+                    count={false}
+                    value={remarks}
+                    onChangeText={setRemarks}
+                    maxLength={80}
+                  />
+                </View>
+              </View>
+
+              {/* Button Container */}
+              <View style={{alignSelf: 'center', marginTop: RFPercentage(3)}}>
+                <GradientButton
+                  title={jobId ? 'Edit Job' : 'Make Job Live'}
+                  textStyle={{fontSize: RFPercentage(1.8)}}
+                  onPress={postJob}
+                  loading={loading}
+                  disabled={loading}
                 />
               </View>
             </View>
-
-            {/* Button Container */}
-            <View style={{alignSelf: 'center', marginTop: RFPercentage(3)}}>
-              <GradientButton
-                title={jobId ? 'Edit Job' : 'Make Job Live'}
-                textStyle={{fontSize: RFPercentage(1.8)}}
-                onPress={postJob}
-                loading={loading}
-                disabled={loading}
-              />
-            </View>
-          </View>
+          </ScrollView>
         </View>
-      </ScrollView>
+      </>
     </TouchableWithoutFeedback>
   );
 };
@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: Colors.background,
-    paddingTop:RFPercentage(8)
+    paddingTop: RFPercentage(6),
   },
   scrollContainer: {
     flexGrow: 1,

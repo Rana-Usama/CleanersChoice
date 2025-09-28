@@ -124,7 +124,7 @@ const Settings = ({navigation}: any) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <HeaderBack title={'Settings'} textStyle={styles.headerText} />
+      <HeaderBack title={'Settings'} textStyle={styles.headerText} logo />
       <View style={styles.container}>
         <View style={styles.sectionTitle}>
           <Text style={styles.sectionTitleText}>Help & Security</Text>

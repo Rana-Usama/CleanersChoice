@@ -183,16 +183,15 @@ const ServiceDetails: React.FC = ({route}: any) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      {/* Header */}
+      <HeaderBack
+        title={'Service Details'}
+        textStyle={{fontSize: RFPercentage(2)}}
+        left={true}
+      />
       <ScrollView
         contentContainerStyle={{paddingBottom: RFPercentage(10)}}
         showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <HeaderBack
-          title={'Service Details'}
-          textStyle={{fontSize: RFPercentage(2)}}
-          left={true}
-        />
-
         {/* Main Container */}
         <View style={{width: '100%', marginTop: RFPercentage(2)}}>
           <ScrollView
@@ -249,7 +248,9 @@ const ServiceDetails: React.FC = ({route}: any) => {
           {/* Service Info */}
           <View style={{marginTop: RFPercentage(2)}}>
             <View style={styles.rowContainer}>
-              <TouchableOpacity   activeOpacity={0.8} onPress={() => setModalVisible(true)}>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => setModalVisible(true)}>
                 <Image
                   source={item.image ? {uri: item.image} : IMAGES.defaultPic}
                   resizeMode="contain"
@@ -548,6 +549,8 @@ const styles = StyleSheet.create({
   cover: {
     width: width * 0.9,
     height: RFPercentage(28),
+    borderWidth:1,
+    borderColor:"rgba(238, 238, 238, 1)"
   },
   joining: {
     color: Colors.placeholderColor,
