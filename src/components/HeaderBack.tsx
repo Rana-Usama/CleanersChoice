@@ -10,7 +10,7 @@ import React from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, Icons} from '../constants/Themes';
 import {useNavigation} from '@react-navigation/native';
-import AntDesign from 'react-native-vector-icons/AntDesign'
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 interface props {
   logo?: boolean;
@@ -27,31 +27,51 @@ const HeaderBack = (props: props) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.leftContainer}>
-        {props.logo ? (
-          <Image
-            source={Icons.homeLogo}
-            resizeMode="contain"
-            style={styles.logo}
-          />
-        ) : props.left ? (
-          <TouchableOpacity   activeOpacity={0.8} onPress={() => navigation.goBack()}>
-            <AntDesign
-              name="arrowleft"
-              color={Colors.secondaryText}
-              size={RFPercentage(2.8)}
+      <View
+        style={{
+          width: '90%',
+          alignSelf: 'center',
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+        <View style={styles.leftContainer}>
+          {props.logo ? (
+            <Image
+              source={Icons.homeLogo}
+              resizeMode="contain"
+              style={styles.logo}
             />
-          </TouchableOpacity>
-        ) : null}
-      </View>
-      <Text style={[styles.headerText, props.textStyle]}>{props.title}</Text>
-      {props.right && (
-        <View style={styles.rightContainer}>
-          <TouchableOpacity   activeOpacity={0.8} onPress={props.onPress}>
-            <Text style={styles.rightText}>{props.rightText}</Text>
-          </TouchableOpacity>
+          ) : props.left ? (
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={{flexDirection:'row', alignItems:'center', marginBottom:10}}
+              onPress={() => navigation.goBack()}>
+              <MaterialIcons
+                name="keyboard-backspace"
+                color={Colors.secondaryText}
+                size={RFPercentage(2.8)}
+              />
+              <Text style={[styles.headerText, props.textStyle, {left:RFPercentage(1)}]}>
+                {props.title}
+              </Text>
+            </TouchableOpacity>
+          ) : null}
         </View>
-      )}
+        {props.logo && (
+          <Text style={[styles.headerText, props.textStyle]}>
+            {props.title}
+          </Text>
+        )}
+
+        {props.right && (
+          <View style={styles.rightContainer}>
+            <TouchableOpacity activeOpacity={0.8} onPress={props.onPress}>
+              <Text style={styles.rightText}>{props.rightText}</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
     </View>
   );
 };
@@ -60,12 +80,15 @@ export default HeaderBack;
 
 const styles = StyleSheet.create({
   container: {
-    width: '90%',
+    width: '100%',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
     alignSelf: 'center',
-    marginTop:
-      Platform.OS === 'android' ? RFPercentage(7) : RFPercentage(1),
+    marginTop: Platform.OS === 'android' ? RFPercentage(6) : RFPercentage(0),
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(220, 220, 220, 1)',
+    height: RFPercentage(8),
+    paddingBottom: RFPercentage(1.8),
   },
   leftContainer: {
     position: 'absolute',

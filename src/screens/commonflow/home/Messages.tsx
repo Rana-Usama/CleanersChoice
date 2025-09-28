@@ -216,6 +216,7 @@ const Messages = ({navigation}: any) => {
         translucent
         backgroundColor="transparent"
       />
+      <HeaderBack title="Messages" textStyle={styles.headerText} logo />
       <ScrollView
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -223,10 +224,9 @@ const Messages = ({navigation}: any) => {
         contentContainerStyle={{paddingBottom: RFPercentage(15)}}
         style={{flex: 1}}
         showsVerticalScrollIndicator={false}>
-        <HeaderBack title="Messages" textStyle={styles.headerText} />
         <View style={styles.container}>
           <View style={styles.toggleContainer}>
-            <TouchableOpacity   activeOpacity={0.8} onPress={toggle1}>
+            <TouchableOpacity activeOpacity={0.8} onPress={toggle1}>
               <View
                 style={[
                   styles.toggleButton,
@@ -247,7 +247,10 @@ const Messages = ({navigation}: any) => {
                 </Text>
               </View>
             </TouchableOpacity>
-            <TouchableOpacity   activeOpacity={0.8} onPress={toggle2} style={styles.unreadButton}>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={toggle2}
+              style={styles.unreadButton}>
               <View
                 style={[
                   styles.toggleButton,
@@ -360,7 +363,7 @@ const Messages = ({navigation}: any) => {
                 />
               ) : (
                 // Not found
-                <View style={{marginTop:RFPercentage(10)}}>
+                <View style={{marginTop: RFPercentage(10)}}>
                   <NotFound text="No chats found" />
                 </View>
               )}
@@ -402,7 +405,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.8),
   },
   unreadButton: {
-    left: RFPercentage(2.8),
+    left: RFPercentage(2),
   },
   messageList: {
     marginTop: RFPercentage(2),

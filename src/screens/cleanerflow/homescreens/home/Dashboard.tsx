@@ -255,6 +255,15 @@ const Dashboard: React.FC = ({navigation}: any) => {
   };
   return (
     <SafeAreaView style={styles.safeArea}>
+      {/* Header */}
+      <HeaderBack
+        logo={true}
+        title="Dashboard"
+        textStyle={styles.headerText}
+        right={profileCompletion === '100' ? true : false}
+        rightText="Edit Service"
+        onPress={() => navigation.navigate('ServiceOne')}
+      />
       <ScrollView
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -262,20 +271,10 @@ const Dashboard: React.FC = ({navigation}: any) => {
         contentContainerStyle={{paddingBottom: RFPercentage(9)}}
         style={{flex: 1}}
         showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <HeaderBack
-          logo={true}
-          title="Dashboard"
-          textStyle={styles.headerText}
-          right={profileCompletion === '100' ? true : false}
-          rightText="Edit Service"
-          onPress={() => navigation.navigate('ServiceOne')}
-        />
-
         <View style={styles.container}>
           {/* Profile Image */}
           <View style={styles.imgContainer}>
-            <TouchableOpacity onPress={uploadImg}   activeOpacity={0.8}>
+            <TouchableOpacity onPress={uploadImg} activeOpacity={0.8}>
               <View style={styles.pictureContainer}>
                 {loading ? (
                   <ActivityIndicator
@@ -297,7 +296,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
                 )}
               </View>
 
-              <TouchableOpacity   activeOpacity={0.8} onPress={uploadImg}>
+              <TouchableOpacity activeOpacity={0.8} onPress={uploadImg}>
                 <Image
                   source={Icons.edit}
                   resizeMode="contain"

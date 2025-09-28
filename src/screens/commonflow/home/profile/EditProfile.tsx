@@ -104,7 +104,6 @@ const EditProfile = ({navigation}: any) => {
           //   },
           // );
           // imageUrl = res.data.secure_url;
-          
 
           const reference = storage().ref(
             `profileImages/profile_${user.uid}.jpg`,
@@ -173,6 +172,11 @@ const EditProfile = ({navigation}: any) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <HeaderBack
+        title="Edit Your Profile"
+        textStyle={styles.headerText}
+        left={true}
+      />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.flexContainer}>
@@ -180,14 +184,12 @@ const EditProfile = ({navigation}: any) => {
           <ScrollView
             contentContainerStyle={styles.scrollContainer}
             keyboardShouldPersistTaps="handled">
-            <HeaderBack
-              title="Edit Your Profile"
-              textStyle={styles.headerText}
-              left={true}
-            />
             <View style={styles.container}>
               {/* Profile Image */}
-              <TouchableOpacity   activeOpacity={0.8} onPress={uploadImg} style={styles.imgContainer}>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={uploadImg}
+                style={styles.imgContainer}>
                 <View style={styles.pictureContainer}>
                   {loading2 ? (
                     <ActivityIndicator
@@ -208,7 +210,7 @@ const EditProfile = ({navigation}: any) => {
                     />
                   )}
                 </View>
-                <TouchableOpacity   activeOpacity={0.8} onPress={uploadImg}>
+                <TouchableOpacity activeOpacity={0.8} onPress={uploadImg}>
                   <Image
                     source={Icons.edit}
                     resizeMode="contain"

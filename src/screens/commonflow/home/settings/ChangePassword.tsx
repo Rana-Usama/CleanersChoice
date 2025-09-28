@@ -20,7 +20,7 @@ import * as yup from 'yup';
 import {Formik} from 'formik';
 import {showToast} from '../../../../utils/ToastMessage';
 
-const ChangePasswordV2 = ({navigation} : any) => {
+const ChangePasswordV2 = ({navigation}: any) => {
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
 
@@ -72,15 +72,14 @@ const ChangePasswordV2 = ({navigation} : any) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <HeaderBack
+        title={`Change Password`}
+        textStyle={{fontSize: RFPercentage(2)}}
+        left={true}
+      />
       <ScrollView
         contentContainerStyle={{paddingBottom: RFPercentage(10)}}
         showsVerticalScrollIndicator={false}>
-        <HeaderBack
-          title={`Change Password`}
-          textStyle={{fontSize: RFPercentage(2)}}
-          left={true}
-        />
-
         <Formik
           initialValues={{
             oldPassword: '',
@@ -116,8 +115,12 @@ const ChangePasswordV2 = ({navigation} : any) => {
                   />
                   {touched.oldPassword && errors.oldPassword && (
                     <>
-                      <View style={{width: '90%', height: 16, bottom: RFPercentage(0.8)
-                      }}>
+                      <View
+                        style={{
+                          width: '90%',
+                          height: 16,
+                          bottom: RFPercentage(0.8),
+                        }}>
                         <Text
                           style={{
                             fontSize: RFPercentage(1.5),
@@ -148,7 +151,12 @@ const ChangePasswordV2 = ({navigation} : any) => {
                   />
                   {touched.password && errors.password && (
                     <>
-                      <View style={{width: '90%', height: 16, bottom: RFPercentage(0.8)}}>
+                      <View
+                        style={{
+                          width: '90%',
+                          height: 16,
+                          bottom: RFPercentage(0.8),
+                        }}>
                         <Text
                           style={{
                             fontSize: RFPercentage(1.5),
@@ -179,7 +187,12 @@ const ChangePasswordV2 = ({navigation} : any) => {
                   />
                   {touched.confirmPassword && errors.confirmPassword && (
                     <>
-                      <View style={{width: '90%', height: 16, bottom:RFPercentage(0.8)}}>
+                      <View
+                        style={{
+                          width: '90%',
+                          height: 16,
+                          bottom: RFPercentage(0.8),
+                        }}>
                         <Text
                           style={{
                             fontSize: RFPercentage(1.5),

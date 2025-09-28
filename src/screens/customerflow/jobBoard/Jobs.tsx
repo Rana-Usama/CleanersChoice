@@ -75,6 +75,7 @@ const Jobs = ({navigation}: any) => {
         .collection('Jobs')
         .where('jobId', '==', user.uid)
         .where('status', '==', status)
+        .orderBy('createdAt2', 'desc')
         .get();
 
       const jobs = snapshot.docs.map(doc => ({
@@ -121,25 +122,25 @@ const Jobs = ({navigation}: any) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      {/* Header */}
+      <HeaderBack
+        title="My Posted Jobs"
+        right={true}
+        rightText="Post Job"
+        textStyle={{fontSize: RFPercentage(2)}}
+        onPress={() => navigation.navigate('PostJob', {jobId: null})}
+        logo
+      />
       <ScrollView
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         contentContainerStyle={styles.scrollView}
         showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <HeaderBack
-          title="My Posted Jobs"
-          right={true}
-          rightText="Post Job"
-          textStyle={{fontSize: RFPercentage(2)}}
-          onPress={() => navigation.navigate('PostJob', {jobId: null})}
-        />
-
         {/* Filters */}
         <View style={styles.container}>
           <View style={styles.toggleContainer}>
-            <TouchableOpacity   activeOpacity={0.8} onPress={toggle1}>
+            <TouchableOpacity activeOpacity={0.8} onPress={toggle1}>
               <View
                 style={[styles.toggleButton, active && styles.activeButton]}>
                 <Text style={[styles.toggleText, active && styles.activeText]}>
@@ -147,7 +148,10 @@ const Jobs = ({navigation}: any) => {
                 </Text>
               </View>
             </TouchableOpacity>
-            <TouchableOpacity   activeOpacity={0.8} onPress={toggle2} style={styles.toggleSpacing}>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={toggle2}
+              style={styles.toggleSpacing}>
               <View
                 style={[styles.toggleButton, completed && styles.activeButton]}>
                 <Text
@@ -197,7 +201,7 @@ const Jobs = ({navigation}: any) => {
                 </>
               ) : (
                 <>
-                  <View style={{marginTop:RFPercentage(8)}}>
+                  <View style={{marginTop: RFPercentage(8)}}>
                     <NotFound text="No Jobs found" />
                   </View>
                 </>
@@ -285,7 +289,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.fontMedium,
   },
   toggleSpacing: {
-    left: RFPercentage(2.4),
+    left: RFPercentage(2),
   },
   listContainer: {
     marginTop: RFPercentage(2),

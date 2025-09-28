@@ -64,14 +64,14 @@ We will let You know via email and/or a prominent notice on Our Service, prior t
 const Privacy: React.FC = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
+      <HeaderBack
+        title={`Privacy Policy`}
+        textStyle={{fontSize: RFPercentage(2)}}
+        left={true}
+      />
       <ScrollView
         contentContainerStyle={{paddingBottom: RFPercentage(10)}}
         showsVerticalScrollIndicator={false}>
-        <HeaderBack
-          title={`Privacy Policy`}
-          textStyle={{fontSize: RFPercentage(2)}}
-          left={true}
-        />
         <View style={styles.container}>
           <View style={{marginTop: 15}}>
             <Text style={styles.e}>

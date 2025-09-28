@@ -95,6 +95,8 @@ const Home = () => {
   const [filteredLocations, setFilteredLocations] = useState<string[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
+  console.log('servicesData.......', servicesData);
+
   // On Refresh
   const onRefresh = () => {
     setRefreshing(true);
@@ -118,6 +120,7 @@ const Home = () => {
     try {
       const querySnapshot = await firestore()
         .collection('CleanerServices')
+        .orderBy('createdAt', 'desc')
         .get();
       if (!querySnapshot.empty) {
         const servicesArray: Service[] = querySnapshot.docs
@@ -137,10 +140,11 @@ const Home = () => {
               !!service.type &&
               !!service.location &&
               Array.isArray(service.serviceImages) &&
-              Array.isArray(service.packages),
-            // && service.rating !== undefined
-            // && Array.isArray(service.reviews)
+              service.serviceImages.length > 0 &&
+              Array.isArray(service.packages) &&
+              service.packages.length > 0,
           );
+
         setServicesData(servicesArray);
 
         const locationsArray = servicesArray
@@ -282,6 +286,14 @@ const Home = () => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.safeArea}>
+        <HeaderBack
+          logo={true}
+          title="Home"
+          right={true}
+          rightText="Post Job"
+          textStyle={{fontSize: RFPercentage(2.2)}}
+          onPress={() => navigation.navigate('PostJob', {jobId: null})}
+        />
         <ScrollView
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -290,16 +302,6 @@ const Home = () => {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="always">
           <View style={styles.container}>
-            {/* Header */}
-            <HeaderBack
-              logo={true}
-              title="Home"
-              right={true}
-              rightText="Post Job"
-              textStyle={{fontSize: RFPercentage(2.2)}}
-              onPress={() => navigation.navigate('PostJob', {jobId: null})}
-            />
-
             {/* Search Field */}
             <View style={styles.searchContainer}>
               <SearchField

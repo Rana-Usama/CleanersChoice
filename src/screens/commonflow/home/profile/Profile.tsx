@@ -16,7 +16,7 @@ import ProfileField from '../../../../components/ProfileField';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import {useFocusEffect} from '@react-navigation/native';
-import { useExitAppOnBack } from '../../../../utils/ExitApp';
+import {useExitAppOnBack} from '../../../../utils/ExitApp';
 
 const Profile = ({navigation}: any) => {
   const [profile, setProfile] = useState(null);
@@ -65,11 +65,11 @@ const Profile = ({navigation}: any) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <HeaderBack title="Your Profile" textStyle={styles.headerText} logo />
       <ScrollView
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }>
-        <HeaderBack title="Your Profile" textStyle={styles.headerText} />
         <View style={styles.container}>
           <View style={styles.imgContainer}>
             <View style={styles.pictureContainer}>
