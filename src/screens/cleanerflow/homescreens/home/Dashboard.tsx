@@ -253,6 +253,9 @@ const Dashboard: React.FC = ({navigation}: any) => {
   const toggleDescription = () => {
     setIsExpanded(prevState => !prevState);
   };
+
+  const cleanDescription = service?.description.replace(/\s+/g, ' ').trim();
+
   return (
     <SafeAreaView style={styles.safeArea}>
       {/* Header */}
@@ -343,9 +346,9 @@ const Dashboard: React.FC = ({navigation}: any) => {
 
                     <Text style={styles.showMore2}>
                       {isExpanded
-                        ? service.description + ' '
-                        : getTruncatedText(service.description)}
-                      {service.description.length > 120 && (
+                        ? cleanDescription + ' '
+                        : getTruncatedText(cleanDescription)}
+                      {cleanDescription?.length > 120 && (
                         <Text
                           onPress={toggleDescription}
                           style={styles.showText}>
