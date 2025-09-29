@@ -151,7 +151,7 @@ const StackNavigator: React.FC = () => {
   } else if (email && password && user === 'Cleaner' && hasActiveSub) {
     initialRoute = 'CleanerNavigator';
   } else if (user === 'Cleaner') {
-    initialRoute = 'Premium'; // covers both expired and never-subscribed
+    initialRoute = 'Premium';
   } else if (loggedOut === 'yes') {
     initialRoute = 'SignIn';
   }

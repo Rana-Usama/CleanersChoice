@@ -232,7 +232,8 @@ const ChangePasswordV2 = ({navigation}: any) => {
             />
             <CustomModal
               passwordModal={true}
-              title={'Your password hase been successfuly changed!'}
+              title='Chnage Password'
+              subTitle={'Your password hase been successfuly changed!'}
               onPress3={() => {
                 navigation.navigate('SignIn');
                 setModalVisible(false);

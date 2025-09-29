@@ -3,6 +3,7 @@ import {
   Text,
   TouchableOpacity,
   ActivityIndicator,
+  View,
 } from 'react-native';
 import React from 'react';
 import LinearGradient from 'react-native-linear-gradient';
@@ -23,15 +24,20 @@ const GradientButton: React.FC<Props> = (props: Props) => {
   return (
     <LinearGradient
       colors={[Colors.gradient1, Colors.gradient2]}
-      style={[styles.nextButton, {...props.style}]}>
+      style={[styles.nextButton, props.style]}>
       <TouchableOpacity
         activeOpacity={0.8}
         onPress={props.onPress}
-        disabled={props.disabled}>
+        disabled={props.disabled || props.loading}
+        style={styles.touchableArea}>
         {props.loading ? (
-          <ActivityIndicator size="small" color={Colors.background} />
+          <ActivityIndicator 
+            size="small" 
+            color={Colors.background} 
+            animating={true}
+          />
         ) : (
-          <Text style={[styles.nextButtonText, {...props.textStyle}]}>
+          <Text style={[styles.nextButtonText, props.textStyle]}>
             {props.title}
           </Text>
         )}
@@ -50,10 +56,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: RFPercentage(18),
   },
+  touchableArea: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   nextButtonText: {
     fontSize: RFPercentage(1.9),
     fontFamily: Fonts.fontMedium,
     color: Colors.background,
-    textAlign:"center"
+    textAlign: 'center',
   },
 });

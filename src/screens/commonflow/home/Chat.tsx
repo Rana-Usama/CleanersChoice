@@ -280,6 +280,7 @@ const Chat = ({navigation, route}: any) => {
                       <TouchableOpacity
                         activeOpacity={0.8}
                         style={styles.sendButton}
+                        hitSlop={{top: 15, bottom: 15, left: 15, right: 15}}
                         onPress={() => {
                           onSend([
                             {
@@ -372,7 +373,7 @@ const styles = StyleSheet.create({
     width: '90%',
     textAlignVertical: 'top',
     fontFamily: Fonts.fontRegular,
-    bottom:2
+    bottom: 2,
   },
   sendButton: {
     justifyContent: 'center',
@@ -381,6 +382,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: RFPercentage(0),
     top: RFPercentage(0.3),
+    zIndex:999
   },
 
   noProfileContainer: {
@@ -430,7 +432,6 @@ const styles = StyleSheet.create({
   toolbar: {
     borderWidth: RFPercentage(0.1),
     borderRadius: RFPercentage(3),
-    // minHeight: RFPercentage(5.5),
     maxHeight: RFPercentage(18),
     justifyContent: 'center',
     paddingHorizontal: RFPercentage(1.7),
