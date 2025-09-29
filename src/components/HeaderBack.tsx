@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
     marginTop: Platform.OS === 'android' ? RFPercentage(6) : RFPercentage(0),
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(220, 220, 220, 1)',
-    height: RFPercentage(8),
+    height: RFPercentage(7),
     paddingBottom: RFPercentage(1.8),
   },
   leftContainer: {

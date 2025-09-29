@@ -178,7 +178,8 @@ const Settings = ({navigation}: any) => {
           <View style={styles.modalContainer}>
             <BlurView style={styles.blurView} blurType="light" blurAmount={5} />
             <CustomModal
-              title={'Are you sure you want to Logout?'}
+              title="Logout Confirmation!"
+              subTitle={'Are you sure you want to Logout?'}
               onPress={() => setModalVisible(false)}
               onPress2={logOut}
               loader={loading}
@@ -192,7 +193,8 @@ const Settings = ({navigation}: any) => {
           <View style={styles.modalContainer}>
             <BlurView style={styles.blurView} blurType="light" blurAmount={5} />
             <CustomModal
-              title={'Are you sure you want to delete your account?'}
+              title="Delete Account!"
+              subTitle={'Are you sure you want to delete your account?'}
               onPress={() => setModalVisible2(false)}
               onPress2={deleteAccount}
             />

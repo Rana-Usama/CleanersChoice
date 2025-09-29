@@ -54,12 +54,12 @@ const SignIn: React.FC = () => {
       const userDoc = await firestore().collection('Users').doc(user.uid).get();
       const userData = userDoc.data();
       const userRole = userData?.role;
-      await messaging().requestPermission();
-      await messaging().registerDeviceForRemoteMessages();
-      const fcmToken = await messaging().getToken();
-      await firestore().collection('Users').doc(user.uid).update({
-        fcmToken: fcmToken,
-      });
+      // await messaging().requestPermission();
+      // await messaging().registerDeviceForRemoteMessages();
+      // const fcmToken = await messaging().getToken();
+      // await firestore().collection('Users').doc(user.uid).update({
+      //   fcmToken: fcmToken,
+      // });
 
       showToast({
         type: 'success',
@@ -77,7 +77,6 @@ const SignIn: React.FC = () => {
         const now = Date.now();
         const expiry = userData?.subscriptionEndDate;
         const hasActiveSub = expiry && expiry > now;
-
         if (hasActiveSub) {
           await navigation.replace('CleanerNavigator');
         } else {

@@ -415,7 +415,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
                             {
                               left:
                                 visibleItems < service?.type?.length
-                                  ? RFPercentage(19.5)
+                                  ? RFPercentage(20.5)
                                   : RFPercentage(35.5),
                             },
                           ]}>
@@ -751,7 +751,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
     textAlign: 'center',
-    bottom: RFPercentage(1.2),
+    bottom: RFPercentage(1.6),
     position: 'absolute',
   },
   showMore2: {

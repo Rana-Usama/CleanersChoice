@@ -217,7 +217,8 @@ const Jobs = ({navigation}: any) => {
           <View style={styles.modalContainer}>
             <BlurView style={styles.blurView} blurType="light" blurAmount={5} />
             <CustomModal
-              title={'Are you sure you want to delete this job?'}
+            title='Delete Job!'
+              subTitle={'Are you sure you want to delete this job?'}
               onPress={() => setModalVisible(false)}
               onPress2={handleDeleteJob}
               loader={loading2}

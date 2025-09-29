@@ -13,6 +13,7 @@ interface props {
   onPress?: () => void;
   onPress2?: () => void;
   loader?: boolean;
+  subTitle: string;
 }
 
 const CustomModal = (props: props) => {
@@ -25,7 +26,15 @@ const CustomModal = (props: props) => {
           size={RFPercentage(5)}
         />
       )}
-      <Text style={styles.modalText}>{props.title}</Text>
+      <Text
+        style={{
+          color: Colors.primaryText,
+          fontFamily: Fonts.fontMedium,
+          fontSize: RFPercentage(2.1),
+        }}>
+        {props.title}
+      </Text>
+      <Text style={styles.modalText}>{props.subTitle}</Text>
       {props.passwordModal ? (
         <View style={styles.okButtonContainer}>
           <GradientButton title="Ok" onPress={props.onPress3} />
@@ -35,7 +44,11 @@ const CustomModal = (props: props) => {
           <NextButton
             title="Cancel"
             onPress={props.onPress}
-            style={{width: RFPercentage(15), height: RFPercentage(5)}}
+            style={{
+              width: RFPercentage(14),
+              height: RFPercentage(5),
+              borderColor: Colors.primaryText,
+            }}
             textStyle={{fontSize: RFPercentage(1.8)}}
           />
           <GradientButton
@@ -43,7 +56,7 @@ const CustomModal = (props: props) => {
             onPress={props.onPress2}
             loading={props.loader}
             disabled={props.loader}
-            style={{width: RFPercentage(15), height: RFPercentage(5)}}
+            style={{width: RFPercentage(14), height: RFPercentage(5)}}
             textStyle={{fontSize: RFPercentage(1.8)}}
           />
         </View>
@@ -69,9 +82,9 @@ const styles = StyleSheet.create({
   },
   modalText: {
     textAlign: 'center',
-    fontSize: RFPercentage(1.8),
-    fontFamily: Fonts.fontMedium,
-    color: '#4B5563',
+    fontSize: RFPercentage(1.7),
+    fontFamily: Fonts.fontRegular,
+    color: '#4a5461ff',
     marginTop: RFPercentage(1.5),
     marginHorizontal: RFPercentage(2),
     lineHeight: RFPercentage(2.4),
