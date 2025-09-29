@@ -108,6 +108,9 @@ const App: React.FC = () => {
         id: 'single-notification',
         title: title || 'No Title',
         body: body || 'No Body',
+        ios: {
+          sound: 'default', 
+        },
         android: {
           channelId,
           smallIcon: 'ic_notification',
