@@ -209,7 +209,9 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
             contentContainerStyle={{paddingHorizontal: RFPercentage(1.6)}}
             keyExtractor={item => item.id.toString()}
             renderItem={({item, index}) => (
-              <TouchableOpacity   activeOpacity={0.8} onPress={() => uploadImg(index)}>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => uploadImg(index)}>
                 <View style={styles.imageContainer}>
                   {loading2 ? (
                     <>
@@ -243,6 +245,15 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
                     </>
                   )}
                 </View>
+                {selectedImages[index] && (
+                  <TouchableOpacity activeOpacity={0.8}>
+                    <Image
+                      source={Icons.edit}
+                      resizeMode="contain"
+                      style={styles.uploadedImg}
+                    />
+                  </TouchableOpacity>
+                )}
               </TouchableOpacity>
             )}
           />
@@ -278,6 +289,14 @@ const styles = StyleSheet.create({
   },
   infoHeaderContainer: {
     marginTop: RFPercentage(2.5),
+  },
+  uploadedImg: {
+    width: RFPercentage(3),
+    height: RFPercentage(3),
+    position: 'absolute',
+    // left: RFPercentage(10.5),
+    bottom: RFPercentage(1),
+    right: RFPercentage(1),
   },
   timelineContainer: {
     marginTop: RFPercentage(2.8),

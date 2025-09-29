@@ -285,27 +285,40 @@ const Dashboard: React.FC = ({navigation}: any) => {
                     color={Colors.inputFieldColor}
                   />
                 ) : (
-                  <Image
-                    source={
-                      img
-                        ? {uri: img?.uri}
-                        : profile
-                        ? {uri: profile}
-                        : IMAGES.defaultPic
-                    }
-                    resizeMode="contain"
-                    style={styles.imgStyle}
-                  />
+                  <>
+                    <Image
+                      source={
+                        img
+                          ? {uri: img?.uri}
+                          : profile
+                          ? {uri: profile}
+                          : IMAGES.defaultPic
+                      }
+                      resizeMode="contain"
+                      style={styles.imgStyle}
+                    />
+                    <Image
+                      source={Icons.owner}
+                      resizeMode="contain"
+                      style={{
+                        position: 'absolute',
+                        width: RFPercentage(4),
+                        height: RFPercentage(4),
+                        right: -5,
+                        top: 0,
+                      }}
+                    />
+                  </>
                 )}
               </View>
 
-              <TouchableOpacity activeOpacity={0.8} onPress={uploadImg}>
+              {/* <TouchableOpacity activeOpacity={0.8} onPress={uploadImg}>
                 <Image
                   source={Icons.edit}
                   resizeMode="contain"
                   style={styles.uploadedImg}
                 />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </TouchableOpacity>
           </View>
           <View style={styles.nameContainer}>
@@ -383,49 +396,41 @@ const Dashboard: React.FC = ({navigation}: any) => {
                   <View style={styles.serviceContainer}>
                     <Text style={styles.headeing2}>Services:</Text>
                   </View>
-                  <View
-                    style={{
-                      right: RFPercentage(0.7),
-                      marginTop: RFPercentage(0.5),
-                    }}>
-                    <FlatList
-                      data={serviceNames}
-                      numColumns={2}
-                      contentContainerStyle={{
-                        paddingHorizontal: RFPercentage(2),
-                      }}
-                      keyExtractor={(item, index) => index.toString()}
-                      renderItem={({item, index}) => (
-                        <View style={styles.serviceBox}>
-                          <Text style={styles.serviceName}>{item}</Text>
-                        </View>
-                      )}
-                    />
-                    {service?.type?.length > 5 && (
-                      <TouchableOpacity
-                        activeOpacity={0.8}
-                        onPress={
-                          visibleItems < service?.type?.length
-                            ? handleShowMore
-                            : handleShowLess
-                        }>
-                        <Text
-                          style={[
-                            styles.showMore,
-                            {
-                              left:
-                                visibleItems < service?.type?.length
-                                  ? RFPercentage(20.5)
-                                  : RFPercentage(35.5),
-                            },
-                          ]}>
-                          {visibleItems < service?.type.length
-                            ? `+${service?.type.length - 5} More`
-                            : `See Less`}
-                        </Text>
-                      </TouchableOpacity>
+
+                  <FlatList
+                    data={serviceNames.slice(0, visibleItems)} // show only visible items
+                    numColumns={2}
+                    contentContainerStyle={{
+                      paddingHorizontal: RFPercentage(2),
+                    }}
+                    keyExtractor={(item, index) => index.toString()}
+                    renderItem={({item}) => (
+                      <View style={styles.serviceBox}>
+                        <Text style={styles.serviceName}>{item}</Text>
+                      </View>
                     )}
-                  </View>
+                  />
+
+                  {service?.type?.length > 5 && (
+                    <TouchableOpacity
+                      activeOpacity={0.8}
+                      style={{
+                        width: '90%',
+                        alignSelf: 'center',
+                        marginTop: RFPercentage(0.6),
+                      }}
+                      onPress={
+                        visibleItems < service?.type?.length
+                          ? handleShowMore
+                          : handleShowLess
+                      }>
+                      <Text style={styles.showMore}>
+                        {visibleItems < service?.type.length
+                          ? `+${service?.type.length - 5} More`
+                          : `See Less`}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
 
                 {/* Packages */}
@@ -449,6 +454,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
                       showsHorizontalScrollIndicator={false}
                       contentContainerStyle={{
                         paddingHorizontal: RFPercentage(1.2),
+                        paddingBottom: RFPercentage(1),
                       }}
                       renderItem={({item}) => {
                         return (
@@ -463,50 +469,8 @@ const Dashboard: React.FC = ({navigation}: any) => {
                     />
                   </View>
                 </View>
-
-                {/* Rating and Review */}
-                {service?.rating || service?.reviews?.length > 0 ? (
-                  <>
-                    <View style={{width: '90%', alignSelf: 'center'}}>
-                      <View>
-                        <Text
-                          style={[
-                            styles.headeing2,
-                            {marginTop: RFPercentage(2.5)},
-                          ]}>
-                          Rating & Reviews:
-                        </Text>
-                      </View>
-                      <View style={styles.ratingContainer}>
-                        <Text
-                          style={[
-                            styles.headeing2,
-                            {color: Colors.primaryText},
-                          ]}>
-                          Overall Rating
-                        </Text>
-                        <View
-                          style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                          }}>
-                          <Image
-                            source={IMAGES.star}
-                            resizeMode="contain"
-                            style={styles.ratingStar}
-                          />
-                          <Text style={styles.ratingText}>5.0</Text>
-                        </View>
-                      </View>
-                      <View style={{marginTop: RFPercentage(2)}}>
-                        <Review />
-                      </View>
-                    </View>
-                  </>
-                ) : null}
               </>
             ) : (
-              // Profile Completion Info Container
               <>
                 <View style={styles.profileCompletionContainer}>
                   <Text style={styles.profileCompletionText}>
@@ -633,7 +597,7 @@ const styles = StyleSheet.create({
   },
   availability: {
     color: Colors.gradient1,
-    fontFamily: Fonts.fontMedium,
+    fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.8),
   },
   availabilityIcon: {
@@ -675,7 +639,7 @@ const styles = StyleSheet.create({
   },
   headeing2: {
     color: Colors.placeholderColor,
-    fontFamily: Fonts.fontMedium,
+    fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.9),
   },
   description: {
@@ -705,8 +669,12 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(0.8),
     margin: RFPercentage(0.7),
     paddingHorizontal: RFPercentage(1.4),
-    // width:RFPercentage(16),
     justifyContent: 'center',
+    backgroundColor: 'white',
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 3},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   serviceName: {
     color: Colors.placeholderColor,
@@ -750,9 +718,6 @@ const styles = StyleSheet.create({
     color: Colors.gradient1,
     fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
-    textAlign: 'center',
-    bottom: RFPercentage(1.6),
-    position: 'absolute',
   },
   showMore2: {
     color: Colors.placeholderColor,

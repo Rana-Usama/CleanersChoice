@@ -9,6 +9,7 @@ import {
   StatusBar,
   ImageBackground,
   TouchableWithoutFeedback,
+  Platform,
 } from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import {GiftedChat, InputToolbar, Bubble} from 'react-native-gifted-chat';
@@ -296,7 +297,7 @@ const Chat = ({navigation, route}: any) => {
                         <Feather
                           name="send"
                           size={RFPercentage(2.5)}
-                          color={'rgba(135, 133, 133, 1)'}
+                          color={Colors.gradient1}
                         />
                       </TouchableOpacity>
                     )}
@@ -373,7 +374,9 @@ const styles = StyleSheet.create({
     width: '90%',
     textAlignVertical: 'top',
     fontFamily: Fonts.fontRegular,
-    bottom: 2,
+    paddingVertical: 0,
+    marginVertical: 0,
+    lineHeight: RFPercentage(2.5),
   },
   sendButton: {
     justifyContent: 'center',
@@ -381,8 +384,8 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(100),
     position: 'absolute',
     right: RFPercentage(0),
-    top: RFPercentage(0.3),
-    zIndex:999
+    top: Platform.OS === 'android' ? RFPercentage(0.3) : 0,
+    zIndex: 999,
   },
 
   noProfileContainer: {

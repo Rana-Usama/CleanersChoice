@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     marginVertical: 0,
     textAlignVertical: 'center',
     includeFontPadding: false,
-    flex: 1,
+    width:"90%"
   },
   iconContainer: {
     position: 'absolute',

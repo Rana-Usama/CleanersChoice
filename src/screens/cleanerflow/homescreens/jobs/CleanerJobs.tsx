@@ -114,13 +114,13 @@ const CleanerJobs = () => {
   );
 
   const getTruncatedText = text => {
-    const maxChars = 12;
+    const maxChars = 23;
     if (text.length <= maxChars) return text;
     return text.slice(0, maxChars).trim() + '... ';
   };
 
   const getTruncatedText2 = text => {
-    const maxChars = 24;
+    const maxChars = 30;
     if (text.length <= maxChars) return text;
     return text.slice(0, maxChars).trim() + '... ';
   };
@@ -286,6 +286,7 @@ const CleanerJobs = () => {
                 marginTop: RFPercentage(1),
                 height: RFPercentage(6),
                 paddingHorizontal: RFPercentage(3),
+                paddingBottom: RFPercentage(1),
               }}>
               {/* Location Filter */}
               <View>
@@ -302,7 +303,7 @@ const CleanerJobs = () => {
                     {
                       backgroundColor: loctionFilter
                         ? Colors.gradient2
-                        : 'transparent',
+                        : 'white',
                     },
                   ]}>
                   <Image
@@ -355,7 +356,7 @@ const CleanerJobs = () => {
                     {
                       backgroundColor: rangeSelector
                         ? Colors.gradient2
-                        : 'transparent',
+                        : 'white',
                       marginLeft: RFPercentage(1.5),
                     },
                   ]}>
@@ -408,9 +409,7 @@ const CleanerJobs = () => {
                   style={[
                     styles.filterBox,
                     {
-                      backgroundColor: serviceType
-                        ? Colors.gradient2
-                        : 'transparent',
+                      backgroundColor: serviceType ? Colors.gradient2 : 'white',
                       marginLeft: RFPercentage(1.5),
                     },
                   ]}>
@@ -566,6 +565,7 @@ const CleanerJobs = () => {
                         <>
                           <FlatList
                             data={filteredLocations}
+                            keyboardShouldPersistTaps="always"
                             keyExtractor={(item, index) => index.toString()}
                             renderItem={({item}) => (
                               <TouchableOpacity
@@ -743,6 +743,7 @@ const CleanerJobs = () => {
                       serviceTypeFilter.length > 0 && (
                         <FlatList
                           data={serviceTypeFilter}
+                          keyboardShouldPersistTaps="always"
                           keyExtractor={(item, index) => index.toString()}
                           renderItem={({item}) => (
                             <TouchableOpacity
@@ -818,8 +819,11 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(100),
     borderColor: Colors.inputFieldColor,
     flexDirection: 'row',
-    backgroundColor: 'white', // Or transparent if not selected
-    borderBottomWidth: RFPercentage(0.3),
+    backgroundColor: 'white',
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
   },
 
   filterText: {
@@ -882,7 +886,7 @@ const styles = StyleSheet.create({
   },
   sliderLabel: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     fontFamily: Fonts.semiBold,
   },
   flatListContainer: {

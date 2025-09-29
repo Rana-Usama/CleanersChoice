@@ -68,9 +68,9 @@ const PostJob = ({route}: any) => {
 
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, 'PostJob'>>();
-  const [date, setDate] = useState<Date>(new Date());
+  const [date, setDate] = useState<Date | null>(null);
   const [open, setOpen] = useState<boolean>(false);
-  const formattedDate = moment(date).format('YYYY-MM-DD  HH:mm A');
+  const formattedDate = date ? moment(date).format('YYYY-MM-DD  HH:mm A') : '';
   const [jobTitle, setJobTitle] = useState('');
   const [Location, setLocation] = useState('');
   const [Description, setDescription] = useState('');
@@ -87,18 +87,19 @@ const PostJob = ({route}: any) => {
   const postJob = async () => {
     const user = auth().currentUser;
     if (!user) return;
-    if (!jobTitle || !Location || !budget || !selectedType) {
+
+    if (!jobTitle || !Location || !budget || !selectedType || !date) {
       showToast({
         type: 'info',
         title: 'Job Post',
-        message: 'Please fill all the details',
+        message: 'Please fill all the details including job due date',
       });
       return;
     }
+
     setLoading(true);
     try {
-      const jobData = {
-        createdAt: formattedDate,
+      const jobData: any = {
         title: jobTitle,
         description: Description,
         type: selectedType,
@@ -109,6 +110,12 @@ const PostJob = ({route}: any) => {
         status: 'active',
         createdAt2: firestore.FieldValue.serverTimestamp(),
       };
+
+      // only set createdAt if date is selected
+      if (date) {
+        jobData.createdAt = moment(date).format('YYYY-MM-DD  HH:mm A');
+      }
+
       if (jobId) {
         await firestore().collection('Jobs').doc(jobId).update(jobData);
         navigation.navigate('Home');
@@ -122,6 +129,7 @@ const PostJob = ({route}: any) => {
         navigation.navigate('JobPosted');
       }
     } catch (error) {
+      console.log('Post Job Error:', error);
     } finally {
       setLoading(false);
     }
@@ -162,20 +170,20 @@ const PostJob = ({route}: any) => {
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <>
-        <View style={styles.safeArea}>
-          <HeaderBack
-            title="Post Job"
-            textStyle={{fontSize: RFPercentage(2)}}
-            left={true}
-          />
-
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.scrollContainer}
-            keyboardShouldPersistTaps="always"
-            style={{backgroundColor: Colors.background}}>
+    <>
+      <HeaderBack
+        title="Post Job"
+        textStyle={{fontSize: RFPercentage(2)}}
+        left={true}
+        style={{height: RFPercentage(13)}}
+      />
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContainer}
+        keyboardShouldPersistTaps="always"
+        style={{backgroundColor: Colors.background}}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.safeArea}>
             {/* Field Container */}
             <View style={styles.container}>
               <InfoHeader text="Post your cleaning job by providing following details!" />
@@ -237,7 +245,15 @@ const PostJob = ({route}: any) => {
                       resizeMode="contain"
                       style={{width: RFPercentage(2), height: RFPercentage(2)}}
                     />
-                    <Text style={styles.dateText}>
+                    <Text
+                      style={[
+                        styles.dateText,
+                        {
+                          color: formattedDate
+                            ? Colors.inputTextColor
+                            : Colors.placeholderColor,
+                        },
+                      ]}>
                       {formattedDate || 'Job Due Date and Time'}
                     </Text>
                   </TouchableOpacity>
@@ -245,7 +261,7 @@ const PostJob = ({route}: any) => {
                 <DatePicker
                   modal
                   open={open}
-                  date={date}
+                  date={date || new Date()}
                   onConfirm={date => {
                     setOpen(false);
                     setDate(date);
@@ -282,10 +298,10 @@ const PostJob = ({route}: any) => {
                 />
               </View>
             </View>
-          </ScrollView>
-        </View>
-      </>
-    </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </ScrollView>
+    </>
   );
 };
 
@@ -295,11 +311,11 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: Colors.background,
-    paddingTop: RFPercentage(6),
+    paddingTop: RFPercentage(0),
   },
   scrollContainer: {
     flexGrow: 1,
-    paddingBottom: RFPercentage(12),
+    paddingBottom: RFPercentage(32),
   },
   container: {
     width: '90%',

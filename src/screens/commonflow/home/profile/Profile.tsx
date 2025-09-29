@@ -17,12 +17,14 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import {useFocusEffect} from '@react-navigation/native';
 import {useExitAppOnBack} from '../../../../utils/ExitApp';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const Profile = ({navigation}: any) => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const [role, setRole] = useState('');
 
   useExitAppOnBack();
 
@@ -50,6 +52,7 @@ const Profile = ({navigation}: any) => {
         const userData = userDoc.data();
         setProfile(userData?.profile);
         setName(userData?.name);
+        setRole(userData?.role);
       }
     } catch (error) {
     } finally {
@@ -63,35 +66,106 @@ const Profile = ({navigation}: any) => {
     }, [userData]),
   );
 
+  // Get role badge styling
+  const getRoleStyle = () => {
+    switch (role?.toLowerCase()) {
+      case 'cleaner':
+        return {
+          backgroundColor: 'rgba(236, 245, 251, 0.9)',
+          color: Colors.gradient1,
+          icon: 'sparkles',
+        };
+      case 'customer':
+        return {
+          backgroundColor: 'rgba(236, 245, 251, 0.9)',
+          color: Colors.gradient1,
+          icon: 'person',
+        };
+      case 'admin':
+        return {
+          backgroundColor: 'rgba(245, 158, 11, 0.1)',
+          color: '#F59E0B',
+          icon: 'shield-checkmark',
+        };
+      default:
+        return {
+          backgroundColor: 'rgba(156, 163, 175, 0.1)',
+          color: '#6B7280',
+          icon: 'person-circle',
+        };
+    }
+  };
+
+  const roleStyle = getRoleStyle();
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <HeaderBack title="Your Profile" textStyle={styles.headerText} logo />
       <ScrollView
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }>
+        }
+        showsVerticalScrollIndicator={false}>
         <View style={styles.container}>
-          <View style={styles.imgContainer}>
-            <View style={styles.pictureContainer}>
+          {/* Profile Picture Section */}
+          <View style={styles.profileHeader}>
+            <View style={styles.avatarContainer}>
               {loading ? (
-                <ActivityIndicator
-                  size={'large'}
-                  color={Colors.placeholderColor}
-                />
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator size="large" color={Colors.gradient1} />
+                </View>
               ) : (
-                <Image
-                  source={profile ? {uri: profile} : IMAGES.defaultPic}
-                  resizeMode="contain"
-                  style={styles.imgStyle}
-                  borderRadius={RFPercentage(100)}
-                />
+                <View style={styles.imageWrapper}>
+                  <Image
+                    source={profile ? {uri: profile} : IMAGES.defaultPic}
+                    resizeMode="cover"
+                    style={styles.avatar}
+                  />
+                  {role === 'Cleaner' && (
+                    <Image
+                      source={Icons.owner}
+                      resizeMode="contain"
+                      style={{
+                        position: 'absolute',
+                        width: RFPercentage(4),
+                        height: RFPercentage(4),
+                        right: -3,
+                        top: 0,
+                      }}
+                    />
+                  )}
+                </View>
               )}
             </View>
+
+            {/* Name and Role Section */}
+            <View style={styles.userInfo}>
+              <Text style={styles.nameText} numberOfLines={1}>
+                {name || 'User Name'}
+              </Text>
+
+              <View
+                style={[
+                  styles.roleBadge,
+                  {backgroundColor: roleStyle.backgroundColor},
+                ]}>
+                <Ionicons
+                  name={roleStyle.icon}
+                  size={RFPercentage(1.8)}
+                  color={roleStyle.color}
+                  style={styles.roleIcon}
+                />
+                <Text style={[styles.roleText, {color: roleStyle.color}]}>
+                  {role
+                    ? `${role.charAt(0).toUpperCase() + role.slice(1)}`
+                    : 'User'}
+                </Text>
+              </View>
+            </View>
           </View>
-          <View style={styles.nameContainer}>
-            <Text style={styles.nameText}>{name}</Text>
-          </View>
-          <View style={styles.profileFieldContainer}>
+
+          {/* Profile Actions */}
+          <View style={{marginTop: RFPercentage(2)}}>
             <ProfileField
               text="Edit Profile"
               icon={Icons.editProfile}
@@ -112,52 +186,127 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   container: {
-    width: '90%',
-    alignSelf: 'center',
-    paddingTop: RFPercentage(4),
+    flex: 1,
+    paddingHorizontal: RFPercentage(2),
+    paddingTop: RFPercentage(2),
   },
   headerText: {
     fontSize: RFPercentage(2.2),
   },
-  imgContainer: {
-    alignSelf: 'center',
-    width: '90%',
+  profileHeader: {
     alignItems: 'center',
-    justifyContent: 'center',
+    paddingVertical: RFPercentage(3),
+    backgroundColor: 'white',
+    borderRadius: RFPercentage(2),
     marginTop: RFPercentage(1),
+    shadowColor: 'rgba(0, 0, 0, 0.1)',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(229, 231, 235, 0.8)',
   },
-  pictureContainer: {
-    width: RFPercentage(15.8),
-    height: RFPercentage(15.8),
-    borderRadius: RFPercentage(10),
+  avatarContainer: {
+    marginBottom: RFPercentage(2),
+  },
+  loadingContainer: {
+    width: RFPercentage(16),
+    height: RFPercentage(16),
+    borderRadius: RFPercentage(8),
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1.8,
-    borderColor: 'rgba(64, 123, 255, 1)',
     backgroundColor: Colors.inputField,
   },
-  imgStyle: {
-    width: RFPercentage(15),
-    height: RFPercentage(15),
-    borderRadius: RFPercentage(100),
+  imageWrapper: {
+    position: 'relative',
   },
-  editIcon: {
-    width: RFPercentage(2.5),
-    height: RFPercentage(2.5),
+  avatar: {
+    width: RFPercentage(16),
+    height: RFPercentage(16),
+    borderRadius: RFPercentage(8),
+    borderWidth: RFPercentage(0.1),
+    borderColor: Colors.gradient1,
+  },
+  onlineIndicator: {
     position: 'absolute',
-    right: RFPercentage(0.8),
-    bottom: RFPercentage(1.4),
+    bottom: RFPercentage(1),
+    right: RFPercentage(1),
+    width: RFPercentage(2),
+    height: RFPercentage(2),
+    borderRadius: RFPercentage(1),
+    backgroundColor: '#10B981',
+    borderWidth: 2,
+    borderColor: 'white',
   },
-  nameContainer: {
-    marginTop: RFPercentage(2),
+  userInfo: {
+    alignItems: 'center',
   },
   nameText: {
+    color: '#445368ff',
+    fontFamily: Fonts.semiBold,
+    fontSize: RFPercentage(2.2),
+    marginBottom: RFPercentage(1),
     textAlign: 'center',
-    color: Colors.primaryText,
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(2),
   },
-  profileFieldContainer: {
-    marginTop: RFPercentage(4.5),
+  roleBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: RFPercentage(1.5),
+    paddingVertical: RFPercentage(0.6),
+    borderRadius: RFPercentage(2),
+    marginTop: RFPercentage(0.5),
+  },
+  roleIcon: {
+    marginRight: RFPercentage(0.5),
+  },
+  roleText: {
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.5),
+    textTransform: 'capitalize',
+  },
+  actionsContainer: {
+    marginTop: RFPercentage(3),
+    backgroundColor: 'white',
+    borderRadius: RFPercentage(2),
+    padding: RFPercentage(2),
+    shadowColor: 'rgba(0, 0, 0, 0.05)',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(229, 231, 235, 0.6)',
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    marginTop: RFPercentage(3),
+    paddingVertical: RFPercentage(2),
+    backgroundColor: 'rgba(249, 250, 251, 0.8)',
+    borderRadius: RFPercentage(1.5),
+    marginHorizontal: RFPercentage(-1),
+  },
+  statItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  statNumber: {
+    color: '#1F2937',
+    fontFamily: Fonts.fontBold,
+    fontSize: RFPercentage(2.2),
+    marginBottom: RFPercentage(0.5),
+  },
+  statLabel: {
+    color: '#6B7280',
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.4),
+    textAlign: 'center',
+  },
+  statDivider: {
+    width: 1,
+    height: '60%',
+    backgroundColor: 'rgba(229, 231, 235, 0.8)',
   },
 });

@@ -50,7 +50,7 @@ const days = [
   },
 ];
 
-const Availability = ({navigation} : any) => {
+const Availability = ({navigation}: any) => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const profileData = useSelector(state => state?.profile?.profileData?.role);
@@ -177,14 +177,15 @@ const Availability = ({navigation} : any) => {
               ) : (
                 <>
                   <Text style={styles.set}>
-                    Set your weekly availability. Edit any day if needed
+                    Set your weekly schedule. Modify days when your availability
+                    changes.
                   </Text>
                 </>
               )}
             </View>
             <View style={{marginTop: RFPercentage(1.6)}}>
               <FlatList
-              scrollEnabled={false}
+                scrollEnabled={false}
                 data={availabilityData}
                 keyExtractor={item => item.day}
                 renderItem={({item}) => {
@@ -266,6 +267,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignSelf: 'center',
     position: 'absolute',
-    bottom: RFPercentage(23),
+    bottom: RFPercentage(26),
   },
 });

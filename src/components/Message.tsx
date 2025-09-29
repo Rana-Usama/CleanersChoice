@@ -55,20 +55,20 @@ const Message = (props: props) => {
               : ''}
           </Text>
         </View>
-        <View>
-          <Text
-            style={[
-              styles.timeText,
-              {color: props.unread ? Colors.gradient1 : 'rgba(75, 85, 99, 1)'},
-            ]}>
-            {props.time}
-          </Text>
-          {props.unread && (
-            <>
-              <View style={styles.unread}></View>
-            </>
-          )}
-        </View>
+      </View>
+      <View style={{}}>
+        <Text
+          style={[
+            styles.timeText,
+            {color: props.unread ? Colors.gradient1 : 'rgba(75, 85, 99, 1)'},
+          ]}>
+          {props.time}
+        </Text>
+        {props.unread && (
+          <>
+            <View style={styles.unread}></View>
+          </>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
   timeText: {
     color: Colors.gradient1,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.6),
   },
   unread: {
     width: RFPercentage(0.9),

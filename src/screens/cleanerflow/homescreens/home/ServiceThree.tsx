@@ -48,9 +48,20 @@ const ServiceThree: React.FC = ({navigation}: any) => {
   };
 
   // Remove Package
-  const removePackage = (id: any) => {
-    if (id === 1) return;
-    setPackages(packages.filter(pkg => pkg.id !== id));
+  // Remove Package
+  const removePackage = (id: number) => {
+    if (id === 1) return; // keep first package always
+
+    // filter out the deleted package
+    const updated = packages.filter(pkg => pkg.id !== id);
+
+    // reassign IDs sequentially (1, 2, 3, ...)
+    const reIndexed = updated.map((pkg, index) => ({
+      ...pkg,
+      id: index + 1,
+    }));
+
+    setPackages(reIndexed);
   };
 
   // Input Field function
@@ -228,115 +239,126 @@ const ServiceThree: React.FC = ({navigation}: any) => {
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <SafeAreaView style={styles.safeArea}>
-        {/* Header */}
-        <HeaderBack title="Service" textStyle={styles.headerText} left={true} />
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : null}
-          style={styles.keyboardAvoidingView}>
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.scrollView}
-            keyboardShouldPersistTaps="handled">
-            <View style={styles.container}>
-              <View style={styles.infoHeaderContainer}>
-                <InfoHeader />
-              </View>
-            </View>
+    <>
+      <HeaderBack
+        title="Service"
+        textStyle={styles.headerText}
+        left={true}
+        style={{height: RFPercentage(12.5)}}
+      />
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollView}
+        style={{backgroundColor: 'white'}}
+        keyboardShouldPersistTaps="handled">
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <SafeAreaView style={styles.safeArea}>
+            {/* Header */}
 
-            {/* Time Line */}
-            <View style={styles.timelineContainer}>
-              <TimeLine stepTwo={true} stepThree={true} />
-            </View>
-
-            {/* Package Details Container */}
-            <View style={styles.container}>
-              <View style={styles.sectionContainer}>
-                <Text style={styles.sectionTitle}>Select General Packages</Text>
-              </View>
-
-              {packages.map(pkg => (
-                <View key={pkg.id} style={styles.sectionContainer}>
-                  <Text style={styles.sectionTitle}>Package {pkg.id}</Text>
-                  {pkg.id === 1 ? null : (
-                    <>
-                      <View style={{position: 'absolute', right: 0}}>
-                        <TouchableOpacity
-                          activeOpacity={0.8}
-                          onPress={() => removePackage(pkg.id)}>
-                          <AntDesign
-                            name="minuscircleo"
-                            size={RFPercentage(2.2)}
-                            color={Colors.gradient1}
-                          />
-                        </TouchableOpacity>
-                      </View>
-                    </>
-                  )}
-
-                  <View>
-                    <DescriptionField
-                      placeholder={`Enter Package details`}
-                      count={true}
-                      value={pkg.details}
-                      maxLength={120}
-                      onChangeText={text =>
-                        handleInputChange(pkg.id, 'details', text)
-                      }
-                      charCount={pkg.details.length}
-                    />
-                    {errors[pkg.id]?.details && (
-                      <Text style={styles.errorText}>
-                        {errors[pkg.id].details}
-                      </Text>
-                    )}
-
-                    <InputField
-                      placeholder={`Starting Price e.g ${25 * pkg.id}$`}
-                      customStyle={{
-                        width: '100%',
-                        borderColor: Colors.inputFieldColor,
-                      }}
-                      value={pkg.price ? `$${pkg.price}` : ''}
-                      onChangeText={text =>
-                        handleInputChange(pkg.id, 'price', text)
-                      }
-                      type={'numeric'}
-                    />
-                    {errors[pkg.id]?.price && (
-                      <Text style={styles.errorText}>
-                        {errors[pkg.id].price}
-                      </Text>
-                    )}
-                  </View>
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : null}
+              style={styles.keyboardAvoidingView}>
+              <View style={styles.container}>
+                <View style={styles.infoHeaderContainer}>
+                  <InfoHeader />
                 </View>
-              ))}
+              </View>
 
-              {packages.length < MAX_PACKAGES && (
-                <View style={{alignSelf: 'flex-end'}}>
-                  <TouchableOpacity activeOpacity={0.8} onPress={addPackage}>
+              {/* Time Line */}
+              <View style={styles.timelineContainer}>
+                <TimeLine stepTwo={true} stepThree={true} />
+              </View>
+
+              {/* Package Details Container */}
+              <View style={styles.container}>
+                <View style={styles.sectionContainer}>
+                  <Text style={styles.sectionTitle}>
+                    Select General Packages
+                  </Text>
+                </View>
+
+                {packages.map(pkg => (
+                  <View key={pkg.id} style={styles.sectionContainer}>
+                    <Text style={styles.sectionTitle}>Package {pkg.id}</Text>
+                    {pkg.id === 1 ? null : (
+                      <>
+                        <View style={{position: 'absolute', right: 0}}>
+                          <TouchableOpacity
+                            activeOpacity={0.8}
+                            onPress={() => removePackage(pkg.id)}>
+                            <AntDesign
+                              name="minuscircleo"
+                              size={RFPercentage(2.2)}
+                              color={Colors.gradient1}
+                            />
+                          </TouchableOpacity>
+                        </View>
+                      </>
+                    )}
+
                     <View>
-                      <Text style={styles.addText}>+ Add Package</Text>
-                    </View>
-                  </TouchableOpacity>
-                </View>
-              )}
+                      <DescriptionField
+                        placeholder={`Enter Package details`}
+                        count={true}
+                        value={pkg.details}
+                        maxLength={120}
+                        onChangeText={text =>
+                          handleInputChange(pkg.id, 'details', text)
+                        }
+                        charCount={pkg.details.length}
+                      />
+                      {errors[pkg.id]?.details && (
+                        <Text style={styles.errorText}>
+                          {errors[pkg.id].details}
+                        </Text>
+                      )}
 
-              {/* Button Container */}
-              <View style={styles.buttonContainer}>
-                <GradientButton
-                  title={profileCompletion === '100' ? 'Edit' : 'Next'}
-                  onPress={savePackagesToFirestore}
-                  loading={loading}
-                  disabled={loading}
-                />
+                      <InputField
+                        placeholder={`Starting Price e.g ${25 * pkg.id}$`}
+                        customStyle={{
+                          width: '100%',
+                          borderColor: Colors.inputFieldColor,
+                        }}
+                        value={pkg.price ? `$${pkg.price}` : ''}
+                        onChangeText={text =>
+                          handleInputChange(pkg.id, 'price', text)
+                        }
+                        type={'numeric'}
+                      />
+                      {errors[pkg.id]?.price && (
+                        <Text style={styles.errorText}>
+                          {errors[pkg.id].price}
+                        </Text>
+                      )}
+                    </View>
+                  </View>
+                ))}
+
+                {packages.length < MAX_PACKAGES && (
+                  <View style={{alignSelf: 'flex-end'}}>
+                    <TouchableOpacity activeOpacity={0.8} onPress={addPackage}>
+                      <View>
+                        <Text style={styles.addText}>+ Add Package</Text>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+                )}
+
+                {/* Button Container */}
+                <View style={styles.buttonContainer}>
+                  <GradientButton
+                    title={profileCompletion === '100' ? 'Edit' : 'Next'}
+                    onPress={savePackagesToFirestore}
+                    loading={loading}
+                    disabled={loading}
+                  />
+                </View>
               </View>
-            </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
-    </TouchableWithoutFeedback>
+            </KeyboardAvoidingView>
+          </SafeAreaView>
+        </TouchableWithoutFeedback>
+      </ScrollView>
+    </>
   );
 };
 
@@ -351,7 +373,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollView: {
-    flexGrow: 1,
     paddingBottom: RFPercentage(5),
   },
   container: {

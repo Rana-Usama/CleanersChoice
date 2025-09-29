@@ -1,4 +1,4 @@
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {Image, Platform, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts} from '../constants/Themes';
@@ -67,6 +67,6 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.8),
     left: RFPercentage(1),
-    lineHeight:RFPercentage(1.9)
+    lineHeight: Platform.OS === 'ios' ?  RFPercentage(1.9) : RFPercentage(2.3)
   },
 });

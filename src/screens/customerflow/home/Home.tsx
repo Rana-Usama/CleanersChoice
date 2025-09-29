@@ -373,7 +373,7 @@ const Home = () => {
             />
 
             {/* Filters */}
-            <Text style={styles.sectionTitle}>Refine Search</Text>
+            <Text style={styles.sectionTitle}>Apply filters</Text>
             <View style={styles.filterWrapper}>
               {/* Location */}
               <View>
@@ -390,7 +390,7 @@ const Home = () => {
                     {
                       backgroundColor: loctionFilter
                         ? Colors.gradient2
-                        : 'transparent',
+                        : 'white',
                     },
                   ]}>
                   <Image
@@ -443,7 +443,7 @@ const Home = () => {
                     {
                       backgroundColor: rangeSelector
                         ? Colors.gradient2
-                        : 'transparent',
+                        : 'white',
                       marginLeft: RFPercentage(2),
                     },
                   ]}>
@@ -485,7 +485,36 @@ const Home = () => {
             </View>
 
             {/* Cleaners Services */}
-            <Text style={styles.sectionTitle}>Cleaning Services</Text>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                width: '90%',
+                alignSelf: 'center',
+                marginTop: RFPercentage(3),
+              }}>
+              <Text
+                style={{
+                  color: Colors.primaryText,
+                  fontFamily: Fonts.fontMedium,
+                  fontSize: RFPercentage(1.8),
+                }}>
+                Cleaning Services
+                {selectedLocation.length > 0 && `:`}
+              </Text>
+              <Text
+                style={{
+                  color: Colors.secondaryText,
+                  fontFamily: Fonts.fontRegular,
+                  fontSize: RFPercentage(1.5),
+                  marginLeft: RFPercentage(1),
+                }}>
+                {selectedLocation.length > 30
+                  ? selectedLocation.substring(0, 30) + `...`
+                  : selectedLocation}
+              </Text>
+            </View>
+
             {loading ? (
               <>
                 <ActivityIndicator
@@ -521,7 +550,7 @@ const Home = () => {
                         }
                         keyExtractor={item => item.id.toString()}
                         numColumns={2}
-                        contentContainerStyle={{paddingBottom:RFPercentage(1)}}
+                        contentContainerStyle={{paddingBottom: RFPercentage(1)}}
                         columnWrapperStyle={styles.serviceColumnWrapper}
                         renderItem={({item}) => (
                           <View style={styles.serviceItem}>
@@ -602,7 +631,7 @@ const Home = () => {
 
                     {query.length > 0 && selectedLocation.length === 0 && (
                       <View style={styles.queryContainer}>
-                        {filteredLocations.length === 0 ? (
+                        {filteredLocations?.length === 0 ? (
                           <>
                             <Text style={styles.queryText}>
                               No Location exist
@@ -613,6 +642,8 @@ const Home = () => {
                             <FlatList
                               data={filteredLocations}
                               keyExtractor={(item, index) => index.toString()}
+                              keyboardShouldPersistTaps="always"
+                              showsVerticalScrollIndicator={false}
                               renderItem={({item}) => (
                                 <TouchableOpacity
                                   activeOpacity={0.8}
@@ -920,16 +951,22 @@ const styles = StyleSheet.create({
     paddingBottom: RFPercentage(0.2),
   },
   filterBox: {
-    width: RFPercentage(14),
+    width: RFPercentage(15),
     height: RFPercentage(5),
     borderWidth: RFPercentage(0.1),
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: RFPercentage(0.8),
+    borderRadius: RFPercentage(100),
     borderColor: Colors.inputFieldColor,
     flexDirection: 'row',
     marginTop: RFPercentage(1),
-    borderBottomWidth: RFPercentage(0.4),
+
+    backgroundColor: '#fff',
+    // Shadow (iOS) + Elevation (Android)
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
 
   filterText: {
@@ -976,7 +1013,7 @@ const styles = StyleSheet.create({
   },
   sliderLabel: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.9),
     fontFamily: Fonts.semiBold,
     marginTop: RFPercentage(1),
   },
@@ -1009,8 +1046,8 @@ const styles = StyleSheet.create({
   },
   cross: {
     position: 'absolute',
-    right: RFPercentage(-0.8),
-    top: RFPercentage(-0.3),
+    right: RFPercentage(-0.6),
+    top: RFPercentage(0.5),
   },
   close: {
     position: 'absolute',
