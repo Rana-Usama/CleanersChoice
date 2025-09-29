@@ -165,7 +165,7 @@ const SignUp: React.FC = ({navigation}: any) => {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       
         <KeyboardAwareScrollView
-          contentContainerStyle={{paddingVertical: RFPercentage(8)}}
+          contentContainerStyle={{paddingVertical: RFPercentage(0)}}
           style={{backgroundColor:Colors.background}}
           keyboardShouldPersistTaps="handled"
           enableOnAndroid
@@ -554,7 +554,7 @@ const styles = StyleSheet.create({
   },
   starContainer: {
     position: 'absolute',
-    bottom: RFPercentage(25),
+    bottom: RFPercentage(20),
     right: RFPercentage(1.5),
   },
   star: {
