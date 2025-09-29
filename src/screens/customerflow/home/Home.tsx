@@ -521,6 +521,7 @@ const Home = () => {
                         }
                         keyExtractor={item => item.id.toString()}
                         numColumns={2}
+                        contentContainerStyle={{paddingBottom:RFPercentage(1)}}
                         columnWrapperStyle={styles.serviceColumnWrapper}
                         renderItem={({item}) => (
                           <View style={styles.serviceItem}>

@@ -181,6 +181,8 @@ const ServiceDetails: React.FC = ({route}: any) => {
     } catch (error) {}
   };
 
+  const cleanDescription = item.description.replace(/\s+/g, ' ').trim();
+
   return (
     <SafeAreaView style={styles.safeArea}>
       {/* Header */}
@@ -287,9 +289,9 @@ const ServiceDetails: React.FC = ({route}: any) => {
               </View>
               <Text style={styles.showMore}>
                 {isExpanded
-                  ? item.description + ' '
-                  : getTruncatedText(item.description)}
-                {item.description.length > 120 && (
+                  ? cleanDescription + ' '
+                  : getTruncatedText(cleanDescription)}
+                {cleanDescription?.length > 120 && (
                   <Text onPress={toggleDescription} style={styles.showText}>
                     {isExpanded ? 'Read Less' : 'Read More'}
                   </Text>
@@ -549,8 +551,8 @@ const styles = StyleSheet.create({
   cover: {
     width: width * 0.9,
     height: RFPercentage(28),
-    borderWidth:1,
-    borderColor:"rgba(238, 238, 238, 1)"
+    borderWidth: 1,
+    borderColor: 'rgba(238, 238, 238, 1)',
   },
   joining: {
     color: Colors.placeholderColor,

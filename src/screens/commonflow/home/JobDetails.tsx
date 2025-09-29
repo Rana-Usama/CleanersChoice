@@ -129,6 +129,8 @@ const JobDetails = ({route, navigation}: any) => {
     tryToFindChat();
   }, [user?.uid, item?.jobId]);
 
+  const cleanDescription = item.description.replace(/\s+/g, ' ').trim();
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <HeaderBack
@@ -183,7 +185,7 @@ const JobDetails = ({route, navigation}: any) => {
               </View>
               <Text style={styles.label}>Description:</Text>
             </View>
-            <Text style={styles.description}>{item.description}</Text>
+            <Text style={styles.description}>{cleanDescription}</Text>
           </View>
 
           <View style={styles.sectionContainer}>
