@@ -20,13 +20,14 @@ interface props {
   rightText?: string;
   onPress?: () => void;
   left?: boolean;
+  style?: object;
 }
 
 const HeaderBack = (props: props) => {
   const navigation = useNavigation();
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, props.style]}>
       <View
         style={{
           width: '90%',
@@ -45,14 +46,23 @@ const HeaderBack = (props: props) => {
           ) : props.left ? (
             <TouchableOpacity
               activeOpacity={0.8}
-              style={{flexDirection:'row', alignItems:'center', marginBottom:10}}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}
               onPress={() => navigation.goBack()}>
               <MaterialIcons
                 name="keyboard-backspace"
                 color={Colors.secondaryText}
                 size={RFPercentage(2.8)}
               />
-              <Text style={[styles.headerText, props.textStyle, {left:RFPercentage(1)}]}>
+              <Text
+                style={[
+                  styles.headerText,
+                  props.textStyle,
+                  {left: RFPercentage(1)},
+                ]}>
                 {props.title}
               </Text>
             </TouchableOpacity>
@@ -89,6 +99,7 @@ const styles = StyleSheet.create({
     borderBottomColor: 'rgba(220, 220, 220, 1)',
     height: RFPercentage(7),
     paddingBottom: RFPercentage(1.8),
+    backgroundColor: Colors.background,
   },
   leftContainer: {
     position: 'absolute',

@@ -109,13 +109,13 @@ const Jobs = ({navigation}: any) => {
 
   // Truncations
   const getTruncatedText = (text: any) => {
-    const maxChars = 12;
+    const maxChars = 20;
     if (text.length <= maxChars) return text;
     return text.slice(0, maxChars).trim() + '... ';
   };
 
   const getTruncatedText2 = (text: any) => {
-    const maxChars = 24;
+    const maxChars = 30;
     if (text.length <= maxChars) return text;
     return text.slice(0, maxChars).trim() + '... ';
   };
@@ -175,7 +175,7 @@ const Jobs = ({navigation}: any) => {
             </>
           ) : (
             <>
-              {Jobs.length > 0 ? (
+              {Jobs?.length > 0 ? (
                 <>
                   <FlatList
                     data={Jobs}
@@ -194,7 +194,7 @@ const Jobs = ({navigation}: any) => {
                           setSelectedJobId(item?.id);
                           setModalVisible(true);
                         }}
-                        delete={true}
+                        delete={completed ? false : true}
                       />
                     )}
                   />

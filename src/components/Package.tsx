@@ -14,7 +14,7 @@ interface props {
   services?: Service[];
   price: string;
   detail: string;
-  onPress : ()=> void
+  onPress: () => void;
 }
 
 const Package = (props: props) => {
@@ -45,16 +45,20 @@ const styles = StyleSheet.create({
   container: {
     width: RFPercentage(20),
     borderWidth: 1,
-    borderColor: 'rgba(156, 163, 175, 1)',
+    borderColor: 'rgba(207, 213, 223, 1)',
     borderRadius: RFPercentage(1),
     marginHorizontal: RFPercentage(1),
-    overflow: 'hidden',
+    backgroundColor: 'white',
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 3},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   packageName: {
     textAlign: 'center',
     color: Colors.primaryText,
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.8),
     paddingVertical: RFPercentage(1),
   },
   dividerContainer: {
@@ -81,7 +85,7 @@ const styles = StyleSheet.create({
   serviceText: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.6),
     lineHeight: RFPercentage(2.4),
     paddingHorizontal: RFPercentage(1),
     marginTop: RFPercentage(0.5),
@@ -95,7 +99,7 @@ const styles = StyleSheet.create({
   priceText: {
     textAlign: 'center',
     color: Colors.gradient1,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.semiBold,
   },
 });
