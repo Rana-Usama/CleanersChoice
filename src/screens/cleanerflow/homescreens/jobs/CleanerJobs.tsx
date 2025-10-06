@@ -485,7 +485,7 @@ const CleanerJobs = () => {
                   {sortedJobs.length > 10 && (
                     <TouchableOpacity
                       onPress={() => setShowAllJobs(prev => !prev)}
-                      style={{marginTop: RFPercentage(2), alignSelf: 'center'}}>
+                      style={{marginVertical: RFPercentage(2), alignSelf: 'center'}}>
                       <Text
                         style={{
                           color: Colors.gradient1,
@@ -783,7 +783,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   scrollView: {
-    paddingBottom: RFPercentage(10),
+    paddingBottom: Platform.OS === 'ios' ? RFPercentage(10) : RFPercentage(12),
   },
   container: {
     backgroundColor: Colors.background,

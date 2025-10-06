@@ -66,7 +66,7 @@ const ServicesCard = ({
             />
             <View>
               <Text style={styles.nameText}>
-                {name?.length > 15 ? `${name.slice(0, 15)}...` : name}
+                {name?.length > 13 ? `${name.slice(0, 13)}...` : name}
               </Text>
               <View style={styles.locationContainer}>
                 <View style={styles.locationRow}>
