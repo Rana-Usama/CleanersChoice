@@ -9,6 +9,8 @@ import {
   ScrollView,
   TouchableWithoutFeedback,
   Keyboard,
+  Platform,
+  StatusBar,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -171,12 +173,17 @@ const PostJob = ({route}: any) => {
 
   return (
     <>
-      <HeaderBack
-        title="Post Job"
-        textStyle={{fontSize: RFPercentage(2)}}
-        left={true}
-        style={{height: RFPercentage(13)}}
-      />
+      <View style={{backgroundColor: 'white'}}>
+        <HeaderBack
+          title="Post Job"
+          textStyle={{fontSize: RFPercentage(2)}}
+          left={true}
+          style={{
+            height: Platform.OS === 'ios' ? RFPercentage(13) : RFPercentage(8),
+          }}
+        />
+      </View>
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}

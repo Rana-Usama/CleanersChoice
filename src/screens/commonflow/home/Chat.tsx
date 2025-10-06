@@ -257,7 +257,10 @@ const Chat = ({navigation, route}: any) => {
                   style={{
                     backgroundColor: 'rgba(248, 248, 248, 1)',
                     width: '100%',
-                    minHeight: RFPercentage(12),
+                    minHeight:
+                      Platform.OS === 'ios'
+                        ? RFPercentage(12)
+                        : RFPercentage(9),
                     justifyContent: 'center',
                     maxHeight: RFPercentage(18),
                     paddingVertical: RFPercentage(2),
@@ -376,7 +379,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.fontRegular,
     paddingVertical: 0,
     marginVertical: 0,
-    lineHeight: RFPercentage(2.5),
+    // lineHeight: RFPercentage(2.5),
   },
   sendButton: {
     justifyContent: 'center',
@@ -444,7 +447,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(219, 221, 222, 0.5)',
     borderColor: 'rgba(234, 232, 232, 0.9)',
     borderTopColor: 'rgba(234, 232, 232, 0.9)',
-    bottom: RFPercentage(1),
+    bottom: Platform.OS === 'ios' ? RFPercentage(1) : 0,
     paddingVertical: RFPercentage(1.4),
   },
 });

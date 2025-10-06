@@ -9,6 +9,7 @@ import {
   ScrollView,
   FlatList,
   RefreshControl,
+  Platform,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -271,7 +272,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        contentContainerStyle={{paddingBottom: RFPercentage(9)}}
+        contentContainerStyle={{paddingBottom: Platform.OS === 'ios' ? RFPercentage(10) : RFPercentage(12)}}
         style={{flex: 1}}
         showsVerticalScrollIndicator={false}>
         <View style={styles.container}>
