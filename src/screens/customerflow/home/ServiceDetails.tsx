@@ -10,6 +10,7 @@ import {
   Dimensions,
   Modal,
   Platform,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import React, {useState, useRef, useEffect} from 'react';
 import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
@@ -26,6 +27,9 @@ import {useSelector} from 'react-redux';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+
+import CustomModal from '../../../components/CustomModal';
+import {BlurView} from '@react-native-community/blur';
 
 const {width} = Dimensions.get('window');
 
@@ -75,6 +79,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
   const [loading, setloading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const toggleDescription = () => {
     setIsExpanded(prevState => !prevState);
@@ -112,6 +117,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
   const serviceNames = getServiceNames(item?.type.slice(0, visibleItems));
   const createdAtDate = new Date(item.createdAt._seconds * 1000);
   const formattedDate = moment(createdAtDate).format('DD MMMM, YYYY');
+  const userFlow = useSelector(state => state.userFlow.userFlow);
 
   const getTruncatedText = (text: any) => {
     const maxChars = 120;
@@ -364,28 +370,27 @@ const ServiceDetails: React.FC = ({route}: any) => {
 
               {/* Show More / Show Less button */}
               {item.type.length > 5 && (
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  onPress={
-                    visibleItems < item.type.length
-                      ? handleShowMore
-                      : handleShowLess
-                  }>
-                  <Text
-                    style={[
-                      styles.serviceMore,
-                      {
-                        left:
-                          visibleItems < item.type.length
-                            ? RFPercentage(20.6)
-                            : RFPercentage(34.5),
-                      },
-                    ]}>
-                    {visibleItems < item.type.length
-                      ? `+${item.type.length - visibleItems} More`
-                      : `See Less`}
-                  </Text>
-                </TouchableOpacity>
+                <View
+                  style={{
+                    width: '100%',
+                    alignSelf: 'center',
+                    marginTop: RFPercentage(1),
+                  }}>
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    style={{width: RFPercentage(10)}}
+                    onPress={
+                      visibleItems < item.type.length
+                        ? handleShowMore
+                        : handleShowLess
+                    }>
+                    <Text style={[styles.serviceMore]}>
+                      {visibleItems < item.type.length
+                        ? `+${item.type.length - visibleItems} More`
+                        : `See Less`}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               )}
             </View>
           </View>
@@ -411,7 +416,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
               data={item.packages}
               keyExtractor={item => item.id.toString()}
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{paddingHorizontal: RFPercentage(1.2)}}
+              contentContainerStyle={{paddingHorizontal: RFPercentage(1.2), paddingBottom:RFPercentage(2)}}
               renderItem={({item}) => {
                 return (
                   <Package
@@ -432,6 +437,11 @@ const ServiceDetails: React.FC = ({route}: any) => {
             style={{width: RFPercentage(20)}}
             textStyle={{fontSize: RFPercentage(1.7)}}
             onPress={() => {
+              if (userFlow === 'Guest') {
+                setShowAuthModal(true);
+                return;
+              }
+              // ✅ Logged-in user — continue
               setloading(true);
               setTimeout(() => {
                 setloading(false);
@@ -476,6 +486,25 @@ const ServiceDetails: React.FC = ({route}: any) => {
             />
           </View>
         </Modal>
+      )}
+
+      {/* Authentication Required Modal */}
+      {showAuthModal && (
+        <TouchableWithoutFeedback onPress={() => setShowAuthModal(false)}>
+          <View style={styles.modalContainer}>
+            <BlurView style={styles.blurView} blurType="light" blurAmount={5} />
+            <CustomModal
+              title="Login Required"
+              subTitle="You need to sign in or create an account to access this feature."
+              onPress={() => setShowAuthModal(false)} // Cancel
+              onPress2={() => {
+                setShowAuthModal(false);
+                navigation.navigate('UserSelection'); // or your login/signup screen
+              }}
+              buttonTitle="Login"
+            />
+          </View>
+        </TouchableWithoutFeedback>
       )}
     </SafeAreaView>
   );
@@ -609,9 +638,10 @@ const styles = StyleSheet.create({
     color: Colors.gradient1,
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontMedium,
-    textAlign: 'center',
-    bottom: RFPercentage(1.5),
-    position: 'absolute',
+    left: RFPercentage(1),
+    // textAlign: 'center',
+    // bottom: RFPercentage(1.5),
+    // position: 'absolute',
   },
   msg: {
     width: '90%',
@@ -631,4 +661,14 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   fullImg: {width: '100%', height: '100%'},
+  modalContainer: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 999,
+  },
+  blurView: {
+    ...StyleSheet.absoluteFillObject,
+  },
 });

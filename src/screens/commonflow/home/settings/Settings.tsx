@@ -25,7 +25,7 @@ const Settings = ({navigation}: any) => {
   const [loading, setLoading] = useState(false);
   useExitAppOnBack();
 
-  // Log out
+  // Log out function
   const logOut = async () => {
     setModalVisible(false);
     setLoading(true);
@@ -40,8 +40,8 @@ const Settings = ({navigation}: any) => {
       await AsyncStorage.setItem('logout', 'yes');
       showToast({
         type: 'success',
-        title: 'Log Out',
-        message: 'Logged out successfully',
+        title: 'Logged Out',
+        message: 'You have been logged out successfully.',
       });
       navigation.reset({
         index: 0,
@@ -53,7 +53,7 @@ const Settings = ({navigation}: any) => {
     }
   };
 
-  // User Role
+  // Get user role
   const userRole = async () => {
     const user = auth().currentUser;
     if (!user) return;
@@ -67,6 +67,7 @@ const Settings = ({navigation}: any) => {
   };
   userRole();
 
+  // Delete Account function
   const deleteAccount = async () => {
     setLoading(true);
     const user = auth().currentUser;
@@ -81,7 +82,9 @@ const Settings = ({navigation}: any) => {
       const password = await AsyncStorage.getItem('password');
       const credential = auth.EmailAuthProvider.credential(email, password);
       await user.reauthenticateWithCredential(credential);
+      // Delete all user-related data
       await firestore().collection('Users').doc(userId).delete();
+
       const querySnapshot = await firestore()
         .collection('Jobs')
         .where('jobId', '==', userId)
@@ -89,6 +92,7 @@ const Settings = ({navigation}: any) => {
       const batch = firestore().batch();
       querySnapshot.forEach(doc => batch.delete(doc.ref));
       await batch.commit();
+
       const chatSnapshot = await firestore()
         .collection('Chats')
         .where('participants', 'array-contains', userId)
@@ -96,13 +100,16 @@ const Settings = ({navigation}: any) => {
       const chatBatch = firestore().batch();
       chatSnapshot.forEach(doc => chatBatch.delete(doc.ref));
       await chatBatch.commit();
+
       await firestore().collection('CleanerServices').doc(userId).delete();
       await user.delete();
+
       await AsyncStorage.multiRemove(['email', 'password', 'role']);
       showToast({
         type: 'success',
-        title: 'Account deleted successfully',
-        message: 'We’re sad to see you go!',
+        title: 'Account Deleted',
+        message:
+          'Your account and all associated data have been permanently removed.',
       });
 
       setTimeout(() => {
@@ -111,11 +118,12 @@ const Settings = ({navigation}: any) => {
           routes: [{name: 'OnBoarding'}],
         });
       }, 1000);
-    } catch (error) {
+    } catch (error: any) {
       showToast({
         type: 'danger',
         title: 'Delete Failed',
-        message: error?.message || 'Something went wrong.',
+        message:
+          error?.message || 'Something went wrong while deleting your account.',
       });
     } finally {
       setLoading(false);
@@ -131,13 +139,11 @@ const Settings = ({navigation}: any) => {
         </View>
         <View style={styles.profileFieldsContainer}>
           {role === 'Cleaner' && (
-            <>
-              <ProfileField
-                text="Cancel Subscription"
-                icon={Icons.policy}
-                onPress={() => navigation.navigate('CancelSubscription')}
-              />
-            </>
+            <ProfileField
+              text="Cancel Subscription"
+              icon={Icons.policy}
+              onPress={() => navigation.navigate('CancelSubscription')}
+            />
           )}
           <ProfileField
             text="Change Password"
@@ -160,26 +166,28 @@ const Settings = ({navigation}: any) => {
             onPress={() => navigation.navigate('FAQS')}
           />
           <ProfileField
-            text={`Account Deactivation`}
+            text="Delete Account"
             icon={Icons.remove}
             color={'rgba(239, 68, 68, 1)'}
             onPress={() => setModalVisible2(true)}
           />
           <ProfileField
-            text={`Logout`}
+            text="Logout"
             icon={Icons.logOut}
             color={'rgba(239, 68, 68, 1)'}
             onPress={() => setModalVisible(true)}
           />
         </View>
       </View>
+
+      {/* Logout Modal */}
       {modalVisible && (
         <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
           <View style={styles.modalContainer}>
             <BlurView style={styles.blurView} blurType="light" blurAmount={5} />
             <CustomModal
-              title="Logout Confirmation!"
-              subTitle={'Are you sure you want to Logout?'}
+              title="Logout Confirmation"
+              subTitle="Are you sure you want to log out from your account?"
               onPress={() => setModalVisible(false)}
               onPress2={logOut}
               loader={loading}
@@ -188,15 +196,17 @@ const Settings = ({navigation}: any) => {
         </TouchableWithoutFeedback>
       )}
 
+      {/* Delete Account Modal */}
       {modalVisible2 && (
         <TouchableWithoutFeedback onPress={() => setModalVisible2(false)}>
           <View style={styles.modalContainer}>
             <BlurView style={styles.blurView} blurType="light" blurAmount={5} />
             <CustomModal
-              title="Delete Account!"
-              subTitle={'Are you sure you want to delete your account?'}
+              title="Permanently Delete Account"
+              subTitle="Deleting your account will permanently remove your profile and all associated data from our system. This action cannot be undone. Do you want to continue?"
               onPress={() => setModalVisible2(false)}
               onPress2={deleteAccount}
+              loader={loading}
             />
           </View>
         </TouchableWithoutFeedback>
@@ -244,5 +254,11 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     position: 'absolute',
+  },
+  infoNote: {
+    color: Colors.grey,
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.4),
+    marginTop: RFPercentage(2),
   },
 });

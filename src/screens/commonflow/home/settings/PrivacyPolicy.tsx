@@ -48,13 +48,25 @@ iv) Usage Data`,
     e: `The security of Your Personal Data is important to Us, but remember that no method of transmission over the Internet, or method of electronic storage is 100% secure. While We strive to use commercially acceptable means to protect Your Personal Data, We cannot guarantee its absolute security.`,
   },
   {
-    id: 5,
+  id: 5,
+  q: 'Account Deletion and Data Removal',
+  e: `Users have the right to permanently delete their account and all associated data at any time directly from within the app by navigating to the Settings > Delete Account section.
+
+Upon confirmation, all personal information, including profile details, messages, and service history, will be permanently deleted from our servers. This process is irreversible.
+
+If you encounter any issue deleting your account, you can contact us at:
+- Harrisonscleaningservice2033s@gmail.com
+and request manual deletion of your data.`,
+},
+
+  {
+    id: 6,
     q: 'Changes to this Privacy Policy',
     e: `We may update Our Privacy Policy from time to time. We will notify You of any changes by posting the new Privacy Policy on this page.
 We will let You know via email and/or a prominent notice on Our Service, prior to the change becoming effective and update the "Last updated" date at the top of this Privacy Policy.`,
   },
   {
-    id: 6,
+    id: 7,
     q: 'Contact Us',
     e: `If you have any questions about this Privacy Policy, You can contact us by email: 
 - Harrisonscleaningservice2033s@gmail.com`,

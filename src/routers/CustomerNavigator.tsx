@@ -8,14 +8,15 @@ import {
   Keyboard,
   BackHandler,
   Platform,
+  Alert,
 } from 'react-native';
 import {
   createBottomTabNavigator,
   BottomTabBarProps,
 } from '@react-navigation/bottom-tabs';
 import {useIsFocused} from '@react-navigation/native';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
-
+import {useSafeAreaInsets, SafeAreaView} from 'react-native-safe-area-context';
+import {useSelector} from 'react-redux'; // 👈 for guest/user check
 import {Icons, Colors, Fonts} from '../constants/Themes';
 import Settings from '../screens/commonflow/home/settings/Settings';
 import Home from '../screens/customerflow/home/Home';
@@ -24,7 +25,6 @@ import Profile from '../screens/commonflow/home/profile/Profile';
 import Messages from '../screens/commonflow/home/Messages';
 import {useUnreadMessages} from '../utils/UnreadMessagesContext';
 import {RFPercentage} from 'react-native-responsive-fontsize';
-import {SafeAreaView} from 'react-native-safe-area-context';
 
 const Tab = createBottomTabNavigator();
 
@@ -38,6 +38,9 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
   const {unreadCount} = useUnreadMessages();
   const [_, forceUpdate] = useState(0);
   const insets = useSafeAreaInsets();
+
+  // 👇 Get current user flow (Customer, Cleaner, or Guest)
+  const userFlow = useSelector(state => state.userFlow.userFlow);
 
   useEffect(() => {
     forceUpdate(n => n + 1);
@@ -61,15 +64,11 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       'keyboardDidShow',
-      () => {
-        setKeyboardVisible(true);
-      },
+      () => setKeyboardVisible(true),
     );
     const keyboardDidHideListener = Keyboard.addListener(
       'keyboardDidHide',
-      () => {
-        setKeyboardVisible(false);
-      },
+      () => setKeyboardVisible(false),
     );
     return () => {
       keyboardDidShowListener.remove();
@@ -79,21 +78,24 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
 
   if (isKeyboardVisible) return null;
 
+  const isGuest = userFlow === 'Guest';
+
   return (
     <SafeAreaView
       edges={['bottom']}
-      style={{backgroundColor: 'rgba(241, 245, 249, 1)'}}>
-      <View style={[styles.tabBarContainer]}>
+      style={{backgroundColor: 'rgba(241,245,249,1)'}}>
+      <View style={styles.tabBarContainer}>
         <View style={styles.labelContainer}>
           {state.routes.map((route, index) => {
             const {options} = descriptors[route.key];
-            const label =
-              options.tabBarLabel !== undefined
-                ? options.tabBarLabel
-                : route.name;
+            const label = options.tabBarLabel ?? route.name;
             const isFocused = state.index === index;
 
             const onPress = () => {
+              if (isGuest && route.name !== 'Home') {
+                return;
+              }
+
               const event = navigation.emit({
                 type: 'tabPress',
                 target: route.key,
@@ -104,12 +106,19 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
               }
             };
 
+            const isDisabled = isGuest && route.name !== 'Home';
+            const opacity = isDisabled ? 0.5 : 1;
+
             return (
               <TouchableOpacity
-                activeOpacity={0.8}
+                activeOpacity={isDisabled ? 1 : 0.8}
                 key={index}
                 onPress={onPress}
-                style={[styles.tabButton, isFocused && styles.activeTab]}>
+                style={[
+                  styles.tabButton,
+                  {opacity},
+                  isFocused && styles.activeTab,
+                ]}>
                 {route.name === 'Home' ? (
                   <View
                     style={{
@@ -131,7 +140,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                       style={styles.imgStyle}
                       resizeMode="contain"
                     />
-                    {unreadCount > 0 && (
+                    {unreadCount > 0 && !isDisabled && (
                       <View
                         style={[
                           styles.count,
@@ -213,7 +222,7 @@ export default CustomerNavigator;
 
 const styles = StyleSheet.create({
   tabBarContainer: {
-    backgroundColor: 'rgba(241, 245, 249, 1)',
+    backgroundColor: 'rgba(241,245,249,1)',
     alignItems: 'center',
     justifyContent: 'center',
     height: RFPercentage(9),
@@ -234,8 +243,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-around',
     height: '100%',
-    bottom:RFPercentage(0.5)
-    // top: RFPercentage(1),
+    bottom: RFPercentage(0.5),
   },
   middle: {
     width: RFPercentage(7.5),
