@@ -14,6 +14,7 @@ interface props {
   onPress2?: () => void;
   loader?: boolean;
   subTitle: string;
+  buttonTitle ? : string
 }
 
 const CustomModal = (props: props) => {
@@ -52,7 +53,7 @@ const CustomModal = (props: props) => {
             textStyle={{fontSize: RFPercentage(1.8)}}
           />
           <GradientButton
-            title="Yes"
+            title={props.buttonTitle ? props.buttonTitle : "Yes"}
             onPress={props.onPress2}
             loading={props.loader}
             disabled={props.loader}
@@ -85,7 +86,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontRegular,
     color: '#4a5461ff',
-    marginTop: RFPercentage(1.5),
+    marginTop: RFPercentage(2),
     marginHorizontal: RFPercentage(2),
     lineHeight: RFPercentage(2.4),
   },

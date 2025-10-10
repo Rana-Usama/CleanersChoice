@@ -15,6 +15,7 @@ import {
   Animated,
   RefreshControl,
   Keyboard,
+  Pressable,
 } from 'react-native';
 import React, {useState, useRef, useCallback, useEffect} from 'react';
 import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
@@ -35,6 +36,8 @@ import {useDispatch} from 'react-redux';
 import {setProfileData} from '../../../redux/ProfileData/Actions';
 import NotFound from '../../../components/NotFound';
 import {useExitAppOnBack} from '../../../utils/ExitApp';
+import {useSelector} from 'react-redux';
+import CustomModal from '../../../components/CustomModal';
 
 const categories = [
   {id: '1', name: 'All', icon: Icons.all},
@@ -95,7 +98,8 @@ const Home = () => {
   const [filteredLocations, setFilteredLocations] = useState<string[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
-  console.log('servicesData.......', servicesData);
+  const userFlow = useSelector(state => state.userFlow.userFlow); // 👈 get user flow
+  const [showAuthModal, setShowAuthModal] = useState(false); // 👈 new modal state
 
   // On Refresh
   const onRefresh = () => {
@@ -292,7 +296,13 @@ const Home = () => {
           right={true}
           rightText="Post Job"
           textStyle={{fontSize: RFPercentage(2.2)}}
-          onPress={() => navigation.navigate('PostJob', {jobId: null})}
+          onPress={() => {
+            if (userFlow === 'Guest') {
+              setShowAuthModal(true); // 👈 show modal if guest
+            } else {
+              navigation.navigate('PostJob', {jobId: null}); // 👈 normal flow
+            }
+          }}
         />
         <ScrollView
           refreshControl={
@@ -602,7 +612,7 @@ const Home = () => {
                   <Animated.View
                     style={[
                       styles.locationModal,
-                      {opacity: opacityAnim, transform: [{scale: scaleAnim}]},
+                      {opacity: opacityAnim, transform: [{scale: scaleAnim}], paddingVertical:RFPercentage(3)},
                     ]}>
                     <TouchableOpacity
                       activeOpacity={0.8}
@@ -644,14 +654,25 @@ const Home = () => {
                               keyExtractor={(item, index) => index.toString()}
                               keyboardShouldPersistTaps="always"
                               showsVerticalScrollIndicator={false}
-                              renderItem={({item}) => (
+                              renderItem={({item, index}) => (
                                 <TouchableOpacity
                                   activeOpacity={0.8}
                                   onPress={() => {
                                     setQuery(item);
                                     setSelectedLocation(item);
                                   }}>
-                                  <Text style={styles.queryText}>{item}</Text>
+                                  <Text
+                                    style={[
+                                      styles.queryText,
+                                      {
+                                        borderBottomWidth:
+                                          index === filteredLocations.length - 1
+                                            ? 0
+                                            : 1,
+                                      },
+                                    ]}>
+                                    {item}
+                                  </Text>
                                 </TouchableOpacity>
                               )}
                             />
@@ -790,6 +811,33 @@ const Home = () => {
             </TouchableWithoutFeedback>
           </>
         )}
+
+        <Modal
+          transparent
+          visible={showAuthModal}
+          animationType="fade"
+          onRequestClose={() => setShowAuthModal(false)}>
+          <TouchableWithoutFeedback onPress={() => setShowAuthModal(false)}>
+            <View style={styles.modalContainer}>
+              <BlurView
+                style={styles.blurView}
+                blurType="light"
+                blurAmount={5}
+                reducedTransparencyFallbackColor="white"
+              />
+              <CustomModal
+                title="Login Required!"
+                subTitle="You need to log in or create an account to access this feature."
+                onPress={() => setShowAuthModal(false)} // Cancel
+                onPress2={() => {
+                  setShowAuthModal(false);
+                  navigation.navigate('UserSelection'); // or 'Login'
+                }}
+                buttonTitle="Login"
+              />
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
       </SafeAreaView>
     </TouchableWithoutFeedback>
   );
@@ -875,6 +923,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.3)',
     borderRadius: RFPercentage(2),
     height: RFPercentage(21),
+    paddingVertical:RFPercentage(2)
   },
   queryText: {
     padding: RFPercentage(2),
@@ -1053,5 +1102,37 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: RFPercentage(2),
     top: RFPercentage(2),
+  },
+  authModalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  authModalContent: {
+    width: '85%',
+    backgroundColor: Colors.background,
+    borderRadius: RFPercentage(2),
+    paddingVertical: RFPercentage(4),
+    paddingHorizontal: RFPercentage(3),
+    alignItems: 'center',
+  },
+  authTitle: {
+    fontFamily: Fonts.semiBold,
+    fontSize: RFPercentage(2.4),
+    color: Colors.primaryText,
+  },
+  authDesc: {
+    marginTop: RFPercentage(1.5),
+    textAlign: 'center',
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.9),
+    color: Colors.secondaryText,
+    lineHeight: RFPercentage(2.8),
+  },
+  closeModalText: {
+    color: Colors.gradient2,
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(2),
   },
 });

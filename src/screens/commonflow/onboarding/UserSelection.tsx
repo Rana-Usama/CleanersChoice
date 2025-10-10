@@ -13,6 +13,7 @@ import SelectionButton from '../../../components/SelectionButton';
 import HeaderComponent from '../../../components/HeaderComponent';
 import {useDispatch} from 'react-redux';
 import {setUserFlow} from '../../../redux/Actions';
+import {TouchableOpacity} from 'react-native';
 
 const UserSelection: React.FC = ({navigation}: any) => {
   const dispatch = useDispatch();
@@ -25,6 +26,14 @@ const UserSelection: React.FC = ({navigation}: any) => {
   const handleNext2 = () => {
     dispatch(setUserFlow('Cleaner'));
     navigation.navigate('SignUp');
+  };
+
+  const handleGuest = () => {
+    dispatch(setUserFlow('Guest'));
+    navigation.reset({
+      index: 0,
+      routes: [{name: 'Home'}], // 👈 change 'Home' to the screen where guests should browse
+    });
   };
 
   return (
@@ -46,13 +55,22 @@ const UserSelection: React.FC = ({navigation}: any) => {
             icon={Icons.customer}
           />
         </View>
-        <View style={[styles.selectionContainer,{marginTop:RFPercentage(2.5)}]}>
+        <View
+          style={[styles.selectionContainer, {marginTop: RFPercentage(2.5)}]}>
           <SelectionButton
-            title="Business Owner /Cleaner"
+            title="Business Owner / Cleaner"
             onPress={handleNext2}
             icon={Icons.owner}
           />
         </View>
+
+        {/* Continue as Guest Button */}
+        <View style={styles.guestContainer}>
+          <TouchableOpacity onPress={handleGuest} activeOpacity={0.8}>
+            <Text style={styles.guestText}>Continue as Guest</Text>
+          </TouchableOpacity>
+        </View>
+
         <View style={styles.descriptionContainer}>
           <Text style={styles.description}>
             Let us know how you would like to register yourself!
@@ -100,7 +118,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   descriptionContainer: {
-    marginTop: RFPercentage(4.6),
+    marginTop: RFPercentage(4),
     width: '90%',
     alignItems: 'center',
     justifyContent: 'center',
@@ -113,6 +131,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     width: '80%',
   },
+  guestContainer: {
+    marginTop: RFPercentage(4),
+    alignItems: 'center',
+  },
+  guestText: {
+    color: Colors.gradient1,
+    fontFamily: Fonts.semiBold,
+    fontSize: RFPercentage(2),
+    textDecorationLine: 'underline',
+  },
   imageContainer: {
     position: 'absolute',
     bottom: RFPercentage(14),
@@ -123,3 +151,6 @@ const styles = StyleSheet.create({
     height: RFPercentage(8),
   },
 });
+
+
+
