@@ -212,6 +212,7 @@ const Premium = ({navigation}: any) => {
             <View style={styles.divider}>
               <View style={styles.listContainer}>
                 <FlatList
+                  scrollEnabled={false}
                   data={services}
                   keyExtractor={item => item.id.toString()}
                   renderItem={({item}) => (
@@ -255,7 +256,7 @@ const Premium = ({navigation}: any) => {
             flexDirection: 'row',
             alignItems: 'center',
             marginTop: RFPercentage(3),
-            justifyContent:"center"
+            justifyContent: 'center',
           }}>
           <Ionicons
             name="chevron-back-circle-sharp"

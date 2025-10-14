@@ -148,7 +148,7 @@ const SignIn: React.FC = () => {
                         <View
                           style={{
                             width: '90%',
-                            height: 16,
+                            height: 20,
                             bottom: RFPercentage(0.8),
                           }}>
                           <Text
@@ -180,7 +180,7 @@ const SignIn: React.FC = () => {
                         <View
                           style={{
                             width: '90%',
-                            height: 16,
+                            height: 20,
                             bottom: RFPercentage(0.8),
                           }}>
                           <Text
@@ -189,6 +189,7 @@ const SignIn: React.FC = () => {
                               fontFamily: Fonts.fontRegular,
                               color: Colors.error,
                               textAlign: 'left',
+                              lineHeight: RFPercentage(2),
                             }}>
                             {errors.password}
                           </Text>

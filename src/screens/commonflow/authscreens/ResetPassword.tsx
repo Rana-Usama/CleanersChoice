@@ -118,7 +118,7 @@ const ResetPassword: React.FC = ({navigation}: any) => {
                         <View
                           style={{
                             width: '90%',
-                            height: 16,
+                            height: 20,
                             bottom: RFPercentage(0.8),
                           }}>
                           <Text
