@@ -239,7 +239,7 @@ const EditProfile = ({navigation}: any) => {
                 <View style={styles.inputContainer}>
                   <Text style={styles.label}>Phone Number</Text>
                   <InputField
-                    placeholder={userData?.phone}
+                    placeholder={userData?.phone || "Add Your Phone Number"}
                     value={phone}
                     onChangeText={text => {
                       const formatted = formatPhoneNumber(text);
