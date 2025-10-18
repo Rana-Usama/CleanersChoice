@@ -124,7 +124,9 @@ const SignUp: React.FC = ({navigation}: any) => {
         uid: user.uid,
         profile: profileUrl || null,
         fcmToken: fcmToken || null,
-        createdAt: firestore.FieldValue.serverTimestamp(),
+        createdAt:
+          firestore.FieldValue?.serverTimestamp?.() ||
+          firestore.Timestamp.now(),
         role: userFlow?.userFlow,
         ...(userFlow?.userFlow === 'Cleaner' && {
           subscription: false,
