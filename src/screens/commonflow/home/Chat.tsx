@@ -71,7 +71,8 @@ const Chat = ({navigation, route}: any) => {
       if (!message.text || message.text.trim() === '') {
         return;
       }
-      const timestamp = firestore.FieldValue.serverTimestamp();
+      const timestamp =
+        firestore.FieldValue?.serverTimestamp?.() || firestore.Timestamp.now();
       const localTimestamp = new Date(); // For UI until server timestamp comes back
       const newMessage = {
         _id: `${Date.now()}`, // temp unique id for UI

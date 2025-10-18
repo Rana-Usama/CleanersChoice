@@ -121,7 +121,10 @@ const ServiceOne: React.FC = ({navigation}: any) => {
           .collection('CleanerServices')
           .doc(user.uid)
           .set({
-            createdAt: firestore.FieldValue.serverTimestamp(),
+            createdAt:
+              firestore.FieldValue?.serverTimestamp?.() ||
+              firestore.Timestamp.now(),
+
             name: profileData?.name,
             image: profileData?.profile,
             description: description,
