@@ -71,8 +71,7 @@ const Chat = ({navigation, route}: any) => {
       if (!message.text || message.text.trim() === '') {
         return;
       }
-      const timestamp =
-        firestore.FieldValue?.serverTimestamp?.() || firestore.Timestamp.now();
+      const timestamp = new Date();
       const localTimestamp = new Date(); // For UI until server timestamp comes back
       const newMessage = {
         _id: `${Date.now()}`, // temp unique id for UI
@@ -380,7 +379,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.fontRegular,
     paddingVertical: 0,
     marginVertical: 0,
-    // lineHeight: RFPercentage(2.5),
+    lineHeight: RFPercentage(2.5),
   },
   sendButton: {
     justifyContent: 'center',

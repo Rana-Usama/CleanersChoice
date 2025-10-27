@@ -14,9 +14,9 @@ import {BlurView} from '@react-native-community/blur';
 import CustomModal from '../../../../components/CustomModal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import auth from '@react-native-firebase/auth';
-import firestore from '@react-native-firebase/firestore';
 import {showToast} from '../../../../utils/ToastMessage';
 import {useExitAppOnBack} from '../../../../utils/ExitApp';
+import firestore, {deleteField} from '@react-native-firebase/firestore';
 
 const Settings = ({navigation}: any) => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -27,13 +27,12 @@ const Settings = ({navigation}: any) => {
 
   // Log out function
   const logOut = async () => {
-    setModalVisible(false);
     setLoading(true);
     try {
       const currentUser = auth().currentUser;
       if (currentUser) {
         await firestore().collection('Users').doc(currentUser.uid).update({
-          fcmToken: firestore.FieldValue.delete(),
+          fcmToken: deleteField(),
         });
       }
       await AsyncStorage.multiRemove(['email', 'password', 'role']);
@@ -43,6 +42,7 @@ const Settings = ({navigation}: any) => {
         title: 'Logged Out',
         message: 'You have been logged out successfully.',
       });
+      setModalVisible(false);
       navigation.reset({
         index: 0,
         routes: [{name: 'SignIn'}],
@@ -67,65 +67,139 @@ const Settings = ({navigation}: any) => {
   };
   userRole();
 
-  // Delete Account function
   const deleteAccount = async () => {
+    console.log('🧹 [deleteAccount] Started');
     setLoading(true);
-    const user = auth().currentUser;
-    if (!user) {
-      setLoading(false);
-      return;
-    }
-    const userId = user.uid;
-    const email = user.email;
-    setModalVisible2(false);
-    try {
-      const password = await AsyncStorage.getItem('password');
-      const credential = auth.EmailAuthProvider.credential(email, password);
-      await user.reauthenticateWithCredential(credential);
-      // Delete all user-related data
-      await firestore().collection('Users').doc(userId).delete();
 
-      const querySnapshot = await firestore()
+    try {
+      const user = auth().currentUser;
+      console.log('👤 Current user:', user ? user.uid : 'No user found');
+      if (!user) {
+        console.log('❌ No user, aborting delete process');
+        setLoading(false);
+        return;
+      }
+
+      const userId = user.uid;
+      const email = user.email;
+      console.log('📧 Email:', email);
+      console.log('🆔 UserID:', userId);
+
+      const password = await AsyncStorage.getItem('password');
+      console.log(
+        '🔑 Retrieved password from AsyncStorage:',
+        password ? '****' : 'NULL',
+      );
+
+      if (!password) {
+        console.log('⚠️ Missing password, showing toast...');
+        showToast({
+          type: 'error',
+          title: 'Missing Password',
+          message: 'Please log in again before deleting your account.',
+        });
+        setLoading(false);
+        return;
+      }
+
+      console.log('🔐 Creating credential...');
+      const credential = auth.EmailAuthProvider.credential(email, password);
+      console.log('✅ Credential created:', credential ? 'Yes' : 'No');
+
+      console.log('🔁 Reauthenticating user...');
+      await user.reauthenticateWithCredential(credential);
+      console.log('✅ Reauthenticated successfully');
+
+      // Delete from Users collection
+      console.log('🗑️ Deleting user doc...');
+      await firestore().collection('Users').doc(userId).delete();
+      console.log('✅ User doc deleted');
+
+      // Delete Jobs data
+      console.log('🗑️ Fetching related Jobs...');
+      const jobsSnapshot = await firestore()
         .collection('Jobs')
         .where('jobId', '==', userId)
         .get();
-      const batch = firestore().batch();
-      querySnapshot.forEach(doc => batch.delete(doc.ref));
-      await batch.commit();
+      console.log('📄 Jobs found:', jobsSnapshot.size);
 
+      const jobBatch = firestore().batch();
+      jobsSnapshot.forEach(doc => jobBatch.delete(doc.ref));
+      if (jobsSnapshot.size > 0) {
+        console.log('🧾 Committing job deletions...');
+        await jobBatch.commit();
+        console.log('✅ Jobs deleted');
+      } else {
+        console.log('ℹ️ No jobs to delete');
+      }
+
+      // Delete Chats data
+      console.log('💬 Fetching related Chats...');
       const chatSnapshot = await firestore()
         .collection('Chats')
         .where('participants', 'array-contains', userId)
         .get();
+      console.log('📄 Chats found:', chatSnapshot.size);
+
       const chatBatch = firestore().batch();
       chatSnapshot.forEach(doc => chatBatch.delete(doc.ref));
-      await chatBatch.commit();
+      if (chatSnapshot.size > 0) {
+        console.log('🧾 Committing chat deletions...');
+        await chatBatch.commit();
+        console.log('✅ Chats deleted');
+      } else {
+        console.log('ℹ️ No chats to delete');
+      }
 
-      await firestore().collection('CleanerServices').doc(userId).delete();
+      // Delete CleanerServices doc (if exists)
+      console.log('🧹 Deleting CleanerServices doc...');
+      await firestore()
+        .collection('CleanerServices')
+        .doc(userId)
+        .delete()
+        .catch(e => {
+          console.log('⚠️ CleanerServices delete error (ignored):', e.message);
+        });
+      console.log('✅ CleanerServices doc deleted or not found');
+
+      // Delete Firebase user
+      console.log('🧨 Deleting Firebase Auth user...');
       await user.delete();
+      console.log('✅ Firebase user deleted');
 
+      // Clear AsyncStorage
+      console.log('🗑️ Clearing AsyncStorage...');
       await AsyncStorage.multiRemove(['email', 'password', 'role']);
+      console.log('✅ AsyncStorage cleared');
+
+      // Show success toast
       showToast({
         type: 'success',
         title: 'Account Deleted',
         message:
           'Your account and all associated data have been permanently removed.',
       });
+      console.log('🎉 Account deletion completed successfully');
+
+      setModalVisible2(false);
 
       setTimeout(() => {
+        console.log('🔄 Navigating to OnBoarding...');
         navigation.reset({
           index: 0,
           routes: [{name: 'OnBoarding'}],
         });
       }, 1000);
-    } catch (error: any) {
+    } catch (error) {
+      console.log('❌ [deleteAccount] ERROR:', error?.message, error);
       showToast({
-        type: 'danger',
+        type: 'error',
         title: 'Delete Failed',
         message:
           error?.message || 'Something went wrong while deleting your account.',
       });
     } finally {
+      console.log('🕓 [deleteAccount] Finished');
       setLoading(false);
     }
   };
@@ -182,7 +256,7 @@ const Settings = ({navigation}: any) => {
 
       {/* Logout Modal */}
       {modalVisible && (
-        <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+        <TouchableWithoutFeedback>
           <View style={styles.modalContainer}>
             <BlurView style={styles.blurView} blurType="light" blurAmount={5} />
             <CustomModal
@@ -198,7 +272,7 @@ const Settings = ({navigation}: any) => {
 
       {/* Delete Account Modal */}
       {modalVisible2 && (
-        <TouchableWithoutFeedback onPress={() => setModalVisible2(false)}>
+        <TouchableWithoutFeedback>
           <View style={styles.modalContainer}>
             <BlurView style={styles.blurView} blurType="light" blurAmount={5} />
             <CustomModal

@@ -64,16 +64,18 @@ const items = [
 ];
 
 const ServiceOne: React.FC = ({navigation}: any) => {
-  const available = useSelector(state => state?.availablity?.availability);
+  const available = useSelector(
+    (state: any) => state?.availablity?.availability,
+  );
   const [location, setLoaction] = useState('');
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-  const description = useSelector(state => state?.form?.description);
+  const description = useSelector((state: any) => state?.form?.description);
   const [serviceData, setServiceData] = useState(null);
   const profileCompletion = useSelector(
-    state => state?.profile?.profileCompletion,
+    (state: any) => state?.profile?.profileCompletion,
   );
-  const profileData = useSelector(state => state?.profile?.profileData);
+  const profileData = useSelector((state: any) => state?.profile?.profileData);
   const [selectedItems, setSelectedItems] = useState([]);
   const multiSelectRef = useRef(null);
   const onSelectedItemsChange = (selectedItems: any) => {
@@ -121,9 +123,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
           .collection('CleanerServices')
           .doc(user.uid)
           .set({
-            createdAt:
-              firestore.FieldValue?.serverTimestamp?.() ||
-              firestore.Timestamp.now(),
+            createdAt: new Date(),
 
             name: profileData?.name,
             image: profileData?.profile,
@@ -183,6 +183,30 @@ const ServiceOne: React.FC = ({navigation}: any) => {
               </View>
 
               <View style={styles.container}>
+                {/* Location------- */}
+
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Location')}
+                  activeOpacity={0.8}
+                  style={{
+                    width: '90%',
+                    alignSelf: 'center',
+                    height: RFPercentage(5),
+                    backgroundColor: 'white',
+                    borderWidth: 1,
+                    borderColor: Colors.borderColor,
+                    borderRadius: RFPercentage(2),
+                    justifyContent: 'center',
+                  }}>
+                  <Text
+                    style={{
+                      color: Colors.placeholder,
+                      fontSize: RFPercentage(1.8),
+                      fontFamily: Fonts.fontRegular,
+                    }}>
+                    Add city/town you provide your services at
+                  </Text>
+                </TouchableOpacity>
                 {/* Description */}
                 <View style={styles.descriptionContainer}>
                   <DescriptionField
@@ -248,12 +272,12 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                 </TouchableOpacity>
 
                 {/* Location */}
-                <InputField
+                {/* <InputField
                   placeholder="Add city/town you provide your services at"
                   value={location}
                   onChangeText={setLoaction}
                   customStyle={{width: '100%', marginBottom: RFPercentage(3)}}
-                />
+                /> */}
 
                 {/* Service Type */}
                 <View style={{flex: 1}}>

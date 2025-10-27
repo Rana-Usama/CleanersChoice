@@ -6,6 +6,8 @@ import FirebaseCore
 import FirebaseMessaging
 import UserNotifications
 import RNNotifee
+import GoogleMaps
+
 
 @main
 class AppDelegate: RCTAppDelegate,
@@ -21,6 +23,8 @@ class AppDelegate: RCTAppDelegate,
     if FirebaseApp.app() == nil {
       FirebaseApp.configure()
     }
+
+    GMSServices.provideAPIKey("AIzaSyBsPsec5oCWbG9NMTFjYGGVtxfv59kZnxc")
 
     // Register for push notifications
     UNUserNotificationCenter.current().delegate = self

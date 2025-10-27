@@ -33,6 +33,7 @@ import Chat from '../screens/commonflow/home/Chat';
 import Messages from '../screens/commonflow/home/Messages';
 import firestore from '@react-native-firebase/firestore';
 import Decider from './Decider';
+import Location from '../screens/commonflow/location/Location';
 
 export type RootStackParamList = {
   SplashOne: undefined;
@@ -72,6 +73,7 @@ export type RootStackParamList = {
     fcmToken: string;
   };
   Messages: undefined;
+  Location:undefined
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -158,7 +160,7 @@ const StackNavigator: React.FC = () => {
 
   return (
     <SafeAreaProvider>
-      <NavigationContainer linking={linking}>
+      <NavigationContainer>
         {isLoading ? (
           <Decider />
         ) : (
@@ -186,6 +188,7 @@ const StackNavigator: React.FC = () => {
             <Stack.Screen name="Availability" component={Availability} />
             <Stack.Screen name="Chat" component={Chat} />
             <Stack.Screen name="Messages" component={Messages} />
+            <Stack.Screen name="Location" component={Location} />
 
             {/* ------------------Customer Flow------------- */}
             <Stack.Screen name="Home" component={CustomerNavigator} />

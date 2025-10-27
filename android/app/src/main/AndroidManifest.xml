@@ -53,5 +53,8 @@
                <data android:scheme="cleanerChoiceApp" android:host="" />
            </intent-filter>
       </activity>
+       <meta-data
+  android:name="com.google.android.geo.API_KEY"
+  android:value="AIzaSyBsPsec5oCWbG9NMTFjYGGVtxfv59kZnxc"/> 
     </application>
 </manifest>

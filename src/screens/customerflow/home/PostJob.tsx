@@ -110,9 +110,7 @@ const PostJob = ({route}: any) => {
         remarks: remarks || '',
         jobId: user.uid,
         status: 'active',
-        createdAt2:
-          firestore.FieldValue?.serverTimestamp?.() ||
-          firestore.Timestamp.now(),
+        createdAt2: new Date(),
       };
 
       // only set createdAt if date is selected
