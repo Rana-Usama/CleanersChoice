@@ -25,7 +25,6 @@ import {useSelector} from 'react-redux';
 import * as yup from 'yup';
 import {Formik} from 'formik';
 import auth from '@react-native-firebase/auth';
-import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 import {Image as CompressorImage} from 'react-native-compressor';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -34,6 +33,7 @@ import messaging from '@react-native-firebase/messaging';
 import {showToast} from '../../../utils/ToastMessage';
 import axios from 'axios';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import firestore from '@react-native-firebase/firestore';
 
 const SignUp: React.FC = ({navigation}: any) => {
   const [selected, setSelected] = useState<boolean>(false);
@@ -124,9 +124,7 @@ const SignUp: React.FC = ({navigation}: any) => {
         uid: user.uid,
         profile: profileUrl || null,
         fcmToken: fcmToken || null,
-        createdAt:
-          firestore.FieldValue?.serverTimestamp?.() ||
-          firestore.Timestamp.now(),
+        createdAt: new Date(),
         role: userFlow?.userFlow,
         ...(userFlow?.userFlow === 'Cleaner' && {
           subscription: false,

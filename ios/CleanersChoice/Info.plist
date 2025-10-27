@@ -96,6 +96,13 @@
 		<string>arm64</string>
 	</array>
 
+	<key>NSLocationWhenInUseUsageDescription</key>
+<string>Cleaners Choice uses your location to help you find nearby jobs and provide cleaning services efficiently to customers in your area.</string>
+
+<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string>Cleaners Choice uses your location to suggest nearby cleaning requests and ensure accurate service availability, even when you’re actively using the app.</string>
+
+
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

@@ -40,7 +40,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
   const insets = useSafeAreaInsets();
 
   // 👇 Get current user flow (Customer, Cleaner, or Guest)
-  const userFlow = useSelector(state => state.userFlow.userFlow);
+  const userFlow = useSelector((state: any) => state.userFlow.userFlow);
 
   useEffect(() => {
     forceUpdate(n => n + 1);

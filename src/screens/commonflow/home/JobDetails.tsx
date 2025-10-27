@@ -29,15 +29,10 @@ const JobDetails = ({route, navigation}: any) => {
   const markComplete = async (jobId: string, newStatus: string) => {
     setLoading(true);
     try {
-      await firestore()
-        .collection('Jobs')
-        .doc(jobId)
-        .update({
-          status: newStatus,
-          updatedAt:
-            firestore.FieldValue?.serverTimestamp?.() ||
-            firestore.Timestamp.now(),
-        });
+      await firestore().collection('Jobs').doc(jobId).update({
+        status: newStatus,
+        updatedAt:new Date(),
+      });
       navigation.goBack();
     } catch (error) {
       console.error('Error marking job as complete:', error);

@@ -69,7 +69,7 @@ const items = [
 
 const Dashboard: React.FC = ({navigation}: any) => {
   const [img, setImg] = useState(null);
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [loading2, setLoading2] = useState(false);
@@ -272,7 +272,10 @@ const Dashboard: React.FC = ({navigation}: any) => {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        contentContainerStyle={{paddingBottom: Platform.OS === 'ios' ? RFPercentage(10) : RFPercentage(12)}}
+        contentContainerStyle={{
+          paddingBottom:
+            Platform.OS === 'ios' ? RFPercentage(10) : RFPercentage(12),
+        }}
         style={{flex: 1}}
         showsVerticalScrollIndicator={false}>
         <View style={styles.container}>
@@ -340,19 +343,6 @@ const Dashboard: React.FC = ({navigation}: any) => {
           <>
             {profileCompletion === '100' ? (
               <>
-                <View style={styles.ratingContainer2}>
-                  <View style={styles.starContainer}>
-                    {Array.from({length: service?.rating}, (_, index) => (
-                      <Image
-                        key={index}
-                        source={IMAGES.star}
-                        resizeMode="contain"
-                        style={styles.star}
-                      />
-                    ))}
-                  </View>
-                </View>
-
                 {/* Description */}
                 <View style={styles.section}>
                   <View>

@@ -275,7 +275,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
 
             <View
               style={{position: 'absolute', right: 0, top: RFPercentage(1.9)}}>
-              <Text style={styles.joining}>Joined on : {formattedDate}</Text>
+              <Text style={styles.joining}>Posted on : {formattedDate}</Text>
             </View>
           </View>
 
@@ -416,7 +416,10 @@ const ServiceDetails: React.FC = ({route}: any) => {
               data={item.packages}
               keyExtractor={item => item.id.toString()}
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{paddingHorizontal: RFPercentage(1.2), paddingBottom:RFPercentage(2)}}
+              contentContainerStyle={{
+                paddingHorizontal: RFPercentage(1.2),
+                paddingBottom: RFPercentage(2),
+              }}
               renderItem={({item}) => {
                 return (
                   <Package
