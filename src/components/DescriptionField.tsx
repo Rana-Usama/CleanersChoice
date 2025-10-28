@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.inputFieldColor,
     borderRadius: RFPercentage(0.8),
     marginVertical: RFPercentage(1.5),
-    paddingHorizontal: RFPercentage(1),
+    paddingHorizontal: RFPercentage(1.5),
     paddingVertical: RFPercentage(1),
   },
   textInput: {

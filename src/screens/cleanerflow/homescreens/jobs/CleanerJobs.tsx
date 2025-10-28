@@ -31,6 +31,10 @@ import SearchField from '../../../../components/SearchField';
 import Slider from '@react-native-community/slider';
 import NotFound from '../../../../components/NotFound';
 import {useExitAppOnBack} from '../../../../utils/ExitApp';
+import {useCurrentLocation} from '../../../../utils/userLocation';
+import {useSelector, useDispatch} from 'react-redux';
+import haversine from 'haversine';
+import {clearFilterLocation} from '../../../../redux/location/Actions';
 
 const items = [
   'Residential Cleaning',
@@ -40,23 +44,22 @@ const items = [
   'Carpet Cleaning',
   'Chimney Cleaning',
   'Lawn Care',
+  'Others',
 ];
 
 const CleanerJobs = () => {
-  const navigation = useNavigation();
+  const {location, loading, error} = useCurrentLocation();
+
+  const navigation = useNavigation<any>();
   const [jobsData, setJobsData] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading2, setLoading] = useState(false);
   const [priceRange, setPriceRange] = useState([10, 2000]);
   const tempValue = useRef(priceRange[0]);
   const [modalVisible, setModalVisible] = useState(false);
   const [rangeSelector, setRangeSelector] = useState(false);
-  const [locations, setLocations] = useState([]);
-  const [query, setQuery] = useState('');
-  const [loctionFilter, setLocationFilter] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
-  const [selectedLocation, setSelectedLocation] = useState([]);
   const [loactionLoading, setLocationLoading] = useState(false);
   const [priceLoading, setPriceLoading] = useState(false);
   const [serviceType, setServiceType] = useState(false);
@@ -64,9 +67,31 @@ const CleanerJobs = () => {
   const [selectedType, setSelectedType] = useState('');
   const [query2, setQuery2] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const [initializingLocation, setInitializingLocation] = useState(true);
+
+  const selectedLocation = useSelector(
+    (state: any) =>
+      state?.location?.filterLocation ?? {
+        latitude: null,
+        longitude: null,
+        name: '',
+      },
+  );
+  const dispatch = useDispatch();
   useExitAppOnBack();
 
-  // console.log('temp value......................', tempValue.current)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setInitializingLocation(false);
+    }, 2000);
+
+    if (location && location.latitude && location.longitude) {
+      clearTimeout(timer);
+      setInitializingLocation(false);
+    }
+
+    return () => clearTimeout(timer);
+  }, [location]);
 
   // On Refresh
   const onRefresh = () => {
@@ -82,26 +107,21 @@ const CleanerJobs = () => {
   // Fetching jobs
   const fetchJobs = async () => {
     const user = auth().currentUser;
+    console.log('user.......', user);
     if (!user) return;
     try {
       const snapshot = await firestore()
         .collection('Jobs')
         .where('status', '==', 'active')
-        .orderBy('createdAt2', 'desc')
+        // .orderBy('createdAt2', 'desc')
         .get();
 
       const jobs = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
       }));
+      console.log(jobs);
       setJobsData(jobs);
-
-      const locationsArray = jobs
-        .map(service => service.location)
-        .filter(location => location !== undefined);
-
-      const uniqueLocations = Array.from(new Set(locationsArray));
-      setLocations(uniqueLocations);
     } catch (error) {
       console.log('Error fetching jobs:', error);
     }
@@ -113,16 +133,20 @@ const CleanerJobs = () => {
     }, []),
   );
 
-  const getTruncatedText = text => {
+  const getTruncatedText = (text: any) => {
     const maxChars = 23;
-    if (text.length <= maxChars) return text;
-    return text.slice(0, maxChars).trim() + '... ';
+    // Convert to string and handle null/undefined
+    const textStr = String(text || '');
+    if (textStr?.length <= maxChars) return textStr;
+    return textStr?.slice(0, maxChars).trim() + '... ';
   };
 
-  const getTruncatedText2 = text => {
+  const getTruncatedText2 = (text: any) => {
     const maxChars = 30;
-    if (text.length <= maxChars) return text;
-    return text.slice(0, maxChars).trim() + '... ';
+    // Convert to string and handle null/undefined
+    const textStr = String(text || '');
+    if (textStr?.length <= maxChars) return textStr;
+    return textStr?.slice(0, maxChars).trim() + '... ';
   };
 
   useEffect(() => {
@@ -153,16 +177,7 @@ const CleanerJobs = () => {
         }),
       ]).start();
     }
-  }, [modalVisible || modalVisible2 || modalVisible3]);
-
-  const handleLocationApply = () => {
-    setLocationLoading(true);
-    setTimeout(() => {
-      setLocationLoading(false);
-      setModalVisible(false);
-      setLocationFilter(true);
-    }, 1500);
-  };
+  }, [modalVisible, modalVisible2, modalVisible3]);
 
   const handlePriceRangeApply = () => {
     setPriceLoading(true);
@@ -173,40 +188,9 @@ const CleanerJobs = () => {
     }, 1500);
   };
 
-  // Filters
-  const [filteredLocations, setFilteredLocations] = useState([]);
-  useEffect(() => {
-    if (query.trim().length > 0) {
-      const filtered = locations.filter(location =>
-        location.toLowerCase().includes(query.toLowerCase()),
-      );
-      setFilteredLocations(filtered);
-    } else {
-      setFilteredLocations([]);
-    }
-  }, [query, locations]);
-
-  const handleSearch = query => {
-    setQuery(query);
-    const filtered = locations.filter(location =>
-      location.toLowerCase().includes(query.toLowerCase()),
-    );
-    setFilteredLocations(filtered);
-  };
-
   const [serviceTypeFilter, setServiceTypeFilter] = useState([]);
-  useEffect(() => {
-    if (query2.trim().length > 0) {
-      const filtered = items.filter(location =>
-        location.toLowerCase().includes(query2.toLowerCase()),
-      );
-      setServiceTypeFilter(filtered);
-    } else {
-      setServiceTypeFilter([]);
-    }
-  }, [query2]);
 
-  const handleSearch2 = query => {
+  const handleSearch2 = (query: string) => {
     setQuery2(query);
     const filtered = items.filter(item =>
       item.toLowerCase().includes(query.toLowerCase()),
@@ -223,27 +207,6 @@ const CleanerJobs = () => {
     }, 1500);
   };
 
-  const finalFilteredJobs = jobsData.filter(job => {
-    const matchesLocation =
-      !loctionFilter ||
-      selectedLocation.length === 0 ||
-      (job.location &&
-        job.location
-          .toLowerCase()
-          .includes(selectedLocation.trim().toLowerCase()));
-
-    const matchesPrice =
-      !rangeSelector ||
-      (job.priceRange >= 0 && job.priceRange <= priceRange[0]);
-
-    const matchesServiceType =
-      !serviceType ||
-      (job.type &&
-        job.type.toLowerCase().includes(selectedType.trim().toLowerCase()));
-
-    return matchesLocation && matchesPrice && matchesServiceType;
-  });
-
   useEffect(() => {
     setLoading(true);
     setTimeout(() => {
@@ -251,13 +214,95 @@ const CleanerJobs = () => {
     }, 3000);
   }, []);
 
+  const finalFilteredJobs = jobsData.filter(job => {
+    // ---- PRICE, NAME, CATEGORY filters (same as before) ----
+    if (rangeSelector) {
+      const price = job?.priceRange || 0;
+      if (price < 0 || price > priceRange[0]) return false;
+    }
+
+    if (
+      query2.trim() !== '' &&
+      !job?.title?.toLowerCase().includes(query2.toLowerCase())
+    ) {
+      return false;
+    }
+
+    if (
+      serviceType &&
+      selectedType &&
+      !job.type?.toLowerCase().includes(selectedType.toLowerCase())
+    ) {
+      return false;
+    }
+
+    // ---- SAFE LOCATION FILTER ----
+    // Check if we have a valid user location
+    const hasUserLocation =
+      (selectedLocation?.latitude && selectedLocation?.longitude) ||
+      (location?.latitude && location?.longitude);
+
+    if (hasUserLocation) {
+      const userLat = selectedLocation?.latitude || location?.latitude;
+      const userLng = selectedLocation?.longitude || location?.longitude;
+
+      // Check if job has valid coordinates
+      if (job?.location?.latitude && job?.location?.longitude) {
+        try {
+          const distance = haversine(
+            {latitude: userLat, longitude: userLng},
+            {
+              latitude: job.location.latitude,
+              longitude: job.location.longitude,
+            },
+            {unit: 'km'},
+          );
+          return distance <= 20;
+        } catch (error) {
+          console.log('Distance calculation error, showing job:', error);
+          return true; // Show job if distance calculation fails
+        }
+      } else {
+        // Job has no coordinates, hide it when we have user location
+        return false;
+      }
+    }
+
+    // No user location or invalid user location - show all jobs
+    return true;
+  });
+
   const [showAllJobs, setShowAllJobs] = useState(false);
 
-  const sortedJobs = finalFilteredJobs.sort(
-    (a, b) => b.createdAt?.toDate?.() - a.createdAt?.toDate?.(),
+  const sortedJobs = finalFilteredJobs?.sort(
+    (a, b) => b?.createdAt?.toDate?.() - a?.createdAt?.toDate?.(),
   );
 
-  const displayedJobs = showAllJobs ? sortedJobs : sortedJobs.slice(0, 10);
+  const displayedJobs = showAllJobs ? sortedJobs : sortedJobs?.slice(0, 10);
+
+  if (initializingLocation) {
+      return (
+        <SafeAreaView style={styles.safeArea}>
+          <View
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: Colors.background,
+            }}>
+            <ActivityIndicator size="large" color={Colors.gradient2} />
+            <Text
+              style={{
+                marginTop: 10,
+                color: Colors.secondaryText,
+                fontFamily: Fonts.fontMedium,
+              }}>
+              Fetching your location...
+            </Text>
+          </View>
+        </SafeAreaView>
+      );
+    }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -293,22 +338,21 @@ const CleanerJobs = () => {
                 <TouchableOpacity
                   activeOpacity={0.8}
                   onPress={() => {
-                    setQuery('');
-                    setFilteredLocations([]);
-                    setSelectedLocation([]);
-                    setModalVisible(true);
+                    navigation.navigate('Location', {location: false});
                   }}
                   style={[
                     styles.filterBox,
                     {
-                      backgroundColor: loctionFilter
+                      backgroundColor: selectedLocation?.name
                         ? Colors.gradient2
                         : 'white',
                     },
                   ]}>
                   <Image
                     source={
-                      loctionFilter ? Icons.locationWhite : Icons.location
+                      selectedLocation?.name
+                        ? Icons.locationWhite
+                        : Icons.location
                     }
                     style={styles.locationImg}
                     resizeMode="contain"
@@ -317,10 +361,10 @@ const CleanerJobs = () => {
                     style={[
                       styles.filterText,
                       {
-                        fontFamily: loctionFilter
+                        fontFamily: selectedLocation?.name
                           ? Fonts.semiBold
                           : Fonts.fontMedium,
-                        color: loctionFilter
+                        color: selectedLocation?.name
                           ? Colors.background
                           : Colors.primaryText,
                       },
@@ -328,13 +372,11 @@ const CleanerJobs = () => {
                     Location
                   </Text>
                 </TouchableOpacity>
-                {loctionFilter && (
+                {selectedLocation?.name && (
                   <TouchableOpacity
                     activeOpacity={0.8}
                     onPress={() => {
-                      setSelectedLocation([]);
-                      setLocationFilter(false);
-                      setQuery('');
+                      dispatch(clearFilterLocation());
                     }}
                     style={styles.cross}>
                     <AntDesign
@@ -449,255 +491,172 @@ const CleanerJobs = () => {
             </ScrollView>
           </View>
         </View>
+        <View
+          style={{
+            width: '90%',
+            alignSelf: 'center',
+            marginTop: RFPercentage(1),
+            marginLeft: RFPercentage(0.5),
+          }}>
+          <Text
+            style={{
+              color: Colors.primaryText,
+              fontFamily: Fonts.fontMedium,
+              fontSize: RFPercentage(1.8),
+            }}>
+            {selectedLocation?.name
+              ? `Jobs : ${selectedLocation?.name}`
+              : `Nearby Jobs`}
+          </Text>
+        </View>
 
         {/* Jobs Container */}
         <View>
           <View style={styles.listContainer}>
-            {loading ? (
-              <>
-                <ActivityIndicator
-                  size={RFPercentage(5)}
-                  color={Colors.placeholderColor}
-                  style={{marginTop: RFPercentage(30)}}
-                />
-              </>
+            {loading2 ? (
+              <ActivityIndicator
+                size={RFPercentage(5)}
+                color={Colors.placeholderColor}
+                style={{marginTop: RFPercentage(30)}}
+              />
             ) : (
               <>
-                (
-                <>
-                  <FlatList
-                    contentContainerStyle={{paddingBottom: RFPercentage(3)}}
-                    data={displayedJobs}
-                    keyExtractor={item => item.id.toString()}
-                    renderItem={({item}) => (
-                      <JobCard
-                        name={getTruncatedText(item.title)}
-                        location={item.location}
-                        price={getTruncatedText2(item.priceRange)}
-                        date={item.createdAt}
-                        onPress={() =>
-                          navigation.navigate('JobDetails', {item: item})
-                        }
-                        delete={false}
-                      />
-                    )}
-                  />
-                  {sortedJobs.length > 10 && (
-                    <TouchableOpacity
-                      onPress={() => setShowAllJobs(prev => !prev)}
-                      style={{marginVertical: RFPercentage(2), alignSelf: 'center'}}>
-                      <Text
-                        style={{
-                          color: Colors.gradient1,
-                          fontSize: RFPercentage(1.7),
-                          fontFamily: Fonts.fontMedium,
-                        }}>
-                        {showAllJobs ? 'View Less' : 'View More'}
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-                </>
+                {displayedJobs.length === 0 ? (
+                  <NotFound text="No Job found" />
                 ) : (
-                <>
-                  {finalFilteredJobs.length === 0 && (
-                    <NotFound text="No Job found" />
-                  )}
-                </>
+                  <>
+                    <FlatList
+                      contentContainerStyle={{paddingBottom: RFPercentage(3)}}
+                      data={displayedJobs}
+                      keyExtractor={item => item.id.toString()}
+                      renderItem={({item}) => (
+                        <JobCard
+                          name={getTruncatedText(item.title)}
+                          location={item.location?.name || 'Not added'}
+                          price={getTruncatedText2(item.priceRange)}
+                          date={item.createdAt}
+                          onPress={() =>
+                            navigation.navigate('JobDetails', {item: item})
+                          }
+                          delete={false}
+                        />
+                      )}
+                    />
+                    {sortedJobs?.length > 10 && (
+                      <TouchableOpacity
+                        onPress={() => setShowAllJobs(prev => !prev)}
+                        style={{
+                          marginVertical: RFPercentage(2),
+                          alignSelf: 'center',
+                        }}>
+                        <Text
+                          style={{
+                            color: Colors.gradient1,
+                            fontSize: RFPercentage(1.7),
+                            fontFamily: Fonts.fontMedium,
+                          }}>
+                          {showAllJobs ? 'View Less' : 'View More'}
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  </>
+                )}
               </>
             )}
           </View>
         </View>
       </ScrollView>
 
-      {/* Filter Modals */}
-      {modalVisible && (
-        <>
+      {/* Price Range Modal */}
+      {modalVisible2 && (
+        <TouchableWithoutFeedback onPress={() => setModalVisible2(false)}>
           <View style={styles.modalContainer}>
             <BlurView style={styles.blurView} blurType="light" blurAmount={5} />
             <Modal
-              visible={modalVisible}
+              visible={modalVisible2}
               transparent={true}
               animationType="none"
-              onRequestClose={() => setModalVisible(false)}>
+              onRequestClose={() => setModalVisible2(false)}>
               <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : null}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 40 : 0}
-                style={{
-                  flex: 1,
-                  alignItems: 'center',
-                }}>
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                style={{flex: 1}}>
                 <Animated.View
                   style={[
-                    styles.locationModal,
-                    {opacity: opacityAnim, transform: [{scale: scaleAnim}]},
+                    {
+                      opacity: opacityAnim,
+                      transform: [{scale: scaleAnim}],
+                    },
+                    styles.rangeModal,
                   ]}>
                   <TouchableOpacity
                     style={styles.close}
-                    onPress={() => setModalVisible(false)}>
+                    onPress={() => setModalVisible2(false)}>
                     <AntDesign
                       name="closecircleo"
                       size={RFPercentage(2.5)}
                       color={Colors.secondaryText}
                     />
                   </TouchableOpacity>
-                  <View style={styles.modalInner}>
-                    <Text style={styles.applyLocation}>
-                      Apply Location Via City
+                  <View
+                    style={[
+                      {
+                        marginTop: RFPercentage(1),
+                      },
+                    ]}>
+                    <Text
+                      style={[styles.applyLocation, {top: RFPercentage(2)}]}>
+                      Select Price Range
                     </Text>
                   </View>
-                  <View style={{width: '100%', marginTop: RFPercentage(2)}}>
-                    <SearchField
-                      placeholder="Search City"
-                      customStyle={{borderColor: 'rgba(39, 38, 38, 0.29)'}}
-                      value={query}
-                      onChangeText={handleSearch}
+                  <View style={{width: '100%', marginTop: RFPercentage(8)}}>
+                    {/* Slider */}
+                    <Slider
+                      style={styles.sliderStyle}
+                      minimumValue={10}
+                      maximumValue={2000}
+                      step={10}
+                      value={priceRange[0]}
+                      onValueChange={value => {
+                        tempValue.current = value;
+                      }}
+                      onSlidingComplete={value => {
+                        setPriceRange([value, priceRange[1]]);
+                      }}
+                      minimumTrackTintColor={Colors.gradient1}
+                      maximumTrackTintColor={Colors.borderBottomColor}
+                      thumbTintColor={Colors.gradient1}
                     />
-                  </View>
-                  {query.length > 0 && selectedLocation.length === 0 && (
-                    <View style={styles.queryContainer}>
-                      {filteredLocations.length === 0 ? (
-                        <>
-                          <Text style={styles.queryText}>
-                            No Location exist
-                          </Text>
-                        </>
-                      ) : (
-                        <>
-                          <FlatList
-                            data={filteredLocations}
-                            keyboardShouldPersistTaps="always"
-                            keyExtractor={(item, index) => index.toString()}
-                            renderItem={({item}) => (
-                              <TouchableOpacity
-                                onPress={() => {
-                                  setQuery(item);
-                                  setSelectedLocation(item);
-                                }}>
-                                <Text style={styles.queryText}>{item}</Text>
-                              </TouchableOpacity>
-                            )}
-                          />
-                        </>
+                    <View style={styles.sliderLabelsContainer}>
+                      <Text
+                        style={[styles.sliderLabel, {left: RFPercentage(1)}]}>
+                        0$
+                      </Text>
+                      <Text
+                        style={[styles.sliderLabel, {left: RFPercentage(1)}]}>
+                        1000$
+                      </Text>
+                      <Text style={styles.sliderLabel}>2000$+</Text>
+                    </View>
+                    <View style={{marginTop: RFPercentage(6)}}>
+                      {tempValue.current > 10 && (
+                        <Text style={styles.range}>
+                          Selected Price Range: 0 - {tempValue.current}$
+                        </Text>
                       )}
                     </View>
-                  )}
-                  <View style={{position: 'absolute', bottom: RFPercentage(3)}}>
+                  </View>
+                  <View style={{position: 'absolute', bottom: RFPercentage(4)}}>
                     <GradientButton
                       title="Apply"
-                      onPress={handleLocationApply}
-                      loading={loactionLoading}
-                      disabled={
-                        query.length > 0 && filteredLocations.length != 0
-                          ? false
-                          : true
-                      }
+                      onPress={handlePriceRangeApply}
+                      loading={priceLoading}
                     />
                   </View>
                 </Animated.View>
               </KeyboardAvoidingView>
             </Modal>
           </View>
-        </>
-      )}
-
-      {/* Price Range Modal */}
-      {modalVisible2 && (
-        <>
-          <TouchableWithoutFeedback onPress={() => setModalVisible2(false)}>
-            <View style={styles.modalContainer}>
-              <BlurView
-                style={styles.blurView}
-                blurType="light"
-                blurAmount={5}
-              />
-              <Modal
-                visible={modalVisible2}
-                transparent={true}
-                animationType="none"
-                onRequestClose={() => setModalVisible2(false)}>
-                <KeyboardAvoidingView
-                  behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-                  style={{flex: 1}}>
-                  <Animated.View
-                    style={[
-                      {
-                        opacity: opacityAnim,
-                        transform: [{scale: scaleAnim}],
-                      },
-                      styles.rangeModal,
-                    ]}>
-                    <TouchableOpacity
-                      style={styles.close}
-                      onPress={() => setModalVisible2(false)}>
-                      <AntDesign
-                        name="closecircleo"
-                        size={RFPercentage(2.5)}
-                        color={Colors.secondaryText}
-                      />
-                    </TouchableOpacity>
-                    <View
-                      style={[
-                        {
-                          marginTop: RFPercentage(1),
-                        },
-                        // styles.modalInner,
-                      ]}>
-                      <Text
-                        style={[styles.applyLocation, {top: RFPercentage(2)}]}>
-                        Select Price Range
-                      </Text>
-                    </View>
-                    <View style={{width: '100%', marginTop: RFPercentage(8)}}>
-                      {/* Slider */}
-                      <Slider
-                        style={styles.sliderStyle}
-                        minimumValue={10}
-                        maximumValue={2000}
-                        step={10}
-                        value={priceRange[0]}
-                        onValueChange={value => {
-                          tempValue.current = value;
-                        }}
-                        onSlidingComplete={value => {
-                          setPriceRange([value, priceRange[1]]);
-                        }}
-                        minimumTrackTintColor={Colors.gradient1}
-                        maximumTrackTintColor={Colors.borderBottomColor}
-                        thumbTintColor={Colors.gradient1}
-                      />
-                      <View style={styles.sliderLabelsContainer}>
-                        <Text
-                          style={[styles.sliderLabel, {left: RFPercentage(1)}]}>
-                          0$
-                        </Text>
-                        <Text
-                          style={[styles.sliderLabel, {left: RFPercentage(1)}]}>
-                          1000$
-                        </Text>
-                        <Text style={styles.sliderLabel}>2000$+</Text>
-                      </View>
-                      <View style={{marginTop: RFPercentage(6)}}>
-                        {tempValue.current > 10 && (
-                          <Text style={styles.range}>
-                            Selected Price Range: 0 - {tempValue.current}$
-                          </Text>
-                        )}
-                      </View>
-                    </View>
-                    <View
-                      style={{position: 'absolute', bottom: RFPercentage(4)}}>
-                      <GradientButton
-                        title="Apply"
-                        onPress={handlePriceRangeApply}
-                        loading={priceLoading}
-                      />
-                    </View>
-                  </Animated.View>
-                </KeyboardAvoidingView>
-              </Modal>
-            </View>
-          </TouchableWithoutFeedback>
-        </>
+        </TouchableWithoutFeedback>
       )}
 
       {/* Service Type */}

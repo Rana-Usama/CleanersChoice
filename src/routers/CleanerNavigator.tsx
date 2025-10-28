@@ -161,6 +161,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                   />
                 )}
                 <Text
+                  numberOfLines={1}
                   style={{
                     color: isFocused ? Colors.gradient2 : Colors.secondaryText,
                     fontSize: RFPercentage(1.4),
@@ -224,7 +225,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-around',
     height: '100%',
-     bottom:RFPercentage(0.5)
+    bottom: RFPercentage(0.5),
     // top: RFPercentage(1),
   },
   middle: {

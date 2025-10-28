@@ -76,9 +76,11 @@ const ServicesCard = ({
                     style={styles.icons}
                   />
                   <Text style={styles.locationText}>
-                    {location.length > 10
-                      ? `${location?.slice(0, 10)}...`
-                      : location}
+                    {location?.name
+                      ? location.name.length > 10
+                        ? `${location.name.slice(0, 10)}...`
+                        : location.name
+                      : 'Not added'}
                   </Text>
                 </View>
               </View>

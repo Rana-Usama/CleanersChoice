@@ -32,12 +32,44 @@
 	<true/>
 
 	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<true/>
-		<key>NSAllowsLocalNetworking</key>
-		<true/>
-	</dict>
+<dict>
+    <key>NSAllowsArbitraryLoads</key>
+    <true/>
+    <key>NSAllowsLocalNetworking</key>
+    <true/>
+    
+    <!-- ✅ Specific exceptions for Google APIs -->
+    <key>NSExceptionDomains</key>
+    <dict>
+        <key>googleapis.com</key>
+        <dict>
+            <key>NSExceptionAllowsInsecureHTTPLoads</key>
+            <true/>
+            <key>NSIncludesSubdomains</key>
+            <true/>
+            <key>NSExceptionRequiresForwardSecrecy</key>
+            <false/>
+            <key>NSExceptionMinimumTLSVersion</key>
+            <string>TLSv1.0</string>
+        </dict>
+        <key>maps.googleapis.com</key>
+        <dict>
+            <key>NSExceptionAllowsInsecureHTTPLoads</key>
+            <true/>
+            <key>NSIncludesSubdomains</key>
+            <true/>
+            <key>NSExceptionRequiresForwardSecrecy</key>
+            <false/>
+        </dict>
+        <key>www.googleapis.com</key>
+        <dict>
+            <key>NSExceptionAllowsInsecureHTTPLoads</key>
+            <true/>
+            <key>NSIncludesSubdomains</key>
+            <true/>
+        </dict>
+    </dict>
+</dict>
 
 	<!-- ✅ Updated Usage Descriptions -->
 	<key>NSCameraUsageDescription</key>

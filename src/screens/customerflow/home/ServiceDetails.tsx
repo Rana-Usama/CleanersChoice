@@ -318,7 +318,9 @@ const ServiceDetails: React.FC = ({route}: any) => {
                 Location:
               </Text>
             </View>
-            <Text style={styles.showMore}>{item.location}</Text>
+            <Text style={styles.showMore}>
+              {item?.location?.name || 'Not added'}
+            </Text>
           </View>
 
           {/* Availability */}

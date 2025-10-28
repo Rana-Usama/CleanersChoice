@@ -271,7 +271,7 @@ const JobDetails = ({route, navigation}: any) => {
             <DetailRow
               icon={Icons.location}
               label="Location"
-              value={item.location}
+              value={item.location?.name || 'Not Added'}
             />
 
             <View style={styles.divider} />

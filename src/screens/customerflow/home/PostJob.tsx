@@ -29,6 +29,7 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import {showToast} from '../../../utils/ToastMessage';
+import {useSelector} from 'react-redux';
 
 const data1 = [
   {
@@ -68,8 +69,7 @@ const data1 = [
 const PostJob = ({route}: any) => {
   const {jobId} = route.params;
 
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList, 'PostJob'>>();
+  const navigation = useNavigation<any>();
   const [date, setDate] = useState<Date | null>(null);
   const [open, setOpen] = useState<boolean>(false);
   const formattedDate = date ? moment(date).format('YYYY-MM-DD  HH:mm A') : '';
@@ -80,6 +80,7 @@ const PostJob = ({route}: any) => {
   const [budget, setBudget] = useState('');
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const userLocation = useSelector((state: any) => state?.location?.location);
 
   const handleSelectedItem = (item: any) => {
     setSelectedType(item);
@@ -90,7 +91,7 @@ const PostJob = ({route}: any) => {
     const user = auth().currentUser;
     if (!user) return;
 
-    if (!jobTitle || !Location || !budget || !selectedType || !date) {
+    if (!jobTitle || !userLocation || !budget || !selectedType || !date) {
       showToast({
         type: 'info',
         title: 'Job Post',
@@ -105,7 +106,7 @@ const PostJob = ({route}: any) => {
         title: jobTitle,
         description: Description,
         type: selectedType,
-        location: Location,
+        location: userLocation,
         priceRange: budget.replace(/[^0-9]/g, ''),
         remarks: remarks || '',
         jobId: user.uid,
@@ -149,7 +150,7 @@ const PostJob = ({route}: any) => {
         const jobData = docSnapshot.data();
         setJobTitle(jobData?.title || '');
         setDescription(jobData?.description || '');
-        setLocation(jobData?.location || '');
+        setLocation(jobData?.location?.name || '');
         setSelectedType(jobData?.type || []);
         setBudget(jobData?.priceRange || null);
         setRemarks(jobData?.remarks || '');
@@ -214,13 +215,36 @@ const PostJob = ({route}: any) => {
                   />
                 </View>
 
-                {/* City */}
-                <InputField
-                  placeholder="Enter City/Town you want services at"
-                  customStyle={{width: '100%'}}
-                  value={Location}
-                  onChangeText={setLocation}
-                />
+                <TouchableOpacity
+                  onPress={() =>
+                    navigation.navigate('Location', {location: true})
+                  }
+                  activeOpacity={0.8}
+                  style={{
+                    width: '100%',
+                    alignSelf: 'center',
+                    height: RFPercentage(5.6),
+                    backgroundColor: 'white',
+                    borderWidth: 1,
+                    borderColor: Colors.inputFieldColor,
+                    borderRadius: RFPercentage(1),
+                    justifyContent: 'center',
+                    marginTop: RFPercentage(2.5),
+                    paddingHorizontal: RFPercentage(1.5),
+                  }}>
+                  <Text
+                    style={{
+                      color: Location || userLocation?.name ? Colors.inputTextColor :  Colors.placeholderColor,
+                      fontSize: RFPercentage(1.7),
+                      fontFamily: Fonts.fontRegular,
+                    }}>
+                    {userLocation?.name
+                      ? userLocation.name
+                      : Location
+                      ? Location
+                      : 'Enter City/Town you want services at'}
+                  </Text>
+                </TouchableOpacity>
 
                 {/* Service Type */}
                 <CustomDropDown

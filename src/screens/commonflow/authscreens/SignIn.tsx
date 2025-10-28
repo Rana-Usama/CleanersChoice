@@ -54,13 +54,16 @@ const SignIn: React.FC = () => {
       const userDoc = await firestore().collection('Users').doc(user.uid).get();
       const userData = userDoc.data();
       const userRole = userData?.role;
-      // await messaging().requestPermission();
-      // await messaging().registerDeviceForRemoteMessages();
-      // const fcmToken = await messaging().getToken();
-      // await firestore().collection('Users').doc(user.uid).update({
-      //   fcmToken: fcmToken,
-      // });
+      await messaging().requestPermission();
+      await messaging().registerDeviceForRemoteMessages();
+      const fcmToken = await messaging().getToken();
+      await firestore().collection('Users').doc(user.uid).update({
+        fcmToken: fcmToken,
+      });
       await AsyncStorage.setItem('password', values.password);
+      await AsyncStorage.setItem('logout', 'no');
+      await AsyncStorage.setItem('role', userRole);
+
       showToast({
         type: 'success',
         title: 'Sign In',
@@ -69,8 +72,6 @@ const SignIn: React.FC = () => {
       if (selected) {
         await AsyncStorage.setItem('email', values.email);
         await AsyncStorage.setItem('password', values.password);
-        await AsyncStorage.setItem('role', userRole);
-        await AsyncStorage.setItem('logout', 'no');
       }
 
       if (userRole === 'Cleaner') {

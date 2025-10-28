@@ -75,6 +75,8 @@ const ServiceOne: React.FC = ({navigation}: any) => {
   const profileCompletion = useSelector(
     (state: any) => state?.profile?.profileCompletion,
   );
+  const userLocation = useSelector((state: any) => state?.location?.location);
+
   const profileData = useSelector((state: any) => state?.profile?.profileData);
   const [selectedItems, setSelectedItems] = useState([]);
   const multiSelectRef = useRef(null);
@@ -106,7 +108,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
         const data = doc.data();
         dispatch(cleanerDescription(data?.description || ''));
         setSelectedItems(data?.type || []);
-        setLoaction(data?.location || '');
+        setLoaction(data?.location?.name || '');
         setServiceData(data);
       }
     } catch (error) {}
@@ -116,7 +118,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
   const addServices = async () => {
     const user = auth().currentUser;
     if (!user) return;
-    if (description && location && available && selectedItems) {
+    if (description && userLocation && available && selectedItems) {
       try {
         setLoading(true);
         const serviceRef = await firestore()
@@ -131,7 +133,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
             availability:
               available.length > 0 ? available : serviceData?.availability,
             type: selectedItems,
-            location: location,
+            location: userLocation,
             serviceImages: serviceData?.serviceImages || [],
             packages: serviceData?.packages || [],
             rating: serviceData?.rating || null,
@@ -186,25 +188,36 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                 {/* Location------- */}
 
                 <TouchableOpacity
-                  onPress={() => navigation.navigate('Location')}
+                  onPress={() =>
+                    navigation.navigate('Location', {location: true})
+                  }
                   activeOpacity={0.8}
                   style={{
-                    width: '90%',
+                    width: '100%',
                     alignSelf: 'center',
-                    height: RFPercentage(5),
+                    height: RFPercentage(5.6),
                     backgroundColor: 'white',
                     borderWidth: 1,
-                    borderColor: Colors.borderColor,
-                    borderRadius: RFPercentage(2),
+                    borderColor: Colors.inputFieldColor,
+                    borderRadius: RFPercentage(1),
                     justifyContent: 'center',
+                    marginTop: RFPercentage(2.5),
+                    paddingHorizontal: RFPercentage(1),
                   }}>
                   <Text
                     style={{
-                      color: Colors.placeholder,
-                      fontSize: RFPercentage(1.8),
+                      color:
+                        userLocation?.name || location
+                          ? Colors.inputTextColor
+                          : Colors.placeholderColor,
+                      fontSize: RFPercentage(1.7),
                       fontFamily: Fonts.fontRegular,
                     }}>
-                    Add city/town you provide your services at
+                    {userLocation?.name
+                      ? userLocation.name
+                      : location
+                      ? location
+                      : 'Add city/town you provide your services at'}
                   </Text>
                 </TouchableOpacity>
                 {/* Description */}
@@ -400,7 +413,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   descriptionContainer: {
-    marginTop: RFPercentage(2),
+    marginTop: RFPercentage(1),
   },
   dateContainer: {
     width: '100%',
