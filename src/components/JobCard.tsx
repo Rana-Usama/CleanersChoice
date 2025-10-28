@@ -59,7 +59,7 @@ const JobCard = (props: props) => {
               style={styles.detailIcon}
             />
             <Text style={styles.detailText} numberOfLines={1}>
-              {props.location}
+              {props.location || 'Not Added'}
             </Text>
           </View>
         </View>

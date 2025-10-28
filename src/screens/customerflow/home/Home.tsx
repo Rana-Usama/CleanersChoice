@@ -24,8 +24,6 @@ import SearchField from '../../../components/SearchField';
 import ServicesCard from '../../../components/ServicesCard';
 import {useNavigation} from '@react-navigation/native';
 import HeaderBack from '../../../components/HeaderBack';
-import {RootStackParamList} from '../../../routers/StackNavigator';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import Slider from '@react-native-community/slider';
 import firestore from '@react-native-firebase/firestore';
 import {BlurView} from '@react-native-community/blur';
@@ -38,6 +36,9 @@ import NotFound from '../../../components/NotFound';
 import {useExitAppOnBack} from '../../../utils/ExitApp';
 import {useSelector} from 'react-redux';
 import CustomModal from '../../../components/CustomModal';
+import {useCurrentLocation} from '../../../utils/userLocation';
+import haversine from 'haversine';
+import {clearFilterLocation} from '../../../redux/location/Actions';
 
 const categories = [
   {id: '1', name: 'All', icon: Icons.all},
@@ -77,29 +78,45 @@ interface Service {
 const Home = () => {
   useExitAppOnBack();
   const [categorySelection, setCategorySelection] = useState('1');
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList, 'Home'>>();
+  const navigation = useNavigation<any>();
   const [priceRange, setPriceRange] = useState([10, 2000]);
   const tempValue = useRef(priceRange[0]);
   const [servicesData, setServicesData] = useState<Service[]>([]);
   const [loading, setLoading] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
   const [rangeSelector, setRangeSelector] = useState(false);
-  const [locations, setLocations] = useState<any[]>([]);
-  const [query, setQuery] = useState('');
   const [loctionFilter, setLocationFilter] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
-  const [selectedLocation, setSelectedLocation] = useState<string>('');
   const [nameQuery, setNameQuery] = useState<string>('');
-  const [loactionLoading, setLocationLoading] = useState(false);
   const [priceLoading, setPriceLoading] = useState(false);
-  const [filteredLocations, setFilteredLocations] = useState<string[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [initializingLocation, setInitializingLocation] = useState(true);
 
-  const userFlow = useSelector(state => state.userFlow.userFlow); // 👈 get user flow
+  const userFlow = useSelector((state: any) => state.userFlow.userFlow); // 👈 get user flow
   const [showAuthModal, setShowAuthModal] = useState(false); // 👈 new modal state
+  const {location} = useCurrentLocation();
+  const selectedLocation = useSelector(
+    (state: any) =>
+      state?.location?.filterLocation ?? {
+        latitude: null,
+        longitude: null,
+        name: '',
+      },
+  );
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setInitializingLocation(false);
+    }, 2000);
+
+    if (location && location.latitude && location.longitude) {
+      clearTimeout(timer);
+      setInitializingLocation(false);
+    }
+
+    return () => clearTimeout(timer);
+  }, [location]);
 
   // On Refresh
   const onRefresh = () => {
@@ -150,16 +167,8 @@ const Home = () => {
           );
 
         setServicesData(servicesArray);
-
-        const locationsArray = servicesArray
-          .map(service => service.location)
-          .filter(location => location !== undefined);
-
-        const uniqueLocations = Array.from(new Set(locationsArray));
-        setLocations(uniqueLocations);
       } else {
         setServicesData([]);
-        setLocations([]);
       }
     } catch (error) {
     } finally {
@@ -167,18 +176,9 @@ const Home = () => {
     }
   };
 
-  // Location Search
-  const handleSearch = (query: any) => {
-    setQuery(query);
-    const filtered = locations.filter(location =>
-      location?.toLowerCase()?.includes(query?.toLowerCase()),
-    );
-    setFilteredLocations(filtered);
-  };
-
   // Modal Animations
   useEffect(() => {
-    if (modalVisible || modalVisible2) {
+    if (modalVisible2) {
       Animated.parallel([
         Animated.timing(opacityAnim, {
           toValue: 1,
@@ -205,17 +205,7 @@ const Home = () => {
         }),
       ]).start();
     }
-  }, [modalVisible || modalVisible2]);
-
-  // Location Apply
-  const handleLocationApply = () => {
-    setLocationLoading(true);
-    setTimeout(() => {
-      setLocationLoading(false);
-      setModalVisible(false);
-      setLocationFilter(true);
-    }, 1500);
-  };
+  }, [modalVisible2]);
 
   // Price Appply
   const handlePriceRangeApply = () => {
@@ -226,18 +216,6 @@ const Home = () => {
       setRangeSelector(true);
     }, 1500);
   };
-
-  // Location Trim
-  useEffect(() => {
-    if (query.trim().length > 0) {
-      const filtered = locations.filter(location =>
-        location.toLowerCase().includes(query.toLowerCase()),
-      );
-      setFilteredLocations(filtered);
-    } else {
-      setFilteredLocations([]);
-    }
-  }, [query, locations]);
 
   // Current User
   const dispatch = useDispatch();
@@ -256,36 +234,97 @@ const Home = () => {
     } catch (error) {}
   };
 
-  // Filtered Jobs
   const finalFilteredJobs = servicesData.filter(service => {
     if (rangeSelector) {
       const price = service?.packages?.[0]?.price || 0;
-      if (price < 0 || price > priceRange[0]) return false;
-    }
-
-    if (loctionFilter && selectedLocation.trim() !== '') {
-      if (
-        !service.location
-          ?.toLowerCase()
-          .includes(selectedLocation.trim().toLowerCase())
-      ) {
+      if (price < 0 || price > priceRange[0]) {
+        console.log('❌ Filtered by PRICE');
         return false;
       }
     }
 
     if (nameQuery.trim() !== '') {
       if (!service.name?.toLowerCase().includes(nameQuery.toLowerCase())) {
+        console.log('❌ Filtered by NAME');
         return false;
       }
     }
 
     if (categorySelection !== '1') {
       if (!service.type?.includes(categorySelection)) {
+        console.log('❌ Filtered by CATEGORY');
         return false;
       }
     }
+
+    const activeLocation = selectedLocation?.latitude
+      ? {
+          latitude: selectedLocation.latitude,
+          longitude: selectedLocation.longitude,
+        }
+      : location;
+
+    console.log('📍 Active location:', activeLocation);
+    console.log('🏠 Service location:', service.location);
+
+    if (activeLocation && activeLocation.latitude && activeLocation.longitude) {
+      console.log('✅ User has location - applying 20km radius filter');
+
+      if (service?.location?.latitude && service?.location?.longitude) {
+        const start = {
+          latitude: activeLocation.latitude,
+          longitude: activeLocation.longitude,
+        };
+        const end = {
+          latitude: service.location.latitude,
+          longitude: service.location.longitude,
+        };
+
+        const distance = haversine(start, end, {unit: 'km'});
+        console.log(`📏 Distance from user to ${service.name}: ${distance}km`);
+
+        if (distance > 20) {
+          console.log('❌ Filtered by DISTANCE (>20km)');
+          return false; // Outside 20km radius
+        }
+        console.log('✅ Within 20km radius');
+      } else {
+        console.log('❌ Service has NO coordinates - HIDING from results');
+        return false;
+      }
+    } else {
+    }
+
+    console.log('✅ Service PASSED all filters');
     return true;
   });
+
+  console.log('location,,,,,,,', location);
+  console.log('finalFilteredJobs,,,,,,,', finalFilteredJobs);
+
+  if (initializingLocation) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: Colors.background,
+          }}>
+          <ActivityIndicator size="large" color={Colors.gradient2} />
+          <Text
+            style={{
+              marginTop: 10,
+              color: Colors.secondaryText,
+              fontFamily: Fonts.fontMedium,
+            }}>
+            Fetching your location...
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -390,22 +429,21 @@ const Home = () => {
                 <TouchableOpacity
                   activeOpacity={0.8}
                   onPress={() => {
-                    setQuery('');
-                    setFilteredLocations([]);
-                    setSelectedLocation('');
-                    setModalVisible(true);
+                    navigation.navigate('Location', {location: false});
                   }}
                   style={[
                     styles.filterBox,
                     {
-                      backgroundColor: loctionFilter
+                      backgroundColor: selectedLocation?.name
                         ? Colors.gradient2
                         : 'white',
                     },
                   ]}>
                   <Image
                     source={
-                      loctionFilter ? Icons.locationWhite : Icons.location
+                      selectedLocation?.name
+                        ? Icons.locationWhite
+                        : Icons.location
                     }
                     style={styles.filterImg}
                     resizeMode="contain"
@@ -414,10 +452,10 @@ const Home = () => {
                     style={[
                       styles.filterText,
                       {
-                        fontFamily: loctionFilter
+                        fontFamily: selectedLocation?.name
                           ? Fonts.semiBold
                           : Fonts.fontMedium,
-                        color: loctionFilter
+                        color: selectedLocation?.name
                           ? Colors.background
                           : Colors.primaryText,
                       },
@@ -425,13 +463,11 @@ const Home = () => {
                     Location
                   </Text>
                 </TouchableOpacity>
-                {loctionFilter && (
+                {selectedLocation?.name && (
                   <TouchableOpacity
                     activeOpacity={0.8}
                     onPress={() => {
-                      setSelectedLocation('');
-                      setLocationFilter(false);
-                      setQuery('');
+                      dispatch(clearFilterLocation());
                     }}
                     style={styles.cross}>
                     <AntDesign
@@ -495,6 +531,7 @@ const Home = () => {
             </View>
 
             {/* Cleaners Services */}
+
             <View
               style={{
                 flexDirection: 'row',
@@ -509,8 +546,8 @@ const Home = () => {
                   fontFamily: Fonts.fontMedium,
                   fontSize: RFPercentage(1.8),
                 }}>
-                Cleaning Services
-                {selectedLocation.length > 0 && `:`}
+                Nearby Services
+                {selectedLocation?.name ? ':' : ''}
               </Text>
               <Text
                 style={{
@@ -519,9 +556,11 @@ const Home = () => {
                   fontSize: RFPercentage(1.5),
                   marginLeft: RFPercentage(1),
                 }}>
-                {selectedLocation.length > 30
-                  ? selectedLocation.substring(0, 30) + `...`
-                  : selectedLocation}
+                {selectedLocation && selectedLocation.name
+                  ? selectedLocation.name.length > 30
+                    ? selectedLocation.name.substring(0, 30) + '...'
+                    : selectedLocation.name
+                  : ''}
               </Text>
             </View>
 
@@ -536,12 +575,7 @@ const Home = () => {
             ) : (
               <>
                 <View style={styles.servicesContainer}>
-                  {((rangeSelector ||
-                    loctionFilter ||
-                    nameQuery ||
-                    categorySelection !== '1') &&
-                    finalFilteredJobs.length === 0) ||
-                  servicesData.length === 0 ? (
+                  {finalFilteredJobs.length === 0 ? (
                     <>
                       <View style={{bottom: RFPercentage(4)}}>
                         <NotFound text="No service found" />
@@ -550,14 +584,7 @@ const Home = () => {
                   ) : (
                     <>
                       <FlatList
-                        data={
-                          rangeSelector ||
-                          loctionFilter ||
-                          nameQuery ||
-                          categorySelection !== '1'
-                            ? finalFilteredJobs
-                            : servicesData
-                        }
+                        data={finalFilteredJobs}
                         keyExtractor={item => item.id.toString()}
                         numColumns={2}
                         contentContainerStyle={{paddingBottom: RFPercentage(1)}}
@@ -588,118 +615,6 @@ const Home = () => {
             )}
           </View>
         </ScrollView>
-
-        {/* Filter Modals */}
-        {modalVisible && (
-          <>
-            <View style={styles.modalContainer}>
-              <BlurView
-                style={styles.blurView}
-                blurType="light"
-                blurAmount={5}
-              />
-              <Modal
-                visible={modalVisible}
-                transparent={true}
-                animationType="none"
-                onRequestClose={() => setModalVisible(false)}>
-                <KeyboardAvoidingView
-                  keyboardVerticalOffset={Platform.OS === 'ios' ? 40 : 0}
-                  style={{
-                    flex: 1,
-                    alignItems: 'center',
-                  }}>
-                  <Animated.View
-                    style={[
-                      styles.locationModal,
-                      {opacity: opacityAnim, transform: [{scale: scaleAnim}], paddingVertical:RFPercentage(3)},
-                    ]}>
-                    <TouchableOpacity
-                      activeOpacity={0.8}
-                      style={styles.close}
-                      onPress={() => setModalVisible(false)}>
-                      <AntDesign
-                        name="closecircleo"
-                        size={RFPercentage(2.6)}
-                        color={Colors.secondaryText}
-                      />
-                    </TouchableOpacity>
-                    <View style={styles.modalInner}>
-                      <Text style={styles.applyLocation}>
-                        Apply Location Via City
-                      </Text>
-                    </View>
-                    <View style={{width: '100%', marginTop: RFPercentage(2)}}>
-                      {/* Search */}
-                      <SearchField
-                        placeholder="Search City"
-                        customStyle={{borderColor: 'rgba(39, 38, 38, 0.29)'}}
-                        value={query}
-                        onChangeText={handleSearch}
-                      />
-                    </View>
-
-                    {query.length > 0 && selectedLocation.length === 0 && (
-                      <View style={styles.queryContainer}>
-                        {filteredLocations?.length === 0 ? (
-                          <>
-                            <Text style={styles.queryText}>
-                              No Location exist
-                            </Text>
-                          </>
-                        ) : (
-                          <>
-                            <FlatList
-                              data={filteredLocations}
-                              keyExtractor={(item, index) => index.toString()}
-                              keyboardShouldPersistTaps="always"
-                              showsVerticalScrollIndicator={false}
-                              renderItem={({item, index}) => (
-                                <TouchableOpacity
-                                  activeOpacity={0.8}
-                                  onPress={() => {
-                                    setQuery(item);
-                                    setSelectedLocation(item);
-                                  }}>
-                                  <Text
-                                    style={[
-                                      styles.queryText,
-                                      {
-                                        borderBottomWidth:
-                                          index === filteredLocations.length - 1
-                                            ? 0
-                                            : 1,
-                                      },
-                                    ]}>
-                                    {item}
-                                  </Text>
-                                </TouchableOpacity>
-                              )}
-                            />
-                          </>
-                        )}
-                      </View>
-                    )}
-                    {/* Apply Button */}
-                    <View
-                      style={{position: 'absolute', bottom: RFPercentage(3)}}>
-                      <GradientButton
-                        title="Apply"
-                        onPress={handleLocationApply}
-                        loading={loactionLoading}
-                        disabled={
-                          query.length > 0 && filteredLocations.length != 0
-                            ? false
-                            : true
-                        }
-                      />
-                    </View>
-                  </Animated.View>
-                </KeyboardAvoidingView>
-              </Modal>
-            </View>
-          </>
-        )}
 
         {/* Price Range Modal */}
         {modalVisible2 && (
@@ -923,7 +838,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.3)',
     borderRadius: RFPercentage(2),
     height: RFPercentage(21),
-    paddingVertical:RFPercentage(2)
+    paddingVertical: RFPercentage(2),
   },
   queryText: {
     padding: RFPercentage(2),

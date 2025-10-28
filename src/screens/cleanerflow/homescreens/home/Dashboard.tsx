@@ -211,20 +211,27 @@ const Dashboard: React.FC = ({navigation}: any) => {
     }, 500);
   };
 
-  // Profile Completion
-  const profileCompletion =
-    service?.availability?.length > 0 &&
-    service?.description?.length > 0 &&
-    service?.location?.length > 0 &&
-    service?.packages?.length > 0
-      ? '100'
-      : service?.availability?.length > 0 &&
-        service?.description?.length > 0 &&
-        service?.location?.length > 0
-      ? '80'
-      : '50';
+  const [profileCompletion, setProfileCompletionValue] = useState('50');
 
-  dispatch(setProfileCompletion(profileCompletion));
+  useEffect(() => {
+    if (service) {
+      const completion =
+        service?.availability?.length > 0 &&
+        service?.description?.length > 0 &&
+        service?.location?.name?.length > 0 &&
+        service?.packages?.length > 0
+          ? '100'
+          : service?.availability?.length > 0 &&
+            service?.description?.length > 0 &&
+            service?.location?.name?.length > 0
+          ? '80'
+          : '50';
+
+      setProfileCompletionValue(completion);
+      dispatch(setProfileCompletion(completion));
+    }
+  }, [service]);
+
   const handleShowMore = () => {
     setVisibleItems(prev => Math.min(prev + 5, service?.type?.length));
   };
@@ -256,6 +263,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
   };
 
   const cleanDescription = service?.description.replace(/\s+/g, ' ').trim();
+  console.log(profileCompletion)
 
   return (
     <SafeAreaView style={styles.safeArea}>

@@ -180,6 +180,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                   />
                 )}
                 <Text
+                numberOfLines={1}
                   style={{
                     color: isFocused ? Colors.gradient2 : Colors.secondaryText,
                     fontSize: RFPercentage(1.4),
@@ -188,7 +189,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                         ? RFPercentage(-2.1)
                         : RFPercentage(0.5),
                     fontFamily: Fonts.fontMedium,
-                  }}>
+                  }} >
                   {label}
                 </Text>
               </TouchableOpacity>

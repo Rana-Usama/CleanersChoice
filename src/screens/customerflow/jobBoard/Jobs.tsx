@@ -108,21 +108,22 @@ const Jobs = ({navigation}: any) => {
   };
 
   // Truncations
-  const getTruncatedText = (text: any) => {
-    const maxChars = 20;
-    if (text.length <= maxChars) return text;
-    return text.slice(0, maxChars).trim() + '... ';
-  };
+const getTruncatedText = (text: string | null | undefined) => {
+  const maxChars = 20;
+  if (!text) return ''; // Return empty string for null/undefined
+  if (text?.length <= maxChars) return text;
+  return text?.slice(0, maxChars).trim() + '... ';
+};
 
-  const getTruncatedText2 = (text: any) => {
-    const maxChars = 30;
-    if (text.length <= maxChars) return text;
-    return text.slice(0, maxChars).trim() + '... ';
-  };
+const getTruncatedText2 = (text: string | null | undefined) => {
+  const maxChars = 40;
+  if (!text) return '';
+  if (text?.length <= maxChars) return text;
+  return text?.slice(0, maxChars).trim() + '... ';
+};
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Header */}
       <HeaderBack
         title="My Posted Jobs"
         right={true}
@@ -184,7 +185,7 @@ const Jobs = ({navigation}: any) => {
                     renderItem={({item}) => (
                       <JobCard
                         name={getTruncatedText(item?.title)}
-                        location={getTruncatedText2(item?.location)}
+                        location={getTruncatedText2(item?.location?.name)}
                         price={item?.priceRange}
                         date={item?.createdAt}
                         onPress={() =>

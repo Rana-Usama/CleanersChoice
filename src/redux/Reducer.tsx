@@ -4,7 +4,7 @@ const initialState = {
   userFlow: '',
 };
 
-export const userFlowReducer = (state = initialState, action) => {
+export const userFlowReducer = (state = initialState, action: any) => {
   switch (action.type) {
     case USER_FLOW:
       return {

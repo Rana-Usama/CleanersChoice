@@ -82,17 +82,8 @@ const Settings = ({navigation}: any) => {
 
       const userId = user.uid;
       const email = user.email;
-      console.log('📧 Email:', email);
-      console.log('🆔 UserID:', userId);
-
       const password = await AsyncStorage.getItem('password');
-      console.log(
-        '🔑 Retrieved password from AsyncStorage:',
-        password ? '****' : 'NULL',
-      );
-
       if (!password) {
-        console.log('⚠️ Missing password, showing toast...');
         showToast({
           type: 'error',
           title: 'Missing Password',
@@ -101,27 +92,14 @@ const Settings = ({navigation}: any) => {
         setLoading(false);
         return;
       }
-
-      console.log('🔐 Creating credential...');
       const credential = auth.EmailAuthProvider.credential(email, password);
-      console.log('✅ Credential created:', credential ? 'Yes' : 'No');
-
-      console.log('🔁 Reauthenticating user...');
       await user.reauthenticateWithCredential(credential);
-      console.log('✅ Reauthenticated successfully');
-
-      // Delete from Users collection
-      console.log('🗑️ Deleting user doc...');
       await firestore().collection('Users').doc(userId).delete();
-      console.log('✅ User doc deleted');
 
-      // Delete Jobs data
-      console.log('🗑️ Fetching related Jobs...');
       const jobsSnapshot = await firestore()
         .collection('Jobs')
         .where('jobId', '==', userId)
         .get();
-      console.log('📄 Jobs found:', jobsSnapshot.size);
 
       const jobBatch = firestore().batch();
       jobsSnapshot.forEach(doc => jobBatch.delete(doc.ref));
@@ -190,14 +168,20 @@ const Settings = ({navigation}: any) => {
           routes: [{name: 'OnBoarding'}],
         });
       }, 1000);
-    } catch (error) {
-      console.log('❌ [deleteAccount] ERROR:', error?.message, error);
-      showToast({
-        type: 'error',
-        title: 'Delete Failed',
-        message:
-          error?.message || 'Something went wrong while deleting your account.',
-      });
+    } catch (error: any) {
+      if (error.code === 'auth/requires-recent-login') {
+        showToast({
+          type: 'error',
+          title: 'Re-authentication Required',
+          message: 'Please log in again before deleting your account.',
+        });
+      } else {
+        showToast({
+          type: 'error',
+          title: 'Delete Failed',
+          message: error.message,
+        });
+      }
     } finally {
       console.log('🕓 [deleteAccount] Finished');
       setLoading(false);
