@@ -17,6 +17,7 @@ import auth from '@react-native-firebase/auth';
 import {showToast} from '../../../../utils/ToastMessage';
 import {useExitAppOnBack} from '../../../../utils/ExitApp';
 import firestore, {deleteField} from '@react-native-firebase/firestore';
+import {EmailAuthProvider} from '@react-native-firebase/auth';
 
 const Settings = ({navigation}: any) => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -70,7 +71,6 @@ const Settings = ({navigation}: any) => {
   const deleteAccount = async () => {
     console.log('🧹 [deleteAccount] Started');
     setLoading(true);
-
     try {
       const user = auth().currentUser;
       console.log('👤 Current user:', user ? user.uid : 'No user found');
@@ -82,6 +82,7 @@ const Settings = ({navigation}: any) => {
 
       const userId = user.uid;
       const email = user.email;
+      console.log('email.......', email);
       const password = await AsyncStorage.getItem('password');
       if (!password) {
         showToast({
@@ -92,7 +93,7 @@ const Settings = ({navigation}: any) => {
         setLoading(false);
         return;
       }
-      const credential = auth.EmailAuthProvider.credential(email, password);
+      const credential = EmailAuthProvider.credential(email, password);
       await user.reauthenticateWithCredential(credential);
       await firestore().collection('Users').doc(userId).delete();
 

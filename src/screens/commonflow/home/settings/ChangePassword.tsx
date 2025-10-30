@@ -19,6 +19,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as yup from 'yup';
 import {Formik} from 'formik';
 import {showToast} from '../../../../utils/ToastMessage';
+import {EmailAuthProvider} from '@react-native-firebase/auth';
 
 const ChangePasswordV2 = ({navigation}: any) => {
   const [loading, setLoading] = useState(false);
@@ -50,7 +51,7 @@ const ChangePasswordV2 = ({navigation}: any) => {
       setLoading(false);
       return;
     }
-    const credential = auth.EmailAuthProvider.credential(
+    const credential = EmailAuthProvider.credential(
       user?.email,
       values.oldPassword,
     );

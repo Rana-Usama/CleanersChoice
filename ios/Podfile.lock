@@ -2659,8 +2659,27 @@ PODS:
     - Yoga
   - react-native-date-picker (5.0.10):
     - React-Core
-  - react-native-geolocation-service (5.3.1):
-    - React
+  - react-native-geolocation (3.4.0):
+    - DoubleConversion
+    - glog
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - react-native-get-random-values (1.11.0):
     - React-Core
   - react-native-keyboard-controller (1.16.8):
@@ -3284,7 +3303,7 @@ DEPENDENCIES:
   - "react-native-blur (from `../node_modules/@react-native-community/blur`)"
   - react-native-compressor (from `../node_modules/react-native-compressor`)
   - react-native-date-picker (from `../node_modules/react-native-date-picker`)
-  - react-native-geolocation-service (from `../node_modules/react-native-geolocation-service`)
+  - "react-native-geolocation (from `../node_modules/@react-native-community/geolocation`)"
   - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
   - react-native-keyboard-controller (from `../node_modules/react-native-keyboard-controller`)
   - react-native-maps (from `../node_modules/react-native-maps`)
@@ -3460,8 +3479,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-compressor"
   react-native-date-picker:
     :path: "../node_modules/react-native-date-picker"
-  react-native-geolocation-service:
-    :path: "../node_modules/react-native-geolocation-service"
+  react-native-geolocation:
+    :path: "../node_modules/@react-native-community/geolocation"
   react-native-get-random-values:
     :path: "../node_modules/react-native-get-random-values"
   react-native-keyboard-controller:
@@ -3628,7 +3647,7 @@ SPEC CHECKSUMS:
   react-native-blur: e8365122fc34df8c43386260672e7d1d859981bd
   react-native-compressor: 2dd55619db5ffb6d2c7a6440d3a1cae3b96e5aca
   react-native-date-picker: c7605040f9fd11702eb818323b31ad7f15e1f7be
-  react-native-geolocation-service: 32b2c2a3b91e70ce2a8d0c684801aaeb0a07e0ec
+  react-native-geolocation: 4089292d550c4142f7a95df52b235a226b8a0d81
   react-native-get-random-values: d16467cf726c618e9c7a8c3c39c31faa2244bbba
   react-native-keyboard-controller: d286cfac658d7a5f1db7d02c8d2838359bcf62db
   react-native-maps: 3b0c8378ff774053bdd8954c820e987fdd7b4d72
