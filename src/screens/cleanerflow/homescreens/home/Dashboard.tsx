@@ -263,7 +263,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
   };
 
   const cleanDescription = service?.description.replace(/\s+/g, ' ').trim();
-  console.log(profileCompletion)
+  console.log("service............", service)
 
   return (
     <SafeAreaView style={styles.safeArea}>

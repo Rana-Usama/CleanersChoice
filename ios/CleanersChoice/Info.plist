@@ -2,6 +2,7 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- Basic App Information -->
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
@@ -23,68 +24,61 @@
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 
+	<!-- Firebase Configuration -->
 	<key>FirebaseAppDelegateProxyEnabled</key>
 	<true/>
 	<key>FirebaseInAppMessagingAutomaticDataCollectionEnabled</key>
 	<true/>
 
+	<!-- App Requirements -->
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 
+	<!-- Network Security -->
 	<key>NSAppTransportSecurity</key>
-<dict>
-    <key>NSAllowsArbitraryLoads</key>
-    <true/>
-    <key>NSAllowsLocalNetworking</key>
-    <true/>
-    
-    <!-- ✅ Specific exceptions for Google APIs -->
-    <key>NSExceptionDomains</key>
-    <dict>
-        <key>googleapis.com</key>
-        <dict>
-            <key>NSExceptionAllowsInsecureHTTPLoads</key>
-            <true/>
-            <key>NSIncludesSubdomains</key>
-            <true/>
-            <key>NSExceptionRequiresForwardSecrecy</key>
-            <false/>
-            <key>NSExceptionMinimumTLSVersion</key>
-            <string>TLSv1.0</string>
-        </dict>
-        <key>maps.googleapis.com</key>
-        <dict>
-            <key>NSExceptionAllowsInsecureHTTPLoads</key>
-            <true/>
-            <key>NSIncludesSubdomains</key>
-            <true/>
-            <key>NSExceptionRequiresForwardSecrecy</key>
-            <false/>
-        </dict>
-        <key>www.googleapis.com</key>
-        <dict>
-            <key>NSExceptionAllowsInsecureHTTPLoads</key>
-            <true/>
-            <key>NSIncludesSubdomains</key>
-            <true/>
-        </dict>
-    </dict>
-</dict>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<false/>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>googleapis.com</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<false/>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+			</dict>
+			<key>localhost</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+			</dict>
+		</dict>
+	</dict>
 
-	<!-- ✅ Updated Usage Descriptions -->
+	<!-- Permissions -->
 	<key>NSCameraUsageDescription</key>
 	<string>Cleaners Choice uses your camera to let you take photos for uploading service images, receipts, or profile pictures.</string>
 
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Cleaners Choice uses your location to show nearby cleaning services and provide accurate pickup and delivery options.</string>
 
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Cleaners Choice uses your location to suggest nearby cleaning requests and ensure accurate service availability, even when you're actively using the app.</string>
+
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Cleaners Choice uses your microphone when you record voice notes or provide voice instructions for service requests.</string>
 
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Cleaners Choice uses your photo library so you can select and upload photos for your cleaning requests or profile image.</string>
-	<!-- ✅ End Updated Usage Descriptions -->
 
+<key>LSApplicationQueriesSchemes</key>
+<array>
+    <string>comgooglemaps</string>
+    <string>comgooglemaps-x-callback</string>
+</array>
+
+	<!-- Custom Fonts -->
 	<key>UIAppFonts</key>
 	<array>
 		<string>Poppins-Bold.ttf</string>
@@ -114,12 +108,14 @@
 		<string>Fontisto.ttf</string>
 	</array>
 
+	<!-- Background Modes -->
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
 		<string>remote-notification</string>
 	</array>
 
+	<!-- UI Configuration -->
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 
@@ -127,13 +123,6 @@
 	<array>
 		<string>arm64</string>
 	</array>
-
-	<key>NSLocationWhenInUseUsageDescription</key>
-<string>Cleaners Choice uses your location to help you find nearby jobs and provide cleaning services efficiently to customers in your area.</string>
-
-<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-<string>Cleaners Choice uses your location to suggest nearby cleaning requests and ensure accurate service availability, even when you’re actively using the app.</string>
-
 
 	<key>UISupportedInterfaceOrientations</key>
 	<array>

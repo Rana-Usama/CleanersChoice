@@ -19,80 +19,64 @@ import {
   setUserLocation,
   setFilterLocation,
 } from '../../../redux/location/Actions';
+import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
 
 export default function Location({navigation, route}: any) {
-  const mapRef = useRef(null);
-  const [marker, setMarker] = useState(null);
-  const [selectedLocation, setSelectedLocation] = useState({
+  const mapRef = useRef<MapView>(null);
+  const placesRef = useRef<any>(null);
+
+  const [marker, setMarker] = useState<any>(null);
+  const [selectedLocation, setSelectedLocation] = useState<any>({
     latitude: null,
     longitude: null,
     name: '',
   });
   const [query, setQuery] = useState('');
-  const [suggestions, setSuggestions] = useState([]);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const dispatch = useDispatch();
   const {location: isLocationSelect} = route?.params || {};
 
-  const GOOGLE_API_KEY = 'AIzaSyBpswfk8p6S57T_TqGTCUaDi7c6oHvHGuA'; // 🔑
+  const GOOGLE_API_KEY = 'AIzaSyBpswfk8p6S57T_TqGTCUaDi7c6oHvHGuA';
 
-  // Fetch autocomplete suggestions
-  const fetchPlaces = async (text: string) => {
+  // Android: Fetch autocomplete suggestions
+  const fetchPlacesAndroid = async (text: string) => {
     setQuery(text);
     if (text.length < 2) {
       setSuggestions([]);
       return;
     }
-
     try {
       const res = await axios.get(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json`,
+        'https://maps.googleapis.com/maps/api/place/autocomplete/json',
         {
-          params: {
-            input: text,
-            key: GOOGLE_API_KEY,
-            language: 'en',
-          },
+          params: {input: text, key: GOOGLE_API_KEY, language: 'en'},
         },
       );
-      if (res.data.status === 'OK') {
-        setSuggestions(res.data.predictions);
-      } else {
-        console.log('⚠️ Places API Error:', res.data.status);
-      }
+      if (res.data.status === 'OK') setSuggestions(res.data.predictions);
+      else console.log('⚠️ Places API Error:', res.data.status);
     } catch (err: any) {
-      console.log('❌ Autocomplete Error:', err.message);
+      console.log('❌ Autocomplete Error (Android):', err.message);
     }
   };
 
-  // When user selects a suggestion
-  const handlePlaceSelect = async (item: any) => {
+  const handlePlaceSelectAndroid = async (item: any) => {
     try {
       const detailRes = await axios.get(
-        `https://maps.googleapis.com/maps/api/place/details/json`,
-        {
-          params: {
-            place_id: item.place_id,
-            key: GOOGLE_API_KEY,
-          },
-        },
+        'https://maps.googleapis.com/maps/api/place/details/json',
+        {params: {place_id: item.place_id, key: GOOGLE_API_KEY}},
       );
-
       const loc = detailRes.data.result.geometry.location;
       const coordinate = {
         latitude: loc.lat,
         longitude: loc.lng,
         name: item.description,
       };
-
       setMarker(coordinate);
       setSelectedLocation(coordinate);
       setSuggestions([]);
       setQuery(item.description);
       setIsSearchFocused(false);
-
-      console.log('setSelectedLocation', coordinate);
-
       mapRef.current?.animateToRegion({
         ...coordinate,
         latitudeDelta: 0.01,
@@ -106,8 +90,7 @@ export default function Location({navigation, route}: any) {
   const handleMapPress = async (event: any) => {
     const coordinate = event.nativeEvent.coordinate;
     setMarker(coordinate);
-
-    mapRef?.current?.animateToRegion({
+    mapRef.current?.animateToRegion({
       ...coordinate,
       latitudeDelta: 0.01,
       longitudeDelta: 0.01,
@@ -119,33 +102,22 @@ export default function Location({navigation, route}: any) {
       );
       const address =
         response.data.results[0]?.formatted_address || 'Selected Location';
-
-      setSelectedLocation({
-        latitude: coordinate.latitude,
-        longitude: coordinate.longitude,
-        name: address,
-      });
+      setSelectedLocation({...coordinate, name: address});
       setQuery(address);
-    } catch (error) {
+    } catch (error: any) {
       console.log('❌ Reverse Geocode Error:', error.message);
     }
   };
 
   const handleApplyFilter = () => {
     if (!selectedLocation.latitude) return;
-
-    if (isLocationSelect) {
-      dispatch(setUserLocation(selectedLocation));
-    } else {
-      dispatch(setFilterLocation(selectedLocation));
-    }
-
+    if (isLocationSelect) dispatch(setUserLocation(selectedLocation));
+    else dispatch(setFilterLocation(selectedLocation));
     navigation.goBack();
   };
 
   return (
     <View style={styles.container}>
-      {/* Map */}
       <MapView
         ref={mapRef}
         style={styles.map}
@@ -159,7 +131,6 @@ export default function Location({navigation, route}: any) {
           isSearchFocused && suggestions.length > 0 ? 'none' : 'auto'
         }
         onPress={e => {
-          // ignore map press if suggestions are visible
           if (isSearchFocused && suggestions.length > 0) return;
           handleMapPress(e);
         }}>
@@ -171,61 +142,112 @@ export default function Location({navigation, route}: any) {
         )}
       </MapView>
 
-      {/* Search Bar */}
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.topContainer}>
         <View style={styles.searchRow}>
           <TouchableOpacity
-          activeOpacity={0.8}
+            activeOpacity={0.8}
             onPress={() => navigation.goBack()}
             style={[styles.backButton, {backgroundColor: 'white'}]}>
-            <AntDesign
-              name="arrowleft"
-              size={RFPercentage(2.7)}
-              color={'gray'}
-            />
+            <AntDesign name="arrowleft" size={RFPercentage(2.7)} color="gray" />
           </TouchableOpacity>
 
           <View style={styles.searchWrapper}>
-            <TextInput
-              value={query}
-              onChangeText={fetchPlaces}
-              onFocus={() => setIsSearchFocused(true)}
-              onBlur={() => setIsSearchFocused(false)}
-              placeholder="Search Location"
-              placeholderTextColor="gray"
-              style={styles.input}
-            />
-
-            {/* Suggestions List */}
-            {isSearchFocused && suggestions.length > 0 && (
-              <FlatList
-                data={suggestions}
-                keyExtractor={item => item.place_id}
-                keyboardShouldPersistTaps="handled"
-                style={styles.listView}
-                renderItem={({item}) => (
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    onPress={() => handlePlaceSelect(item)}
-                    style={styles.listItem}
-                    pointerEvents="auto">
-                    <Text style={styles.description}>{item.description}</Text>
-                  </TouchableOpacity>
-                )}
-                pointerEvents="auto"
+            {Platform.OS === 'ios' ? (
+              <GooglePlacesAutocomplete
+                ref={placesRef}
+                placeholder="Search Location"
+                fetchDetails
+                enablePoweredByContainer={false}
+                debounce={300}
+                minLength={2}
+                predefinedPlaces={[]}
+                query={{
+                  key: GOOGLE_API_KEY,
+                  language: 'en',
+                }}
+                onPress={(data, details = null) => {
+                  if (!details?.geometry?.location) return;
+                  const coordinate = {
+                    latitude: details.geometry.location.lat,
+                    longitude: details.geometry.location.lng,
+                    name: data.description,
+                  };
+                  setMarker(coordinate);
+                  setSelectedLocation(coordinate);
+                  mapRef.current?.animateToRegion({
+                    ...coordinate,
+                    latitudeDelta: 0.01,
+                    longitudeDelta: 0.01,
+                  });
+                  setQuery(data.description);
+                  setIsSearchFocused(false);
+                }}
+                textInputProps={{
+                  onFocus: () => setIsSearchFocused(true),
+                  onBlur: () => setIsSearchFocused(false),
+                  clearButtonMode: 'while-editing',
+                }}
+                styles={{
+                  textInputContainer: {
+                    backgroundColor: 'white',
+                    borderRadius: 8,
+                  },
+                  textInput: {
+                    height: RFPercentage(5),
+                    fontSize: RFPercentage(1.8),
+                  },
+                  listView: {
+                    backgroundColor: 'white',
+                    borderRadius: 8,
+                    maxHeight: RFPercentage(40),
+                    zIndex: 9999,
+                    elevation: 10,
+                    marginTop:10
+                  },
+                }}
               />
+            ) : (
+              <>
+                <TextInput
+                  value={query}
+                  onChangeText={fetchPlacesAndroid}
+                  onFocus={() => setIsSearchFocused(true)}
+                  onBlur={() => setIsSearchFocused(false)}
+                  placeholder="Search Location"
+                  placeholderTextColor="gray"
+                  style={styles.input}
+                />
+
+                {isSearchFocused && suggestions?.length > 0 && (
+                  <FlatList
+                    data={suggestions}
+                    keyExtractor={item => item.place_id}
+                    keyboardShouldPersistTaps="handled"
+                    style={styles.listView}
+                    renderItem={({item}) => (
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={() => handlePlaceSelectAndroid(item)}
+                        style={styles.listItem}>
+                        <Text style={styles.description}>
+                          {item.description}
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  />
+                )}
+              </>
             )}
           </View>
         </View>
       </KeyboardAvoidingView>
 
-      {/* Apply Button */}
-      {selectedLocation.latitude && (
+      {selectedLocation?.latitude && (
         <View style={styles.buttonWrapper}>
           <TouchableOpacity
-           activeOpacity={0.8}
+            activeOpacity={0.8}
             onPress={handleApplyFilter}
             style={[styles.applyButton, {backgroundColor: Colors.gradient1}]}>
             <Text style={styles.applyButtonText}>Apply Location</Text>
@@ -236,7 +258,6 @@ export default function Location({navigation, route}: any) {
   );
 }
 
-// 💅 Styles
 const styles = StyleSheet.create({
   container: {flex: 1},
   map: {...StyleSheet.absoluteFillObject},
@@ -249,7 +270,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: RFPercentage(2),
   },
   searchRow: {flexDirection: 'row', width: '100%', top: RFPercentage(2)},
-  searchWrapper: {flex: 1, zIndex: 9999},
   backButton: {
     width: RFPercentage(5.3),
     height: RFPercentage(5.3),
@@ -258,8 +278,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: RFPercentage(1),
     elevation: 3,
-    top:RFPercentage(0.5)
+    top: Platform.OS === 'android' ?  RFPercentage(0.5) : 0,
   },
+  searchWrapper: {flex: 1, zIndex: 9999, position: 'relative'},
   input: {
     height: RFPercentage(6),
     fontSize: RFPercentage(1.8),
@@ -273,14 +294,17 @@ const styles = StyleSheet.create({
   listView: {
     backgroundColor: 'white',
     borderRadius: 8,
-    marginTop: 60,
-    elevation: 20, // increase
+    marginTop: 8,
+    maxHeight: RFPercentage(40),
     zIndex: 9999,
-    position: 'absolute', // ensures it’s above the map
+    position: 'absolute',
     width: '100%',
-    
+    elevation: 20,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
-
   listItem: {
     paddingVertical: 12,
     paddingHorizontal: 15,
