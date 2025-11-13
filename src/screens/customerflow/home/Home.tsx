@@ -84,7 +84,6 @@ const Home = () => {
   const [servicesData, setServicesData] = useState<Service[]>([]);
   const [loading, setLoading] = useState(false);
   const [rangeSelector, setRangeSelector] = useState(false);
-  const [loctionFilter, setLocationFilter] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -109,12 +108,10 @@ const Home = () => {
     const timer = setTimeout(() => {
       setInitializingLocation(false);
     }, 2000);
-
     if (location && location.latitude && location.longitude) {
       clearTimeout(timer);
       setInitializingLocation(false);
     }
-
     return () => clearTimeout(timer);
   }, [location]);
 
@@ -268,8 +265,6 @@ const Home = () => {
     console.log('🏠 Service location:', service.location);
 
     if (activeLocation && activeLocation.latitude && activeLocation.longitude) {
-      console.log('✅ User has location - applying 20km radius filter');
-
       if (service?.location?.latitude && service?.location?.longitude) {
         const start = {
           latitude: activeLocation.latitude,
@@ -281,26 +276,16 @@ const Home = () => {
         };
 
         const distance = haversine(start, end, {unit: 'km'});
-        console.log(`📏 Distance from user to ${service.name}: ${distance}km`);
-
         if (distance > 20) {
-          console.log('❌ Filtered by DISTANCE (>20km)');
           return false; // Outside 20km radius
         }
-        console.log('✅ Within 20km radius');
       } else {
-        console.log('❌ Service has NO coordinates - HIDING from results');
         return false;
       }
     } else {
     }
-
-    console.log('✅ Service PASSED all filters');
     return true;
   });
-
-  console.log('location,,,,,,,', location);
-  console.log('finalFilteredJobs,,,,,,,', finalFilteredJobs);
 
   if (initializingLocation) {
     return (
@@ -337,9 +322,9 @@ const Home = () => {
           textStyle={{fontSize: RFPercentage(2.2)}}
           onPress={() => {
             if (userFlow === 'Guest') {
-              setShowAuthModal(true); // 👈 show modal if guest
+              setShowAuthModal(true);
             } else {
-              navigation.navigate('PostJob', {jobId: null}); // 👈 normal flow
+              navigation.navigate('PostJob', {jobId: null});
             }
           }}
         />
@@ -351,7 +336,6 @@ const Home = () => {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="always">
           <View style={styles.container}>
-            {/* Search Field */}
             <View style={styles.searchContainer}>
               <SearchField
                 placeholder="Search Businesses"
@@ -360,7 +344,6 @@ const Home = () => {
               />
             </View>
 
-            {/* Categories */}
             <Text style={[styles.sectionTitle, {marginTop: RFPercentage(2)}]}>
               Categories
             </Text>
@@ -421,10 +404,8 @@ const Home = () => {
               contentContainerStyle={styles.flatListPadding}
             />
 
-            {/* Filters */}
             <Text style={styles.sectionTitle}>Apply filters</Text>
             <View style={styles.filterWrapper}>
-              {/* Location */}
               <View>
                 <TouchableOpacity
                   activeOpacity={0.8}
@@ -479,7 +460,6 @@ const Home = () => {
                 )}
               </View>
 
-              {/* Price Range */}
               <View>
                 <TouchableOpacity
                   activeOpacity={0.8}
@@ -529,8 +509,6 @@ const Home = () => {
                 )}
               </View>
             </View>
-
-            {/* Cleaners Services */}
 
             <View
               style={{
@@ -586,9 +564,7 @@ const Home = () => {
                       <FlatList
                         data={finalFilteredJobs}
                         keyExtractor={item => item.id.toString()}
-                        numColumns={2}
                         contentContainerStyle={{paddingBottom: RFPercentage(1)}}
-                        columnWrapperStyle={styles.serviceColumnWrapper}
                         renderItem={({item}) => (
                           <View style={styles.serviceItem}>
                             <ServicesCard
@@ -604,6 +580,7 @@ const Home = () => {
                                   item: item,
                                 })
                               }
+                              createdAt={item.createdAt}
                             />
                           </View>
                         )}
@@ -615,8 +592,6 @@ const Home = () => {
             )}
           </View>
         </ScrollView>
-
-        {/* Price Range Modal */}
         {modalVisible2 && (
           <>
             <TouchableWithoutFeedback onPress={() => setModalVisible2(false)}>
@@ -642,33 +617,34 @@ const Home = () => {
                         },
                         styles.rangeModal,
                       ]}>
-                      <TouchableOpacity
-                        activeOpacity={0.8}
-                        style={styles.close}
-                        onPress={() => setModalVisible2(false)}>
-                        <AntDesign
-                          name="closecircleo"
-                          size={RFPercentage(2.6)}
-                          color={Colors.secondaryText}
-                        />
-                      </TouchableOpacity>
-                      <View
-                        style={[
-                          {
-                            marginTop: RFPercentage(3),
-                          },
-                          // styles.modalInner,
-                        ]}>
-                        <Text
-                          style={[
-                            styles.applyLocation,
-                            {top: RFPercentage(2)},
-                          ]}>
+                      {/* Header */}
+                      <View style={styles.modalHeader}>
+                        <Text style={styles.modalTitle}>
                           Select Price Range
                         </Text>
+                        <TouchableOpacity
+                          activeOpacity={0.7}
+                          style={styles.closeButton}
+                          onPress={() => setModalVisible2(false)}>
+                          <AntDesign
+                            name="close"
+                            size={RFPercentage(2.2)}
+                            color={Colors.secondaryText}
+                          />
+                        </TouchableOpacity>
                       </View>
-                      <View style={{width: '100%', marginTop: RFPercentage(8)}}>
-                        {/* Slider */}
+
+                      {/* Current Price Display */}
+                      <View style={styles.priceDisplayContainer}>
+                        <View style={styles.priceBubble}>
+                          <Text style={styles.priceValue}>
+                            ${tempValue.current}
+                          </Text>
+                        </View>
+                      </View>
+
+                      {/* Slider Container */}
+                      <View style={styles.sliderContainer}>
                         <Slider
                           style={styles.sliderStyle}
                           minimumValue={10}
@@ -682,37 +658,29 @@ const Home = () => {
                             setPriceRange([value, priceRange[1]]);
                           }}
                           minimumTrackTintColor={Colors.gradient1}
-                          maximumTrackTintColor={Colors.borderBottomColor}
                           thumbTintColor={Colors.gradient1}
+                          maximumTrackTintColor={
+                            Platform.OS === 'ios' ? '#bfc9deff' : '#7a7e85ff'
+                          }
                         />
+
+                        {/* Slider Labels */}
                         <View style={styles.sliderLabelsContainer}>
-                          <Text
-                            style={[
-                              styles.sliderLabel,
-                              {left: RFPercentage(1)},
-                            ]}>
-                            0$
-                          </Text>
-                          <Text
-                            style={[
-                              styles.sliderLabel,
-                              {left: RFPercentage(1)},
-                            ]}>
-                            1000$
-                          </Text>
-                          <Text style={styles.sliderLabel}>2000$+</Text>
+                          <Text style={styles.sliderMinLabel}>$10</Text>
+                          <Text style={styles.sliderMaxLabel}>$2000+</Text>
                         </View>
-                        <View style={{marginTop: RFPercentage(6)}}>
-                          {tempValue.current > 10 && (
-                            <Text style={styles.range}>
-                              Selected Price Range: 0 - {tempValue.current}$
-                            </Text>
-                          )}
+
+                        {/* Range Indicator */}
+                        <View style={styles.rangeIndicator}>
+                          <View style={styles.rangeIndicatorLine} />
+                          <Text style={styles.rangeIndicatorText}>
+                            Selected range: $0 - ${tempValue.current}
+                          </Text>
                         </View>
                       </View>
+
                       {/* Apply Button */}
-                      <View
-                        style={{position: 'absolute', bottom: RFPercentage(4)}}>
+                      <View style={styles.applyButtonContainer}>
                         <GradientButton
                           title="Apply"
                           onPress={handlePriceRangeApply}
@@ -726,7 +694,6 @@ const Home = () => {
             </TouchableWithoutFeedback>
           </>
         )}
-
         <Modal
           transparent
           visible={showAuthModal}
@@ -848,17 +815,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.fontRegular,
     color: Colors.placeholderColor,
   },
-  rangeModal: {
-    width: '90%',
-    height: '45%',
-    alignSelf: 'center',
-    backgroundColor: 'rgba(226, 238, 255, 0.9)',
-    alignItems: 'center',
-    borderRadius: RFPercentage(2.5),
-    top: RFPercentage(20),
-    paddingHorizontal: RFPercentage(1.6),
-    paddingVertical: RFPercentage(2.5),
-  },
+
   range: {
     textAlign: 'center',
     fontFamily: Fonts.fontMedium,
@@ -942,7 +899,7 @@ const styles = StyleSheet.create({
   },
   serviceItem: {
     margin: RFPercentage(0.6),
-    width: '47.5%',
+    // width: '47.5%',
     marginTop: RFPercentage(1),
   },
   servicesContainer: {
@@ -964,17 +921,7 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
   },
-  sliderStyle: {
-    width: '100%',
-    height: RFPercentage(3),
-  },
-  sliderLabelsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    // bottom: 5,
-    // marginTop: -4,
-  },
+
   sliderLabel: {
     color: Colors.secondaryText,
     fontSize: RFPercentage(1.9),
@@ -1049,5 +996,149 @@ const styles = StyleSheet.create({
     color: Colors.gradient2,
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(2),
+  },
+
+  rangeModal: {
+    width: '85%',
+    height: '50%',
+    minHeight: RFPercentage(35),
+    alignSelf: 'center',
+    backgroundColor: Colors.background,
+    borderRadius: RFPercentage(3),
+    top: RFPercentage(20),
+    paddingHorizontal: RFPercentage(3),
+    paddingVertical: RFPercentage(3),
+    // Shadow
+    shadowColor: 'rgba(73, 113, 152, 1)',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: RFPercentage(2),
+  },
+
+  modalTitle: {
+    color: Colors.secondaryText,
+    fontFamily: Fonts.semiBold,
+    fontSize: RFPercentage(2),
+    flex: 1,
+  },
+
+  closeButton: {
+    padding: RFPercentage(0.5),
+    // backgroundColor: 'rgba(215, 229, 244, 1)',
+    borderRadius: RFPercentage(100),
+  },
+
+  priceDisplayContainer: {
+    alignItems: 'center',
+    marginBottom: RFPercentage(4),
+  },
+
+  priceBubble: {
+    backgroundColor: 'rgba(202, 217, 238, 0.44)',
+    paddingHorizontal: RFPercentage(3),
+    paddingVertical: RFPercentage(1.5),
+    borderRadius: RFPercentage(1),
+    alignItems: 'center',
+    // Shadow
+    shadowColor: 'rgba(130, 170, 193, 0.69)',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 10,
+  },
+
+  priceLabel: {
+    color: Colors.background,
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.4),
+    opacity: 0.9,
+  },
+
+  priceValue: {
+    color: Colors.primaryText,
+    fontFamily: Fonts.semiBold,
+    fontSize: RFPercentage(2.4),
+    marginTop: RFPercentage(0.2),
+  },
+
+  sliderContainer: {
+    width: '100%',
+    marginBottom: RFPercentage(4),
+  },
+
+  sliderStyle: {
+    width: '100%',
+    height: RFPercentage(4),
+  },
+
+  sliderThumb: {
+    shadowColor: Colors.gradient1,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+
+  sliderLabelsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginTop: RFPercentage(1),
+  },
+
+  sliderMinLabel: {
+    color: Colors.secondaryText,
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontMedium,
+  },
+
+  sliderMaxLabel: {
+    color: Colors.secondaryText,
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontMedium,
+  },
+
+  rangeIndicator: {
+    alignItems: 'center',
+    marginTop: RFPercentage(3),
+  },
+
+  rangeIndicatorLine: {
+    width: '60%',
+    height: 1,
+    backgroundColor: Colors.inputFieldColor,
+    marginBottom: RFPercentage(1),
+  },
+
+  rangeIndicatorText: {
+    color: Colors.primaryText,
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.6),
+    textAlign: 'center',
+  },
+
+  applyButtonContainer: {
+    width: '100%',
+    alignSelf: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

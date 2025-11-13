@@ -180,7 +180,8 @@ const PostJob = ({route}: any) => {
           textStyle={{fontSize: RFPercentage(2)}}
           left={true}
           style={{
-            height: Platform.OS === 'ios' ? RFPercentage(13) : RFPercentage(8),
+            height:
+              Platform.OS === 'ios' ? RFPercentage(13) : RFPercentage(13),
           }}
         />
       </View>
@@ -223,18 +224,21 @@ const PostJob = ({route}: any) => {
                   style={{
                     width: '100%',
                     alignSelf: 'center',
-                    height: RFPercentage(5.6),
+                    height: RFPercentage(6.5),
                     backgroundColor: 'white',
                     borderWidth: 1,
                     borderColor: Colors.inputFieldColor,
-                    borderRadius: RFPercentage(1),
+                    borderRadius: RFPercentage(1.3),
                     justifyContent: 'center',
-                    marginTop: RFPercentage(2.5),
+                    marginTop: RFPercentage(2),
                     paddingHorizontal: RFPercentage(1.5),
                   }}>
                   <Text
                     style={{
-                      color: Location || userLocation?.name ? Colors.inputTextColor :  Colors.placeholderColor,
+                      color:
+                        Location || userLocation?.name
+                          ? Colors.inputTextColor
+                          : Colors.placeholderColor,
                       fontSize: RFPercentage(1.7),
                       fontFamily: Fonts.fontRegular,
                     }}>
@@ -259,7 +263,7 @@ const PostJob = ({route}: any) => {
                 {/* Budget */}
                 <InputField
                   placeholder="Budget e.g; $120"
-                  customStyle={{width: '100%'}}
+                  customStyle={{width: '100%', marginTop: RFPercentage(2)}}
                   value={budget}
                   onChangeText={handleBudgetChange}
                   type={'numeric'}
@@ -293,6 +297,7 @@ const PostJob = ({route}: any) => {
                   modal
                   open={open}
                   date={date || new Date()}
+                  minimumDate={new Date()} // This prevents selecting past dates
                   onConfirm={date => {
                     setOpen(false);
                     setDate(date);
@@ -365,7 +370,7 @@ const styles = StyleSheet.create({
     height: RFPercentage(12),
     borderWidth: 1,
     borderColor: Colors.inputFieldColor,
-    borderRadius: RFPercentage(0.8),
+    borderRadius: RFPercentage(2),
     marginVertical: RFPercentage(1.5),
     paddingHorizontal: RFPercentage(1),
     paddingTop: RFPercentage(0.8),
@@ -381,11 +386,11 @@ const styles = StyleSheet.create({
   },
   dateContainer: {
     width: '100%',
-    height: RFPercentage(5.4),
+    height: RFPercentage(6.5),
     borderWidth: 1,
     borderColor: Colors.inputFieldColor,
-    borderRadius: RFPercentage(0.8),
-    marginVertical: RFPercentage(1.5),
+    borderRadius: RFPercentage(1.3),
+    marginVertical: RFPercentage(1),
     paddingHorizontal: RFPercentage(1.5),
     justifyContent: 'center',
   },

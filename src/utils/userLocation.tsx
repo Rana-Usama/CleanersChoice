@@ -14,7 +14,6 @@ export const useCurrentLocation = () => {
 
   const requestPermission = useCallback(async () => {
     if (Platform.OS === 'ios') {
-      // For iOS, we can use requestAuthorization
       return new Promise((resolve) => {
         Geolocation.requestAuthorization(
           () => {

@@ -89,9 +89,9 @@ export default CustomDropDown;
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    height: RFPercentage(5.6),
-    borderRadius: RFPercentage(0.8),
-    marginVertical: RFPercentage(1.5),
+    height: RFPercentage(6.5),
+    borderRadius: RFPercentage(1.3),
+    marginTop: RFPercentage(2),
     justifyContent: 'center',
     paddingHorizontal: RFPercentage(1.5),
   },

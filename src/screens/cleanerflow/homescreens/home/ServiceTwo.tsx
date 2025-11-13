@@ -176,9 +176,9 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <View style={styles.safeArea}>
       {/* Header */}
-      <HeaderBack title="Service" textStyle={styles.headerText} left={true} />
+      <HeaderBack title="Service" textStyle={styles.headerText} left={true} style={{height:RFPercentage(13)}} />
       <View style={[styles.container, {width: '90%', alignSelf: 'center'}]}>
         <View style={styles.infoHeaderContainer}>
           <InfoHeader />
@@ -269,7 +269,7 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
           />
         </View>
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 
