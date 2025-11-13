@@ -215,42 +215,37 @@ const CleanerJobs = () => {
   }, []);
 
   const finalFilteredJobs = jobsData.filter(job => {
-    // ---- PRICE, NAME, CATEGORY filters (same as before) ----
+    // Price filter
     if (rangeSelector) {
       const price = job?.priceRange || 0;
-      if (price < 0 || price > priceRange[0]) return false;
+      if (price < 0 || price > priceRange[0]) {
+        return false;
+      }
     }
 
-    if (
-      query2.trim() !== '' &&
-      !job?.title?.toLowerCase().includes(query2.toLowerCase())
-    ) {
-      return false;
+    // Service type filter - More robust exact matching
+    if (serviceType && selectedType) {
+      const jobType = job.type?.toLowerCase().trim();
+      const selectedTypeLower = selectedType.toLowerCase().trim();
+      if (jobType !== selectedTypeLower) {
+        return false;
+      }
     }
 
-    if (
-      serviceType &&
-      selectedType &&
-      !job.type?.toLowerCase().includes(selectedType.toLowerCase())
-    ) {
-      return false;
-    }
+    // Location filtering logic
+    const hasSelectedLocation =
+      selectedLocation?.latitude && selectedLocation?.longitude;
+    const hasCurrentLocation = location?.latitude && location?.longitude;
 
-    // ---- SAFE LOCATION FILTER ----
-    // Check if we have a valid user location
-    const hasUserLocation =
-      (selectedLocation?.latitude && selectedLocation?.longitude) ||
-      (location?.latitude && location?.longitude);
-
-    if (hasUserLocation) {
-      const userLat = selectedLocation?.latitude || location?.latitude;
-      const userLng = selectedLocation?.longitude || location?.longitude;
-
-      // Check if job has valid coordinates
+    // Priority 1: If user has selected a specific location, use that
+    if (hasSelectedLocation) {
       if (job?.location?.latitude && job?.location?.longitude) {
         try {
           const distance = haversine(
-            {latitude: userLat, longitude: userLng},
+            {
+              latitude: selectedLocation.latitude,
+              longitude: selectedLocation.longitude,
+            },
             {
               latitude: job.location.latitude,
               longitude: job.location.longitude,
@@ -259,16 +254,33 @@ const CleanerJobs = () => {
           );
           return distance <= 20;
         } catch (error) {
-          console.log('Distance calculation error, showing job:', error);
+          console.log('Distance calculation error:', error);
           return true; // Show job if distance calculation fails
         }
       } else {
-        // Job has no coordinates, hide it when we have user location
-        return false;
+        return false; // Hide jobs without coordinates when location filter is active
       }
     }
-
-    // No user location or invalid user location - show all jobs
+    if (hasCurrentLocation) {
+      if (job?.location?.latitude && job?.location?.longitude) {
+        try {
+          const distance = haversine(
+            {latitude: location.latitude, longitude: location.longitude},
+            {
+              latitude: job.location.latitude,
+              longitude: job.location.longitude,
+            },
+            {unit: 'km'},
+          );
+          return distance <= 20; // Only show jobs within 20km of current location
+        } catch (error) {
+          console.log('Distance calculation error:', error);
+          return true;
+        }
+      } else {
+        return false; // Hide jobs without coordinates when we have current location
+      }
+    }
     return true;
   });
 
@@ -280,29 +292,34 @@ const CleanerJobs = () => {
 
   const displayedJobs = showAllJobs ? sortedJobs : sortedJobs?.slice(0, 10);
 
+  // Determine if no location exists
+  const noLocation =
+    (!location?.latitude || !location?.longitude) &&
+    (!selectedLocation?.latitude || !selectedLocation?.longitude);
+
   if (initializingLocation) {
-      return (
-        <SafeAreaView style={styles.safeArea}>
-          <View
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: Colors.background,
+          }}>
+          <ActivityIndicator size="large" color={Colors.gradient2} />
+          <Text
             style={{
-              flex: 1,
-              justifyContent: 'center',
-              alignItems: 'center',
-              backgroundColor: Colors.background,
+              marginTop: 10,
+              color: Colors.secondaryText,
+              fontFamily: Fonts.fontMedium,
             }}>
-            <ActivityIndicator size="large" color={Colors.gradient2} />
-            <Text
-              style={{
-                marginTop: 10,
-                color: Colors.secondaryText,
-                fontFamily: Fonts.fontMedium,
-              }}>
-              Fetching your location...
-            </Text>
-          </View>
-        </SafeAreaView>
-      );
-    }
+            Fetching your location...
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -519,47 +536,60 @@ const CleanerJobs = () => {
                 color={Colors.placeholderColor}
                 style={{marginTop: RFPercentage(30)}}
               />
+            ) : noLocation ? (
+              <View
+                style={{
+                  marginTop: RFPercentage(20),
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                <Text
+                  style={{
+                    color: Colors.primaryText,
+                    fontSize: RFPercentage(1.8),
+                    fontFamily: Fonts.fontMedium,
+                    textAlign: 'center',
+                  }}>
+                  {`Apply a location for\nbetter experience`}
+                </Text>
+              </View>
+            ) : displayedJobs.length === 0 ? (
+              <NotFound text="No Job found" />
             ) : (
               <>
-                {displayedJobs.length === 0 ? (
-                  <NotFound text="No Job found" />
-                ) : (
-                  <>
-                    <FlatList
-                      contentContainerStyle={{paddingBottom: RFPercentage(3)}}
-                      data={displayedJobs}
-                      keyExtractor={item => item.id.toString()}
-                      renderItem={({item}) => (
-                        <JobCard
-                          name={getTruncatedText(item.title)}
-                          location={item.location?.name || 'Not added'}
-                          price={getTruncatedText2(item.priceRange)}
-                          date={item.createdAt}
-                          onPress={() =>
-                            navigation.navigate('JobDetails', {item: item})
-                          }
-                          delete={false}
-                        />
-                      )}
+                <FlatList
+                  contentContainerStyle={{paddingBottom: RFPercentage(3)}}
+                  data={displayedJobs}
+                  keyExtractor={item => item.id.toString()}
+                  renderItem={({item}) => (
+                    <JobCard
+                      name={getTruncatedText(item.title)}
+                      location={item.location?.name || 'Not added'}
+                      price={getTruncatedText2(item.priceRange)}
+                      date={item.createdAt}
+                      onPress={() =>
+                        navigation.navigate('JobDetails', {item: item})
+                      }
+                      delete={false}
                     />
-                    {sortedJobs?.length > 10 && (
-                      <TouchableOpacity
-                        onPress={() => setShowAllJobs(prev => !prev)}
-                        style={{
-                          marginVertical: RFPercentage(2),
-                          alignSelf: 'center',
-                        }}>
-                        <Text
-                          style={{
-                            color: Colors.gradient1,
-                            fontSize: RFPercentage(1.7),
-                            fontFamily: Fonts.fontMedium,
-                          }}>
-                          {showAllJobs ? 'View Less' : 'View More'}
-                        </Text>
-                      </TouchableOpacity>
-                    )}
-                  </>
+                  )}
+                />
+                {sortedJobs?.length > 10 && (
+                  <TouchableOpacity
+                    onPress={() => setShowAllJobs(prev => !prev)}
+                    style={{
+                      marginVertical: RFPercentage(2),
+                      alignSelf: 'center',
+                    }}>
+                    <Text
+                      style={{
+                        color: Colors.gradient1,
+                        fontSize: RFPercentage(1.7),
+                        fontFamily: Fonts.fontMedium,
+                      }}>
+                      {showAllJobs ? 'View Less' : 'View More'}
+                    </Text>
+                  </TouchableOpacity>
                 )}
               </>
             )}
@@ -569,94 +599,104 @@ const CleanerJobs = () => {
 
       {/* Price Range Modal */}
       {modalVisible2 && (
-        <TouchableWithoutFeedback onPress={() => setModalVisible2(false)}>
-          <View style={styles.modalContainer}>
-            <BlurView style={styles.blurView} blurType="light" blurAmount={5} />
-            <Modal
-              visible={modalVisible2}
-              transparent={true}
-              animationType="none"
-              onRequestClose={() => setModalVisible2(false)}>
-              <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-                style={{flex: 1}}>
-                <Animated.View
-                  style={[
-                    {
-                      opacity: opacityAnim,
-                      transform: [{scale: scaleAnim}],
-                    },
-                    styles.rangeModal,
-                  ]}>
-                  <TouchableOpacity
-                    style={styles.close}
-                    onPress={() => setModalVisible2(false)}>
-                    <AntDesign
-                      name="closecircleo"
-                      size={RFPercentage(2.5)}
-                      color={Colors.secondaryText}
-                    />
-                  </TouchableOpacity>
-                  <View
+        <>
+          <TouchableWithoutFeedback onPress={() => setModalVisible2(false)}>
+            <View style={styles.modalContainer}>
+              <BlurView
+                style={styles.blurView}
+                blurType="light"
+                blurAmount={5}
+              />
+              <Modal
+                visible={modalVisible2}
+                transparent={true}
+                animationType="none"
+                onRequestClose={() => setModalVisible2(false)}>
+                <KeyboardAvoidingView
+                  behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                  style={{flex: 1}}>
+                  <Animated.View
                     style={[
                       {
-                        marginTop: RFPercentage(1),
+                        opacity: opacityAnim,
+                        transform: [{scale: scaleAnim}],
                       },
+                      styles.rangeModal,
                     ]}>
-                    <Text
-                      style={[styles.applyLocation, {top: RFPercentage(2)}]}>
-                      Select Price Range
-                    </Text>
-                  </View>
-                  <View style={{width: '100%', marginTop: RFPercentage(8)}}>
-                    {/* Slider */}
-                    <Slider
-                      style={styles.sliderStyle}
-                      minimumValue={10}
-                      maximumValue={2000}
-                      step={10}
-                      value={priceRange[0]}
-                      onValueChange={value => {
-                        tempValue.current = value;
-                      }}
-                      onSlidingComplete={value => {
-                        setPriceRange([value, priceRange[1]]);
-                      }}
-                      minimumTrackTintColor={Colors.gradient1}
-                      maximumTrackTintColor={Colors.borderBottomColor}
-                      thumbTintColor={Colors.gradient1}
-                    />
-                    <View style={styles.sliderLabelsContainer}>
-                      <Text
-                        style={[styles.sliderLabel, {left: RFPercentage(1)}]}>
-                        0$
-                      </Text>
-                      <Text
-                        style={[styles.sliderLabel, {left: RFPercentage(1)}]}>
-                        1000$
-                      </Text>
-                      <Text style={styles.sliderLabel}>2000$+</Text>
+                    {/* Header */}
+                    <View style={styles.modalHeader}>
+                      <Text style={styles.modalTitle}>Select Price Range</Text>
+                      <TouchableOpacity
+                        activeOpacity={0.7}
+                        style={styles.closeButton}
+                        onPress={() => setModalVisible2(false)}>
+                        <AntDesign
+                          name="close"
+                          size={RFPercentage(2.2)}
+                          color={Colors.secondaryText}
+                        />
+                      </TouchableOpacity>
                     </View>
-                    <View style={{marginTop: RFPercentage(6)}}>
-                      {tempValue.current > 10 && (
-                        <Text style={styles.range}>
-                          Selected Price Range: 0 - {tempValue.current}$
+
+                    {/* Current Price Display */}
+                    <View style={styles.priceDisplayContainer}>
+                      <View style={styles.priceBubble}>
+                        <Text style={styles.priceValue}>
+                          ${tempValue.current}
                         </Text>
-                      )}
+                      </View>
                     </View>
-                  </View>
-                  <View style={{position: 'absolute', bottom: RFPercentage(4)}}>
-                    <GradientButton
-                      title="Apply"
-                      onPress={handlePriceRangeApply}
-                      loading={priceLoading}
-                    />
-                  </View>
-                </Animated.View>
-              </KeyboardAvoidingView>
-            </Modal>
-          </View>
-        </TouchableWithoutFeedback>
+
+                    {/* Slider Container */}
+                    <View style={styles.sliderContainer}>
+                      <Slider
+                        style={styles.sliderStyle}
+                        minimumValue={10}
+                        maximumValue={2000}
+                        step={10}
+                        value={priceRange[0]}
+                        onValueChange={value => {
+                          tempValue.current = value;
+                        }}
+                        onSlidingComplete={value => {
+                          setPriceRange([value, priceRange[1]]);
+                        }}
+                        minimumTrackTintColor={Colors.gradient1}
+                        thumbTintColor={Colors.gradient1}
+                        maximumTrackTintColor={
+                          Platform.OS === 'ios' ? '#bfc9deff' : '#7a7e85ff'
+                        }
+                      />
+
+                      {/* Slider Labels */}
+                      <View style={styles.sliderLabelsContainer}>
+                        <Text style={styles.sliderMinLabel}>$10</Text>
+                        <Text style={styles.sliderMaxLabel}>$2000+</Text>
+                      </View>
+
+                      {/* Range Indicator */}
+                      <View style={styles.rangeIndicator}>
+                        <View style={styles.rangeIndicatorLine} />
+                        <Text style={styles.rangeIndicatorText}>
+                          Selected range: $0 - ${tempValue.current}
+                        </Text>
+                      </View>
+                    </View>
+
+                    {/* Apply Button */}
+                    <View style={styles.buttonContainer}>
+                      <GradientButton
+                        title="Apply"
+                        onPress={handlePriceRangeApply}
+                        loading={priceLoading}
+                      />
+                    </View>
+                  </Animated.View>
+                </KeyboardAvoidingView>
+              </Modal>
+            </View>
+          </TouchableWithoutFeedback>
+        </>
       )}
 
       {/* Service Type */}
@@ -666,7 +706,7 @@ const CleanerJobs = () => {
           <Modal
             visible={modalVisible3}
             transparent={true}
-            animationType="none"
+            animationType="fade"
             onRequestClose={() => setModalVisible3(false)}>
             <KeyboardAvoidingView
               keyboardVerticalOffset={Platform.OS === 'ios' ? 40 : 0}
@@ -676,48 +716,97 @@ const CleanerJobs = () => {
                   styles.locationModal,
                   {opacity: opacityAnim, transform: [{scale: scaleAnim}]},
                 ]}>
-                <TouchableOpacity
-                  style={styles.close}
-                  onPress={() => setModalVisible3(false)}>
-                  <AntDesign
-                    name="closecircleo"
-                    size={RFPercentage(2.5)}
-                    color={Colors.secondaryText}
-                  />
-                </TouchableOpacity>
-                <View style={styles.modalInner}>
-                  <Text style={styles.applyLocation}>Apply Service Type</Text>
+                {/* Header */}
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>Select Service Type</Text>
+                  <TouchableOpacity
+                    style={styles.closeButton}
+                    onPress={() => setModalVisible3(false)}>
+                    <AntDesign
+                      name="close"
+                      size={RFPercentage(2.2)}
+                      color={Colors.secondaryText}
+                    />
+                  </TouchableOpacity>
                 </View>
-                <View style={{width: '100%', marginTop: RFPercentage(2)}}>
+
+                {/* Search Section */}
+                <View style={styles.searchSection}>
                   <SearchField
-                    placeholder="Search Services"
-                    customStyle={{borderColor: 'rgba(39, 38, 38, 0.29)'}}
+                    placeholder="Search service types..."
+                    customStyle={styles.searchInput}
                     value={query2}
                     onChangeText={handleSearch2}
                   />
                 </View>
+
+                {/* Results List */}
                 {query2.length > 0 && selectedType.length === 0 && (
-                  <View style={styles.queryContainer}>
+                  <View style={styles.resultsContainer}>
                     {Array.isArray(serviceTypeFilter) &&
-                      serviceTypeFilter.length > 0 && (
-                        <FlatList
-                          data={serviceTypeFilter}
-                          keyboardShouldPersistTaps="always"
-                          keyExtractor={(item, index) => index.toString()}
-                          renderItem={({item}) => (
-                            <TouchableOpacity
-                              onPress={() => {
-                                setQuery2(item);
-                                setSelectedType(item);
-                              }}>
-                              <Text style={styles.queryText}>{item}</Text>
-                            </TouchableOpacity>
-                          )}
-                        />
-                      )}
+                    serviceTypeFilter.length > 0 ? (
+                      <FlatList
+                        data={serviceTypeFilter}
+                        keyboardShouldPersistTaps="always"
+                        keyExtractor={(item, index) => index.toString()}
+                        showsVerticalScrollIndicator={false}
+                        style={styles.resultsList}
+                        renderItem={({item}) => (
+                          <TouchableOpacity
+                            style={styles.resultItem}
+                            onPress={() => {
+                              setQuery2(item);
+                              setSelectedType(item);
+                            }}>
+                            <Text style={styles.resultText}>{item}</Text>
+                            <AntDesign
+                              name="right"
+                              size={RFPercentage(1.8)}
+                              color={Colors.secondaryText}
+                              style={styles.arrowIcon}
+                            />
+                          </TouchableOpacity>
+                        )}
+                        ItemSeparatorComponent={() => (
+                          <View style={styles.separator} />
+                        )}
+                      />
+                    ) : (
+                      <View style={styles.noResults}>
+                        <Text style={styles.noResultsText}>
+                          No services found
+                        </Text>
+                      </View>
+                    )}
                   </View>
                 )}
-                <View style={{position: 'absolute', bottom: RFPercentage(3)}}>
+
+                {/* Selected Type Preview */}
+                {selectedType.length > 0 && (
+                  <View style={styles.selectedPreview}>
+                    <Text style={styles.selectedLabel}>Selected:</Text>
+                    <View style={styles.selectedType}>
+                      <Text style={styles.selectedTypeText}>
+                        {selectedType}
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() => {
+                          setSelectedType('');
+                          setQuery2('');
+                        }}
+                        style={styles.clearSelection}>
+                        <AntDesign
+                          name="closecircle"
+                          size={RFPercentage(1.6)}
+                          color={Colors.secondaryText}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
+
+                {/* Apply Button */}
+                <View style={styles.buttonContainer}>
                   <GradientButton
                     title="Apply"
                     onPress={handleServiceTypeApply}
@@ -822,27 +911,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: RFPercentage(1),
   },
-  modalContainer: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  blurView: {
-    width: '100%',
-    height: '100%',
-    position: 'absolute',
-  },
-  sliderStyle: {
-    width: '100%',
-    height: RFPercentage(3),
-  },
-  sliderLabelsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
+
   sliderLabel: {
     color: Colors.secondaryText,
     fontSize: RFPercentage(1.9),
@@ -852,17 +921,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: RFPercentage(1.2),
     paddingTop: RFPercentage(1.5),
   },
-  locationModal: {
-    width: '90%',
-    height: RFPercentage(50),
-    alignSelf: 'center',
-    backgroundColor: 'rgba(226, 238, 255, 0.9)',
-    alignItems: 'center',
-    borderRadius: RFPercentage(2.5),
-    paddingHorizontal: RFPercentage(1.6),
-    paddingVertical: RFPercentage(2.5),
-    top: RFPercentage(20),
-  },
+
   modalInner: {
     width: '100%',
     alignItems: 'center',
@@ -891,14 +950,24 @@ const styles = StyleSheet.create({
   },
   rangeModal: {
     width: '90%',
-    height: '45%',
+    height: '50%',
     alignSelf: 'center',
-    backgroundColor: 'rgba(226, 238, 255, 0.9)',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     alignItems: 'center',
     borderRadius: RFPercentage(2.5),
     top: RFPercentage(20),
     paddingHorizontal: RFPercentage(1.6),
     paddingVertical: RFPercentage(2.5),
+    shadowColor: 'rgba(90, 138, 179, 1)',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+    borderWidth:RFPercentage(0.1),
+    borderColor:"rgba(235, 242, 249, 1)"
   },
   range: {
     textAlign: 'center',
@@ -920,5 +989,235 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: RFPercentage(2),
     top: RFPercentage(2),
+  },
+  modalContainer: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  blurView: {
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
+  },
+  locationModal: {
+    width: '85%',
+    // height: '60%',
+    minHeight: RFPercentage(40),
+    alignSelf: 'center',
+    backgroundColor: Colors.background,
+    borderRadius: RFPercentage(2.5),
+    paddingHorizontal: RFPercentage(2.5),
+    paddingVertical: RFPercentage(2),
+    // Shadow
+    shadowColor: 'rgba(90, 138, 179, 1)',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+    marginTop: RFPercentage(20),
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: RFPercentage(2),
+  },
+  modalTitle: {
+    color: Colors.secondaryText,
+    fontFamily: Fonts.semiBold,
+    fontSize: RFPercentage(2),
+    flex: 1,
+  },
+  closeButton: {
+    padding: RFPercentage(0.5),
+  },
+  searchSection: {
+    width: '100%',
+    marginBottom: RFPercentage(1),
+  },
+  searchInput: {
+    borderColor: 'rgba(226, 232, 240, 0.8)',
+    backgroundColor: 'rgba(248, 250, 252, 0.5)',
+  },
+  resultsContainer: {
+    flex: 1,
+    width: '100%',
+    marginTop: RFPercentage(1),
+    backgroundColor: 'rgba(248, 250, 252, 0.5)',
+    borderRadius: RFPercentage(1.2),
+    borderWidth: 1,
+    borderColor: 'rgba(226, 232, 240, 0.5)',
+  },
+  resultsList: {
+    flex: 1,
+  },
+  resultItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: RFPercentage(1.2),
+    paddingHorizontal: RFPercentage(1.5),
+  },
+  resultText: {
+    color: Colors.primaryText,
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.6),
+    flex: 1,
+  },
+  arrowIcon: {
+    opacity: 0.6,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: 'rgba(226, 232, 240, 0.5)',
+    marginHorizontal: RFPercentage(1.5),
+  },
+  noResults: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: RFPercentage(3),
+  },
+  noResultsText: {
+    color: Colors.secondaryText,
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.5),
+  },
+  selectedPreview: {
+    width: '100%',
+    marginTop: RFPercentage(1),
+    marginBottom: RFPercentage(1),
+  },
+  selectedLabel: {
+    color: Colors.secondaryText,
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.4),
+    marginBottom: RFPercentage(0.5),
+  },
+  selectedType: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(74, 144, 226, 0.05)',
+    paddingVertical: RFPercentage(1),
+    paddingHorizontal: RFPercentage(1.5),
+    borderRadius: RFPercentage(1),
+    borderWidth: 1,
+    borderColor: 'rgba(74, 144, 226, 0.1)',
+  },
+  selectedTypeText: {
+    color: Colors.gradient1,
+    fontFamily: Fonts.semiBold,
+    fontSize: RFPercentage(1.6),
+    flex: 1,
+  },
+  clearSelection: {
+    padding: RFPercentage(0.3),
+  },
+  buttonContainer: {
+    width: '100%',
+    marginTop: RFPercentage(1),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  priceDisplayContainer: {
+    alignItems: 'center',
+    marginBottom: RFPercentage(4),
+  },
+
+  priceBubble: {
+    backgroundColor: 'rgba(202, 217, 238, 0.44)',
+    paddingHorizontal: RFPercentage(3),
+    paddingVertical: RFPercentage(1.5),
+    borderRadius: RFPercentage(1),
+    alignItems: 'center',
+    // Shadow
+    shadowColor: 'rgba(130, 170, 193, 0.69)',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 10,
+  },
+
+  priceLabel: {
+    color: Colors.background,
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.4),
+    opacity: 0.9,
+  },
+
+  priceValue: {
+    color: Colors.primaryText,
+    fontFamily: Fonts.semiBold,
+    fontSize: RFPercentage(2.4),
+    marginTop: RFPercentage(0.2),
+  },
+
+  sliderContainer: {
+    width: '100%',
+    marginBottom: RFPercentage(4),
+  },
+
+  sliderStyle: {
+    width: '100%',
+    height: RFPercentage(4),
+  },
+
+  sliderThumb: {
+    shadowColor: Colors.gradient1,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+
+  sliderLabelsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginTop: RFPercentage(1),
+  },
+
+  sliderMinLabel: {
+    color: Colors.secondaryText,
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontMedium,
+  },
+
+  sliderMaxLabel: {
+    color: Colors.secondaryText,
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontMedium,
+  },
+
+  rangeIndicator: {
+    alignItems: 'center',
+    marginTop: RFPercentage(3),
+  },
+
+  rangeIndicatorLine: {
+    width: '60%',
+    height: 1,
+    backgroundColor: Colors.inputFieldColor,
+    marginBottom: RFPercentage(1),
+  },
+
+  rangeIndicatorText: {
+    color: Colors.primaryText,
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.6),
+    textAlign: 'center',
   },
 });

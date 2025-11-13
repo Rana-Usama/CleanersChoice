@@ -44,10 +44,12 @@ const Settings = ({navigation}: any) => {
         message: 'You have been logged out successfully.',
       });
       setModalVisible(false);
-      navigation.reset({
-        index: 0,
-        routes: [{name: 'SignIn'}],
-      });
+      setTimeout(() => {
+        navigation.reset({
+          index: 0,
+          routes: [{name: 'SignIn'}],
+        });
+      }, 300);
     } catch (error) {
     } finally {
       setLoading(false);

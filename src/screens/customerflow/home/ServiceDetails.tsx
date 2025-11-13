@@ -27,6 +27,7 @@ import {useSelector} from 'react-redux';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import ImageView from 'react-native-image-viewing';
 
 import CustomModal from '../../../components/CustomModal';
 import {BlurView} from '@react-native-community/blur';
@@ -75,7 +76,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
     useNavigation<
       NativeStackNavigationProp<RootStackParamList, 'ServiceDetails'>
     >();
-  const profileData = useSelector(state => state.profile.profileData);
+  const profileData = useSelector((state: any) => state.profile.profileData);
   const [loading, setloading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
@@ -114,11 +115,14 @@ const ServiceDetails: React.FC = ({route}: any) => {
       })
       .filter((name: any) => name !== null);
   };
+  const [visible, setIsVisible] = useState(false);
+
   const serviceNames = getServiceNames(item?.type.slice(0, visibleItems));
   const createdAtDate = new Date(item.createdAt._seconds * 1000);
   const formattedDate = moment(createdAtDate).format('DD MMMM, YYYY');
-  const userFlow = useSelector(state => state.userFlow.userFlow);
-
+  const userFlow = useSelector((state: any) => state.userFlow.userFlow);
+  const imageObjects =
+    item?.serviceImages?.map((url: any) => ({uri: url})) || [];
   const getTruncatedText = (text: any) => {
     const maxChars = 120;
     if (text.length <= maxChars) return text;
@@ -218,14 +222,21 @@ const ServiceDetails: React.FC = ({route}: any) => {
               justifyContent: 'center',
             }}>
             {item.serviceImages.map((image: any, index: any) => (
-              <View key={index} style={{margin: 20}}>
+              <TouchableOpacity
+                key={index}
+                style={{margin: 20}}
+                activeOpacity={0.8}
+                onPress={() => {
+                  setStep(index);
+                  setIsVisible(true);
+                }}>
                 <Image
                   source={typeof image === 'string' ? {uri: image} : image}
                   resizeMode="cover"
                   style={styles.cover}
                   borderRadius={RFPercentage(1)}
                 />
-              </View>
+              </TouchableOpacity>
             ))}
           </ScrollView>
           {item.serviceImages.length > 1 && (
@@ -252,6 +263,12 @@ const ServiceDetails: React.FC = ({route}: any) => {
             </View>
           )}
         </View>
+        <ImageView
+          images={imageObjects}
+          imageIndex={step}
+          visible={visible}
+          onRequestClose={() => setIsVisible(false)}
+        />
         <View style={styles.container}>
           {/* Service Info */}
           <View style={{marginTop: RFPercentage(2)}}>
@@ -428,6 +445,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
                     name={`Package ${item.id}`}
                     price={item.price}
                     detail={item.details}
+                    onPress={() => {}}
                   />
                 );
               }}

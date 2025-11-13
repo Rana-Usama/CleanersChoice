@@ -9,6 +9,7 @@ import {
   ScrollView,
   TouchableWithoutFeedback,
   Keyboard,
+  StatusBar,
 } from 'react-native';
 import React, {useState, useCallback, useRef} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -159,8 +160,9 @@ const ServiceOne: React.FC = ({navigation}: any) => {
         title="Service"
         textStyle={styles.headerText}
         left={true}
-        style={{height: RFPercentage(12.5)}}
+        style={{height: RFPercentage(12)}}
       />
+      <StatusBar backgroundColor={"white"}  />
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView
           contentContainerStyle={{
@@ -170,7 +172,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
           }}
           keyboardShouldPersistTaps="always"
           showsVerticalScrollIndicator={false}>
-          <SafeAreaView style={styles.safeArea}>
+          <View style={styles.safeArea}>
             <KeyboardAvoidingView style={{flex: 1}}>
               {/* Header */}
               <View style={styles.container}>
@@ -382,7 +384,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                 </View>
               </View>
             </KeyboardAvoidingView>
-          </SafeAreaView>
+          </View>
         </ScrollView>
       </TouchableWithoutFeedback>
     </>
@@ -413,7 +415,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   descriptionContainer: {
-    marginTop: RFPercentage(1),
+    marginTop: RFPercentage(0.5),
   },
   dateContainer: {
     width: '100%',

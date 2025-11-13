@@ -73,7 +73,7 @@ export type RootStackParamList = {
     fcmToken: string;
   };
   Messages: undefined;
-  Location:undefined
+  Location: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -148,11 +148,16 @@ const StackNavigator: React.FC = () => {
 
   let initialRoute: keyof RootStackParamList = 'SplashOne';
 
-  if (email && password && user === 'Customer') {
+  if (email && password && userData?.role === 'Customer') {
     initialRoute = 'Home';
-  } else if (email && password && user === 'Cleaner' && hasActiveSub) {
+  } else if (
+    email &&
+    password &&
+    userData?.role === 'Cleaner' &&
+    hasActiveSub
+  ) {
     initialRoute = 'CleanerNavigator';
-  } else if (user === 'Cleaner') {
+  } else if (userData?.role === 'Cleaner' && !hasActiveSub) {
     initialRoute = 'Premium';
   } else if (loggedOut === 'yes') {
     initialRoute = 'SignIn';

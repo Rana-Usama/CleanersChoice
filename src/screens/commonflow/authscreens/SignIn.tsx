@@ -78,6 +78,9 @@ const SignIn: React.FC = () => {
         const now = Date.now();
         const expiry = userData?.subscriptionEndDate;
         const hasActiveSub = expiry && expiry > now;
+        console.log('hasActiveSub...........', hasActiveSub);
+        console.log('expiry...........', expiry);
+
         if (hasActiveSub) {
           await navigation.replace('CleanerNavigator');
         } else {

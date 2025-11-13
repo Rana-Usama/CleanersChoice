@@ -5,9 +5,9 @@ import {
   View,
   Platform,
   Text,
-  KeyboardAvoidingView,
   TextInput,
   FlatList,
+  Keyboard,
 } from 'react-native';
 import MapView, {Marker} from 'react-native-maps';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -19,12 +19,10 @@ import {
   setUserLocation,
   setFilterLocation,
 } from '../../../redux/location/Actions';
-import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
+import {GOOGLE_PLACES_API_KEY} from '@env';
 
 export default function Location({navigation, route}: any) {
   const mapRef = useRef<MapView>(null);
-  const placesRef = useRef<any>(null);
-
   const [marker, setMarker] = useState<any>(null);
   const [selectedLocation, setSelectedLocation] = useState<any>({
     latitude: null,
@@ -34,10 +32,9 @@ export default function Location({navigation, route}: any) {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [isSelectingSuggestion, setIsSelectingSuggestion] = useState(false);
   const dispatch = useDispatch();
   const {location: isLocationSelect} = route?.params || {};
-
-  const GOOGLE_API_KEY = 'AIzaSyBpswfk8p6S57T_TqGTCUaDi7c6oHvHGuA';
 
   // Android: Fetch autocomplete suggestions
   const fetchPlacesAndroid = async (text: string) => {
@@ -50,21 +47,24 @@ export default function Location({navigation, route}: any) {
       const res = await axios.get(
         'https://maps.googleapis.com/maps/api/place/autocomplete/json',
         {
-          params: {input: text, key: GOOGLE_API_KEY, language: 'en'},
+          params: {input: text, key: GOOGLE_PLACES_API_KEY, language: 'en'},
         },
       );
       if (res.data.status === 'OK') setSuggestions(res.data.predictions);
       else console.log('⚠️ Places API Error:', res.data.status);
     } catch (err: any) {
-      console.log('❌ Autocomplete Error (Android):', err.message);
+      console.log('❌ Autocomplete Error:', err.message);
     }
   };
 
   const handlePlaceSelectAndroid = async (item: any) => {
+    setIsSelectingSuggestion(true);
+    
     try {
+      Keyboard.dismiss();
       const detailRes = await axios.get(
         'https://maps.googleapis.com/maps/api/place/details/json',
-        {params: {place_id: item.place_id, key: GOOGLE_API_KEY}},
+        {params: {place_id: item.place_id, key: GOOGLE_PLACES_API_KEY}},
       );
       const loc = detailRes.data.result.geometry.location;
       const coordinate = {
@@ -76,29 +76,54 @@ export default function Location({navigation, route}: any) {
       setSelectedLocation(coordinate);
       setSuggestions([]);
       setQuery(item.description);
-      setIsSearchFocused(false);
+
+      // Clear the selecting flag after a short delay
+      setTimeout(() => {
+        setIsSearchFocused(false);
+        setIsSelectingSuggestion(false);
+      }, 400);
+
+      if (isNaN(coordinate.latitude) || isNaN(coordinate.longitude)) {
+        console.log('Invalid coordinates:', coordinate);
+        return;
+      }
+
       mapRef.current?.animateToRegion({
-        ...coordinate,
+        latitude: coordinate.latitude,
+        longitude: coordinate.longitude,
         latitudeDelta: 0.01,
         longitudeDelta: 0.01,
       });
     } catch (error: any) {
       console.log('❌ Place Detail Error:', error.message);
+      setIsSelectingSuggestion(false);
     }
   };
 
   const handleMapPress = async (event: any) => {
+    // Prevent map interaction when suggestions are visible or selecting
+    if (isSelectingSuggestion || (isSearchFocused && suggestions.length > 0)) {
+      return;
+    }
+
     const coordinate = event.nativeEvent.coordinate;
-    setMarker(coordinate);
+
+    if (isNaN(coordinate.latitude) || isNaN(coordinate.longitude)) {
+      console.log('Invalid coordinates:', coordinate);
+      return;
+    }
+
     mapRef.current?.animateToRegion({
-      ...coordinate,
+      latitude: coordinate.latitude,
+      longitude: coordinate.longitude,
       latitudeDelta: 0.01,
       longitudeDelta: 0.01,
     });
 
+    setMarker(coordinate);
     try {
       const response = await axios.get(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coordinate.latitude},${coordinate.longitude}&key=${GOOGLE_API_KEY}`,
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coordinate.latitude},${coordinate.longitude}&key=${GOOGLE_PLACES_API_KEY}`,
       );
       const address =
         response.data.results[0]?.formatted_address || 'Selected Location';
@@ -106,6 +131,12 @@ export default function Location({navigation, route}: any) {
       setQuery(address);
     } catch (error: any) {
       console.log('❌ Reverse Geocode Error:', error.message);
+    }
+  };
+
+  const handleTextInputBlur = () => {
+    if (!isSelectingSuggestion) {
+      setIsSearchFocused(false);
     }
   };
 
@@ -118,6 +149,45 @@ export default function Location({navigation, route}: any) {
 
   return (
     <View style={styles.container}>
+      <View style={styles.topRow}>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => navigation.goBack()}
+          style={[styles.backButton, {backgroundColor: 'white'}]}>
+          <AntDesign name="arrowleft" size={RFPercentage(2.7)} color="gray" />
+        </TouchableOpacity>
+        <View style={{width: '90%'}}>
+          <TextInput
+            value={query}
+            onChangeText={fetchPlacesAndroid}
+            onFocus={() => setIsSearchFocused(true)}
+            onBlur={handleTextInputBlur}
+            placeholder="Search Location"
+            placeholderTextColor="gray"
+            style={styles.input}
+          />
+
+          {isSearchFocused && suggestions?.length > 0 && (
+            <View style={styles.suggestionsContainer}>
+              <FlatList
+                data={suggestions}
+                keyExtractor={item => item.place_id}
+                keyboardShouldPersistTaps="handled"
+                style={styles.listView}
+                renderItem={({item}) => (
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={() => handlePlaceSelectAndroid(item)}
+                    style={styles.listItem}>
+                    <Text style={styles.description}>{item.description}</Text>
+                  </TouchableOpacity>
+                )}
+              />
+            </View>
+          )}
+        </View>
+      </View>
+
       <MapView
         ref={mapRef}
         style={styles.map}
@@ -130,119 +200,14 @@ export default function Location({navigation, route}: any) {
         pointerEvents={
           isSearchFocused && suggestions.length > 0 ? 'none' : 'auto'
         }
-        onPress={e => {
-          if (isSearchFocused && suggestions.length > 0) return;
-          handleMapPress(e);
-        }}>
-        {marker && (
+        onPress={handleMapPress}>
+        {marker?.latitude && marker?.longitude && (
           <Marker
             coordinate={marker}
             title={selectedLocation?.name || 'Selected Location'}
           />
         )}
       </MapView>
-
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.topContainer}>
-        <View style={styles.searchRow}>
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => navigation.goBack()}
-            style={[styles.backButton, {backgroundColor: 'white'}]}>
-            <AntDesign name="arrowleft" size={RFPercentage(2.7)} color="gray" />
-          </TouchableOpacity>
-
-          <View style={styles.searchWrapper}>
-            {Platform.OS === 'ios' ? (
-              <GooglePlacesAutocomplete
-                ref={placesRef}
-                placeholder="Search Location"
-                fetchDetails
-                enablePoweredByContainer={false}
-                debounce={300}
-                minLength={2}
-                predefinedPlaces={[]}
-                query={{
-                  key: GOOGLE_API_KEY,
-                  language: 'en',
-                }}
-                onPress={(data, details = null) => {
-                  if (!details?.geometry?.location) return;
-                  const coordinate = {
-                    latitude: details.geometry.location.lat,
-                    longitude: details.geometry.location.lng,
-                    name: data.description,
-                  };
-                  setMarker(coordinate);
-                  setSelectedLocation(coordinate);
-                  mapRef.current?.animateToRegion({
-                    ...coordinate,
-                    latitudeDelta: 0.01,
-                    longitudeDelta: 0.01,
-                  });
-                  setQuery(data.description);
-                  setIsSearchFocused(false);
-                }}
-                textInputProps={{
-                  onFocus: () => setIsSearchFocused(true),
-                  onBlur: () => setIsSearchFocused(false),
-                  clearButtonMode: 'while-editing',
-                }}
-                styles={{
-                  textInputContainer: {
-                    backgroundColor: 'white',
-                    borderRadius: 8,
-                  },
-                  textInput: {
-                    height: RFPercentage(5),
-                    fontSize: RFPercentage(1.8),
-                  },
-                  listView: {
-                    backgroundColor: 'white',
-                    borderRadius: 8,
-                    maxHeight: RFPercentage(40),
-                    zIndex: 9999,
-                    elevation: 10,
-                    marginTop:10
-                  },
-                }}
-              />
-            ) : (
-              <>
-                <TextInput
-                  value={query}
-                  onChangeText={fetchPlacesAndroid}
-                  onFocus={() => setIsSearchFocused(true)}
-                  onBlur={() => setIsSearchFocused(false)}
-                  placeholder="Search Location"
-                  placeholderTextColor="gray"
-                  style={styles.input}
-                />
-
-                {isSearchFocused && suggestions?.length > 0 && (
-                  <FlatList
-                    data={suggestions}
-                    keyExtractor={item => item.place_id}
-                    keyboardShouldPersistTaps="handled"
-                    style={styles.listView}
-                    renderItem={({item}) => (
-                      <TouchableOpacity
-                        activeOpacity={0.8}
-                        onPress={() => handlePlaceSelectAndroid(item)}
-                        style={styles.listItem}>
-                        <Text style={styles.description}>
-                          {item.description}
-                        </Text>
-                      </TouchableOpacity>
-                    )}
-                  />
-                )}
-              </>
-            )}
-          </View>
-        </View>
-      </KeyboardAvoidingView>
 
       {selectedLocation?.latitude && (
         <View style={styles.buttonWrapper}>
@@ -261,15 +226,14 @@ export default function Location({navigation, route}: any) {
 const styles = StyleSheet.create({
   container: {flex: 1},
   map: {...StyleSheet.absoluteFillObject},
-  topContainer: {
+  topRow: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? RFPercentage(6) : RFPercentage(5),
-    left: 0,
-    right: 0,
-    zIndex: 9999,
-    paddingHorizontal: RFPercentage(2),
+    top: Platform.OS === 'ios' ? RFPercentage(8) : RFPercentage(8),
+    flexDirection: 'row',
+    width: '90%',
+    alignSelf: 'center',
+    zIndex: 10,
   },
-  searchRow: {flexDirection: 'row', width: '100%', top: RFPercentage(2)},
   backButton: {
     width: RFPercentage(5.3),
     height: RFPercentage(5.3),
@@ -278,9 +242,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: RFPercentage(1),
     elevation: 3,
-    top: Platform.OS === 'android' ?  RFPercentage(0.5) : 0,
+    top: Platform.OS === 'android' ? RFPercentage(0.5) : 2,
   },
-  searchWrapper: {flex: 1, zIndex: 9999, position: 'relative'},
   input: {
     height: RFPercentage(6),
     fontSize: RFPercentage(1.8),
@@ -290,15 +253,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderWidth: 1,
     borderColor: '#ddd',
+    width: '90%',
+  },
+  suggestionsContainer: {
+    position: 'absolute',
+    top: Platform.OS === 'android' ? RFPercentage(7) : RFPercentage(7),
+    width: '90%',
+    zIndex: 1000,
   },
   listView: {
     backgroundColor: 'white',
     borderRadius: 8,
-    marginTop: 8,
     maxHeight: RFPercentage(40),
-    zIndex: 9999,
-    position: 'absolute',
-    width: '100%',
     elevation: 20,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
@@ -316,7 +282,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: RFPercentage(5),
     alignSelf: 'center',
-    zIndex: 9998,
   },
   applyButton: {
     paddingHorizontal: RFPercentage(3),

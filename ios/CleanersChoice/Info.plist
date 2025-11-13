@@ -35,40 +35,42 @@
 	<true/>
 
 	<!-- Network Security -->
-	<key>NSAppTransportSecurity</key>
+<key>NSAppTransportSecurity</key>
+<dict>
+	<key>NSAllowsArbitraryLoads</key>
+	<true/>
+	<key>NSExceptionDomains</key>
 	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<false/>
-		<key>NSExceptionDomains</key>
+		<key>maps.googleapis.com</key>
 		<dict>
-			<key>googleapis.com</key>
-			<dict>
-				<key>NSExceptionAllowsInsecureHTTPLoads</key>
-				<false/>
-				<key>NSIncludesSubdomains</key>
-				<true/>
-			</dict>
-			<key>localhost</key>
-			<dict>
-				<key>NSExceptionAllowsInsecureHTTPLoads</key>
-				<true/>
-			</dict>
+			<key>NSIncludesSubdomains</key>
+			<true/>
+			<key>NSExceptionAllowsInsecureHTTPLoads</key>
+			<false/>
+			<key>NSExceptionRequiresForwardSecrecy</key>
+			<false/>
+		</dict>
+		<key>localhost</key>
+		<dict>
+			<key>NSExceptionAllowsInsecureHTTPLoads</key>
+			<true/>
 		</dict>
 	</dict>
+</dict>
+
 
 	<!-- Permissions -->
-	<key>NSCameraUsageDescription</key>
+	
+<key>NSCameraUsageDescription</key>
 	<string>Cleaners Choice uses your camera to let you take photos for uploading service images, receipts, or profile pictures.</string>
-
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Cleaners Choice uses your location to show nearby cleaning services and provide accurate pickup and delivery options.</string>
 
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Cleaners Choice uses your location to suggest nearby cleaning requests and ensure accurate service availability, even when you're actively using the app.</string>
-
-	<key>NSMicrophoneUsageDescription</key>
+<key>NSMicrophoneUsageDescription</key>
 	<string>Cleaners Choice uses your microphone when you record voice notes or provide voice instructions for service requests.</string>
-
+	
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Cleaners Choice uses your photo library so you can select and upload photos for your cleaning requests or profile image.</string>
 
