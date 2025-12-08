@@ -21,6 +21,8 @@ interface props {
   onPress?: () => void;
   left?: boolean;
   style?: object;
+  arrowColor? : any
+  tintColor?:any
 }
 
 const HeaderBack = (props: props) => {
@@ -42,6 +44,7 @@ const HeaderBack = (props: props) => {
               source={Icons.homeLogo}
               resizeMode="contain"
               style={styles.logo}
+              tintColor={props?.tintColor}
             />
           ) : props.left ? (
             <TouchableOpacity
@@ -54,7 +57,7 @@ const HeaderBack = (props: props) => {
               onPress={() => navigation.goBack()}>
               <MaterialIcons
                 name="keyboard-backspace"
-                color={Colors.secondaryText}
+                color={ props.arrowColor ? props?.arrowColor : Colors.secondaryText}
                 size={RFPercentage(2.8)}
               />
               <Text
@@ -118,9 +121,10 @@ const styles = StyleSheet.create({
   logo: {
     width: RFPercentage(7),
     height: RFPercentage(7),
+    left:-20
   },
   rightText: {
-    color: Colors.gradient1,
+    color: Colors.background,
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.7),
   },

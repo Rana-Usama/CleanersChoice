@@ -7,6 +7,8 @@ import {
   RefreshControl,
   ActivityIndicator,
   ScrollView,
+  Platform,
+  StatusBar,
 } from 'react-native';
 import React, {useState, useCallback} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -18,6 +20,7 @@ import firestore from '@react-native-firebase/firestore';
 import {useFocusEffect} from '@react-navigation/native';
 import {useExitAppOnBack} from '../../../../utils/ExitApp';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import LinearGradient from 'react-native-linear-gradient';
 
 const Profile = ({navigation}: any) => {
   const [profile, setProfile] = useState(null);
@@ -99,8 +102,22 @@ const Profile = ({navigation}: any) => {
   const roleStyle = getRoleStyle();
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <HeaderBack title="Your Profile" textStyle={styles.headerText} logo />
+    <View style={styles.safeArea}>
+            <StatusBar backgroundColor="#FFFFFF" barStyle="light-content" />
+      
+      <LinearGradient
+        colors={[Colors.gradient1, Colors.gradient2]}
+        style={styles.gradientHeader}>
+        <HeaderBack
+          title="Your Profile"
+          textStyle={styles.headerText}
+          left={true}
+          arrowColor="#FFFFFF"
+          style={{backgroundColor: 'transparent'}}
+          logo
+          tintColor={'white'}
+        />
+      </LinearGradient>
       <ScrollView
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -174,7 +191,7 @@ const Profile = ({navigation}: any) => {
           </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -190,8 +207,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: RFPercentage(2),
     paddingTop: RFPercentage(2),
   },
+  gradientHeader: {
+    paddingTop: Platform.OS === 'ios' ? 40 : 20,
+    paddingBottom: 30,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+  },
   headerText: {
-    fontSize: RFPercentage(2.2),
+    fontSize: RFPercentage(2),
+    fontFamily: Fonts.semiBold,
+    color: '#FFFFFF',
   },
   profileHeader: {
     alignItems: 'center',

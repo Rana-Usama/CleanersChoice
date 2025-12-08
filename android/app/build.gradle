@@ -17,9 +17,13 @@ android {
         applicationId "com.cleanerschoice"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 13
-        versionName "13.0"
+        versionCode 16
+        versionName "16.0"
         multiDexEnabled true
+
+        ndk {
+            abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+        }
     }
 
     signingConfigs {
@@ -33,19 +37,30 @@ android {
         }
     }
 
-   buildTypes {
-    release {
-        signingConfig signingConfigs.release
-        minifyEnabled enableProguardInReleaseBuilds
-        shrinkResources false
-        proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled enableProguardInReleaseBuilds
+            shrinkResources false
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+        }
+        debug {
+            signingConfig signingConfigs.release
+        }
     }
-    debug {
-        signingConfig signingConfigs.release
+
+    // Optional: create universal APK / AAB that supports all ABIs
+    splits {
+        abi {
+            enable true
+            reset()
+            include "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+            universalApk true
+        }
     }
 }
 
-}
+
 
 react {
     autolinkLibrariesWithApp()

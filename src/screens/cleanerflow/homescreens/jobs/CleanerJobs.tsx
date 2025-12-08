@@ -14,6 +14,8 @@ import {
   Animated,
   Platform,
   RefreshControl,
+  Dimensions,
+  StatusBar,
 } from 'react-native';
 import React, {useCallback, useState, useRef, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -35,6 +37,11 @@ import {useCurrentLocation} from '../../../../utils/userLocation';
 import {useSelector, useDispatch} from 'react-redux';
 import haversine from 'haversine';
 import {clearFilterLocation} from '../../../../redux/location/Actions';
+import LinearGradient from 'react-native-linear-gradient';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+
+const {width} = Dimensions.get('window');
 
 const items = [
   'Residential Cleaning',
@@ -49,7 +56,6 @@ const items = [
 
 const CleanerJobs = () => {
   const {location, loading, error} = useCurrentLocation();
-
   const navigation = useNavigation<any>();
   const [jobsData, setJobsData] = useState([]);
   const [loading2, setLoading] = useState(false);
@@ -107,20 +113,17 @@ const CleanerJobs = () => {
   // Fetching jobs
   const fetchJobs = async () => {
     const user = auth().currentUser;
-    console.log('user.......', user);
     if (!user) return;
     try {
       const snapshot = await firestore()
         .collection('Jobs')
         .where('status', '==', 'active')
-        // .orderBy('createdAt2', 'desc')
         .get();
 
       const jobs = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
       }));
-      console.log(jobs);
       setJobsData(jobs);
     } catch (error) {
       console.log('Error fetching jobs:', error);
@@ -135,7 +138,6 @@ const CleanerJobs = () => {
 
   const getTruncatedText = (text: any) => {
     const maxChars = 23;
-    // Convert to string and handle null/undefined
     const textStr = String(text || '');
     if (textStr?.length <= maxChars) return textStr;
     return textStr?.slice(0, maxChars).trim() + '... ';
@@ -143,14 +145,13 @@ const CleanerJobs = () => {
 
   const getTruncatedText2 = (text: any) => {
     const maxChars = 30;
-    // Convert to string and handle null/undefined
     const textStr = String(text || '');
     if (textStr?.length <= maxChars) return textStr;
     return textStr?.slice(0, maxChars).trim() + '... ';
   };
 
   useEffect(() => {
-    if (modalVisible || modalVisible2 || modalVisible3) {
+    if (modalVisible2 || modalVisible3) {
       Animated.parallel([
         Animated.timing(opacityAnim, {
           toValue: 1,
@@ -177,7 +178,7 @@ const CleanerJobs = () => {
         }),
       ]).start();
     }
-  }, [modalVisible, modalVisible2, modalVisible3]);
+  }, [modalVisible2, modalVisible3]);
 
   const handlePriceRangeApply = () => {
     setPriceLoading(true);
@@ -223,7 +224,7 @@ const CleanerJobs = () => {
       }
     }
 
-    // Service type filter - More robust exact matching
+    // Service type filter
     if (serviceType && selectedType) {
       const jobType = job.type?.toLowerCase().trim();
       const selectedTypeLower = selectedType.toLowerCase().trim();
@@ -237,7 +238,6 @@ const CleanerJobs = () => {
       selectedLocation?.latitude && selectedLocation?.longitude;
     const hasCurrentLocation = location?.latitude && location?.longitude;
 
-    // Priority 1: If user has selected a specific location, use that
     if (hasSelectedLocation) {
       if (job?.location?.latitude && job?.location?.longitude) {
         try {
@@ -254,11 +254,10 @@ const CleanerJobs = () => {
           );
           return distance <= 20;
         } catch (error) {
-          console.log('Distance calculation error:', error);
-          return true; // Show job if distance calculation fails
+          return true;
         }
       } else {
-        return false; // Hide jobs without coordinates when location filter is active
+        return false;
       }
     }
     if (hasCurrentLocation) {
@@ -272,13 +271,12 @@ const CleanerJobs = () => {
             },
             {unit: 'km'},
           );
-          return distance <= 20; // Only show jobs within 20km of current location
+          return distance <= 20;
         } catch (error) {
-          console.log('Distance calculation error:', error);
           return true;
         }
       } else {
-        return false; // Hide jobs without coordinates when we have current location
+        return false;
       }
     }
     return true;
@@ -300,300 +298,297 @@ const CleanerJobs = () => {
   if (initializingLocation) {
     return (
       <SafeAreaView style={styles.safeArea}>
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: Colors.background,
-          }}>
-          <ActivityIndicator size="large" color={Colors.gradient2} />
-          <Text
-            style={{
-              marginTop: 10,
-              color: Colors.secondaryText,
-              fontFamily: Fonts.fontMedium,
-            }}>
-            Fetching your location...
-          </Text>
+        <StatusBar backgroundColor="#FFFFFF" barStyle="dark-content" />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.gradient1} />
+          <Text style={styles.loadingText}>Fetching your location...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <HeaderBack
-        title={'Recent Jobs posts by clients'}
-        textStyle={{fontSize: RFPercentage(2)}}
-        left
-      />
+    <View style={styles.safeArea}>
+      <StatusBar backgroundColor="#FFFFFF" barStyle="light-content" />
+
+      {/* Modern Header */}
+      <LinearGradient
+        colors={[Colors.gradient1, Colors.gradient2]}
+        style={styles.gradientHeader}>
+        <HeaderBack
+          title="Available Jobs"
+          textStyle={styles.headerText}
+          left={true}
+          arrowColor="#FFFFFF"
+          style={{backgroundColor: 'transparent'}}
+          logo
+          tintColor={'white'}
+        />
+      </LinearGradient>
+
       <ScrollView
-        contentContainerStyle={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }>
-        <View style={styles.container}>
-          {/* Filters Container */}
-          <View>
-            <Text style={styles.sectionTitle}>Apply Filters</Text>
+        {/* Filters Section */}
+        <View style={styles.filtersSection}>
+          <Text style={styles.sectionTitle}>Filter Jobs</Text>
+          <Text style={styles.sectionSubtitle}>
+            Narrow down your job search
+          </Text>
 
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginTop: RFPercentage(1),
-                height: RFPercentage(6),
-                paddingHorizontal: RFPercentage(3),
-                paddingBottom: RFPercentage(1),
-              }}>
-              {/* Location Filter */}
-              <View>
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  onPress={() => {
-                    navigation.navigate('Location', {location: false});
-                  }}
-                  style={[
-                    styles.filterBox,
-                    {
-                      backgroundColor: selectedLocation?.name
-                        ? Colors.gradient2
-                        : 'white',
-                    },
-                  ]}>
-                  <Image
-                    source={
-                      selectedLocation?.name
-                        ? Icons.locationWhite
-                        : Icons.location
-                    }
-                    style={styles.locationImg}
-                    resizeMode="contain"
-                  />
+          <View style={styles.filtersContainer}>
+            {/* Location Filter */}
+            <View style={styles.filterItem}>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => {
+                  navigation.navigate('Location', {location: false});
+                }}
+                style={[
+                  styles.filterButton,
+                  selectedLocation?.name && styles.filterButtonActive,
+                ]}>
+                <LinearGradient
+                  colors={
+                    selectedLocation?.name
+                      ? [Colors.gradient1, Colors.gradient2]
+                      : ['#FFFFFF', '#dae2f6ff']
+                  }
+                  style={styles.filterGradient}>
+                  <View style={styles.filterIconContainer}>
+                    <Ionicons
+                      name="location"
+                      size={RFPercentage(2)}
+                      color={Colors.gradient1}
+                    />
+                  </View>
                   <Text
                     style={[
-                      styles.filterText,
-                      {
-                        fontFamily: selectedLocation?.name
-                          ? Fonts.semiBold
-                          : Fonts.fontMedium,
-                        color: selectedLocation?.name
-                          ? Colors.background
-                          : Colors.primaryText,
-                      },
+                      styles.filterButtonText,
+                      selectedLocation?.name && styles.filterButtonTextActive,
                     ]}>
                     Location
                   </Text>
-                </TouchableOpacity>
-                {selectedLocation?.name && (
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    onPress={() => {
-                      dispatch(clearFilterLocation());
-                    }}
-                    style={styles.cross}>
-                    <AntDesign
-                      name="closecircle"
-                      size={RFPercentage(2)}
-                      color={'rgb(206, 211, 219)'}
-                    />
-                  </TouchableOpacity>
-                )}
-              </View>
-
-              {/* Price Range Filter */}
-              <View>
+                </LinearGradient>
+              </TouchableOpacity>
+              {selectedLocation?.name && (
                 <TouchableOpacity
-                  activeOpacity={0.8}
-                  onPress={() => setModalVisible2(true)}
-                  style={[
-                    styles.filterBox,
-                    {
-                      backgroundColor: rangeSelector
-                        ? Colors.gradient2
-                        : 'white',
-                      marginLeft: RFPercentage(1.5),
-                    },
-                  ]}>
-                  <Image
-                    source={
-                      rangeSelector ? Icons.priceRangeWhite : Icons.priceRange
-                    }
-                    style={styles.locationImg}
-                    resizeMode="contain"
-                  />
+                  activeOpacity={0.7}
+                  onPress={() => dispatch(clearFilterLocation())}
+                  style={styles.removeFilter}>
+                  <AntDesign name="closecircle" size={16} color="#94A3B8" />
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {/* Price Range Filter */}
+            <View style={styles.filterItem}>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => setModalVisible2(true)}
+                style={[
+                  styles.filterButton,
+                  rangeSelector && styles.filterButtonActive,
+                ]}>
+                <LinearGradient
+                  colors={
+                    rangeSelector
+                      ? [Colors.gradient1, Colors.gradient2]
+                      : ['#FFFFFF', '#dae2f6ff']
+                  }
+                  style={styles.filterGradient}>
+                  <View style={styles.filterIconContainer}>
+                    <MaterialIcons
+                      name="attach-money"
+                      size={RFPercentage(2)}
+                      color={Colors.gradient1}
+                    />
+                  </View>
                   <Text
                     style={[
-                      styles.filterText,
-                      {
-                        fontFamily: rangeSelector
-                          ? Fonts.semiBold
-                          : Fonts.fontMedium,
-                        color: rangeSelector
-                          ? Colors.background
-                          : Colors.primaryText,
-                      },
+                      styles.filterButtonText,
+                      rangeSelector && styles.filterButtonTextActive,
                     ]}>
-                    Price Range
+                    Price
                   </Text>
-                </TouchableOpacity>
-                {rangeSelector && (
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    onPress={() => setRangeSelector(false)}
-                    style={styles.cross}>
-                    <AntDesign
-                      name="closecircle"
-                      size={RFPercentage(2)}
-                      color={'rgb(206, 211, 219)'}
-                    />
-                  </TouchableOpacity>
-                )}
-              </View>
-
-              {/* Service Type Filter */}
-              <View>
+                </LinearGradient>
+              </TouchableOpacity>
+              {rangeSelector && (
                 <TouchableOpacity
-                  activeOpacity={0.8}
-                  onPress={() => {
-                    setQuery2('');
-                    setServiceTypeFilter([]);
-                    setSelectedType('');
-                    setModalVisible3(true);
-                  }}
-                  style={[
-                    styles.filterBox,
-                    {
-                      backgroundColor: serviceType ? Colors.gradient2 : 'white',
-                      marginLeft: RFPercentage(1.5),
-                    },
-                  ]}>
-                  <Image
-                    source={serviceType ? Icons.verifyWhite : Icons.verify}
-                    style={styles.locationImg}
-                    resizeMode="contain"
-                  />
+                  activeOpacity={0.7}
+                  onPress={() => setRangeSelector(false)}
+                  style={styles.removeFilter}>
+                  <AntDesign name="closecircle" size={16} color="#94A3B8" />
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {/* Service Type Filter */}
+            <View style={styles.filterItem}>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => {
+                  setQuery2('');
+                  setServiceTypeFilter([]);
+                  setSelectedType('');
+                  setModalVisible3(true);
+                }}
+                style={[
+                  styles.filterButton,
+                  serviceType && styles.filterButtonActive,
+                ]}>
+                <LinearGradient
+                  colors={
+                    serviceType
+                      ? [Colors.gradient1, Colors.gradient2]
+                      : ['#FFFFFF', '#dae2f6ff']
+                  }
+                  style={styles.filterGradient}>
+                  <View style={styles.filterIconContainer}>
+                    <MaterialIcons
+                      name="cleaning-services"
+                      size={RFPercentage(2)}
+                      color={Colors.gradient1}
+                    />
+                  </View>
                   <Text
                     style={[
-                      styles.filterText,
-                      {
-                        fontFamily: serviceType
-                          ? Fonts.semiBold
-                          : Fonts.fontMedium,
-                        color: serviceType
-                          ? Colors.background
-                          : Colors.primaryText,
-                      },
+                      styles.filterButtonText,
+                      serviceType && styles.filterButtonTextActive,
                     ]}>
-                    Service Type
+                    Type
                   </Text>
+                </LinearGradient>
+              </TouchableOpacity>
+              {serviceType && (
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => setServiceType(false)}
+                  style={styles.removeFilter}>
+                  <AntDesign name="closecircle" size={16} color="#94A3B8" />
                 </TouchableOpacity>
-                {serviceType && (
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    onPress={() => setServiceType(false)}
-                    style={styles.cross}>
-                    <AntDesign
-                      name="closecircle"
-                      size={RFPercentage(2)}
-                      color={'rgb(206, 211, 219)'}
-                    />
-                  </TouchableOpacity>
-                )}
-              </View>
-            </ScrollView>
+              )}
+            </View>
           </View>
         </View>
-        <View
-          style={{
-            width: '90%',
-            alignSelf: 'center',
-            marginTop: RFPercentage(1),
-            marginLeft: RFPercentage(0.5),
-          }}>
-          <Text
-            style={{
-              color: Colors.primaryText,
-              fontFamily: Fonts.fontMedium,
-              fontSize: RFPercentage(1.8),
-            }}>
-            {selectedLocation?.name
-              ? `Jobs : ${selectedLocation?.name}`
-              : `Nearby Jobs`}
-          </Text>
-        </View>
 
-        {/* Jobs Container */}
-        <View>
-          <View style={styles.listContainer}>
-            {loading2 ? (
-              <ActivityIndicator
-                size={RFPercentage(5)}
-                color={Colors.placeholderColor}
-                style={{marginTop: RFPercentage(30)}}
-              />
-            ) : noLocation ? (
-              <View
-                style={{
-                  marginTop: RFPercentage(20),
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                <Text
-                  style={{
-                    color: Colors.primaryText,
-                    fontSize: RFPercentage(1.8),
-                    fontFamily: Fonts.fontMedium,
-                    textAlign: 'center',
-                  }}>
-                  {`Apply a location for\nbetter experience`}
-                </Text>
-              </View>
-            ) : displayedJobs.length === 0 ? (
-              <NotFound text="No Job found" />
-            ) : (
-              <>
-                <FlatList
-                  contentContainerStyle={{paddingBottom: RFPercentage(3)}}
-                  data={displayedJobs}
-                  keyExtractor={item => item.id.toString()}
-                  renderItem={({item}) => (
-                    <JobCard
-                      name={getTruncatedText(item.title)}
-                      location={item.location?.name || 'Not added'}
-                      price={getTruncatedText2(item.priceRange)}
-                      date={item.createdAt}
-                      onPress={() =>
-                        navigation.navigate('JobDetails', {item: item})
-                      }
-                      delete={false}
-                    />
-                  )}
-                />
-                {sortedJobs?.length > 10 && (
-                  <TouchableOpacity
-                    onPress={() => setShowAllJobs(prev => !prev)}
-                    style={{
-                      marginVertical: RFPercentage(2),
-                      alignSelf: 'center',
-                    }}>
-                    <Text
-                      style={{
-                        color: Colors.gradient1,
-                        fontSize: RFPercentage(1.7),
-                        fontFamily: Fonts.fontMedium,
-                      }}>
-                      {showAllJobs ? 'View Less' : 'View More'}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              </>
+        {/* Active Filters Info */}
+        {(selectedLocation?.name || rangeSelector || serviceType) && (
+          <View style={styles.activeFiltersCard}>
+            <Text style={styles.activeFiltersTitle}>Active Filters</Text>
+            <View style={styles.activeFiltersList}>
+              {selectedLocation?.name && (
+                <View style={styles.activeFilterTag}>
+                  <Ionicons name="location" size={14} color="#FFFFFF" />
+                  <Text style={styles.activeFilterText}>
+                    {selectedLocation.name}
+                  </Text>
+                </View>
+              )}
+              {rangeSelector && (
+                <View style={styles.activeFilterTag}>
+                  <MaterialIcons
+                    name="attach-money"
+                    size={14}
+                    color="#FFFFFF"
+                  />
+                  <Text style={styles.activeFilterText}>
+                    Up to ${priceRange[0]}
+                  </Text>
+                </View>
+              )}
+              {serviceType && selectedType && (
+                <View style={styles.activeFilterTag}>
+                  <MaterialIcons
+                    name="cleaning-services"
+                    size={14}
+                    color="#FFFFFF"
+                  />
+                  <Text style={styles.activeFilterText}>{selectedType}</Text>
+                </View>
+              )}
+            </View>
+          </View>
+        )}
+
+        {/* Jobs Section */}
+        <View style={styles.jobsSection}>
+          <View style={styles.jobsHeader}>
+            <Text style={styles.jobsTitle}>
+              {selectedLocation?.name
+                ? `Jobs in ${selectedLocation.name}`
+                : 'Nearby Cleaning Jobs'}
+            </Text>
+            {!noLocation && (
+              <Text style={styles.jobsCount}>
+                {displayedJobs.length} job
+                {displayedJobs.length !== 1 ? 's' : ''} available
+              </Text>
             )}
           </View>
+
+          {loading2 ? (
+            <View style={styles.loadingJobsContainer}>
+              <ActivityIndicator size="large" color={Colors.gradient1} />
+              <Text style={styles.loadingJobsText}>Loading jobs...</Text>
+            </View>
+          ) : noLocation ? (
+            <View style={styles.noLocationContainer}>
+              <MaterialIcons
+                name="location-off"
+                size={RFPercentage(8)}
+                color="#CBD5E1"
+              />
+              <Text style={styles.noLocationTitle}>Location Required</Text>
+              <Text style={styles.noLocationText}>
+                {`Please apply a location filter to see nearby\ncleaning jobs`}
+              </Text>
+            </View>
+          ) : displayedJobs.length === 0 ? (
+            <View style={styles.noJobsContainer}>
+              <NotFound
+                text={`No cleaning jobs found\nmatching your filters`}
+              />
+            </View>
+          ) : (
+            <>
+              <FlatList
+                scrollEnabled={false}
+                data={displayedJobs}
+                keyExtractor={item => item.id.toString()}
+                renderItem={({item}) => (
+                  <JobCard
+                    name={getTruncatedText(item.title)}
+                    location={item.location?.name || 'Location not specified'}
+                    price={getTruncatedText2(item.priceRange)}
+                    date={item.createdAt}
+                    onPress={() =>
+                      navigation.navigate('JobDetails', {item: item})
+                    }
+                    delete={false}
+                  />
+                )}
+                contentContainerStyle={styles.jobsList}
+              />
+              {sortedJobs?.length > 10 && (
+                <TouchableOpacity
+                  onPress={() => setShowAllJobs(prev => !prev)}
+                  style={styles.viewMoreButton}>
+                  <Text style={styles.viewMoreText}>
+                    {showAllJobs ? 'Show Less Jobs' : 'View All Jobs'}
+                  </Text>
+                  <MaterialIcons
+                    name={showAllJobs ? 'expand-less' : 'expand-more'}
+                    size={20}
+                    color={Colors.gradient1}
+                  />
+                </TouchableOpacity>
+              )}
+            </>
+          )}
         </View>
       </ScrollView>
 
@@ -601,7 +596,7 @@ const CleanerJobs = () => {
       {modalVisible2 && (
         <>
           <TouchableWithoutFeedback onPress={() => setModalVisible2(false)}>
-            <View style={styles.modalContainer}>
+            <View style={styles.modalOverlay}>
               <BlurView
                 style={styles.blurView}
                 blurType="light"
@@ -610,10 +605,10 @@ const CleanerJobs = () => {
               <Modal
                 visible={modalVisible2}
                 transparent={true}
-                animationType="none"
+                animationType="fade"
                 onRequestClose={() => setModalVisible2(false)}>
                 <KeyboardAvoidingView
-                  behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                   style={{flex: 1}}>
                   <Animated.View
                     style={[
@@ -621,36 +616,46 @@ const CleanerJobs = () => {
                         opacity: opacityAnim,
                         transform: [{scale: scaleAnim}],
                       },
-                      styles.rangeModal,
+                      styles.priceModal,
                     ]}>
-                    {/* Header */}
+                    {/* Modal Header */}
                     <View style={styles.modalHeader}>
-                      <Text style={styles.modalTitle}>Select Price Range</Text>
+                      <View style={styles.modalIconContainer}>
+                        <MaterialIcons
+                          name="attach-money"
+                          size={24}
+                          color={Colors.gradient1}
+                        />
+                      </View>
+                      <View style={styles.modalTitleContainer}>
+                        <Text style={styles.modalTitle}>Set Price Range</Text>
+                        <Text style={styles.modalSubtitle}>
+                          Drag to adjust maximum price
+                        </Text>
+                      </View>
                       <TouchableOpacity
                         activeOpacity={0.7}
-                        style={styles.closeButton}
+                        style={styles.modalCloseButton}
                         onPress={() => setModalVisible2(false)}>
-                        <AntDesign
-                          name="close"
-                          size={RFPercentage(2.2)}
-                          color={Colors.secondaryText}
-                        />
+                        <AntDesign name="close" size={22} color="#6B7280" />
                       </TouchableOpacity>
                     </View>
 
-                    {/* Current Price Display */}
-                    <View style={styles.priceDisplayContainer}>
-                      <View style={styles.priceBubble}>
-                        <Text style={styles.priceValue}>
-                          ${tempValue.current}
-                        </Text>
-                      </View>
+                    {/* Price Display */}
+                    <View style={styles.priceDisplayCard}>
+                      <Text style={styles.priceLabel}>Maximum Price</Text>
+                      <Text style={styles.priceValue}>
+                        ${tempValue.current}
+                      </Text>
+                      <Text style={styles.priceHint}>
+                        Jobs below this price will be shown
+                      </Text>
                     </View>
 
-                    {/* Slider Container */}
+                    {/* Slider */}
                     <View style={styles.sliderContainer}>
                       <Slider
-                        style={styles.sliderStyle}
+                        style={styles.slider}
                         minimumValue={10}
                         maximumValue={2000}
                         step={10}
@@ -663,33 +668,39 @@ const CleanerJobs = () => {
                         }}
                         minimumTrackTintColor={Colors.gradient1}
                         thumbTintColor={Colors.gradient1}
-                        maximumTrackTintColor={
-                          Platform.OS === 'ios' ? '#bfc9deff' : '#7a7e85ff'
-                        }
+                        maximumTrackTintColor="#E5E7EB"
                       />
-
-                      {/* Slider Labels */}
-                      <View style={styles.sliderLabelsContainer}>
-                        <Text style={styles.sliderMinLabel}>$10</Text>
-                        <Text style={styles.sliderMaxLabel}>$2000+</Text>
-                      </View>
-
-                      {/* Range Indicator */}
-                      <View style={styles.rangeIndicator}>
-                        <View style={styles.rangeIndicatorLine} />
-                        <Text style={styles.rangeIndicatorText}>
-                          Selected range: $0 - ${tempValue.current}
-                        </Text>
+                      <View style={styles.sliderLabels}>
+                        <Text style={styles.sliderMin}>$10</Text>
+                        <Text style={styles.sliderMax}>$2000+</Text>
                       </View>
                     </View>
 
                     {/* Apply Button */}
-                    <View style={styles.buttonContainer}>
-                      <GradientButton
-                        title="Apply"
+                    <View style={styles.modalButtonContainer}>
+                      <TouchableOpacity
+                        style={styles.applyButton}
                         onPress={handlePriceRangeApply}
-                        loading={priceLoading}
-                      />
+                        disabled={priceLoading}>
+                        <LinearGradient
+                          colors={[Colors.gradient1, Colors.gradient2]}
+                          style={styles.applyButtonGradient}>
+                          {priceLoading ? (
+                            <ActivityIndicator color="#FFFFFF" />
+                          ) : (
+                            <>
+                              <Text style={styles.applyButtonText}>
+                                Apply Filter
+                              </Text>
+                              <AntDesign
+                                name="check"
+                                size={18}
+                                color="#FFFFFF"
+                              />
+                            </>
+                          )}
+                        </LinearGradient>
+                      </TouchableOpacity>
                     </View>
                   </Animated.View>
                 </KeyboardAvoidingView>
@@ -699,9 +710,9 @@ const CleanerJobs = () => {
         </>
       )}
 
-      {/* Service Type */}
+      {/* Service Type Modal */}
       {modalVisible3 && (
-        <View style={styles.modalContainer}>
+        <View style={styles.modalOverlay}>
           <BlurView style={styles.blurView} blurType="light" blurAmount={5} />
           <Modal
             visible={modalVisible3}
@@ -709,29 +720,37 @@ const CleanerJobs = () => {
             animationType="fade"
             onRequestClose={() => setModalVisible3(false)}>
             <KeyboardAvoidingView
-              keyboardVerticalOffset={Platform.OS === 'ios' ? 40 : 0}
-              style={{flex: 1, alignItems: 'center'}}>
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              style={{flex: 1}}>
               <Animated.View
                 style={[
-                  styles.locationModal,
+                  styles.serviceModal,
                   {opacity: opacityAnim, transform: [{scale: scaleAnim}]},
                 ]}>
-                {/* Header */}
+                {/* Modal Header */}
                 <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>Select Service Type</Text>
-                  <TouchableOpacity
-                    style={styles.closeButton}
-                    onPress={() => setModalVisible3(false)}>
-                    <AntDesign
-                      name="close"
-                      size={RFPercentage(2.2)}
-                      color={Colors.secondaryText}
+                  <View style={styles.modalIconContainer}>
+                    <MaterialIcons
+                      name="cleaning-services"
+                      size={24}
+                      color={Colors.gradient1}
                     />
+                  </View>
+                  <View style={styles.modalTitleContainer}>
+                    <Text style={styles.modalTitle}>Select Service Type</Text>
+                    <Text style={styles.modalSubtitle}>
+                      Choose a specific cleaning service
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    style={styles.modalCloseButton}
+                    onPress={() => setModalVisible3(false)}>
+                    <AntDesign name="close" size={22} color="#6B7280" />
                   </TouchableOpacity>
                 </View>
 
-                {/* Search Section */}
-                <View style={styles.searchSection}>
+                {/* Search */}
+                <View style={styles.searchContainer}>
                   <SearchField
                     placeholder="Search service types..."
                     customStyle={styles.searchInput}
@@ -740,52 +759,115 @@ const CleanerJobs = () => {
                   />
                 </View>
 
-                {/* Results List */}
-                {query2.length > 0 && selectedType.length === 0 && (
-                  <View style={styles.resultsContainer}>
-                    {Array.isArray(serviceTypeFilter) &&
-                    serviceTypeFilter.length > 0 ? (
-                      <FlatList
-                        data={serviceTypeFilter}
-                        keyboardShouldPersistTaps="always"
-                        keyExtractor={(item, index) => index.toString()}
-                        showsVerticalScrollIndicator={false}
-                        style={styles.resultsList}
-                        renderItem={({item}) => (
-                          <TouchableOpacity
-                            style={styles.resultItem}
-                            onPress={() => {
-                              setQuery2(item);
-                              setSelectedType(item);
-                            }}>
-                            <Text style={styles.resultText}>{item}</Text>
-                            <AntDesign
-                              name="right"
-                              size={RFPercentage(1.8)}
-                              color={Colors.secondaryText}
-                              style={styles.arrowIcon}
-                            />
-                          </TouchableOpacity>
-                        )}
-                        ItemSeparatorComponent={() => (
-                          <View style={styles.separator} />
-                        )}
-                      />
-                    ) : (
-                      <View style={styles.noResults}>
-                        <Text style={styles.noResultsText}>
-                          No services found
+                {/* Service Type Results */}
+                {query2.length > 0 ? (
+                  selectedType.length === 0 && (
+                    <View style={styles.resultsContainer}>
+                      {serviceTypeFilter.length > 0 ? (
+                        <FlatList
+                          data={serviceTypeFilter}
+                          keyboardShouldPersistTaps="always"
+                          keyExtractor={(item, index) => index.toString()}
+                          showsVerticalScrollIndicator={false}
+                          style={styles.resultsList}
+                          renderItem={({item}) => (
+                            <TouchableOpacity
+                              style={styles.resultItem}
+                              onPress={() => {
+                                setQuery2(item);
+                                setSelectedType(item);
+                              }}>
+                              <MaterialIcons
+                                name="check-circle-outline"
+                                size={20}
+                                color="#9CA3AF"
+                              />
+                              <Text style={styles.resultText}>{item}</Text>
+                              <AntDesign
+                                name="right"
+                                size={16}
+                                color="#9CA3AF"
+                              />
+                            </TouchableOpacity>
+                          )}
+                          ItemSeparatorComponent={() => (
+                            <View style={styles.separator} />
+                          )}
+                        />
+                      ) : (
+                        <View style={styles.noResults}>
+                          <MaterialIcons
+                            name="search-off"
+                            size={RFPercentage(5)}
+                            color="#CBD5E1"
+                          />
+                          <Text style={styles.noResultsTitle}>
+                            No services found
+                          </Text>
+                          <Text style={styles.noResultsText}>
+                            Try searching for something else
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  )
+                ) : (
+                  // Show this when no query has been entered yet
+                  <View style={styles.emptySearchContainer}>
+                    <Text style={styles.emptySearchTitle}>
+                      Refine Your Search
+                    </Text>
+                    <Text style={styles.emptySearchText}>
+                      Type in the search box above to find specific cleaning
+                      services
+                    </Text>
+                    <View style={styles.searchTips}>
+                      <View style={styles.tipItem}>
+                        <MaterialIcons
+                          name="check-circle"
+                          size={16}
+                          color="#10B981"
+                        />
+                        <Text style={styles.tipText}>
+                          Search by service type
                         </Text>
                       </View>
-                    )}
+                      <View style={styles.tipItem}>
+                        <MaterialIcons
+                          name="check-circle"
+                          size={16}
+                          color="#10B981"
+                        />
+                        <Text style={styles.tipText}>
+                          Browse available categories
+                        </Text>
+                      </View>
+                      <View style={styles.tipItem}>
+                        <MaterialIcons
+                          name="check-circle"
+                          size={16}
+                          color="#10B981"
+                        />
+                        <Text style={styles.tipText}>
+                          Select one to apply filter
+                        </Text>
+                      </View>
+                    </View>
                   </View>
                 )}
 
-                {/* Selected Type Preview */}
+                {/* Selected Type - Keep this outside so it shows even when no query */}
                 {selectedType.length > 0 && (
-                  <View style={styles.selectedPreview}>
-                    <Text style={styles.selectedLabel}>Selected:</Text>
-                    <View style={styles.selectedType}>
+                  <View style={styles.selectedTypeContainer}>
+                    <Text style={styles.selectedTypeLabel}>
+                      Selected Service:
+                    </Text>
+                    <View style={styles.selectedTypeCard}>
+                      <MaterialIcons
+                        name="check-circle"
+                        size={20}
+                        color="#10B981"
+                      />
                       <Text style={styles.selectedTypeText}>
                         {selectedType}
                       </Text>
@@ -793,266 +875,402 @@ const CleanerJobs = () => {
                         onPress={() => {
                           setSelectedType('');
                           setQuery2('');
-                        }}
-                        style={styles.clearSelection}>
-                        <AntDesign
-                          name="closecircle"
-                          size={RFPercentage(1.6)}
-                          color={Colors.secondaryText}
-                        />
+                        }}>
+                        <AntDesign name="close" size={16} color="#94A3B8" />
                       </TouchableOpacity>
                     </View>
                   </View>
                 )}
-
                 {/* Apply Button */}
-                <View style={styles.buttonContainer}>
-                  <GradientButton
-                    title="Apply"
+                <View style={[styles.modalButtonContainer]}>
+                  <TouchableOpacity
+                    style={[
+                      styles.applyButton,
+                      query2.length === 0 && styles.buttonDisabled,
+                    ]}
                     onPress={handleServiceTypeApply}
-                    loading={loactionLoading}
-                    disabled={query2.length === 0}
-                  />
+                    disabled={query2.length === 0 || loactionLoading}>
+                    <LinearGradient
+                      colors={[Colors.gradient1, Colors.gradient2]}
+                      style={styles.applyButtonGradient}>
+                      {loactionLoading ? (
+                        <ActivityIndicator color="#FFFFFF" />
+                      ) : (
+                        <>
+                          <Text style={styles.applyButtonText}>
+                            Apply Filter
+                          </Text>
+                          <AntDesign name="check" size={18} color="#FFFFFF" />
+                        </>
+                      )}
+                    </LinearGradient>
+                  </TouchableOpacity>
                 </View>
               </Animated.View>
             </KeyboardAvoidingView>
           </Modal>
         </View>
       )}
-    </SafeAreaView>
+    </View>
   );
 };
-
-export default CleanerJobs;
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: '#FFFFFF',
   },
-  scrollView: {
-    paddingBottom: Platform.OS === 'ios' ? RFPercentage(10) : RFPercentage(12),
-  },
-  container: {
-    backgroundColor: Colors.background,
-    width: '100%',
-    alignSelf: 'center',
-  },
-  sectionTitle: {
-    marginTop: RFPercentage(2.5),
-    color: Colors.primaryText,
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.8),
-    marginLeft: RFPercentage(3),
-  },
-  filterWrapper: {
-    position: 'relative',
-  },
-
-  shadowWrapper: {
+  gradientHeader: {
+    paddingTop: Platform.OS === 'ios' ? 40 : 20,
+    paddingBottom: 30,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    elevation: 8, // Android shadow
-    borderRadius: RFPercentage(0.8),
-  },
-
-  filterBox: {
-    width: RFPercentage(15),
-    height: RFPercentage(4.7),
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: RFPercentage(100),
-    borderColor: Colors.inputFieldColor,
-    flexDirection: 'row',
-    backgroundColor: 'white',
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-  },
-
-  filterText: {
-    color: Colors.primaryText,
-    fontSize: RFPercentage(1.5),
-    fontFamily: Fonts.bold,
-  },
-  listContainer: {
-    marginTop: RFPercentage(0.7),
-    width: '100%',
-  },
-  jobPosted: {
-    textAlign: 'center',
-    color: Colors.primaryText,
-    fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.9),
-  },
-  jobPostedContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: RFPercentage(2),
-  },
-  noServiceContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-    marginTop: RFPercentage(20),
-  },
-  noServiceImg: {
-    width: RFPercentage(10),
-    height: RFPercentage(10),
-  },
-  noServiceText: {
-    color: Colors.placeholderColor,
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.8),
-    textAlign: 'center',
-    marginTop: RFPercentage(1),
-  },
-
-  sliderLabel: {
-    color: Colors.secondaryText,
-    fontSize: RFPercentage(1.9),
-    fontFamily: Fonts.semiBold,
-  },
-  flatListContainer: {
-    paddingHorizontal: RFPercentage(1.2),
-    paddingTop: RFPercentage(1.5),
-  },
-
-  modalInner: {
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: RFPercentage(3),
-  },
-  applyLocation: {
-    color: Colors.primaryText,
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(2.1),
-  },
-  queryContainer: {
-    top: RFPercentage(0.5),
-    width: '100%',
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    height: RFPercentage(21),
-    borderRadius: RFPercentage(1),
-  },
-  queryText: {
-    padding: RFPercentage(2),
-    fontSize: RFPercentage(1.6),
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.inputFieldColor,
-    fontFamily: Fonts.fontRegular,
-    color: Colors.placeholderColor,
-  },
-  rangeModal: {
-    width: '90%',
-    height: '50%',
-    alignSelf: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    alignItems: 'center',
-    borderRadius: RFPercentage(2.5),
-    top: RFPercentage(20),
-    paddingHorizontal: RFPercentage(1.6),
-    paddingVertical: RFPercentage(2.5),
-    shadowColor: 'rgba(90, 138, 179, 1)',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.1,
     shadowRadius: 12,
     elevation: 8,
-    borderWidth:RFPercentage(0.1),
-    borderColor:"rgba(235, 242, 249, 1)"
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
   },
-  range: {
-    textAlign: 'center',
+  headerText: {
+    fontSize: RFPercentage(2),
+    fontFamily: Fonts.semiBold,
+    color: '#FFFFFF',
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 40,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.9),
-    color: Colors.primaryText,
+    color: '#6B7280',
   },
-  locationImg: {
-    width: RFPercentage(1.6),
-    height: RFPercentage(1.6),
-    marginRight: RFPercentage(0.5),
+  filtersSection: {
+    paddingHorizontal: 20,
+    paddingTop: 24,
   },
-  cross: {
+  sectionTitle: {
+    fontSize: RFPercentage(2),
+    fontFamily: Fonts.semiBold,
+    color: '#1F2937',
+    marginBottom: 4,
+  },
+  sectionSubtitle: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontRegular,
+    color: '#6B7280',
+    marginBottom: 20,
+  },
+  filtersContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  filterItem: {
+    position: 'relative',
+  },
+  filterButton: {
+    width: (width - 60) / 3,
+    borderRadius: 12,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  filterButtonActive: {
+    shadowColor: Colors.gradient1,
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  filterGradient: {
+    padding: 16,
+    alignItems: 'center',
+    borderRadius: 12,
+  },
+  filterIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(224, 234, 253, 1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  filterButtonText: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontMedium,
+    color: '#374151',
+  },
+  filterButtonTextActive: {
+    color: '#FFFFFF',
+  },
+  removeFilter: {
     position: 'absolute',
-    right: RFPercentage(-0.7),
-    top: RFPercentage(-0.7),
+    top: -8,
+    right: -8,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    padding: 2,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 1},
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
-  close: {
-    position: 'absolute',
-    right: RFPercentage(2),
-    top: RFPercentage(2),
+  activeFiltersCard: {
+    marginHorizontal: 20,
+    marginTop: 16,
+    backgroundColor: '#F8FAFF',
+    borderRadius: 16,
+    padding: 16,
   },
-  modalContainer: {
+  activeFiltersTitle: {
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontMedium,
+    color: '#4B5563',
+    marginBottom: 12,
+  },
+  activeFiltersList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  activeFilterTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.gradient1,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 6,
+  },
+  activeFilterText: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: Fonts.fontMedium,
+    color: '#FFFFFF',
+  },
+  jobsSection: {
+    marginTop: 24,
+    paddingHorizontal: 20,
+  },
+  jobsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  jobsTitle: {
+    fontSize: RFPercentage(1.7),
+    fontFamily: Fonts.semiBold,
+    color: '#1F2937',
+    width: '50%',
+  },
+  jobsCount: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: Fonts.fontMedium,
+    color: Colors.gradient1,
+    backgroundColor: '#EEF2FF',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  loadingJobsContainer: {
+    height: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingJobsText: {
+    marginTop: 12,
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontMedium,
+    color: '#6B7280',
+  },
+  noLocationContainer: {
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  noLocationTitle: {
+    fontSize: RFPercentage(1.8),
+    fontFamily: Fonts.semiBold,
+    color: '#374151',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  noLocationText: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontRegular,
+    color: '#6B7280',
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  noJobsContainer: {
+    // paddingVertical: 40,
+    bottom: 40,
+  },
+  jobsList: {
+    paddingBottom: 16,
+  },
+  viewMoreButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F8FAFF',
+    paddingVertical: 12,
+    borderRadius: 12,
+    marginTop: 8,
+    gap: 8,
+  },
+  viewMoreText: {
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontMedium,
+    color: Colors.gradient1,
+  },
+  modalOverlay: {
     position: 'absolute',
     width: '100%',
     height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   blurView: {
     width: '100%',
     height: '100%',
     position: 'absolute',
   },
-  locationModal: {
-    width: '85%',
-    // height: '60%',
-    minHeight: RFPercentage(40),
+  priceModal: {
+    width: width - 40,
     alignSelf: 'center',
-    backgroundColor: Colors.background,
-    borderRadius: RFPercentage(2.5),
-    paddingHorizontal: RFPercentage(2.5),
-    paddingVertical: RFPercentage(2),
-    // Shadow
-    shadowColor: 'rgba(90, 138, 179, 1)',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 8,
-    marginTop: RFPercentage(20),
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 24,
+    marginTop: '50%',
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 10},
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  serviceModal: {
+    width: width - 40,
+    alignSelf: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 24,
+    marginTop: '40%',
+    minHeight: '60%',
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 10},
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 10,
   },
   modalHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: RFPercentage(2),
+    marginBottom: 24,
   },
-  modalTitle: {
-    color: Colors.secondaryText,
-    fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(2),
+  modalIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#EEF2FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  modalTitleContainer: {
     flex: 1,
   },
-  closeButton: {
-    padding: RFPercentage(0.5),
+  modalTitle: {
+    fontSize: RFPercentage(1.8),
+    fontFamily: Fonts.semiBold,
+    color: '#1F2937',
+    marginBottom: 4,
   },
-  searchSection: {
+  modalSubtitle: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: Fonts.fontRegular,
+    color: '#6B7280',
+  },
+  modalCloseButton: {
+    padding: 4,
+  },
+  priceDisplayCard: {
+    backgroundColor: '#F8FAFF',
+    borderRadius: 16,
+    padding: 20,
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  priceLabel: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: Fonts.fontMedium,
+    color: '#6B7280',
+    marginBottom: 4,
+  },
+  priceValue: {
+    fontSize: RFPercentage(3),
+    fontFamily: Fonts.semiBold,
+    color: Colors.gradient1,
+    marginBottom: 8,
+  },
+  priceHint: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: Fonts.fontRegular,
+    color: '#9CA3AF',
+    textAlign: 'center',
+  },
+  sliderContainer: {
+    marginBottom: 32,
+  },
+  slider: {
     width: '100%',
-    marginBottom: RFPercentage(1),
+    height: 40,
+  },
+  sliderLabels: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
+  },
+  sliderMin: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: Fonts.fontRegular,
+    color: '#6B7280',
+  },
+  sliderMax: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: Fonts.fontRegular,
+    color: '#6B7280',
+  },
+  searchContainer: {
+    // marginBottom: 20,
+    width: '100%',
+    alignSelf: 'center',
   },
   searchInput: {
-    borderColor: 'rgba(226, 232, 240, 0.8)',
-    backgroundColor: 'rgba(248, 250, 252, 0.5)',
+    backgroundColor: '#F9FAFB',
+    borderColor: '#E5E7EB',
+    width: '100%',
   },
   resultsContainer: {
     flex: 1,
-    width: '100%',
-    marginTop: RFPercentage(1),
-    backgroundColor: 'rgba(248, 250, 252, 0.5)',
-    borderRadius: RFPercentage(1.2),
+    minHeight: 200,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(226, 232, 240, 0.5)',
+    borderColor: '#E5E7EB',
   },
   resultsList: {
     flex: 1,
@@ -1060,164 +1278,127 @@ const styles = StyleSheet.create({
   resultItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: RFPercentage(1.2),
-    paddingHorizontal: RFPercentage(1.5),
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    gap: 12,
   },
   resultText: {
-    color: Colors.primaryText,
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.6),
     flex: 1,
-  },
-  arrowIcon: {
-    opacity: 0.6,
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontMedium,
+    color: '#374151',
   },
   separator: {
     height: 1,
-    backgroundColor: 'rgba(226, 232, 240, 0.5)',
-    marginHorizontal: RFPercentage(1.5),
+    backgroundColor: '#E5E7EB',
+    marginHorizontal: 16,
   },
   noResults: {
-    flex: 1,
+    paddingVertical: 30,
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: RFPercentage(3),
   },
   noResultsText: {
-    color: Colors.secondaryText,
-    fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontRegular,
+    color: '#9CA3AF',
   },
-  selectedPreview: {
-    width: '100%',
-    marginTop: RFPercentage(1),
-    marginBottom: RFPercentage(1),
+  selectedTypeContainer: {
+    marginTop: 20,
+    marginBottom: 24,
   },
-  selectedLabel: {
-    color: Colors.secondaryText,
-    fontFamily: Fonts.fontMedium,
+  selectedTypeLabel: {
     fontSize: RFPercentage(1.4),
-    marginBottom: RFPercentage(0.5),
+    fontFamily: Fonts.fontMedium,
+    color: '#6B7280',
+    marginBottom: 8,
   },
-  selectedType: {
+  selectedTypeCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'rgba(74, 144, 226, 0.05)',
-    paddingVertical: RFPercentage(1),
-    paddingHorizontal: RFPercentage(1.5),
-    borderRadius: RFPercentage(1),
+    backgroundColor: '#F0FDF4',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(74, 144, 226, 0.1)',
+    borderColor: '#DCFCE7',
+    gap: 12,
   },
   selectedTypeText: {
-    color: Colors.gradient1,
-    fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.6),
     flex: 1,
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontMedium,
+    color: '#166534',
   },
-  clearSelection: {
-    padding: RFPercentage(0.3),
+  modalButtonContainer: {
+    marginTop: 8,
   },
-  buttonContainer: {
-    width: '100%',
-    marginTop: RFPercentage(1),
+  applyButton: {
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
+  applyButtonGradient: {
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 10,
   },
-  priceDisplayContainer: {
-    alignItems: 'center',
-    marginBottom: RFPercentage(4),
-  },
-
-  priceBubble: {
-    backgroundColor: 'rgba(202, 217, 238, 0.44)',
-    paddingHorizontal: RFPercentage(3),
-    paddingVertical: RFPercentage(1.5),
-    borderRadius: RFPercentage(1),
-    alignItems: 'center',
-    // Shadow
-    shadowColor: 'rgba(130, 170, 193, 0.69)',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 10,
-  },
-
-  priceLabel: {
-    color: Colors.background,
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.4),
-    opacity: 0.9,
-  },
-
-  priceValue: {
-    color: Colors.primaryText,
+  applyButtonText: {
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(2.4),
-    marginTop: RFPercentage(0.2),
+    color: '#FFFFFF',
   },
 
-  sliderContainer: {
-    width: '100%',
-    marginBottom: RFPercentage(4),
-  },
-
-  sliderStyle: {
-    width: '100%',
-    height: RFPercentage(4),
-  },
-
-  sliderThumb: {
-    shadowColor: Colors.gradient1,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-
-  sliderLabelsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    marginTop: RFPercentage(1),
-  },
-
-  sliderMinLabel: {
-    color: Colors.secondaryText,
-    fontSize: RFPercentage(1.6),
-    fontFamily: Fonts.fontMedium,
-  },
-
-  sliderMaxLabel: {
-    color: Colors.secondaryText,
-    fontSize: RFPercentage(1.6),
-    fontFamily: Fonts.fontMedium,
-  },
-
-  rangeIndicator: {
+  emptySearchContainer: {
     alignItems: 'center',
-    marginTop: RFPercentage(3),
+    paddingVertical: 30,
+    paddingHorizontal: 20,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 12,
+    marginVertical: 16,
   },
-
-  rangeIndicatorLine: {
-    width: '60%',
-    height: 1,
-    backgroundColor: Colors.inputFieldColor,
-    marginBottom: RFPercentage(1),
+  emptySearchTitle: {
+    fontSize: RFPercentage(1.8),
+    fontFamily: Fonts.semiBold,
+    color: '#374151',
+    marginTop: 16,
+    marginBottom: 8,
   },
-
-  rangeIndicatorText: {
-    color: Colors.primaryText,
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.6),
+  emptySearchText: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontRegular,
+    color: '#6B7280',
     textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 20,
+  },
+  searchTips: {
+    width: '100%',
+    gap: 12,
+  },
+  tipItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  tipText: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: Fonts.fontRegular,
+    color: '#6B7280',
+  },
+
+  noResultsTitle: {
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontMedium,
+    color: '#374151',
+    marginTop: 12,
+    marginBottom: 4,
   },
 });
+
+export default CleanerJobs;

@@ -3195,6 +3195,8 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - RNSVG (15.15.1):
+    - React-Core
   - RNVectorIcons (10.2.0):
     - DoubleConversion
     - glog
@@ -3350,6 +3352,7 @@ DEPENDENCIES:
   - "RNNotifee (from `../node_modules/@notifee/react-native`)"
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
+  - RNSVG (from `../node_modules/react-native-svg`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - Stripe (~> 24.20.0)
   - "stripe-react-native (from `../node_modules/@stripe/stripe-react-native`)"
@@ -3573,6 +3576,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
     :path: "../node_modules/react-native-screens"
+  RNSVG:
+    :path: "../node_modules/react-native-svg"
   RNVectorIcons:
     :path: "../node_modules/react-native-vector-icons"
   stripe-react-native:
@@ -3695,6 +3700,7 @@ SPEC CHECKSUMS:
   RNNotifee: 5e3b271e8ea7456a36eec994085543c9adca9168
   RNReanimated: 13766f414b1fcc69c89dff5463e9ead4060f8019
   RNScreens: 621820c0097b3e73e174efaaeb43e601395cb9b8
+  RNSVG: dc0d173e7dbb006a8082d465e5eab5b6c1ea9392
   RNVectorIcons: ad4f78a46d6607cc26b6ed1b47c697cc4da84e83
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Stripe: 517f6e3e25f01641be2adab3aa3d1f45d4d443c6

@@ -34,6 +34,7 @@ import Messages from '../screens/commonflow/home/Messages';
 import firestore from '@react-native-firebase/firestore';
 import Decider from './Decider';
 import Location from '../screens/commonflow/location/Location';
+import ProfileCompletionCongratulations from '../screens/cleanerflow/homescreens/home/SuccessScreen';
 
 export type RootStackParamList = {
   SplashOne: undefined;
@@ -74,6 +75,7 @@ export type RootStackParamList = {
   };
   Messages: undefined;
   Location: undefined;
+  CongratulationsScreen : undefined
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -194,6 +196,10 @@ const StackNavigator: React.FC = () => {
             <Stack.Screen name="Chat" component={Chat} />
             <Stack.Screen name="Messages" component={Messages} />
             <Stack.Screen name="Location" component={Location} />
+            <Stack.Screen
+              name="CongratulationsScreen"
+              component={ProfileCompletionCongratulations}
+            />
 
             {/* ------------------Customer Flow------------- */}
             <Stack.Screen name="Home" component={CustomerNavigator} />

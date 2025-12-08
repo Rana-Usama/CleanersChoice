@@ -63,8 +63,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   nextButtonText: {
-    fontSize: RFPercentage(1.9),
-    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.7),
+    fontFamily: Fonts.semiBold,
     color: Colors.background,
     textAlign: 'center',
   },
