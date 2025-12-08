@@ -39,25 +39,22 @@ import CustomModal from '../../../components/CustomModal';
 import {useCurrentLocation} from '../../../utils/userLocation';
 import haversine from 'haversine';
 import {clearFilterLocation} from '../../../redux/location/Actions';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import HomeCard from '../../../components/CardHome';
+import Entypo from 'react-native-vector-icons/Entypo';
+import LinearGradient from 'react-native-linear-gradient';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 const categories = [
-  {id: '1', name: 'All', icon: Icons.all},
-  {id: '44', name: 'Residential Cleaning', icon: Icons.residential},
-  {id: '66', name: 'Car Cleaning', icon: Icons.car},
-  {id: '55', name: 'Pressure Washing', icon: Icons.pressure},
-  {id: '22', name: 'Chimney Cleaning', icon: Icons.chimney},
-  {id: '33', name: 'Carpet Cleaning', icon: Icons.carpet},
-  {id: '11', name: 'Window Cleaning', icon: Icons.window},
-  {
-    id: '77',
-    name: 'Lawn Care',
-    icon: Icons.lawn,
-  },
-  {
-    id: '88',
-    name: 'Others',
-    icon: Icons.others,
-  },
+  {id: '1', name: 'All', icon: 'apps'},
+  {id: '44', name: 'Residential', icon: 'home'},
+  {id: '66', name: 'Vehicle', icon: 'car'},
+  {id: '55', name: 'Pressure', icon: 'speedometer'},
+  {id: '22', name: 'Chimney', icon: 'fireplace'}, // Fire/smoke represents chimney
+  {id: '33', name: 'Carpet', icon: 'texture'}, // Texture represents carpet
+  {id: '11', name: 'Window', icon: 'view-day'}, // Alternative for window
+  {id: '77', name: 'Lawn Care', icon: 'nature-people'},
+  {id: '88', name: 'Others', icon: 'dots-horizontal'},
 ];
 
 interface Service {
@@ -91,10 +88,11 @@ const Home = () => {
   const [priceLoading, setPriceLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [initializingLocation, setInitializingLocation] = useState(true);
-
+  const [user, setUser] = useState(null);
   const userFlow = useSelector((state: any) => state.userFlow.userFlow); // 👈 get user flow
   const [showAuthModal, setShowAuthModal] = useState(false); // 👈 new modal state
   const {location} = useCurrentLocation();
+
   const selectedLocation = useSelector(
     (state: any) =>
       state?.location?.filterLocation ?? {
@@ -226,6 +224,7 @@ const Home = () => {
       const userDoc = await firestore().collection('Users').doc(user.uid).get();
       if (userDoc.exists) {
         const userData = userDoc.data();
+        setUser(userData);
         dispatch(setProfileData(userData));
       }
     } catch (error) {}
@@ -311,23 +310,28 @@ const Home = () => {
     );
   }
 
+  const truncateText = (text: string, length = 20) => {
+    if (!text) return '';
+    return text.length > length ? text.substring(0, length) + '...' : text;
+  };
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <SafeAreaView style={styles.safeArea}>
-        <HeaderBack
-          logo={true}
-          title="Home"
-          right={true}
-          rightText="Post Job"
-          textStyle={{fontSize: RFPercentage(2.2)}}
-          onPress={() => {
-            if (userFlow === 'Guest') {
-              setShowAuthModal(true);
-            } else {
-              navigation.navigate('PostJob', {jobId: null});
-            }
-          }}
-        />
+      <View style={styles.safeArea}>
+        <LinearGradient
+          colors={[Colors.gradient1, Colors.gradient2]}
+          style={styles.gradientHeader}>
+          <HeaderBack
+            title="Home"
+            textStyle={styles.headerText}
+            left={true}
+            arrowColor="#FFFFFF"
+            style={{backgroundColor: 'transparent'}}
+            logo
+            tintColor={'white'}
+          />
+        </LinearGradient>
+
         <ScrollView
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -336,15 +340,113 @@ const Home = () => {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="always">
           <View style={styles.container}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                width: '90%',
+                alignSelf: 'center',
+                marginTop: RFPercentage(1.5),
+              }}>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <Image
+                  source={Icons.location}
+                  resizeMode="contain"
+                  style={{
+                    width: RFPercentage(2.3),
+                    height: RFPercentage(2.3),
+                  }}
+                />
+                <View style={{marginLeft: RFPercentage(1)}}>
+                  <Text
+                    style={{
+                      fontFamily: Fonts.fontMedium,
+                      fontSize: RFPercentage(1.5),
+                      color: Colors.secondaryText,
+                    }}>
+                    Location
+                  </Text>
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={() => {
+                      navigation.navigate('Location', {location: false});
+                    }}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginTop: RFPercentage(0.5),
+                    }}>
+                    <Text
+                      style={{
+                        fontFamily: Fonts.semiBold,
+                        fontSize: RFPercentage(1.6),
+                        color: Colors.secondaryText,
+                      }}>
+                      {selectedLocation?.name
+                        ? truncateText(selectedLocation.name)
+                        : truncateText(location?.address || 'Not Specified')}
+                    </Text>
+                    <Entypo
+                      name="chevron-down"
+                      size={RFPercentage(2)}
+                      style={{marginLeft: RFPercentage(0.5)}}
+                      color={Colors.secondaryText}
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <TouchableOpacity
+                style={{
+                  width: RFPercentage(7),
+                  height: RFPercentage(7),
+                  borderRadius: RFPercentage(100),
+                  borderWidth: 1,
+                  borderColor: Colors.gradient2,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                <Image
+                  source={
+                    user?.profile ? {uri: user?.profile} : IMAGES.defaultPic
+                  }
+                  resizeMode="cover"
+                  style={{
+                    width: RFPercentage(6.5),
+                    height: RFPercentage(6.5),
+                    borderRadius: RFPercentage(100),
+                  }}
+                />
+              </TouchableOpacity>
+            </View>
             <View style={styles.searchContainer}>
               <SearchField
-                placeholder="Search Businesses"
+                placeholder="Search by name..."
                 value={nameQuery}
                 onChangeText={setNameQuery}
               />
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => setModalVisible2(true)}
+                style={{
+                  width: RFPercentage(5.5),
+                  height: RFPercentage(5.5),
+                  borderRadius: RFPercentage(1.2),
+                  borderWidth: RFPercentage(0.1),
+                  borderColor: Colors.inputFieldColor,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: rangeSelector ? Colors.gradient1 : 'white',
+                }}>
+                <MaterialIcons
+                  name="filter-list-alt"
+                  size={RFPercentage(3)}
+                  color={rangeSelector ? 'white' : 'rgba(164, 173, 200, 1)'}
+                />
+              </TouchableOpacity>
             </View>
 
-            <Text style={[styles.sectionTitle, {marginTop: RFPercentage(2)}]}>
+            <Text style={[styles.sectionTitle, {marginTop: RFPercentage(1.5)}]}>
               Categories
             </Text>
             <FlatList
@@ -361,50 +463,51 @@ const Home = () => {
                     style={[
                       styles.categoryBox,
                       {
-                        borderColor:
+                        backgroundColor:
                           categorySelection === item.id
-                            ? Colors.gradient2
-                            : Colors.inputFieldColor,
+                            ? Colors.gradient1
+                            : Colors.white,
                       },
                     ]}>
-                    <Image
-                      source={item.icon}
-                      resizeMode="contain"
-                      style={[
-                        styles.categoryIcon,
-                        {
-                          width:
-                            item.id === '1' || item.id === '88'
-                              ? RFPercentage(3.2)
-                              : RFPercentage(4),
-                          height:
-                            item.id === '1' || item.id === '88'
-                              ? RFPercentage(3.2)
-                              : RFPercentage(4),
-                        },
-                      ]}
+                    <Icon
+                      name={item.icon}
+                      size={30}
+                      color={
+                        categorySelection === item.id
+                          ? '#ffffffff'
+                          : 'rgba(164, 173, 200, 1)'
+                      }
                     />
-                    <Text
-                      style={[
-                        styles.categoryText,
-                        {
-                          fontFamily:
-                            categorySelection === item.id
-                              ? Fonts.semiBold
-                              : Fonts.fontMedium,
-                        },
-                      ]}>
-                      {item.name.length > 8
-                        ? `${item.name.slice(0, 8)}..`
-                        : item.name}
-                    </Text>
                   </View>
+                  <Text
+                    style={[
+                      styles.categoryText,
+                      {
+                        fontFamily:
+                          categorySelection === item.id
+                            ? Fonts.semiBold
+                            : Fonts.fontMedium,
+                      },
+                    ]}>
+                    {item.name.length > 8
+                      ? `${item.name.slice(0, 8)}..`
+                      : item.name}
+                  </Text>
                 </TouchableOpacity>
               )}
               contentContainerStyle={styles.flatListPadding}
             />
+            <HomeCard
+              onPostJob={() => {
+                if (userFlow === 'Guest') {
+                  setShowAuthModal(true);
+                } else {
+                  navigation.navigate('PostJob', {jobId: null});
+                }
+              }}
+            />
 
-            <Text style={styles.sectionTitle}>Apply filters</Text>
+            {/* <Text style={styles.sectionTitle}>Apply filters</Text>
             <View style={styles.filterWrapper}>
               <View>
                 <TouchableOpacity
@@ -508,7 +611,7 @@ const Home = () => {
                   </TouchableOpacity>
                 )}
               </View>
-            </View>
+            </View> */}
 
             <View
               style={{
@@ -516,7 +619,7 @@ const Home = () => {
                 alignItems: 'center',
                 width: '90%',
                 alignSelf: 'center',
-                marginTop: RFPercentage(3),
+                marginTop: RFPercentage(4),
               }}>
               <Text
                 style={{
@@ -564,7 +667,9 @@ const Home = () => {
                       <FlatList
                         data={finalFilteredJobs}
                         keyExtractor={item => item.id.toString()}
-                        contentContainerStyle={{paddingBottom: RFPercentage(1)}}
+                        contentContainerStyle={{
+                          paddingBottom: RFPercentage(1),
+                        }}
                         renderItem={({item}) => (
                           <View style={styles.serviceItem}>
                             <ServicesCard
@@ -592,6 +697,7 @@ const Home = () => {
             )}
           </View>
         </ScrollView>
+
         {modalVisible2 && (
           <>
             <TouchableWithoutFeedback onPress={() => setModalVisible2(false)}>
@@ -599,101 +705,197 @@ const Home = () => {
                 <BlurView
                   style={styles.blurView}
                   blurType="light"
-                  blurAmount={5}
+                  blurAmount={10}
+                  reducedTransparencyFallbackColor="white"
                 />
                 <Modal
                   visible={modalVisible2}
                   transparent={true}
-                  animationType="none"
+                  animationType="fade"
                   onRequestClose={() => setModalVisible2(false)}>
                   <KeyboardAvoidingView
-                    behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                     style={{flex: 1}}>
-                    <Animated.View
-                      style={[
-                        {
-                          opacity: opacityAnim,
-                          transform: [{scale: scaleAnim}],
-                        },
-                        styles.rangeModal,
-                      ]}>
-                      {/* Header */}
-                      <View style={styles.modalHeader}>
-                        <Text style={styles.modalTitle}>
-                          Select Price Range
-                        </Text>
-                        <TouchableOpacity
-                          activeOpacity={0.7}
-                          style={styles.closeButton}
-                          onPress={() => setModalVisible2(false)}>
-                          <AntDesign
-                            name="close"
-                            size={RFPercentage(2.2)}
-                            color={Colors.secondaryText}
-                          />
-                        </TouchableOpacity>
+                    <TouchableWithoutFeedback
+                      onPress={() => setModalVisible2(false)}>
+                      <View style={styles.modalOverlay}>
+                        <TouchableWithoutFeedback onPress={() => {}}>
+                          <Animated.View
+                            style={[
+                              {
+                                opacity: opacityAnim,
+                                transform: [{scale: scaleAnim}],
+                              },
+                              styles.rangeModal,
+                            ]}>
+                            {/* Header with gradient */}
+                            <LinearGradient
+                              colors={[Colors.gradient1, Colors.gradient2]}
+                              start={{x: 0, y: 0}}
+                              end={{x: 1, y: 0}}
+                              style={styles.modalHeader}>
+                              <View style={styles.headerContent}>
+                                <View style={styles.titleContainer}>
+                                  <MaterialIcons
+                                    name="price-change"
+                                    size={RFPercentage(2.5)}
+                                    color="white"
+                                  />
+                                  <Text style={styles.modalTitle}>
+                                    Price Range
+                                  </Text>
+                                </View>
+                                <TouchableOpacity
+                                  activeOpacity={0.7}
+                                  style={styles.closeButton}
+                                  onPress={() => setModalVisible2(false)}>
+                                  <AntDesign
+                                    name="close"
+                                    size={RFPercentage(2.2)}
+                                    color="white"
+                                  />
+                                </TouchableOpacity>
+                              </View>
+                            </LinearGradient>
+
+                            {/* Body */}
+                            <View style={styles.modalBody}>
+                              {/* Current Price Display */}
+                              <View style={styles.priceDisplayCard}>
+                                <View style={styles.priceDisplayHeader}>
+                                  <Text style={styles.priceDisplayTitle}>
+                                    Selected Price
+                                  </Text>
+                                  <View style={styles.pricePill}>
+                                    <Text style={styles.pricePillText}>
+                                      ${tempValue.current}
+                                    </Text>
+                                  </View>
+                                </View>
+
+                                {/* Range Display */}
+                                <View style={styles.rangeDisplay}>
+                                  <View style={styles.rangeItem}>
+                                    <Text style={styles.rangeLabel}>Min</Text>
+                                    <Text style={styles.rangeValue}>$10</Text>
+                                  </View>
+                                  <View style={styles.rangeSeparator}>
+                                    <View style={styles.dashLine} />
+                                  </View>
+                                  <View style={styles.rangeItem}>
+                                    <Text style={styles.rangeLabel}>Max</Text>
+                                    <Text style={styles.rangeValue}>
+                                      ${tempValue.current}
+                                    </Text>
+                                  </View>
+                                </View>
+                              </View>
+
+                              {/* Slider Container */}
+                              <View style={styles.sliderCard}>
+                                <Text style={styles.sliderTitle}>
+                                  Adjust Maximum Price
+                                </Text>
+
+                                {/* Slider Component */}
+                                <Slider
+                                  style={styles.sliderStyle}
+                                  minimumValue={10}
+                                  maximumValue={2000}
+                                  step={10}
+                                  value={priceRange[0]}
+                                  onValueChange={value => {
+                                    tempValue.current = value;
+                                  }}
+                                  onSlidingComplete={value => {
+                                    setPriceRange([value, priceRange[1]]);
+                                  }}
+                                  minimumTrackTintColor={Colors.gradient1}
+                                  thumbTintColor={Colors.gradient1}
+                                  maximumTrackTintColor="#E8E8E8"
+                                />
+
+                                {/* Price Markers */}
+                                <View style={styles.priceMarkers}>
+                                  <Text style={styles.markerText}>$10</Text>
+                                  <Text style={styles.markerText}>$1000</Text>
+                                  <Text style={styles.markerText}>$2000+</Text>
+                                </View>
+                              </View>
+
+                              {/* Quick Select Buttons */}
+                              <View style={styles.quickSelectContainer}>
+                                <Text style={styles.quickSelectTitle}>
+                                  Quick Select
+                                </Text>
+                                <View style={styles.quickSelectButtons}>
+                                  {[50, 100, 250, 500, 1000].map(price => (
+                                    <TouchableOpacity
+                                      key={price}
+                                      style={[
+                                        styles.quickButton,
+                                        tempValue.current >= price &&
+                                          styles.quickButtonActive,
+                                      ]}
+                                      onPress={() => {
+                                        tempValue.current = price;
+                                        setPriceRange([price, priceRange[1]]);
+                                      }}>
+                                      <Text
+                                        style={[
+                                          styles.quickButtonText,
+                                          tempValue.current >= price &&
+                                            styles.quickButtonTextActive,
+                                        ]}>
+                                        ${price}
+                                      </Text>
+                                    </TouchableOpacity>
+                                  ))}
+                                </View>
+                              </View>
+
+                              {/* Action Buttons */}
+                              <View style={styles.actionButtonsContainer}>
+                                <TouchableOpacity
+                                  style={styles.removeButton}
+                                  onPress={() => {
+                                    setPriceRange([10, 2000]);
+                                    tempValue.current = 2000;
+                                    setModalVisible2(false);
+                                    setRangeSelector(false);
+                                  }}
+                                  activeOpacity={0.8}>
+                                  <MaterialIcons
+                                    name="filter-alt-off"
+                                    size={RFPercentage(2)}
+                                    color={Colors.error}
+                                  />
+                                  <Text style={styles.removeButtonText}>
+                                    Remove Filter
+                                  </Text>
+                                </TouchableOpacity>
+
+                                <View style={styles.applyButtonWrapper}>
+                                  <GradientButton
+                                    title="Apply Range"
+                                    onPress={handlePriceRangeApply}
+                                    loading={priceLoading}
+                                    style={styles.applyButton}
+                                  />
+                                </View>
+                              </View>
+                            </View>
+                          </Animated.View>
+                        </TouchableWithoutFeedback>
                       </View>
-
-                      {/* Current Price Display */}
-                      <View style={styles.priceDisplayContainer}>
-                        <View style={styles.priceBubble}>
-                          <Text style={styles.priceValue}>
-                            ${tempValue.current}
-                          </Text>
-                        </View>
-                      </View>
-
-                      {/* Slider Container */}
-                      <View style={styles.sliderContainer}>
-                        <Slider
-                          style={styles.sliderStyle}
-                          minimumValue={10}
-                          maximumValue={2000}
-                          step={10}
-                          value={priceRange[0]}
-                          onValueChange={value => {
-                            tempValue.current = value;
-                          }}
-                          onSlidingComplete={value => {
-                            setPriceRange([value, priceRange[1]]);
-                          }}
-                          minimumTrackTintColor={Colors.gradient1}
-                          thumbTintColor={Colors.gradient1}
-                          maximumTrackTintColor={
-                            Platform.OS === 'ios' ? '#bfc9deff' : '#7a7e85ff'
-                          }
-                        />
-
-                        {/* Slider Labels */}
-                        <View style={styles.sliderLabelsContainer}>
-                          <Text style={styles.sliderMinLabel}>$10</Text>
-                          <Text style={styles.sliderMaxLabel}>$2000+</Text>
-                        </View>
-
-                        {/* Range Indicator */}
-                        <View style={styles.rangeIndicator}>
-                          <View style={styles.rangeIndicatorLine} />
-                          <Text style={styles.rangeIndicatorText}>
-                            Selected range: $0 - ${tempValue.current}
-                          </Text>
-                        </View>
-                      </View>
-
-                      {/* Apply Button */}
-                      <View style={styles.applyButtonContainer}>
-                        <GradientButton
-                          title="Apply"
-                          onPress={handlePriceRangeApply}
-                          loading={priceLoading}
-                        />
-                      </View>
-                    </Animated.View>
+                    </TouchableWithoutFeedback>
                   </KeyboardAvoidingView>
                 </Modal>
               </View>
             </TouchableWithoutFeedback>
           </>
         )}
+
         <Modal
           transparent
           visible={showAuthModal}
@@ -720,7 +922,7 @@ const Home = () => {
             </View>
           </TouchableWithoutFeedback>
         </Modal>
-      </SafeAreaView>
+      </View>
     </TouchableWithoutFeedback>
   );
 };
@@ -738,6 +940,27 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.background,
   },
+
+  gradientHeader: {
+    paddingTop: Platform.OS === 'ios' ? 40 : 20,
+    paddingBottom: 25,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+  },
+  headerText: {
+    fontSize: RFPercentage(2),
+    fontFamily: Fonts.semiBold,
+    color: '#FFFFFF',
+  },
   headerContainer: {
     width: '90%',
     alignItems: 'center',
@@ -749,11 +972,7 @@ const styles = StyleSheet.create({
     width: RFPercentage(7),
     height: RFPercentage(7),
   },
-  headerText: {
-    color: Colors.primaryText,
-    fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(2),
-  },
+
   postJobText: {
     color: Colors.gradient1,
     fontFamily: Fonts.semiBold,
@@ -826,8 +1045,10 @@ const styles = StyleSheet.create({
     width: '90%',
     alignSelf: 'center',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     marginTop: RFPercentage(1.5),
+    flexDirection: 'row',
+    // backgroundColor:"red"
   },
   sectionTitle: {
     width: '90%',
@@ -838,28 +1059,27 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.8),
   },
   categoryBox: {
-    width: RFPercentage(10),
-    height: RFPercentage(10),
-    borderRadius: RFPercentage(1),
-    borderWidth: 1.2,
+    width: RFPercentage(7),
+    height: RFPercentage(7),
+    borderRadius: RFPercentage(100),
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
     marginHorizontal: RFPercentage(1),
-    marginTop: RFPercentage(0.6),
+    marginTop: RFPercentage(1),
 
     // Shadow for iOS
-    shadowColor: 'rgb(204, 206, 209)',
+    shadowColor: 'rgba(137, 148, 164, 1)',
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-    backgroundColor: '#fff',
-    borderBottomWidth: RFPercentage(0.4),
+    borderColor: 'rgba(217, 228, 246, 1)',
   },
 
   categoryIcon: {
-    width: RFPercentage(4),
-    height: RFPercentage(4),
+    width: RFPercentage(3),
+    height: RFPercentage(3),
   },
   categoryText: {
     color: Colors.primaryText,
@@ -869,7 +1089,7 @@ const styles = StyleSheet.create({
   },
   flatListPadding: {
     paddingHorizontal: RFPercentage(1.4),
-    paddingBottom: RFPercentage(0.2),
+    paddingBottom: RFPercentage(1.5),
   },
   filterBox: {
     width: RFPercentage(15),
@@ -880,7 +1100,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(100),
     borderColor: Colors.inputFieldColor,
     flexDirection: 'row',
-    marginTop: RFPercentage(1),
+    marginTop: RFPercentage(1.5),
 
     backgroundColor: '#fff',
     // Shadow (iOS) + Elevation (Android)
@@ -932,18 +1152,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: RFPercentage(1.2),
     paddingTop: RFPercentage(1.5),
   },
-  modalContainer: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  blurView: {
-    width: '100%',
-    height: '100%',
-    position: 'absolute',
-  },
+
   filterWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -998,48 +1207,6 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(2),
   },
 
-  rangeModal: {
-    width: '85%',
-    height: '50%',
-    minHeight: RFPercentage(35),
-    alignSelf: 'center',
-    backgroundColor: Colors.background,
-    borderRadius: RFPercentage(3),
-    top: RFPercentage(20),
-    paddingHorizontal: RFPercentage(3),
-    paddingVertical: RFPercentage(3),
-    // Shadow
-    shadowColor: 'rgba(73, 113, 152, 1)',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 10,
-  },
-
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
-    marginBottom: RFPercentage(2),
-  },
-
-  modalTitle: {
-    color: Colors.secondaryText,
-    fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(2),
-    flex: 1,
-  },
-
-  closeButton: {
-    padding: RFPercentage(0.5),
-    // backgroundColor: 'rgba(215, 229, 244, 1)',
-    borderRadius: RFPercentage(100),
-  },
-
   priceDisplayContainer: {
     alignItems: 'center',
     marginBottom: RFPercentage(4),
@@ -1079,22 +1246,6 @@ const styles = StyleSheet.create({
   sliderContainer: {
     width: '100%',
     marginBottom: RFPercentage(4),
-  },
-
-  sliderStyle: {
-    width: '100%',
-    height: RFPercentage(4),
-  },
-
-  sliderThumb: {
-    shadowColor: Colors.gradient1,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 4,
   },
 
   sliderLabelsContainer: {
@@ -1140,5 +1291,268 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+
+  modalContainer: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 1000,
+  },
+  blurView: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: RFPercentage(2),
+  },
+  rangeModal: {
+    width: '100%',
+    maxWidth: 400,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    overflow: 'hidden',
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 10},
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    height: '70%',
+  },
+  modalHeader: {
+    paddingVertical: RFPercentage(2.5),
+    paddingHorizontal: RFPercentage(2),
+  },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: RFPercentage(1),
+  },
+  modalTitle: {
+    fontSize: RFPercentage(2.2),
+    fontFamily: Fonts.semiBold,
+    color: 'white',
+  },
+  closeButton: {
+    width: RFPercentage(3),
+    height: RFPercentage(3),
+    borderRadius: RFPercentage(1.5),
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalBody: {
+    padding: RFPercentage(2),
+  },
+  priceDisplayCard: {
+    backgroundColor: '#F8F9FF',
+    borderRadius: 16,
+    padding: RFPercentage(2),
+    marginBottom: RFPercentage(2),
+    borderWidth: 1,
+    borderColor: '#E8F0FE',
+  },
+  priceDisplayHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: RFPercentage(1.5),
+  },
+  priceDisplayTitle: {
+    fontSize: RFPercentage(1.8),
+    fontFamily: Fonts.fontMedium,
+    color: Colors.primaryText,
+  },
+  pricePill: {
+    backgroundColor: Colors.gradient1,
+    paddingHorizontal: RFPercentage(1.2),
+    paddingVertical: RFPercentage(0.5),
+    borderRadius: 20,
+  },
+  pricePillText: {
+    color: 'white',
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.semiBold,
+  },
+  rangeDisplay: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  rangeItem: {
+    alignItems: 'center',
+  },
+  rangeLabel: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontRegular,
+    color: Colors.secondaryText,
+    marginBottom: RFPercentage(0.5),
+  },
+  rangeValue: {
+    fontSize: RFPercentage(2),
+    fontFamily: Fonts.semiBold,
+    color: Colors.primaryText,
+  },
+  rangeSeparator: {
+    flex: 1,
+    alignItems: 'center',
+    paddingHorizontal: RFPercentage(1),
+  },
+  dashLine: {
+    width: '100%',
+    height: 1,
+    backgroundColor: '#E0E0E0',
+    borderStyle: 'dashed',
+    borderWidth: 1,
+    borderRadius: 1,
+  },
+  sliderCard: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: RFPercentage(2),
+    marginBottom: RFPercentage(2),
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+  },
+  sliderTitle: {
+    fontSize: RFPercentage(1.8),
+    fontFamily: Fonts.fontMedium,
+    color: Colors.primaryText,
+    marginBottom: RFPercentage(2),
+  },
+  sliderTrack: {
+    height: 6,
+    backgroundColor: '#E8E8E8',
+    borderRadius: 3,
+    marginBottom: RFPercentage(4),
+    position: 'relative',
+  },
+  sliderProgress: {
+    height: 6,
+    backgroundColor: Colors.gradient1,
+    borderRadius: 3,
+  },
+  sliderThumbContainer: {
+    position: 'absolute',
+    top: -RFPercentage(2),
+    alignItems: 'center',
+  },
+  sliderThumb: {
+    width: RFPercentage(4),
+    height: RFPercentage(4),
+    borderRadius: RFPercentage(2),
+    backgroundColor: 'white',
+    borderWidth: 3,
+    borderColor: Colors.gradient1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: Colors.gradient1,
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  thumbInner: {
+    width: RFPercentage(1),
+    height: RFPercentage(1),
+    borderRadius: RFPercentage(0.5),
+    backgroundColor: Colors.gradient1,
+  },
+  thumbValueBubble: {
+    position: 'absolute',
+    top: -RFPercentage(3.5),
+    backgroundColor: Colors.gradient1,
+    paddingHorizontal: RFPercentage(1),
+    paddingVertical: RFPercentage(0.5),
+    borderRadius: 12,
+  },
+  thumbValueText: {
+    color: 'white',
+    fontSize: RFPercentage(1.4),
+    fontFamily: Fonts.semiBold,
+  },
+  sliderStyle: {
+    width: '100%',
+    height: 40,
+  },
+  priceMarkers: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: RFPercentage(1),
+  },
+  markerText: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: Fonts.fontRegular,
+    color: Colors.secondaryText,
+  },
+  quickSelectContainer: {
+    marginBottom: RFPercentage(2),
+  },
+  quickSelectTitle: {
+    fontSize: RFPercentage(1.8),
+    fontFamily: Fonts.fontMedium,
+    color: Colors.primaryText,
+    marginBottom: RFPercentage(1.5),
+  },
+  quickSelectButtons: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: RFPercentage(1),
+  },
+  quickButton: {
+    paddingHorizontal: RFPercentage(1.3),
+    paddingVertical: RFPercentage(0.8),
+    borderRadius: 20,
+    backgroundColor: '#F5F5F5',
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  quickButtonActive: {
+    backgroundColor: Colors.gradient1,
+    borderColor: Colors.gradient1,
+  },
+  quickButtonText: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontMedium,
+    color: Colors.secondaryText,
+  },
+  quickButtonTextActive: {
+    color: 'white',
+  },
+  actionButtonsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: RFPercentage(1),
+    marginTop: RFPercentage(3),
+  },
+  removeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: RFPercentage(1.5),
+    borderRadius: 100,
+    backgroundColor: '#FFF5F5',
+    borderWidth: 1,
+    borderColor: '#FFE0E0',
+    gap: RFPercentage(1),
+    width: RFPercentage(18),
+  },
+  removeButtonText: {
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.semiBold,
+    color: Colors.error,
+  },
+  applyButtonWrapper: {},
+  applyButton: {
+    width: RFPercentage(18),
+
+    // height: '100%',
   },
 });

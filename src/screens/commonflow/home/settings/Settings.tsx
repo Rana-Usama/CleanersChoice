@@ -4,6 +4,8 @@ import {
   Text,
   View,
   TouchableWithoutFeedback,
+  Platform,
+  StatusBar,
 } from 'react-native';
 import React, {useState} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -18,6 +20,7 @@ import {showToast} from '../../../../utils/ToastMessage';
 import {useExitAppOnBack} from '../../../../utils/ExitApp';
 import firestore, {deleteField} from '@react-native-firebase/firestore';
 import {EmailAuthProvider} from '@react-native-firebase/auth';
+import LinearGradient from 'react-native-linear-gradient';
 
 const Settings = ({navigation}: any) => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -192,8 +195,22 @@ const Settings = ({navigation}: any) => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <HeaderBack title={'Settings'} textStyle={styles.headerText} logo />
+    <View style={styles.safeArea}>
+      <StatusBar backgroundColor="#FFFFFF" barStyle="light-content" />
+
+      <LinearGradient
+        colors={[Colors.gradient1, Colors.gradient2]}
+        style={styles.gradientHeader}>
+        <HeaderBack
+          title="Settings"
+          textStyle={styles.headerText}
+          left={true}
+          arrowColor="#FFFFFF"
+          style={{backgroundColor: 'transparent'}}
+          logo
+          tintColor={'white'}
+        />
+      </LinearGradient>
       <View style={styles.container}>
         <View style={styles.sectionTitle}>
           <Text style={styles.sectionTitleText}>Help & Security</Text>
@@ -272,7 +289,7 @@ const Settings = ({navigation}: any) => {
           </View>
         </TouchableWithoutFeedback>
       )}
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -283,8 +300,25 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
+  gradientHeader: {
+    paddingTop: Platform.OS === 'ios' ? 40 : 20,
+    paddingBottom: 30,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+  },
   headerText: {
     fontSize: RFPercentage(2),
+    fontFamily: Fonts.semiBold,
+    color: '#FFFFFF',
   },
   container: {
     width: '90%',

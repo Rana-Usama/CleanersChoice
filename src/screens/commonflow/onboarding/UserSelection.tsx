@@ -32,7 +32,7 @@ const UserSelection: React.FC = ({navigation}: any) => {
     dispatch(setUserFlow('Guest'));
     navigation.reset({
       index: 0,
-      routes: [{name: 'Home'}], // 👈 change 'Home' to the screen where guests should browse
+      routes: [{name: 'Home'}],
     });
   };
 
@@ -47,6 +47,11 @@ const UserSelection: React.FC = ({navigation}: any) => {
         <HeaderComponent />
         <View style={styles.titleContainer}>
           <Text style={styles.title}>Register Yourself As</Text>
+        </View>
+         <View style={styles.descriptionContainer}>
+          <Text style={styles.description}>
+            Let us know how you would like to register yourself!
+          </Text>
         </View>
         <View style={styles.selectionContainer}>
           <SelectionButton
@@ -71,10 +76,14 @@ const UserSelection: React.FC = ({navigation}: any) => {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.descriptionContainer}>
-          <Text style={styles.description}>
-            Let us know how you would like to register yourself!
-          </Text>
+
+        <View style={styles.buttonInnerContainer}>
+          <Text style={styles.bottomText}>Already have an account?</Text>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate('SignIn')}>
+            <Text style={styles.signIn}>SignIn</Text>
+          </TouchableOpacity>
         </View>
       </View>
       <View style={styles.imageContainer}>
@@ -99,7 +108,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   titleContainer: {
-    marginTop: RFPercentage(9),
+    marginTop: RFPercentage(5),
     alignSelf: 'center',
     width: '90%',
     justifyContent: 'center',
@@ -111,14 +120,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   selectionContainer: {
-    marginTop: RFPercentage(3.5),
+    marginTop: RFPercentage(5),
     width: '90%',
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'center',
   },
   descriptionContainer: {
-    marginTop: RFPercentage(4),
+    marginTop: RFPercentage(2),
     width: '90%',
     alignItems: 'center',
     justifyContent: 'center',
@@ -132,7 +141,7 @@ const styles = StyleSheet.create({
     width: '80%',
   },
   guestContainer: {
-    marginTop: RFPercentage(4),
+    marginTop: RFPercentage(2.5),
     alignItems: 'center',
   },
   guestText: {
@@ -150,7 +159,21 @@ const styles = StyleSheet.create({
     width: RFPercentage(8),
     height: RFPercentage(8),
   },
+  buttonInnerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: RFPercentage(4),
+    alignSelf:'center'
+  },
+  bottomText: {
+    color: Colors.secondaryText,
+    fontSize: RFPercentage(1.7),
+    fontFamily: Fonts.fontRegular,
+  },
+  signIn: {
+    color: Colors.gradient1,
+    fontSize: RFPercentage(1.7),
+    fontFamily: Fonts.fontMedium,
+    left: 3,
+  },
 });
-
-
-

@@ -11,6 +11,7 @@ interface props {
   time: string;
   unread: boolean;
   noProfile: any;
+  customStyle? :any
 }
 
 const Message = (props: props) => {
@@ -18,7 +19,7 @@ const Message = (props: props) => {
     <TouchableOpacity
       activeOpacity={0.8}
       onPress={props.onPress}
-      style={styles.container}>
+      style={[styles.container,props.customStyle]}>
       {props.image ? (
         <>
           <Image

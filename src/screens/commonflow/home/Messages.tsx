@@ -8,8 +8,12 @@ import {
   ScrollView,
   RefreshControl,
   StatusBar,
+  Dimensions,
+  ActivityIndicator,
+  Animated,
+  Platform,
 } from 'react-native';
-import React, {useState, useEffect, useCallback} from 'react';
+import React, {useState, useEffect, useCallback, useRef} from 'react';
 import firestore from '@react-native-firebase/firestore';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import HeaderBack from '../../../components/HeaderBack';
@@ -21,6 +25,11 @@ import auth from '@react-native-firebase/auth';
 import NotFound from '../../../components/NotFound';
 import {Skeleton} from '@rneui/themed';
 import {useExitAppOnBack} from '../../../utils/ExitApp';
+import LinearGradient from 'react-native-linear-gradient';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+
+const {width} = Dimensions.get('window');
 
 const Messages = ({navigation}: any) => {
   const [chats, setChats] = useState<
@@ -31,6 +40,7 @@ const Messages = ({navigation}: any) => {
       lastMessage: any;
       lastMessageTimestamp: any;
       receiverId: any;
+      fcmToken: any;
     }[]
   >([]);
 
@@ -39,8 +49,20 @@ const Messages = ({navigation}: any) => {
   const [loading2, setLoading2] = useState(false);
   const [all, setAll] = useState(true);
   const [unread, setUnread] = useState(false);
-
   const [userId, setUserId] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [senderName, setSenderName] = useState('');
+  const scaleAnim = useRef(new Animated.Value(0)).current;
+  const opacityAnim = useRef(new Animated.Value(0)).current;
+
+  // Animation for filter toggle
+  useEffect(() => {
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      friction: 8,
+      useNativeDriver: true,
+    }).start();
+  }, []);
 
   useEffect(() => {
     const unsubscribeAuth = auth().onAuthStateChanged(user => {
@@ -65,8 +87,6 @@ const Messages = ({navigation}: any) => {
     }, 2000);
   }, []);
 
-  const [refreshing, setRefreshing] = useState(false);
-
   // Fetch chats
   const fetchChats = async () => {
     try {
@@ -90,7 +110,9 @@ const Messages = ({navigation}: any) => {
         : allChats;
 
       setChats(filteredChats);
-    } catch (error) {}
+    } catch (error) {
+      console.error('Error fetching chats:', error);
+    }
   };
 
   // On Refresh
@@ -131,7 +153,9 @@ const Messages = ({navigation}: any) => {
               : allChats;
 
             setChats(filteredChats);
-          } catch (error) {}
+          } catch (error) {
+            console.error('Error in snapshot:', error);
+          }
         });
       }
       return () => {
@@ -185,8 +209,6 @@ const Messages = ({navigation}: any) => {
     }
   };
 
-  const [senderName, setSenderName] = useState('');
-
   async function fetchCurrentUserName() {
     const user = auth().currentUser;
     if (!user) {
@@ -209,224 +231,432 @@ const Messages = ({navigation}: any) => {
 
   fetchCurrentUserName();
 
+  const unreadCount = chats.filter(
+    chat => chat.lastMessage?.unread && userId === chat.lastMessage?.receiver,
+  ).length;
+
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar
-        barStyle={'dark-content'}
-        translucent
-        backgroundColor="transparent"
-      />
-      <HeaderBack title="Messages" textStyle={styles.headerText} logo />
+    <View style={styles.safeArea}>
+      <StatusBar backgroundColor="#FFFFFF" barStyle="light-content" />
+
+      {/* Modern Header */}
+      <LinearGradient
+        colors={[Colors.gradient1, Colors.gradient2]}
+        style={styles.gradientHeader}>
+        <HeaderBack
+          title="Messages"
+          textStyle={styles.headerText}
+          left={true}
+          arrowColor="#FFFFFF"
+          style={{backgroundColor: 'transparent'}}
+          logo
+          tintColor={'white'}
+        />
+        {unreadCount > 0 && (
+          <View style={styles.unreadBadge}>
+            <Text style={styles.unreadBadgeText}>{unreadCount}</Text>
+          </View>
+        )}
+      </LinearGradient>
+
       <ScrollView
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={Colors.gradient1}
+          />
         }
-        contentContainerStyle={{paddingBottom: RFPercentage(15)}}
-        style={{flex: 1}}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
-        <View style={styles.container}>
-          <View style={styles.toggleContainer}>
-            <TouchableOpacity activeOpacity={0.8} onPress={toggle1}>
-              <View
+        {/* Filter Section */}
+        <View style={styles.filtersSection}>
+          <Text style={styles.sectionTitle}>Conversations</Text>
+          <Text style={styles.sectionSubtitle}>
+            Manage your messages and chats
+          </Text>
+
+          <View style={styles.filtersContainer}>
+            <Animated.View style={{transform: [{scale: scaleAnim}]}}>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={toggle1}
+                style={[styles.filterButton, all && styles.filterButtonActive]}>
+                <LinearGradient
+                  colors={
+                    all
+                      ? [Colors.gradient1, Colors.gradient2]
+                      : ['#FFFFFF', '#dae2f6ff']
+                  }
+                  style={styles.filterGradient}>
+                  <Text
+                    style={[
+                      styles.filterButtonText,
+                      all && styles.filterButtonTextActive,
+                    ]}>
+                    All Messages
+                  </Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </Animated.View>
+
+            <Animated.View style={{transform: [{scale: scaleAnim}]}}>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={toggle2}
                 style={[
-                  styles.toggleButton,
-                  {
-                    backgroundColor: all ? Colors.gradient1 : 'transparent',
-                    borderColor: all ? 'transparent' : Colors.inputFieldColor,
-                  },
+                  styles.filterButton,
+                  unread && styles.filterButtonActive,
                 ]}>
-                <Text
-                  style={[
-                    styles.toggleText,
-                    {
-                      color: all ? Colors.background : Colors.placeholderColor,
-                      fontFamily: all ? Fonts.fontMedium : Fonts.fontRegular,
-                    },
-                  ]}>
-                  All
-                </Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={toggle2}
-              style={styles.unreadButton}>
-              <View
-                style={[
-                  styles.toggleButton,
-                  {
-                    backgroundColor: unread ? Colors.gradient1 : 'transparent',
-                    borderColor: unread
-                      ? 'transparent'
-                      : Colors.inputFieldColor,
-                  },
-                ]}>
-                <Text
-                  style={[
-                    styles.toggleText,
-                    {
-                      color: unread
-                        ? Colors.background
-                        : Colors.placeholderColor,
-                      fontFamily: unread ? Fonts.fontMedium : Fonts.fontRegular,
-                    },
-                  ]}>
-                  Unread
-                </Text>
-              </View>
-            </TouchableOpacity>
+                <LinearGradient
+                  colors={
+                    unread
+                      ? [Colors.gradient1, Colors.gradient2]
+                      : ['#FFFFFF', '#dae2f6ff']
+                  }
+                  style={styles.filterGradient}>
+                  <Text
+                    style={[
+                      styles.filterButtonText,
+                      unread && styles.filterButtonTextActive,
+                    ]}>
+                    Unread Only
+                  </Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </Animated.View>
+          </View>
+
+          {/* Active Filter Info */}
+          <View style={styles.activeFilterCard}>
+            <View style={styles.activeFilterContent}>
+              <MaterialIcons name="info" size={20} color={Colors.gradient1} />
+              <Text style={styles.activeFilterText}>
+                {unread
+                  ? `Showing ${unreadCount} unread conversation${
+                      unreadCount !== 1 ? 's' : ''
+                    }`
+                  : `Showing all conversations (${chats.length})`}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Messages Section */}
+        <View style={styles.messagesSection}>
+          <View style={styles.messagesHeader}>
+            <Text style={styles.messagesTitle}>
+              {unread ? 'Unread Messages' : 'All Conversations'}
+            </Text>
+            <Text style={styles.messagesCount}>
+              {chats.length} chat{chats.length !== 1 ? 's' : ''}
+            </Text>
           </View>
 
           {loading2 ? (
-            <>
-              {/* Skeleton */}
-              <View style={{marginTop: RFPercentage(4)}}>
-                {[...Array(7)].map((_, index) => (
-                  <View
-                    key={index}
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      marginBottom: RFPercentage(2),
-                    }}>
-                    <Skeleton
-                      animation="wave"
-                      circle
-                      width={50}
-                      height={50}
-                      style={{
-                        marginRight: RFPercentage(2),
-                        backgroundColor: 'rgb(223, 231, 242)',
-                      }}
-                    />
-                    <View style={{flex: 1}}>
-                      <Skeleton
-                        animation="wave"
-                        width="90%"
-                        height={15}
-                        style={{
-                          marginBottom: 6,
-                          backgroundColor: 'rgb(223, 231, 242)',
-                        }}
-                      />
-                      <Skeleton
-                        width="60%"
-                        height={12}
-                        style={{backgroundColor: 'rgb(223, 231, 242)'}}
-                      />
-                    </View>
-                  </View>
-                ))}
-              </View>
-            </>
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color={Colors.gradient1} />
+              <Text style={styles.loadingText}>Loading messages...</Text>
+            </View>
+          ) : chats.length === 0 ? (
+            <View style={styles.noMessagesContainer}>
+              <NotFound
+                // icon="chatbubble-outline"
+                text={
+                  unread
+                    ? 'No unread messages\nStart a new conversation'
+                    : 'No conversations yet\nStart chatting with clients'
+                }
+              />
+            </View>
           ) : (
-            <>
-              {/* Chats */}
-              {chats.length > 0 ? (
-                <FlatList
-                  contentContainerStyle={{
-                    paddingTop: RFPercentage(2.5),
-                    paddingBottom: RFPercentage(8),
-                  }}
-                  data={chats}
-                  keyExtractor={item => item.id}
-                  renderItem={({item}) => {
-                    return (
-                      <Message
-                        name={item.name}
-                        unread={
-                          item?.lastMessage?.unread &&
-                          userId === item?.lastMessage?.receiver
-                        }
-                        message={item.lastMessage?.text || 'No message'}
-                        image={item.image}
-                        noProfile={IMAGES.defaultPic}
-                        time={
-                          item.lastMessageTimestamp
-                            ? formatTimestamp(item.lastMessageTimestamp)
-                            : ''
-                        }
-                        onPress={() =>
-                          navigation.navigate('Chat', {
-                            chatId: item.lastMessage?.chatId,
-                            senderId: userId,
-                            senderName: senderName,
-                            receiver: item.receiverId,
-                            receiverName: item.name,
-                            receiverProfile: item.image,
-                            fcmToken: item.fcmToken,
-                          })
-                        }
-                      />
-                    );
-                  }}
-                />
-              ) : (
-                // Not found
-                <View style={{marginTop: RFPercentage(10)}}>
-                  <NotFound text="No chats found" />
-                </View>
-              )}
-            </>
+            <View style={styles.messagesList}>
+              <FlatList
+                scrollEnabled={false}
+                data={chats}
+                keyExtractor={item => item.id}
+                renderItem={({item}) => {
+                  const isUnread =
+                    item.lastMessage?.unread &&
+                    userId === item.lastMessage?.receiver;
+
+                  return (
+                    <Message
+                      name={item.name}
+                      unread={isUnread}
+                      message={item.lastMessage?.text || 'No message yet'}
+                      image={item.image}
+                      noProfile={IMAGES.defaultPic}
+                      time={
+                        item.lastMessageTimestamp
+                          ? formatTimestamp(item.lastMessageTimestamp)
+                          : ''
+                      }
+                      onPress={() =>
+                        navigation.navigate('Chat', {
+                          chatId: item.lastMessage?.chatId,
+                          senderId: userId,
+                          senderName: senderName,
+                          receiver: item.receiverId,
+                          receiverName: item.name,
+                          receiverProfile: item.image,
+                          fcmToken: item?.fcmToken,
+                        })
+                      }
+                      // customStyle={[
+                      //   styles.messageCard,
+                      //   isUnread && styles.unreadMessageCard,
+                      // ]}
+                    />
+                  );
+                }}
+                contentContainerStyle={styles.messagesListContent}
+              />
+            </View>
           )}
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: '#FFFFFF',
   },
-  container: {
-    width: '90%',
-    alignSelf: 'center',
-    paddingTop: RFPercentage(4),
-    flex: 1,
+  gradientHeader: {
+    paddingTop: Platform.OS === 'ios' ? 40 : 20,
+    paddingBottom: 30,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
   },
   headerText: {
     fontSize: RFPercentage(2),
+    fontFamily: Fonts.semiBold,
+    color: '#FFFFFF',
   },
-  toggleContainer: {
+  unreadBadge: {
+    backgroundColor: '#FFFFFF',
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  unreadBadgeText: {
+    color: Colors.gradient1,
+    fontSize: RFPercentage(1.4),
+    fontFamily: Fonts.fontMedium,
+    fontWeight: 'bold',
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 100,
+  },
+  filtersSection: {
+    paddingHorizontal: 20,
+    paddingTop: 24,
+  },
+  sectionTitle: {
+    fontSize: RFPercentage(2),
+    fontFamily: Fonts.semiBold,
+    color: '#1F2937',
+    marginBottom: 4,
+  },
+  sectionSubtitle: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontRegular,
+    color: '#6B7280',
+    marginBottom: 20,
+  },
+  filtersContainer: {
+    flexDirection: 'row',
+    // justifyContent: 'space-between',
+    gap: 12,
+  },
+  filterButton: {
+    flex: 1,
+    borderRadius: 12,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  filterButtonActive: {
+    shadowColor: Colors.gradient1,
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  filterGradient: {
+    padding: 12,
+    alignItems: 'center',
+    borderRadius: 12,
+    paddingHorizontal:16
+  },
+  filterIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(224, 234, 253, 1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  filterButtonText: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontMedium,
+    color: '#374151',
+    textAlign: 'center',
+  },
+  filterButtonTextActive: {
+    color: '#FFFFFF',
+  },
+  activeFilterCard: {
+    marginTop: 16,
+    backgroundColor: '#F8FAFF',
+    borderRadius: 16,
+    padding: 16,
+  },
+  activeFilterContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 12,
   },
-  toggleButton: {
-    width: RFPercentage(14),
-    height: RFPercentage(4.5),
-    borderRadius: RFPercentage(100),
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-  },
-  toggleText: {
-    fontSize: RFPercentage(1.8),
-  },
-  unreadButton: {
-    left: RFPercentage(2),
-  },
-  messageList: {
-    marginTop: RFPercentage(2),
-    marginBottom: RFPercentage(5),
-  },
-  noServiceContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-    marginTop: RFPercentage(20),
-  },
-  noServiceImg: {
-    width: RFPercentage(10),
-    height: RFPercentage(10),
-  },
-  noServiceText: {
-    color: Colors.placeholderColor,
+  activeFilterText: {
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.8),
-    textAlign: 'center',
-    marginTop: RFPercentage(1),
+    color: '#4B5563',
+    flex: 1,
+  },
+  messagesSection: {
+    marginTop: 24,
+    paddingHorizontal: 20,
+  },
+  messagesHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  messagesTitle: {
+    fontSize: RFPercentage(1.7),
+    fontFamily: Fonts.semiBold,
+    color: '#1F2937',
+  },
+  messagesCount: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: Fonts.fontMedium,
+    color: Colors.gradient1,
+    backgroundColor: '#EEF2FF',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  loadingContainer: {
+    height: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontMedium,
+    color: '#6B7280',
+  },
+  noMessagesContainer: {
+    alignItems: 'center',
+    paddingVertical: 40,
+    bottom: 50,
+  },
+  startChatButton: {
+    marginTop: 24,
+    borderRadius: 100,
+    overflow: 'hidden',
+    width: '50%',
+  },
+  startChatGradient: {
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+  },
+  startChatText: {
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.semiBold,
+    color: '#FFFFFF',
+  },
+  messagesList: {
+    marginTop: 8,
+  },
+  messagesListContent: {
+    paddingBottom: 16,
+  },
+  messageCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
+  },
+  unreadMessageCard: {
+    backgroundColor: '#F8FAFF',
+    borderColor: Colors.gradient1 + '20',
+    shadowColor: Colors.gradient1,
+    shadowOpacity: 0.1,
+  },
+  newMessageButton: {
+    position: 'absolute',
+    bottom: 30,
+    right: 20,
+    borderRadius: 50,
+    overflow: 'hidden',
+    shadowColor: Colors.gradient1,
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  newMessageGradient: {
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 50,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    minWidth: 180,
+  },
+  newMessageText: {
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.semiBold,
+    color: '#FFFFFF',
   },
 });
 

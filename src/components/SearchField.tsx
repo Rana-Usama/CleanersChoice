@@ -39,17 +39,17 @@ export default SearchField;
 
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
+    width: '82%',
     height: RFPercentage(6),
     borderWidth: 1,
     borderColor: Colors.inputFieldColor,
-    borderRadius: RFPercentage(1),
+    borderRadius: RFPercentage(1.4),
     marginVertical: RFPercentage(1.5),
     alignItems: 'center',
     justifyContent: 'center',
   },
   innerContainer: {
-    width: '94%',
+    width: '90%',
     alignItems: 'center',
     justifyContent: 'flex-start',
     flexDirection: 'row',

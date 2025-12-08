@@ -4,8 +4,8 @@ import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts} from '../constants/Themes';
 
 interface Props {
-  stepTwo? : number;
-  stepThree? : number
+  stepTwo? : boolean;
+  stepThree? : boolean
 }
 
 const TimeLine = (props:Props) => {

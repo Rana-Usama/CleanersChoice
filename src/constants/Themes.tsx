@@ -61,6 +61,7 @@ export const Icons: {[key: string]: any} = {
   locationWhite: require('../assets/icons/location-white.png'),
   slider: require('../assets/icons/cd.png'),
   availablityEdit: require('../assets/icons/avail.png'),
+  clean: require('../assets/icons/clean.png'),
 };
 
 export const IMAGES: {[key: string]: any} = {

@@ -92,9 +92,9 @@ export default JobCard;
 
 const styles = StyleSheet.create({
   shadowContainer: {
-    width: '90%',
+    width: '100%',
     alignSelf: 'center',
-    shadowColor: 'rgba(182, 182, 215, 0.15)',
+    shadowColor: 'rgba(182, 196, 215, 0.15)',
     shadowOffset: {width: 0, height: 8},
     shadowOpacity: 0.25,
     shadowRadius: 12,
