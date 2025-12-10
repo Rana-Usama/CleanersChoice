@@ -290,13 +290,13 @@ const Jobs = ({navigation}: any) => {
                       : ['#FFFFFF', '#dae2f6ff']
                   }
                   style={styles.filterGradient}>
-                  <View style={styles.filterIconContainer}>
+                  {/* <View style={styles.filterIconContainer}>
                     <MaterialIcons
                       name="check-circle"
                       size={RFPercentage(2)}
                       color={Colors.gradient1}
                     />
-                  </View>
+                  </View> */}
                   <Text
                     style={[
                       styles.filterButtonText,
@@ -323,13 +323,13 @@ const Jobs = ({navigation}: any) => {
                       : ['#FFFFFF', '#dae2f6ff']
                   }
                   style={styles.filterGradient}>
-                  <View style={styles.filterIconContainer}>
+                  {/* <View style={styles.filterIconContainer}>
                     <MaterialIcons
                       name="done-all"
                       size={RFPercentage(2)}
                       color={ Colors.gradient1}
                     />
-                  </View>
+                  </View> */}
                   <Text
                     style={[
                       styles.filterButtonText,
@@ -471,7 +471,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   gradientHeader: {
-    paddingTop: Platform.OS === 'ios' ? 40 : 20,
+    paddingTop: Platform.OS === 'ios' ? 40 : 0,
     paddingBottom: 30,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
@@ -479,7 +479,6 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 12,
-    elevation: 8,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -597,19 +596,20 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
+    // elevation: 3,
   },
   filterButtonActive: {
     shadowColor: Colors.gradient1,
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.15,
     shadowRadius: 12,
-    elevation: 6,
+    // elevation: 6,
   },
   filterGradient: {
-    padding: 16,
+    padding: 12,
     alignItems: 'center',
     borderRadius: 12,
+    paddingHorizontal:16
   },
   filterIconContainer: {
     width: 40,
@@ -733,7 +733,7 @@ const styles = StyleSheet.create({
   },
   newJobButton: {
     position: 'absolute',
-    bottom: 70,
+    bottom: 90,
     right: 20,
     borderRadius: 50,
     overflow: 'hidden',

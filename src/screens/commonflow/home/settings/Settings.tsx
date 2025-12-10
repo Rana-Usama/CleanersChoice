@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   gradientHeader: {
-    paddingTop: Platform.OS === 'ios' ? 40 : 20,
+    paddingTop: Platform.OS === 'ios' ? 40 : 0,
     paddingBottom: 30,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
@@ -309,7 +309,6 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 12,
-    elevation: 8,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

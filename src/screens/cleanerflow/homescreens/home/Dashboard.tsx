@@ -353,7 +353,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
   return (
     <View style={styles.safeArea}>
       {/* Modern Header */}
-      <StatusBar translucent={true} backgroundColor={Colors.background} />
+      <StatusBar translucent={true} backgroundColor={Colors.background} barStyle={'light-content'} />
 
       <LinearGradient
         colors={[Colors.gradient1, Colors.gradient2]}
@@ -769,7 +769,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffffff',
   },
   gradientHeader: {
-    paddingTop: Platform.OS === 'ios' ? 40 : 20,
+    paddingTop: Platform.OS === 'ios' ? 40 : 0,
     paddingBottom: 30,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
@@ -777,7 +777,6 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 12,
-    elevation: 8,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -795,7 +794,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     marginTop: RFPercentage(8),
-    paddingBottom: Platform.OS === 'ios' ? 140 : 120,
+    paddingBottom: Platform.OS === 'ios' ? 140 : RFPercentage(20),
   },
   profileCard: {
     marginTop: -40,
@@ -929,7 +928,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 5},
     shadowOpacity: 0.2,
     shadowRadius: 15,
-    elevation: 8,
+    // elevation: 8,
   },
   overviewGradient: {
     padding: 20,
@@ -997,7 +996,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 10,
-    elevation: 3,
+    // elevation: 3,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -1049,7 +1048,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 6,
-    elevation: 2,
+    // elevation: 2,
   },
   serviceGradient: {
     padding: 16,
@@ -1108,7 +1107,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 8,
-    elevation: 4,
+    // elevation: 4,
     height: RFPercentage(30),
   },
   packageGradient: {
@@ -1284,7 +1283,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 10},
     shadowOpacity: 0.1,
     shadowRadius: 20,
-    elevation: 10,
+    // elevation: 2,
   },
   emptyStateIcon: {
     width: 100,

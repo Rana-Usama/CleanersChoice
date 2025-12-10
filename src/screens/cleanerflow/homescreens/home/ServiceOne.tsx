@@ -130,6 +130,9 @@ const ServiceOne: React.FC = ({navigation}: any) => {
     setSelectedItems(selectedItems);
   };
 
+
+  console.log(userLocation)
+
   useFocusEffect(
     useCallback(() => {
       if (!hasFetchedData) {
@@ -162,7 +165,9 @@ const ServiceOne: React.FC = ({navigation}: any) => {
   const addServices = async () => {
     const user = auth().currentUser;
     if (!user) return;
-    if (description && userLocation && available && selectedItems) {
+
+    const finalLocation = userLocation || location; 
+    if (description && finalLocation && available && selectedItems) {
       try {
         setLoading(true);
         const serviceRef = await firestore()
@@ -176,7 +181,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
             availability:
               available.length > 0 ? available : serviceData?.availability,
             type: selectedItems,
-            location: userLocation,
+            location: finalLocation,
             serviceImages: serviceData?.serviceImages || [],
             packages: serviceData?.packages || [],
             rating: serviceData?.rating || null,
@@ -572,7 +577,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   gradientHeader: {
-    paddingTop: Platform.OS === 'ios' ? 40 : 20,
+    paddingTop: Platform.OS === 'ios' ? 40 : 0,
     paddingBottom: 20,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
@@ -580,7 +585,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 12,
-    elevation: 8,
+    // elevation: 8,
   },
   headerText: {
     fontSize: RFPercentage(2.2),
@@ -628,7 +633,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.05,
     shadowRadius: 12,
-    elevation: 5,
+    // elevation: 5,
   },
   formContainer: {
     paddingHorizontal: 20,
@@ -642,7 +647,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
+    // elevation: 3,
   },
   locationGradient: {
     padding: 18,
@@ -696,7 +701,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
+    // elevation: 3,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -750,7 +755,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
+    // elevation: 3,
   },
   availabilityGradient: {
     padding: 18,
@@ -804,7 +809,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
+    // elevation: 3,
   },
   selectedCount: {
     backgroundColor: '#EEF2FF',
@@ -904,7 +909,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 8},
     shadowOpacity: 0.25,
     shadowRadius: 16,
-    elevation: 8,
+    // elevation: 8,
     width: '60%',
     alignSelf: 'center',
     

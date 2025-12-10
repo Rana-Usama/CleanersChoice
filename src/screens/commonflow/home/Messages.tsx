@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   gradientHeader: {
-    paddingTop: Platform.OS === 'ios' ? 40 : 20,
+    paddingTop: Platform.OS === 'ios' ? 40 : 0,
     paddingBottom: 30,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
@@ -434,7 +434,6 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 12,
-    elevation: 8,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -497,14 +496,12 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
   },
   filterButtonActive: {
     shadowColor: Colors.gradient1,
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.15,
     shadowRadius: 12,
-    elevation: 6,
   },
   filterGradient: {
     padding: 12,

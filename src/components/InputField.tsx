@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   inputContainer: {
-    width: '93%',
+    width: '92%',
   },
   textInput: {
     color: Colors.inputTextColor,
