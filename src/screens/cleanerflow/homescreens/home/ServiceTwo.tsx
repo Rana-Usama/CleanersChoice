@@ -528,7 +528,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   gradientHeader: {
-    paddingTop: Platform.OS === 'ios' ? 40 : 20,
+    paddingTop: Platform.OS === 'ios' ? 40 : 0,
     paddingBottom: 20,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
@@ -584,7 +584,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.05,
     shadowRadius: 12,
-    elevation: 5,
+    // elevation: 5,
   },
   statsCard: {
     marginHorizontal: 20,
@@ -595,7 +595,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 4,
+    // elevation: 4,
   },
   statsGradient: {
     padding: 20,
@@ -636,7 +636,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
+    // elevation: 3,
   },
   instructionsHeader: {
     flexDirection: 'row',
@@ -720,7 +720,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 8,
-    elevation: 4,
+    // elevation: 4,
   },
   imageTouchable: {
     width: '100%',
@@ -842,7 +842,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 8},
     shadowOpacity: 0.25,
     shadowRadius: 16,
-    elevation: 8,
+    // elevation: 8,
     width:"60%",
     alignSelf:"center"
   },

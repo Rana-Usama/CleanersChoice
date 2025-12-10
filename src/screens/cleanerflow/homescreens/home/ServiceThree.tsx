@@ -668,7 +668,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   gradientHeader: {
-    paddingTop: Platform.OS === 'ios' ? 40 : 20,
+    paddingTop: Platform.OS === 'ios' ? 40 : 0,
     paddingBottom: 20,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
@@ -676,7 +676,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 12,
-    elevation: 8,
+    // elevation: 8,
   },
   headerText: {
     fontSize: RFPercentage(2.2),
@@ -724,7 +724,8 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.05,
     shadowRadius: 12,
-    elevation: 5,
+    // elevation: 5,
+
   },
   completionCard: {
     marginHorizontal: 20,
@@ -735,7 +736,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 4,
+    // elevation: 4,
   },
   completionGradient: {
     padding: 20,
@@ -846,7 +847,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
+    // elevation: 3,
   },
   packageHeader: {
     borderRadius: 16,
@@ -1080,7 +1081,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 8},
     shadowOpacity: 0.25,
     shadowRadius: 16,
-    elevation: 8,
+    // elevation: 8,
     width:"60%",
     alignSelf:"center"
   },

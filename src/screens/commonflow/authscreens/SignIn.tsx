@@ -45,9 +45,11 @@ const SignIn: React.FC = () => {
   // Sign In
   const handleSignIn = async (values: any) => {
     setLoading(true);
+    const normalizedEmail = values.email.toLowerCase();
+
     try {
       const userCredential = await auth().signInWithEmailAndPassword(
-        values.email,
+        normalizedEmail,
         values.password,
       );
       const user = userCredential?.user;
@@ -70,7 +72,7 @@ const SignIn: React.FC = () => {
         message: 'Logged in successfully!',
       });
       if (selected) {
-        await AsyncStorage.setItem('email', values.email);
+        await AsyncStorage.setItem('email', normalizedEmail);
         await AsyncStorage.setItem('password', values.password);
       }
 

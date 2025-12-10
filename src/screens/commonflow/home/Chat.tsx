@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.fontRegular,
     paddingVertical: 0,
     marginVertical: 0,
-    lineHeight: RFPercentage(2.5),
+    lineHeight: RFPercentage(3),
   },
   sendButton: {
     justifyContent: 'center',

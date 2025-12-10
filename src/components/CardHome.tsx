@@ -56,13 +56,14 @@ const styles = StyleSheet.create({
       height: 8,
     },
     shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowRadius: 100,
+    // elevation: 8,
   },
   content: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    borderRadius:100
   },
   textSection: {
     marginRight: 15,
@@ -87,10 +88,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 100,
-    width: 120,
+    width: 130,
     justifyContent: 'center',
     marginTop: 15,
   },
@@ -99,6 +99,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginRight: 6,
     fontFamily: Fonts.semiBold,
+    lineHeight:RFPercentage(2)
   },
 });
 

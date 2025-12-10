@@ -103,8 +103,8 @@ const Profile = ({navigation}: any) => {
 
   return (
     <View style={styles.safeArea}>
-            <StatusBar backgroundColor="#FFFFFF" barStyle="light-content" />
-      
+      <StatusBar backgroundColor="#FFFFFF" barStyle="light-content" />
+
       <LinearGradient
         colors={[Colors.gradient1, Colors.gradient2]}
         style={styles.gradientHeader}>
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     paddingTop: RFPercentage(2),
   },
   gradientHeader: {
-    paddingTop: Platform.OS === 'ios' ? 40 : 20,
+    paddingTop: Platform.OS === 'ios' ? 40 : 0,
     paddingBottom: 30,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
@@ -216,7 +216,6 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 12,
-    elevation: 8,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

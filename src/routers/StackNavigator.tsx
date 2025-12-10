@@ -75,7 +75,7 @@ export type RootStackParamList = {
   };
   Messages: undefined;
   Location: undefined;
-  CongratulationsScreen : undefined
+  CongratulationsScreen: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -106,9 +106,12 @@ const StackNavigator: React.FC = () => {
             .collection('Users')
             .where('email', '==', storedEmail)
             .get();
+          console.log('Query size:', userQuery.size);
+          userQuery.docs.forEach(doc => console.log('Found doc:', doc.data()));
 
           if (!userQuery.empty) {
             const userDoc = userQuery.docs[0].data();
+            console.log(userDoc);
             setUserData(userDoc);
           }
         }
@@ -141,7 +144,7 @@ const StackNavigator: React.FC = () => {
     },
   };
 
-  console.log(email, password, user);
+  console.log(email, password, userData);
 
   const now = Date.now();
   const expiry = userData?.subscriptionEndDate;

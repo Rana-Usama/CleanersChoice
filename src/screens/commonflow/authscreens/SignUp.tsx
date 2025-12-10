@@ -93,9 +93,11 @@ const SignUp: React.FC = ({navigation}: any) => {
       return;
     }
     setLoading(true);
+    const normalizedEmail = values.email.toLowerCase();
+
     try {
       const userCredential = await auth().createUserWithEmailAndPassword(
-        values.email,
+        normalizedEmail,
         values.password,
       );
       const user = userCredential.user;
@@ -119,7 +121,7 @@ const SignUp: React.FC = ({navigation}: any) => {
       const fcmToken = await messaging().getToken();
       const userData = {
         name: values.name,
-        email: values.email,
+        email: normalizedEmail,
         phone: values.phone || null,
         uid: user.uid,
         profile: profileUrl || null,
@@ -133,7 +135,7 @@ const SignUp: React.FC = ({navigation}: any) => {
         }),
       };
       await firestore().collection('Users').doc(user.uid).set(userData);
-      await AsyncStorage.setItem('email', values.email);
+      await AsyncStorage.setItem('email', normalizedEmail);
       await AsyncStorage.setItem('password', values.password);
       await AsyncStorage.setItem('role', userFlow?.userFlow);
       showToast({

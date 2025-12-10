@@ -16,6 +16,7 @@ import {
   RefreshControl,
   Keyboard,
   Pressable,
+  StatusBar,
 } from 'react-native';
 import React, {useState, useRef, useCallback, useEffect} from 'react';
 import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
@@ -105,7 +106,8 @@ const Home = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setInitializingLocation(false);
-    }, 2000);
+    }, 5000); // fallback after 5 seconds
+
     if (location && location.latitude && location.longitude) {
       clearTimeout(timer);
       setInitializingLocation(false);
@@ -217,6 +219,7 @@ const Home = () => {
   useEffect(() => {
     fetchUserData();
   }, []);
+
   const fetchUserData = async () => {
     const user = auth().currentUser;
     if (!user) return;
@@ -302,8 +305,9 @@ const Home = () => {
               marginTop: 10,
               color: Colors.secondaryText,
               fontFamily: Fonts.fontMedium,
+              fontSize: RFPercentage(1.9),
             }}>
-            Fetching your location...
+            Fetching Your Current Location...
           </Text>
         </View>
       </SafeAreaView>
@@ -317,7 +321,8 @@ const Home = () => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={styles.safeArea}>
+      <>
+      <StatusBar backgroundColor={Colors.background} barStyle={'light-content'} />
         <LinearGradient
           colors={[Colors.gradient1, Colors.gradient2]}
           style={styles.gradientHeader}>
@@ -339,175 +344,177 @@ const Home = () => {
           contentContainerStyle={styles.scrollView}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="always">
-          <View style={styles.container}>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                width: '90%',
-                alignSelf: 'center',
-                marginTop: RFPercentage(1.5),
-              }}>
-              <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                <Image
-                  source={Icons.location}
-                  resizeMode="contain"
-                  style={{
-                    width: RFPercentage(2.3),
-                    height: RFPercentage(2.3),
-                  }}
-                />
-                <View style={{marginLeft: RFPercentage(1)}}>
-                  <Text
+          <View style={styles.safeArea}>
+            <View style={styles.container}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  width: '90%',
+                  alignSelf: 'center',
+                  marginTop: RFPercentage(1.5),
+                }}>
+                <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                  <Image
+                    source={Icons.location}
+                    resizeMode="contain"
                     style={{
-                      fontFamily: Fonts.fontMedium,
-                      fontSize: RFPercentage(1.5),
-                      color: Colors.secondaryText,
-                    }}>
-                    Location
-                  </Text>
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    onPress={() => {
-                      navigation.navigate('Location', {location: false});
+                      width: RFPercentage(2.3),
+                      height: RFPercentage(2.3),
                     }}
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      marginTop: RFPercentage(0.5),
-                    }}>
+                  />
+                  <View style={{marginLeft: RFPercentage(1)}}>
                     <Text
                       style={{
-                        fontFamily: Fonts.semiBold,
-                        fontSize: RFPercentage(1.6),
+                        fontFamily: Fonts.fontMedium,
+                        fontSize: RFPercentage(1.5),
                         color: Colors.secondaryText,
                       }}>
-                      {selectedLocation?.name
-                        ? truncateText(selectedLocation.name)
-                        : truncateText(location?.address || 'Not Specified')}
+                      Location
                     </Text>
-                    <Entypo
-                      name="chevron-down"
-                      size={RFPercentage(2)}
-                      style={{marginLeft: RFPercentage(0.5)}}
-                      color={Colors.secondaryText}
-                    />
-                  </TouchableOpacity>
+                    <TouchableOpacity
+                      activeOpacity={0.8}
+                      onPress={() => {
+                        navigation.navigate('Location', {location: false});
+                      }}
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        marginTop: RFPercentage(0.5),
+                      }}>
+                      <Text
+                        style={{
+                          fontFamily: Fonts.semiBold,
+                          fontSize: RFPercentage(1.6),
+                          color: Colors.secondaryText,
+                        }}>
+                        {selectedLocation?.name
+                          ? truncateText(selectedLocation.name)
+                          : truncateText(location?.address || 'Not Specified')}
+                      </Text>
+                      <Entypo
+                        name="chevron-down"
+                        size={RFPercentage(2)}
+                        style={{marginLeft: RFPercentage(0.5)}}
+                        color={Colors.secondaryText}
+                      />
+                    </TouchableOpacity>
+                  </View>
                 </View>
-              </View>
-              <TouchableOpacity
-                style={{
-                  width: RFPercentage(7),
-                  height: RFPercentage(7),
-                  borderRadius: RFPercentage(100),
-                  borderWidth: 1,
-                  borderColor: Colors.gradient2,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}>
-                <Image
-                  source={
-                    user?.profile ? {uri: user?.profile} : IMAGES.defaultPic
-                  }
-                  resizeMode="cover"
+                <TouchableOpacity
                   style={{
-                    width: RFPercentage(6.5),
-                    height: RFPercentage(6.5),
+                    width: RFPercentage(7),
+                    height: RFPercentage(7),
                     borderRadius: RFPercentage(100),
-                  }}
+                    borderWidth: 1,
+                    borderColor: Colors.gradient2,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                  <Image
+                    source={
+                      user?.profile ? {uri: user?.profile} : IMAGES.defaultPic
+                    }
+                    resizeMode="cover"
+                    style={{
+                      width: RFPercentage(6.5),
+                      height: RFPercentage(6.5),
+                      borderRadius: RFPercentage(100),
+                    }}
+                  />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.searchContainer}>
+                <SearchField
+                  placeholder="Search by name..."
+                  value={nameQuery}
+                  onChangeText={setNameQuery}
                 />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.searchContainer}>
-              <SearchField
-                placeholder="Search by name..."
-                value={nameQuery}
-                onChangeText={setNameQuery}
-              />
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={() => setModalVisible2(true)}
-                style={{
-                  width: RFPercentage(5.5),
-                  height: RFPercentage(5.5),
-                  borderRadius: RFPercentage(1.2),
-                  borderWidth: RFPercentage(0.1),
-                  borderColor: Colors.inputFieldColor,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: rangeSelector ? Colors.gradient1 : 'white',
-                }}>
-                <MaterialIcons
-                  name="filter-list-alt"
-                  size={RFPercentage(3)}
-                  color={rangeSelector ? 'white' : 'rgba(164, 173, 200, 1)'}
-                />
-              </TouchableOpacity>
-            </View>
-
-            <Text style={[styles.sectionTitle, {marginTop: RFPercentage(1.5)}]}>
-              Categories
-            </Text>
-            <FlatList
-              data={categories}
-              keyExtractor={item => item.id}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              renderItem={({item}) => (
                 <TouchableOpacity
                   activeOpacity={0.8}
-                  onPress={() => setCategorySelection(item?.id)}
-                  style={{marginTop: RFPercentage(0.5)}}>
-                  <View
-                    style={[
-                      styles.categoryBox,
-                      {
-                        backgroundColor:
-                          categorySelection === item.id
-                            ? Colors.gradient1
-                            : Colors.white,
-                      },
-                    ]}>
-                    <Icon
-                      name={item.icon}
-                      size={30}
-                      color={
-                        categorySelection === item.id
-                          ? '#ffffffff'
-                          : 'rgba(164, 173, 200, 1)'
-                      }
-                    />
-                  </View>
-                  <Text
-                    style={[
-                      styles.categoryText,
-                      {
-                        fontFamily:
-                          categorySelection === item.id
-                            ? Fonts.semiBold
-                            : Fonts.fontMedium,
-                      },
-                    ]}>
-                    {item.name.length > 8
-                      ? `${item.name.slice(0, 8)}..`
-                      : item.name}
-                  </Text>
+                  onPress={() => setModalVisible2(true)}
+                  style={{
+                    width: RFPercentage(5.5),
+                    height: RFPercentage(5.5),
+                    borderRadius: RFPercentage(1.2),
+                    borderWidth: RFPercentage(0.1),
+                    borderColor: Colors.inputFieldColor,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: rangeSelector ? Colors.gradient1 : 'white',
+                  }}>
+                  <MaterialIcons
+                    name="filter-list-alt"
+                    size={RFPercentage(3)}
+                    color={rangeSelector ? 'white' : 'rgba(164, 173, 200, 1)'}
+                  />
                 </TouchableOpacity>
-              )}
-              contentContainerStyle={styles.flatListPadding}
-            />
-            <HomeCard
-              onPostJob={() => {
-                if (userFlow === 'Guest') {
-                  setShowAuthModal(true);
-                } else {
-                  navigation.navigate('PostJob', {jobId: null});
-                }
-              }}
-            />
+              </View>
 
-            {/* <Text style={styles.sectionTitle}>Apply filters</Text>
+              <Text
+                style={[styles.sectionTitle, {marginTop: RFPercentage(1.5)}]}>
+                Categories
+              </Text>
+              <FlatList
+                data={categories}
+                keyExtractor={item => item.id}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                renderItem={({item}) => (
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={() => setCategorySelection(item?.id)}
+                    style={{marginTop: RFPercentage(0.5)}}>
+                    <View
+                      style={[
+                        styles.categoryBox,
+                        {
+                          backgroundColor:
+                            categorySelection === item.id
+                              ? Colors.gradient1
+                              : Colors.white,
+                        },
+                      ]}>
+                      <Icon
+                        name={item.icon}
+                        size={30}
+                        color={
+                          categorySelection === item.id
+                            ? '#ffffffff'
+                            : 'rgba(164, 173, 200, 1)'
+                        }
+                      />
+                    </View>
+                    <Text
+                      style={[
+                        styles.categoryText,
+                        {
+                          fontFamily:
+                            categorySelection === item.id
+                              ? Fonts.semiBold
+                              : Fonts.fontMedium,
+                        },
+                      ]}>
+                      {item.name.length > 8
+                        ? `${item.name.slice(0, 8)}..`
+                        : item.name}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                contentContainerStyle={styles.flatListPadding}
+              />
+              <HomeCard
+                onPostJob={() => {
+                  if (userFlow === 'Guest') {
+                    setShowAuthModal(true);
+                  } else {
+                    navigation.navigate('PostJob', {jobId: null});
+                  }
+                }}
+              />
+
+              {/* <Text style={styles.sectionTitle}>Apply filters</Text>
             <View style={styles.filterWrapper}>
               <View>
                 <TouchableOpacity
@@ -613,88 +620,89 @@ const Home = () => {
               </View>
             </View> */}
 
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                width: '90%',
-                alignSelf: 'center',
-                marginTop: RFPercentage(4),
-              }}>
-              <Text
+              <View
                 style={{
-                  color: Colors.primaryText,
-                  fontFamily: Fonts.fontMedium,
-                  fontSize: RFPercentage(1.8),
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  width: '90%',
+                  alignSelf: 'center',
+                  marginTop: RFPercentage(4),
                 }}>
-                Nearby Services
-                {selectedLocation?.name ? ':' : ''}
-              </Text>
-              <Text
-                style={{
-                  color: Colors.secondaryText,
-                  fontFamily: Fonts.fontRegular,
-                  fontSize: RFPercentage(1.5),
-                  marginLeft: RFPercentage(1),
-                }}>
-                {selectedLocation && selectedLocation.name
-                  ? selectedLocation.name.length > 30
-                    ? selectedLocation.name.substring(0, 30) + '...'
-                    : selectedLocation.name
-                  : ''}
-              </Text>
-            </View>
+                <Text
+                  style={{
+                    color: Colors.primaryText,
+                    fontFamily: Fonts.fontMedium,
+                    fontSize: RFPercentage(1.8),
+                  }}>
+                  Nearby Services
+                  {selectedLocation?.name ? ':' : ''}
+                </Text>
+                <Text
+                  style={{
+                    color: Colors.secondaryText,
+                    fontFamily: Fonts.fontRegular,
+                    fontSize: RFPercentage(1.5),
+                    marginLeft: RFPercentage(1),
+                  }}>
+                  {selectedLocation && selectedLocation.name
+                    ? selectedLocation.name.length > 30
+                      ? selectedLocation.name.substring(0, 30) + '...'
+                      : selectedLocation.name
+                    : ''}
+                </Text>
+              </View>
 
-            {loading ? (
-              <>
-                <ActivityIndicator
-                  size={'large'}
-                  color={Colors.placeholderColor}
-                  style={{top: RFPercentage(14)}}
-                />
-              </>
-            ) : (
-              <>
-                <View style={styles.servicesContainer}>
-                  {finalFilteredJobs.length === 0 ? (
-                    <>
-                      <View style={{bottom: RFPercentage(4)}}>
-                        <NotFound text="No service found" />
-                      </View>
-                    </>
-                  ) : (
-                    <>
-                      <FlatList
-                        data={finalFilteredJobs}
-                        keyExtractor={item => item.id.toString()}
-                        contentContainerStyle={{
-                          paddingBottom: RFPercentage(1),
-                        }}
-                        renderItem={({item}) => (
-                          <View style={styles.serviceItem}>
-                            <ServicesCard
-                              covers={item?.serviceImages}
-                              name={item?.name}
-                              icon={item?.image}
-                              price={item?.packages?.[0]?.price ?? 0}
-                              star={IMAGES?.star}
-                              rating={5}
-                              location={item?.location}
-                              onPress={() =>
-                                navigation.navigate('ServiceDetails', {
-                                  item: item,
-                                })
-                              }
-                              createdAt={item.createdAt}
-                            />
-                          </View>
-                        )}
-                      />
-                    </>
-                  )}
-                </View>
-              </>
-            )}
+              {loading ? (
+                <>
+                  <ActivityIndicator
+                    size={'large'}
+                    color={Colors.placeholderColor}
+                    style={{top: RFPercentage(14)}}
+                  />
+                </>
+              ) : (
+                <>
+                  <View style={styles.servicesContainer}>
+                    {finalFilteredJobs?.length === 0 ? (
+                      <>
+                        <View style={{bottom: RFPercentage(4)}}>
+                          <NotFound text="No services found" />
+                        </View>
+                      </>
+                    ) : (
+                      <>
+                        <FlatList
+                          data={finalFilteredJobs}
+                          keyExtractor={item => item.id.toString()}
+                          contentContainerStyle={{
+                            paddingBottom: RFPercentage(1),
+                          }}
+                          renderItem={({item}) => (
+                            <View style={styles.serviceItem}>
+                              <ServicesCard
+                                covers={item?.serviceImages}
+                                name={item?.name}
+                                icon={item?.image}
+                                price={item?.packages?.[0]?.price ?? 0}
+                                star={IMAGES?.star}
+                                rating={5}
+                                location={item?.location}
+                                onPress={() =>
+                                  navigation.navigate('ServiceDetails', {
+                                    item: item,
+                                  })
+                                }
+                                createdAt={item.createdAt}
+                              />
+                            </View>
+                          )}
+                        />
+                      </>
+                    )}
+                  </View>
+                </>
+              )}
+            </View>
           </View>
         </ScrollView>
 
@@ -821,38 +829,7 @@ const Home = () => {
                                   <Text style={styles.markerText}>$1000</Text>
                                   <Text style={styles.markerText}>$2000+</Text>
                                 </View>
-                              </View>
-
-                              {/* Quick Select Buttons */}
-                              <View style={styles.quickSelectContainer}>
-                                <Text style={styles.quickSelectTitle}>
-                                  Quick Select
-                                </Text>
-                                <View style={styles.quickSelectButtons}>
-                                  {[50, 100, 250, 500, 1000].map(price => (
-                                    <TouchableOpacity
-                                      key={price}
-                                      style={[
-                                        styles.quickButton,
-                                        tempValue.current >= price &&
-                                          styles.quickButtonActive,
-                                      ]}
-                                      onPress={() => {
-                                        tempValue.current = price;
-                                        setPriceRange([price, priceRange[1]]);
-                                      }}>
-                                      <Text
-                                        style={[
-                                          styles.quickButtonText,
-                                          tempValue.current >= price &&
-                                            styles.quickButtonTextActive,
-                                        ]}>
-                                        ${price}
-                                      </Text>
-                                    </TouchableOpacity>
-                                  ))}
-                                </View>
-                              </View>
+                              </View>                            
 
                               {/* Action Buttons */}
                               <View style={styles.actionButtonsContainer}>
@@ -922,7 +899,7 @@ const Home = () => {
             </View>
           </TouchableWithoutFeedback>
         </Modal>
-      </View>
+      </>
     </TouchableWithoutFeedback>
   );
 };
@@ -936,13 +913,14 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     paddingBottom: RFPercentage(12),
+    backgroundColor: Colors.background,
   },
   container: {
     backgroundColor: Colors.background,
   },
 
   gradientHeader: {
-    paddingTop: Platform.OS === 'ios' ? 40 : 20,
+    paddingTop: Platform.OS === 'ios' ? 40 : 0,
     paddingBottom: 25,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
@@ -950,7 +928,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 12,
-    elevation: 8,
+    // elevation: 8,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -1073,7 +1051,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    elevation: 5,
+    // elevation: 5,
     borderColor: 'rgba(217, 228, 246, 1)',
   },
 
@@ -1318,7 +1296,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 10},
     shadowOpacity: 0.1,
     shadowRadius: 20,
-    height: '70%',
+    height: '65%',
   },
   modalHeader: {
     paddingVertical: RFPercentage(2.5),
