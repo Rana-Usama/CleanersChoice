@@ -183,7 +183,11 @@ const Availability = ({navigation}: any) => {
 
   return (
     <View style={styles.safeArea}>
-      <StatusBar backgroundColor={Colors.gradient1} barStyle="light-content" />
+      <StatusBar
+        backgroundColor={Colors.gradient1}
+        barStyle="light-content"
+        translucent={true}
+      />
 
       {/* Modern Header with Gradient */}
       <LinearGradient
@@ -329,6 +333,7 @@ const Availability = ({navigation}: any) => {
               <Text style={styles.bulkTitle}>Quick Actions</Text>
               <View style={styles.bulkButtons}>
                 <TouchableOpacity
+                  activeOpacity={0.6}
                   style={styles.bulkButton}
                   onPress={() => {
                     setAvailabilityData((prev: any) =>
@@ -343,6 +348,7 @@ const Availability = ({navigation}: any) => {
                   <Text style={styles.bulkButtonText}>Select All</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
+                  activeOpacity={0.6}
                   style={styles.bulkButton}
                   onPress={() => {
                     setAvailabilityData((prev: any) =>
@@ -357,6 +363,7 @@ const Availability = ({navigation}: any) => {
                   <Text style={styles.bulkButtonText}>Clear All</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
+                  activeOpacity={0.6}
                   style={styles.bulkButton}
                   onPress={() => {
                     setAvailabilityData((prev: any) =>
@@ -387,7 +394,7 @@ const Availability = ({navigation}: any) => {
                 ]}
                 onPress={handleSetAvailability}
                 disabled={loading || selectedDaysCount === 0}
-                activeOpacity={0.8}>
+                activeOpacity={0.6}>
                 <LinearGradient
                   colors={
                     selectedDaysCount === 0
@@ -404,12 +411,6 @@ const Availability = ({navigation}: any) => {
                           ? 'Update Availability'
                           : 'Save Availability'}
                       </Text>
-                      <MaterialIcons
-                        name="check"
-                        size={RFPercentage(2)}
-                        color="#FFFFFF"
-                        style={styles.buttonIcon}
-                      />
                     </>
                   )}
                 </LinearGradient>
@@ -436,7 +437,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   gradientHeader: {
-    paddingTop: Platform.OS === 'ios' ? 40 : 20,
+    paddingTop: Platform.OS === 'ios' ? 40 : 0,
     paddingBottom: 20,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
@@ -444,7 +445,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 12,
-    elevation: 8,
+    // elevation: 8,
   },
   headerText: {
     fontSize: RFPercentage(2.2),
@@ -504,7 +505,9 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
+    borderWidth:1,
+    borderColor:"#d3e7f7ff"
+    // elevation: 3,
   },
   instructionsHeader: {
     flexDirection: 'row',
@@ -646,14 +649,16 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 8},
     shadowOpacity: 0.25,
     shadowRadius: 16,
-    elevation: 8,
+    // elevation: 8,
+    width: '60%',
+    alignSelf: 'center',
   },
   buttonDisabled: {
     shadowOpacity: 0,
     elevation: 0,
   },
   buttonGradient: {
-    paddingVertical: 18,
+    paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 100,
     flexDirection: 'row',
@@ -662,7 +667,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.7),
     color: '#FFFFFF',
     marginRight: 10,
   },

@@ -186,7 +186,11 @@ const Jobs = ({navigation}: any) => {
 
   return (
     <View style={styles.safeArea}>
-      <StatusBar backgroundColor="#FFFFFF" barStyle="light-content" />
+      <StatusBar
+        backgroundColor={Colors.gradient1}
+        barStyle="light-content"
+        translucent={true}
+      />
 
       {/* Modern Header */}
       <LinearGradient
@@ -433,7 +437,7 @@ const Jobs = ({navigation}: any) => {
 
       {Jobs.length > 0 && active && (
         <TouchableOpacity
-        activeOpacity={0.8}
+          activeOpacity={0.8}
           style={styles.newJobButton}
           onPress={() => navigation.navigate('PostJob', {jobId: null})}>
           <LinearGradient
@@ -609,7 +613,7 @@ const styles = StyleSheet.create({
     padding: 12,
     alignItems: 'center',
     borderRadius: 12,
-    paddingHorizontal:16
+    paddingHorizontal: 16,
   },
   filterIconContainer: {
     width: 40,
@@ -750,7 +754,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 10,
     width: 60,
-    height:60
+    height: 60,
   },
   newJobText: {
     fontSize: RFPercentage(1.6),

@@ -6,6 +6,7 @@ import {
   View,
   Animated,
   Easing,
+  StatusBar,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
@@ -55,6 +56,12 @@ const JobPosted = () => {
     <LinearGradient
       colors={[Colors.gradient1, Colors.gradient2]}
       style={styles.safeArea}>
+      <StatusBar
+        backgroundColor={Colors.gradient1}
+        barStyle="light-content"
+        translucent={true}
+      />
+
       {/* Background Decorative Elements */}
       <View style={styles.backgroundCircles}>
         <View style={[styles.circle, styles.circle1]} />

@@ -229,7 +229,7 @@ const ServiceThree: React.FC = ({navigation}: any) => {
       });
 
       // navigation.navigate('CleanerNavigator');
-      navigation.navigate("CongratulationsScreen")
+      navigation.navigate('CongratulationsScreen');
     } catch (error) {
       Toast.show({
         type: 'error',
@@ -270,7 +270,11 @@ const ServiceThree: React.FC = ({navigation}: any) => {
 
   return (
     <View style={styles.safeArea}>
-      <StatusBar backgroundColor={Colors.gradient1} barStyle="light-content" />
+      <StatusBar
+        backgroundColor={Colors.gradient1}
+        barStyle="light-content"
+        translucent={true}
+      />
 
       {/* Modern Header with Gradient */}
       <LinearGradient
@@ -725,7 +729,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 12,
     // elevation: 5,
-
   },
   completionCard: {
     marginHorizontal: 20,
@@ -1036,7 +1039,7 @@ const styles = StyleSheet.create({
     borderColor: '#E5E7EB',
     borderStyle: 'dashed',
     height: 55,
-    justifyContent:'center'
+    justifyContent: 'center',
   },
   addPackageContent: {
     flexDirection: 'row',
@@ -1082,24 +1085,24 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 16,
     // elevation: 8,
-    width:"60%",
-    alignSelf:"center"
+    width: '60%',
+    alignSelf: 'center',
+    height: RFPercentage(5.6),
   },
   buttonDisabled: {
     shadowOpacity: 0,
     elevation: 0,
   },
   buttonGradient: {
-    paddingVertical: 18,
-    paddingHorizontal: 24,
-    borderRadius: 16,
+    borderRadius: 100,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    flex:1
   },
   buttonText: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.7),
     color: '#FFFFFF',
     marginRight: 10,
   },

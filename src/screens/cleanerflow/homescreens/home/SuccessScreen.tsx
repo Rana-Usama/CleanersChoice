@@ -1,15 +1,14 @@
-import React, {useEffect, useRef} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   Dimensions,
-  ScrollView,
   StatusBar,
   Animated,
   Easing,
-  Image,
+  ScrollView,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -28,9 +27,8 @@ const ProfileCompletionCongratulations = ({
   const fadeValue = useRef(new Animated.Value(0)).current;
   const progressValue = useRef(new Animated.Value(0)).current;
   const confettiAnimation = useRef(new Animated.Value(0)).current;
-  const starAnimations = useRef(
-    Array.from({length: 6}, () => new Animated.Value(0)),
-  ).current;
+  const [expandedSection, setExpandedSection] = useState('benefits'); // 'benefits', 'stats', or 'steps'
+  const heightAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     // Start main animations
@@ -50,13 +48,11 @@ const ProfileCompletionCongratulations = ({
         toValue: completionPercentage,
         duration: 1500,
         easing: Easing.bezier(0.4, 0, 0.2, 1),
-        useNativeDriver: false, // Changed to false for width interpolation
+        useNativeDriver: false,
       }),
     ]).start();
 
-    // Start celebration animations if 100%
     if (completionPercentage === 100) {
-      // Confetti animation
       Animated.sequence([
         Animated.timing(confettiAnimation, {
           toValue: 1,
@@ -70,38 +66,6 @@ const ProfileCompletionCongratulations = ({
           useNativeDriver: true,
         }),
       ]).start();
-
-      // Star floating animations
-      starAnimations.forEach((anim, index) => {
-        Animated.sequence([
-          Animated.delay(index * 100),
-          Animated.parallel([
-            Animated.timing(anim, {
-              toValue: 1,
-              duration: 800,
-              easing: Easing.out(Easing.cubic),
-              useNativeDriver: true,
-            }),
-            Animated.loop(
-              Animated.sequence([
-                Animated.timing(anim, {
-                  toValue: 1.2,
-                  duration: 500,
-                  easing: Easing.inOut(Easing.sin),
-                  useNativeDriver: true,
-                }),
-                Animated.timing(anim, {
-                  toValue: 1,
-                  duration: 500,
-                  easing: Easing.inOut(Easing.sin),
-                  useNativeDriver: true,
-                }),
-              ]),
-              {iterations: 3},
-            ),
-          ]),
-        ]).start();
-      });
     }
   }, []);
 
@@ -110,7 +74,10 @@ const ProfileCompletionCongratulations = ({
     outputRange: ['0%', '100%'],
   });
 
-  // Based on your service setup steps
+  const toggleSection = section => {
+    setExpandedSection(expandedSection === section ? null : section);
+  };
+
   const completedSteps = [
     {
       step: 1,
@@ -142,40 +109,38 @@ const ProfileCompletionCongratulations = ({
     },
   ];
 
-  // Benefits specific to your cleaning service
   const benefits = [
     {
       icon: 'star-circle',
-      title: 'Featured Listings',
+      title: 'Featured',
       description: 'Priority in search results',
       color: '#FFD700',
     },
     {
       icon: 'trending-up',
       title: 'Higher Bookings',
-      description: 'More cleaning jobs daily',
+      description: 'More jobs daily',
       color: '#4CAF50',
     },
     {
       icon: 'badge-account',
-      title: 'Trusted Cleaner',
-      description: 'Verified service provider',
+      title: 'Trusted',
+      description: 'Verified provider',
       color: '#2196F3',
     },
     {
       icon: 'cash-multiple',
       title: 'Steady Income',
-      description: 'Regular cleaning contracts',
+      description: 'Regular contracts',
       color: '#9C27B0',
     },
   ];
 
-  // Stats based on typical cleaner profile
   const profileStats = [
-    {label: 'Response Rate', value: '95%', change: 'excellent'},
-    {label: 'Avg. Rating', value: '4.9★', change: 'rating'},
-    {label: 'Jobs Completed', value: '25+', change: 'reliable'},
-    {label: 'Repeat Clients', value: '70%', change: 'trusted'},
+    {label: 'Response', value: '95%'},
+    {label: 'Rating', value: '4.9★'},
+    {label: 'Jobs', value: '25+'},
+    {label: 'Repeat', value: '70%'},
   ];
 
   const handleGoToDashboard = () => {
@@ -186,22 +151,15 @@ const ProfileCompletionCongratulations = ({
     navigation.navigate('CleanerNavigator', {screen: 'Home'});
   };
 
-  // Floating star positions
-  const starPositions = [
-    {top: RFPercentage(34), left: RFPercentage(4)},
-    {top: RFPercentage(6), left: RFPercentage(37)},
-    {top: RFPercentage(7), left: RFPercentage(14)},
-    {top: RFPercentage(17), left: RFPercentage(34)},
-    {top: RFPercentage(14), left: RFPercentage(40)},
-    {top: RFPercentage(14), left: RFPercentage(4)},
-  ];
-
   return (
     <View style={styles.container}>
-      <StatusBar backgroundColor={Colors.gradient1} barStyle="light-content" />
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}>
+      <StatusBar
+        backgroundColor={Colors.gradient1}
+        barStyle="light-content"
+        translucent={true}
+      />
+
+      <ScrollView>
         {/* Background Gradient */}
         <LinearGradient
           colors={[Colors.gradient1, Colors.gradient2]}
@@ -210,297 +168,189 @@ const ProfileCompletionCongratulations = ({
           end={{x: 1, y: 1}}
         />
 
-        {/* Celebration Elements */}
-        {completionPercentage === 100 && (
-          <View style={styles.starsContainer}>
-            {starPositions.map((pos, index) => (
-              <Animated.View
-                key={index}
-                style={[
-                  styles.floatingStar,
-                  {
-                    top: pos.top,
-                    left: pos.left,
-                    right: pos.right,
-                    transform: [
-                      {scale: starAnimations[index]},
-                      {
-                        rotate: starAnimations[index].interpolate({
-                          inputRange: [0, 1],
-                          outputRange: ['0deg', '360deg'],
-                        }),
-                      },
-                    ],
-                  },
-                ]}>
-                <Icon name="star" size={20} color="#FFD700" />
-              </Animated.View>
-            ))}
-          </View>
-        )}
-
-        {/* Header */}
-        <View style={styles.header}>
-          <Animated.View
-            style={[styles.logoContainer, {transform: [{scale: scaleValue}]}]}>
-            <AntDesign
-              name="checkcircle"
-              color={Colors.background}
-              size={RFPercentage(10)}
-            />
-          </Animated.View>
-
-          <Animated.Text style={[styles.title, {opacity: fadeValue}]}>
-            Profile Complete! 🎉
-          </Animated.Text>
-
-          <Animated.Text style={[styles.subtitle, {opacity: fadeValue}]}>
-            {`Your cleaning service is now\nready for bookings`}
-          </Animated.Text>
-
-          {completionPercentage === 100 && (
+        {/* Main Content - No ScrollView */}
+        <View style={styles.content}>
+          {/* Header Section */}
+          <View style={styles.header}>
             <Animated.View
-              style={[styles.sparkleContainer, {opacity: fadeValue}]}>
-              <Ionicons name="sparkles" size={20} color="#FFD700" />
-              <Text style={styles.perfectText}>Ready to Start Cleaning!</Text>
-              <Ionicons name="sparkles" size={20} color="#FFD700" />
+              style={[
+                styles.logoContainer,
+                {transform: [{scale: scaleValue}]},
+              ]}>
+              <AntDesign
+                name="checkcircle"
+                color={Colors.background}
+                size={RFPercentage(8)}
+              />
             </Animated.View>
+
+            <Animated.Text style={[styles.title, {opacity: fadeValue}]}>
+              Profile Complete! 🎉
+            </Animated.Text>
+
+            <Animated.Text style={[styles.subtitle, {opacity: fadeValue}]}>
+              Your cleaning service is now ready
+            </Animated.Text>
+
+            {completionPercentage === 100 && (
+              <Animated.View
+                style={[styles.sparkleContainer, {opacity: fadeValue}]}>
+                <Ionicons name="sparkles" size={16} color="#FFD700" />
+                <Text style={styles.perfectText}>Ready to Start Cleaning!</Text>
+                <Ionicons name="sparkles" size={16} color="#FFD700" />
+              </Animated.View>
+            )}
+          </View>
+
+          {/* Collapsible Content Areas */}
+          <View style={styles.collapsibleContainer}>
+            {/* Steps Toggle */}
+            <TouchableOpacity
+              style={styles.collapsibleHeader}
+              onPress={() => toggleSection('steps')}
+              activeOpacity={0.7}>
+              <Text style={styles.collapsibleTitle}>Completed Steps</Text>
+              <Icon
+                name={
+                  expandedSection === 'steps' ? 'chevron-up' : 'chevron-down'
+                }
+                size={20}
+                color={Colors.gradient1}
+              />
+            </TouchableOpacity>
+
+            {expandedSection === 'steps' && (
+              <Animated.View style={styles.stepsGrid}>
+                {completedSteps.map(step => (
+                  <View key={step.step} style={styles.stepItem}>
+                    <View
+                      style={[
+                        styles.stepIcon,
+                        {backgroundColor: `${step.color}20`},
+                      ]}>
+                      <Icon name={step.icon} size={20} color={step.color} />
+                    </View>
+                    <View style={styles.stepTextContainer}>
+                      <Text style={styles.stepTitle}>{step.title}</Text>
+                      <Text style={styles.stepDesc}>{step.description}</Text>
+                    </View>
+                    <Icon name="check-circle" size={16} color="#4CAF50" />
+                  </View>
+                ))}
+              </Animated.View>
+            )}
+
+            {/* Benefits Toggle */}
+            <TouchableOpacity
+              style={styles.collapsibleHeader}
+              onPress={() => toggleSection('benefits')}
+              activeOpacity={0.7}>
+              <Text style={styles.collapsibleTitle}>Your Benefits</Text>
+              <Icon
+                name={
+                  expandedSection === 'benefits' ? 'chevron-up' : 'chevron-down'
+                }
+                size={20}
+                color={Colors.gradient1}
+              />
+            </TouchableOpacity>
+
+            {expandedSection === 'benefits' && (
+              <View style={styles.benefitsGrid}>
+                {benefits.map((benefit, index) => (
+                  <View key={index} style={styles.benefitItem}>
+                    <View
+                      style={[
+                        styles.benefitIcon,
+                        {backgroundColor: `${benefit.color}20`},
+                      ]}>
+                      <Icon
+                        name={benefit.icon}
+                        size={20}
+                        color={benefit.color}
+                      />
+                    </View>
+                    <Text style={styles.benefitTitle}>{benefit.title}</Text>
+                    <Text style={styles.benefitDesc}>
+                      {benefit.description}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            )}
+
+            {expandedSection === 'stats' && (
+              <View style={styles.statsGrid}>
+                {profileStats.map((stat, index) => (
+                  <View key={index} style={styles.statItem}>
+                    <Text style={styles.statValue}>{stat.value}</Text>
+                    <Text style={styles.statLabel}>{stat.label}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+          </View>
+
+          {/* Next Steps Summary */}
+          <View style={styles.nextStepsSummary}>
+            <Text style={styles.summaryTitle}>Start Getting Cleaning Jobs</Text>
+            <View style={styles.summaryPoints}>
+              <View style={styles.summaryPoint}>
+                <View style={styles.pointBullet} />
+                <Text style={styles.pointText}>
+                  Browse available cleaning requests
+                </Text>
+              </View>
+              <View style={styles.summaryPoint}>
+                <View style={styles.pointBullet} />
+                <Text style={styles.pointText}>
+                  Accept and confirm bookings
+                </Text>
+              </View>
+              <View style={styles.summaryPoint}>
+                <View style={styles.pointBullet} />
+                <Text style={styles.pointText}>Earn 5-star reviews</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Action Buttons */}
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={styles.primaryButton}
+              onPress={handleGoToDashboard}
+              activeOpacity={0.8}>
+              <LinearGradient
+                colors={[Colors.gradient1, Colors.gradient2]}
+                style={styles.buttonGradient}
+                start={{x: 0, y: 0}}
+                end={{x: 1, y: 0}}>
+                <Icon name="broom" size={22} color="white" />
+                <Text style={styles.primaryButtonText}>
+                  Start Cleaning Jobs
+                </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.secondaryButton}
+              onPress={handleViewProfile}
+              activeOpacity={0.8}>
+              <Icon name="eye" size={18} color={Colors.gradient1} />
+              <Text style={styles.secondaryButtonText}>View My Profile</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Celebration Footer */}
+          {completionPercentage === 100 && (
+            <View style={styles.celebrationFooter}>
+              <Icon name="party-popper" size={16} color="#FFD700" />
+              <Text style={styles.celebrationText}>
+                You're now a verified cleaning service provider!
+              </Text>
+            </View>
           )}
         </View>
-
-        {/* Steps Completion Section */}
-        <View style={styles.section}>
-          <View style={styles.progressHeader}>
-            <Text style={styles.sectionTitle}>Setup Completed</Text>
-            <View style={styles.percentageContainer}>
-              <Text style={styles.percentageText}>{completionPercentage}%</Text>
-              {completionPercentage === 100 && (
-                <Animated.View style={styles.crownIcon}>
-                  <Icon name="crown" size={18} color="#FFD700" />
-                </Animated.View>
-              )}
-            </View>
-          </View>
-
-          {/* Progress Bar */}
-          <View style={styles.progressContainer}>
-            <Animated.View style={[styles.progressBar, {width: animatedWidth}]}>
-              {completionPercentage === 100 && (
-                <Animated.View
-                  style={[
-                    styles.progressShine,
-                    {
-                      transform: [
-                        {
-                          translateX: confettiAnimation.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: [-100, width],
-                          }),
-                        },
-                      ],
-                    },
-                  ]}
-                />
-              )}
-            </Animated.View>
-          </View>
-
-          {/* Completed Steps */}
-          <View style={styles.stepsContainer}>
-            {completedSteps.map((step, index) => (
-              <Animated.View
-                key={step.step}
-                style={[
-                  styles.stepCard,
-                  {
-                    opacity: fadeValue,
-                    transform: [
-                      {
-                        translateY: fadeValue.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [30, 0],
-                        }),
-                      },
-                    ],
-                  },
-                ]}>
-                <View style={styles.stepHeader}>
-                  <View
-                    style={[
-                      styles.stepIconContainer,
-                      {backgroundColor: `${step.color}20`},
-                    ]}>
-                    <Icon name={step.icon} size={24} color={step.color} />
-                  </View>
-                  <Text style={styles.stepTitle}>{step.title}</Text>
-                </View>
-                <Text style={styles.stepDescription}>{step.description}</Text>
-                <View style={styles.stepStatus}>
-                  <Icon name="check-circle" size={16} color="#4CAF50" />
-                  <Text style={styles.stepStatusText}>Completed</Text>
-                </View>
-              </Animated.View>
-            ))}
-          </View>
-        </View>
-
-        {/* Benefits for Cleaners */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Your Benefits as a Cleaner</Text>
-          <View style={styles.benefitsGrid}>
-            {benefits.map((benefit, index) => (
-              <Animated.View
-                key={index}
-                style={[
-                  styles.benefitCard,
-                  {
-                    opacity: fadeValue,
-                    transform: [
-                      {
-                        translateY: fadeValue.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [50, 0],
-                        }),
-                      },
-                    ],
-                  },
-                ]}>
-                <View
-                  style={[
-                    styles.benefitIconContainer,
-                    {backgroundColor: `${benefit.color}20`},
-                  ]}>
-                  <Icon name={benefit.icon} size={24} color={benefit.color} />
-                </View>
-                <Text style={styles.benefitTitle}>{benefit.title}</Text>
-                <Text style={styles.benefitDescription}>
-                  {benefit.description}
-                </Text>
-              </Animated.View>
-            ))}
-          </View>
-        </View>
-
-        {/* Expected Performance */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Expected Performance</Text>
-          <View style={styles.statsContainer}>
-            {profileStats.map((stat, index) => (
-              <Animated.View
-                key={index}
-                style={[
-                  styles.statCard,
-                  {
-                    opacity: fadeValue,
-                    transform: [
-                      {
-                        scale: fadeValue.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [0.8, 1],
-                        }),
-                      },
-                    ],
-                  },
-                ]}>
-                <Text style={styles.statValue}>{stat.value}</Text>
-                <Text style={styles.statLabel}>{stat.label}</Text>
-                <View
-                  style={[
-                    styles.statBadge,
-                    stat.change === 'excellent' && styles.excellentBadge,
-                    stat.change === 'rating' && styles.ratingBadge,
-                    stat.change === 'reliable' && styles.reliableBadge,
-                    stat.change === 'trusted' && styles.trustedBadge,
-                  ]}>
-                  <Text style={styles.statBadgeText}>
-                    {stat.change === 'excellent' && 'Excellent'}
-                    {stat.change === 'rating' && 'Top Rated'}
-                    {stat.change === 'reliable' && 'Reliable'}
-                    {stat.change === 'trusted' && 'Trusted'}
-                  </Text>
-                </View>
-              </Animated.View>
-            ))}
-          </View>
-        </View>
-
-        {/* Next Steps for Cleaners */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Start Getting Cleaning Jobs</Text>
-          <View style={styles.nextStepsContainer}>
-            <View style={styles.nextStepItem}>
-              <View style={styles.stepNumber}>
-                <Text style={styles.stepNumberText}>1</Text>
-              </View>
-              <View style={styles.stepContent}>
-                <Text style={styles.stepTitle}>Browse Cleaning Jobs</Text>
-                <Text style={styles.stepDescription}>
-                  Check available cleaning requests in your area
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.nextStepItem}>
-              <View style={styles.stepNumber}>
-                <Text style={styles.stepNumberText}>2</Text>
-              </View>
-              <View style={styles.stepContent}>
-                <Text style={styles.stepTitle}>Accept Bookings</Text>
-                <Text style={styles.stepDescription}>
-                  Review and accept cleaning appointments
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.nextStepItem}>
-              <View style={styles.stepNumber}>
-                <Text style={styles.stepNumberText}>3</Text>
-              </View>
-              <View style={styles.stepContent}>
-                <Text style={styles.stepTitle}>Earn Reviews</Text>
-                <Text style={styles.stepDescription}>
-                  Complete jobs and get 5-star reviews
-                </Text>
-              </View>
-            </View>
-          </View>
-        </View>
-
-        {/* CTA Buttons */}
-        <View style={styles.ctaContainer}>
-          <TouchableOpacity
-            style={styles.primaryButton}
-            onPress={handleGoToDashboard}
-            activeOpacity={0.8}>
-            <LinearGradient
-              colors={[Colors.gradient1, Colors.gradient2]}
-              style={styles.buttonGradient}
-              start={{x: 0, y: 0}}
-              end={{x: 1, y: 0}}>
-              <Icon name="broom" size={24} color="white" />
-              <Text style={styles.primaryButtonText}>Start Cleaning Jobs</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.secondaryButton}
-            onPress={handleViewProfile}
-            activeOpacity={0.8}>
-            <Icon name="eye" size={20} color={Colors.gradient1} />
-            <Text style={styles.secondaryButtonText}>View My Profile</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Celebration Message */}
-        {completionPercentage === 100 && (
-          <Animated.View
-            style={[styles.celebrationMessage, {opacity: fadeValue}]}>
-            <Icon name="party-popper" size={20} color="#FFD700" />
-            <Text style={styles.celebrationText}>
-              You're now a verified cleaning service provider!
-            </Text>
-          </Animated.View>
-        )}
       </ScrollView>
     </View>
   );
@@ -516,54 +366,33 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     top: 0,
-    height: height * 0.4,
-    borderBottomLeftRadius: 40,
-    borderBottomRightRadius: 40,
+    height: height * 0.35,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
   },
-  starsContainer: {
-    // position: 'absolute',
-  },
-  floatingStar: {
-    position: 'absolute',
-  },
-  scrollContent: {
-    paddingBottom: 40,
+  content: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 60,
+    paddingBottom: 20,
   },
   header: {
     alignItems: 'center',
-    paddingTop: 60,
-    paddingBottom: 30,
+    marginBottom: 25,
+    marginTop: 20,
   },
   logoContainer: {
-    marginBottom: 20,
-    marginTop:20
-  },
-  logoGradient: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    // elevation: 10,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 10},
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
-  },
-  checkIcon: {
-    width: 40,
-    height: 40,
-    tintColor: '#4CAF50',
+    marginBottom: 15,
   },
   title: {
-    fontSize: RFPercentage(3),
+    fontSize: RFPercentage(2.5),
     fontFamily: Fonts.semiBold,
     color: 'white',
     textAlign: 'center',
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
     color: 'rgba(255, 255, 255, 0.9)',
     textAlign: 'center',
@@ -573,37 +402,36 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(255, 215, 0, 0.2)',
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderRadius: 20,
-    marginTop: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 15,
+    marginTop: 8,
   },
   perfectText: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.3),
     fontFamily: Fonts.semiBold,
     color: '#FFD700',
-    marginHorizontal: 8,
+    marginHorizontal: 6,
   },
-  section: {
+  progressSection: {
     backgroundColor: 'white',
-    marginHorizontal: 20,
-    marginTop: 20,
-    padding: 20,
-    borderRadius: 20,
-    // elevation: 5,
+    padding: 15,
+    borderRadius: 15,
+    marginBottom: 15,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 5},
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
-    shadowRadius: 10,
+    shadowRadius: 6,
+    elevation: 2,
   },
   progressHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: 10,
   },
-  sectionTitle: {
-    fontSize: RFPercentage(1.8),
+  progressTitle: {
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.semiBold,
     color: '#1F2937',
   },
@@ -612,80 +440,77 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   percentageText: {
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(1.8),
     fontFamily: Fonts.semiBold,
     color: Colors.gradient1,
-    marginRight: 8,
-  },
-  crownIcon: {
-    marginLeft: 5,
+    marginRight: 6,
   },
   progressContainer: {
-    height: 8,
+    height: 6,
     backgroundColor: '#f0f0f0',
-    borderRadius: 4,
+    borderRadius: 3,
     overflow: 'hidden',
-    position: 'relative',
-    marginBottom: 20,
   },
   progressBar: {
     height: '100%',
     backgroundColor: Colors.gradient1,
-    borderRadius: 4,
-    position: 'relative',
-    overflow: 'hidden',
+    borderRadius: 3,
   },
-  progressShine: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: '100%',
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+  collapsibleContainer: {
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 15,
+    marginBottom: 15,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    borderWidth: 1,
+    borderColor: '#e2f0fbff',
   },
-  stepsContainer: {
+  collapsibleHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  collapsibleTitle: {
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.semiBold,
+    color: '#3c5475ff',
+  },
+  stepsGrid: {
     marginTop: 10,
   },
-  stepCard: {
-    backgroundColor: '#F8F9FF',
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 12,
-  },
-  stepHeader: {
+  stepItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#F8F9FF',
+    padding: 12,
+    borderRadius: 10,
     marginBottom: 8,
   },
-  stepIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  stepIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
   },
-  stepTitle: {
-    fontSize: RFPercentage(1.6),
-    fontFamily: Fonts.fontMedium,
-    color: '#374151',
+  stepTextContainer: {
     flex: 1,
   },
-  stepDescription: {
-    fontSize: RFPercentage(1.4),
+  stepTitle: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontMedium,
+    color: '#374151',
+  },
+  stepDesc: {
+    fontSize: RFPercentage(1.3),
     fontFamily: Fonts.fontRegular,
     color: '#6B7280',
-    marginBottom: 8,
-  },
-  stepStatus: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  stepStatusText: {
-    fontSize: RFPercentage(1.3),
-    fontFamily: Fonts.fontMedium,
-    color: '#4CAF50',
-    marginLeft: 6,
+    marginTop: 2,
   },
   benefitsGrid: {
     flexDirection: 'row',
@@ -693,171 +518,147 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 10,
   },
-  benefitCard: {
+  benefitItem: {
     width: '48%',
     backgroundColor: '#F8F9FF',
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 12,
+    padding: 12,
+    borderRadius: 10,
+    marginBottom: 8,
     alignItems: 'center',
   },
-  benefitIconContainer: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+  benefitIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 8,
   },
   benefitTitle: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontMedium,
     color: '#374151',
     textAlign: 'center',
     marginBottom: 4,
   },
-  benefitDescription: {
-    fontSize: RFPercentage(1.3),
+  benefitDesc: {
+    fontSize: RFPercentage(1.2),
     fontFamily: Fonts.fontRegular,
     color: '#6B7280',
     textAlign: 'center',
   },
-  statsContainer: {
+  statsGrid: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     justifyContent: 'space-between',
     marginTop: 10,
   },
-  statCard: {
-    width: '48%',
+  statItem: {
+    flex: 1,
     backgroundColor: '#F8F9FF',
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 12,
+    padding: 12,
+    borderRadius: 10,
+    marginHorizontal: 4,
     alignItems: 'center',
   },
   statValue: {
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(1.8),
     fontFamily: Fonts.semiBold,
     color: Colors.gradient1,
     marginBottom: 4,
   },
   statLabel: {
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.2),
     fontFamily: Fonts.fontRegular,
     color: '#6B7280',
-    marginBottom: 8,
-    textAlign: 'center',
   },
-  statBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  excellentBadge: {
-    backgroundColor: '#E8F5E9',
-  },
-  ratingBadge: {
-    backgroundColor: '#FFF3E0',
-  },
-  reliableBadge: {
-    backgroundColor: '#E3F2FD',
-  },
-  trustedBadge: {
-    backgroundColor: '#F3E5F5',
-  },
-  statBadgeText: {
-    fontSize: RFPercentage(1.2),
-    fontFamily: Fonts.fontMedium,
-    color: '#374151',
-  },
-  nextStepsContainer: {
-    marginTop: 10,
-  },
-  nextStepItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F8F9FF',
+  nextStepsSummary: {
+    backgroundColor: '#F0F9FF',
     padding: 15,
-    borderRadius: 12,
+    borderRadius: 15,
+    marginBottom: 15,
+  },
+  summaryTitle: {
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.semiBold,
+    color: Colors.gradient1,
     marginBottom: 10,
   },
-  stepNumber: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: Colors.gradient1,
-    justifyContent: 'center',
+  summaryPoints: {
+    paddingLeft: 5,
+  },
+  summaryPoint: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 15,
+    marginBottom: 8,
   },
-  stepNumberText: {
+  pointBullet: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: Colors.gradient1,
+    marginRight: 10,
+  },
+  pointText: {
     fontSize: RFPercentage(1.4),
-    fontFamily: Fonts.semiBold,
-    color: 'white',
-  },
-  stepContent: {
+    fontFamily: Fonts.fontRegular,
+    color: '#374151',
     flex: 1,
   },
-  ctaContainer: {
-    marginHorizontal: 20,
-    marginTop: 30,
-    marginBottom: 20,
-    gap: 12,
+  buttonContainer: {
+    gap: 10,
+    marginBottom: 10,
   },
   primaryButton: {
     borderRadius: 100,
     overflow: 'hidden',
-    // elevation: 5,
     shadowColor: Colors.gradient1,
-    shadowOffset: {width: 0, height: 10},
-    shadowOpacity: 0.3,
-    shadowRadius: 15,
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
   },
   buttonGradient: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 18,
-    paddingHorizontal: 30,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
   },
   primaryButtonText: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.semiBold,
     color: 'white',
-    marginLeft: 10,
+    marginLeft: 8,
   },
   secondaryButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'white',
-    paddingVertical: 16,
+    paddingVertical: 14,
     borderRadius: 100,
     borderWidth: 2,
     borderColor: Colors.gradient1,
   },
   secondaryButtonText: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.semiBold,
     color: Colors.gradient1,
-    marginLeft: 10,
+    marginLeft: 8,
   },
-  celebrationMessage: {
+  celebrationFooter: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(255, 215, 0, 0.1)',
-    padding: 12,
-    borderRadius: 12,
-    marginHorizontal: 20,
-    marginTop: 10,
+    padding: 10,
+    borderRadius: 10,
+    marginTop: 5,
   },
   celebrationText: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.3),
     fontFamily: Fonts.semiBold,
     color: '#FFA000',
-    marginLeft: 10,
+    marginLeft: 8,
   },
 });
 

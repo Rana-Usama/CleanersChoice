@@ -324,7 +324,11 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
 
   return (
     <View style={styles.safeArea}>
-      <StatusBar backgroundColor={Colors.gradient1} barStyle="light-content" />
+      <StatusBar
+        backgroundColor={Colors.gradient1}
+        barStyle="light-content"
+        translucent={true}
+      />
 
       {/* Modern Header with Gradient */}
       <LinearGradient
@@ -392,7 +396,11 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
         <Animated.View entering={SlideInRight.delay(200)}>
           <View style={styles.instructionsCard}>
             <View style={styles.instructionsHeader}>
-              <MaterialIcons name="camera" size={RFPercentage(2)} color={Colors.primaryText} />
+              <MaterialIcons
+                name="camera"
+                size={RFPercentage(2)}
+                color={Colors.primaryText}
+              />
               <Text style={styles.instructionsTitle}>Photo Guidelines</Text>
             </View>
             <View style={styles.instructionsList}>
@@ -653,7 +661,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.8),
     color: '#1F2937',
-    marginLeft:RFPercentage(1)
+    marginLeft: RFPercentage(1),
   },
   instructionsList: {
     marginLeft: 8,
@@ -843,24 +851,24 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 16,
     // elevation: 8,
-    width:"60%",
-    alignSelf:"center"
+    width: '60%',
+    alignSelf: 'center',
+    height: RFPercentage(5.6),
   },
   buttonDisabled: {
     shadowOpacity: 0,
     elevation: 0,
   },
   buttonGradient: {
-    paddingVertical: 18,
-    paddingHorizontal: 24,
-    borderRadius: 16,
+    borderRadius: 100,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    flex:1
   },
   buttonText: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     color: '#FFFFFF',
     marginRight: 10,
   },

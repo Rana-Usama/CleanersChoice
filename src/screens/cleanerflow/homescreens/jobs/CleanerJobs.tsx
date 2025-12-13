@@ -16,6 +16,7 @@ import {
   RefreshControl,
   Dimensions,
   StatusBar,
+  Keyboard,
 } from 'react-native';
 import React, {useCallback, useState, useRef, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -55,13 +56,14 @@ const items = [
 ];
 
 const CleanerJobs = () => {
+  const profileData = useSelector((state: any) => state?.profile.profileData);
+
   const {location, loading, error} = useCurrentLocation();
   const navigation = useNavigation<any>();
   const [jobsData, setJobsData] = useState([]);
   const [loading2, setLoading] = useState(false);
   const [priceRange, setPriceRange] = useState([10, 2000]);
   const tempValue = useRef(priceRange[0]);
-  const [modalVisible, setModalVisible] = useState(false);
   const [rangeSelector, setRangeSelector] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
   const scaleAnim = useRef(new Animated.Value(0)).current;
@@ -74,6 +76,8 @@ const CleanerJobs = () => {
   const [query2, setQuery2] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [initializingLocation, setInitializingLocation] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(profileData?.admin);
+  const [adminViewAllJobs, setAdminViewAllJobs] = useState(false);
 
   const selectedLocation = useSelector(
     (state: any) =>
@@ -216,70 +220,54 @@ const CleanerJobs = () => {
   }, []);
 
   const finalFilteredJobs = jobsData.filter(job => {
-    // Price filter
-    if (rangeSelector) {
-      const price = job?.priceRange || 0;
-      if (price < 0 || price > priceRange[0]) {
-        return false;
+    if (job.status !== 'active') return false;
+
+    if (isAdmin && adminViewAllJobs) {
+      if (rangeSelector) {
+        const price = job?.priceRange || 0;
+        if (price < 0 || price > priceRange[0]) return false;
       }
+      if (serviceType && selectedType) {
+        const jobType = job?.type?.toLowerCase().trim();
+        const selectedTypeLower = selectedType.toLowerCase().trim();
+        if (jobType !== selectedTypeLower) return false;
+      }
+
+      return true; // 👈 Admin sees everything else
     }
 
-    // Service type filter
-    if (serviceType && selectedType) {
-      const jobType = job.type?.toLowerCase().trim();
-      const selectedTypeLower = selectedType.toLowerCase().trim();
-      if (jobType !== selectedTypeLower) {
-        return false;
-      }
-    }
-
-    // Location filtering logic
     const hasSelectedLocation =
       selectedLocation?.latitude && selectedLocation?.longitude;
     const hasCurrentLocation = location?.latitude && location?.longitude;
 
-    if (hasSelectedLocation) {
-      if (job?.location?.latitude && job?.location?.longitude) {
-        try {
-          const distance = haversine(
-            {
-              latitude: selectedLocation.latitude,
-              longitude: selectedLocation.longitude,
-            },
-            {
-              latitude: job.location.latitude,
-              longitude: job.location.longitude,
-            },
-            {unit: 'km'},
-          );
-          return distance <= 20;
-        } catch (error) {
-          return true;
-        }
-      } else {
-        return false;
-      }
+    if (!hasSelectedLocation && !hasCurrentLocation) return false;
+
+    if (rangeSelector) {
+      const price = job?.priceRange || 0;
+      if (price < 0 || price > priceRange[0]) return false;
     }
-    if (hasCurrentLocation) {
-      if (job?.location?.latitude && job?.location?.longitude) {
-        try {
-          const distance = haversine(
-            {latitude: location.latitude, longitude: location.longitude},
-            {
-              latitude: job.location.latitude,
-              longitude: job.location.longitude,
-            },
-            {unit: 'km'},
-          );
-          return distance <= 20;
-        } catch (error) {
-          return true;
-        }
-      } else {
-        return false;
-      }
+
+    if (serviceType && selectedType) {
+      const jobType = job?.type?.toLowerCase().trim();
+      const selectedTypeLower = selectedType.toLowerCase().trim();
+      if (jobType !== selectedTypeLower) return false;
     }
-    return true;
+
+    // Distance check
+    const jobLoc = job?.location;
+    if (!jobLoc?.latitude || !jobLoc?.longitude) return false;
+
+    const position = hasSelectedLocation ? selectedLocation : location;
+    try {
+      const distance = haversine(
+        {latitude: position.latitude, longitude: position.longitude},
+        {latitude: jobLoc.latitude, longitude: jobLoc.longitude},
+        {unit: 'km'},
+      );
+      return distance <= 20;
+    } catch (e) {
+      return false;
+    }
   });
 
   const [showAllJobs, setShowAllJobs] = useState(false);
@@ -309,7 +297,11 @@ const CleanerJobs = () => {
 
   return (
     <View style={styles.safeArea}>
-      <StatusBar backgroundColor="#FFFFFF" barStyle="light-content" />
+      <StatusBar
+        backgroundColor={Colors.gradient1}
+        barStyle="light-content"
+        translucent={true}
+      />
 
       {/* Modern Header */}
       <LinearGradient
@@ -514,18 +506,79 @@ const CleanerJobs = () => {
           </View>
         )}
 
+        {/* Admin Toggle - Only visible to admins */}
+        {isAdmin && (
+          <View style={styles.adminToggleSection}>
+            <View style={styles.adminToggleHeader}>
+              <View style={styles.adminBadge}>
+                <MaterialIcons
+                  name="admin-panel-settings"
+                  size={16}
+                  color="#FFFFFF"
+                />
+                <Text style={styles.adminBadgeText}>Admin Mode</Text>
+              </View>
+            </View>
+
+            <View style={styles.adminToggleCard}>
+              <View style={styles.adminToggleRow}>
+                <View style={styles.adminToggleInfo}>
+                  <MaterialIcons name="public" size={20} color="#4B5563" />
+                  <View style={styles.adminToggleTextContainer}>
+                    <Text style={styles.adminToggleTitle}>View All Jobs</Text>
+                    <Text style={styles.adminToggleDescription}>
+                      {adminViewAllJobs
+                        ? 'Viewing all active jobs'
+                        : 'Viewing jobs by location filter'}
+                    </Text>
+                  </View>
+                </View>
+
+                <TouchableOpacity
+                  onPress={() => setAdminViewAllJobs(prev => !prev)}
+                  style={[
+                    styles.toggleSwitch,
+                    adminViewAllJobs && styles.toggleSwitchActive,
+                  ]}>
+                  <View
+                    style={[
+                      styles.toggleCircle,
+                      adminViewAllJobs && styles.toggleCircleActive,
+                    ]}
+                  />
+                </TouchableOpacity>
+              </View>
+
+              {adminViewAllJobs && (
+                <View style={styles.adminStats}>
+                  <View style={styles.adminStatItem}>
+                    <Text style={styles.adminStatNumber}>
+                      {jobsData.filter(job => job.status === 'active').length}
+                    </Text>
+                    <Text style={styles.adminStatLabel}>Total Active Jobs</Text>
+                  </View>
+                </View>
+              )}
+            </View>
+          </View>
+        )}
+
         {/* Jobs Section */}
         <View style={styles.jobsSection}>
           <View style={styles.jobsHeader}>
-            <Text style={styles.jobsTitle}>
-              {selectedLocation?.name
-                ? `Jobs in ${selectedLocation.name}`
-                : 'Nearby Cleaning Jobs'}
-            </Text>
+            <View style={styles.jobsTitleContainer}>
+              <Text style={styles.jobsTitle}>
+                {isAdmin && adminViewAllJobs
+                  ? 'All Active Jobs'
+                  : selectedLocation?.name
+                  ? `Jobs in ${selectedLocation.name}`
+                  : 'Nearby Cleaning Jobs'}
+              </Text>
+            </View>
             {!noLocation && (
               <Text style={styles.jobsCount}>
-                {displayedJobs.length} job
-                {displayedJobs.length !== 1 ? 's' : ''} available
+                {sortedJobs?.length} job
+                {sortedJobs?.length !== 1 ? 's' : ''}
               </Text>
             )}
           </View>
@@ -535,19 +588,25 @@ const CleanerJobs = () => {
               <ActivityIndicator size="large" color={Colors.gradient1} />
               <Text style={styles.loadingJobsText}>Loading jobs...</Text>
             </View>
-          ) : noLocation ? (
+          ) : noLocation && !isAdmin ? (
             <View style={styles.noLocationContainer}>
               <MaterialIcons
                 name="location-off"
                 size={RFPercentage(8)}
                 color="#CBD5E1"
               />
-              <Text style={styles.noLocationTitle}>Location Required</Text>
+              <Text style={styles.noLocationTitle}>
+                {isAdmin && adminViewAllJobs
+                  ? 'Viewing All Jobs'
+                  : 'Location Required'}
+              </Text>
               <Text style={styles.noLocationText}>
-                {`Please apply a location filter to see nearby\ncleaning jobs`}
+                {isAdmin && adminViewAllJobs
+                  ? 'You are viewing all active jobs'
+                  : 'Please apply a location filter to see nearby\ncleaning jobs'}
               </Text>
             </View>
-          ) : displayedJobs.length === 0 ? (
+          ) : displayedJobs?.length === 0 ? (
             <View style={styles.noJobsContainer}>
               <NotFound
                 text={`No cleaning jobs found\nmatching your filters`}
@@ -679,6 +738,7 @@ const CleanerJobs = () => {
                     {/* Apply Button */}
                     <View style={styles.modalButtonContainer}>
                       <TouchableOpacity
+                        activeOpacity={0.8}
                         style={styles.applyButton}
                         onPress={handlePriceRangeApply}
                         disabled={priceLoading}>
@@ -760,8 +820,8 @@ const CleanerJobs = () => {
                 </View>
 
                 {/* Service Type Results */}
-                {query2.length > 0 ? (
-                  selectedType.length === 0 && (
+                {query2?.length > 0 ? (
+                  selectedType?.length === 0 && (
                     <View style={styles.resultsContainer}>
                       {serviceTypeFilter.length > 0 ? (
                         <FlatList
@@ -776,6 +836,7 @@ const CleanerJobs = () => {
                               onPress={() => {
                                 setQuery2(item);
                                 setSelectedType(item);
+                                Keyboard.dismiss();
                               }}>
                               <MaterialIcons
                                 name="check-circle-outline"
@@ -857,7 +918,7 @@ const CleanerJobs = () => {
                 )}
 
                 {/* Selected Type - Keep this outside so it shows even when no query */}
-                {selectedType.length > 0 && (
+                {selectedType?.length > 0 && (
                   <View style={styles.selectedTypeContainer}>
                     <Text style={styles.selectedTypeLabel}>
                       Selected Service:
@@ -884,12 +945,13 @@ const CleanerJobs = () => {
                 {/* Apply Button */}
                 <View style={[styles.modalButtonContainer]}>
                   <TouchableOpacity
+                    activeOpacity={0.8}
                     style={[
                       styles.applyButton,
-                      query2.length === 0 && styles.buttonDisabled,
+                      query2?.length === 0 && styles.buttonDisabled,
                     ]}
                     onPress={handleServiceTypeApply}
-                    disabled={query2.length === 0 || loactionLoading}>
+                    disabled={query2?.length === 0 || loactionLoading}>
                     <LinearGradient
                       colors={[Colors.gradient1, Colors.gradient2]}
                       style={styles.applyButtonGradient}>
@@ -942,7 +1004,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 40,
+    paddingBottom: 100,
   },
   loadingContainer: {
     flex: 1,
@@ -997,7 +1059,7 @@ const styles = StyleSheet.create({
     // elevation: 6,
   },
   filterGradient: {
-    padding: 16,
+    padding: 12,
     alignItems: 'center',
     borderRadius: 12,
   },
@@ -1333,20 +1395,22 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   applyButton: {
-    borderRadius: 12,
+    borderRadius: 100,
     overflow: 'hidden',
+    width: RFPercentage(20),
+    alignSelf: 'center',
+    height: RFPercentage(5.6),
   },
   buttonDisabled: {
     opacity: 0.6,
   },
   applyButtonGradient: {
-    paddingVertical: 12,
-    paddingHorizontal: 24,
     borderRadius: 12,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
+    flex: 1,
   },
   applyButtonText: {
     fontSize: RFPercentage(1.7),
@@ -1398,6 +1462,119 @@ const styles = StyleSheet.create({
     color: '#374151',
     marginTop: 12,
     marginBottom: 4,
+  },
+  adminToggleSection: {
+    marginHorizontal: 20,
+    marginTop: 16,
+  },
+  adminToggleHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  adminBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#10B981', // Purple color for admin
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 6,
+  },
+  adminBadgeText: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: Fonts.fontMedium,
+    color: '#FFFFFF',
+  },
+  adminToggleCard: {
+    backgroundColor: '#f5f8ffff', // Light purple background
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#F3E8FF',
+    paddingVertical: 12,
+    justifyContent: 'center',
+  },
+  adminToggleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  adminToggleInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+  },
+  adminToggleTextContainer: {
+    flex: 1,
+  },
+  adminToggleTitle: {
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontMedium,
+    color: '#1F2937',
+    marginBottom: 2,
+  },
+  adminToggleDescription: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: Fonts.fontRegular,
+    color: '#6B7280',
+  },
+  toggleSwitch: {
+    width: 50,
+    height: 24,
+    borderRadius: 14,
+    backgroundColor: '#E5E7EB',
+    padding: 2,
+    justifyContent: 'center',
+  },
+  toggleSwitchActive: {
+    backgroundColor: '#10B981',
+  },
+  toggleCircle: {
+    width: 20,
+    height: 20,
+    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    alignSelf: 'flex-start',
+  },
+  toggleCircleActive: {
+    alignSelf: 'flex-end',
+  },
+  adminStats: {
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+  },
+  adminStatItem: {
+    alignItems: 'center',
+  },
+  adminStatNumber: {
+    fontSize: RFPercentage(2),
+    fontFamily: Fonts.semiBold,
+    color: '#10B981',
+    marginBottom: 4,
+  },
+  adminStatLabel: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: Fonts.fontRegular,
+    color: '#6B7280',
+  },
+
+  // Updated styles for jobs header
+  jobsTitleContainer: {
+    flex: 1,
+  },
+  adminIndicator: {
+    color: '#8B5CF6',
+    fontSize: RFPercentage(1.4),
+  },
+  adminSubtitle: {
+    fontSize: RFPercentage(1.2),
+    fontFamily: Fonts.fontRegular,
+    color: '#6B7280',
+    marginTop: 2,
   },
 });
 

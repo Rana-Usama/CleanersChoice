@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(100),
     alignItems: 'center',
     justifyContent: 'center',
-    width: RFPercentage(18),
+    width: RFPercentage(20),
   },
   touchableArea: {
     width: '100%',

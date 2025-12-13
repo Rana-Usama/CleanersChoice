@@ -90,9 +90,11 @@ const Home = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [initializingLocation, setInitializingLocation] = useState(true);
   const [user, setUser] = useState(null);
-  const userFlow = useSelector((state: any) => state.userFlow.userFlow); // 👈 get user flow
-  const [showAuthModal, setShowAuthModal] = useState(false); // 👈 new modal state
+  const userFlow = useSelector((state: any) => state.userFlow.userFlow);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const {location} = useCurrentLocation();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminViewAllServices, setAdminViewAllServices] = useState(false);
 
   const selectedLocation = useSelector(
     (state: any) =>
@@ -228,34 +230,48 @@ const Home = () => {
       if (userDoc.exists) {
         const userData = userDoc.data();
         setUser(userData);
+        setIsAdmin(userData?.admin);
         dispatch(setProfileData(userData));
       }
     } catch (error) {}
   };
 
   const finalFilteredJobs = servicesData.filter(service => {
+    // Price filter
     if (rangeSelector) {
       const price = service?.packages?.[0]?.price || 0;
       if (price < 0 || price > priceRange[0]) {
-        console.log('❌ Filtered by PRICE');
         return false;
       }
     }
 
+    // Name search filter
     if (nameQuery.trim() !== '') {
       if (!service.name?.toLowerCase().includes(nameQuery.toLowerCase())) {
-        console.log('❌ Filtered by NAME');
         return false;
       }
     }
 
+    // Category filter
     if (categorySelection !== '1') {
       if (!service.type?.includes(categorySelection)) {
-        console.log('❌ Filtered by CATEGORY');
         return false;
       }
     }
 
+    // ADMIN LOGIC: If admin and toggle is ON, skip location filtering
+    if (isAdmin && adminViewAllServices) {
+      return true; // Admin sees all services without location restriction
+    }
+
+    // LOCATION FILTERING - Only applies to regular users OR admin with toggle OFF
+
+    // First check: Does the service have location data?
+    if (!service?.location?.latitude || !service?.location?.longitude) {
+      return false; // Service has no location data
+    }
+
+    // Second check: Do we have a location to compare with?
     const activeLocation = selectedLocation?.latitude
       ? {
           latitude: selectedLocation.latitude,
@@ -263,31 +279,27 @@ const Home = () => {
         }
       : location;
 
-    console.log('📍 Active location:', activeLocation);
-    console.log('🏠 Service location:', service.location);
-
-    if (activeLocation && activeLocation.latitude && activeLocation.longitude) {
-      if (service?.location?.latitude && service?.location?.longitude) {
-        const start = {
-          latitude: activeLocation.latitude,
-          longitude: activeLocation.longitude,
-        };
-        const end = {
-          latitude: service.location.latitude,
-          longitude: service.location.longitude,
-        };
-
-        const distance = haversine(start, end, {unit: 'km'});
-        if (distance > 20) {
-          return false; // Outside 20km radius
-        }
-      } else {
-        return false;
-      }
-    } else {
+    // If no active location, don't show any services
+    if (!activeLocation?.latitude || !activeLocation?.longitude) {
+      return false;
     }
-    return true;
+    // Calculate distance if both locations exist
+    const start = {
+      latitude: activeLocation.latitude,
+      longitude: activeLocation.longitude,
+    };
+    const end = {
+      latitude: service.location.latitude,
+      longitude: service.location.longitude,
+    };
+
+    const distance = haversine(start, end, {unit: 'km'});
+    return distance <= 20;
   });
+
+  const adminViewingAllServices = isAdmin && adminViewAllServices;
+  const noLocationForRegularUser =
+    !isAdmin && !selectedLocation?.latitude && !location?.latitude;
 
   if (initializingLocation) {
     return (
@@ -305,7 +317,7 @@ const Home = () => {
               marginTop: 10,
               color: Colors.secondaryText,
               fontFamily: Fonts.fontMedium,
-              fontSize: RFPercentage(1.9),
+              fontSize: RFPercentage(1.6),
             }}>
             Fetching Your Current Location...
           </Text>
@@ -322,7 +334,12 @@ const Home = () => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <>
-      <StatusBar backgroundColor={Colors.background} barStyle={'light-content'} />
+        <StatusBar
+          backgroundColor={Colors.gradient1}
+          barStyle="light-content"
+          translucent={true}
+        />
+
         <LinearGradient
           colors={[Colors.gradient1, Colors.gradient2]}
           style={styles.gradientHeader}>
@@ -403,6 +420,7 @@ const Home = () => {
                   </View>
                 </View>
                 <TouchableOpacity
+                activeOpacity={1}
                   style={{
                     width: RFPercentage(7),
                     height: RFPercentage(7),
@@ -446,7 +464,7 @@ const Home = () => {
                   }}>
                   <MaterialIcons
                     name="filter-list-alt"
-                    size={RFPercentage(3)}
+                    size={RFPercentage(2.8)}
                     color={rangeSelector ? 'white' : 'rgba(164, 173, 200, 1)'}
                   />
                 </TouchableOpacity>
@@ -478,7 +496,7 @@ const Home = () => {
                       ]}>
                       <Icon
                         name={item.icon}
-                        size={30}
+                        size={25}
                         color={
                           categorySelection === item.id
                             ? '#ffffffff'
@@ -514,111 +532,69 @@ const Home = () => {
                 }}
               />
 
-              {/* <Text style={styles.sectionTitle}>Apply filters</Text>
-            <View style={styles.filterWrapper}>
-              <View>
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  onPress={() => {
-                    navigation.navigate('Location', {location: false});
-                  }}
-                  style={[
-                    styles.filterBox,
-                    {
-                      backgroundColor: selectedLocation?.name
-                        ? Colors.gradient2
-                        : 'white',
-                    },
-                  ]}>
-                  <Image
-                    source={
-                      selectedLocation?.name
-                        ? Icons.locationWhite
-                        : Icons.location
-                    }
-                    style={styles.filterImg}
-                    resizeMode="contain"
-                  />
-                  <Text
-                    style={[
-                      styles.filterText,
-                      {
-                        fontFamily: selectedLocation?.name
-                          ? Fonts.semiBold
-                          : Fonts.fontMedium,
-                        color: selectedLocation?.name
-                          ? Colors.background
-                          : Colors.primaryText,
-                      },
-                    ]}>
-                    Location
-                  </Text>
-                </TouchableOpacity>
-                {selectedLocation?.name && (
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    onPress={() => {
-                      dispatch(clearFilterLocation());
-                    }}
-                    style={styles.cross}>
-                    <AntDesign
-                      name="closecircle"
-                      size={RFPercentage(2)}
-                      color={'rgb(206, 211, 219)'}
-                    />
-                  </TouchableOpacity>
-                )}
-              </View>
+              {/* Admin Toggle - Only visible to admins */}
+              {isAdmin && (
+                <View style={styles.adminToggleSection}>
+                  <View style={styles.adminToggleCard}>
+                    <View style={styles.adminToggleHeader}>
+                      <View style={styles.adminBadge}>
+                        <MaterialIcons
+                          name="admin-panel-settings"
+                          size={16}
+                          color="#FFFFFF"
+                        />
+                        <Text style={styles.adminBadgeText}>Admin View</Text>
+                      </View>
+                      <TouchableOpacity
+                        onPress={() => setAdminViewAllServices(prev => !prev)}
+                        style={[
+                          styles.adminToggleSwitch,
+                          adminViewAllServices &&
+                            styles.adminToggleSwitchActive,
+                        ]}>
+                        <View
+                          style={[
+                            styles.adminToggleThumb,
+                            adminViewAllServices &&
+                              styles.adminToggleThumbActive,
+                          ]}
+                        />
+                      </TouchableOpacity>
+                    </View>
 
-              <View>
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  onPress={() => setModalVisible2(true)}
-                  style={[
-                    styles.filterBox,
-                    {
-                      backgroundColor: rangeSelector
-                        ? Colors.gradient2
-                        : 'white',
-                      marginLeft: RFPercentage(2),
-                    },
-                  ]}>
-                  <Image
-                    source={
-                      rangeSelector ? Icons.priceRangeWhite : Icons.priceRange
-                    }
-                    style={styles.filterImg}
-                    resizeMode="contain"
-                  />
-                  <Text
-                    style={[
-                      styles.filterText,
-                      {
-                        fontFamily: rangeSelector
-                          ? Fonts.semiBold
-                          : Fonts.fontMedium,
-                        color: rangeSelector
-                          ? Colors.background
-                          : Colors.primaryText,
-                      },
-                    ]}>
-                    Price Range
-                  </Text>
-                </TouchableOpacity>
-                {rangeSelector && (
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    onPress={() => setRangeSelector(false)}
-                    style={styles.cross}>
-                    <AntDesign
-                      name="closecircle"
-                      size={RFPercentage(2)}
-                      color={'rgb(206, 211, 219)'}
-                    />
-                  </TouchableOpacity>
-                )}
-              </View>
-            </View> */}
+                    <View style={styles.adminToggleInfo}>
+                      <MaterialIcons
+                        name={adminViewAllServices ? 'public' : 'location-on'}
+                        size={20}
+                        color="#4B5563"
+                      />
+                      <View style={styles.adminToggleTextContainer}>
+                        <Text style={styles.adminToggleTitle}>
+                          {adminViewAllServices
+                            ? 'Viewing All Services'
+                            : 'Location-Based View'}
+                        </Text>
+                        <Text style={styles.adminToggleDescription}>
+                          {adminViewAllServices
+                            ? 'Showing all services'
+                            : 'Showing services within 20km radius'}
+                        </Text>
+                      </View>
+                    </View>
+
+                    {adminViewAllServices && (
+                      <View style={styles.adminStats}>
+                        <Text style={styles.adminStatText}>
+                          Total Services: {servicesData.length}
+                        </Text>
+                        <Text style={styles.adminStatSubText}>
+                          Displaying: {finalFilteredJobs.length} services
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                </View>
+              )}
 
               <View
                 style={{
@@ -634,22 +610,43 @@ const Home = () => {
                     fontFamily: Fonts.fontMedium,
                     fontSize: RFPercentage(1.8),
                   }}>
-                  Nearby Services
-                  {selectedLocation?.name ? ':' : ''}
-                </Text>
-                <Text
-                  style={{
-                    color: Colors.secondaryText,
-                    fontFamily: Fonts.fontRegular,
-                    fontSize: RFPercentage(1.5),
-                    marginLeft: RFPercentage(1),
-                  }}>
-                  {selectedLocation && selectedLocation.name
-                    ? selectedLocation.name.length > 30
-                      ? selectedLocation.name.substring(0, 30) + '...'
-                      : selectedLocation.name
+                  {adminViewingAllServices
+                    ? 'All Services'
+                    : noLocationForRegularUser
+                    ? 'Services'
+                    : 'Nearby Services'}
+                  {!adminViewingAllServices && selectedLocation?.name
+                    ? ':'
                     : ''}
                 </Text>
+                {!adminViewingAllServices && selectedLocation?.name && (
+                  <Text
+                    style={{
+                      color: Colors.secondaryText,
+                      fontFamily: Fonts.fontRegular,
+                      fontSize: RFPercentage(1.5),
+                      marginLeft: RFPercentage(1),
+                    }}>
+                    {selectedLocation.name.length > 30
+                      ? selectedLocation.name.substring(0, 30) + '...'
+                      : selectedLocation.name}
+                  </Text>
+                )}
+                {noLocationForRegularUser && !adminViewingAllServices && (
+                  <Text
+                    style={{
+                      color: '#EF4444',
+                      fontFamily: Fonts.fontMedium,
+                      fontSize: RFPercentage(1.3),
+                      marginLeft: RFPercentage(1),
+                      backgroundColor: '#FEF2F2',
+                      paddingHorizontal: 8,
+                      paddingVertical: 2,
+                      borderRadius: 10,
+                    }}>
+                    Location Required
+                  </Text>
+                )}
               </View>
 
               {loading ? (
@@ -829,7 +826,7 @@ const Home = () => {
                                   <Text style={styles.markerText}>$1000</Text>
                                   <Text style={styles.markerText}>$2000+</Text>
                                 </View>
-                              </View>                            
+                              </View>
 
                               {/* Action Buttons */}
                               <View style={styles.actionButtonsContainer}>
@@ -1296,7 +1293,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 10},
     shadowOpacity: 0.1,
     shadowRadius: 20,
-    height: '65%',
+    height: '60%',
   },
   modalHeader: {
     paddingVertical: RFPercentage(2.5),
@@ -1528,6 +1525,98 @@ const styles = StyleSheet.create({
     color: Colors.error,
   },
   applyButtonWrapper: {},
+  adminToggleSection: {
+    marginTop: RFPercentage(2),
+    paddingHorizontal: '5%',
+  },
+  adminToggleCard: {
+    backgroundColor: '#f5f8ffff',
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#F3E8FF',
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+  },
+  adminToggleHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  adminBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#10B981',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 16,
+    gap: 6,
+  },
+  adminBadgeText: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: Fonts.fontMedium,
+    color: '#FFFFFF',
+  },
+  adminToggleSwitch: {
+    width: 50,
+    height: 24,
+    borderRadius: 13,
+    backgroundColor: '#E5E7EB',
+    padding: 2,
+    justifyContent: 'center',
+  },
+  adminToggleSwitchActive: {
+    backgroundColor: '#10B981',
+  },
+  adminToggleThumb: {
+    width: 20,
+    height: 20,
+    borderRadius: 11,
+    backgroundColor: '#FFFFFF',
+    alignSelf: 'flex-start',
+  },
+  adminToggleThumbActive: {
+    alignSelf: 'flex-end',
+  },
+  adminToggleInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  adminToggleTextContainer: {
+    flex: 1,
+  },
+  adminToggleTitle: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontMedium,
+    color: '#1F2937',
+    marginBottom: 2,
+  },
+  adminToggleDescription: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: Fonts.fontRegular,
+    color: '#6B7280',
+  },
+  adminStats: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+  },
+  adminStatText: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: Fonts.fontMedium,
+    color: '#10B981',
+    marginBottom: 4,
+  },
+  adminStatSubText: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: Fonts.fontRegular,
+    color: '#6B7280',
+  },
   applyButton: {
     width: RFPercentage(18),
 
