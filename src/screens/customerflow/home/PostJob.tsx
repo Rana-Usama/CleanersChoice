@@ -239,7 +239,7 @@ const PostJob = ({route}: any) => {
                         Location || userLocation?.name
                           ? Colors.inputTextColor
                           : Colors.placeholderColor,
-                      fontSize: RFPercentage(1.7),
+                      fontSize: RFPercentage(1.8),
                       fontFamily: Fonts.fontRegular,
                     }}>
                     {userLocation?.name
@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
-    paddingBottom: RFPercentage(32),
+    paddingBottom: RFPercentage(20),
   },
   container: {
     width: '90%',
@@ -397,13 +397,13 @@ const styles = StyleSheet.create({
   dateText: {
     color: Colors.inputTextColor,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.8),
     left: 5,
     top: 1.5,
   },
   remarksText: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     color: Colors.primaryText,
   },
 });

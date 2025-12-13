@@ -42,6 +42,8 @@ import * as Progress from 'react-native-progress';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Octicons from 'react-native-vector-icons/Octicons';
+import {tuple} from 'yup';
+import { setFilterLocation, setUserLocation } from '../../../../redux/location/Actions';
 
 const {width} = Dimensions.get('window');
 
@@ -130,8 +132,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
     setSelectedItems(selectedItems);
   };
 
-
-  console.log(userLocation)
+  console.log(userLocation);
 
   useFocusEffect(
     useCallback(() => {
@@ -157,6 +158,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
         setSelectedItems(data?.type || []);
         setLocation(data?.location || '');
         setServiceData(data);
+        dispatch(setUserLocation(data?.location))
       }
     } catch (error) {}
   };
@@ -166,8 +168,17 @@ const ServiceOne: React.FC = ({navigation}: any) => {
     const user = auth().currentUser;
     if (!user) return;
 
-    const finalLocation = userLocation || location; 
-    if (description && finalLocation && available && selectedItems) {
+    const finalLocation = userLocation || serviceData?.location;
+    console.log('userLocation............', userLocation);
+
+    const hasValidLocation =
+      finalLocation &&
+      (finalLocation.name ||
+        finalLocation.address ||
+        finalLocation.coordinates);
+
+    console.log('serviceData............', serviceData);
+    if (description && hasValidLocation && available && selectedItems) {
       try {
         setLoading(true);
         const serviceRef = await firestore()
@@ -220,7 +231,11 @@ const ServiceOne: React.FC = ({navigation}: any) => {
 
   return (
     <View style={styles.safeArea}>
-      <StatusBar backgroundColor={Colors.gradient1} barStyle="light-content" />
+      <StatusBar
+        backgroundColor={Colors.gradient1}
+        barStyle="light-content"
+        translucent={true}
+      />
 
       {/* Modern Header with Gradient */}
       <LinearGradient
@@ -279,7 +294,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                   style={styles.locationCard}>
                   <LinearGradient
                     colors={
-                      location?.name || userLocation?.name
+                      serviceData?.location?.name || userLocation?.name
                         ? ['#EFF6FF', '#e6effcff']
                         : ['#FFFFFF', '#F9FAFB']
                     }
@@ -300,11 +315,11 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                           style={[
                             styles.locationValue,
                             !userLocation?.name &&
-                              !location?.name &&
+                              !serviceData?.location?.name &&
                               styles.placeholderText,
                           ]}>
                           {userLocation?.name ||
-                            location?.name ||
+                            serviceData?.location?.name ||
                             'Tap to add your service location'}
                         </Text>
                       </View>
@@ -313,7 +328,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                           name="right"
                           size={RFPercentage(1.8)}
                           color={
-                            userLocation?.name || location?.name
+                            userLocation?.name || serviceData?.location?.name
                               ? Colors.secondaryText
                               : '#9CA3AF'
                           }
@@ -912,23 +927,22 @@ const styles = StyleSheet.create({
     // elevation: 8,
     width: '60%',
     alignSelf: 'center',
-    
+    height: RFPercentage(5.6),
   },
   buttonDisabled: {
     shadowOpacity: 0,
     elevation: 0,
   },
   buttonGradient: {
-    paddingVertical: 18,
-    paddingHorizontal: 24,
-    borderRadius: 16,
+    borderRadius: 100,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    flex: 1,
   },
   buttonText: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     color: '#FFFFFF',
     marginRight: 10,
   },

@@ -103,7 +103,11 @@ const Profile = ({navigation}: any) => {
 
   return (
     <View style={styles.safeArea}>
-      <StatusBar backgroundColor="#FFFFFF" barStyle="light-content" />
+      <StatusBar
+        backgroundColor={Colors.gradient1}
+        barStyle="light-content"
+        translucent={true}
+      />
 
       <LinearGradient
         colors={[Colors.gradient1, Colors.gradient2]}

@@ -6,7 +6,7 @@ buildscript {
         targetSdkVersion = 35
         ndkVersion = "27.1.12297006"
         kotlinVersion = "2.0.21"
-        googlePlayServicesVersion      = "17.0.0"
+        googlePlayServicesVersion = "17.0.0"
     }
     repositories {
         google()
@@ -21,3 +21,35 @@ buildscript {
 }
 
 apply plugin: "com.facebook.react.rootproject"
+
+// ADD THIS ENTIRE SECTION
+allprojects {
+    repositories {
+        // LOCAL repositories FIRST
+        maven {
+            url "${rootProject.projectDir}/../node_modules/@notifee/react-native/android/libs"
+        }
+        
+        // React Native Android
+        maven {
+            url("${rootProject.projectDir}/../node_modules/react-native/android")
+        }
+        
+        // Other local repos if any
+        
+        // REMOTE repositories
+        google()
+        mavenCentral()
+        maven { url 'https://www.jitpack.io' }
+        
+        // JSC Android
+        maven {
+            url("${rootProject.projectDir}/../node_modules/jsc-android/dist")
+        }
+        
+        // For Firebase (if needed)
+        maven {
+            url "${rootProject.projectDir}/../node_modules/@react-native-firebase/app/android/libs"
+        }
+    }
+}

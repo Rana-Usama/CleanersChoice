@@ -18,7 +18,6 @@ import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, Icons, IMAGES} from '../../../../constants/Themes';
 import HeaderBack from '../../../../components/HeaderBack';
 import ImagePicker from 'react-native-image-crop-picker';
-import GradientButton from '../../../../components/GradientButton';
 import {useFocusEffect} from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
@@ -33,12 +32,9 @@ import {useExitAppOnBack} from '../../../../utils/ExitApp';
 import LinearGradient from 'react-native-linear-gradient';
 import * as Progress from 'react-native-progress';
 import Animated, {FadeInDown, FadeInUp, ZoomIn} from 'react-native-reanimated';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import Entypo from 'react-native-vector-icons/Entypo';
 import moment from 'moment';
 
-const {width} = Dimensions.get('window');
 const items = [
   {
     id: '11',
@@ -98,6 +94,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
     weeklySchedule: '',
     nextAvailable: '',
   });
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useExitAppOnBack();
 
@@ -113,45 +110,6 @@ const Dashboard: React.FC = ({navigation}: any) => {
       setLoading(false);
       setLoading3(false);
     }, 2000);
-  };
-
-  // Upload Image
-  const uploadImg = async () => {
-    try {
-      setLoading(true);
-      const image = await ImagePicker.openPicker({
-        width: 1000,
-        height: 1000,
-        cropping: true,
-      });
-      if (!image) {
-        setLoading(false);
-        return;
-      }
-      const compressedImage = await CompressorImage.compress(image.path, {
-        compressionMethod: 'manual',
-        maxWidth: 1000,
-        quality: 0.8,
-      });
-      const user = auth().currentUser;
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-
-      const fileName = `profile_${user.uid}.jpg`;
-      const reference = storage().ref(`profileImages/profile_${user.uid}.jpg`);
-      await reference.putFile(compressedImage);
-      const downloadURL = await reference.getDownloadURL();
-      await firestore().collection('Users').doc(user.uid).update({
-        profile: downloadURL,
-      });
-      setImg({uri: downloadURL});
-      setProfile(downloadURL);
-    } catch (error) {
-    } finally {
-      setLoading(false);
-    }
   };
 
   useEffect(() => {
@@ -177,6 +135,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
         const userData = userDoc.data();
         setProfile(userData?.profile);
         setName(userData?.name);
+        setIsAdmin(userData?.admin);
         dispatch(setProfileData(userData));
       }
     } catch (error) {}
@@ -297,6 +256,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
   };
 
   const [profileCompletion, setProfileCompletionValue] = useState('50');
+  console.log("service..........", service)
 
   useEffect(() => {
     if (service) {
@@ -353,7 +313,11 @@ const Dashboard: React.FC = ({navigation}: any) => {
   return (
     <View style={styles.safeArea}>
       {/* Modern Header */}
-      <StatusBar translucent={true} backgroundColor={Colors.background} barStyle={'light-content'} />
+      <StatusBar
+        backgroundColor={Colors.gradient1}
+        barStyle="light-content"
+        translucent={true}
+      />
 
       <LinearGradient
         colors={[Colors.gradient1, Colors.gradient2]}
@@ -383,32 +347,41 @@ const Dashboard: React.FC = ({navigation}: any) => {
             colors={['#FFFFFF', '#F8FAFF']}
             style={styles.profileGradient}>
             <View style={styles.profileSection}>
-              <TouchableOpacity onPress={uploadImg} activeOpacity={0.7}>
+              <TouchableOpacity activeOpacity={1}>
                 <View style={styles.avatarContainer}>
                   {loading ? (
                     <ActivityIndicator size="large" color="#667eea" />
                   ) : (
                     <>
                       <Image
-                        source={
-                          img
-                            ? {uri: img?.uri}
-                            : profile
-                            ? {uri: profile}
-                            : IMAGES.defaultPic
-                        }
+                        source={profile ? {uri: profile} : IMAGES.defaultPic}
                         style={styles.avatar}
                       />
-                      <View style={styles.cameraBadge}>
-                        <MaterialIcons name="edit" size={14} color="#FFFFFF" />
-                      </View>
                     </>
                   )}
                 </View>
               </TouchableOpacity>
 
               <View style={styles.profileInfo}>
-                <Text style={styles.name}>{name}</Text>
+                <View style={styles.nameContainer}>
+                  <Text style={styles.name} numberOfLines={1}>
+                    {name && name?.length > 10
+                      ? `${name.substring(0, 10)}...`
+                      : name}
+                  </Text>
+                  {isAdmin && (
+                    <View style={styles.adminBadge}>
+                      <MaterialIcons
+                        name="security"
+                        size={14}
+                        color="#FFFFFF"
+                      />
+                      <Text style={styles.adminText}>Admin</Text>
+                    </View>
+                  )}
+                </View>
+
+                {/* Rest of the profile info... */}
                 <View style={styles.availabilityStats}>
                   <View style={styles.availabilityItem}>
                     <View>
@@ -424,11 +397,9 @@ const Dashboard: React.FC = ({navigation}: any) => {
                   <View style={styles.availabilityItem}>
                     <View>
                       <Text style={styles.availabilityValue} numberOfLines={1}>
-                         {service?.packages?.length || 0}
+                        {service?.packages?.length || 0}
                       </Text>
-                      <Text style={styles.availabilityLabel}>
-                       Packages
-                      </Text>
+                      <Text style={styles.availabilityLabel}>Packages</Text>
                     </View>
                   </View>
                 </View>
@@ -445,7 +416,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
                 progress={parseInt(profileCompletion) / 100}
                 width={null}
                 height={8}
-                color={'rgba(79, 189, 108, 1)'}
+                color={Colors.gradient1}
                 unfilledColor="#E5E7EB"
                 borderWidth={0}
                 borderRadius={20}
@@ -466,7 +437,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
                 {/* Availability Overview Card */}
                 <View style={styles.overviewCard}>
                   <LinearGradient
-                    colors={[Colors.gradient1, Colors.gradient2]}
+                    colors={['#edf1f5ff', '#cdd1daff']}
                     style={styles.overviewGradient}>
                     <View style={styles.availabilityOverview}>
                       <View style={styles.availabilityOverviewItem}>
@@ -499,7 +470,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
                       <MaterialIcons
                         name="schedule"
                         size={20}
-                        color="#FFFFFF"
+                        color="rgba(165, 169, 176, 1)"
                       />
                       <Text style={styles.nextAvailableText}>
                         Next available: {availabilitySummary.nextAvailable}
@@ -515,7 +486,11 @@ const Dashboard: React.FC = ({navigation}: any) => {
                     <TouchableOpacity
                       style={styles.editButton}
                       onPress={() => navigation.navigate('ServiceOne')}>
-                      <MaterialIcons name="edit-document" color={Colors.gradient1} size={RFPercentage(1.6)} />
+                      <MaterialIcons
+                        name="edit-document"
+                        color={Colors.gradient1}
+                        size={RFPercentage(1.6)}
+                      />
                     </TouchableOpacity>
                   </View>
                   <Text style={styles.description}>
@@ -563,6 +538,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
                   </View>
                   {service?.type?.length > 4 && (
                     <TouchableOpacity
+                      activeOpacity={0.6}
                       onPress={
                         visibleItems < service?.type?.length
                           ? handleShowMore
@@ -591,6 +567,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
                   <View style={[styles.cardHeader, {paddingHorizontal: 20}]}>
                     <Text style={styles.cardTitle}>Starting Packages</Text>
                     <TouchableOpacity
+                      activeOpacity={0.6}
                       onPress={() => navigation.navigate('ServiceThree')}>
                       <Text style={styles.seeAll}>Edit All</Text>
                     </TouchableOpacity>
@@ -612,7 +589,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
                               Package {item.id}
                             </Text>
                             <View style={styles.priceTag}>
-                              <Text style={styles.priceText}>
+                              <Text style={styles.priceText} numberOfLines={1}>
                                 ${item.price}
                               </Text>
                             </View>
@@ -623,6 +600,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
                             {item.details}
                           </Text>
                           <TouchableOpacity
+                            activeOpacity={0.6}
                             style={styles.selectButton}
                             onPress={() => navigation.navigate('ServiceThree')}>
                             <Text style={styles.selectButtonText}>
@@ -644,6 +622,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
                   <View style={styles.cardHeader}>
                     <Text style={styles.cardTitle}>Weekly Availability</Text>
                     <TouchableOpacity
+                      activeOpacity={0.6}
                       onPress={() => navigation.navigate('Availability')}
                       style={styles.availabilityButton}>
                       <Text style={styles.availabilityButtonText}>Edit</Text>
@@ -734,6 +713,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
                   </Text>
 
                   <TouchableOpacity
+                    activeOpacity={0.6}
                     style={styles.ctaButton}
                     onPress={handleNext}
                     disabled={loading2}>
@@ -863,7 +843,7 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 8,
     // backgroundColor:"red",
-    justifyContent:'center'
+    justifyContent: 'center',
   },
   availabilityIconContainer: {
     width: 32,
@@ -908,7 +888,7 @@ const styles = StyleSheet.create({
   progressPercent: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.6),
-    color: 'rgba(79, 189, 108, 1)',
+    color: Colors.gradient1,
   },
   progressBar: {
     marginTop: 4,
@@ -928,6 +908,8 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 5},
     shadowOpacity: 0.2,
     shadowRadius: 15,
+      borderWidth: 1,
+    borderColor:"#F0F7FF"
     // elevation: 8,
   },
   overviewGradient: {
@@ -946,14 +928,14 @@ const styles = StyleSheet.create({
   overviewNumber: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(2.4),
-    color: '#FFFFFF',
+    color: Colors.secondaryText,
     marginTop: 8,
     marginBottom: 4,
   },
   overviewSchedule: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.8),
-    color: '#FFFFFF',
+    color: Colors.secondaryText,
     marginTop: 8,
     marginBottom: 4,
     textAlign: 'center',
@@ -961,7 +943,7 @@ const styles = StyleSheet.create({
   overviewLabel: {
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.4),
-    color: 'rgba(255,255,255,0.9)',
+    color: 'rgba(165, 169, 176, 1)',
     textAlign: 'center',
   },
   overviewDividerVertical: {
@@ -974,7 +956,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(255, 255, 255, 0.48)',
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 12,
@@ -983,7 +965,7 @@ const styles = StyleSheet.create({
   nextAvailableText: {
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.4),
-    color: '#FFFFFF',
+    color: 'rgba(165, 169, 176, 1)',
     marginLeft: 8,
   },
   sectionCard: {
@@ -996,6 +978,8 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 10,
+      borderWidth: 1,
+    borderColor:"#F0F7FF"
     // elevation: 3,
   },
   cardHeader: {
@@ -1048,6 +1032,8 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 6,
+      borderWidth: 1,
+    borderColor:"#F0F7FF"
     // elevation: 2,
   },
   serviceGradient: {
@@ -1062,8 +1048,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
-    borderWidth:1,
-    borderColor:Colors.inputFieldColor
+    borderWidth: 1,
+    borderColor: Colors.inputFieldColor,
   },
   serviceIcon: {
     width: 25,
@@ -1109,6 +1095,8 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     // elevation: 4,
     height: RFPercentage(30),
+      borderWidth: 1,
+    borderColor:"#F0F7FF"
   },
   packageGradient: {
     padding: 16,
@@ -1132,6 +1120,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 12,
     marginLeft: 8,
+    maxWidth:RFPercentage(8)
   },
   priceText: {
     fontFamily: Fonts.semiBold,
@@ -1283,7 +1272,9 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 10},
     shadowOpacity: 0.1,
     shadowRadius: 20,
-    // elevation: 2,
+
+    borderWidth: 1,
+    borderColor:"#F0F7FF"
   },
   emptyStateIcon: {
     width: 100,
@@ -1319,10 +1310,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: Colors.gradient1,
-    paddingVertical: 16,
     paddingHorizontal: 32,
     borderRadius: 100,
     width: '65%',
+    height:RFPercentage(5.6)
   },
   ctaButtonText: {
     fontFamily: Fonts.semiBold,
@@ -1334,5 +1325,29 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     tintColor: '#FFFFFF',
+  },
+
+  nameContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    flexWrap: 'wrap',
+  },
+
+  adminBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#10B981', // Green color for admin
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginLeft: 8,
+    gap: 4,
+  },
+
+  adminText: {
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.2),
+    color: '#FFFFFF',
   },
 });

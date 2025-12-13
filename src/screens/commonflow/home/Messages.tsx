@@ -237,7 +237,11 @@ const Messages = ({navigation}: any) => {
 
   return (
     <View style={styles.safeArea}>
-      <StatusBar backgroundColor="#FFFFFF" barStyle="light-content" />
+      <StatusBar
+        backgroundColor={Colors.gradient1}
+        barStyle="light-content"
+        translucent={true}
+      />
 
       {/* Modern Header */}
       <LinearGradient
@@ -456,6 +460,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    right: 30,
+    top: 5,
   },
   unreadBadgeText: {
     color: Colors.gradient1,
@@ -507,7 +513,7 @@ const styles = StyleSheet.create({
     padding: 12,
     alignItems: 'center',
     borderRadius: 12,
-    paddingHorizontal:16
+    paddingHorizontal: 16,
   },
   filterIconContainer: {
     width: 40,

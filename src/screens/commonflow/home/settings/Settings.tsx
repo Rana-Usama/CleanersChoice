@@ -28,6 +28,7 @@ const Settings = ({navigation}: any) => {
   const [role, setuserRole] = useState('');
   const [loading, setLoading] = useState(false);
   useExitAppOnBack();
+  const [subscriptionId, setSubscriptionId] = useState(null);
 
   // Log out function
   const logOut = async () => {
@@ -67,6 +68,7 @@ const Settings = ({navigation}: any) => {
       const userDoc = await firestore().collection('Users').doc(user.uid).get();
       if (userDoc.exists) {
         const userData = userDoc.data();
+        setSubscriptionId(userData?.subscriptionId);
         setuserRole(userData?.role);
       }
     } catch (error) {}
@@ -74,20 +76,16 @@ const Settings = ({navigation}: any) => {
   userRole();
 
   const deleteAccount = async () => {
-    console.log('🧹 [deleteAccount] Started');
     setLoading(true);
     try {
       const user = auth().currentUser;
-      console.log('👤 Current user:', user ? user.uid : 'No user found');
       if (!user) {
-        console.log('❌ No user, aborting delete process');
         setLoading(false);
         return;
       }
 
       const userId = user.uid;
       const email = user.email;
-      console.log('email.......', email);
       const password = await AsyncStorage.getItem('password');
       if (!password) {
         showToast({
@@ -110,33 +108,26 @@ const Settings = ({navigation}: any) => {
       const jobBatch = firestore().batch();
       jobsSnapshot.forEach(doc => jobBatch.delete(doc.ref));
       if (jobsSnapshot.size > 0) {
-        console.log('🧾 Committing job deletions...');
         await jobBatch.commit();
-        console.log('✅ Jobs deleted');
       } else {
         console.log('ℹ️ No jobs to delete');
       }
 
       // Delete Chats data
-      console.log('💬 Fetching related Chats...');
       const chatSnapshot = await firestore()
         .collection('Chats')
         .where('participants', 'array-contains', userId)
         .get();
-      console.log('📄 Chats found:', chatSnapshot.size);
 
       const chatBatch = firestore().batch();
       chatSnapshot.forEach(doc => chatBatch.delete(doc.ref));
       if (chatSnapshot.size > 0) {
-        console.log('🧾 Committing chat deletions...');
         await chatBatch.commit();
-        console.log('✅ Chats deleted');
       } else {
         console.log('ℹ️ No chats to delete');
       }
 
       // Delete CleanerServices doc (if exists)
-      console.log('🧹 Deleting CleanerServices doc...');
       await firestore()
         .collection('CleanerServices')
         .doc(userId)
@@ -144,17 +135,20 @@ const Settings = ({navigation}: any) => {
         .catch(e => {
           console.log('⚠️ CleanerServices delete error (ignored):', e.message);
         });
-      console.log('✅ CleanerServices doc deleted or not found');
-
       // Delete Firebase user
-      console.log('🧨 Deleting Firebase Auth user...');
       await user.delete();
-      console.log('✅ Firebase user deleted');
-
       // Clear AsyncStorage
-      console.log('🗑️ Clearing AsyncStorage...');
       await AsyncStorage.multiRemove(['email', 'password', 'role']);
-      console.log('✅ AsyncStorage cleared');
+      if (subscriptionId) {
+        await fetch(
+          'https://cleaners-choice-server.vercel.app/api/cancel-subscription',
+          {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({subscriptionId}),
+          },
+        );
+      }
 
       // Show success toast
       showToast({
@@ -168,7 +162,6 @@ const Settings = ({navigation}: any) => {
       setModalVisible2(false);
 
       setTimeout(() => {
-        console.log('🔄 Navigating to OnBoarding...');
         navigation.reset({
           index: 0,
           routes: [{name: 'OnBoarding'}],
@@ -196,7 +189,7 @@ const Settings = ({navigation}: any) => {
 
   return (
     <View style={styles.safeArea}>
-      <StatusBar backgroundColor="#FFFFFF" barStyle="light-content" />
+              <StatusBar backgroundColor={Colors.gradient1} barStyle="light-content"  translucent={true}/>
 
       <LinearGradient
         colors={[Colors.gradient1, Colors.gradient2]}

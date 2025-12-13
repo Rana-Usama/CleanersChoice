@@ -127,6 +127,7 @@ const SignUp: React.FC = ({navigation}: any) => {
         profile: profileUrl || null,
         fcmToken: fcmToken || null,
         createdAt: new Date(),
+        admin: false,
         role: userFlow?.userFlow,
         ...(userFlow?.userFlow === 'Cleaner' && {
           subscription: false,
