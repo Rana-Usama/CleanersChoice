@@ -223,17 +223,24 @@ const Home = () => {
   }, []);
 
   const fetchUserData = async () => {
-    const user = auth().currentUser;
-    if (!user) return;
-    try {
-      const userDoc = await firestore().collection('Users').doc(user.uid).get();
-      if (userDoc.exists) {
-        const userData = userDoc.data();
-        setUser(userData);
-        setIsAdmin(userData?.admin);
-        dispatch(setProfileData(userData));
-      }
-    } catch (error) {}
+    if (userFlow === 'Guest') {
+      return;
+    } else {
+      const user = auth().currentUser;
+      if (!user) return;
+      try {
+        const userDoc = await firestore()
+          .collection('Users')
+          .doc(user.uid)
+          .get();
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          setUser(userData);
+          setIsAdmin(userData?.admin);
+          dispatch(setProfileData(userData));
+        }
+      } catch (error) {}
+    }
   };
 
   const finalFilteredJobs = servicesData.filter(service => {
@@ -420,7 +427,7 @@ const Home = () => {
                   </View>
                 </View>
                 <TouchableOpacity
-                activeOpacity={1}
+                  activeOpacity={1}
                   style={{
                     width: RFPercentage(7),
                     height: RFPercentage(7),

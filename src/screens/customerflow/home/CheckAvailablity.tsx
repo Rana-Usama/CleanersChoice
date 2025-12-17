@@ -5,6 +5,7 @@ import {
   Text,
   View,
   Image,
+  StatusBar,
 } from 'react-native';
 import React from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -18,6 +19,8 @@ const CheckAvailability = ({route}: any) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+            <StatusBar backgroundColor={Colors.background} barStyle="dark-content" />
+      
       <HeaderBack
         title="Availability"
         textStyle={styles.headerText}

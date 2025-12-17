@@ -3,93 +3,117 @@ $RNFirebaseAsStaticFramework = true
 
 # Ensure correct Node binary
 ENV['NODE_BINARY'] = '/usr/local/bin/node'
+# DISABLE New Architecture completely - this is required for react-native-maps 1.25.x
 ENV['RCT_NEW_ARCH_ENABLED'] = '0'
 
-
-# Resolve react_native_pods.rb with node to allow for hoisting
-require Pod::Executable.execute_command('node', ['-p',
-  'require.resolve(
-    "react-native/scripts/react_native_pods.rb",
-    {paths: [process.argv[1]]},
-  )', __dir__]).strip
+# Resolve react_native_pods.rb with node (hoisting-safe)
+require Pod::Executable.execute_command(
+  'node',
+  ['-p', 'require.resolve("react-native/scripts/react_native_pods.rb", {paths: [process.argv[1]]})', __dir__]
+).strip
 
 # iOS minimum deployment target
 platform :ios, '15.1'
 
+# Use static frameworks for Firebase compatibility
 use_frameworks! :linkage => :static
 prepare_react_native_project!
 
 target 'CleanersChoice' do
   config = use_native_modules!
 
-  # React Native core setup
+  # React Native core - DISABLE Fabric completely
   use_react_native!(
     :path => config[:reactNativePath],
     :app_path => "#{Pod::Config.instance.installation_root}/..",
-    :hermes_enabled => false,
-    :fabric_enabled => false ,
-    :new_arch_enabled => false
+    :hermes_enabled => true,
+    :fabric_enabled => false,      # MUST be false for Old Architecture
+    :new_arch_enabled => false     # MUST be false for Old Architecture
   )
 
-  $RNGetRandomValues_USE_TURBOMODULES = false
-
-  # 🔔 Notifee (Local Notifications)
+  # 🔔 Notifee
   pod 'RNNotifee', :path => '../node_modules/@notifee/react-native'
 
-  # 💳 Stripe SDK
+  # 💳 Stripe
   pod 'Stripe', '~> 24.20.0'
   pod 'StripePayments', '~> 24.20.0'
   pod 'StripePaymentsUI', '~> 24.20.0'
   pod 'StripeApplePay', '~> 24.20.0'
 
-# 🗺️ React Native Maps (Google)
-rn_maps_path = '../node_modules/react-native-maps'
-pod 'react-native-maps', :path => rn_maps_path
+  # 🗺️ React Native Maps + Google Maps
+  rn_maps_path = '../node_modules/react-native-maps'
+  pod 'react-native-maps', :path => rn_maps_path
+  pod 'GoogleMaps', '~> 8.4'
+  pod 'Google-Maps-iOS-Utils', '~> 5.0'
 
-pod 'GoogleMaps', '~> 8.4'
-pod 'Google-Maps-iOS-Utils', '~> 5.0'
-
-
-  # 🧩 gRPC dependencies (for Firebase Firestore)
+  # 🔥 Firebase / gRPC support
   pod 'glog', :podspec => '../node_modules/react-native/third-party-podspecs/glog.podspec'
-  pod 'gRPC-C++'  # Let Firebase resolve the correct version
-  pod 'gRPC-Core' # Let Firebase resolve the correct version
+
+  # REMOVE React-Fabric pod - it's causing conflicts with Old Architecture
+  # DO NOT add: pod 'React-Fabric', :path => '../node_modules/react-native/ReactCommon'
 
   post_install do |installer|
-    # React Native's default post install
     react_native_post_install(
       installer,
       config[:reactNativePath],
       mac_catalyst_enabled: false
     )
 
+    # Fix for M1 Macs
+    installer.pods_project.build_configurations.each do |config|
+      config.build_settings["EXCLUDED_ARCHS[sdk=iphonesimulator*]"] = "arm64"
+    end
+
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
-        # ✅ Ensure consistent deployment target
+        # iOS target consistency
         config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.1'
-
-        # ✅ Fix non-modular include error
-        config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
-
-        # ✅ Fix gRPC missing UPB headers
-        if target.name == 'gRPC-C++'
-          config.build_settings['HEADER_SEARCH_PATHS'] ||= ['$(inherited)']
-          config.build_settings['HEADER_SEARCH_PATHS'] << '$(PODS_ROOT)/gRPC-C++/third_party/upb'
-        end
-
-        # ✅ Avoid simulator arch issues
+        
+        # Fix Xcode 15 warnings
+        config.build_settings['GCC_TREAT_WARNINGS_AS_ERRORS'] = 'NO'
+        config.build_settings['CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS'] = 'NO'
+        config.build_settings['CLANG_WARN_DEPRECATED_OBJC_ISA_USAGE'] = 'NO'
+        
+        # Fix for M1 Simulators
         config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
-        config.build_settings['ONLY_ACTIVE_ARCH'] = 'YES'
-      end
-
-      # ✅ Clean up unused privacy bundles
-      next unless target.respond_to?(:resources_build_phase)
-      ['leveldb-library', 'boost'].each do |lib|
-        next unless target.name == lib
-        target.resources_build_phase.files.each do |file|
-          if file.display_name.downcase.include?('privacy.bundle')
-            target.resources_build_phase.remove_file_reference(file.file_ref)
-          end
+        
+        # Fix non-modular includes
+        config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
+        
+        # REMOVE all React-Fabric header search paths
+        # Keep only standard paths
+        
+        # Specific settings for react-native-maps - KEEP Architecture DISABLED
+        if target.name == 'react-native-maps'
+          config.build_settings['CLANG_ENABLE_MODULES'] = 'YES'
+          config.build_settings['DEFINES_MODULE'] = 'YES'
+          config.build_settings['GCC_WARN_INHIBIT_ALL_WARNINGS'] = 'YES'
+          
+          # CRITICAL: Keep Fabric DISABLED for react-native-maps 1.25.x
+          config.build_settings['RCT_NEW_ARCH_ENABLED'] = '0'
+          config.build_settings['FBJSC_USE_HERMES'] = '1'
+          
+          # Add Folly definitions to prevent build errors
+          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
+          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'FOLLY_NO_CONFIG=1'
+          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'FOLLY_MOBILE=1'
+          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'FOLLY_USE_LIBCPP=1'
+          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'FOLLY_CFG_NO_COROUTINES=1'
+          
+          # Remove React-Fabric framework search paths
+          # DO NOT add: config.build_settings['FRAMEWORK_SEARCH_PATHS'] << '"${PODS_ROOT}/React-Fabric"'
+          
+          # Standard header paths only
+          config.build_settings['HEADER_SEARCH_PATHS'] ||= ['$(inherited)']
+          config.build_settings['HEADER_SEARCH_PATHS'] << '"${PODS_ROOT}/DoubleConversion"'
+          config.build_settings['HEADER_SEARCH_PATHS'] << '"$(PODS_TARGET_SRCROOT)/ReactCommon"'
+        end
+        
+        # Fix for other problematic libraries
+        if target.name.start_with?('RNFB') || target.name == 'RNNotifee'
+          config.build_settings['DEFINES_MODULE'] = 'YES'
+          config.build_settings['CLANG_ENABLE_MODULES'] = 'YES'
+          config.build_settings['RCT_NEW_ARCH_ENABLED'] = '0'
         end
       end
     end

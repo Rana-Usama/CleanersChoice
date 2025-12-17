@@ -543,7 +543,7 @@ const ServiceThree: React.FC = ({navigation}: any) => {
 
                         {/* Package Status */}
                         <View style={styles.packageStatus}>
-                          {pkg.details && pkg.price ? (
+                          {pkg?.details && pkg.price ? (
                             <View style={styles.statusComplete}>
                               <AntDesign
                                 name="checkcircle"
@@ -570,7 +570,7 @@ const ServiceThree: React.FC = ({navigation}: any) => {
               ))}
 
               {/* Add Package Button */}
-              {packages.length < MAX_PACKAGES && (
+              {packages?.length < MAX_PACKAGES && (
                 <Animated.View entering={FadeInUp.delay(300)}>
                   <TouchableOpacity
                     onPress={addPackage}
@@ -587,7 +587,7 @@ const ServiceThree: React.FC = ({navigation}: any) => {
                           />
                         </View>
                         <Text style={styles.addPackageText}>
-                          Add Package {packages.length + 1}
+                          Add Package {packages?.length + 1}
                         </Text>
                       </View>
                     </LinearGradient>
@@ -850,6 +850,8 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
+    borderWidth:1,
+    borderColor:"#e5ecfcff"
     // elevation: 3,
   },
   packageHeader: {

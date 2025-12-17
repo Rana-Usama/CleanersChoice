@@ -143,6 +143,7 @@
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				4B1311B04B997DFC7DBEB2E7 /* [CP] Copy Pods Resources */,
 				39348E3AAF8274694FB80ED1 /* [CP-User] [RNFB] Core Configuration */,
+				D9CF6F6EB443B2F3564F6380 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -282,6 +283,27 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-CleanersChoice/Pods-CleanersChoice-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		D9CF6F6EB443B2F3564F6380 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-CleanersChoice/Pods-CleanersChoice-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-CleanersChoice/Pods-CleanersChoice-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-CleanersChoice/Pods-CleanersChoice-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -305,7 +327,7 @@
 				CODE_SIGN_ENTITLEMENTS = CleanersChoice/CleanersChoice.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = XR28Q255F5;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = CleanersChoice/Info.plist;
@@ -314,7 +336,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 18.0;
+				MARKETING_VERSION = 17.1.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -338,7 +360,7 @@
 				CODE_SIGN_ENTITLEMENTS = CleanersChoice/CleanersChoice.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = XR28Q255F5;
 				INFOPLIST_FILE = CleanersChoice/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
@@ -346,7 +368,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 18.0;
+				MARKETING_VERSION = 17.1.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -445,7 +467,7 @@
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
-				USE_HERMES = false;
+				USE_HERMES = true;
 			};
 			name = Debug;
 		};
@@ -525,7 +547,7 @@
 				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
-				USE_HERMES = false;
+				USE_HERMES = true;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;

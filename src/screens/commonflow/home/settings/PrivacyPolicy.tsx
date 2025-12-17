@@ -5,6 +5,7 @@ import {
   View,
   FlatList,
   ScrollView,
+  StatusBar,
 } from 'react-native';
 import React from 'react';
 import {Colors, Fonts} from '../../../../constants/Themes';
@@ -76,6 +77,8 @@ We will let You know via email and/or a prominent notice on Our Service, prior t
 const Privacy: React.FC = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
+            <StatusBar backgroundColor={Colors.background} barStyle="dark-content" />
+      
       <HeaderBack
         title={`Privacy Policy`}
         textStyle={{fontSize: RFPercentage(2)}}

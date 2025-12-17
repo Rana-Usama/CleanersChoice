@@ -11,6 +11,7 @@ import {
   Modal,
   Platform,
   TouchableWithoutFeedback,
+  StatusBar,
 } from 'react-native';
 import React, {useState, useRef, useEffect} from 'react';
 import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
@@ -195,6 +196,8 @@ const ServiceDetails: React.FC = ({route}: any) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <StatusBar backgroundColor={Colors.background} barStyle="dark-content" />
+
       {/* Header */}
       <HeaderBack
         title={'Service Details'}

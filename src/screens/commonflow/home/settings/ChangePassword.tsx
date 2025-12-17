@@ -5,6 +5,7 @@ import {
   View,
   ScrollView,
   TouchableWithoutFeedback,
+  StatusBar,
 } from 'react-native';
 import React, {useState} from 'react';
 import {Colors, Fonts} from '../../../../constants/Themes';
@@ -73,6 +74,8 @@ const ChangePasswordV2 = ({navigation}: any) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+            < StatusBar backgroundColor={Colors.background} barStyle="dark-content" />
+      
       <HeaderBack
         title={`Change Password`}
         textStyle={{fontSize: RFPercentage(2)}}

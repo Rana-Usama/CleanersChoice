@@ -172,7 +172,7 @@ const Chat = ({navigation, route}: any) => {
         <StatusBar
           barStyle={'dark-content'}
           translucent
-          backgroundColor="transparent"
+          backgroundColor={Colors.background}
         />
         <View style={styles.profileContainer}>
           <View style={styles.inner}>

@@ -174,14 +174,15 @@ const PostJob = ({route}: any) => {
 
   return (
     <>
+      <StatusBar backgroundColor={Colors.background} barStyle="dark-content" />
+
       <View style={{backgroundColor: 'white'}}>
         <HeaderBack
           title="Post Job"
           textStyle={{fontSize: RFPercentage(2)}}
           left={true}
           style={{
-            height:
-              Platform.OS === 'ios' ? RFPercentage(13) : RFPercentage(13),
+            height: Platform.OS === 'ios' ? RFPercentage(13) : RFPercentage(13),
           }}
         />
       </View>
@@ -351,7 +352,7 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
-    paddingBottom: RFPercentage(20),
+    paddingBottom: RFPercentage(24),
   },
   container: {
     width: '90%',

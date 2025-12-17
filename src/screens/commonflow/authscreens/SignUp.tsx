@@ -447,6 +447,7 @@ const styles = StyleSheet.create({
   },
   container: {
     backgroundColor: Colors.background,
+    marginTop: Platform.OS === 'android' ? RFPercentage(2) : RFPercentage(6),
   },
   errorContainer: {
     width: '90%',
