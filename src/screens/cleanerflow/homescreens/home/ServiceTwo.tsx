@@ -346,10 +346,13 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
         <View style={styles.progressSection}>
           <View style={styles.progressHeader}>
             <Text style={styles.progressTitle}>Step 2 of 3</Text>
-            <Text style={styles.progressPercent}>66%</Text>
+            <Text style={styles.progressPercent}>{`${(
+              (uploadedCount / 6) *
+              100
+            ).toFixed(0)}%`}</Text>
           </View>
           <Progress.Bar
-            progress={0.66}
+            progress={(uploadedCount / 6) * 100}
             width={width - 80}
             height={6}
             color="#FFFFFF"
@@ -864,7 +867,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    flex:1
+    flex: 1,
   },
   buttonText: {
     fontFamily: Fonts.semiBold,

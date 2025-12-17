@@ -691,9 +691,9 @@ const styles = StyleSheet.create({
   },
   postJobButton: {
     marginTop: 24,
-    borderRadius: 12,
+    borderRadius: 100,
     overflow: 'hidden',
-    width: '100%',
+    width: '55%',
   },
   postJobGradient: {
     paddingVertical: 16,

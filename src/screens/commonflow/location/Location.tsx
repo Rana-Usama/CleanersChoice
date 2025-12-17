@@ -8,6 +8,7 @@ import {
   TextInput,
   FlatList,
   Keyboard,
+  StatusBar,
 } from 'react-native';
 import MapView, {Marker} from 'react-native-maps';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -149,6 +150,8 @@ export default function Location({navigation, route}: any) {
 
   return (
     <View style={styles.container}>
+            <StatusBar backgroundColor={Colors.background} barStyle="dark-content" />
+      
       <View style={styles.topRow}>
         <TouchableOpacity
           activeOpacity={0.8}

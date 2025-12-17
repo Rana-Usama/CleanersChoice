@@ -11,6 +11,7 @@ import {
   Keyboard,
   Platform,
   ActivityIndicator,
+  StatusBar,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {Colors, Icons, Fonts, IMAGES} from '../../../../constants/Themes';
@@ -172,6 +173,8 @@ const EditProfile = ({navigation}: any) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <StatusBar backgroundColor={Colors.background} barStyle="dark-content" />
+
       <HeaderBack
         title="Edit Your Profile"
         textStyle={styles.headerText}
@@ -239,7 +242,7 @@ const EditProfile = ({navigation}: any) => {
                 <View style={styles.inputContainer}>
                   <Text style={styles.label}>Phone Number</Text>
                   <InputField
-                    placeholder={userData?.phone || "Add Your Phone Number"}
+                    placeholder={userData?.phone || 'Add Your Phone Number'}
                     value={phone}
                     onChangeText={text => {
                       const formatted = formatPhoneNumber(text);

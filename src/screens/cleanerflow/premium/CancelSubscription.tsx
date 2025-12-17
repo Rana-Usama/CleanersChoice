@@ -7,6 +7,7 @@ import {
   FlatList,
   TouchableWithoutFeedback,
   TouchableOpacity,
+  StatusBar,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -114,6 +115,8 @@ const CancelSubscription = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+            <StatusBar backgroundColor={Colors.background} barStyle="dark-content" />
+      
       {/* Header */}
       <HeaderComponent />
 

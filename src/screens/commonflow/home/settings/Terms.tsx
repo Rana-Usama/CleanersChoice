@@ -5,6 +5,7 @@ import {
   View,
   FlatList,
   ScrollView,
+  StatusBar,
 } from 'react-native';
 import React from 'react';
 import {Colors, Fonts} from '../../../../constants/Themes';
@@ -46,6 +47,8 @@ Ohio, United States
 const Terms: React.FC = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
+            <StatusBar backgroundColor={Colors.background} barStyle="dark-content" />
+      
       <HeaderBack title={`T&C’s`} textStyle={styles.headerText} left={true} />
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
