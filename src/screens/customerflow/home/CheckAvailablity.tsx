@@ -15,12 +15,14 @@ import CheckAvailable from '../../../components/CheckAvailable';
 
 const CheckAvailability = ({route}: any) => {
   const {item} = route.params;
-  const availableDays = item.availability.filter((day: any) => day.checked === true);
+  const availableDays = item.availability.filter(
+    (day: any) => day.checked === true,
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
-            <StatusBar backgroundColor={Colors.background} barStyle="dark-content" />
-      
+      <StatusBar backgroundColor={Colors.background} barStyle="dark-content" />
+
       <HeaderBack
         title="Availability"
         textStyle={styles.headerText}
@@ -93,7 +95,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(2),
     lineHeight: RFPercentage(2.8),
     marginTop: RFPercentage(1.5),
-    textAlign:"center"
+    textAlign: 'center',
   },
   descriptionText: {
     color: Colors.secondaryText,

@@ -99,7 +99,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                 activeOpacity={0.8}
                 key={index}
                 onPress={() => navigation.navigate(route.name)}
-                style={[styles.tabButton, isFocused && styles.activeTab]}>
+                style={[styles.tabButton]}>
                 {route.name === 'Home' ? (
                   <View
                     style={{
@@ -171,7 +171,16 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                         : RFPercentage(0.5),
                     fontFamily: Fonts.fontMedium,
                   }}>
-                  {label}
+                  {typeof label === 'function'
+                    ? label({
+                        focused: isFocused,
+                        color: isFocused
+                          ? Colors.gradient2
+                          : Colors.secondaryText,
+                        position: 'below-icon',
+                        children: route.name,
+                      })
+                    : label}
                 </Text>
               </TouchableOpacity>
             );

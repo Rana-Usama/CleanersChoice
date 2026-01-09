@@ -16,7 +16,7 @@ import {
 } from '@react-navigation/bottom-tabs';
 import {useIsFocused} from '@react-navigation/native';
 import {useSafeAreaInsets, SafeAreaView} from 'react-native-safe-area-context';
-import {useSelector} from 'react-redux'; // 👈 for guest/user check
+import {useSelector} from 'react-redux'; 
 import {Icons, Colors, Fonts} from '../constants/Themes';
 import Settings from '../screens/commonflow/home/settings/Settings';
 import Home from '../screens/customerflow/home/Home';
@@ -99,6 +99,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
               const event = navigation.emit({
                 type: 'tabPress',
                 target: route.key,
+                canPreventDefault: true,
               });
 
               if (!isFocused && !event.defaultPrevented) {
@@ -114,11 +115,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                 activeOpacity={isDisabled ? 1 : 0.8}
                 key={index}
                 onPress={onPress}
-                style={[
-                  styles.tabButton,
-                  {opacity},
-                  isFocused && styles.activeTab,
-                ]}>
+                style={[styles.tabButton, {opacity}]}>
                 {route.name === 'Home' ? (
                   <View
                     style={{
@@ -180,7 +177,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                   />
                 )}
                 <Text
-                numberOfLines={1}
+                  numberOfLines={1}
                   style={{
                     color: isFocused ? Colors.gradient2 : Colors.secondaryText,
                     fontSize: RFPercentage(1.4),
@@ -189,8 +186,17 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                         ? RFPercentage(-2.1)
                         : RFPercentage(0.5),
                     fontFamily: Fonts.fontMedium,
-                  }} >
-                  {label}
+                  }}>
+                  {typeof label === 'function'
+                    ? label({
+                        focused: isFocused,
+                        color: isFocused
+                          ? Colors.gradient2
+                          : Colors.secondaryText,
+                        position: 'below-icon',
+                        children: route.name,
+                      })
+                    : label}
                 </Text>
               </TouchableOpacity>
             );

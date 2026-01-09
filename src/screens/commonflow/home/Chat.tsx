@@ -12,7 +12,12 @@ import {
   Platform,
 } from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
-import {GiftedChat, InputToolbar, Bubble} from 'react-native-gifted-chat';
+import {
+  GiftedChat,
+  InputToolbar,
+  Bubble,
+  IMessage,
+} from 'react-native-gifted-chat';
 import firestore from '@react-native-firebase/firestore';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, IMAGES} from '../../../constants/Themes';
@@ -21,9 +26,8 @@ import Feather from 'react-native-vector-icons/Feather';
 import {useFocusEffect} from '@react-navigation/native';
 
 const Chat = ({navigation, route}: any) => {
-  const [messages, setMessages] = useState<
-    {id: string; text: string; sender: string; timestamp: number}[]
-  >([]);
+  const [messages, setMessages] = useState<IMessage[]>([]);
+
   const {
     chatId,
     senderId,
@@ -66,9 +70,9 @@ const Chat = ({navigation, route}: any) => {
 
   // Send Message
   const onSend = useCallback(
-    async (messagesToSend = []) => {
+    async (messagesToSend: IMessage[] = []) => {
       const message = messagesToSend[0];
-      if (!message.text || message.text.trim() === '') {
+      if (!message || !message.text?.trim()) {
         return;
       }
       const timestamp = new Date();
@@ -288,6 +292,7 @@ const Chat = ({navigation, route}: any) => {
                         onPress={() => {
                           onSend([
                             {
+                              _id: `${Date.now()}`,
                               text: message,
                               user: {
                                 _id: senderId,
@@ -372,7 +377,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: RFPercentage(2.6),
   },
   customTextInput: {
-    color: Colors.white,
+    color: Colors.inputTextColor,
     fontSize: RFPercentage(1.8),
     width: '90%',
     textAlignVertical: 'top',

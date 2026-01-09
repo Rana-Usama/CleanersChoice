@@ -25,14 +25,15 @@ import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 import {Image as CompressorImage} from 'react-native-compressor';
 import {showToast} from '../../../../utils/ToastMessage';
-import axios from 'axios';
+import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
 
 const EditProfile = ({navigation}: any) => {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [img, setImg] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
-  const [userData, setUserData] = useState(null);
+  const [userData, setUserData] =
+    useState<FirebaseFirestoreTypes.DocumentData | null>(null);
   const [loading2, setLoading2] = useState(false);
 
   // Image Picker
@@ -60,7 +61,7 @@ const EditProfile = ({navigation}: any) => {
             .doc(user.uid)
             .get();
           if (userDoc.exists) {
-            const userData = userDoc.data();
+            const userData = userDoc.data() ?? null;
             setUserData(userData);
           }
         } catch (error) {}
@@ -85,26 +86,6 @@ const EditProfile = ({navigation}: any) => {
             maxWidth: 1000,
             quality: 0.8,
           });
-
-          // const data = new FormData();
-          // data.append('file', {
-          //   uri: compressedImage,
-          //   type: 'image/jpeg',
-          //   name: `profile_${user.uid}.jpg`,
-          // });
-          // data.append('upload_preset', 'CleanersChoice');
-          // data.append('cloud_name', 'dfd65wawq');
-
-          // const res = await axios.post(
-          //   'https://api.cloudinary.com/v1_1/dfd65wawq/image/upload',
-          //   data,
-          //   {
-          //     headers: {
-          //       'Content-Type': 'multipart/form-data',
-          //     },
-          //   },
-          // );
-          // imageUrl = res.data.secure_url;
 
           const reference = storage().ref(
             `profileImages/profile_${user.uid}.jpg`,

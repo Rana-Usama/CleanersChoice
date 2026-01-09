@@ -108,7 +108,6 @@ const Profile = ({navigation}: any) => {
         barStyle="light-content"
         translucent={true}
       />
-
       <LinearGradient
         colors={[Colors.gradient1, Colors.gradient2]}
         style={styles.gradientHeader}>

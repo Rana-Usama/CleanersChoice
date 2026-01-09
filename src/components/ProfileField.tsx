@@ -1,4 +1,11 @@
-import {Image, Platform, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {
+  Image,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import React from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts} from '../constants/Themes';
@@ -19,7 +26,7 @@ const ProfileField: React.FC<Props> = (props: Props) => {
           <Image
             source={props.icon}
             resizeMode="contain"
-            tintColor={props.color ? props.color : null}
+            tintColor={props.color ?? undefined}
             style={styles.icon}
           />
           <Text style={[styles.text, props.color && {color: props.color}]}>
@@ -60,13 +67,13 @@ const styles = StyleSheet.create({
   icon: {
     width: RFPercentage(2),
     height: RFPercentage(2),
-    bottom:1
+    bottom: 1,
   },
   text: {
     color: Colors.brown,
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.8),
     left: RFPercentage(1),
-    lineHeight: Platform.OS === 'ios' ?  RFPercentage(1.9) : RFPercentage(2.3)
+    lineHeight: Platform.OS === 'ios' ? RFPercentage(1.9) : RFPercentage(2.3),
   },
 });

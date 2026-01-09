@@ -20,6 +20,7 @@ import firestore from '@react-native-firebase/firestore';
 import SubscriptionModal from '../../../components/SubscriptionModal';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {showToast} from '../../../utils/ToastMessage';
+import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
 
 const services = [
   {id: 1, name: 'Connect with cleaning customers'},
@@ -32,7 +33,8 @@ const Premium = ({navigation}: any) => {
   const {initPaymentSheet, presentPaymentSheet} = useStripe();
   const [loading, setLoading] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUser, setCurrentUser] =
+    useState<FirebaseFirestoreTypes.DocumentData | null>(null);
 
   const user = auth().currentUser;
 

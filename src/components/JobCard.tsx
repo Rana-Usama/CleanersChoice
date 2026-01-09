@@ -5,7 +5,7 @@ import {Colors, Fonts, Icons} from '../constants/Themes';
 
 interface props {
   delete?: boolean;
-  onPress2: () => void;
+  onPress2?: () => void;
   name: string;
   date: string;
   location: string;

@@ -14,7 +14,7 @@ interface Props {
   setValue?: (item: Item) => void;
   icon?: any;
   placeholder: string;
-  placeholderColor?: object;
+  placeholderColor?: string;
 }
 
 const CustomDropDown: React.FC<Props> = (props: Props) => {
@@ -24,7 +24,7 @@ const CustomDropDown: React.FC<Props> = (props: Props) => {
   return (
     <View>
       <TouchableOpacity
-      activeOpacity={0.8}
+        activeOpacity={0.8}
         style={[
           styles.container,
           styles.borderStyle,
@@ -43,7 +43,7 @@ const CustomDropDown: React.FC<Props> = (props: Props) => {
             ]}>
             {selectedLabel || props.placeholder}
           </Text>
-          <TouchableOpacity   activeOpacity={0.8} onPress={() => setOpen(!open)}>
+          <TouchableOpacity activeOpacity={0.8} onPress={() => setOpen(!open)}>
             <Entypo
               name="chevron-small-down"
               color={Colors.placeholderColor}
@@ -65,7 +65,7 @@ const CustomDropDown: React.FC<Props> = (props: Props) => {
                   onPress={() => {
                     setOpen(false);
                     setSelectedLabel(item.label);
-                    props.setValue && props.setValue(item?.label);
+                    props.setValue && props.setValue(item);
                   }}>
                   <View
                     style={[

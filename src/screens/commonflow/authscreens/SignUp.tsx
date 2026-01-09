@@ -1,12 +1,8 @@
 import {
   Image,
-  SafeAreaView,
-  StatusBar,
   StyleSheet,
   Text,
   View,
-  ScrollView,
-  KeyboardAvoidingView,
   TouchableOpacity,
   TouchableWithoutFeedback,
   Keyboard,
@@ -31,7 +27,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import messaging from '@react-native-firebase/messaging';
 import {showToast} from '../../../utils/ToastMessage';
-import axios from 'axios';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import firestore from '@react-native-firebase/firestore';
 
@@ -45,7 +40,7 @@ const SignUp: React.FC = ({navigation}: any) => {
   let validationSchema = yup.object({
     name: yup.string().required('Username is required'),
     email: yup.string().email('Invalid email').required('Email is required'),
-    // ✅ Make phone optional
+    //Make phone optional
     phone: yup
       .string()
       .nullable()
@@ -327,7 +322,6 @@ const SignUp: React.FC = ({navigation}: any) => {
                     </>
                   )}
 
-                  {/* Phone */}
                   {/* Phone (Optional) */}
                   <InputField
                     placeholder="Phone Number (optional)"
@@ -364,7 +358,6 @@ const SignUp: React.FC = ({navigation}: any) => {
                       index={0}
                       isSelected={selected}
                       onPress={() => setSelected(!selected)}
-                      borderWidth={1}
                       buttonInnerColor={Colors.gradient1}
                       buttonOuterColor={
                         selected ? Colors.gradient1 : Colors.inputFieldColor
@@ -433,7 +426,6 @@ const SignUp: React.FC = ({navigation}: any) => {
         </View>
         <View style={{marginBottom: RFPercentage(5)}} />
       </KeyboardAwareScrollView>
-      {/* </SafeAreaView> */}
     </TouchableWithoutFeedback>
   );
 };

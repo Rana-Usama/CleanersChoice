@@ -1,11 +1,9 @@
 import {
   Image,
-  SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  KeyboardAvoidingView,
   ScrollView,
   TouchableWithoutFeedback,
   Keyboard,
@@ -24,8 +22,6 @@ import DatePicker from 'react-native-date-picker';
 import DescriptionField from '../../../components/DescriptionField';
 import InfoHeader from '../../../components/InfoHeader';
 import moment from 'moment';
-import {RootStackParamList} from '../../../routers/StackNavigator';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import {showToast} from '../../../utils/ToastMessage';
@@ -99,7 +95,6 @@ const PostJob = ({route}: any) => {
       });
       return;
     }
-
     setLoading(true);
     try {
       const jobData: any = {
@@ -175,7 +170,6 @@ const PostJob = ({route}: any) => {
   return (
     <>
       <StatusBar backgroundColor={Colors.background} barStyle="dark-content" />
-
       <View style={{backgroundColor: 'white'}}>
         <HeaderBack
           title="Post Job"
@@ -205,7 +199,6 @@ const PostJob = ({route}: any) => {
                   value={jobTitle}
                   onChangeText={setJobTitle}
                 />
-
                 {/* Describe */}
                 <View>
                   <DescriptionField
@@ -222,18 +215,7 @@ const PostJob = ({route}: any) => {
                     navigation.navigate('Location', {location: true})
                   }
                   activeOpacity={0.8}
-                  style={{
-                    width: '100%',
-                    alignSelf: 'center',
-                    height: RFPercentage(6.5),
-                    backgroundColor: 'white',
-                    borderWidth: 1,
-                    borderColor: Colors.inputFieldColor,
-                    borderRadius: RFPercentage(1.3),
-                    justifyContent: 'center',
-                    marginTop: RFPercentage(2),
-                    paddingHorizontal: RFPercentage(1.5),
-                  }}>
+                  style={styles.container2}>
                   <Text
                     style={{
                       color:
@@ -253,10 +235,12 @@ const PostJob = ({route}: any) => {
 
                 {/* Service Type */}
                 <CustomDropDown
-                  placeholder={jobId ? selectedType : 'Service Type'}
+                  placeholder={jobId ? selectedType ?? '' : 'Service Type'}
                   data={data1}
                   placeholderColor={
-                    jobId ? Colors.inputTextColor : Colors.placeholderColor
+                    jobId
+                      ? {color: Colors.inputTextColor}
+                      : {color: Colors.placeholderColor}
                   }
                   setValue={handleSelectedItem}
                 />
@@ -353,6 +337,18 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
     paddingBottom: RFPercentage(24),
+  },
+  container2: {
+    width: '100%',
+    alignSelf: 'center',
+    height: RFPercentage(6.5),
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: Colors.inputFieldColor,
+    borderRadius: RFPercentage(1.3),
+    justifyContent: 'center',
+    marginTop: RFPercentage(2),
+    paddingHorizontal: RFPercentage(1.5),
   },
   container: {
     width: '90%',

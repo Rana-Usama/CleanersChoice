@@ -4,11 +4,9 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   RefreshControl,
   StatusBar,
-  Dimensions,
   ActivityIndicator,
   Animated,
   Platform,
@@ -23,13 +21,9 @@ import moment from 'moment';
 import {useFocusEffect} from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import NotFound from '../../../components/NotFound';
-import {Skeleton} from '@rneui/themed';
 import {useExitAppOnBack} from '../../../utils/ExitApp';
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-
-const {width} = Dimensions.get('window');
 
 const Messages = ({navigation}: any) => {
   const [chats, setChats] = useState<

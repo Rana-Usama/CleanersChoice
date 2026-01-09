@@ -30,7 +30,7 @@ export const useCurrentLocation = () => {
 
       return formattedAddress;
     } catch (err) {
-      console.log("❌ Reverse Geocoding Error:", err);
+      console.log("Reverse Geocoding Error:", err);
       return null;
     }
   };

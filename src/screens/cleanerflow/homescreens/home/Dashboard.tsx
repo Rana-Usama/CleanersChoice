@@ -1,5 +1,4 @@
 import {
-  SafeAreaView,
   StyleSheet,
   Text,
   View,
@@ -7,27 +6,22 @@ import {
   Image,
   ActivityIndicator,
   ScrollView,
-  FlatList,
   RefreshControl,
   Platform,
-  Dimensions,
   StatusBar,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, Icons, IMAGES} from '../../../../constants/Themes';
 import HeaderBack from '../../../../components/HeaderBack';
-import ImagePicker from 'react-native-image-crop-picker';
 import {useFocusEffect} from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
-import storage from '@react-native-firebase/storage';
 import {useDispatch} from 'react-redux';
 import {
   setProfileData,
   setProfileCompletion,
 } from '../../../../redux/ProfileData/Actions';
-import {Image as CompressorImage} from 'react-native-compressor';
 import {useExitAppOnBack} from '../../../../utils/ExitApp';
 import LinearGradient from 'react-native-linear-gradient';
 import * as Progress from 'react-native-progress';
@@ -79,7 +73,6 @@ const items = [
 ];
 
 const Dashboard: React.FC = ({navigation}: any) => {
-  const [img, setImg] = useState(null);
   const [profile, setProfile] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
@@ -256,8 +249,6 @@ const Dashboard: React.FC = ({navigation}: any) => {
   };
 
   const [profileCompletion, setProfileCompletionValue] = useState('50');
-  console.log("service..........", service)
-
   useEffect(() => {
     if (service) {
       const completion =
@@ -518,7 +509,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
                     {serviceItems.map((item: any, index: number) => (
                       <Animated.View
                         key={index}
-                        entering={ZoomIn.delay(index * 100)}
+                        
                         style={styles.serviceCard}>
                         <LinearGradient
                           colors={['#F8FAFF', '#f4f7fcff']}

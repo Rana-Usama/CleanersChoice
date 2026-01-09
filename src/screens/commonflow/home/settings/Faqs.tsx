@@ -69,8 +69,8 @@ const FAQS: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-            <StatusBar backgroundColor={Colors.background} barStyle="dark-content" />
-      
+      <StatusBar backgroundColor={Colors.background} barStyle="dark-content" />
+
       <HeaderBack title={`FAQ's`} textStyle={styles.headerText} left={true} />
       <ScrollView
         contentContainerStyle={styles.scrollViewContent}

@@ -15,10 +15,9 @@ import {
   Animated,
   RefreshControl,
   Keyboard,
-  Pressable,
   StatusBar,
 } from 'react-native';
-import React, {useState, useRef, useCallback, useEffect} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import SearchField from '../../../components/SearchField';
@@ -39,21 +38,21 @@ import {useSelector} from 'react-redux';
 import CustomModal from '../../../components/CustomModal';
 import {useCurrentLocation} from '../../../utils/userLocation';
 import haversine from 'haversine';
-import {clearFilterLocation} from '../../../redux/location/Actions';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import HomeCard from '../../../components/CardHome';
 import Entypo from 'react-native-vector-icons/Entypo';
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
 
 const categories = [
   {id: '1', name: 'All', icon: 'apps'},
   {id: '44', name: 'Residential', icon: 'home'},
   {id: '66', name: 'Vehicle', icon: 'car'},
   {id: '55', name: 'Pressure', icon: 'speedometer'},
-  {id: '22', name: 'Chimney', icon: 'fireplace'}, // Fire/smoke represents chimney
-  {id: '33', name: 'Carpet', icon: 'texture'}, // Texture represents carpet
-  {id: '11', name: 'Window', icon: 'view-day'}, // Alternative for window
+  {id: '22', name: 'Chimney', icon: 'fireplace'},
+  {id: '33', name: 'Carpet', icon: 'texture'},
+  {id: '11', name: 'Window', icon: 'view-day'},
   {id: '77', name: 'Lawn Care', icon: 'nature-people'},
   {id: '88', name: 'Others', icon: 'dots-horizontal'},
 ];
@@ -89,7 +88,9 @@ const Home = () => {
   const [priceLoading, setPriceLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [initializingLocation, setInitializingLocation] = useState(true);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<FirebaseFirestoreTypes.DocumentData | null>(
+    null,
+  );
   const userFlow = useSelector((state: any) => state.userFlow.userFlow);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const {location} = useCurrentLocation();
@@ -234,7 +235,7 @@ const Home = () => {
           .doc(user.uid)
           .get();
         if (userDoc.exists) {
-          const userData = userDoc.data();
+          const userData = userDoc.data() ?? null;
           setUser(userData);
           setIsAdmin(userData?.admin);
           dispatch(setProfileData(userData));
@@ -268,29 +269,20 @@ const Home = () => {
 
     // ADMIN LOGIC: If admin and toggle is ON, skip location filtering
     if (isAdmin && adminViewAllServices) {
-      return true; // Admin sees all services without location restriction
+      return true;
     }
-
-    // LOCATION FILTERING - Only applies to regular users OR admin with toggle OFF
-
-    // First check: Does the service have location data?
     if (!service?.location?.latitude || !service?.location?.longitude) {
-      return false; // Service has no location data
+      return false;
     }
-
-    // Second check: Do we have a location to compare with?
     const activeLocation = selectedLocation?.latitude
       ? {
           latitude: selectedLocation.latitude,
           longitude: selectedLocation.longitude,
         }
       : location;
-
-    // If no active location, don't show any services
     if (!activeLocation?.latitude || !activeLocation?.longitude) {
       return false;
     }
-    // Calculate distance if both locations exist
     const start = {
       latitude: activeLocation.latitude,
       longitude: activeLocation.longitude,
@@ -1300,7 +1292,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 10},
     shadowOpacity: 0.1,
     shadowRadius: 20,
-    height: '60%',
+    height: '65%',
   },
   modalHeader: {
     paddingVertical: RFPercentage(2.5),

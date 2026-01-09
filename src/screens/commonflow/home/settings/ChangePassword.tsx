@@ -74,8 +74,8 @@ const ChangePasswordV2 = ({navigation}: any) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-            < StatusBar backgroundColor={Colors.background} barStyle="dark-content" />
-      
+      <StatusBar backgroundColor={Colors.background} barStyle="dark-content" />
+
       <HeaderBack
         title={`Change Password`}
         textStyle={{fontSize: RFPercentage(2)}}
@@ -236,7 +236,7 @@ const ChangePasswordV2 = ({navigation}: any) => {
             />
             <CustomModal
               passwordModal={true}
-              title='Chnage Password'
+              title="Chnage Password"
               subTitle={'Your password hase been successfuly changed!'}
               onPress3={() => {
                 navigation.navigate('SignIn');

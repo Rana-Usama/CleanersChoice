@@ -1,6 +1,5 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
-  SafeAreaView,
   StyleSheet,
   Text,
   View,
@@ -8,20 +7,15 @@ import {
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
-  TouchableWithoutFeedback,
-  Keyboard,
   Dimensions,
   StatusBar,
   ActivityIndicator,
   Animated as RNAnimated,
-  Alert,
 } from 'react-native';
 import {RFPercentage} from 'react-native-responsive-fontsize';
-import {Colors, Fonts, Icons} from '../../../../constants/Themes';
+import {Colors, Fonts} from '../../../../constants/Themes';
 import HeaderBack from '../../../../components/HeaderBack';
-import InfoHeader from '../../../../components/InfoHeader';
-import TimeLine from '../../../../components/TimeLine';
-import GradientButton from '../../../../components/GradientButton';
+import RemovePackageModal from '../../../../components/RemovePackageModal';
 import DescriptionField from '../../../../components/DescriptionField';
 import InputField from '../../../../components/InputField';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -32,18 +26,21 @@ import auth from '@react-native-firebase/auth';
 import Toast from 'react-native-toast-message';
 import {useSelector} from 'react-redux';
 import LinearGradient from 'react-native-linear-gradient';
-import Animated, {
-  FadeInDown,
-  FadeInUp,
-  SlideInRight,
-  ZoomIn,
-  StretchInX,
-} from 'react-native-reanimated';
+import Animated, {FadeInUp, ZoomIn} from 'react-native-reanimated';
 import * as Progress from 'react-native-progress';
 import Octicons from 'react-native-vector-icons/Octicons';
 
 const {width} = Dimensions.get('window');
 const MAX_PACKAGES = 4;
+
+type PackageError = {
+  price?: string;
+  details?: string;
+};
+
+type PackageErrors = {
+  [key: number]: PackageError;
+};
 
 const ServiceThree: React.FC = ({navigation}: any) => {
   const [packages, setPackages] = useState([{id: 1, details: '', price: ''}]);
@@ -52,10 +49,11 @@ const ServiceThree: React.FC = ({navigation}: any) => {
   const profileCompletion = useSelector(
     (state: any) => state?.profile?.profileCompletion,
   );
-  const [errors, setErrors] = useState<{
-    [key: number]: {price?: string; details?: string};
-  }>({});
+  const [errors, setErrors] = useState<PackageErrors>({});
 
+  const [modalVisible, setModalVisible] = useState(false);
+  const [packageToRemove, setPackageToRemove] = useState<number | null>(null);
+  const scrollViewRef = useRef<ScrollView>(null);
   // Add package
   const addPackage = () => {
     if (packages.length < MAX_PACKAGES) {
@@ -71,26 +69,8 @@ const ServiceThree: React.FC = ({navigation}: any) => {
   const removePackage = (id: number) => {
     if (id === 1) return;
 
-    Alert.alert(
-      'Remove Package',
-      'Are you sure you want to remove this package?',
-      [
-        {text: 'Cancel', style: 'cancel'},
-        {
-          text: 'Remove',
-          style: 'destructive',
-          onPress: () => {
-            const updated = packages.filter(pkg => pkg.id !== id);
-            const reIndexed = updated.map((pkg, index) => ({
-              ...pkg,
-              id: index + 1,
-            }));
-            setPackages(reIndexed);
-            setExpandedPackage(null);
-          },
-        },
-      ],
-    );
+    setPackageToRemove(id);
+    setModalVisible(true);
   };
 
   // Input Field function
@@ -150,7 +130,7 @@ const ServiceThree: React.FC = ({navigation}: any) => {
     if (!user) return;
 
     // Validate all fields
-    let newErrors = {};
+    let newErrors: PackageErrors = {};
     let hasError = false;
 
     packages.forEach(pkg => {
@@ -162,7 +142,6 @@ const ServiceThree: React.FC = ({navigation}: any) => {
         pkgErrors.details = 'Package details are required';
         hasError = true;
       }
-
       if (!pkg.price.trim()) {
         pkgErrors.price = 'Price is required';
         hasError = true;
@@ -170,7 +149,6 @@ const ServiceThree: React.FC = ({navigation}: any) => {
         pkgErrors.price = `Price must be at least $${minPrice}`;
         hasError = true;
       }
-
       if (Object.keys(pkgErrors).length > 0) {
         newErrors[pkg.id] = pkgErrors;
       }
@@ -210,7 +188,7 @@ const ServiceThree: React.FC = ({navigation}: any) => {
         const existingData = doc.data();
         let existingPackages = existingData?.packages || [];
         const updatedPackages = packages.map(pkg => {
-          const existingPkg = existingPackages.find(p => p.id === pkg.id);
+          const existingPkg = existingPackages.find((p: any) => p.id === pkg.id);
           return existingPkg ? {...existingPkg, ...pkg} : pkg;
         });
 
@@ -307,359 +285,402 @@ const ServiceThree: React.FC = ({navigation}: any) => {
         </View>
       </LinearGradient>
 
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}>
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={{flex: 1}}>
-            {/* Completion Card */}
-            <Animated.View entering={FadeInUp.duration(600)}>
-              <View style={styles.completionCard}>
-                <LinearGradient
-                  colors={['#F0FDF4', '#DCFCE7']}
-                  style={styles.completionGradient}>
-                  <View style={styles.completionContent}>
-                    <View style={styles.completionIconContainer}>
-                      <Octicons name="package" size={24} color="#22C55E" />
-                    </View>
-                    <View style={styles.completionTextContainer}>
-                      <Text style={styles.completionTitle}>
-                        Package Progress
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{flex: 1}}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
+        <ScrollView
+          ref={scrollViewRef}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          keyboardDismissMode="interactive"
+          automaticallyAdjustContentInsets={true}
+          contentInsetAdjustmentBehavior="automatic">
+          {/* Completion Card */}
+          <Animated.View>
+            <View style={styles.completionCard}>
+              <LinearGradient
+                colors={['#F0FDF4', '#DCFCE7']}
+                style={styles.completionGradient}>
+                <View style={styles.completionContent}>
+                  <View style={styles.completionIconContainer}>
+                    <Octicons name="package" size={24} color="#22C55E" />
+                  </View>
+                  <View style={styles.completionTextContainer}>
+                    <Text style={styles.completionTitle}>Package Progress</Text>
+                    <Text style={styles.completionSubtitle}>
+                      {validPackagesCount >= 3
+                        ? '✓ Ready to publish!'
+                        : `${3 - validPackagesCount} more package${
+                            3 - validPackagesCount > 1 ? 's' : ''
+                          } needed`}
+                    </Text>
+                  </View>
+                  <View style={styles.progressCircle}>
+                    <Progress.Circle
+                      progress={progress}
+                      size={50}
+                      thickness={4}
+                      color={progress === 1 ? '#22C55E' : Colors.gradient1}
+                      unfilledColor="#E5E7EB"
+                      borderWidth={0}>
+                      <Text style={styles.progressCircleText}>
+                        {validPackagesCount}/3
                       </Text>
-                      <Text style={styles.completionSubtitle}>
-                        {validPackagesCount >= 3
-                          ? '✓ Ready to publish!'
-                          : `${3 - validPackagesCount} more package${
-                              3 - validPackagesCount > 1 ? 's' : ''
-                            } needed`}
-                      </Text>
-                    </View>
-                    <View style={styles.progressCircle}>
-                      <Progress.Circle
-                        progress={progress}
-                        size={50}
-                        thickness={4}
-                        color={progress === 1 ? '#22C55E' : Colors.gradient1}
-                        unfilledColor="#E5E7EB"
-                        borderWidth={0}>
-                        <Text style={styles.progressCircleText}>
-                          {validPackagesCount}/3
-                        </Text>
-                      </Progress.Circle>
-                    </View>
-                  </View>
-                </LinearGradient>
-              </View>
-            </Animated.View>
-
-            {/* Instructions Card */}
-            <Animated.View entering={SlideInRight.delay(100)}>
-              <View style={styles.instructionsCard}>
-                <View style={styles.instructionsHeader}>
-                  <FontAwesome name="lightbulb-o" size={20} color="#F59E0B" />
-                  <Text style={styles.instructionsTitle}>Pricing Tips</Text>
-                </View>
-                <View style={styles.instructionsContent}>
-                  <View style={styles.tipItem}>
-                    <View style={styles.tipBullet} />
-                    <Text style={styles.tipText}>
-                      Package 1: Basic cleaning services (Starting at $25)
-                    </Text>
-                  </View>
-                  <View style={styles.tipItem}>
-                    <View style={styles.tipBullet} />
-                    <Text style={styles.tipText}>
-                      Package 2: Standard services with extras (Starting at $50)
-                    </Text>
-                  </View>
-                  <View style={styles.tipItem}>
-                    <View style={styles.tipBullet} />
-                    <Text style={styles.tipText}>
-                      Package 3: Premium services (Starting at $75)
-                    </Text>
-                  </View>
-                  <View style={styles.tipItem}>
-                    <View style={styles.tipBullet} />
-                    <Text style={styles.tipText}>
-                      Higher packages should offer more value
-                    </Text>
+                    </Progress.Circle>
                   </View>
                 </View>
+              </LinearGradient>
+            </View>
+          </Animated.View>
+
+          {/* Instructions Card */}
+          <Animated.View>
+            <View style={styles.instructionsCard}>
+              <View style={styles.instructionsHeader}>
+                <FontAwesome name="lightbulb-o" size={20} color="#F59E0B" />
+                <Text style={styles.instructionsTitle}>Pricing Tips</Text>
               </View>
-            </Animated.View>
-
-            {/* Packages Container */}
-            <View style={styles.packagesContainer}>
-              <Text style={styles.packagesTitle}>Create Your Packages</Text>
-              <Text style={styles.packagesSubtitle}>
-                Add 3-4 packages with clear pricing and details
-              </Text>
-
-              {packages.map((pkg, index) => (
-                <Animated.View
-                  key={pkg.id}
-                  entering={StretchInX.delay(200 + index * 100)}
-                  style={styles.packageCardWrapper}>
-                  <TouchableOpacity
-                    activeOpacity={0.7}
-                    onPress={() => togglePackage(pkg.id)}
-                    style={[
-                      styles.packageHeader,
-                      expandedPackage === pkg.id &&
-                        styles.packageHeaderExpanded,
-                    ]}>
-                    <LinearGradient
-                      colors={
-                        pkg.details && pkg.price
-                          ? ['#EEF2FF', '#f7fbffff']
-                          : ['#FFFFFF', '#F9FAFB']
-                      }
-                      style={styles.packageHeaderGradient}>
-                      <View style={styles.packageHeaderContent}>
-                        <View style={styles.packageNumberContainer}>
-                          <Text style={styles.packageNumber}>{pkg.id}</Text>
-                        </View>
-                        <View style={styles.packageTitleContainer}>
-                          <Text style={styles.packageTitle}>
-                            Package {pkg.id}
-                          </Text>
-                          {pkg.price ? (
-                            <Text style={styles.packagePricePreview}>
-                              ${pkg.price}
-                            </Text>
-                          ) : (
-                            <Text style={styles.packagePlaceholder}>
-                              Set pricing
-                            </Text>
-                          )}
-                        </View>
-                        <View style={styles.packageActions}>
-                          {pkg.id > 1 && (
-                            <TouchableOpacity
-                              onPress={() => removePackage(pkg.id)}
-                              style={styles.removeButton}>
-                              <AntDesign
-                                name="close"
-                                size={16}
-                                color="#EF4444"
-                              />
-                            </TouchableOpacity>
-                          )}
-                          <MaterialIcons
-                            name={
-                              expandedPackage === pkg.id
-                                ? 'keyboard-arrow-up'
-                                : 'keyboard-arrow-down'
-                            }
-                            size={24}
-                            color="#6B7280"
-                          />
-                        </View>
-                      </View>
-                    </LinearGradient>
-                  </TouchableOpacity>
-
-                  {expandedPackage === pkg.id && (
-                    <Animated.View
-                      entering={ZoomIn.duration(300)}
-                      style={styles.packageContent}>
-                      <LinearGradient
-                        colors={['#FFFFFF', '#F8FAFF']}
-                        style={styles.packageContentGradient}>
-                        {/* Package Details */}
-                        <View style={styles.inputSection}>
-                          <View style={styles.inputLabelContainer}>
-                            <Text style={styles.inputLabel}>
-                              Package Details
-                            </Text>
-                            <Text style={styles.charCount}>
-                              {pkg.details.length}/120
-                            </Text>
-                          </View>
-                          <DescriptionField
-                            placeholder="Describe what's included in this package..."
-                            count={false}
-                            value={pkg.details}
-                            maxLength={120}
-                            onChangeText={text =>
-                              handleInputChange(pkg.id, 'details', text)
-                            }
-                            style={styles.descriptionField}
-                          />
-                          {errors[pkg.id]?.details && (
-                            <View style={styles.errorContainer}>
-                              <MaterialIcons
-                                name="error-outline"
-                                size={16}
-                                color="#EF4444"
-                              />
-                              <Text style={styles.errorText}>
-                                {errors[pkg.id].details}
-                              </Text>
-                            </View>
-                          )}
-                        </View>
-
-                        {/* Price Input */}
-                        <View style={styles.inputSection}>
-                          <View style={styles.inputLabelContainer}>
-                            <Text style={styles.inputLabel}>
-                              Starting Price
-                            </Text>
-                            <Text style={styles.minPriceHint}>
-                              Min: ${25 * pkg.id}
-                            </Text>
-                          </View>
-                          <View style={styles.priceInputContainer}>
-                            <View style={styles.priceSymbol}>
-                              <Text style={styles.priceSymbolText}>$</Text>
-                            </View>
-                            <InputField
-                              placeholder={`e.g. ${25 * pkg.id}`}
-                              customStyle={styles.priceInput}
-                              value={pkg.price}
-                              onChangeText={text =>
-                                handleInputChange(pkg.id, 'price', text)
-                              }
-                              type={'numeric'}
-                            />
-                          </View>
-                          {errors[pkg.id]?.price && (
-                            <View style={styles.errorContainer}>
-                              <MaterialIcons
-                                name="error-outline"
-                                size={16}
-                                color="#EF4444"
-                              />
-                              <Text style={styles.errorText}>
-                                {errors[pkg.id].price}
-                              </Text>
-                            </View>
-                          )}
-                        </View>
-
-                        {/* Package Status */}
-                        <View style={styles.packageStatus}>
-                          {pkg?.details && pkg.price ? (
-                            <View style={styles.statusComplete}>
-                              <AntDesign
-                                name="checkcircle"
-                                size={16}
-                                color="#22C55E"
-                              />
-                              <Text style={styles.statusText}>Complete</Text>
-                            </View>
-                          ) : (
-                            <View style={styles.statusIncomplete}>
-                              <MaterialIcons
-                                name="info-outline"
-                                size={16}
-                                color="#F59E0B"
-                              />
-                              <Text style={styles.statusText}>Incomplete</Text>
-                            </View>
-                          )}
-                        </View>
-                      </LinearGradient>
-                    </Animated.View>
-                  )}
-                </Animated.View>
-              ))}
-
-              {/* Add Package Button */}
-              {packages?.length < MAX_PACKAGES && (
-                <Animated.View entering={FadeInUp.delay(300)}>
-                  <TouchableOpacity
-                    onPress={addPackage}
-                    style={styles.addPackageButton}>
-                    <LinearGradient
-                      colors={['#FFFFFF', '#F8FAFF']}
-                      style={styles.addPackageGradient}>
-                      <View style={styles.addPackageContent}>
-                        <View style={styles.addIconContainer}>
-                          <AntDesign
-                            name="plus"
-                            size={20}
-                            color={Colors.gradient1}
-                          />
-                        </View>
-                        <Text style={styles.addPackageText}>
-                          Add Package {packages?.length + 1}
-                        </Text>
-                      </View>
-                    </LinearGradient>
-                  </TouchableOpacity>
-                </Animated.View>
-              )}
-
-              {/* Package Limit Info */}
-              <View style={styles.limitInfo}>
-                <MaterialIcons name="info-outline" size={16} color="#6B7280" />
-                <Text style={styles.limitInfoText}>
-                  You can add up to {MAX_PACKAGES} packages
-                </Text>
+              <View style={styles.instructionsContent}>
+                <View style={styles.tipItem}>
+                  <View style={styles.tipBullet} />
+                  <Text style={styles.tipText}>
+                    Package 1: Basic cleaning services (Starting at $25)
+                  </Text>
+                </View>
+                <View style={styles.tipItem}>
+                  <View style={styles.tipBullet} />
+                  <Text style={styles.tipText}>
+                    Package 2: Standard services with extras (Starting at $50)
+                  </Text>
+                </View>
+                <View style={styles.tipItem}>
+                  <View style={styles.tipBullet} />
+                  <Text style={styles.tipText}>
+                    Package 3: Premium services (Starting at $75)
+                  </Text>
+                </View>
+                <View style={styles.tipItem}>
+                  <View style={styles.tipBullet} />
+                  <Text style={styles.tipText}>
+                    Higher packages should offer more value
+                  </Text>
+                </View>
               </View>
             </View>
+          </Animated.View>
 
-            {/* Continue Button */}
-            <Animated.View
-              entering={FadeInUp.delay(500)}
-              style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={[
-                  styles.continueButton,
-                  validPackagesCount < 3 && styles.buttonDisabled,
-                ]}
-                onPress={savePackagesToFirestore}
-                disabled={loading || validPackagesCount < 3}
-                activeOpacity={0.8}>
-                <LinearGradient
-                  colors={
-                    validPackagesCount < 3
-                      ? ['#E5E7EB', '#D1D5DB']
-                      : [Colors.gradient1, Colors.gradient2]
-                  }
-                  style={styles.buttonGradient}>
-                  {loading ? (
-                    <ActivityIndicator color="#FFFFFF" />
-                  ) : (
-                    <>
-                      <Text style={styles.buttonText}>
-                        {profileCompletion === '100'
-                          ? 'Update Packages'
-                          : validPackagesCount >= 3
-                          ? 'Complete Setup'
-                          : `Add ${3 - validPackagesCount} More Package${
-                              3 - validPackagesCount > 1 ? 's' : ''
-                            }`}
-                      </Text>
-                      {validPackagesCount >= 3 && (
-                        <AntDesign
-                          name="check"
-                          size={RFPercentage(2.2)}
-                          color="#FFFFFF"
-                          style={styles.buttonIcon}
+          {/* Packages Container */}
+          <View style={styles.packagesContainer}>
+            <Text style={styles.packagesTitle}>Create Your Packages</Text>
+            <Text style={styles.packagesSubtitle}>
+              Add 3-4 packages with clear pricing and details
+            </Text>
+
+            {packages.map((pkg, index) => (
+              <Animated.View key={pkg.id} style={styles.packageCardWrapper}>
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => togglePackage(pkg.id)}
+                  style={[
+                    styles.packageHeader,
+                    expandedPackage === pkg.id && styles.packageHeaderExpanded,
+                  ]}>
+                  <LinearGradient
+                    colors={
+                      pkg.details && pkg.price
+                        ? ['#EEF2FF', '#f7fbffff']
+                        : ['#FFFFFF', '#F9FAFB']
+                    }
+                    style={styles.packageHeaderGradient}>
+                    <View style={styles.packageHeaderContent}>
+                      <View style={styles.packageNumberContainer}>
+                        <Text style={styles.packageNumber}>{pkg.id}</Text>
+                      </View>
+                      <View style={styles.packageTitleContainer}>
+                        <Text style={styles.packageTitle}>
+                          Package {pkg.id}
+                        </Text>
+                        {pkg.price ? (
+                          <Text style={styles.packagePricePreview}>
+                            ${pkg.price}
+                          </Text>
+                        ) : (
+                          <Text style={styles.packagePlaceholder}>
+                            Set pricing
+                          </Text>
+                        )}
+                      </View>
+                      <View style={styles.packageActions}>
+                        {pkg.id > 1 && (
+                          <TouchableOpacity
+                            onPress={() => removePackage(pkg.id)}
+                            style={styles.removeButton}>
+                            <AntDesign
+                              name="delete"
+                              size={16}
+                              color="#EF4444"
+                            />
+                          </TouchableOpacity>
+                        )}
+                        <MaterialIcons
+                          name={
+                            expandedPackage === pkg.id
+                              ? 'keyboard-arrow-up'
+                              : 'keyboard-arrow-down'
+                          }
+                          size={24}
+                          color="#6B7280"
                         />
-                      )}
-                    </>
-                  )}
-                </LinearGradient>
-              </TouchableOpacity>
+                      </View>
+                    </View>
+                  </LinearGradient>
+                </TouchableOpacity>
 
-              <Text style={styles.requirementsText}>
-                {validPackagesCount >= 3
-                  ? '✓ Ready to publish your service profile!'
-                  : `${3 - validPackagesCount} package${
-                      3 - validPackagesCount > 1 ? 's' : ''
-                    } remaining`}
+                {expandedPackage === pkg.id && (
+                  <Animated.View
+                    entering={ZoomIn.duration(300)}
+                    style={styles.packageContent}>
+                    <LinearGradient
+                      colors={['#FFFFFF', '#F8FAFF']}
+                      style={styles.packageContentGradient}>
+                      {/* Package Details */}
+                      <View style={styles.inputSection}>
+                        <View style={styles.inputLabelContainer}>
+                          <Text style={styles.inputLabel}>Package Details</Text>
+                          <Text style={styles.charCount}>
+                            {pkg.details.length}/120
+                          </Text>
+                        </View>
+                        <DescriptionField
+                          placeholder="Describe what's included in this package..."
+                          count={false}
+                          value={pkg.details}
+                          maxLength={120}
+                          onChangeText={text =>
+                            handleInputChange(pkg.id, 'details', text)
+                          }
+                          style={styles.descriptionField}
+                          textInput={{fontSize: RFPercentage(1.4)}}
+                        />
+                        {errors[pkg.id]?.details && (
+                          <View style={styles.errorContainer}>
+                            <MaterialIcons
+                              name="error-outline"
+                              size={16}
+                              color="#EF4444"
+                            />
+                            <Text style={styles.errorText}>
+                              {errors[pkg.id].details}
+                            </Text>
+                          </View>
+                        )}
+                      </View>
+
+                      {/* Price Input */}
+                      <View style={styles.inputSection}>
+                        <View style={styles.inputLabelContainer}>
+                          <Text style={styles.inputLabel}>Starting Price</Text>
+                          <Text style={styles.minPriceHint}>
+                            Min: ${25 * pkg.id}
+                          </Text>
+                        </View>
+                        <View style={styles.priceInputContainer}>
+                          <View style={styles.priceSymbol}>
+                            <Text style={styles.priceSymbolText}>$</Text>
+                          </View>
+                          <InputField
+                            placeholder={`e.g. ${25 * pkg.id}`}
+                            customStyle={styles.priceInput}
+                            value={pkg.price}
+                            onChangeText={text =>
+                              handleInputChange(pkg.id, 'price', text)
+                            }
+                            type={'numeric'}
+                          />
+                        </View>
+                        {errors[pkg.id]?.price && (
+                          <View style={styles.errorContainer}>
+                            <MaterialIcons
+                              name="error-outline"
+                              size={16}
+                              color="#EF4444"
+                            />
+                            <Text style={styles.errorText}>
+                              {errors[pkg.id].price}
+                            </Text>
+                          </View>
+                        )}
+                      </View>
+
+                      {/* Package Status */}
+                      <View style={styles.packageStatus}>
+                        {pkg?.details && pkg.price ? (
+                          <View style={styles.statusComplete}>
+                            <AntDesign
+                              name="checkcircle"
+                              size={16}
+                              color="#22C55E"
+                            />
+                            <Text style={styles.statusText}>Complete</Text>
+                          </View>
+                        ) : (
+                          <View style={styles.statusIncomplete}>
+                            <MaterialIcons
+                              name="info-outline"
+                              size={16}
+                              color="#F59E0B"
+                            />
+                            <Text style={styles.statusText}>Incomplete</Text>
+                          </View>
+                        )}
+                      </View>
+                    </LinearGradient>
+                  </Animated.View>
+                )}
+              </Animated.View>
+            ))}
+
+            {/* Add Package Button */}
+            {packages?.length < MAX_PACKAGES && (
+              <Animated.View entering={FadeInUp.delay(300)}>
+                <TouchableOpacity
+                  onPress={addPackage}
+                  style={styles.addPackageButton}>
+                  <LinearGradient
+                    colors={['#FFFFFF', '#F8FAFF']}
+                    style={styles.addPackageGradient}>
+                    <View style={styles.addPackageContent}>
+                      <View style={styles.addIconContainer}>
+                        <AntDesign
+                          name="plus"
+                          size={20}
+                          color={Colors.gradient1}
+                        />
+                      </View>
+                      <Text style={styles.addPackageText}>
+                        Add Package {packages?.length + 1}
+                      </Text>
+                    </View>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </Animated.View>
+            )}
+
+            {/* Package Limit Info */}
+            <View style={styles.limitInfo}>
+              <MaterialIcons name="info-outline" size={16} color="#6B7280" />
+              <Text style={styles.limitInfoText}>
+                You can add up to {MAX_PACKAGES} packages
               </Text>
-            </Animated.View>
-          </KeyboardAvoidingView>
-        </TouchableWithoutFeedback>
-      </ScrollView>
+            </View>
+          </View>
+
+          {/* Continue Button */}
+          <Animated.View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={[
+                styles.continueButton,
+                validPackagesCount < 3 && styles.buttonDisabled,
+              ]}
+              onPress={savePackagesToFirestore}
+              disabled={loading || validPackagesCount < 3}
+              activeOpacity={0.8}>
+              <LinearGradient
+                colors={
+                  validPackagesCount < 3
+                    ? ['#E5E7EB', '#D1D5DB']
+                    : [Colors.gradient1, Colors.gradient2]
+                }
+                style={styles.buttonGradient}>
+                {loading ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <>
+                    <Text style={styles.buttonText}>
+                      {profileCompletion === '100'
+                        ? 'Update Packages'
+                        : validPackagesCount >= 3
+                        ? 'Complete Setup'
+                        : `Add ${3 - validPackagesCount} More Package${
+                            3 - validPackagesCount > 1 ? 's' : ''
+                          }`}
+                    </Text>
+                    {validPackagesCount >= 3 && (
+                      <AntDesign
+                        name="check"
+                        size={RFPercentage(2.2)}
+                        color="#FFFFFF"
+                        style={styles.buttonIcon}
+                      />
+                    )}
+                  </>
+                )}
+              </LinearGradient>
+            </TouchableOpacity>
+
+            <Text style={styles.requirementsText}>
+              {validPackagesCount >= 3
+                ? '✓ Ready to publish your service profile!'
+                : `${3 - validPackagesCount} package${
+                    3 - validPackagesCount > 1 ? 's' : ''
+                  } remaining`}
+            </Text>
+          </Animated.View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+
+      <RemovePackageModal
+        visible={modalVisible}
+        onClose={() => {
+          setModalVisible(false);
+          setPackageToRemove(null);
+        }}
+        onConfirm={async () => {
+          if (packageToRemove) {
+            try {
+              // Step 1: Remove from screen
+              const updated = packages.filter(
+                pkg => pkg.id !== packageToRemove,
+              );
+              const reIndexed = updated.map((pkg, index) => ({
+                ...pkg,
+                id: index + 1,
+              }));
+              setPackages(reIndexed);
+              setExpandedPackage(null);
+
+              // Step 2: Save to Firebase
+              const user = auth().currentUser;
+              if (user) {
+                await firestore()
+                  .collection('CleanerServices')
+                  .doc(user.uid)
+                  .update({
+                    packages: reIndexed,
+                    updatedAt: new Date(),
+                  });
+
+                Toast.show({
+                  type: 'success',
+                  text1: 'Package Removed',
+                  text2: 'Package has been removed',
+                });
+              }
+            } catch (error) {
+              Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Failed to remove package',
+              });
+            }
+          }
+          setModalVisible(false);
+          setPackageToRemove(null);
+        }}
+        packageNumber={packageToRemove || undefined}
+      />
     </View>
   );
 };
@@ -850,8 +871,8 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    borderWidth:1,
-    borderColor:"#e5ecfcff"
+    borderWidth: 1,
+    borderColor: '#e5ecfcff',
     // elevation: 3,
   },
   packageHeader: {
@@ -956,7 +977,7 @@ const styles = StyleSheet.create({
     padding: 16,
     minHeight: 100,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.4),
     color: '#374151',
   },
   priceInputContainer: {
@@ -1100,7 +1121,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    flex:1
+    flex: 1,
   },
   buttonText: {
     fontFamily: Fonts.semiBold,

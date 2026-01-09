@@ -137,7 +137,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
     return `${userId}_${item.id}`;
   };
   const chatId = generateChatId();
-  const [existingChatId, setExistingChatId] = useState(null);
+  const [existingChatId, setExistingChatId] = useState<string | null>(null);
 
   // Existing chat id
   const fetchExistingChatId = async (userId1: any, userId2: any) => {
@@ -178,7 +178,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
   }, [userId, item?.id]);
 
   // Fetching token
-  const [token, setFcmToken] = useState(null);
+  const [token, setFcmToken] = useState<string>('');
   useEffect(() => {
     fetchToken(item.id);
   }, []);
@@ -665,9 +665,6 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontMedium,
     left: RFPercentage(1),
-    // textAlign: 'center',
-    // bottom: RFPercentage(1.5),
-    // position: 'absolute',
   },
   msg: {
     width: '90%',

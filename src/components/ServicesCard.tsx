@@ -5,14 +5,32 @@ import {
   View,
   TouchableOpacity,
   Platform,
+  ImageSourcePropType,
 } from 'react-native';
-import React, {useState} from 'react';
-import {Colors, Fonts, IMAGES, Icons} from '../constants/Themes';
-import {RFPercentage} from 'react-native-responsive-fontsize';
+import React, { useState } from 'react';
+import { Colors, Fonts, IMAGES, Icons } from '../constants/Themes';
+import { RFPercentage } from 'react-native-responsive-fontsize';
 import LinearGradient from 'react-native-linear-gradient';
 import moment from 'moment';
 
-const ServicesCard = ({
+interface Location {
+  name?: string;
+  [key: string]: any;
+}
+
+interface ServicesCardProps {
+  covers: string[]; // URLs of service images
+  icon?: string | null; // service icon URL
+  name: string;
+  price: number;
+  rating?: number;
+  star?: ImageSourcePropType;
+  location?: Location;
+  onPress: () => void;
+  createdAt: { _seconds: number; _nanoseconds?: number };
+}
+
+const ServicesCard: React.FC<ServicesCardProps> = ({
   covers,
   icon,
   name,
@@ -23,7 +41,8 @@ const ServicesCard = ({
   onPress,
   createdAt,
 }) => {
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState<number>(0);
+
   const createdAtDate = new Date(createdAt._seconds * 1000);
   const formattedDate = moment(createdAtDate).format('DD MMMM, YYYY');
 
@@ -33,7 +52,7 @@ const ServicesCard = ({
         {/* Image Section */}
         <View style={styles.imageContainer}>
           <Image
-            source={{uri: covers[step]}}
+            source={{ uri: covers[step] }}
             resizeMode="cover"
             style={styles.image}
           />
@@ -41,7 +60,8 @@ const ServicesCard = ({
           <View style={styles.priceBadge}>
             <LinearGradient
               colors={[Colors.gradient1, Colors.gradient2]}
-              style={styles.priceGradient}>
+              style={styles.priceGradient}
+            >
               <Text style={styles.priceBadgeText}>${price}</Text>
             </LinearGradient>
           </View>
@@ -58,7 +78,7 @@ const ServicesCard = ({
           {/* Header Row */}
           <View style={styles.headerRow}>
             <Image
-              source={icon ? {uri: icon} : IMAGES.defaultPic}
+              source={icon ? { uri: icon } : IMAGES.defaultPic}
               resizeMode="cover"
               style={styles.serviceIcon}
             />
@@ -66,17 +86,7 @@ const ServicesCard = ({
               <Text style={styles.serviceName} numberOfLines={1}>
                 {name}
               </Text>
-              {/* Rating Row */}
-              {/* <View style={styles.ratingContainer}>
-                <Image
-                  source={Icons.star || IMAGES.star}
-                  resizeMode="contain"
-                  style={styles.starIcon}
-                />
-                <Text style={styles.ratingText}>
-                  {rating || 'New'}
-                </Text>
-              </View> */}
+              {/* Rating row can be added here */}
             </View>
           </View>
 
@@ -95,14 +105,15 @@ const ServicesCard = ({
                 : 'Location not specified'}
             </Text>
 
-            <View style={{position: 'absolute', right: 0}}>
+            <View style={{ position: 'absolute', right: 0 }}>
               <Text
                 style={{
                   fontFamily: Fonts.fontRegular,
                   fontSize: RFPercentage(1.1),
                   color: Colors.secondaryText,
-                }}>
-                Posted on : {formattedDate}
+                }}
+              >
+                Posted on: {formattedDate}
               </Text>
             </View>
           </View>
@@ -112,7 +123,8 @@ const ServicesCard = ({
             <Text style={styles.startingText}>
               Starting price{' '}
               <Text
-                style={{color: Colors.gradient1, fontFamily: Fonts.semiBold}}>
+                style={{ color: Colors.gradient1, fontFamily: Fonts.semiBold }}
+              >
                 {price}$
               </Text>
             </Text>
@@ -131,12 +143,8 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: '#fff',
     borderRadius: RFPercentage(2.5),
-    // Enhanced Shadow
     shadowColor: 'rgba(208, 227, 254, 0.8)',
-    shadowOffset: {
-      width: 0,
-      height: 6,
-    },
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.1,
     shadowRadius: 20,
     elevation: 8,
@@ -166,12 +174,8 @@ const styles = StyleSheet.create({
     right: RFPercentage(1.5),
     borderRadius: RFPercentage(1),
     overflow: 'hidden',
-    // Shadow for badge
     shadowColor: Colors.gradient1,
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
     elevation: 6,
@@ -217,20 +221,6 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(0.4),
     lineHeight: RFPercentage(2.2),
   },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  starIcon: {
-    width: RFPercentage(1.4),
-    height: RFPercentage(1.4),
-    marginRight: RFPercentage(0.4),
-  },
-  ratingText: {
-    color: Colors.secondaryText,
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.3),
-  },
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -266,13 +256,9 @@ const styles = StyleSheet.create({
     width: RFPercentage(1),
     height: RFPercentage(1),
     borderRadius: RFPercentage(0.5),
-    backgroundColor: '#10B981', // Green dot for available
-    // Shadow for dot
+    backgroundColor: '#10B981',
     shadowColor: '#10B981',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.3,
     shadowRadius: 2,
     elevation: 2,

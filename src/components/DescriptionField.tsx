@@ -1,7 +1,7 @@
-import { StyleSheet, Text, View, TextInput } from 'react-native';
-import React, { useState } from 'react';
-import { RFPercentage } from 'react-native-responsive-fontsize';
-import { Colors, Fonts } from '../constants/Themes';
+import {StyleSheet, Text, View, TextInput} from 'react-native';
+import React, {useState} from 'react';
+import {RFPercentage} from 'react-native-responsive-fontsize';
+import {Colors, Fonts} from '../constants/Themes';
 
 interface Props {
   style?: object;
@@ -9,13 +9,12 @@ interface Props {
   count: boolean;
   onChangeText?: (text: string) => void;
   value?: string;
-  maxLength? : number
+  maxLength?: number;
+  textInput?: object;
 }
 
-
 const DescriptionField = (props: Props) => {
-  const MAX_CHARACTERS = props.maxLength;
-
+  const MAX_CHARACTERS = props.maxLength ?? 200;
 
   const handleTextChange = (text: string) => {
     if (text.length <= MAX_CHARACTERS) {
@@ -23,13 +22,12 @@ const DescriptionField = (props: Props) => {
     }
   };
 
-
   return (
-    <View style={[styles.textArea, { ...props.style }]}>
+    <View style={[styles.textArea, {...props.style}]}>
       <TextInput
         placeholder={props.placeholder}
         placeholderTextColor={Colors.placeholderColor}
-        style={styles.textInput}
+        style={[styles.textInput, {...props.textInput}]}
         numberOfLines={20}
         multiline
         onChangeText={handleTextChange}
@@ -39,9 +37,13 @@ const DescriptionField = (props: Props) => {
         <Text
           style={[
             styles.charCount,
-            { color: (props.value?.length ?? 0) === MAX_CHARACTERS ? 'red' : Colors.secondaryText },
-          ]}
-        >
+            {
+              color:
+                (props.value?.length ?? 0) === MAX_CHARACTERS
+                  ? 'red'
+                  : Colors.secondaryText,
+            },
+          ]}>
           {props.value?.length ?? 0}/{MAX_CHARACTERS}
         </Text>
       )}
