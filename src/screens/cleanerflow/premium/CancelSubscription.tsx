@@ -34,10 +34,8 @@ const CancelSubscription = () => {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
-  const [modalVisible3, setModalVisible3] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoading2, setIsLoading2] = useState(false);
-  const [isLoading3, setIsLoading3] = useState(false);
   const [cancel, setCancel] = useState(null);
   const [subscriptionId, setSubscriptionId] = useState(null);
   const user = auth().currentUser;
@@ -115,8 +113,8 @@ const CancelSubscription = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-            <StatusBar backgroundColor={Colors.background} barStyle="dark-content" />
-      
+      <StatusBar backgroundColor={Colors.background} barStyle="dark-content" />
+
       {/* Header */}
       <HeaderComponent />
 

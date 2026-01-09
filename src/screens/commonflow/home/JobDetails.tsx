@@ -6,6 +6,7 @@ import {
   Text,
   View,
   StatusBar,
+  ImageSourcePropType,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -17,10 +18,18 @@ import {useDispatch, useSelector} from 'react-redux';
 import firestore from '@react-native-firebase/firestore';
 import {setJobId} from '../../../redux/Job/Actions';
 import auth from '@react-native-firebase/auth';
+import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
+
+type DetailRowProps = {
+  icon: ImageSourcePropType;
+  label: string;
+  value: string | number;
+  isDescription?: boolean;
+};
 
 const JobDetails = ({route, navigation}: any) => {
   const {item} = route.params;
-  const userData = useSelector(state => state?.profile?.profileData);
+  const userData = useSelector((state: any) => state?.profile?.profileData);
   const [loading, setLoading] = useState(false);
   const [loading2, setLoading2] = useState(false);
   const [loading3, setLoading3] = useState(false);
@@ -31,7 +40,7 @@ const JobDetails = ({route, navigation}: any) => {
     try {
       await firestore().collection('Jobs').doc(jobId).update({
         status: newStatus,
-        updatedAt:new Date(),
+        updatedAt: new Date(),
       });
       navigation.goBack();
     } catch (error) {
@@ -60,10 +69,11 @@ const JobDetails = ({route, navigation}: any) => {
     return `${userId}_${item.id}`;
   };
   const chatId = generateChatId();
-  const [existingChatId, setExistingChatId] = useState(null);
+  const [existingChatId, setExistingChatId] = useState<string | null>(null);
 
   // User Data
-  const [userInfo, setUserInfo] = useState([]);
+  const [userInfo, setUserInfo] =
+    useState<FirebaseFirestoreTypes.DocumentData | null>(null);
   useEffect(() => {
     fetchUserData();
   }, []);
@@ -73,7 +83,7 @@ const JobDetails = ({route, navigation}: any) => {
     try {
       const userDoc = await firestore().collection('Users').doc(user.uid).get();
       if (userDoc.exists) {
-        const userData = userDoc.data();
+        const userData = userDoc.data() ?? null;
         setUserInfo(userData);
       }
     } catch (error) {
@@ -82,7 +92,8 @@ const JobDetails = ({route, navigation}: any) => {
   };
 
   // Other user
-  const [otherUser, setOtherUser] = useState([]);
+  const [otherUser, setOtherUser] =
+    useState<FirebaseFirestoreTypes.DocumentData | null>(null);
   useEffect(() => {
     otherUserData();
   }, []);
@@ -93,7 +104,7 @@ const JobDetails = ({route, navigation}: any) => {
         .doc(item.jobId)
         .get();
       if (userDoc.exists) {
-        const userData = userDoc.data();
+        const userData = userDoc.data() ?? null;
         setOtherUser(userData);
       }
     } catch (error) {
@@ -139,7 +150,7 @@ const JobDetails = ({route, navigation}: any) => {
   const cleanDescription = item.description.replace(/\s+/g, ' ').trim();
 
   // Status Badge Component
-  const StatusBadge = ({status}) => {
+  const StatusBadge = ({status}: any) => {
     const getStatusConfig = () => {
       switch (status) {
         case 'active':
@@ -192,8 +203,12 @@ const JobDetails = ({route, navigation}: any) => {
     );
   };
 
-  // Detail Row Component
-  const DetailRow = ({icon, label, value, isDescription = false}) => (
+  const DetailRow: React.FC<DetailRowProps> = ({
+    icon,
+    label,
+    value,
+    isDescription = false,
+  }) => (
     <View style={styles.detailRow}>
       <View style={styles.detailIconContainer}>
         <Image
@@ -331,7 +346,7 @@ const JobDetails = ({route, navigation}: any) => {
                       receiverName: otherUser?.name,
                       receiverProfile: otherUser?.profile,
                       senderProfile: userInfo?.profile,
-                      fcmToken: otherUser.fcmToken,
+                      fcmToken: otherUser?.fcmToken,
                     });
                   }, 1000);
                 }}

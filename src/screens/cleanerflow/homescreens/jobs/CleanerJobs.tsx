@@ -26,10 +26,8 @@ import JobCard from '../../../../components/JobCard';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
-import {Icons} from '../../../../constants/Themes';
 import {BlurView} from '@react-native-community/blur';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import GradientButton from '../../../../components/GradientButton';
 import SearchField from '../../../../components/SearchField';
 import Slider from '@react-native-community/slider';
 import NotFound from '../../../../components/NotFound';
@@ -55,12 +53,26 @@ const items = [
   'Others',
 ];
 
+type Job = {
+  id: string;
+  title?: string;
+  status?: string;
+  priceRange?: number;
+  type?: string;
+  location?: {
+    name?: string;
+    latitude?: number;
+    longitude?: number;
+  };
+  createdAt?: any;
+};
+
 const CleanerJobs = () => {
   const profileData = useSelector((state: any) => state?.profile.profileData);
 
   const {location, loading, error} = useCurrentLocation();
   const navigation = useNavigation<any>();
-  const [jobsData, setJobsData] = useState([]);
+  const [jobsData, setJobsData] = useState<Job[]>([]);
   const [loading2, setLoading] = useState(false);
   const [priceRange, setPriceRange] = useState([10, 2000]);
   const tempValue = useRef(priceRange[0]);
@@ -193,7 +205,7 @@ const CleanerJobs = () => {
     }, 1500);
   };
 
-  const [serviceTypeFilter, setServiceTypeFilter] = useState([]);
+  const [serviceTypeFilter, setServiceTypeFilter] = useState<string[]>([]);
 
   const handleSearch2 = (query: string) => {
     setQuery2(query);
@@ -779,197 +791,180 @@ const CleanerJobs = () => {
             transparent={true}
             animationType="fade"
             onRequestClose={() => setModalVisible3(false)}>
-            <KeyboardAvoidingView
-              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-              style={{flex: 1}}>
-              <Animated.View
-                style={[
-                  styles.serviceModal,
-                  {opacity: opacityAnim, transform: [{scale: scaleAnim}]},
-                ]}>
-                {/* Modal Header */}
-                <View style={styles.modalHeader}>
-                  <View style={styles.modalIconContainer}>
-                    <MaterialIcons
-                      name="cleaning-services"
-                      size={24}
-                      color={Colors.gradient1}
-                    />
-                  </View>
-                  <View style={styles.modalTitleContainer}>
-                    <Text style={styles.modalTitle}>Select Service Type</Text>
-                    <Text style={styles.modalSubtitle}>
-                      Choose a specific cleaning service
-                    </Text>
-                  </View>
-                  <TouchableOpacity
-                    style={styles.modalCloseButton}
-                    onPress={() => setModalVisible3(false)}>
-                    <AntDesign name="close" size={22} color="#6B7280" />
-                  </TouchableOpacity>
-                </View>
-
-                {/* Search */}
-                <View style={styles.searchContainer}>
-                  <SearchField
-                    placeholder="Search service types..."
-                    customStyle={styles.searchInput}
-                    value={query2}
-                    onChangeText={handleSearch2}
+            <Animated.View
+              style={[styles.serviceModal, {opacity: opacityAnim}]}>
+              {/* Modal Header */}
+              <View style={styles.modalHeader}>
+                <View style={styles.modalIconContainer}>
+                  <MaterialIcons
+                    name="cleaning-services"
+                    size={24}
+                    color={Colors.gradient1}
                   />
                 </View>
+                <View style={styles.modalTitleContainer}>
+                  <Text style={styles.modalTitle}>Select Service Type</Text>
+                  <Text style={styles.modalSubtitle}>
+                    Choose a specific cleaning service
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  style={styles.modalCloseButton}
+                  onPress={() => setModalVisible3(false)}>
+                  <AntDesign name="close" size={22} color="#6B7280" />
+                </TouchableOpacity>
+              </View>
 
-                {/* Service Type Results */}
-                {query2?.length > 0 ? (
-                  selectedType?.length === 0 && (
-                    <View style={styles.resultsContainer}>
-                      {serviceTypeFilter.length > 0 ? (
-                        <FlatList
-                          data={serviceTypeFilter}
-                          keyboardShouldPersistTaps="always"
-                          keyExtractor={(item, index) => index.toString()}
-                          showsVerticalScrollIndicator={false}
-                          style={styles.resultsList}
-                          renderItem={({item}) => (
-                            <TouchableOpacity
-                              style={styles.resultItem}
-                              onPress={() => {
-                                setQuery2(item);
-                                setSelectedType(item);
-                                Keyboard.dismiss();
-                              }}>
-                              <MaterialIcons
-                                name="check-circle-outline"
-                                size={20}
-                                color="#9CA3AF"
-                              />
-                              <Text style={styles.resultText}>{item}</Text>
-                              <AntDesign
-                                name="right"
-                                size={16}
-                                color="#9CA3AF"
-                              />
-                            </TouchableOpacity>
-                          )}
-                          ItemSeparatorComponent={() => (
-                            <View style={styles.separator} />
-                          )}
-                        />
-                      ) : (
-                        <View style={styles.noResults}>
-                          <MaterialIcons
-                            name="search-off"
-                            size={RFPercentage(5)}
-                            color="#CBD5E1"
-                          />
-                          <Text style={styles.noResultsTitle}>
-                            No services found
-                          </Text>
-                          <Text style={styles.noResultsText}>
-                            Try searching for something else
-                          </Text>
-                        </View>
-                      )}
-                    </View>
-                  )
-                ) : (
-                  // Show this when no query has been entered yet
-                  <View style={styles.emptySearchContainer}>
-                    <Text style={styles.emptySearchTitle}>
-                      Refine Your Search
-                    </Text>
-                    <Text style={styles.emptySearchText}>
-                      Type in the search box above to find specific cleaning
-                      services
-                    </Text>
-                    <View style={styles.searchTips}>
-                      <View style={styles.tipItem}>
+              {/* Search */}
+              <View style={styles.searchContainer}>
+                <SearchField
+                  placeholder="Search service types..."
+                  customStyle={styles.searchInput}
+                  value={query2}
+                  onChangeText={handleSearch2}
+                />
+              </View>
+
+              {/* Service Type Results */}
+              {query2?.length > 0 ? (
+                selectedType?.length === 0 && (
+                  <View style={styles.resultsContainer}>
+                    {serviceTypeFilter.length > 0 ? (
+                      <FlatList
+                        data={serviceTypeFilter}
+                        keyboardShouldPersistTaps="always"
+                        keyExtractor={(item, index) => index.toString()}
+                        showsVerticalScrollIndicator={false}
+                        style={styles.resultsList}
+                        renderItem={({item}) => (
+                          <TouchableOpacity
+                            style={styles.resultItem}
+                            onPress={() => {
+                              setQuery2(item);
+                              setSelectedType(item);
+                              Keyboard.dismiss();
+                            }}>
+                            <MaterialIcons
+                              name="check-circle-outline"
+                              size={20}
+                              color="#9CA3AF"
+                            />
+                            <Text style={styles.resultText}>{item}</Text>
+                            <AntDesign name="right" size={16} color="#9CA3AF" />
+                          </TouchableOpacity>
+                        )}
+                        ItemSeparatorComponent={() => (
+                          <View style={styles.separator} />
+                        )}
+                      />
+                    ) : (
+                      <View style={styles.noResults}>
                         <MaterialIcons
-                          name="check-circle"
-                          size={16}
-                          color="#10B981"
+                          name="search-off"
+                          size={RFPercentage(5)}
+                          color="#CBD5E1"
                         />
-                        <Text style={styles.tipText}>
-                          Search by service type
+                        <Text style={styles.noResultsTitle}>
+                          No services found
+                        </Text>
+                        <Text style={styles.noResultsText}>
+                          Try searching for something else
                         </Text>
                       </View>
-                      <View style={styles.tipItem}>
-                        <MaterialIcons
-                          name="check-circle"
-                          size={16}
-                          color="#10B981"
-                        />
-                        <Text style={styles.tipText}>
-                          Browse available categories
-                        </Text>
-                      </View>
-                      <View style={styles.tipItem}>
-                        <MaterialIcons
-                          name="check-circle"
-                          size={16}
-                          color="#10B981"
-                        />
-                        <Text style={styles.tipText}>
-                          Select one to apply filter
-                        </Text>
-                      </View>
-                    </View>
+                    )}
                   </View>
-                )}
-
-                {/* Selected Type - Keep this outside so it shows even when no query */}
-                {selectedType?.length > 0 && (
-                  <View style={styles.selectedTypeContainer}>
-                    <Text style={styles.selectedTypeLabel}>
-                      Selected Service:
-                    </Text>
-                    <View style={styles.selectedTypeCard}>
+                )
+              ) : (
+                // Show this when no query has been entered yet
+                <View style={styles.emptySearchContainer}>
+                  <Text style={styles.emptySearchTitle}>
+                    Refine Your Search
+                  </Text>
+                  <Text style={styles.emptySearchText}>
+                    Type in the search box above to find specific cleaning
+                    services
+                  </Text>
+                  <View style={styles.searchTips}>
+                    <View style={styles.tipItem}>
                       <MaterialIcons
                         name="check-circle"
-                        size={20}
+                        size={16}
                         color="#10B981"
                       />
-                      <Text style={styles.selectedTypeText}>
-                        {selectedType}
+                      <Text style={styles.tipText}>Search by service type</Text>
+                    </View>
+                    <View style={styles.tipItem}>
+                      <MaterialIcons
+                        name="check-circle"
+                        size={16}
+                        color="#10B981"
+                      />
+                      <Text style={styles.tipText}>
+                        Browse available categories
                       </Text>
-                      <TouchableOpacity
-                        onPress={() => {
-                          setSelectedType('');
-                          setQuery2('');
-                        }}>
-                        <AntDesign name="close" size={16} color="#94A3B8" />
-                      </TouchableOpacity>
+                    </View>
+                    <View style={styles.tipItem}>
+                      <MaterialIcons
+                        name="check-circle"
+                        size={16}
+                        color="#10B981"
+                      />
+                      <Text style={styles.tipText}>
+                        Select one to apply filter
+                      </Text>
                     </View>
                   </View>
-                )}
-                {/* Apply Button */}
-                <View style={[styles.modalButtonContainer]}>
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    style={[
-                      styles.applyButton,
-                      query2?.length === 0 && styles.buttonDisabled,
-                    ]}
-                    onPress={handleServiceTypeApply}
-                    disabled={query2?.length === 0 || loactionLoading}>
-                    <LinearGradient
-                      colors={[Colors.gradient1, Colors.gradient2]}
-                      style={styles.applyButtonGradient}>
-                      {loactionLoading ? (
-                        <ActivityIndicator color="#FFFFFF" />
-                      ) : (
-                        <>
-                          <Text style={styles.applyButtonText}>
-                            Apply Filter
-                          </Text>
-                          <AntDesign name="check" size={18} color="#FFFFFF" />
-                        </>
-                      )}
-                    </LinearGradient>
-                  </TouchableOpacity>
                 </View>
-              </Animated.View>
-            </KeyboardAvoidingView>
+              )}
+
+              {/* Selected Type - Keep this outside so it shows even when no query */}
+              {selectedType?.length > 0 && (
+                <View style={styles.selectedTypeContainer}>
+                  <Text style={styles.selectedTypeLabel}>
+                    Selected Service:
+                  </Text>
+                  <View style={styles.selectedTypeCard}>
+                    <MaterialIcons
+                      name="check-circle"
+                      size={20}
+                      color="#10B981"
+                    />
+                    <Text style={styles.selectedTypeText}>{selectedType}</Text>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setSelectedType('');
+                        setQuery2('');
+                      }}>
+                      <AntDesign name="close" size={16} color="#94A3B8" />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+              {/* Apply Button */}
+              <View style={[styles.modalButtonContainer]}>
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  style={[
+                    styles.applyButton,
+                    query2?.length === 0 && styles.buttonDisabled,
+                  ]}
+                  onPress={handleServiceTypeApply}
+                  disabled={query2?.length === 0 || loactionLoading}>
+                  <LinearGradient
+                    colors={[Colors.gradient1, Colors.gradient2]}
+                    style={styles.applyButtonGradient}>
+                    {loactionLoading ? (
+                      <ActivityIndicator color="#FFFFFF" />
+                    ) : (
+                      <>
+                        <Text style={styles.applyButtonText}>Apply Filter</Text>
+                        <AntDesign name="check" size={18} color="#FFFFFF" />
+                      </>
+                    )}
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
+            </Animated.View>
           </Modal>
         </View>
       )}
@@ -1230,8 +1225,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
     padding: 24,
-    marginTop: '40%',
-    minHeight: '60%',
+
+    maxHeight: '80%',
+    minHeight: 500,
+
+    marginTop: 'auto',
+    marginBottom: 'auto',
+
     shadowColor: '#3c5c87ff',
     shadowOffset: {width: 0, height: 10},
     shadowOpacity: 0.1,

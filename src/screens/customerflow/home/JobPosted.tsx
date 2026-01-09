@@ -14,12 +14,9 @@ import {Colors, Fonts} from '../../../constants/Themes';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {useNavigation} from '@react-navigation/native';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../../../routers/StackNavigator';
 
 const JobPosted = () => {
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList, 'JobPosted'>>();
+  const navigation = useNavigation<any>();
   const [loading, setLoading] = useState(false);
 
   // Animation values
@@ -70,14 +67,7 @@ const JobPosted = () => {
       </View>
 
       {/* Main Content */}
-      <Animated.View
-        style={[
-          styles.centeredView,
-          {
-            // opacity: fadeAnim,
-            // transform: [{scale: scaleAnim}],
-          },
-        ]}>
+      <Animated.View style={[styles.centeredView]}>
         {/* Success Icon with Ring */}
         <View style={styles.iconContainer}>
           <View style={styles.iconRing}>

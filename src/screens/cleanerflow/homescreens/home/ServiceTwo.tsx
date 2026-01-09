@@ -15,11 +15,8 @@ import {
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
-import {Colors, Icons, Fonts} from '../../../../constants/Themes';
+import {Colors, Fonts} from '../../../../constants/Themes';
 import HeaderBack from '../../../../components/HeaderBack';
-import InfoHeader from '../../../../components/InfoHeader';
-import TimeLine from '../../../../components/TimeLine';
-import GradientButton from '../../../../components/GradientButton';
 import ImagePicker from 'react-native-image-crop-picker';
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
@@ -29,9 +26,7 @@ import {Image as CompressorImage} from 'react-native-compressor';
 import Toast from 'react-native-toast-message';
 import LinearGradient from 'react-native-linear-gradient';
 import Animated, {
-  FadeInDown,
   FadeInUp,
-  SlideInRight,
   ZoomIn,
   LightSpeedInRight,
 } from 'react-native-reanimated';
@@ -368,9 +363,7 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
         {/* Gallery Stats */}
-        <Animated.View
-          entering={FadeInUp.duration(600)}
-          style={styles.statsCard}>
+        <Animated.View style={styles.statsCard}>
           <LinearGradient
             colors={['#F0F7FF', '#E6F0FF']}
             style={styles.statsGradient}>
@@ -396,7 +389,7 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
         </Animated.View>
 
         {/* Gallery Instructions */}
-        <Animated.View entering={SlideInRight.delay(200)}>
+        <Animated.View>
           <View style={styles.instructionsCard}>
             <View style={styles.instructionsHeader}>
               <MaterialIcons
@@ -464,7 +457,7 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
 
         {/* Tips */}
         {uploadedCount < 3 && uploadedCount > 0 && (
-          <Animated.View entering={FadeInUp.delay(400)}>
+          <Animated.View>
             <View style={styles.tipsCard}>
               <View style={styles.tipsHeader}>
                 <MaterialIcons name="lightbulb" size={20} color="#F59E0B" />

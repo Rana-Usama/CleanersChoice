@@ -16,19 +16,17 @@ import {Colors, Fonts, Icons} from '../../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import {useNavigation} from '@react-navigation/native';
 
 const {width, height} = Dimensions.get('window');
 
-const ProfileCompletionCongratulations = ({
-  navigation,
-  completionPercentage = 100,
-}) => {
+const ProfileCompletionCongratulations = ({completionPercentage = 100}) => {
   const scaleValue = useRef(new Animated.Value(0)).current;
   const fadeValue = useRef(new Animated.Value(0)).current;
   const progressValue = useRef(new Animated.Value(0)).current;
   const confettiAnimation = useRef(new Animated.Value(0)).current;
   const [expandedSection, setExpandedSection] = useState('benefits'); // 'benefits', 'stats', or 'steps'
-  const heightAnim = useRef(new Animated.Value(0)).current;
+  const navigation = useNavigation<any>();
 
   useEffect(() => {
     // Start main animations
@@ -69,12 +67,7 @@ const ProfileCompletionCongratulations = ({
     }
   }, []);
 
-  const animatedWidth = progressValue.interpolate({
-    inputRange: [0, 100],
-    outputRange: ['0%', '100%'],
-  });
-
-  const toggleSection = section => {
+  const toggleSection = (section: any) => {
     setExpandedSection(expandedSection === section ? null : section);
   };
 

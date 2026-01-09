@@ -2,7 +2,6 @@ import {
   StyleSheet,
   Text,
   View,
-  SafeAreaView,
   ScrollView,
   TouchableOpacity,
   FlatList,
@@ -10,7 +9,6 @@ import {
   ActivityIndicator,
   RefreshControl,
   Platform,
-  Dimensions,
   StatusBar,
   Animated,
 } from 'react-native';
@@ -29,18 +27,25 @@ import {showToast} from '../../../utils/ToastMessage';
 import {useExitAppOnBack} from '../../../utils/ExitApp';
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 
-const {width} = Dimensions.get('window');
+interface Job {
+  id: string;
+  title?: string;
+  location?: {name?: string};
+  priceRange?: string;
+  createdAt?: any;
+}
 
 const Jobs = ({navigation}: any) => {
   const [active, setActive] = useState(true);
   const [completed, setCompleted] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [Jobs, setJobs] = useState([]);
+  const [Jobs, setJobs] = useState<Job[]>([]);
   const [status, setStatus] = useState('active');
   const [loading, setLoading] = useState(false);
-  const [selectedJobId, setSelectedJobId] = useState(null);
+  const [selectedJobId, setSelectedJobId] = useState<string | undefined>(
+    undefined,
+  );
   const [loading2, setLoading2] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [jobStats, setJobStats] = useState({
@@ -294,13 +299,6 @@ const Jobs = ({navigation}: any) => {
                       : ['#FFFFFF', '#dae2f6ff']
                   }
                   style={styles.filterGradient}>
-                  {/* <View style={styles.filterIconContainer}>
-                    <MaterialIcons
-                      name="check-circle"
-                      size={RFPercentage(2)}
-                      color={Colors.gradient1}
-                    />
-                  </View> */}
                   <Text
                     style={[
                       styles.filterButtonText,
@@ -327,13 +325,6 @@ const Jobs = ({navigation}: any) => {
                       : ['#FFFFFF', '#dae2f6ff']
                   }
                   style={styles.filterGradient}>
-                  {/* <View style={styles.filterIconContainer}>
-                    <MaterialIcons
-                      name="done-all"
-                      size={RFPercentage(2)}
-                      color={ Colors.gradient1}
-                    />
-                  </View> */}
                   <Text
                     style={[
                       styles.filterButtonText,
@@ -411,7 +402,7 @@ const Jobs = ({navigation}: any) => {
                   <JobCard
                     name={getTruncatedText(item?.title)}
                     location={getTruncatedText2(item?.location?.name)}
-                    price={item?.priceRange}
+                    price={item?.priceRange ?? ''}
                     date={item?.createdAt}
                     onPress={() =>
                       navigation.navigate('JobDetails', {item: item})
@@ -421,11 +412,6 @@ const Jobs = ({navigation}: any) => {
                       setModalVisible(true);
                     }}
                     delete={completed ? false : true}
-                    // customStyle={[
-                    //   styles.jobCard,
-                    //   active && styles.activeJobCard,
-                    //   completed && styles.completedJobCard,
-                    // ]}
                   />
                 )}
                 contentContainerStyle={styles.jobsListContent}

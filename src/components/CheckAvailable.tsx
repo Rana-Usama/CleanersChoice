@@ -5,8 +5,8 @@ import { Colors, Fonts } from '../constants/Themes';
 
 type CheckAvailableProps = {
   day: string;
-  fromTime: any; // assuming Unix timestamp in seconds
-  toTime: any;   // assuming Unix timestamp in seconds
+  fromTime: any; 
+  toTime: any;   
 };
 
 const CheckAvailable: React.FC<CheckAvailableProps> = ({ day, fromTime, toTime }) => {

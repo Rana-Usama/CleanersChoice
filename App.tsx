@@ -18,7 +18,6 @@ import messaging from '@react-native-firebase/messaging';
 import notifee from '@notifee/react-native';
 import {UnreadMessagesProvider} from './src/utils/UnreadMessagesContext';
 import {toastConfig} from './src/utils/toastConfig';
-import {__DEV__} from 'react-native';
 
 const App: React.FC = () => {
   console.log('Running in', __DEV__ ? 'DEBUG' : 'RELEASE');
@@ -26,7 +25,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const requestNotificationPermission = async () => {
       try {
-        console.log('🔔 Requesting notification permission...');
+        console.log('Requesting notification permission...');
 
         if (Platform.OS === 'android' && Platform.Version >= 33) {
           const granted = await PermissionsAndroid.request(
@@ -43,18 +42,18 @@ const App: React.FC = () => {
           authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
         if (enabled) {
-          console.log('✅ Notification permission granted');
+          console.log('Notification permission granted');
           await messaging().registerDeviceForRemoteMessages();
           console.log('📲 registerDeviceForRemoteMessages done');
 
           // Wait a bit for APNs token → FCM mapping
           const fcmToken = await messaging().getToken();
-          console.log('🎯 FCM token from getToken():', fcmToken);
+          console.log('FCM token from getToken():', fcmToken);
         } else {
-          console.log('❌ Notification permission denied');
+          console.log('Notification permission denied');
         }
       } catch (error) {
-        console.log('⚠️ Error requesting permission:', error);
+        console.log('Error requesting permission:', error);
       }
     };
 
@@ -62,7 +61,7 @@ const App: React.FC = () => {
 
     // Foreground messages
     const unsubscribeOnMessage = messaging().onMessage(async remoteMessage => {
-      console.log('📩 onMessage received:', remoteMessage); // 👀
+      console.log('onMessage received:', remoteMessage); 
       try {
         onDisplayNotification(remoteMessage);
       } catch (error) {
@@ -72,7 +71,7 @@ const App: React.FC = () => {
 
     // Token refresh listener
     const unsubscribeToken = messaging().onTokenRefresh(token => {
-      console.log('🔄 FCM token refreshed (after APNs token linked):', token); // 👀
+      console.log('FCM token refreshed (after APNs token linked):', token);
     });
 
     return () => {

@@ -6,7 +6,29 @@ import DatePicker from 'react-native-date-picker';
 import {useSelector} from 'react-redux';
 import CheckBox from 'react-native-check-box';
 
-const SetAvailability = ({
+/* -------------------- Types -------------------- */
+
+type SetAvailabilityProps = {
+  day: string;
+  fullName: string;
+  fromTime: Date;
+  toTime: Date;
+  checked: boolean;
+  onToggleCheckBox: (day: string) => void;
+  onUpdateAvailability: (day: string, fromTime: Date, toTime: Date) => void;
+};
+
+type RootState = {
+  profile: {
+    profileData: {
+      role: 'Customer' | 'Cleaner' | string;
+    };
+  };
+};
+
+/* -------------------- Component -------------------- */
+
+const SetAvailability: React.FC<SetAvailabilityProps> = ({
   day,
   fromTime,
   toTime,
@@ -14,9 +36,14 @@ const SetAvailability = ({
   checked,
   onToggleCheckBox,
 }) => {
-  const profileData = useSelector(state => state.profile.profileData.role);
-  const [openFromPicker, setOpenFromPicker] = useState(false);
-  const [openToPicker, setOpenToPicker] = useState(false);
+  const profileRole = useSelector(
+    (state: RootState) => state.profile.profileData.role,
+  );
+
+  const [openFromPicker, setOpenFromPicker] = useState<boolean>(false);
+  const [openToPicker, setOpenToPicker] = useState<boolean>(false);
+
+  const isDisabled = profileRole === 'Customer';
 
   return (
     <View style={styles.container}>
@@ -27,6 +54,7 @@ const SetAvailability = ({
         checkedCheckBoxColor={Colors.gradient1}
         uncheckedCheckBoxColor={'rgba(164, 172, 188, 1)'}
       />
+
       <View style={styles.dayView}>
         <Text style={styles.dayText}>{day}</Text>
       </View>
@@ -35,10 +63,10 @@ const SetAvailability = ({
       <TouchableOpacity
         activeOpacity={0.8}
         onPress={() => setOpenFromPicker(true)}
-        disabled={profileData === 'Customer' ? true : false}
+        disabled={isDisabled}
         style={styles.timeView}>
-        <Text style={[styles.timeText]}>
-          {new Date(fromTime).toLocaleTimeString([], {
+        <Text style={styles.timeText}>
+          {fromTime.toLocaleTimeString([], {
             hour: '2-digit',
             minute: '2-digit',
             hour12: true,
@@ -50,10 +78,10 @@ const SetAvailability = ({
       <TouchableOpacity
         activeOpacity={0.8}
         onPress={() => setOpenToPicker(true)}
-        disabled={profileData === 'Customer' ? true : false}
+        disabled={isDisabled}
         style={styles.timeView}>
-        <Text style={[styles.timeText]}>
-          {new Date(toTime).toLocaleTimeString([], {
+        <Text style={styles.timeText}>
+          {toTime.toLocaleTimeString([], {
             hour: '2-digit',
             minute: '2-digit',
             hour12: true,
@@ -61,12 +89,13 @@ const SetAvailability = ({
         </Text>
       </TouchableOpacity>
 
+      {/* From Time Picker */}
       <DatePicker
         modal
         mode="time"
         open={openFromPicker}
-        date={new Date(fromTime)}
-        onConfirm={date => {
+        date={fromTime}
+        onConfirm={(date: Date) => {
           onUpdateAvailability(day, date, toTime);
           setOpenFromPicker(false);
         }}
@@ -76,12 +105,13 @@ const SetAvailability = ({
         dividerColor={Colors.gradient1}
       />
 
+      {/* To Time Picker */}
       <DatePicker
         modal
         mode="time"
         open={openToPicker}
-        date={new Date(toTime)}
-        onConfirm={date => {
+        date={toTime}
+        onConfirm={(date: Date) => {
           onUpdateAvailability(day, fromTime, date);
           setOpenToPicker(false);
         }}
@@ -95,6 +125,8 @@ const SetAvailability = ({
 };
 
 export default SetAvailability;
+
+/* -------------------- Styles -------------------- */
 
 const styles = StyleSheet.create({
   container: {
@@ -134,8 +166,5 @@ const styles = StyleSheet.create({
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.4),
-  },
-  boldText: {
-    fontFamily: Fonts.bold, // Assuming you have a bold font variant
   },
 });

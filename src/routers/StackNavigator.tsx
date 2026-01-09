@@ -71,6 +71,7 @@ export type RootStackParamList = {
     receiver: string;
     receiverName: string;
     receiverProfile: string;
+    senderProfile:any;
     fcmToken: string;
   };
   Messages: undefined;

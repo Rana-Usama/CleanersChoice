@@ -1,11 +1,15 @@
-// toastConfig.js
+// toastConfig.tsx
 import React from 'react';
 import {Text, View, StyleSheet, Dimensions} from 'react-native';
 import {RFPercentage} from 'react-native-responsive-fontsize';
-import {Fonts} from '../constants/Themes';
-import {Colors} from '../constants/Themes';
+import {Fonts, Colors} from '../constants/Themes';
 
 const {width} = Dimensions.get('window');
+
+interface ToastProps {
+  text1?: string;
+  text2?: string;
+}
 
 const baseToastStyle = {
   borderLeftWidth: RFPercentage(1.5),
@@ -16,19 +20,19 @@ const baseToastStyle = {
 };
 
 export const toastConfig = {
-  success: ({text1, text2}) => (
+  success: ({text1, text2}: ToastProps) => (
     <View style={[styles.toastContainer, styles.success]}>
       <Text style={styles.text1}>{text1}</Text>
       <Text style={styles.text2}>{text2}</Text>
     </View>
   ),
-  error: ({text1, text2}) => (
+  error: ({text1, text2}: ToastProps) => (
     <View style={[styles.toastContainer, styles.error]}>
       <Text style={styles.text1}>{text1}</Text>
       <Text style={styles.text2}>{text2}</Text>
     </View>
   ),
-  info: ({text1, text2}) => (
+  info: ({text1, text2}: ToastProps) => (
     <View style={[styles.toastContainer, styles.info]}>
       <Text style={styles.text1}>{text1}</Text>
       <Text style={styles.text2}>{text2}</Text>

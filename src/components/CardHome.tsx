@@ -3,7 +3,6 @@ import {View, Text, TouchableOpacity, StyleSheet, Image} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {Colors, Fonts, Icons} from '../constants/Themes';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 
 const HomeCard = ({onPostJob}: any) => {
@@ -13,32 +12,25 @@ const HomeCard = ({onPostJob}: any) => {
       start={{x: 0, y: 0}}
       end={{x: 0, y: 1}}
       style={styles.gradientCard}>
-      {/* Content Container */}
       <View style={styles.content}>
-        {/* Left Section - Icon and Text */}
         <View style={styles.textSection}>
           <Text style={styles.title}>Cleaning Services</Text>
           <Text style={styles.subtitle}>
             Available for service or post your job requirements
           </Text>
-          <TouchableOpacity activeOpacity={0.8} style={styles.button} onPress={onPostJob}>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            style={styles.button}
+            onPress={onPostJob}>
             <Text style={styles.buttonText}>Post a Job</Text>
             <Icon name="arrow-right" size={18} color={Colors.gradient1} />
           </TouchableOpacity>
         </View>
-
-        {/* Right Section - Button */}
         <Image
           source={Icons.clean}
           resizeMode="contain"
           style={{width: RFPercentage(12), height: RFPercentage(12)}}
         />
-        {/* <Ionicons
-          name="sparkles"
-          size={50}
-          color={Colors.background}
-          style={styles.icon}
-        /> */}
       </View>
     </LinearGradient>
   );
@@ -63,7 +55,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderRadius:100
+    borderRadius: 100,
   },
   textSection: {
     marginRight: 15,
@@ -99,7 +91,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginRight: 6,
     fontFamily: Fonts.semiBold,
-    lineHeight:RFPercentage(2)
+    lineHeight: RFPercentage(2),
   },
 });
 

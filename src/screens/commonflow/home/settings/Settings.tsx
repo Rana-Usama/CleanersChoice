@@ -110,7 +110,7 @@ const Settings = ({navigation}: any) => {
       if (jobsSnapshot.size > 0) {
         await jobBatch.commit();
       } else {
-        console.log('ℹ️ No jobs to delete');
+        console.log(' No jobs to delete');
       }
 
       // Delete Chats data
@@ -124,7 +124,7 @@ const Settings = ({navigation}: any) => {
       if (chatSnapshot.size > 0) {
         await chatBatch.commit();
       } else {
-        console.log('ℹ️ No chats to delete');
+        console.log(' No chats to delete');
       }
 
       // Delete CleanerServices doc (if exists)
@@ -133,7 +133,7 @@ const Settings = ({navigation}: any) => {
         .doc(userId)
         .delete()
         .catch(e => {
-          console.log('⚠️ CleanerServices delete error (ignored):', e.message);
+          console.log(' CleanerServices delete error (ignored):', e.message);
         });
       // Delete Firebase user
       await user.delete();
@@ -157,10 +157,7 @@ const Settings = ({navigation}: any) => {
         message:
           'Your account and all associated data have been permanently removed.',
       });
-      console.log('🎉 Account deletion completed successfully');
-
       setModalVisible2(false);
-
       setTimeout(() => {
         navigation.reset({
           index: 0,
@@ -182,14 +179,17 @@ const Settings = ({navigation}: any) => {
         });
       }
     } finally {
-      console.log('🕓 [deleteAccount] Finished');
       setLoading(false);
     }
   };
 
   return (
     <View style={styles.safeArea}>
-              <StatusBar backgroundColor={Colors.gradient1} barStyle="light-content"  translucent={true}/>
+      <StatusBar
+        backgroundColor={Colors.gradient1}
+        barStyle="light-content"
+        translucent={true}
+      />
 
       <LinearGradient
         colors={[Colors.gradient1, Colors.gradient2]}

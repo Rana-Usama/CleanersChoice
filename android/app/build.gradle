@@ -4,6 +4,8 @@ apply plugin: "com.facebook.react"
 apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
 apply plugin: "com.google.gms.google-services"
 
+// Enable Hermes to support 16 KB memory pages
+def hermesEnabled = true
 def enableProguardInReleaseBuilds = false
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
@@ -17,8 +19,8 @@ android {
         applicationId "com.cleanerschoice"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 17
-        versionName "2.1.0"
+        versionCode 19
+        versionName "2.3.0"
         multiDexEnabled true
 
         ndk {
@@ -60,8 +62,6 @@ android {
     }
 }
 
-
-
 react {
     autolinkLibrariesWithApp()
     // Uncomment below if you're customizing:
@@ -74,6 +74,7 @@ dependencies {
     implementation "com.facebook.react:react-android"
 
     if (hermesEnabled.toBoolean()) {
+        // Hermes enabled → supports 16 KB pages
         implementation "com.facebook.react:hermes-android"
     } else {
         implementation jscFlavor

@@ -46,7 +46,6 @@ const SignIn: React.FC = () => {
   const handleSignIn = async (values: any) => {
     setLoading(true);
     const normalizedEmail = values.email.toLowerCase();
-
     try {
       const userCredential = await auth().signInWithEmailAndPassword(
         normalizedEmail,
@@ -75,21 +74,17 @@ const SignIn: React.FC = () => {
         await AsyncStorage.setItem('email', normalizedEmail);
         await AsyncStorage.setItem('password', values.password);
       }
-
       if (userRole === 'Cleaner') {
         const now = Date.now();
         const expiry = userData?.subscriptionEndDate;
         const hasActiveSub = expiry && expiry > now;
-        console.log('hasActiveSub...........', hasActiveSub);
-        console.log('expiry...........', expiry);
-
         if (hasActiveSub) {
-          await navigation.replace('CleanerNavigator');
+          navigation.replace('CleanerNavigator');
         } else {
-          await navigation.replace('Premium');
+          navigation.replace('Premium');
         }
       } else {
-        await navigation.replace('Home');
+        navigation.replace('Home');
       }
     } catch (error: any) {
       showToast({
@@ -216,7 +211,6 @@ const SignIn: React.FC = () => {
                           index={0}
                           isSelected={selected}
                           onPress={() => setSelected(!selected)}
-                          borderWidth={1}
                           buttonInnerColor={Colors.gradient1}
                           buttonOuterColor={
                             selected ? Colors.gradient1 : Colors.inputFieldColor

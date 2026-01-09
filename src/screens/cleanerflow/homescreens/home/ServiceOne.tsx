@@ -1,6 +1,5 @@
 import {
   Image,
-  SafeAreaView,
   StyleSheet,
   Text,
   View,
@@ -18,13 +17,9 @@ import React, {useState, useCallback, useRef, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Icons, Fonts} from '../../../../constants/Themes';
 import HeaderBack from '../../../../components/HeaderBack';
-import InfoHeader from '../../../../components/InfoHeader';
 import DescriptionField from '../../../../components/DescriptionField';
-import TimeLine from '../../../../components/TimeLine';
-import GradientButton from '../../../../components/GradientButton';
 import {useFocusEffect} from '@react-navigation/native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import InputField from '../../../../components/InputField';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import {useDispatch, useSelector} from 'react-redux';
@@ -32,18 +27,13 @@ import {cleanerDescription} from '../../../../redux/Form/Actions';
 import MultiSelect from 'react-native-multiple-select';
 import {showToast} from '../../../../utils/ToastMessage';
 import LinearGradient from 'react-native-linear-gradient';
-import Animated, {
-  FadeInDown,
-  FadeInUp,
-  SlideInRight,
-  ZoomIn,
-} from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import * as Progress from 'react-native-progress';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Octicons from 'react-native-vector-icons/Octicons';
-import {tuple} from 'yup';
-import { setFilterLocation, setUserLocation } from '../../../../redux/location/Actions';
+import {setUserLocation} from '../../../../redux/location/Actions';
+import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
 
 const {width} = Dimensions.get('window');
 
@@ -90,15 +80,34 @@ const items = [
   },
 ];
 
+type ServiceData = FirebaseFirestoreTypes.DocumentData & {
+  location?: {
+    name?: string;
+    address?: string;
+    coordinates?: any;
+  };
+  availability?: any[];
+  serviceImages?: any[];
+  packages?: any[];
+  rating?: number | null;
+  reviews?: any[];
+};
+
+type LocationData = {
+  name?: string;
+  address?: string;
+  coordinates?: any;
+};
+
 const ServiceOne: React.FC = ({navigation}: any) => {
   const available = useSelector(
     (state: any) => state?.availablity?.availability,
   );
-  const [location, setLocation] = useState('');
+  const [location, setLocation] = useState<LocationData | null>(null);
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const description = useSelector((state: any) => state?.form?.description);
-  const [serviceData, setServiceData] = useState(null);
+  const [serviceData, setServiceData] = useState<ServiceData | null>(null);
   const profileCompletion = useSelector(
     (state: any) => state?.profile?.profileCompletion,
   );
@@ -132,8 +141,6 @@ const ServiceOne: React.FC = ({navigation}: any) => {
     setSelectedItems(selectedItems);
   };
 
-  console.log(userLocation);
-
   useFocusEffect(
     useCallback(() => {
       if (!hasFetchedData) {
@@ -154,11 +161,13 @@ const ServiceOne: React.FC = ({navigation}: any) => {
       const doc = await serviceRef.get();
       if (doc.exists) {
         const data = doc.data();
-        dispatch(cleanerDescription(data?.description || ''));
-        setSelectedItems(data?.type || []);
-        setLocation(data?.location || '');
-        setServiceData(data);
-        dispatch(setUserLocation(data?.location))
+        if (data) {
+          setServiceData(data as ServiceData);
+          dispatch(cleanerDescription(data.description || ''));
+          setSelectedItems(data.type || []);
+          setLocation(data.location || '');
+          dispatch(setUserLocation(data.location));
+        }
       }
     } catch (error) {}
   };
@@ -169,8 +178,6 @@ const ServiceOne: React.FC = ({navigation}: any) => {
     if (!user) return;
 
     const finalLocation = userLocation || serviceData?.location;
-    console.log('userLocation............', userLocation);
-
     const hasValidLocation =
       finalLocation &&
       (finalLocation.name ||
@@ -225,9 +232,10 @@ const ServiceOne: React.FC = ({navigation}: any) => {
 
   const progress = calculateProgress();
 
-  const availableDays = serviceData?.availability.filter(
-    (item: any) => item.checked,
-  ).length;
+  const availableDays =
+    serviceData?.availability?.filter((item: any) => item.checked).length ?? 0;
+
+  const serviceAvailabilityLength = serviceData?.availability?.length ?? 0;
 
   return (
     <View style={styles.safeArea}>
@@ -281,11 +289,9 @@ const ServiceOne: React.FC = ({navigation}: any) => {
           // behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           >
             {/* Form Container */}
-            <Animated.View
-              entering={FadeInUp.duration(600)}
-              style={styles.formContainer}>
+            <Animated.View style={styles.formContainer}>
               {/* Location Card */}
-              <Animated.View entering={SlideInRight.delay(100)}>
+              <Animated.View>
                 <TouchableOpacity
                   onPress={() =>
                     navigation.navigate('Location', {location: true})
@@ -340,7 +346,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
               </Animated.View>
 
               {/* Description Card */}
-              <Animated.View entering={SlideInRight.delay(200)}>
+              <Animated.View>
                 <View style={styles.sectionCard}>
                   <View style={styles.cardHeader}>
                     <View style={styles.sectionIconContainer}>
@@ -369,7 +375,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
               </Animated.View>
 
               {/* Availability Card */}
-              <Animated.View entering={SlideInRight.delay(300)}>
+              <Animated.View>
                 <TouchableOpacity
                   activeOpacity={0.7}
                   onPress={() => navigation.navigate('Availability')}
@@ -377,7 +383,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                   <LinearGradient
                     colors={
                       available.length > 0 ||
-                      serviceData?.availability?.length > 0
+                      (serviceData?.availability?.length ?? 0) > 0
                         ? ['#F0FDF4', '#DCFCE7']
                         : ['#FFFFFF', '#F9FAFB']
                     }
@@ -401,15 +407,14 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                               !serviceData?.availability?.length &&
                               styles.placeholderText,
                           ]}>
-                          {available.length > 0 ||
-                          serviceData?.availability?.length > 0
+                          {available.length > 0 || serviceAvailabilityLength > 0
                             ? `${availableDays} days set`
                             : 'Set your working days & hours'}
                         </Text>
                       </View>
                       <View style={styles.availabilityArrow}>
                         {available.length > 0 ||
-                        serviceData?.availability?.length > 0 ? (
+                        serviceAvailabilityLength > 0 ? (
                           <Octicons
                             name="pencil"
                             color={'#22C55E'}
@@ -421,7 +426,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                             size={RFPercentage(1.8)}
                             color={
                               available.length > 0 ||
-                              serviceData?.availability?.length > 0
+                              serviceAvailabilityLength > 0
                                 ? Colors.gradient1
                                 : '#9CA3AF'
                             }
@@ -434,7 +439,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
               </Animated.View>
 
               {/* Services Selection Card */}
-              <Animated.View entering={SlideInRight.delay(400)}>
+              <Animated.View>
                 <View style={styles.servicesCard}>
                   <View style={styles.cardHeader}>
                     <View style={styles.sectionIconContainer}>
@@ -480,7 +485,6 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                     styleItemsContainer={styles.itemsContainer}
                     styleTextDropdownSelected={styles.dropdownTextSelected}
                     styleTextDropdown={styles.dropdownText}
-                    styleTextTag={styles.tagText}
                     hideDropdown
                     textInputProps={{autoFocus: false}}
                     styleDropdownMenu={styles.dropdownStyle}
@@ -488,7 +492,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
 
                   {/* Selected Services Tags */}
                   {selectedItems?.length > 0 && (
-                    <Animated.View entering={ZoomIn.duration(400)}>
+                    <Animated.View>
                       <ScrollView
                         showsVerticalScrollIndicator={false}
                         contentContainerStyle={styles.tagsContainer}>

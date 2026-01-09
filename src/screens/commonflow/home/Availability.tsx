@@ -1,6 +1,5 @@
 import {
   FlatList,
-  SafeAreaView,
   StyleSheet,
   Text,
   View,
@@ -16,7 +15,6 @@ import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts} from '../../../constants/Themes';
 import HeaderBack from '../../../components/HeaderBack';
 import {useSelector} from 'react-redux';
-import GradientButton from '../../../components/GradientButton';
 import {useDispatch} from 'react-redux';
 import {cleanerAvailability} from '../../../redux/Availability/Actions';
 import auth from '@react-native-firebase/auth';
@@ -27,6 +25,7 @@ import Animated, {FadeInUp, SlideInRight} from 'react-native-reanimated';
 import * as Progress from 'react-native-progress';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
 
 const {width} = Dimensions.get('window');
 
@@ -68,15 +67,26 @@ const days = [
   },
 ];
 
+type AvailabilityItem = {
+  day: string;
+  fullName: string;
+  fromTime: Date;
+  toTime: Date;
+  checked: boolean;
+};
+
 const Availability = ({navigation}: any) => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
-  const [service, setService] = useState(null);
+  const [service, setService] =
+    useState<FirebaseFirestoreTypes.DocumentData | null>(null);
   const profileCompletion = useSelector(
-    state => state?.profile?.profileCompletion,
+    (state: any) => state?.profile?.profileCompletion,
   );
   const [loading2, setLoading2] = useState(false);
-  const [availabilityData, setAvailabilityData] = useState([]);
+  const [availabilityData, setAvailabilityData] = useState<AvailabilityItem[]>(
+    [],
+  );
 
   useEffect(() => {
     serviceDetails();
@@ -92,7 +102,7 @@ const Availability = ({navigation}: any) => {
         .doc(user.uid)
         .get();
       if (userDoc.exists) {
-        const userData = userDoc.data();
+        const userData = userDoc.data() ?? null;
         setService(userData);
       }
     } catch (error) {
@@ -107,7 +117,7 @@ const Availability = ({navigation}: any) => {
       const updatedAvailability = days.map(day => {
         const found =
           service?.availability?.length > 0 &&
-          service?.availability?.find(item => item.day === day.name);
+          service?.availability?.find((item: any) => item.day === day.name);
         return {
           day: day.name,
           fullName: day.fullName,
@@ -143,22 +153,19 @@ const Availability = ({navigation}: any) => {
     }
   }, [service?.availability]);
 
-  const toggleCheckBox = day => {
-    setAvailabilityData(prev => {
-      const updated = prev.map(item =>
+  const toggleCheckBox = (day: any) => {
+    setAvailabilityData((prev: any) => {
+      const updated = prev.map((item: any) =>
         item.day === day ? {...item, checked: !item.checked} : item,
       );
       return updated;
     });
   };
 
-  const updateAvailability = (day, fromTime, toTime) => {
-    setAvailabilityData(prev => {
-      const updated = prev.map(item =>
-        item.day === day ? {...item, fromTime, toTime} : item,
-      );
-      return updated;
-    });
+  const updateAvailability = (day: string, fromTime: Date, toTime: Date) => {
+    setAvailabilityData(prev =>
+      prev.map(item => (item.day === day ? {...item, fromTime, toTime} : item)),
+    );
   };
 
   const handleSetAvailability = () => {
@@ -505,8 +512,8 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    borderWidth:1,
-    borderColor:"#d3e7f7ff"
+    borderWidth: 1,
+    borderColor: '#d3e7f7ff',
     // elevation: 3,
   },
   instructionsHeader: {

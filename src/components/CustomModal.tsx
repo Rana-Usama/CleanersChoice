@@ -14,7 +14,7 @@ interface props {
   onPress2?: () => void;
   loader?: boolean;
   subTitle: string;
-  buttonTitle ? : string
+  buttonTitle?: string;
 }
 
 const CustomModal = (props: props) => {
@@ -38,23 +38,26 @@ const CustomModal = (props: props) => {
       <Text style={styles.modalText}>{props.subTitle}</Text>
       {props.passwordModal ? (
         <View style={styles.okButtonContainer}>
-          <GradientButton title="Ok" onPress={props.onPress3} />
+          <GradientButton title="Ok" onPress={props.onPress3 ?? (() => {})} />
         </View>
       ) : (
         <View style={styles.buttonContainer}>
           <NextButton
             title="Cancel"
-            onPress={props.onPress}
+            onPress={props.onPress ?? (() => {})}
             style={{
               width: RFPercentage(14),
               height: RFPercentage(5),
-              borderColor: Colors.primaryText,
+              borderColor: 'rgba(155, 171, 198, 1)',
             }}
-            textStyle={{fontSize: RFPercentage(1.8)}}
+            textStyle={{
+              fontSize: RFPercentage(1.8),
+              color: 'rgba(127, 146, 177, 1)',
+            }}
           />
           <GradientButton
-            title={props.buttonTitle ? props.buttonTitle : "Yes"}
-            onPress={props.onPress2}
+            title={props.buttonTitle ? props.buttonTitle : 'Yes'}
+            onPress={props.onPress2 ?? (() => {})}
             loading={props.loader}
             disabled={props.loader}
             style={{width: RFPercentage(14), height: RFPercentage(5)}}

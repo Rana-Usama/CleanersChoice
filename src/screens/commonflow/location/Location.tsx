@@ -52,15 +52,15 @@ export default function Location({navigation, route}: any) {
         },
       );
       if (res.data.status === 'OK') setSuggestions(res.data.predictions);
-      else console.log('⚠️ Places API Error:', res.data.status);
+      else console.log('Places API Error:', res.data.status);
     } catch (err: any) {
-      console.log('❌ Autocomplete Error:', err.message);
+      console.log('Autocomplete Error:', err.message);
     }
   };
 
   const handlePlaceSelectAndroid = async (item: any) => {
     setIsSelectingSuggestion(true);
-    
+
     try {
       Keyboard.dismiss();
       const detailRes = await axios.get(
@@ -96,7 +96,7 @@ export default function Location({navigation, route}: any) {
         longitudeDelta: 0.01,
       });
     } catch (error: any) {
-      console.log('❌ Place Detail Error:', error.message);
+      console.log('Place Detail Error:', error.message);
       setIsSelectingSuggestion(false);
     }
   };
@@ -131,7 +131,7 @@ export default function Location({navigation, route}: any) {
       setSelectedLocation({...coordinate, name: address});
       setQuery(address);
     } catch (error: any) {
-      console.log('❌ Reverse Geocode Error:', error.message);
+      console.log('Reverse Geocode Error:', error.message);
     }
   };
 
@@ -150,8 +150,8 @@ export default function Location({navigation, route}: any) {
 
   return (
     <View style={styles.container}>
-            <StatusBar backgroundColor={Colors.background} barStyle="dark-content" />
-      
+      <StatusBar backgroundColor={Colors.background} barStyle="dark-content" />
+
       <View style={styles.topRow}>
         <TouchableOpacity
           activeOpacity={0.8}

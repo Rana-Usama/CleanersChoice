@@ -5,7 +5,7 @@ const initialState = {
   profileCompletion : ''
 };
 
-export const userDataReducer = (state = initialState, action) => {
+export const userDataReducer = (state = initialState, action:any) => {
   switch (action.type) {
     case PROFILE_DATA:
       return {

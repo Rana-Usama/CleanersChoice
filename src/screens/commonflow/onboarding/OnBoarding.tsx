@@ -8,7 +8,6 @@ import {
   View,
   Animated,
   TouchableOpacity,
-  ScrollView,
 } from 'react-native';
 import React, {useState, useRef, useEffect} from 'react';
 import NextButton from '../../../components/NextButton';
@@ -88,7 +87,6 @@ const OnBoarding = ({navigation}: any) => {
         translucent
         backgroundColor="transparent"
       />
-      {/* <ScrollView contentContainerStyle={{paddingBottom: RFPercentage(3)}}> */}
       <View style={styles.container}>
         <HeaderComponent />
         <View style={styles.content}>
