@@ -12,23 +12,25 @@ import {
   Platform,
   TouchableWithoutFeedback,
   StatusBar,
+  Animated,
 } from 'react-native';
 import React, {useState, useRef, useEffect} from 'react';
 import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
-import HeaderBack from '../../../components/HeaderBack';
 import LinearGradient from 'react-native-linear-gradient';
-import Package from '../../../components/Package';
 import GradientButton from '../../../components/GradientButton';
 import {useNavigation} from '@react-navigation/native';
-import {RootStackParamList} from '../../../routers/StackNavigator';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import moment from 'moment';
 import {useSelector} from 'react-redux';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import Fontisto from 'react-native-vector-icons/Fontisto';
+import Feather from 'react-native-vector-icons/Feather';
 import ImageView from 'react-native-image-viewing';
+import ServicePackage from '../../../components/ServicePackage';
 
 import CustomModal from '../../../components/CustomModal';
 import {BlurView} from '@react-native-community/blur';
@@ -39,49 +41,61 @@ const items = [
   {
     id: '11',
     name: 'Window Cleaning',
+    icon: 'window-open',
   },
   {
     id: '22',
     name: 'Chimney Cleaning',
+    icon: 'fireplace',
   },
   {
     id: '33',
     name: 'Carpet Cleaning',
+    icon: 'vacuum',
   },
   {
     id: '44',
     name: 'Residential Cleaning',
+    icon: 'home',
   },
   {
     id: '55',
     name: 'Pressure Washing',
+    icon: 'water-pump',
   },
   {
     id: '66',
     name: 'Car Washing',
+    icon: 'car-wash',
   },
   {
     id: '77',
     name: 'Lawn Care',
+    icon: 'leaf',
   },
   {
     id: '88',
     name: 'Others',
+    icon: 'dots-horizontal',
   },
 ];
 
 const ServiceDetails: React.FC = ({route}: any) => {
   const {item} = route.params;
   const [visibleItems, setVisibleItems] = useState(5);
-  const navigation =
-    useNavigation<
-      NativeStackNavigationProp<RootStackParamList, 'ServiceDetails'>
-    >();
+  const navigation = useNavigation<any>();
   const profileData = useSelector((state: any) => state.profile.profileData);
   const [loading, setloading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [visible, setIsVisible] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState(null);
+  const [packageModalVisible, setPackageModalVisible] = useState(false);
+
+  console.log('selectedPackage.........', selectedPackage);
 
   const toggleDescription = () => {
     setIsExpanded(prevState => !prevState);
@@ -96,6 +110,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
 
     if (index !== step) {
       setStep(index);
+      setActiveImageIndex(index);
     }
   };
 
@@ -107,30 +122,26 @@ const ServiceDetails: React.FC = ({route}: any) => {
     setVisibleItems(5);
   };
 
-  // Services names
-  const getServiceNames = (serviceIds: any) => {
-    return serviceIds
-      ?.map((id: any) => {
-        const serviceItem = items.find(item => item.id === id);
-        return serviceItem ? serviceItem.name : null;
-      })
-      .filter((name: any) => name !== null);
+  const getServiceWithIcon = (serviceId: any) => {
+    return items.find(service => service.id === serviceId);
   };
-  const [visible, setIsVisible] = useState(false);
 
-  const serviceNames = getServiceNames(item?.type.slice(0, visibleItems));
+  const serviceNames = item?.type
+    ?.slice(0, visibleItems)
+    .map((id: any) => getServiceWithIcon(id));
   const createdAtDate = new Date(item.createdAt._seconds * 1000);
   const formattedDate = moment(createdAtDate).format('DD MMMM, YYYY');
+  const relativeDate = moment(createdAtDate).fromNow();
   const userFlow = useSelector((state: any) => state.userFlow.userFlow);
   const imageObjects =
     item?.serviceImages?.map((url: any) => ({uri: url})) || [];
+
   const getTruncatedText = (text: any) => {
     const maxChars = 120;
     if (text.length <= maxChars) return text;
     return text.slice(0, maxChars).trim() + '... ';
   };
 
-  // Generating chat id
   const user = auth().currentUser;
   const userId = user?.uid;
   const generateChatId = () => {
@@ -139,7 +150,6 @@ const ServiceDetails: React.FC = ({route}: any) => {
   const chatId = generateChatId();
   const [existingChatId, setExistingChatId] = useState<string | null>(null);
 
-  // Existing chat id
   const fetchExistingChatId = async (userId1: any, userId2: any) => {
     try {
       const chatsSnapshot = await firestore()
@@ -161,27 +171,23 @@ const ServiceDetails: React.FC = ({route}: any) => {
     }
   };
 
-  // Finding chat
   useEffect(() => {
     const tryToFindChat = async () => {
       if (user?.uid && item?.jobId) {
         const chatId = await fetchExistingChatId(userId, item.id);
         if (chatId) {
           setExistingChatId(chatId);
-        } else {
-          console.log('No existing chat found');
         }
       }
     };
-
     tryToFindChat();
   }, [userId, item?.id]);
 
-  // Fetching token
   const [token, setFcmToken] = useState<string>('');
   useEffect(() => {
     fetchToken(item.id);
   }, []);
+
   const fetchToken = async (id: any) => {
     try {
       const userDoc = await firestore().collection('Users').doc(id).get();
@@ -194,21 +200,26 @@ const ServiceDetails: React.FC = ({route}: any) => {
 
   const cleanDescription = item.description.replace(/\s+/g, ' ').trim();
 
+
+
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar backgroundColor={Colors.background} barStyle="dark-content" />
-
-      {/* Header */}
-      <HeaderBack
-        title={'Service Details'}
-        textStyle={{fontSize: RFPercentage(2)}}
-        left={true}
+      <StatusBar
+        backgroundColor={Colors.gradient1}
+        barStyle="light-content"
+        translucent
       />
+
       <ScrollView
-        contentContainerStyle={{paddingBottom: RFPercentage(10)}}
-        showsVerticalScrollIndicator={false}>
-        {/* Main Container */}
-        <View style={{width: '100%', marginTop: RFPercentage(2)}}>
+        contentContainerStyle={{paddingBottom: RFPercentage(15)}}
+        showsVerticalScrollIndicator={false}
+        onScroll={Animated.event(
+          [{nativeEvent: {contentOffset: {y: scrollY}}}],
+          {useNativeDriver: false},
+        )}
+        scrollEventThrottle={16}>
+        {/* Image Gallery with Gradient Overlay */}
+        <View style={styles.imageGalleryContainer}>
           <ScrollView
             horizontal
             onScroll={onScroll}
@@ -216,19 +227,11 @@ const ServiceDetails: React.FC = ({route}: any) => {
             pagingEnabled
             showsHorizontalScrollIndicator={false}
             scrollEventThrottle={16}
-            style={{
-              width: width,
-              height: RFPercentage(28),
-            }}
-            contentContainerStyle={{
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
+            style={styles.imageScrollView}>
             {item.serviceImages.map((image: any, index: any) => (
               <TouchableOpacity
                 key={index}
-                style={{margin: 20}}
-                activeOpacity={0.8}
+                activeOpacity={0.9}
                 onPress={() => {
                   setStep(index);
                   setIsVisible(true);
@@ -236,279 +239,441 @@ const ServiceDetails: React.FC = ({route}: any) => {
                 <Image
                   source={typeof image === 'string' ? {uri: image} : image}
                   resizeMode="cover"
-                  style={styles.cover}
-                  borderRadius={RFPercentage(1)}
+                  style={styles.coverImage}
+                />
+                <LinearGradient
+                  colors={['transparent', 'rgba(0,0,0,0.1)', 'rgba(0,0,0,0.3)']}
+                  style={styles.imageGradient}
                 />
               </TouchableOpacity>
             ))}
           </ScrollView>
-          {item.serviceImages.length > 1 && (
+
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => navigation.goBack()}
+            style={{
+              position: 'absolute',
+              top: RFPercentage(2),
+              left: RFPercentage(2),
+              width: RFPercentage(4.5),
+              height: RFPercentage(4.5),
+              borderRadius: RFPercentage(100),
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'rgba(0,0,0,0.3)',
+            }}>
+            <Feather
+              name="arrow-left"
+              color={Colors.background}
+              size={RFPercentage(2.4)}
+            />
+          </TouchableOpacity>
+
+          {/* Image Counter */}
+          {item?.serviceImages?.length > 1 && (
+            <View style={styles.imageCounter}>
+              <View style={styles.counterBadge}>
+                <Text style={styles.counterText}>
+                  {activeImageIndex + 1} / {item.serviceImages.length}
+                </Text>
+              </View>
+            </View>
+          )}
+
+          {/* Dots Indicator */}
+          {item?.serviceImages?.length > 1 && (
             <View style={styles.dotsContainer}>
-              {item.serviceImages.length === 1 ? null : (
-                <>
-                  {item.serviceImages.map((_: any, index: any) => (
-                    <TouchableOpacity
-                      activeOpacity={0.8}
-                      key={index}
-                      onPress={() => setStep(index)}>
-                      {step === index ? (
-                        <LinearGradient
-                          colors={[Colors.gradient1, Colors.gradient2]}
-                          style={styles.activeDot}
-                        />
-                      ) : (
-                        <View style={styles.inactiveDot} />
-                      )}
-                    </TouchableOpacity>
-                  ))}
-                </>
-              )}
+              {item.serviceImages.map((_: any, index: any) => (
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  key={index}
+                  onPress={() => {
+                    setStep(index);
+                    setActiveImageIndex(index);
+                    scrollViewRef?.current?.scrollTo({
+                      x: width * index,
+                      animated: true,
+                    });
+                  }}>
+                  {step === index ? (
+                    <LinearGradient
+                      colors={[Colors.gradient1, Colors.gradient2]}
+                      style={styles.activeDot}
+                    />
+                  ) : (
+                    <View style={styles.inactiveDot} />
+                  )}
+                </TouchableOpacity>
+              ))}
             </View>
           )}
         </View>
-        <ImageView
-          images={imageObjects}
-          imageIndex={step}
-          visible={visible}
-          onRequestClose={() => setIsVisible(false)}
-        />
-        <View style={styles.container}>
-          {/* Service Info */}
-          <View style={{marginTop: RFPercentage(2)}}>
-            <View style={styles.rowContainer}>
+
+        {/* Main Content Container */}
+        <View style={styles.contentContainer}>
+          <View style={styles.serviceHeaderCard}>
+            <LinearGradient
+              colors={[Colors.gradient1, Colors.gradient2]}
+              style={styles.serviceBadge}>
+              <Ionicons name="sparkles" size={16} color="#FFFFFF" />
+              <Text style={styles.serviceBadgeText}>Premium Service</Text>
+            </LinearGradient>
+
+            <View style={styles.serviceTitleRow}>
               <TouchableOpacity
                 activeOpacity={0.8}
-                onPress={() => setModalVisible(true)}>
+                onPress={() => setModalVisible(true)}
+                style={styles.profileImageContainer}>
                 <Image
                   source={item.image ? {uri: item.image} : IMAGES.defaultPic}
-                  resizeMode="contain"
-                  style={styles.icon}
+                  resizeMode="cover"
+                  style={styles.profileImage}
                 />
+                <View style={styles.verifiedBadge}>
+                  <MaterialCommunityIcons
+                    name="check-decagram"
+                    size={12}
+                    color="#FFFFFF"
+                  />
+                </View>
               </TouchableOpacity>
 
-              <Text style={[styles.headeing2, {color: Colors.primaryText}]}>
-                {item.name?.length > 10
-                  ? `${item.name.slice(0, 10)}...`
-                  : item.name}
-              </Text>
-            </View>
-
-            <View
-              style={{position: 'absolute', right: 0, top: RFPercentage(1.9)}}>
-              <Text style={styles.joining}>Posted on : {formattedDate}</Text>
-            </View>
-          </View>
-
-          {/* Description */}
-          <View style={{marginTop: RFPercentage(2.5)}}>
-            <View>
-              <View style={styles.rowAlign}>
-                <Image
-                  source={Icons.bars}
-                  resizeMode="contain"
-                  style={styles.icons}
-                />
-                <Text
-                  style={[styles.headeing2, {marginLeft: RFPercentage(0.8)}]}>
-                  Description:
-                </Text>
+              <View style={styles.serviceTitleContainer}>
+                <Text style={styles.serviceName}>{item.name}</Text>
+                {/* <View style={styles.ratingContainer}>
+                  <FontAwesome name="star" size={14} color="#FFD700" />
+                  <Text style={styles.ratingText}>5.0</Text>
+                  <Text style={styles.reviewsText}>(24 reviews)</Text>
+                </View> */}
               </View>
-              <Text style={styles.showMore}>
-                {isExpanded
-                  ? cleanDescription + ' '
-                  : getTruncatedText(cleanDescription)}
-                {cleanDescription?.length > 120 && (
-                  <Text onPress={toggleDescription} style={styles.showText}>
-                    {isExpanded ? 'Read Less' : 'Read More'}
-                  </Text>
-                )}
-              </Text>
+
+              <TouchableOpacity
+                style={styles.shareButton}
+                onPress={() => {
+                  if (userFlow === 'Guest') {
+                    setShowAuthModal(true);
+                    return;
+                  }
+
+                  navigation.navigate('Chat', {
+                    chatId: existingChatId ? existingChatId : chatId,
+                    senderId: profileData.uid,
+                    senderName: profileData.name,
+                    receiver: item.id,
+                    receiverName: item.name,
+                    receiverProfile: item.image,
+                    senderProfile: profileData.profile,
+                    fcmToken: token,
+                  });
+                }}>
+                <Fontisto name="hipchat" size={20} color={Colors.gradient1} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.metaInfoContainer}>
+              <View style={styles.metaItem}>
+                <Ionicons
+                  name="time-outline"
+                  size={16}
+                  color={Colors.secondaryText}
+                />
+                <Text style={styles.metaText}>Posted {relativeDate}</Text>
+              </View>
+              <View style={styles.metaItem}>
+                <Ionicons
+                  name="calendar-outline"
+                  size={16}
+                  color={Colors.secondaryText}
+                />
+                <Text style={styles.metaText}>{formattedDate}</Text>
+              </View>
             </View>
           </View>
 
-          {/* Location */}
-          <View style={{marginTop: RFPercentage(2.5)}}>
-            <View style={styles.rowAlign}>
-              <Image
-                source={Icons.location}
-                resizeMode="contain"
-                style={styles.icons}
-              />
-              <Text style={[styles.headeing2, {marginLeft: RFPercentage(0.8)}]}>
-                Location:
-              </Text>
+          {/* Description Card */}
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <AntDesign name="setting" size={20} color={Colors.gradient1} />
+              <Text style={styles.cardTitle}>Description</Text>
             </View>
-            <Text style={styles.showMore}>
-              {item?.location?.name || 'Not added'}
+            <Text style={styles.descriptionText}>
+              {isExpanded
+                ? cleanDescription
+                : getTruncatedText(cleanDescription)}
+              {cleanDescription?.length > 120 && (
+                <Text onPress={toggleDescription} style={styles.readMoreText}>
+                  {isExpanded ? ' Show less' : ' Read more'}
+                </Text>
+              )}
             </Text>
           </View>
 
-          {/* Availability */}
-          <View style={{marginTop: RFPercentage(2.5)}}>
-            <View>
-              <TouchableOpacity
-                activeOpacity={0.6}
-                onPress={() =>
-                  navigation.navigate('CheckAvailability', {item: item})
-                }
-                style={styles.availabilityRow}>
-                <Image
-                  source={Icons.availability}
-                  resizeMode="contain"
-                  style={styles.icons}
-                />
-                <Text style={styles.check}>Check Availability</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Services */}
-          <View style={{marginTop: RFPercentage(2.5)}}>
-            <View style={styles.serviceRow}>
-              <View style={styles.rowAlign}>
-                <Image
-                  source={Icons.verify}
-                  resizeMode="contain"
-                  style={styles.icons}
-                />
-                <Text
-                  style={[styles.headeing2, {marginLeft: RFPercentage(0.8)}]}>
-                  Services:
-                </Text>
-              </View>
-            </View>
-            <View
-              style={{right: RFPercentage(0.7), marginTop: RFPercentage(0.5)}}>
-              <FlatList
-                data={serviceNames}
-                numColumns={2}
-                keyExtractor={(item, index) => index.toString()}
-                renderItem={({item, index}) => (
-                  <View style={styles.serviceBox}>
-                    <Text style={styles.serviceText}>{item}</Text>
-                  </View>
-                )}
+          {/* Location Card */}
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <Ionicons
+                name="location-outline"
+                size={20}
+                color={Colors.gradient1}
               />
-
-              {/* Show More / Show Less button */}
-              {item.type.length > 5 && (
-                <View
-                  style={{
-                    width: '100%',
-                    alignSelf: 'center',
-                    marginTop: RFPercentage(1),
-                  }}>
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    style={{width: RFPercentage(10)}}
-                    onPress={
-                      visibleItems < item.type.length
-                        ? handleShowMore
-                        : handleShowLess
-                    }>
-                    <Text style={[styles.serviceMore]}>
-                      {visibleItems < item.type.length
-                        ? `+${item.type.length - visibleItems} More`
-                        : `See Less`}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              )}
+              <Text style={styles.cardTitle}>Location</Text>
             </View>
-          </View>
-        </View>
-
-        {/* Packages */}
-        <View>
-          <View style={styles.msg}>
-            <View style={styles.rowAlign}>
-              <Image
-                source={Icons.verify}
-                resizeMode="contain"
-                style={styles.icons}
-              />
-              <Text style={[styles.headeing2, {marginLeft: RFPercentage(0.8)}]}>
-                Starting Packages:
+            <View style={styles.locationContainer}>
+              <Ionicons name="pin" size={16} color="#EF4444" />
+              <Text style={styles.locationText}>
+                {item?.location?.name || 'Location not specified'}
               </Text>
             </View>
           </View>
-          <View style={{marginTop: RFPercentage(1.5)}}>
-            <FlatList
-              horizontal
-              data={item.packages}
-              keyExtractor={item => item.id.toString()}
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{
-                paddingHorizontal: RFPercentage(1.2),
-                paddingBottom: RFPercentage(2),
-              }}
-              renderItem={({item}) => {
-                return (
-                  <Package
-                    name={`Package ${item.id}`}
-                    price={item.price}
-                    detail={item.details}
-                    onPress={() => {}}
-                  />
-                );
-              }}
-            />
-          </View>
-        </View>
 
-        {/* Button Container */}
-        <View style={{alignSelf: 'center', marginTop: RFPercentage(7)}}>
-          <GradientButton
-            title="Get Custom Offer"
-            style={{width: RFPercentage(20)}}
-            textStyle={{fontSize: RFPercentage(1.7)}}
-            onPress={() => {
-              if (userFlow === 'Guest') {
-                setShowAuthModal(true);
-                return;
+          {/* Availability Card */}
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <MaterialCommunityIcons
+                name="calendar-check-outline"
+                size={20}
+                color={Colors.gradient1}
+              />
+              <Text style={styles.cardTitle}>Availability</Text>
+            </View>
+            <TouchableOpacity
+              activeOpacity={0.6}
+              onPress={() =>
+                navigation.navigate('CheckAvailability', {item: item})
               }
-              // ✅ Logged-in user — continue
-              setloading(true);
-              setTimeout(() => {
-                setloading(false);
-                navigation.navigate('Chat', {
-                  chatId: existingChatId ? existingChatId : chatId,
-                  senderId: profileData.uid,
-                  senderName: profileData.name,
-                  receiver: item.id,
-                  receiverName: item.name,
-                  receiverProfile: item.image,
-                  senderProfile: profileData.profile,
-                  fcmToken: token,
-                });
-              }, 1000);
-            }}
-            loading={loading}
-          />
+              style={styles.availabilityButton}>
+              <LinearGradient
+                colors={[Colors.gradient1, Colors.gradient2]}
+                style={styles.availabilityGradient}
+                start={{x: 0, y: 0}}
+                end={{x: 1, y: 0}}>
+                <Ionicons
+                  name="calendar-clear-outline"
+                  size={18}
+                  color="#FFFFFF"
+                />
+                <Text style={styles.availabilityButtonText}>
+                  Check Availability Schedule
+                </Text>
+                <Feather name="chevron-right" size={18} color="#FFFFFF" />
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+
+          {/* Services Card */}
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <MaterialCommunityIcons
+                name="format-list-bulleted"
+                size={20}
+                color={Colors.gradient1}
+              />
+              <Text style={styles.cardTitle}>Services Offered</Text>
+            </View>
+
+            <View style={styles.servicesGrid}>
+              {serviceNames.map(
+                (service: any, index: any) =>
+                  service && (
+                    <View key={index} style={styles.serviceChip}>
+                      <MaterialCommunityIcons
+                        name={service.icon}
+                        size={16}
+                        color={Colors.gradient1}
+                      />
+                      <Text style={styles.serviceChipText}>
+                        {service.name.length > 12
+                          ? `${service.name.slice(0, 12)}...`
+                          : service.name}
+                      </Text>
+                    </View>
+                  ),
+              )}
+            </View>
+
+            {item.type.length > 5 && (
+              <TouchableOpacity
+                activeOpacity={0.8}
+                style={styles.showMoreButton}
+                onPress={
+                  visibleItems < item.type.length
+                    ? handleShowMore
+                    : handleShowLess
+                }>
+                <Text style={styles.showMoreText}>
+                  {visibleItems < item.type.length
+                    ? `View ${item.type.length - visibleItems} more services`
+                    : `Show less`}
+                </Text>
+                <Feather
+                  name={
+                    visibleItems < item.type.length
+                      ? 'chevron-down'
+                      : 'chevron-up'
+                  }
+                  size={16}
+                  color={Colors.gradient1}
+                />
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {/* Packages Card */}
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <MaterialCommunityIcons
+                name="package-variant"
+                size={20}
+                color={Colors.gradient1}
+              />
+              <Text style={styles.cardTitle}>Available Packages</Text>
+            </View>
+
+            <View style={styles.packagesHeader}>
+              <View>
+                <Text style={styles.startingFromText}>Starting from</Text>
+                <Text style={styles.startingPrice}>
+                  ${item.packages?.[0]?.price || 0}
+                </Text>
+              </View>
+              <View style={styles.bestValueBadge}>
+                <MaterialCommunityIcons
+                  name="crown"
+                  size={14}
+                  color="#FFFFFF"
+                />
+                <Text style={styles.bestValueText}>Best Value</Text>
+              </View>
+            </View>
+
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.packagesScroll}>
+              {item.packages.map((pkg: any, index: any) => (
+                <ServicePackage
+                  key={index}
+                  name={`${pkg.name || `Package ${index + 1}`}`}
+                  price={pkg.price}
+                  detail={pkg.details}
+                  onPress={() => {
+                    setSelectedPackage(pkg);
+                    setPackageModalVisible(true);
+                  }}
+                  // isSelected
+                  // isFeatured
+                />
+              ))}
+            </ScrollView>
+          </View>
+
+          {/* Service Provider Info */}
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <MaterialCommunityIcons
+                name="account-tie"
+                size={20}
+                color={Colors.gradient1}
+              />
+              <Text style={styles.cardTitle}>Service Provider</Text>
+            </View>
+
+            <View style={styles.providerInfo}>
+              <Image
+                source={item.image ? {uri: item.image} : IMAGES.defaultPic}
+                resizeMode="cover"
+                style={styles.providerImage}
+              />
+              <View style={styles.providerDetails}>
+                <Text style={styles.providerName}>{item.name}</Text>
+                <View style={styles.providerStats}>
+                  <View style={styles.statItem}>
+                    <MaterialCommunityIcons
+                      name="check-decagram"
+                      size={14}
+                      color="#10B981"
+                    />
+                    <Text style={styles.statText}>Verified</Text>
+                  </View>
+                  {/* <View style={styles.statItem}>
+                    <MaterialCommunityIcons
+                      name="star"
+                      size={14}
+                      color="#FFD700"
+                    />
+                    <Text style={styles.statText}>5.0 (24)</Text>
+                  </View>
+                  <View style={styles.statItem}>
+                    <MaterialCommunityIcons
+                      name="briefcase-check"
+                      size={14}
+                      color={Colors.gradient1}
+                    />
+                    <Text style={styles.statText}>50+ jobs</Text>
+                  </View> */}
+                </View>
+              </View>
+            </View>
+          </View>
         </View>
       </ScrollView>
 
-      {/* Full picture */}
+      {/* Fixed Bottom Action Bar */}
+      <View style={styles.bottomActionBar}>
+        <View style={styles.priceContainer}>
+          <Text style={styles.startingFrom}>Starting from</Text>
+          <Text style={styles.bottomPrice}>
+            ${item.packages?.[0]?.price || 0}
+          </Text>
+        </View>
+
+        <GradientButton
+          title="Get Custom Offer"
+          style={styles.actionButton}
+          textStyle={styles.actionButtonText}
+          onPress={() => {
+            if (userFlow === 'Guest') {
+              setShowAuthModal(true);
+              return;
+            }
+            setloading(true);
+            setTimeout(() => {
+              setloading(false);
+              navigation.navigate('Chat', {
+                chatId: existingChatId ? existingChatId : chatId,
+                senderId: profileData.uid,
+                senderName: profileData.name,
+                receiver: item.id,
+                receiverName: item.name,
+                receiverProfile: item.image,
+                senderProfile: profileData.profile,
+                fcmToken: token,
+              });
+            }, 1000);
+          }}
+          loading={loading}
+        />
+      </View>
+
+      {/* Full Screen Image Modal */}
       {modalVisible && (
         <Modal
           visible={modalVisible}
+          transparent
           onRequestClose={() => setModalVisible(false)}
           animationType="fade">
-          <View style={styles.modelContent}>
+          <View style={styles.fullScreenModal}>
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={() => setModalVisible(false)}
-              style={styles.arrow}>
-              <AntDesign
-                name="arrowleft"
-                color={Colors.primaryText}
-                size={RFPercentage(2.8)}
-              />
+              style={styles.closeModalButton}>
+              <AntDesign name="close" size={24} color="#FFFFFF" />
             </TouchableOpacity>
             <Image
               source={item.image ? {uri: item.image} : IMAGES.defaultPic}
               resizeMode="contain"
-              style={styles.fullImg}
+              style={styles.fullScreenImage}
             />
           </View>
         </Modal>
@@ -517,20 +682,134 @@ const ServiceDetails: React.FC = ({route}: any) => {
       {/* Authentication Required Modal */}
       {showAuthModal && (
         <TouchableWithoutFeedback onPress={() => setShowAuthModal(false)}>
-          <View style={styles.modalContainer}>
-            <BlurView style={styles.blurView} blurType="light" blurAmount={5} />
+          <View style={styles.authModalContainer}>
+            <BlurView style={styles.blurView} blurType="dark" blurAmount={10} />
             <CustomModal
               title="Login Required"
-              subTitle="You need to sign in or create an account to access this feature."
-              onPress={() => setShowAuthModal(false)} // Cancel
+              subTitle="You need to sign in or create an account to contact service providers and get custom offers."
+              onPress={() => setShowAuthModal(false)}
               onPress2={() => {
                 setShowAuthModal(false);
-                navigation.navigate('UserSelection'); // or your login/signup screen
+                navigation.navigate('UserSelection');
               }}
-              buttonTitle="Login"
+              buttonTitle="Continue to Login"
             />
           </View>
         </TouchableWithoutFeedback>
+      )}
+
+      <ImageView
+        images={imageObjects}
+        imageIndex={step}
+        visible={visible}
+        onRequestClose={() => setIsVisible(false)}
+        backgroundColor="rgba(0,0,0,0.9)"
+        presentationStyle="fullScreen"
+      />
+
+      {packageModalVisible && selectedPackage && (
+        <Modal
+          visible={packageModalVisible}
+          transparent
+          animationType="none"
+          onRequestClose={() => setPackageModalVisible(false)}>
+          <View style={styles.packageModalContainer}>
+            <BlurView style={styles.blurView} blurType="dark" blurAmount={10} />
+            <View style={styles.packageModalContent}>
+              {/* Modal Header */}
+              <LinearGradient
+                colors={[Colors.gradient1, Colors.gradient2]}
+                style={styles.packageModalHeader}>
+                <Text style={styles.packageModalTitle}>{item?.name}</Text>
+                <TouchableOpacity
+                  onPress={() => setPackageModalVisible(false)}
+                  style={styles.packageModalClose}>
+                  <AntDesign name="close" size={24} color="#FFFFFF" />
+                </TouchableOpacity>
+              </LinearGradient>
+
+              {/* Modal Body */}
+              <ScrollView style={styles.packageModalBody}>
+                <View style={styles.packagePriceSection}>
+                  <Text style={styles.packageModalPriceLabel}>Price</Text>
+                  <View style={styles.packagePriceRow}>
+                    <Text style={styles.packageModalCurrency}>$</Text>
+                    <Text style={styles.packageModalPrice}>
+                      {selectedPackage?.price}
+                    </Text>
+                    <Text style={styles.packageModalPriceUnit}>/service</Text>
+                  </View>
+                </View>
+
+                <View style={styles.packageDetailSection}>
+                  <View style={styles.sectionHeader}>
+                    <MaterialCommunityIcons
+                      name="text-box-outline"
+                      size={20}
+                      color={Colors.gradient1}
+                    />
+                    <Text style={styles.sectionTitle}>What's Included</Text>
+                  </View>
+                  <Text style={styles.packageDetailText}>
+                    {selectedPackage?.details}
+                  </Text>
+                </View>
+
+                {/* Add additional package details if available */}
+                {selectedPackage?.services && (
+                  <View style={styles.packageServicesSection}>
+                    <View style={styles.sectionHeader}>
+                      <MaterialCommunityIcons
+                        name="check-circle-outline"
+                        size={20}
+                        color={Colors.gradient1}
+                      />
+                      <Text style={styles.sectionTitle}>Services Included</Text>
+                    </View>
+                    {selectedPackage?.services.map((service, index) => (
+                      <View key={index} style={styles.serviceItem}>
+                        <MaterialCommunityIcons
+                          name="check-circle"
+                          size={16}
+                          color={Colors.gradient1}
+                        />
+                        <Text style={styles.serviceText}>{service}</Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
+              </ScrollView>
+
+              {/* Modal Footer */}
+              <View style={styles.packageModalFooter}>
+                <GradientButton
+                  title="Get Package Offer"
+                  style={styles.selectPackageButton}
+                  textStyle={{fontSize: RFPercentage(1.6)}}
+                  onPress={() => {
+                    if (userFlow === 'Guest') {
+                      setShowAuthModal(true);
+                      return;
+                    }
+
+                    navigation.navigate('Chat', {
+                      chatId: existingChatId ? existingChatId : chatId,
+                      senderId: profileData.uid,
+                      senderName: profileData.name,
+                      receiver: item.id,
+                      receiverName: item.name,
+                      receiverProfile: item.image,
+                      senderProfile: profileData.profile,
+                      fcmToken: token,
+                    });
+
+                    setPackageModalVisible(false);
+                  }}
+                />
+              </View>
+            </View>
+          </View>
+        </Modal>
       )}
     </SafeAreaView>
   );
@@ -543,155 +822,529 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
-  container: {
-    width: '90%',
-    alignSelf: 'center',
-    paddingTop: RFPercentage(1),
+  gradientHeader: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 100,
+    paddingTop: Platform.OS === 'ios' ? 40 : 0,
+  },
+  headerText: {
+    fontSize: RFPercentage(2),
+    fontFamily: Fonts.semiBold,
+    color: '#FFFFFF',
+  },
+  imageGalleryContainer: {
+    height: RFPercentage(35),
+    marginTop: Platform.OS === 'ios' ? 0 : 20,
+  },
+  imageScrollView: {
+    width: width,
+    height: RFPercentage(35),
+  },
+  coverImage: {
+    width: width,
+    height: RFPercentage(35),
+  },
+  imageGradient: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: RFPercentage(15),
+  },
+  imageCounter: {
+    position: 'absolute',
+    top: RFPercentage(2),
+    right: RFPercentage(2),
+  },
+  counterBadge: {
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    paddingHorizontal: RFPercentage(1),
+    paddingVertical: RFPercentage(0.5),
+    borderRadius: 12,
+  },
+  counterText: {
+    color: '#FFFFFF',
+    fontSize: RFPercentage(1.3),
+    fontFamily: Fonts.fontMedium,
   },
   dotsContainer: {
+    position: 'absolute',
+    bottom: RFPercentage(2),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: RFPercentage(2),
+    width: '100%',
   },
   activeDot: {
-    width: RFPercentage(1),
-    height: RFPercentage(1),
-    borderRadius: RFPercentage(2),
-    marginHorizontal: 3,
+    width: RFPercentage(1.5),
+    height: RFPercentage(1.5),
+    borderRadius: RFPercentage(0.75),
+    marginHorizontal: RFPercentage(0.3),
   },
   inactiveDot: {
     width: RFPercentage(1),
     height: RFPercentage(1),
-    borderRadius: RFPercentage(2),
-    marginHorizontal: 3,
-    backgroundColor: 'rgba(209, 213, 219, 1)',
+    borderRadius: RFPercentage(0.5),
+    marginHorizontal: RFPercentage(0.3),
+    backgroundColor: 'rgba(255,255,255,0.5)',
   },
-  image: {
-    width: '100%',
-    height: RFPercentage(27),
+  contentContainer: {
+    paddingHorizontal: RFPercentage(2),
+    paddingTop: RFPercentage(2),
+    paddingBottom: RFPercentage(15),
   },
-  rowContainer: {
+  serviceHeaderCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: RFPercentage(2),
+    marginBottom: RFPercentage(2),
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 5,
+  },
+  serviceBadge: {
     flexDirection: 'row',
     alignItems: 'center',
+    alignSelf: 'flex-start',
+    paddingHorizontal: RFPercentage(1.2),
+    paddingVertical: RFPercentage(0.5),
+    borderRadius: 20,
+    marginBottom: RFPercentage(1),
+    gap: RFPercentage(0.5),
   },
-  icon: {
+  serviceBadgeText: {
+    color: '#FFFFFF',
+    fontSize: RFPercentage(1.3),
+    fontFamily: Fonts.fontMedium,
+  },
+  serviceTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: RFPercentage(1.5),
+  },
+  profileImageContainer: {
+    position: 'relative',
+    marginRight: RFPercentage(1.5),
+  },
+  profileImage: {
     width: RFPercentage(6),
     height: RFPercentage(6),
-    borderRadius: RFPercentage(100),
-    marginRight: RFPercentage(1),
+    borderRadius: RFPercentage(3),
     borderWidth: 2,
     borderColor: Colors.gradient1,
   },
-  starContainer: {
-    flexDirection: 'row',
-    // marginTop: RFPercentage(0.4),
-    marginLeft: RFPercentage(7),
-    bottom: RFPercentage(1.5),
-  },
-  star: {
-    width: RFPercentage(1.3),
-    height: RFPercentage(1.3),
-    marginRight: RFPercentage(0.2),
-  },
-  headeing2: {
-    color: Colors.placeholderColor,
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.8),
-  },
-  rowAlign: {
-    flexDirection: 'row',
+  verifiedBadge: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: Colors.gradient1,
+    borderRadius: 10,
+    width: RFPercentage(2.5),
+    height: RFPercentage(2.5),
     alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
   },
-  cover: {
-    width: width * 0.9,
-    height: RFPercentage(28),
-    borderWidth: 1,
-    borderColor: 'rgba(238, 238, 238, 1)',
+  serviceTitleContainer: {
+    flex: 1,
   },
-  joining: {
-    color: Colors.placeholderColor,
-    fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.4),
-  },
-  icons: {width: RFPercentage(1.8), height: RFPercentage(1.8)},
-  showMore: {
-    color: Colors.placeholderColor,
-    fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.6),
-    textAlign: 'justify',
-    lineHeight: RFPercentage(2.5),
-    marginTop: RFPercentage(0.5),
-  },
-  showText: {
-    color: Colors.gradient1,
-    fontSize: RFPercentage(1.6),
-    fontFamily: Fonts.fontMedium,
-  },
-  availabilityRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: RFPercentage(20),
-  },
-  check: {
-    color: Colors.gradient1,
+  serviceName: {
+    fontSize: RFPercentage(2.2),
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.7),
-    left: RFPercentage(0.8),
+    color: Colors.primaryText,
+    marginBottom: RFPercentage(0.3),
   },
-  serviceRow: {
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: RFPercentage(0.3),
+  },
+  ratingText: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontMedium,
+    color: Colors.primaryText,
+    marginLeft: RFPercentage(0.3),
+  },
+  reviewsText: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: Fonts.fontRegular,
+    color: Colors.secondaryText,
+    marginLeft: RFPercentage(0.5),
+  },
+  shareButton: {
+    width: RFPercentage(4.5),
+    height: RFPercentage(4.5),
+    borderRadius: RFPercentage(2.25),
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  metaInfoContainer: {
+    flexDirection: 'row',
+    gap: RFPercentage(2),
+  },
+  metaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: RFPercentage(0.5),
+  },
+  metaText: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: Fonts.fontRegular,
+    color: Colors.secondaryText,
+  },
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: RFPercentage(2),
+    marginBottom: RFPercentage(2),
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: RFPercentage(1.5),
+    gap: RFPercentage(1),
+  },
+  cardTitle: {
+    fontSize: RFPercentage(1.8),
+    fontFamily: Fonts.fontMedium,
+    color: Colors.primaryText,
+  },
+  descriptionText: {
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontRegular,
+    color: Colors.secondaryText,
+    lineHeight: RFPercentage(2.2),
+  },
+  readMoreText: {
+    color: Colors.gradient1,
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontMedium,
+  },
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: RFPercentage(0.8),
+    backgroundColor: '#F8FAFC',
+    padding: RFPercentage(1.2),
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  locationText: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontRegular,
+    color: Colors.primaryText,
+    flex: 1,
+  },
+  availabilityButton: {
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  availabilityGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: RFPercentage(1.5),
+    gap: RFPercentage(1),
+  },
+  availabilityButtonText: {
+    color: '#FFFFFF',
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontMedium,
+  },
+  servicesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: RFPercentage(1),
+  },
+  serviceChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+    paddingHorizontal: RFPercentage(1.2),
+    paddingVertical: RFPercentage(0.8),
+    borderRadius: 20,
+    gap: RFPercentage(0.5),
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  serviceChipText: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: Fonts.fontMedium,
+    color: Colors.primaryText,
+  },
+  showMoreButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: RFPercentage(1.5),
+    gap: RFPercentage(0.5),
+  },
+  showMoreText: {
+    color: Colors.gradient1,
+    fontSize: RFPercentage(1.4),
+    fontFamily: Fonts.fontMedium,
+  },
+  packagesHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: RFPercentage(1.5),
+  },
+  startingFromText: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: Fonts.fontRegular,
+    color: Colors.secondaryText,
+  },
+  startingPrice: {
+    fontSize: RFPercentage(2.4),
+    fontFamily: Fonts.semiBold,
+    color: Colors.gradient1,
+  },
+  bestValueBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F59E0B',
+    paddingHorizontal: RFPercentage(1),
+    paddingVertical: RFPercentage(0.5),
+    borderRadius: 12,
+    gap: RFPercentage(0.3),
+  },
+  bestValueText: {
+    color: '#FFFFFF',
+    fontSize: RFPercentage(1.2),
+    fontFamily: Fonts.fontMedium,
+  },
+  packagesScroll: {
+    marginHorizontal: -RFPercentage(2),
+    paddingHorizontal: RFPercentage(2),
+  },
+  providerInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: RFPercentage(1.5),
+  },
+  providerImage: {
+    width: RFPercentage(5),
+    height: RFPercentage(5),
+    borderRadius: RFPercentage(2.5),
+  },
+  providerDetails: {
+    flex: 1,
+  },
+  providerName: {
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontMedium,
+    color: Colors.primaryText,
+    marginBottom: RFPercentage(0.5),
+  },
+  providerStats: {
+    flexDirection: 'row',
+    gap: RFPercentage(1.5),
+  },
+  statItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: RFPercentage(0.3),
+  },
+  statText: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: Fonts.fontRegular,
+    color: Colors.secondaryText,
+  },
+  bottomActionBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: RFPercentage(2),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: -4},
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 10,
+    paddingBottom: Platform.OS === 'ios' ? RFPercentage(4) : RFPercentage(2),
   },
-  serviceBox: {
-    height: RFPercentage(4),
-    borderWidth: 1,
-    borderColor: Colors.inputFieldColor,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: RFPercentage(0.8),
-    margin: RFPercentage(0.7),
-    paddingHorizontal: RFPercentage(2),
-    alignSelf: 'flex-start',
-  },
-  serviceText: {
-    color: Colors.placeholderColor,
-    fontSize: RFPercentage(1.5),
-    fontFamily: Fonts.fontRegular,
-  },
-  serviceMore: {
-    color: Colors.gradient1,
-    fontSize: RFPercentage(1.4),
-    fontFamily: Fonts.fontMedium,
-    left: RFPercentage(1),
-  },
-  msg: {
-    width: '90%',
-    alignSelf: 'center',
-    marginTop: RFPercentage(2.5),
-  },
-  modelContent: {
+  priceContainer: {
     flex: 1,
-    backgroundColor: '',
+  },
+  startingFrom: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: Fonts.fontRegular,
+    color: Colors.secondaryText,
+  },
+  bottomPrice: {
+    fontSize: RFPercentage(2.2),
+    fontFamily: Fonts.semiBold,
+    color: Colors.gradient1,
+  },
+  actionButton: {
+    flex: 2,
+    marginLeft: RFPercentage(1),
+  },
+  actionButtonText: {
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontMedium,
+  },
+  fullScreenModal: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.9)',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  arrow: {
+  closeModalButton: {
     position: 'absolute',
-    left: RFPercentage(2),
-    top: Platform.OS === 'android' ? RFPercentage(3.6) : RFPercentage(6),
+    top: Platform.OS === 'ios' ? RFPercentage(6) : RFPercentage(4),
+    right: RFPercentage(2),
     zIndex: 2,
-  },
-  fullImg: {width: '100%', height: '100%'},
-  modalContainer: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    width: RFPercentage(4),
+    height: RFPercentage(4),
+    borderRadius: RFPercentage(2),
+    backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  fullScreenImage: {
+    width: '90%',
+    height: '90%',
+  },
+  authModalContainer: {
+    ...StyleSheet.absoluteFillObject,
     zIndex: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   blurView: {
     ...StyleSheet.absoluteFillObject,
+  },
+  packageModalContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  packageModalContent: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    maxHeight: '80%',
+  },
+  packageModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: RFPercentage(2),
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+  },
+  packageModalTitle: {
+    color: '#FFFFFF',
+    fontSize: RFPercentage(1.8),
+    fontFamily: Fonts.semiBold,
+  },
+  packageModalClose: {
+    padding: RFPercentage(0.5),
+  },
+  packageModalBody: {
+    padding: RFPercentage(2),
+  },
+  packagePriceSection: {
+    alignItems: 'center',
+    marginBottom: RFPercentage(2),
+  },
+  packageModalPriceLabel: {
+    color: Colors.secondaryText,
+    fontSize: RFPercentage(1.4),
+    fontFamily: Fonts.fontRegular,
+    marginBottom: RFPercentage(0.5),
+  },
+  packagePriceRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+  },
+  packageModalCurrency: {
+    color: Colors.gradient1,
+    fontSize: RFPercentage(2),
+    fontFamily: Fonts.fontMedium,
+  },
+  packageModalPrice: {
+    color: Colors.gradient1,
+    fontSize: RFPercentage(3.5),
+    fontFamily: Fonts.fontBold,
+    marginHorizontal: RFPercentage(0.5),
+  },
+  packageModalPriceUnit: {
+    color: Colors.secondaryText,
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontRegular,
+  },
+  packageDetailSection: {
+    marginBottom: RFPercentage(2),
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: RFPercentage(1),
+    gap: RFPercentage(0.8),
+  },
+  sectionTitle: {
+    color: Colors.primaryText,
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontMedium,
+  },
+  packageDetailText: {
+    color: Colors.secondaryText,
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontRegular,
+    lineHeight: RFPercentage(2.2),
+  },
+  packageServicesSection: {
+    marginBottom: RFPercentage(2),
+  },
+  serviceItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: RFPercentage(0.8),
+    gap: RFPercentage(0.8),
+  },
+  serviceText: {
+    color: Colors.primaryText,
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontRegular,
+    flex: 1,
+  },
+  packageModalFooter: {
+    padding: RFPercentage(2),
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+  },
+  selectPackageButton: {
+    marginBottom: RFPercentage(1),
+    alignSelf: 'center',
+  },
+  customizeButton: {
+    padding: RFPercentage(1.5),
+    alignItems: 'center',
+  },
+  customizeText: {
+    color: Colors.gradient1,
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontMedium,
   },
 });

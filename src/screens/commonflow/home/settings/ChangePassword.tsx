@@ -6,6 +6,8 @@ import {
   ScrollView,
   TouchableWithoutFeedback,
   StatusBar,
+  TouchableOpacity,
+  Platform,
 } from 'react-native';
 import React, {useState} from 'react';
 import {Colors, Fonts} from '../../../../constants/Themes';
@@ -21,6 +23,8 @@ import * as yup from 'yup';
 import {Formik} from 'formik';
 import {showToast} from '../../../../utils/ToastMessage';
 import {EmailAuthProvider} from '@react-native-firebase/auth';
+import LinearGradient from 'react-native-linear-gradient';
+import Feather from 'react-native-vector-icons/Feather';
 
 const ChangePasswordV2 = ({navigation}: any) => {
   const [loading, setLoading] = useState(false);
@@ -73,14 +77,31 @@ const ChangePasswordV2 = ({navigation}: any) => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar backgroundColor={Colors.background} barStyle="dark-content" />
-
-      <HeaderBack
-        title={`Change Password`}
-        textStyle={{fontSize: RFPercentage(2)}}
-        left={true}
+    <View style={styles.safeArea}>
+      <StatusBar
+        backgroundColor={Colors.gradient1}
+        barStyle="light-content"
+        translucent
       />
+
+      {/* Header with Gradient */}
+      <LinearGradient
+        colors={[Colors.gradient1, Colors.gradient2]}
+        style={styles.gradientHeader}>
+        <View style={styles.headerContent}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}>
+            <Feather
+              name="arrow-left"
+              color="#FFFFFF"
+              size={RFPercentage(2.4)}
+            />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Change Password</Text>
+          <View style={styles.placeholderView} />
+        </View>
+      </LinearGradient>
       <ScrollView
         contentContainerStyle={{paddingBottom: RFPercentage(10)}}
         showsVerticalScrollIndicator={false}>
@@ -246,7 +267,7 @@ const ChangePasswordV2 = ({navigation}: any) => {
           </View>
         </TouchableWithoutFeedback>
       )}
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -261,6 +282,34 @@ const styles = StyleSheet.create({
   container: {
     width: '90%',
     alignSelf: 'center',
+  },
+  gradientHeader: {
+    paddingTop: Platform.OS === 'ios' ? RFPercentage(7) : RFPercentage(5),
+    paddingBottom: RFPercentage(2),
+    paddingHorizontal: RFPercentage(2),
+    // borderBottomLeftRadius: 30,
+    // borderBottomRightRadius: 30,
+  },
+  placeholderView: {
+    width: RFPercentage(4.5),
+  },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  backButton: {
+    width: RFPercentage(4.5),
+    height: RFPercentage(4.5),
+    borderRadius: RFPercentage(2.25),
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
+  headerTitle: {
+    color: '#FFFFFF',
+    fontSize: RFPercentage(1.8),
+    fontFamily: Fonts.semiBold,
   },
   label: {
     color: Colors.brown,

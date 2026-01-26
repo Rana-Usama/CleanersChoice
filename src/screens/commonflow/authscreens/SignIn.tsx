@@ -215,7 +215,7 @@ const SignIn: React.FC = () => {
                           buttonOuterColor={
                             selected ? Colors.gradient1 : Colors.inputFieldColor
                           }
-                          buttonSize={RFPercentage(1.4)}
+                          buttonSize={RFPercentage(1)}
                           buttonOuterSize={RFPercentage(2)}
                         />
                         <Text style={styles.radioLabel}>Remember me?</Text>
@@ -279,6 +279,7 @@ const styles = StyleSheet.create({
   container: {
     // backgroundColor: 'red',
     flex: 1,
+    marginTop: Platform.OS === 'android' ? RFPercentage(5) : 0,
   },
   radioContainer: {
     alignItems: 'center',
@@ -319,7 +320,7 @@ const styles = StyleSheet.create({
   fieldContainer: {
     alignSelf: 'center',
     marginTop: RFPercentage(2.9),
-    width: '95%',
+    width: '98%',
     alignItems: 'center',
   },
   radioInner: {

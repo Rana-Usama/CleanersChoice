@@ -1,19 +1,35 @@
-import { StyleSheet, Text, View } from 'react-native';
+import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import React from 'react';
-import { RFPercentage } from 'react-native-responsive-fontsize';
-import { Colors, Fonts } from '../constants/Themes';
+import {RFPercentage} from 'react-native-responsive-fontsize';
+import {Colors, Fonts} from '../constants/Themes';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Feather from 'react-native-vector-icons/Feather';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import LinearGradient from 'react-native-linear-gradient';
 
 type CheckAvailableProps = {
   day: string;
-  fromTime: any; 
-  toTime: any;   
+  fromTime: any;
+  toTime: any;
+  isToday?: boolean;
+  onPress?: () => void;
 };
 
-const CheckAvailable: React.FC<CheckAvailableProps> = ({ day, fromTime, toTime }) => {
-  const fromDate = new Date(fromTime * 1000);
-  const toDate = new Date(toTime * 1000);
+const CheckAvailable: React.FC<CheckAvailableProps> = ({
+  day,
+  fromTime,
+  toTime,
+  isToday = false,
+  onPress,
+}) => {
+  const formatTime = (timestamp: any) => {
+    if (!timestamp) return '--:--';
 
-  const formatTime = (date: Date) => {
+    // Handle both Unix timestamp (seconds) and Date objects
+    const date = timestamp._seconds
+      ? new Date(timestamp._seconds * 1000)
+      : new Date(timestamp);
+
     return date.toLocaleTimeString([], {
       hour: '2-digit',
       minute: '2-digit',
@@ -21,22 +37,114 @@ const CheckAvailable: React.FC<CheckAvailableProps> = ({ day, fromTime, toTime }
     });
   };
 
+  // Format day abbreviation
+  const getDayAbbreviation = () => {
+    const abbreviations: {[key: string]: string} = {
+      Monday: 'Mon',
+      Tuesday: 'Tue',
+      Wednesday: 'Wed',
+      Thursday: 'Thu',
+      Friday: 'Fri',
+      Saturday: 'Sat',
+      Sunday: 'Sun',
+    };
+    return abbreviations[day] || day.slice(0, 3);
+  };
+
+  // Get day number for calendar view
+  const getDayNumber = () => {
+    const dayMap: {[key: string]: number} = {
+      Monday: 1,
+      Tuesday: 2,
+      Wednesday: 3,
+      Thursday: 4,
+      Friday: 5,
+      Saturday: 6,
+      Sunday: 7,
+    };
+    return dayMap[day] || 0;
+  };
+
+  // Get icon based on day
+  const getDayIcon = () => {
+    if (isToday) return 'star';
+
+    const dayIcons: {[key: string]: string} = {
+      Monday: 'calendar-blank',
+      Tuesday: 'calendar-blank',
+      Wednesday: 'calendar-blank',
+      Thursday: 'calendar-blank',
+      Friday: 'calendar-blank',
+      Saturday: 'palm-tree',
+      Sunday: 'weather-sunny',
+    };
+    return dayIcons[day] || 'calendar-blank';
+  };
+
+  const ComponentWrapper = onPress ? TouchableOpacity : View;
+
   return (
-    <View style={styles.container}>
-      <View style={styles.dayView}>
-        <Text style={styles.dayText}>{day}</Text>
+    <ComponentWrapper
+      style={[styles.container, isToday && styles.todayContainer]}
+      onPress={onPress}
+      activeOpacity={0.7}>
+      {/* Left: Calendar-style day indicator */}
+      <View style={styles.daySection}>
+        <View style={styles.dayInfo}>
+          <Text
+            style={[styles.dayFullName, isToday && styles.todayDayFullName]}>
+            {getDayAbbreviation()}
+          </Text>
+          {/* {isToday && (
+            <View style={styles.todayBadge}>
+              <Feather name="zap" size={10} color="#FFFFFF" />
+              <Text style={styles.todayBadgeText}>Today</Text>
+            </View>
+          )} */}
+        </View>
       </View>
 
-      <Text style={styles.label}>From</Text>
-      <View style={styles.timeView}>
-        <Text style={styles.timeText}>{formatTime(fromDate)}</Text>
+      {/* Center: Time Slot */}
+      <View style={styles.timeSection}>
+        <View style={styles.timeSlot}>
+          <View style={styles.timeIconContainer}>
+            <Ionicons
+              name="time-outline"
+              size={16}
+              color={isToday ? Colors.gradient1 : Colors.secondaryText}
+            />
+          </View>
+          <View style={styles.timeRange}>
+            <Text style={[styles.timeText, isToday && styles.todayTimeText]}>
+              {formatTime(fromTime)}
+            </Text>
+            <Feather
+              name="arrow-right"
+              size={12}
+              color={isToday ? Colors.gradient1 : Colors.secondaryText}
+              style={styles.arrowIcon}
+            />
+            <Text style={[styles.timeText, isToday && styles.todayTimeText]}>
+              {formatTime(toTime)}
+            </Text>
+          </View>
+        </View>
       </View>
 
-      <Text style={styles.label}>To</Text>
-      <View style={styles.timeView}>
-        <Text style={styles.timeText}>{formatTime(toDate)}</Text>
+      {/* Right: Status Indicator */}
+      <View style={styles.statusSection}>
+        <LinearGradient
+          colors={[Colors.gradient1, Colors.gradient2]}
+          style={styles.availableBadge}>
+          <MaterialCommunityIcons
+            name="check-circle"
+            size={14}
+            color="#FFFFFF"
+          />
+          <Text style={styles.availableText}>Available</Text>
+        </LinearGradient>
       </View>
-    </View>
+    </ComponentWrapper>
   );
 };
 
@@ -45,40 +153,163 @@ export default CheckAvailable;
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     flexDirection: 'row',
-    marginTop: RFPercentage(1.8),
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: RFPercentage(1.5),
+    marginBottom: RFPercentage(1),
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
+    justifyContent: 'space-between',
   },
-  dayView: {
-    width: RFPercentage(10),
-    height: RFPercentage(3.8),
-    borderRadius: RFPercentage(100),
+  todayContainer: {
+    backgroundColor: '#F0F9FF',
+    borderColor: Colors.gradient1,
+    borderWidth: 1.5,
+    shadowColor: Colors.gradient1,
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+  },
+  daySection: {
+    // backgroundColor:"red",
+    width: RFPercentage(4),
+  },
+  dayCircle: {
+    width: RFPercentage(5),
+    height: RFPercentage(5),
+    borderRadius: RFPercentage(2.5),
+    backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(164, 172, 188, 0.5)',
+    marginRight: RFPercentage(1),
   },
-  dayText: {
-    color: Colors.placeholderColor,
-    fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.7),
+  todayDayCircle: {
+    backgroundColor: Colors.gradient1,
   },
-  label: {
-    color: Colors.secondaryText,
+  dayAbbreviation: {
+    fontSize: RFPercentage(1.2),
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.6),
+    color: Colors.secondaryText,
+    marginBottom: -2,
   },
-  timeView: {
-    width: RFPercentage(10),
-    height: RFPercentage(3.8),
-    borderRadius: RFPercentage(100),
+  todayDayText: {
+    color: '#FFFFFF',
+  },
+  dayNumber: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: Fonts.semiBold,
+    color: Colors.primaryText,
+  },
+  todayDayNumber: {
+    color: '#FFFFFF',
+  },
+  dayInfo: {
+    flexDirection: 'column',
+  },
+  dayFullName: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontMedium,
+    color: Colors.primaryText,
+    marginBottom: RFPercentage(0.2),
+  },
+  todayDayFullName: {
+    color: Colors.gradient1,
+    fontFamily: Fonts.semiBold,
+  },
+  todayBadge: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgb(231, 239, 245)',
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: RFPercentage(0.6),
+    paddingVertical: RFPercentage(0.2),
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+    gap: 2,
+    position:"absolute"
+  },
+  todayBadgeText: {
+    color: '#92400E',
+    fontSize: RFPercentage(1),
+    fontFamily: Fonts.fontMedium,
+  },
+  timeSection: {
+    // flex: 1,
+    // alignItems: 'center',
+    marginLeft: RFPercentage(1.5),
+    // backgroundColor:"red"
+  },
+  timeSlot: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+    paddingHorizontal: RFPercentage(1),
+    paddingVertical: RFPercentage(0.8),
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  timeIconContainer: {
+    marginRight: RFPercentage(0.5),
+  },
+  timeRange: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   timeText: {
-    color: Colors.placeholderColor,
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
+    color: Colors.primaryText,
+  },
+  todayTimeText: {
+    color: Colors.gradient1,
+    fontFamily: Fonts.semiBold,
+  },
+  arrowIcon: {
+    marginHorizontal: RFPercentage(0.5),
+  },
+  statusSection: {
+    flex: 1,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: RFPercentage(0.5),
+  },
+  availableBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: RFPercentage(0.8),
+    paddingVertical: RFPercentage(0.4),
+    borderRadius: 12,
+    gap: RFPercentage(0.3),
+  },
+  availableText: {
+    color: '#FFFFFF',
+    fontSize: RFPercentage(1.1),
+    fontFamily: Fonts.fontMedium,
+  },
+  scheduledBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: RFPercentage(0.8),
+    paddingVertical: RFPercentage(0.4),
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#D1FAE5',
+    gap: RFPercentage(0.3),
+  },
+  scheduledText: {
+    color: Colors.gradient1,
+    fontSize: RFPercentage(1.1),
+    fontFamily: Fonts.fontMedium,
+  },
+  chevronIcon: {
+    marginLeft: RFPercentage(0.3),
   },
 });

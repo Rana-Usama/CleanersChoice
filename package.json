@@ -42,6 +42,7 @@
     "react-native-check-box": "^2.1.7",
     "react-native-compressor": "^1.11.0",
     "react-native-date-picker": "^5.0.10",
+    "react-native-device-info": "^15.0.1",
     "react-native-dotenv": "^3.4.11",
     "react-native-fs": "^2.20.0",
     "react-native-gesture-handler": "^2.24.0",

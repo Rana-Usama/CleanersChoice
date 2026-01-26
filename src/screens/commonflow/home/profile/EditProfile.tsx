@@ -12,6 +12,7 @@ import {
   Platform,
   ActivityIndicator,
   StatusBar,
+  Dimensions,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {Colors, Icons, Fonts, IMAGES} from '../../../../constants/Themes';
@@ -26,6 +27,11 @@ import storage from '@react-native-firebase/storage';
 import {Image as CompressorImage} from 'react-native-compressor';
 import {showToast} from '../../../../utils/ToastMessage';
 import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
+import LinearGradient from 'react-native-linear-gradient';
+import Feather from 'react-native-vector-icons/Feather';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+
+const {width} = Dimensions.get('window');
 
 const EditProfile = ({navigation}: any) => {
   const [name, setName] = useState('');
@@ -153,34 +159,52 @@ const EditProfile = ({navigation}: any) => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar backgroundColor={Colors.background} barStyle="dark-content" />
-
-      <HeaderBack
-        title="Edit Your Profile"
-        textStyle={styles.headerText}
-        left={true}
+    <View style={styles.safeArea}>
+      <StatusBar
+        backgroundColor={Colors.gradient1}
+        barStyle="light-content"
+        translucent
       />
+
+      {/* Header with Gradient */}
+      <LinearGradient
+        colors={[Colors.gradient1, Colors.gradient2]}
+        style={styles.gradientHeader}>
+        <View style={styles.headerContent}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}>
+            <Feather
+              name="arrow-left"
+              color="#FFFFFF"
+              size={RFPercentage(2.4)}
+            />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Edit Profile</Text>
+          <View style={styles.placeholderView} />
+        </View>
+      </LinearGradient>
+
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.flexContainer}>
+        style={styles.keyboardContainer}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <ScrollView
             contentContainerStyle={styles.scrollContainer}
-            keyboardShouldPersistTaps="handled">
-            <View style={styles.container}>
-              {/* Profile Image */}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}>
+            {/* Profile Image Section */}
+            <View style={styles.profileSection}>
               <TouchableOpacity
                 activeOpacity={0.8}
                 onPress={uploadImg}
-                style={styles.imgContainer}>
-                <View style={styles.pictureContainer}>
-                  {loading2 ? (
-                    <ActivityIndicator
-                      size={'large'}
-                      color={Colors.inputFieldColor}
-                    />
-                  ) : (
+                style={styles.profileImageContainer}>
+                {loading2 ? (
+                  <View style={styles.profileImageLoader}>
+                    <ActivityIndicator size="large" color={Colors.gradient1} />
+                  </View>
+                ) : (
+                  <View style={styles.profileImageWrapper}>
                     <Image
                       source={
                         img
@@ -189,67 +213,167 @@ const EditProfile = ({navigation}: any) => {
                           ? {uri: userData.profile}
                           : IMAGES.defaultPic
                       }
-                      resizeMode="contain"
-                      style={styles.imgStyle}
+                      resizeMode="cover"
+                      style={styles.profileImage}
                     />
-                  )}
-                </View>
-                <TouchableOpacity activeOpacity={0.8} onPress={uploadImg}>
-                  <Image
-                    source={Icons.edit}
-                    resizeMode="contain"
-                    style={styles.uploadedImg}
-                  />
-                </TouchableOpacity>
+                    <View style={styles.profileImageOverlay}>
+                      <MaterialCommunityIcons
+                        name="camera"
+                        size={RFPercentage(2.5)}
+                        color="#FFFFFF"
+                      />
+                    </View>
+                  </View>
+                )}
               </TouchableOpacity>
 
-              {/* Edit Info Title */}
-              <View style={styles.sectionTitle}>
-                <Text style={styles.sectionTitleText}>Edit Info</Text>
+              <View style={styles.profileInfo}>
+                <Text style={styles.profileName}>
+                  {userData?.name || 'Your Name'}
+                </Text>
+                <Text style={styles.profileRole}>
+                  {userData?.role === 'Cleaner'
+                    ? 'Professional Cleaner'
+                    : 'Customer'}
+                </Text>
+              </View>
+            </View>
+
+            {/* Edit Form Card */}
+            <View style={styles.formCard}>
+              {/* Form Header */}
+              <View style={styles.formHeader}>
+                <MaterialCommunityIcons
+                  name="account-edit"
+                  size={RFPercentage(2.5)}
+                  color={Colors.gradient1}
+                />
+                <Text style={styles.formTitle}>Edit Information</Text>
               </View>
 
-              {/* Input Fields */}
-              <View style={styles.inputFieldsWrapper}>
-                <View style={styles.inputContainer}>
-                  <Text style={styles.label}>Name</Text>
-                  <InputField
-                    placeholder={userData?.name}
-                    value={name}
-                    onChangeText={setName}
-                    customStyle={styles.inputField}
+              {/* Name Field */}
+              <View style={styles.inputSection}>
+                <View style={styles.inputLabelRow}>
+                  <MaterialCommunityIcons
+                    name="account-outline"
+                    size={RFPercentage(2)}
+                    color={Colors.secondaryText}
                   />
+                  <Text style={styles.inputLabel}>Full Name</Text>
                 </View>
-
-                <View style={styles.inputContainer}>
-                  <Text style={styles.label}>Phone Number</Text>
-                  <InputField
-                    placeholder={userData?.phone || 'Add Your Phone Number'}
-                    value={phone}
-                    onChangeText={text => {
-                      const formatted = formatPhoneNumber(text);
-                      setPhone(formatted);
-                    }}
-                    type={'phone-pad'}
-                    length={15}
-                    customStyle={styles.inputField}
-                  />
-                </View>
+                <InputField
+                  placeholder={userData?.name || 'Enter your full name'}
+                  value={name}
+                  onChangeText={setName}
+                  customStyle={styles.inputField}
+                />
+                {userData?.name && name !== userData.name && (
+                  <Text style={styles.currentValue}>
+                    Current: {userData.name}
+                  </Text>
+                )}
               </View>
 
-              {/* Edit Button */}
-              <View style={styles.editButtonWrapper}>
+              {/* Phone Field */}
+              <View style={styles.inputSection}>
+                <View style={styles.inputLabelRow}>
+                  <MaterialCommunityIcons
+                    name="phone-outline"
+                    size={RFPercentage(2)}
+                    color={Colors.secondaryText}
+                  />
+                  <Text style={styles.inputLabel}>Phone Number</Text>
+                </View>
+                <InputField
+                  placeholder={userData?.phone || 'Add your phone number'}
+                  value={phone}
+                  onChangeText={text => {
+                    const formatted = formatPhoneNumber(text);
+                    setPhone(formatted);
+                  }}
+                  type={'phone-pad'}
+                  length={15}
+                  customStyle={styles.inputField}
+                />
+                {userData?.phone && phone !== userData.phone && (
+                  <Text style={styles.currentValue}>
+                    Current: {userData.phone}
+                  </Text>
+                )}
+              </View>
+
+              {/* Email Field (Read-only) */}
+              <View style={styles.inputSection}>
+                <View style={styles.readOnlyField}>
+                  <MaterialCommunityIcons
+                    name="lock"
+                    size={RFPercentage(2)}
+                    color={Colors.secondaryText}
+                    style={styles.lockIcon}
+                  />
+                  <Text style={styles.readOnlyText}>
+                    {userData?.email || 'your@email.com'}
+                  </Text>
+                </View>
+                <Text style={styles.fieldHint}>
+                  Email cannot be changed for security reasons
+                </Text>
+              </View>
+
+              {/* Update Button */}
+              <View style={styles.buttonContainer}>
                 <GradientButton
-                  title={'Edit'}
+                  title="Update Profile"
                   onPress={handleEditProfile}
                   loading={loading}
                   disabled={loading}
+                  style={styles.updateButton}
+                  textStyle={styles.updateButtonText}
                 />
+              </View>
+            </View>
+
+            {/* Profile Tips */}
+            <View style={styles.tipsCard}>
+              <View style={styles.tipsHeader}>
+                <Feather name="info" size={20} color="#F59E0B" />
+                <Text style={styles.tipsTitle}>Profile Tips</Text>
+              </View>
+              <View style={styles.tipItem}>
+                <MaterialCommunityIcons
+                  name="check-circle"
+                  size={16}
+                  color="#10B981"
+                />
+                <Text style={styles.tipText}>
+                  Use a clear, professional profile photo
+                </Text>
+              </View>
+              <View style={styles.tipItem}>
+                <MaterialCommunityIcons
+                  name="check-circle"
+                  size={16}
+                  color="#10B981"
+                />
+                <Text style={styles.tipText}>
+                  Keep your contact information up to date
+                </Text>
+              </View>
+              <View style={styles.tipItem}>
+                <MaterialCommunityIcons
+                  name="check-circle"
+                  size={16}
+                  color="#10B981"
+                />
+                <Text style={styles.tipText}>
+                  Changes may take a few moments to appear
+                </Text>
               </View>
             </View>
           </ScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -260,82 +384,246 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
-  flexContainer: {
+  placeholderView: {
+    width: RFPercentage(4.5),
+  },
+  gradientHeader: {
+    paddingTop: Platform.OS === 'ios' ? RFPercentage(7) : RFPercentage(5),
+    paddingBottom: RFPercentage(2),
+    paddingHorizontal: RFPercentage(2),
+  },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  backButton: {
+    width: RFPercentage(4.5),
+    height: RFPercentage(4.5),
+    borderRadius: RFPercentage(2.25),
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
+  headerTitle: {
+    color: '#FFFFFF',
+    fontSize: RFPercentage(1.8),
+    fontFamily: Fonts.semiBold,
+  },
+  keyboardContainer: {
     flex: 1,
   },
   scrollContainer: {
     flexGrow: 1,
+    paddingBottom: RFPercentage(20),
   },
-  headerText: {
-    fontSize: RFPercentage(2),
-  },
-  container: {
-    width: '90%',
+  profileSection: {
+    alignItems: 'center',
     paddingTop: RFPercentage(3),
-    alignSelf: 'center',
+    paddingHorizontal: RFPercentage(2),
+  },
+  profileImageContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  profileImageLoader: {
+    width: RFPercentage(16),
+    height: RFPercentage(16),
+    borderRadius: RFPercentage(8),
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 4,
+    borderColor: Colors.gradient1,
   },
   profileImageWrapper: {
-    alignSelf: 'center',
-    marginTop: RFPercentage(2),
+    width: RFPercentage(16),
+    height: RFPercentage(16),
+    borderRadius: RFPercentage(8),
+    borderWidth: 4,
+    borderColor: Colors.gradient1,
+    overflow: 'hidden',
+    position: 'relative',
   },
-  imgContainer: {
-    alignSelf: 'center',
-    width: '90%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: RFPercentage(1),
+  profileImage: {
+    width: '100%',
+    height: '100%',
   },
-  pictureContainer: {
-    width: RFPercentage(15.8),
-    height: RFPercentage(15.8),
-    borderRadius: RFPercentage(10),
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: 'rgba(64, 123, 255, 1)',
-    backgroundColor: Colors.inputField,
-  },
-  imgStyle: {
-    width: RFPercentage(15),
-    height: RFPercentage(15),
-    borderRadius: RFPercentage(100),
-  },
-  uploadedImg: {
-    width: RFPercentage(3),
-    height: RFPercentage(3),
+  profileImageOverlay: {
     position: 'absolute',
-    left: RFPercentage(3),
-    bottom: RFPercentage(0.5),
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    alignItems: 'center',
+    paddingVertical: RFPercentage(0.5),
   },
-  sectionTitle: {
-    marginTop: RFPercentage(4),
-    borderBottomColor: Colors.inputFieldColor,
-    borderBottomWidth: 1,
-    paddingBottom: 5,
-    width: RFPercentage(30),
-  },
-  sectionTitleText: {
-    color: Colors.placeholderColor,
-    fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(2),
-  },
-  inputFieldsWrapper: {
-    marginTop: RFPercentage(1),
-  },
-  inputContainer: {
+  profileInfo: {
+    alignItems: 'center',
     marginTop: RFPercentage(2),
   },
-  label: {
+  profileName: {
     color: Colors.primaryText,
+    fontSize: RFPercentage(2.2),
+    fontFamily: Fonts.semiBold,
+    marginBottom: RFPercentage(0.5),
+  },
+  profileRole: {
+    color: Colors.secondaryText,
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
+    marginBottom: RFPercentage(1.5),
+  },
+  changePhotoButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0F9FF',
+    paddingHorizontal: RFPercentage(1.5),
+    paddingVertical: RFPercentage(0.8),
+    borderRadius: 20,
+    gap: RFPercentage(0.5),
+    borderWidth: 1,
+    borderColor: '#BAE6FD',
+  },
+  changePhotoText: {
+    color: Colors.gradient1,
+    fontSize: RFPercentage(1.4),
+    fontFamily: Fonts.fontMedium,
+  },
+  formCard: {
+    backgroundColor: '#FFFFFF',
+    marginHorizontal: RFPercentage(2),
+    marginTop: RFPercentage(2),
+    borderRadius: 16,
+    padding: RFPercentage(2.5),
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
+  },
+  formHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: RFPercentage(2),
+    gap: RFPercentage(1),
+    paddingBottom: RFPercentage(1.5),
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  formTitle: {
+    color: Colors.primaryText,
     fontSize: RFPercentage(1.8),
+    fontFamily: Fonts.fontMedium,
+  },
+  inputSection: {
+    marginBottom: RFPercentage(2),
+  },
+  inputLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: RFPercentage(1),
+    gap: RFPercentage(0.8),
+  },
+  inputLabel: {
+    color: Colors.primaryText,
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontMedium,
   },
   inputField: {
     width: '100%',
-    marginVertical: RFPercentage(1),
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
-  editButtonWrapper: {
-    marginTop: RFPercentage(4.5),
+  currentValue: {
+    color: Colors.secondaryText,
+    fontSize: RFPercentage(1.3),
+    fontFamily: Fonts.fontRegular,
+    marginTop: RFPercentage(0.5),
+    fontStyle: 'italic',
+  },
+  readOnlyField: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+    padding: RFPercentage(1.5),
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    gap: RFPercentage(1),
+  },
+  lockIcon: {
+    opacity: 0.7,
+  },
+  readOnlyText: {
+    color: Colors.secondaryText,
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontRegular,
+    flex: 1,
+  },
+  fieldHint: {
+    color: Colors.secondaryText,
+    fontSize: RFPercentage(1.3),
+    fontFamily: Fonts.fontRegular,
+    marginTop: RFPercentage(0.5),
+    fontStyle: 'italic',
+  },
+  buttonContainer: {
+    marginTop: RFPercentage(2),
+    gap: RFPercentage(1),
+  },
+  updateButton: {
+    width: '60%',
     alignSelf: 'center',
+  },
+  updateButtonText: {
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontMedium,
+  },
+  cancelButton: {
+    padding: RFPercentage(1.5),
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    color: Colors.secondaryText,
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontMedium,
+  },
+  tipsCard: {
+    backgroundColor: '#fef5d0ff',
+    marginHorizontal: RFPercentage(2),
+    marginTop: RFPercentage(2),
+    borderRadius: 16,
+    padding: RFPercentage(2),
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    marginBottom: RFPercentage(2),
+  },
+  tipsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: RFPercentage(1),
+    gap: RFPercentage(0.8),
+  },
+  tipsTitle: {
+    color: '#92400E',
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontMedium,
+  },
+  tipItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: RFPercentage(0.8),
+    gap: RFPercentage(0.8),
+  },
+  tipText: {
+    color: '#92400E',
+    fontSize: RFPercentage(1.4),
+    fontFamily: Fonts.fontRegular,
+    flex: 1,
+    lineHeight: RFPercentage(2),
   },
 });

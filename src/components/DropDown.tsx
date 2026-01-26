@@ -14,7 +14,7 @@ interface Props {
   setValue?: (item: Item) => void;
   icon?: any;
   placeholder: string;
-  placeholderColor?: string;
+  placeholderColor?: any;
 }
 
 const CustomDropDown: React.FC<Props> = (props: Props) => {

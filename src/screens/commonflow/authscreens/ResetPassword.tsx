@@ -8,22 +8,27 @@ import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
+  ScrollView,
+  Platform,
+  TouchableOpacity
 } from 'react-native';
 import React, {useState} from 'react';
 import {Fonts, IMAGES, Colors} from '../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import InputField from '../../../components/InputField';
 import GradientButton from '../../../components/GradientButton';
-import HeaderBack from '../../../components/HeaderBack';
 import * as yup from 'yup';
 import {Formik} from 'formik';
 import auth from '@react-native-firebase/auth';
 import {showToast} from '../../../utils/ToastMessage';
 import firestore from '@react-native-firebase/firestore';
+import LinearGradient from 'react-native-linear-gradient';
+import Feather from 'react-native-vector-icons/Feather';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const ResetPassword: React.FC = ({navigation}: any) => {
   const [loading, setLoading] = useState(false);
-  const [text, setText] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
   // Validation Schema
   let validationSchema = yup.object({
@@ -49,8 +54,7 @@ const ResetPassword: React.FC = ({navigation}: any) => {
             title: 'Success',
             message: 'Reset password link sent to your email.',
           });
-          setText(true);
-          // navigation.navigate('SignIn');
+          setResetSent(true);
         } else {
           // Email not found
           showToast({
@@ -73,105 +77,196 @@ const ResetPassword: React.FC = ({navigation}: any) => {
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <SafeAreaView style={styles.safeArea}>
-        <StatusBar
-          barStyle={'dark-content'}
-          translucent
-          backgroundColor="transparent"
-        />
-        <KeyboardAvoidingView>
-          <HeaderBack title={'Reset Password?'} left={true} />
+    <View style={styles.safeArea}>
+      <StatusBar
+        backgroundColor={Colors.gradient1}
+        barStyle="light-content"
+        translucent
+      />
 
-          {/* Field Container */}
-          <Formik
-            initialValues={{
-              email: '',
-            }}
-            validationSchema={validationSchema}
-            onSubmit={values => handleNext(values)}>
-            {({
-              handleChange,
-              handleBlur,
-              handleSubmit,
-              values,
-              errors,
-              touched,
-            }) => (
-              <>
-                <View style={styles.container}>
-                  <View style={styles.inputContainer}>
+      {/* Header with Gradient */}
+      <LinearGradient
+        colors={[Colors.gradient1, Colors.gradient2]}
+        style={styles.gradientHeader}>
+        <View style={styles.headerContent}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}>
+            <Feather
+              name="arrow-left"
+              color="#FFFFFF"
+              size={RFPercentage(2.4)}
+            />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Reset Password</Text>
+          <View style={styles.placeholderView} />
+        </View>
+      </LinearGradient>
+
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardContainer}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <ScrollView
+            contentContainerStyle={styles.scrollContainer}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled">
+            
+            {/* Reset Password Illustration */}
+            <View style={styles.illustrationContainer}>
+              <View style={styles.illustrationIcon}>
+                <MaterialCommunityIcons
+                  name="lock-reset"
+                  size={RFPercentage(6)}
+                  color={Colors.gradient1}
+                />
+              </View>
+              <Text style={styles.illustrationTitle}>
+                Forgot Your Password?
+              </Text>
+              <Text style={styles.illustrationText}>
+                Enter your email address and we'll send you a link to reset your
+                password.
+              </Text>
+            </View>
+
+            {/* Form */}
+            <Formik
+              initialValues={{
+                email: '',
+              }}
+              validationSchema={validationSchema}
+              onSubmit={values => handleNext(values)}>
+              {({
+                handleChange,
+                handleBlur,
+                handleSubmit,
+                values,
+                errors,
+                touched,
+              }) => (
+                <View style={styles.formContainer}>
+                  {/* Email Input Card */}
+                  <View style={styles.inputCard}>
+                    <View style={styles.inputHeader}>
+                      <MaterialCommunityIcons
+                        name="email-outline"
+                        size={RFPercentage(2.2)}
+                        color={Colors.gradient1}
+                      />
+                      <Text style={styles.inputLabel}>Email Address</Text>
+                    </View>
+                    
                     <InputField
-                      placeholder="Enter Email"
+                      placeholder="Enter your registered email"
                       onChangeText={handleChange('email')}
                       handleBlur={handleBlur('email')}
                       value={values.email}
-                      customStyle={{
-                        borderColor:
-                          touched.email && errors.email
-                            ? Colors.error
-                            : Colors.inputFieldColor,
-                      }}
+                      customStyle={[
+                        styles.inputField,
+                        touched.email &&
+                          errors.email && {
+                            borderColor: Colors.error,
+                            borderWidth: 1,
+                          },
+                      ]}
                     />
+                    
                     {touched.email && errors.email && (
-                      <>
-                        <View
-                          style={{
-                            width: '90%',
-                            height: 20,
-                            bottom: RFPercentage(0.8),
-                          }}>
-                          <Text
-                            style={{
-                              fontSize: RFPercentage(1.5),
-                              fontFamily: Fonts.fontRegular,
-                              color: Colors.error,
-                              textAlign: 'left',
-                            }}>
-                            {errors.email}
-                          </Text>
-                        </View>
-                      </>
+                      <View style={styles.errorContainer}>
+                        <MaterialCommunityIcons
+                          name="alert-circle"
+                          size={RFPercentage(1.8)}
+                          color={Colors.error}
+                        />
+                        <Text style={styles.errorText}>{errors.email}</Text>
+                      </View>
                     )}
                   </View>
-                  {text && (
-                    <Text
-                      style={{
-                        textAlign: 'center',
-                        marginHorizontal: RFPercentage(3),
-                        fontFamily: Fonts.fontMedium,
-                        color: Colors.secondaryText,
-                        fontSize: RFPercentage(1.5),
-                        marginTop: RFPercentage(2),
-                      }}>
-                      We’ve sent you a password reset link. If it doesn’t appear
-                      in your inbox within a few minutes, please also check your
-                      Spam or Junk folder.
-                    </Text>
+
+                  {/* Reset Sent Success Message */}
+                  {resetSent && (
+                    <View style={styles.successCard}>
+                      <View style={styles.successIcon}>
+                        <MaterialCommunityIcons
+                          name="check-circle"
+                          size={RFPercentage(3)}
+                          color="#10B981"
+                        />
+                      </View>
+                      <Text style={styles.successTitle}>
+                        Reset Link Sent!
+                      </Text>
+                      <Text style={styles.successText}>
+                        We've sent you a password reset link. If it doesn't appear
+                        in your inbox within a few minutes, please also check your
+                        Spam or Junk folder.
+                      </Text>
+                      
+                      <TouchableOpacity
+                        onPress={() => navigation.navigate('SignIn')}
+                        style={styles.backToLoginButton}>
+                        <Feather name="log-in" size={18} color="#FFFFFF" />
+                        <Text style={styles.backToLoginText}>
+                          Back to Login
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
                   )}
 
-                  <View style={styles.buttonContainer}>
+                  {/* Action Buttons */}
+                  <View style={styles.buttonSection}>
                     <GradientButton
-                      title="Enter Email"
+                      title="Send Reset Link"
                       onPress={handleSubmit}
                       loading={loading}
                       disabled={loading}
+                      style={styles.resetButton}
+                      textStyle={styles.resetButtonText}
                     />
+                    
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate('SignIn')}
+                      style={styles.cancelButton}>
+                      <Feather
+                        name="arrow-left"
+                        size={RFPercentage(2)}
+                        color={Colors.gradient1}
+                      />
+                      <Text style={styles.cancelButtonText}>
+                        Back to Sign In
+                      </Text>
+                    </TouchableOpacity>
                   </View>
                 </View>
-              </>
-            )}
-          </Formik>
-          <View style={styles.imageContainer}>
-            <Image
-              source={IMAGES.stars}
-              resizeMode="contain"
-              style={styles.imageStyle}
-            />
-          </View>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
-    </TouchableWithoutFeedback>
+              )}
+            </Formik>
+
+            {/* Security Note */}
+            <View style={styles.securityNote}>
+              <MaterialCommunityIcons
+                name="shield-check"
+                size={RFPercentage(2)}
+                color={Colors.secondaryText}
+              />
+              <Text style={styles.securityText}>
+                Your email is secure with us. We'll only send password reset
+                instructions to verified accounts.
+              </Text>
+            </View>
+
+            {/* Decorative Star */}
+            <View style={styles.starContainer}>
+              <Image
+                source={IMAGES.stars}
+                resizeMode="contain"
+                style={styles.starImage}
+              />
+            </View>
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+    </View>
   );
 };
 
@@ -182,46 +277,209 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
-  flexContainer: {
-    flex: 1,
+  placeholderView: {
+    width: RFPercentage(4.5),
   },
-  container: {
-    backgroundColor: Colors.background,
+  gradientHeader: {
+    paddingTop: Platform.OS === 'ios' ? RFPercentage(7) : RFPercentage(7),
+    paddingBottom: RFPercentage(2),
+    paddingHorizontal: RFPercentage(2),
   },
-  headerContainer: {
+  headerContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    width: '90%',
-    alignSelf: 'center',
-    marginTop: RFPercentage(4),
   },
-  headerText: {
-    color: Colors.primaryText,
+  backButton: {
+    width: RFPercentage(4.5),
+    height: RFPercentage(4.5),
+    borderRadius: RFPercentage(2.25),
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
+  headerTitle: {
+    color: '#FFFFFF',
+    fontSize: RFPercentage(1.8),
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(2.3),
+  },
+  keyboardContainer: {
+    flex: 1,
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    paddingBottom: RFPercentage(20),
+  },
+  illustrationContainer: {
+    alignItems: 'center',
+    paddingHorizontal: RFPercentage(2),
+    paddingTop: RFPercentage(3),
+    marginBottom: RFPercentage(2),
+  },
+  illustrationIcon: {
+    width: RFPercentage(10),
+    height: RFPercentage(10),
+    borderRadius: RFPercentage(5),
+    backgroundColor: 'rgba(161, 198, 241, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: RFPercentage(2),
+    borderWidth: 2,
+    borderColor: 'rgba(161, 198, 241, 0.2)',
+  },
+  illustrationTitle: {
+    color: Colors.primaryText,
+    fontSize: RFPercentage(2.2),
+    fontFamily: Fonts.semiBold,
+    textAlign: 'center',
+    marginBottom: RFPercentage(1),
+  },
+  illustrationText: {
+    color: Colors.secondaryText,
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontRegular,
+    textAlign: 'center',
+    lineHeight: RFPercentage(2.4),
+    paddingHorizontal: RFPercentage(2),
+  },
+  formContainer: {
+    paddingHorizontal: RFPercentage(2),
+  },
+  inputCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: RFPercentage(2),
+    shadowColor: '#66738dff',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.05,
+    shadowRadius: 16,
+    // elevation: 18,
+    borderWidth: 1,
+    borderColor: '#e8edf8ff',
+    marginBottom: RFPercentage(2),
+  },
+  inputHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: RFPercentage(1.5),
+    gap: RFPercentage(0.8),
+  },
+  inputLabel: {
+    color: Colors.primaryText,
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontMedium,
+  },
+  inputField: {
+    width: '100%',
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: RFPercentage(1),
+    gap: RFPercentage(0.5),
+  },
+  errorText: {
+    color: Colors.error,
+    fontSize: RFPercentage(1.4),
+    fontFamily: Fonts.fontRegular,
+    flex: 1,
+    lineHeight:RFPercentage(1.5)
+  },
+  successCard: {
+    backgroundColor: '#D1FAE5',
+    borderRadius: 16,
+    padding: RFPercentage(2.5),
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+    marginBottom: RFPercentage(2),
+    alignItems: 'center',
+  },
+  successIcon: {
+    marginBottom: RFPercentage(1.5),
+  },
+  successTitle: {
+    color: '#065F46',
+    fontSize: RFPercentage(1.9),
+    fontFamily: Fonts.fontMedium,
+    marginBottom: RFPercentage(1),
     textAlign: 'center',
   },
-  inputContainer: {
-    alignSelf: 'center',
-    marginTop: RFPercentage(3),
-    width: '95%',
-    alignItems: 'center',
+  successText: {
+    color: '#065F46',
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontRegular,
+    textAlign: 'center',
+    lineHeight: RFPercentage(2.2),
+    marginBottom: RFPercentage(1.5),
   },
-  buttonContainer: {
-    alignSelf: 'center',
-    marginTop: RFPercentage(3),
-    width: '95%',
+  backToLoginButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: "#10B981",
+    paddingHorizontal: RFPercentage(2),
+    paddingVertical: RFPercentage(1),
+    borderRadius: 12,
+    gap: RFPercentage(0.8),
+  },
+  backToLoginText: {
+    color: '#FFFFFF',
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontMedium,
+  },
+  buttonSection: {
+    marginBottom: RFPercentage(2),
+  },
+  resetButton: {
+    width: '55%',
+    marginBottom: RFPercentage(1.5),
+    alignSelf:"center"
+  },
+  resetButtonText: {
+    fontSize: RFPercentage(1.7),
+    fontFamily: Fonts.fontMedium,
+    lineHeight:RFPercentage(1.9)
+  },
+  cancelButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'center',
-    alignItems: 'center',
+    padding: RFPercentage(1.5),
+    gap: RFPercentage(0.5),
   },
-  imageContainer: {
+  cancelButtonText: {
+    color: Colors.gradient1,
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontMedium,
+  },
+  securityNote: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: '#F8FAFC',
+    marginHorizontal: RFPercentage(2),
+    padding: RFPercentage(2),
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    gap: RFPercentage(1),
+    marginBottom: RFPercentage(2),
+  },
+  securityText: {
+    color: Colors.secondaryText,
+    fontSize: RFPercentage(1.4),
+    fontFamily: Fonts.fontRegular,
+    flex: 1,
+    lineHeight: RFPercentage(2),
+  },
+  starContainer: {
     position: 'absolute',
-    // bottom: RFPercentage(8),
     right: RFPercentage(1.5),
-    top: RFPercentage(70),
+    bottom: RFPercentage(5),
+    opacity: 0.2,
   },
-  imageStyle: {
+  starImage: {
     width: RFPercentage(8),
     height: RFPercentage(8),
   },
