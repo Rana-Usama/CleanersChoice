@@ -188,8 +188,9 @@ const Profile = ({navigation}: any) => {
           <View style={{marginTop: RFPercentage(2)}}>
             <ProfileField
               text="Edit Profile"
-              icon={Icons.editProfile}
+              icon="edit"
               onPress={() => navigation.navigate('EditProfile')}
+              style={{width: '100%'}}
             />
           </View>
         </View>

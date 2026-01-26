@@ -5,9 +5,12 @@ import {
   Text,
   View,
   FlatList,
-  Alert,
   TouchableOpacity,
   StatusBar,
+  Dimensions,
+  ScrollView,
+  Alert,
+  Platform,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -21,6 +24,9 @@ import SubscriptionModal from '../../../components/SubscriptionModal';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {showToast} from '../../../utils/ToastMessage';
 import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+
+const {width} = Dimensions.get('window');
 
 const services = [
   {id: 1, name: 'Connect with cleaning customers'},
@@ -102,9 +108,6 @@ const Premium = ({navigation}: any) => {
       return;
     }
 
-    // const presentPaymentSheetRes = await presentPaymentSheet();
-    // console.log('presentPaymentSheetRes................', presentPaymentSheetRes)
-
     const {error: paymentError} = await presentPaymentSheet();
 
     if (paymentError) {
@@ -174,69 +177,105 @@ const Premium = ({navigation}: any) => {
       />
 
       <HeaderComponent />
-      <View style={styles.container}>
-        <View style={styles.premiumHeader}>
+
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}>
+        {/* Header Section */}
+        <View style={styles.headerContainer}>
           {currentUser?.cancelSubscription === true &&
           currentUser?.subscriptionEndDate < Date.now() ? (
             <>
-              <Image
-                source={Icons.owner}
-                resizeMode="contain"
-                style={styles.ownerIcon}
-              />
-              <Text style={styles.premiumText}>Renew Your Premium Account</Text>
+              <Text style={styles.premiumTitle}>Renew Premium Account</Text>
+              <Text style={styles.premiumSubtitle}>
+                Continue growing your cleaning business with premium features
+              </Text>
             </>
           ) : (
             <>
-              <Image
-                source={Icons.owner}
-                resizeMode="contain"
-                style={styles.ownerIcon}
-              />
-              <Text style={styles.premiumText}>Premium Business Account</Text>
+              <Text style={styles.premiumTitle}>Premium Business Account</Text>
+              <Text style={styles.premiumSubtitle}>
+                Unlock premium features to grow your cleaning business
+              </Text>
             </>
           )}
         </View>
 
-        <View style={styles.subscriptionContainer}>
-          <View style={styles.subscriptionBox}>
-            <View style={styles.starLeft}>
-              <Image
-                source={IMAGES.stars}
-                resizeMode="contain"
-                style={styles.starIcon}
-              />
-            </View>
+        {/* Pricing Card */}
+        <View style={styles.pricingCard}>
+          {/* Badge */}
+          <View style={styles.popularBadge}>
+            <MaterialCommunityIcons
+              name="star"
+              size={RFPercentage(1.6)}
+              color="#FFFFFF"
+            />
+            <Text style={styles.popularText}>MOST POPULAR</Text>
+          </View>
+
+          {/* Price */}
+          <View style={styles.priceSection}>
             <Text style={styles.priceText}>
-              $15.
-              <Text style={styles.priceSubText}>99/month</Text>
+              $15
+              <Text style={styles.priceDecimal}>.99</Text>
             </Text>
-            <View style={styles.divider}>
-              <View style={styles.listContainer}>
-                <FlatList
-                  scrollEnabled={false}
-                  data={services}
-                  keyExtractor={item => item.id.toString()}
-                  renderItem={({item}) => (
-                    <View style={styles.listItem}>
-                      <View style={styles.bullet} />
-                      <Text style={styles.listText}>{item.name}</Text>
-                    </View>
-                  )}
-                />
-              </View>
-              <View style={styles.starRight}>
-                <Image
-                  source={IMAGES.stars}
-                  resizeMode="contain"
-                  style={styles.starIcon}
-                />
-              </View>
+            <Text style={styles.pricePeriod}>per month</Text>
+          </View>
+
+          {/* Features List */}
+          <View style={styles.featuresContainer}>
+            <Text style={styles.featuresTitle}>Premium Features</Text>
+
+            <FlatList
+              scrollEnabled={false}
+              data={services}
+              keyExtractor={item => item.id.toString()}
+              renderItem={({item}) => (
+                <View style={styles.featureItem}>
+                  <MaterialCommunityIcons
+                    name="check-circle"
+                    size={RFPercentage(2.2)}
+                    color="#10B981"
+                    style={styles.featureIcon}
+                  />
+                  <Text style={styles.featureText}>{item.name}</Text>
+                </View>
+              )}
+            />
+          </View>
+
+          {/* Trust Indicators */}
+          <View style={styles.trustContainer}>
+            <View style={styles.trustItem}>
+              <MaterialCommunityIcons
+                name="shield-check"
+                size={RFPercentage(2)}
+                color="#10B981"
+              />
+              <Text style={styles.trustText}>Secure Payment</Text>
+            </View>
+            <View style={styles.trustItem}>
+              <MaterialCommunityIcons
+                name="cancel"
+                size={RFPercentage(2)}
+                color={Colors.gradient1}
+              />
+              <Text style={styles.trustText}>Cancel Anytime</Text>
             </View>
           </View>
         </View>
 
-        <View style={styles.buttonContainer}>
+        {/* Bottom Spacer */}
+        <View style={styles.spacer} />
+      </ScrollView>
+
+      {/* Fixed Action Section */}
+      <View style={styles.actionSection}>
+        <View style={styles.actionContent}>
+          <TouchableOpacity onPress={() => navigation.navigate('SignIn')} activeOpacity={0.8} style={styles.totalContainer}>
+            <Text style={styles.totalLabel}>Back</Text>
+          </TouchableOpacity>
+
           <GradientButton
             title={
               currentUser?.cancelSubscription === true &&
@@ -246,48 +285,41 @@ const Premium = ({navigation}: any) => {
             }
             textStyle={styles.buttonText}
             onPress={openPaymentSheet}
-            style={{width: RFPercentage(20)}}
+            style={styles.subscribeButton}
             loading={loading}
             disabled={loading}
           />
         </View>
-        <TouchableOpacity
+
+        {/* <TouchableOpacity
           activeOpacity={0.8}
           onPress={() => navigation.navigate('SignIn')}
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            marginTop: RFPercentage(3),
-            justifyContent: 'center',
-          }}>
+          style={styles.signInButton}>
           <Ionicons
-            name="chevron-back-circle-sharp"
-            color={'rgba(178, 204, 228, 1)'}
-            size={RFPercentage(2.4)}
+            name="chevron-back"
+            color={Colors.gradient1}
+            size={RFPercentage(2)}
           />
-          <Text style={[styles.signIn, {color: 'rgba(134, 154, 173, 1)'}]}>
-            SignIn
-          </Text>
-        </TouchableOpacity>
+          <Text style={styles.signInText}>Back to Sign In</Text>
+        </TouchableOpacity> */}
       </View>
 
+      {/* Stars Decoration */}
       <View style={styles.starContainer}>
         <Image source={IMAGES.stars} resizeMode="contain" style={styles.star} />
       </View>
 
       {/* Modals */}
       {modalVisible2 && (
-        <>
-          <View style={styles.modalOverlay}>
-            <SubscriptionModal
-              text="Subscription Failed Try again."
-              icon="exclamationcircle"
-              onPress={() => {
-                setModalVisible2(false), setLoading(false);
-              }}
-            />
-          </View>
-        </>
+        <View style={styles.modalOverlay}>
+          <SubscriptionModal
+            text="Subscription Failed Try again."
+            icon="exclamationcircle"
+            onPress={() => {
+              setModalVisible2(false), setLoading(false);
+            }}
+          />
+        </View>
       )}
     </SafeAreaView>
   );
@@ -300,106 +332,292 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
-  container: {
-    width: '90%',
-    alignSelf: 'center',
-    paddingTop: RFPercentage(5),
+  scrollContainer: {
+    flexGrow: 1,
+    paddingBottom: RFPercentage(15),
   },
-  premiumHeader: {
+  headerContainer: {
+    alignItems: 'center',
+    paddingHorizontal: RFPercentage(2),
+    marginTop: RFPercentage(2),
+    marginBottom: RFPercentage(4),
+  },
+  premiumBadge: {
+    width: RFPercentage(8),
+    height: RFPercentage(8),
+    borderRadius: RFPercentage(4),
+    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: RFPercentage(2),
+    borderWidth: 2,
+    borderColor: 'rgba(245, 158, 11, 0.2)',
+  },
+  premiumTitle: {
+    color: Colors.brown,
+    fontSize: RFPercentage(2.5),
+    fontFamily: Fonts.semiBold,
+    textAlign: 'center',
+    marginBottom: RFPercentage(1),
+  },
+  premiumSubtitle: {
+    color: Colors.secondaryText,
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontRegular,
+    textAlign: 'center',
+    lineHeight: RFPercentage(2.2),
+    paddingHorizontal: RFPercentage(4),
+  },
+  pricingCard: {
+    backgroundColor: '#FFFFFF',
+    marginHorizontal: RFPercentage(2),
+    borderRadius: RFPercentage(2),
+    padding: RFPercentage(2.5),
+    shadowColor: 'rgba(0, 0, 0, 0.1)',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(229, 231, 235, 0.8)',
+    position: 'relative',
+    marginBottom: RFPercentage(2),
+  },
+  popularBadge: {
+    position: 'absolute',
+    top: RFPercentage(-1),
+    alignSelf: 'center',
+    backgroundColor: Colors.gradient1,
+    paddingHorizontal: RFPercentage(1.5),
+    paddingVertical: RFPercentage(0.8),
+    borderRadius: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: RFPercentage(0.5),
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  popularText: {
+    color: '#FFFFFF',
+    fontSize: RFPercentage(1.1),
+    fontFamily: Fonts.fontMedium,
+  },
+  priceSection: {
+    alignItems: 'center',
+    marginTop: RFPercentage(2),
+    marginBottom: RFPercentage(2),
+  },
+  priceText: {
+    color: Colors.brown,
+    fontFamily: Fonts.fontBold,
+    fontSize: RFPercentage(4.5),
+  },
+  priceDecimal: {
+    fontSize: RFPercentage(2.5),
+    fontFamily: Fonts.fontMedium,
+  },
+  pricePeriod: {
+    color: Colors.secondaryText,
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontRegular,
+    marginTop: RFPercentage(0.5),
+  },
+  featuresContainer: {
+    marginVertical: RFPercentage(1),
+  },
+  featuresTitle: {
+    color: Colors.primaryText,
+    fontSize: RFPercentage(1.8),
+    fontFamily: Fonts.fontMedium,
+    marginBottom: RFPercentage(1.5),
+    paddingHorizontal: RFPercentage(0.5),
+  },
+  featureItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: RFPercentage(1),
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(229, 231, 235, 0.5)',
+  },
+  featureIcon: {
+    marginRight: RFPercentage(1.5),
+  },
+  featureText: {
+    color: Colors.primaryText,
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontRegular,
+    flex: 1,
+  },
+  trustContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: RFPercentage(2),
+    paddingTop: RFPercentage(2),
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(229, 231, 235, 0.8)',
+  },
+  trustItem: {
+    alignItems: 'center',
+  },
+  trustText: {
+    color: Colors.secondaryText,
+    fontSize: RFPercentage(1.2),
+    fontFamily: Fonts.fontMedium,
+    marginTop: RFPercentage(0.5),
+  },
+  statsCard: {
+    backgroundColor: '#FFFFFF',
+    marginHorizontal: RFPercentage(2),
+    borderRadius: RFPercentage(2),
+    padding: RFPercentage(2),
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    shadowColor: 'rgba(0, 0, 0, 0.1)',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(229, 231, 235, 0.8)',
+    marginBottom: RFPercentage(2),
+  },
+  statItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  statDivider: {
+    width: 1,
+    height: RFPercentage(4),
+    backgroundColor: 'rgba(229, 231, 235, 0.8)',
+  },
+  statNumber: {
+    color: Colors.gradient1,
+    fontSize: RFPercentage(2.2),
+    fontFamily: Fonts.fontBold,
+    marginBottom: RFPercentage(0.3),
+  },
+  statLabel: {
+    color: Colors.secondaryText,
+    fontSize: RFPercentage(1.3),
+    fontFamily: Fonts.fontRegular,
+    textAlign: 'center',
+  },
+  testimonialCard: {
+    backgroundColor: 'rgba(244, 248, 252, 0.9)',
+    marginHorizontal: RFPercentage(2),
+    borderRadius: RFPercentage(2),
+    padding: RFPercentage(2.5),
+    borderWidth: 1,
+    borderColor: 'rgba(219, 222, 226, 0.6)',
+    marginBottom: RFPercentage(2),
+  },
+  quoteIcon: {
+    position: 'absolute',
+    top: RFPercentage(1),
+    left: RFPercentage(1),
+  },
+  testimonialText: {
+    color: Colors.primaryText,
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontRegular,
+    fontStyle: 'italic',
+    lineHeight: RFPercentage(2.4),
+    marginBottom: RFPercentage(1.5),
+    textAlign: 'center',
+  },
+  testimonialAuthor: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: RFPercentage(1),
   },
-  ownerIcon: {
-    width: RFPercentage(3.5),
-    height: RFPercentage(3.5),
+  authorInfo: {
+    alignItems: 'flex-start',
   },
-  signIn: {
-    color: Colors.gradient1,
-    fontSize: RFPercentage(1.7),
+  authorName: {
+    color: Colors.primaryText,
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
-    left: 3,
   },
-  premiumText: {
-    color: Colors.brown,
-    fontSize: RFPercentage(2),
-    fontFamily: Fonts.fontMedium,
-    marginLeft: RFPercentage(0.6),
+  authorRole: {
+    color: Colors.secondaryText,
+    fontSize: RFPercentage(1.3),
+    fontFamily: Fonts.fontRegular,
   },
-  subscriptionContainer: {
-    marginTop: RFPercentage(4),
+  spacer: {
+    height: RFPercentage(2),
   },
-  subscriptionBox: {
-    width: '85%',
-    borderWidth: 1,
-    borderColor: 'rgba(217, 225, 238, 1)',
-    borderRadius: RFPercentage(1.8),
-    alignSelf: 'center',
-    paddingVertical: RFPercentage(2),
-    borderBottomWidth: RFPercentage(0.5),
-    backgroundColor: '#fff',
-  },
-
-  starLeft: {
+  actionSection: {
     position: 'absolute',
+    bottom: 0,
     left: 0,
-  },
-  starRight: {
-    position: 'absolute',
     right: 0,
-    bottom: RFPercentage(-1.5),
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: RFPercentage(2),
+    paddingBottom: Platform.OS === 'ios' ? RFPercentage(4) : RFPercentage(2),
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: -4},
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 10,
   },
-  starIcon: {
-    width: RFPercentage(5),
-    height: RFPercentage(5),
-  },
-  priceText: {
-    textAlign: 'center',
-    color: Colors.brown,
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(3.5),
-  },
-  priceSubText: {
-    fontSize: RFPercentage(1.7),
-    fontFamily: Fonts.semiBold,
-  },
-  divider: {
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(217, 225, 238, 1)',
-    marginTop: RFPercentage(1),
-  },
-  listContainer: {
-    marginTop: RFPercentage(2),
-  },
-  listItem: {
+  actionContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: RFPercentage(1),
-    margin: RFPercentage(0.8),
+    marginBottom: RFPercentage(1.5),
+    gap: RFPercentage(1.5),
   },
-  bullet: {
-    width: 4,
-    height: 4,
-    borderRadius: 20,
-    backgroundColor: Colors.placeholderColor,
+  totalContainer: {
+    flex: 1,
+    borderWidth:1,
+    height:RFPercentage(5.5),
+    borderColor:Colors.gradient1,
+    borderRadius:RFPercentage(2),
+    alignItems:"center",
+    justifyContent:"center"
   },
-  listText: {
-    color: Colors.placeholderColor,
-    fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.7),
-    marginLeft: 5,
+  totalLabel: {
+    color: Colors.gradient1,
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.semiBold,
+ 
   },
-  buttonContainer: {
-    alignSelf: 'center',
-    marginTop: RFPercentage(5),
+  totalPrice: {
+    color: Colors.gradient1,
+    fontSize: RFPercentage(2),
+    fontFamily: Fonts.fontBold,
+  },
+  subscribeButton: {
+    flex: 2,
+    borderRadius:RFPercentage(2),
   },
   buttonText: {
     fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontMedium,
+  },
+  signInButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: RFPercentage(0.5),
+    paddingVertical: RFPercentage(1),
+  },
+  signInText: {
+    color: Colors.gradient1,
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontMedium,
   },
   starContainer: {
     position: 'absolute',
     right: RFPercentage(1.5),
-    bottom: RFPercentage(10),
+    bottom: RFPercentage(15),
+    opacity: 0.3,
   },
   star: {
     width: RFPercentage(8),
@@ -412,10 +630,5 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(89, 92, 96, 0.8)',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  arrow: {
-    position: 'absolute',
-    top: RFPercentage(7),
-    left: RFPercentage(3),
   },
 });

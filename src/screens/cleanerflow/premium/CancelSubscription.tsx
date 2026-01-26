@@ -8,6 +8,7 @@ import {
   TouchableWithoutFeedback,
   TouchableOpacity,
   StatusBar,
+  ScrollView,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -22,6 +23,7 @@ import SubscriptionModal from '../../../components/SubscriptionModal';
 import NextButton from '../../../components/NextButton';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {showToast} from '../../../utils/ToastMessage';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const services = [
   {id: 1, name: 'Connect with cleaning customers'},
@@ -68,7 +70,7 @@ const CancelSubscription = () => {
       return;
     }
     try {
-      setIsLoading(true); // Start loader
+      setIsLoading(true);
       const res = await fetch(
         'https://cleaners-choice-server.vercel.app/api/cancel-subscription',
         {
@@ -77,12 +79,11 @@ const CancelSubscription = () => {
           body: JSON.stringify({subscriptionId}),
         },
       );
-      const text = await res.text(); // Read as text first
+      const text = await res.text();
       try {
-        const result = JSON.parse(text); // Try parsing manually
+        const result = JSON.parse(text);
         if (result.success) {
           const {currentPeriodEnd} = result;
-          console.log('currentPeriodEnd.....', currentPeriodEnd);
           if (user?.uid) {
             await firestore()
               .collection('Users')
@@ -118,137 +119,199 @@ const CancelSubscription = () => {
       {/* Header */}
       <HeaderComponent />
 
-      {/* Main Container */}
-      <View style={styles.container}>
-        <View style={styles.premiumHeader}>
-          <Image
-            source={Icons.owner}
-            resizeMode="contain"
-            style={styles.ownerIcon}
-          />
-          <Text style={styles.premiumText}>Cancel Premium Subscription</Text>
-        </View>
-        <View style={styles.subscriptionContainer}>
-          <View style={styles.subscriptionBox}>
-            <View style={styles.starLeft}>
-              <Image
-                source={IMAGES.stars}
-                resizeMode="contain"
-                style={styles.starIcon}
-              />
-            </View>
-            <View>
-              <Text
-                style={{
-                  textAlign: 'center',
-                  bottom: 2,
-                  fontFamily: Fonts.fontMedium,
-                  color: Colors.brown,
-                  fontSize: RFPercentage(1.7),
-                }}>
-                Current Plan
-              </Text>
-            </View>
-            <Text style={styles.priceText}>
-              $15.
-              <Text style={styles.priceSubText}>99/month</Text>
-            </Text>
-            <View style={styles.divider}>
-              <View style={styles.listContainer}>
-                <FlatList
-                  data={services}
-                  keyExtractor={item => item.id.toString()}
-                  renderItem={({item}) => (
-                    <View style={styles.listItem}>
-                      <View style={styles.bullet} />
-                      <Text style={styles.listText}>{item.name}</Text>
-                    </View>
-                  )}
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}>
+        {/* Main Container */}
+        <View style={styles.container}>
+          {/* Header Section */}
+          <View style={styles.headerSection}>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <View style={styles.warningBadge}>
+                <MaterialCommunityIcons
+                  name="alert-circle"
+                  size={RFPercentage(1.5)}
+                  color="#EF4444"
                 />
               </View>
-              <View style={styles.starRight}>
-                <Image
-                  source={IMAGES.stars}
-                  resizeMode="contain"
-                  style={styles.starIcon}
-                />
+              <Text style={styles.titleText}>Cancel Premium Subscription</Text>
+            </View>
+            <Text style={styles.subtitleText}>
+              Are you sure you want to cancel your premium subscription?
+            </Text>
+          </View>
+
+          {/* Current Plan Card */}
+          <View style={styles.planCard}>
+            <View style={styles.currentBadge}>
+              <MaterialCommunityIcons
+                name="crown"
+                size={RFPercentage(1.6)}
+                color="#FFFFFF"
+              />
+              <Text style={styles.currentBadgeText}>CURRENT PLAN</Text>
+            </View>
+
+            <View style={styles.planContent}>
+              <Text style={styles.planName}>Premium Business Account</Text>
+              <View style={styles.priceSection}>
+                <Text style={styles.priceText}>
+                  $15
+                  <Text style={styles.priceDecimal}>.99</Text>
+                </Text>
+                <Text style={styles.pricePeriod}>per month</Text>
               </View>
             </View>
           </View>
+
+          {/* Features Card */}
+          <View style={styles.featuresCard}>
+            <Text style={styles.featuresTitle}>Premium Features</Text>
+            <FlatList
+              data={services}
+              scrollEnabled={false}
+              keyExtractor={item => item.id.toString()}
+              renderItem={({item}) => (
+                <View style={styles.featureItem}>
+                  <MaterialCommunityIcons
+                    name="check-circle"
+                    size={RFPercentage(2.2)}
+                    color="#10B981"
+                    style={styles.featureIcon}
+                  />
+                  <Text style={styles.featureText}>{item.name}</Text>
+                </View>
+              )}
+            />
+          </View>
+
+          {/* Warning Note */}
+          <View style={styles.warningNote}>
+            <MaterialCommunityIcons
+              name="information"
+              size={RFPercentage(2.5)}
+              color="#F59E0B"
+              style={styles.warningIcon}
+            />
+            <View style={styles.warningContent}>
+              <Text style={styles.warningTitle}>Important Notice</Text>
+              <Text style={styles.warningText}>
+                You will lose access to all premium features after your current
+                billing cycle ends.
+              </Text>
+            </View>
+          </View>
+
+          {/* Action Buttons */}
+          <View style={styles.actionContainer}>
+            <GradientButton
+              title={
+                cancel === true
+                  ? 'Subscription Canceled'
+                  : 'Cancel Subscription'
+              }
+              textStyle={styles.cancelButtonText}
+              onPress={() => setModalVisible(true)}
+              style={styles.cancelButton}
+              loading={isLoading}
+              disabled={isLoading || cancel === true}
+            />
+
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => navigation.goBack()}
+              style={styles.backButton}>
+              <Ionicons
+                name="arrow-back"
+                color={Colors.gradient1}
+                size={RFPercentage(2)}
+              />
+              <Text style={styles.backButtonText}>Keep Subscription</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
-        {/* Buuton */}
-        <View style={styles.buttonContainer}>
-          <GradientButton
-            title={cancel === true ? 'Canceled' : 'Cancel'}
-            textStyle={styles.buttonText}
-            onPress={() => setModalVisible(true)}
-            style={{width: RFPercentage(18)}}
-            loading={isLoading}
-            disabled={isLoading || cancel === true ? true : false}
+        {/* Decorative Star */}
+        <View style={styles.starContainer}>
+          <Image
+            source={IMAGES.stars}
+            resizeMode="contain"
+            style={styles.star}
           />
         </View>
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => navigation.goBack()}
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            marginTop: RFPercentage(2),
-            justifyContent: 'center',
-          }}>
-          <Ionicons
-            name="chevron-back-circle-sharp"
-            color={'rgba(178, 204, 228, 1)'}
-            size={RFPercentage(2.4)}
-          />
-          <Text style={[styles.signIn, {color: 'rgba(134, 154, 173, 1)'}]}>
-            Back
-          </Text>
-        </TouchableOpacity>
-      </View>
+      </ScrollView>
 
-      <View style={styles.starContainer}>
-        <Image source={IMAGES.stars} resizeMode="contain" style={styles.star} />
-      </View>
-
-      {/* Modals */}
+      {/* Confirmation Modal */}
       {modalVisible && (
         <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
           <View style={styles.modalContainer}>
-            <BlurView style={styles.blurView} blurType="light" blurAmount={2} />
-            <View style={styles.modalCancel}>
-              <Text style={styles.cancelHeading}>
-                You’ll lose access to all premium features after one month,
-                including:
-              </Text>
-              <View
-                style={{
-                  marginVertical: RFPercentage(5),
-                  width: RFPercentage(32),
-                }}>
-                <Text style={styles.cancelInfo}>
-                  {`1. Access to the Job Portal will be removed.`}
-                </Text>
-                <Text
-                  style={[
-                    styles.cancelInfo,
-                    {marginVertical: RFPercentage(2)},
-                  ]}>
-                  {`2. You will no longer be able to chat with customers.`}
-                </Text>
-                <Text style={styles.cancelInfo}>
-                  {`3. You’ll need to reactivate your subscription to continue using the app.`}
-                </Text>
+            <BlurView style={styles.blurView} blurType="light" blurAmount={5} />
+            <View style={styles.confirmationModal}>
+              {/* Modal Header */}
+              <View style={styles.modalHeader}>
+                <MaterialCommunityIcons
+                  name="alert-circle-outline"
+                  size={RFPercentage(4)}
+                  color="#EF4444"
+                />
+                <Text style={styles.modalTitle}>Confirm Cancellation</Text>
               </View>
-              <View style={styles.buttonWrapper}>
+
+              {/* Warning Content */}
+              <View style={styles.warningList}>
+                <Text style={styles.warningListTitle}>
+                  You'll lose access to:
+                </Text>
+
+                <View style={styles.warningItem}>
+                  <MaterialCommunityIcons
+                    name="close-circle"
+                    size={RFPercentage(2)}
+                    color="#EF4444"
+                  />
+                  <Text style={styles.warningItemText}>
+                    Access to the Job Portal
+                  </Text>
+                </View>
+
+                <View style={styles.warningItem}>
+                  <MaterialCommunityIcons
+                    name="close-circle"
+                    size={RFPercentage(2)}
+                    color="#EF4444"
+                  />
+                  <Text style={styles.warningItemText}>
+                    Chat with customers feature
+                  </Text>
+                </View>
+
+                <View style={styles.warningItem}>
+                  <MaterialCommunityIcons
+                    name="close-circle"
+                    size={RFPercentage(2)}
+                    color="#EF4444"
+                  />
+                  <Text style={styles.warningItemText}>
+                    All premium features until reactivation
+                  </Text>
+                </View>
+              </View>
+
+              <Text style={styles.modalNote}>
+                Your subscription will remain active until the end of the
+                current billing period.
+              </Text>
+
+              {/* Modal Buttons */}
+              <View style={styles.modalButtons}>
                 <NextButton
-                  title="Cancel"
-                  style={styles.buttonWidth}
+                  title="Keep Premium"
+                  style={styles.modalCancelButton}
+                  textStyle={styles.modalCancelButtonText}
                   onPress={() => setModalVisible(false)}
                 />
                 <GradientButton
-                  title="Yes"
+                  title="Cancel"
                   onPress={() => {
                     setIsLoading2(true);
                     setTimeout(() => {
@@ -257,7 +320,7 @@ const CancelSubscription = () => {
                       setModalVisible(false);
                     }, 1000);
                   }}
-                  style={styles.buttonWidth}
+                  style={styles.modalConfirmButton}
                   loading={isLoading2}
                   disabled={isLoading2}
                 />
@@ -267,16 +330,15 @@ const CancelSubscription = () => {
         </TouchableWithoutFeedback>
       )}
 
+      {/* Error Modal */}
       {modalVisible2 && (
-        <>
-          <View style={styles.modalOverlay}>
-            <SubscriptionModal
-              text="Failed Try again."
-              icon="exclamationcircle"
-              onPress={() => setModalVisible2(false)}
-            />
-          </View>
-        </>
+        <View style={styles.errorModalOverlay}>
+          <SubscriptionModal
+            text="Failed. Please try again."
+            icon="exclamationcircle"
+            onPress={() => setModalVisible2(false)}
+          />
+        </View>
       )}
     </SafeAreaView>
   );
@@ -289,104 +351,205 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
+  scrollContainer: {
+    flexGrow: 1,
+    paddingBottom: RFPercentage(20),
+  },
   container: {
     width: '90%',
     alignSelf: 'center',
-    paddingTop: RFPercentage(8),
+    paddingTop: RFPercentage(2),
   },
-  premiumHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
+  headerSection: {
+    alignItems: 'center',
+    marginBottom: RFPercentage(3),
+  },
+  warningBadge: {
+    width: RFPercentage(2.5),
+    height: RFPercentage(2.5),
+    borderRadius: RFPercentage(4),
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(239, 68, 68, 0.2)',
+    right:RFPercentage(1)
   },
-  ownerIcon: {
-    width: RFPercentage(3.5),
-    height: RFPercentage(3.5),
-  },
-  premiumText: {
+  titleText: {
     color: Colors.brown,
     fontSize: RFPercentage(2),
-    fontFamily: Fonts.fontMedium,
-    marginLeft: RFPercentage(0.6),
-  },
-  subscriptionContainer: {
-    marginTop: RFPercentage(4),
-  },
-  subscriptionBox: {
-    width: '85%',
-    borderWidth: 1,
-    borderColor: 'rgba(209, 213, 219, 1)',
-    borderRadius: RFPercentage(1.8),
-    alignSelf: 'center',
-    paddingVertical: RFPercentage(2),
-    borderBottomWidth: RFPercentage(0.4),
-  },
-  signIn: {
-    color: Colors.gradient1,
-    fontSize: RFPercentage(1.7),
-    fontFamily: Fonts.fontMedium,
-    left: 3,
-  },
-  starLeft: {
-    position: 'absolute',
-    left: 0,
-  },
-  starRight: {
-    position: 'absolute',
-    right: 0,
-    bottom: RFPercentage(-1.5),
-  },
-  starIcon: {
-    width: RFPercentage(5),
-    height: RFPercentage(5),
-  },
-  priceText: {
-    textAlign: 'center',
-    color: Colors.brown,
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(3.6),
-  },
-  priceSubText: {
-    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.semiBold,
+    textAlign: 'center',
+   
   },
-  divider: {
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(156, 163, 175, 0.8)',
-    marginTop: RFPercentage(1),
+  subtitleText: {
+    color: Colors.secondaryText,
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontRegular,
+    textAlign: 'center',
+    lineHeight: RFPercentage(2.2),
+    paddingHorizontal: RFPercentage(2),
+    marginTop:RFPercentage(1)
   },
-  listContainer: {
-    marginTop: RFPercentage(2),
+  planCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: RFPercentage(2),
+    padding: RFPercentage(2.5),
+    marginBottom: RFPercentage(2),
+    shadowColor: 'rgba(0, 0, 0, 0.1)',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(229, 231, 235, 0.8)',
+    position: 'relative',
   },
-  listItem: {
+  currentBadge: {
+    position: 'absolute',
+    top: RFPercentage(-1),
+    alignSelf: 'center',
+    backgroundColor: Colors.gradient1,
+    paddingHorizontal: RFPercentage(1.5),
+    paddingVertical: RFPercentage(0.8),
+    borderRadius: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: RFPercentage(1),
-    margin: RFPercentage(0.8),
+    gap: RFPercentage(0.5),
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  bullet: {
-    width: 4,
-    height: 4,
-    borderRadius: 20,
-    backgroundColor: Colors.placeholderColor,
+  currentBadgeText: {
+    color: '#FFFFFF',
+    fontSize: RFPercentage(1.1),
+    fontFamily: Fonts.fontMedium,
   },
-  listText: {
-    color: Colors.placeholderColor,
-    fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.7),
-    marginLeft: 5,
+  planContent: {
+    alignItems: 'center',
+    marginTop: RFPercentage(1),
   },
-  buttonContainer: {
-    alignSelf: 'center',
-    marginTop: RFPercentage(5),
-  },
-  buttonText: {
+  planName: {
+    color: Colors.primaryText,
     fontSize: RFPercentage(1.8),
+    fontFamily: Fonts.fontMedium,
+    marginBottom: RFPercentage(1.5),
+  },
+  priceSection: {
+    alignItems: 'center',
+  },
+  priceText: {
+    color: Colors.brown,
+    fontFamily: Fonts.fontBold,
+    fontSize: RFPercentage(3.5),
+  },
+  priceDecimal: {
+    fontSize: RFPercentage(2),
+    fontFamily: Fonts.fontMedium,
+  },
+  pricePeriod: {
+    color: Colors.secondaryText,
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontRegular,
+    marginTop: RFPercentage(0.5),
+  },
+  featuresCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: RFPercentage(2),
+    padding: RFPercentage(2.5),
+    marginBottom: RFPercentage(2),
+    shadowColor: 'rgba(0, 0, 0, 0.1)',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(229, 231, 235, 0.8)',
+  },
+  featuresTitle: {
+    color: Colors.primaryText,
+    fontSize: RFPercentage(1.8),
+    fontFamily: Fonts.fontMedium,
+    marginBottom: RFPercentage(1.5),
+    paddingBottom: RFPercentage(1),
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(229, 231, 235, 0.8)',
+  },
+  featureItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: RFPercentage(1),
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(244, 244, 245, 1)',
+  },
+  featureIcon: {
+    marginRight: RFPercentage(1.5),
+  },
+  featureText: {
+    color: Colors.primaryText,
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontRegular,
+    flex: 1,
+  },
+  warningNote: {
+    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+    borderRadius: RFPercentage(2),
+    padding: RFPercentage(2),
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: RFPercentage(3),
+    borderWidth: 1,
+    borderColor: 'rgba(245, 158, 11, 0.2)',
+  },
+  warningIcon: {
+    marginRight: RFPercentage(1.5),
+    marginTop: RFPercentage(0.2),
+  },
+  warningContent: {
+    flex: 1,
+  },
+  warningTitle: {
+    color: '#92400E',
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontMedium,
+    marginBottom: RFPercentage(0.5),
+  },
+  warningText: {
+    color: '#92400E',
+    fontSize: RFPercentage(1.4),
+    fontFamily: Fonts.fontRegular,
+    lineHeight: RFPercentage(2),
+  },
+  actionContainer: {
+    alignItems: 'center',
+  },
+  cancelButton: {
+    width: '60%',
+    marginBottom: RFPercentage(2),
+  },
+  cancelButtonText: {
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontMedium,
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: RFPercentage(0.5),
+    paddingVertical: RFPercentage(1),
+  },
+  backButtonText: {
+    color: Colors.gradient1,
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontMedium,
   },
   starContainer: {
     position: 'absolute',
-    right: RFPercentage(1.5),
-    bottom: RFPercentage(10),
+    right: RFPercentage(1),
+    bottom: RFPercentage(15),
+    opacity: 0.2,
   },
   star: {
     width: RFPercentage(8),
@@ -402,51 +565,90 @@ const styles = StyleSheet.create({
     height: '100%',
     position: 'absolute',
   },
-  buttonWidth: {
-    width: RFPercentage(15),
-  },
-  modalCancel: {
+  confirmationModal: {
     width: '90%',
     borderRadius: RFPercentage(2),
-    backgroundColor: 'rgb(232, 243, 252)',
+    backgroundColor: '#FFFFFF',
     alignSelf: 'center',
-    alignItems: 'center',
-    justifyContent: 'center',
     position: 'absolute',
-    paddingHorizontal: RFPercentage(2.5),
-    height: '50%',
-    top: RFPercentage(20),
+    paddingHorizontal: RFPercentage(3.5),
     paddingVertical: RFPercentage(3),
+    top: RFPercentage(20),
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(229, 231, 235, 0.8)',
   },
-  cancelHeading: {
-    textAlign: 'center',
-    fontSize: RFPercentage(2),
-    fontFamily: Fonts.fontMedium,
-    color: Colors.primaryText,
-  },
-  cancelInfo: {
-    textAlign: 'left',
-    fontFamily: Fonts.fontMedium,
-    color: Colors.secondaryText,
-    fontSize: RFPercentage(1.7),
-  },
-  buttonWrapper: {
-    flexDirection: 'row',
+  modalHeader: {
     alignItems: 'center',
-    justifyContent: 'space-between',
-    width: RFPercentage(32),
+    marginBottom: RFPercentage(2),
   },
-  modalOverlay: {
+  modalTitle: {
+    color: Colors.primaryText,
+    fontSize: RFPercentage(2),
+    fontFamily: Fonts.semiBold,
+    textAlign: 'center',
+    marginTop: RFPercentage(1),
+  },
+  warningList: {
+    marginBottom: RFPercentage(2),
+  },
+  warningListTitle: {
+    color: Colors.primaryText,
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontMedium,
+    marginBottom: RFPercentage(1.5),
+  },
+  warningItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: RFPercentage(1.2),
+    gap: RFPercentage(1),
+  },
+  warningItemText: {
+    color: Colors.secondaryText,
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontRegular,
+    flex: 1,
+    lineHeight: RFPercentage(2),
+  },
+  modalNote: {
+    color: Colors.secondaryText,
+    fontSize: RFPercentage(1.4),
+    fontFamily: Fonts.fontRegular,
+    textAlign: 'center',
+    fontStyle: 'italic',
+    marginBottom: RFPercentage(2),
+    paddingHorizontal: RFPercentage(1),
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: RFPercentage(1.5),
+  },
+  modalCancelButton: {
+   width:RFPercentage(16),
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.2,
+    borderColor: "#a7acb2ff",
+  },
+  modalCancelButtonText: {
+    color: "#888b8fff",
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.semiBold,
+  },
+  modalConfirmButton: {
+    flex: 2,
+  },
+  errorModalOverlay: {
     position: 'absolute',
     width: '100%',
     height: '100%',
     backgroundColor: 'rgba(89, 92, 96, 0.8)',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  arrow: {
-    position: 'absolute',
-    top: RFPercentage(7),
-    left: RFPercentage(3),
   },
 });

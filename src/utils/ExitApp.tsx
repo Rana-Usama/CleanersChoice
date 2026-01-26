@@ -1,4 +1,3 @@
-// useExitAppOnBack.ts
 import { useFocusEffect } from '@react-navigation/native';
 import { BackHandler } from 'react-native';
 import React from 'react';

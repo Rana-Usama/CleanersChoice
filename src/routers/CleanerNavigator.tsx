@@ -40,22 +40,22 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
     forceUpdate(n => n + 1);
   }, [unreadCount]);
 
-  useEffect(() => {
-    const backAction = () => {
-      if (screenFocused) {
-        navigation.goBack();
-        return true;
-      }
-      return false;
-    };
+  // useEffect(() => {
+  //   const backAction = () => {
+  //     if (screenFocused) {
+  //       navigation.goBack();
+  //       return true;
+  //     }
+  //     return false;
+  //   };
 
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      backAction,
-    );
+  //   const backHandler = BackHandler.addEventListener(
+  //     'hardwareBackPress',
+  //     backAction,
+  //   );
 
-    return () => backHandler.remove();
-  }, [screenFocused, navigation]);
+  //   return () => backHandler.remove();
+  // }, [screenFocused, navigation]);
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(

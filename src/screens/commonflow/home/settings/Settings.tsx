@@ -6,8 +6,9 @@ import {
   TouchableWithoutFeedback,
   Platform,
   StatusBar,
+  ScrollView,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, Icons} from '../../../../constants/Themes';
 import HeaderBack from '../../../../components/HeaderBack';
@@ -21,6 +22,10 @@ import {useExitAppOnBack} from '../../../../utils/ExitApp';
 import firestore, {deleteField} from '@react-native-firebase/firestore';
 import {EmailAuthProvider} from '@react-native-firebase/auth';
 import LinearGradient from 'react-native-linear-gradient';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Feather from 'react-native-vector-icons/Feather';
+import DeviceInfo from 'react-native-device-info';
+import moment from 'moment';
 
 const Settings = ({navigation}: any) => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -29,6 +34,14 @@ const Settings = ({navigation}: any) => {
   const [loading, setLoading] = useState(false);
   useExitAppOnBack();
   const [subscriptionId, setSubscriptionId] = useState(null);
+
+  const [appVersion, setAppVersion] = useState('');
+  const [buildNumber, setBuildNumber] = useState('');
+
+  useEffect(() => {
+    setAppVersion(DeviceInfo.getVersion());
+    setBuildNumber(DeviceInfo.getBuildNumber());
+  }, []);
 
   // Log out function
   const logOut = async () => {
@@ -204,64 +217,109 @@ const Settings = ({navigation}: any) => {
           tintColor={'white'}
         />
       </LinearGradient>
-      <View style={styles.container}>
-        <View style={styles.sectionTitle}>
-          <Text style={styles.sectionTitleText}>Help & Security</Text>
+
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.container}>
+          {/* Help & Security Section */}
+          <View style={styles.sectionCard}>
+            <View style={styles.sectionHeader}>
+              <MaterialCommunityIcons
+                name="shield-account"
+                size={RFPercentage(2.5)}
+                color={Colors.gradient1}
+              />
+              <Text style={styles.sectionTitle}>Help & Security</Text>
+            </View>
+
+            <View style={styles.fieldsContainer}>
+              {role === 'Cleaner' && (
+                <ProfileField
+                  text="Cancel Subscription"
+                  icon="credit-card-remove"
+                  onPress={() => navigation.navigate('CancelSubscription')}
+                />
+              )}
+              <ProfileField
+                text="Change Password"
+                icon="lock-reset"
+                onPress={() => navigation.navigate('ChangePasswordV2')}
+              />
+              <ProfileField
+                text="Privacy Policy"
+                icon="shield-lock"
+                onPress={() => navigation.navigate('Privacy')}
+              />
+              <ProfileField
+                text="Terms & Conditions"
+                icon="file-document"
+                onPress={() => navigation.navigate('Terms')}
+              />
+              <ProfileField
+                text="FAQs"
+                icon="help-circle"
+                onPress={() => navigation.navigate('FAQS')}
+              />
+            </View>
+          </View>
+
+          {/* Account Actions Section */}
+          <View style={styles.sectionCard}>
+            <View style={styles.sectionHeader}>
+              <MaterialCommunityIcons
+                name="account-cog"
+                size={RFPercentage(2.5)}
+                color={Colors.primaryText}
+              />
+              <Text style={styles.sectionTitle}>Account Actions</Text>
+            </View>
+
+            <View style={styles.fieldsContainer}>
+              <ProfileField
+                text="Delete Account"
+                icon="account-remove"
+                color="#EF4444"
+                onPress={() => setModalVisible2(true)}
+              />
+              <ProfileField
+                text="Logout"
+                icon="earth-remove"
+                color="#EF4444"
+                onPress={() => setModalVisible(true)}
+              />
+            </View>
+          </View>
+
+          {/* App Info */}
+          <View style={styles.infoCard}>
+            <View style={styles.infoHeader}>
+              <Feather name="info" size={18} color={Colors.secondaryText} />
+              <Text style={styles.infoTitle}>App Information</Text>
+            </View>
+            <Text style={styles.infoText}>
+              Version {appVersion} © {moment().format('YYYY')} Cleaner Choice
+            </Text>
+          </View>
         </View>
-        <View style={styles.profileFieldsContainer}>
-          {role === 'Cleaner' && (
-            <ProfileField
-              text="Cancel Subscription"
-              icon={Icons.policy}
-              onPress={() => navigation.navigate('CancelSubscription')}
-            />
-          )}
-          <ProfileField
-            text="Change Password"
-            icon={Icons.policy}
-            onPress={() => navigation.navigate('ChangePasswordV2')}
-          />
-          <ProfileField
-            text="Privacy Policy"
-            icon={Icons.policy}
-            onPress={() => navigation.navigate('Privacy')}
-          />
-          <ProfileField
-            text="Terms & Conditions"
-            icon={Icons.terms}
-            onPress={() => navigation.navigate('Terms')}
-          />
-          <ProfileField
-            text={`FAQ's`}
-            icon={Icons.faqs}
-            onPress={() => navigation.navigate('FAQS')}
-          />
-          <ProfileField
-            text="Delete Account"
-            icon={Icons.remove}
-            color={'rgba(239, 68, 68, 1)'}
-            onPress={() => setModalVisible2(true)}
-          />
-          <ProfileField
-            text="Logout"
-            icon={Icons.logOut}
-            color={'rgba(239, 68, 68, 1)'}
-            onPress={() => setModalVisible(true)}
-          />
-        </View>
-      </View>
+      </ScrollView>
 
       {/* Logout Modal */}
       {modalVisible && (
         <TouchableWithoutFeedback>
           <View style={styles.modalContainer}>
-            <BlurView style={styles.blurView} blurType="light" blurAmount={5} />
+            <BlurView
+              style={styles.blurView}
+              blurType="light"
+              blurAmount={10}
+            />
             <CustomModal
-              title="Logout Confirmation"
+              title="Logout"
               subTitle="Are you sure you want to log out from your account?"
               onPress={() => setModalVisible(false)}
               onPress2={logOut}
               loader={loading}
+              buttonTitle="Logout"
             />
           </View>
         </TouchableWithoutFeedback>
@@ -271,13 +329,18 @@ const Settings = ({navigation}: any) => {
       {modalVisible2 && (
         <TouchableWithoutFeedback>
           <View style={styles.modalContainer}>
-            <BlurView style={styles.blurView} blurType="light" blurAmount={5} />
+            <BlurView
+              style={styles.blurView}
+              blurType="light"
+              blurAmount={10}
+            />
             <CustomModal
-              title="Permanently Delete Account"
-              subTitle="Deleting your account will permanently remove your profile and all associated data from our system. This action cannot be undone. Do you want to continue?"
+              title="Delete Account"
+              subTitle="Are you sure you want to permanently delete your account?"
               onPress={() => setModalVisible2(false)}
               onPress2={deleteAccount}
               loader={loading}
+              buttonTitle="Delete"
             />
           </View>
         </TouchableWithoutFeedback>
@@ -293,6 +356,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
+
   gradientHeader: {
     paddingTop: Platform.OS === 'ios' ? 40 : 0,
     paddingBottom: 30,
@@ -312,40 +376,81 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.semiBold,
     color: '#FFFFFF',
   },
+  scrollContainer: {
+    flexGrow: 1,
+    paddingBottom: RFPercentage(20),
+  },
   container: {
-    width: '90%',
-    alignSelf: 'center',
-    paddingTop: RFPercentage(1),
+    paddingHorizontal: RFPercentage(2),
+    paddingTop: RFPercentage(2),
+  },
+  sectionCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    marginBottom: RFPercentage(2),
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
+    overflow: 'hidden',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: RFPercentage(2),
+    backgroundColor: '#F9FAFB',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+    gap: RFPercentage(1),
   },
   sectionTitle: {
-    marginTop: RFPercentage(2),
-    borderBottomColor: Colors.inputFieldColor,
-    borderBottomWidth: 1,
-    paddingBottom: 5,
-    width: RFPercentage(30),
-  },
-  sectionTitleText: {
     color: Colors.primaryText,
-    fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
+    fontFamily: Fonts.fontMedium,
   },
-  profileFieldsContainer: {
+  fieldsContainer: {
+    paddingVertical: RFPercentage(0.5),
+    alignItems: 'center',
+  },
+  infoCard: {
+    backgroundColor: '#F9FAFB',
+    borderRadius: 12,
+    padding: RFPercentage(2),
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
     marginTop: RFPercentage(1),
+  },
+  infoHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: RFPercentage(0.5),
+    gap: RFPercentage(0.8),
+  },
+  infoTitle: {
+    color: Colors.secondaryText,
+    fontSize: RFPercentage(1.4),
+    fontFamily: Fonts.fontMedium,
+  },
+  infoText: {
+    color: Colors.secondaryText,
+    fontSize: RFPercentage(1.3),
+    fontFamily: Fonts.fontRegular,
+    textAlign: 'center',
   },
   modalContainer: {
     position: 'absolute',
     width: '100%',
     height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   blurView: {
     width: '100%',
     height: '100%',
     position: 'absolute',
-  },
-  infoNote: {
-    color: Colors.grey,
-    fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.4),
-    marginTop: RFPercentage(2),
   },
 });

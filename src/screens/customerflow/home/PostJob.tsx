@@ -9,6 +9,9 @@ import {
   Keyboard,
   Platform,
   StatusBar,
+  SafeAreaView,
+  Dimensions,
+  TextInput,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -26,8 +29,15 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import {showToast} from '../../../utils/ToastMessage';
 import {useSelector} from 'react-redux';
+import LinearGradient from 'react-native-linear-gradient';
+import Feather from 'react-native-vector-icons/Feather';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
-const data1 = [
+const {width} = Dimensions.get('window');
+
+// Data for dropdown (objects with id and label)
+const serviceTypes = [
   {
     id: 1,
     label: 'Window Cleaning',
@@ -62,13 +72,59 @@ const data1 = [
   },
 ];
 
+// Separate array with icons for display
+const serviceTypesWithIcons = [
+  {
+    id: 1,
+    label: 'Window Cleaning',
+    icon: 'window-open',
+  },
+  {
+    id: 2,
+    label: 'Chimney Cleaning',
+    icon: 'fireplace',
+  },
+  {
+    id: 3,
+    label: 'Carpet Cleaning',
+    icon: 'vacuum',
+  },
+  {
+    id: 4,
+    label: 'Car Cleaning',
+    icon: 'car-wash',
+  },
+  {
+    id: 5,
+    label: 'Residential Cleaning',
+    icon: 'home',
+  },
+  {
+    id: 6,
+    label: 'Pressure Washing',
+    icon: 'water-pump',
+  },
+  {
+    id: 7,
+    label: 'Lawn Care',
+    icon: 'leaf',
+  },
+  {
+    id: 8,
+    label: 'Others',
+    icon: 'dots-horizontal',
+  },
+];
+
 const PostJob = ({route}: any) => {
   const {jobId} = route.params;
 
   const navigation = useNavigation<any>();
   const [date, setDate] = useState<Date | null>(null);
   const [open, setOpen] = useState<boolean>(false);
-  const formattedDate = date ? moment(date).format('YYYY-MM-DD  HH:mm A') : '';
+  const formattedDate = date
+    ? moment(date).format('MMM DD, YYYY  •  hh:mm A')
+    : '';
   const [jobTitle, setJobTitle] = useState('');
   const [Location, setLocation] = useState('');
   const [Description, setDescription] = useState('');
@@ -76,10 +132,14 @@ const PostJob = ({route}: any) => {
   const [budget, setBudget] = useState('');
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState(1);
+  const [selectedService, setSelectedService] = useState<any>(null);
   const userLocation = useSelector((state: any) => state?.location?.location);
 
   const handleSelectedItem = (item: any) => {
-    setSelectedType(item);
+    setSelectedType(item.label);
+    const service = serviceTypesWithIcons.find(s => s.label === item.label);
+    setSelectedService(service);
   };
 
   // Post Job
@@ -95,6 +155,7 @@ const PostJob = ({route}: any) => {
       });
       return;
     }
+
     setLoading(true);
     try {
       const jobData: any = {
@@ -116,18 +177,28 @@ const PostJob = ({route}: any) => {
 
       if (jobId) {
         await firestore().collection('Jobs').doc(jobId).update(jobData);
-        navigation.navigate('Home');
         showToast({
           type: 'success',
-          title: 'Job Update',
-          message: 'Job Updated successfully',
+          title: 'Success',
+          message: 'Job updated successfully',
         });
+        navigation.navigate('Home');
       } else {
         await firestore().collection('Jobs').add(jobData);
+        showToast({
+          type: 'success',
+          title: 'Congratulations!',
+          message: 'Your job is now live',
+        });
         navigation.navigate('JobPosted');
       }
     } catch (error) {
       console.log('Post Job Error:', error);
+      showToast({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to post job. Please try again.',
+      });
     } finally {
       setLoading(false);
     }
@@ -146,13 +217,18 @@ const PostJob = ({route}: any) => {
         setJobTitle(jobData?.title || '');
         setDescription(jobData?.description || '');
         setLocation(jobData?.location?.name || '');
-        setSelectedType(jobData?.type || []);
-        setBudget(jobData?.priceRange || null);
+        setSelectedType(jobData?.type || null);
+        setBudget(jobData?.priceRange ? `$${jobData.priceRange}` : '');
         setRemarks(jobData?.remarks || '');
         setDate(moment(jobData?.createdAt, 'YYYY-MM-DD  HH:mm A').toDate());
-      } else {
+
+        const service = serviceTypesWithIcons.find(
+          s => s.label === jobData?.type,
+        );
+        setSelectedService(service);
       }
     } catch (error) {
+      console.log('Fetch Job Error:', error);
     } finally {
       setLoading(false);
     }
@@ -167,162 +243,424 @@ const PostJob = ({route}: any) => {
     setBudget(numeric ? `$${numeric}` : '');
   };
 
-  return (
-    <>
-      <StatusBar backgroundColor={Colors.background} barStyle="dark-content" />
-      <View style={{backgroundColor: 'white'}}>
-        <HeaderBack
-          title="Post Job"
-          textStyle={{fontSize: RFPercentage(2)}}
-          left={true}
-          style={{
-            height: Platform.OS === 'ios' ? RFPercentage(13) : RFPercentage(13),
-          }}
-        />
+  const handleNext = () => {
+    if (!jobTitle.trim()) {
+      showToast({
+        type: 'info',
+        title: 'Required',
+        message: 'Please enter a job title',
+      });
+      return;
+    }
+    if (!Description.trim()) {
+      showToast({
+        type: 'info',
+        title: 'Required',
+        message: 'Please enter a job description',
+      });
+      return;
+    }
+    if (!selectedType) {
+      showToast({
+        type: 'info',
+        title: 'Required',
+        message: 'Please select a service type',
+      });
+      return;
+    }
+    setStep(2);
+  };
+
+  const handleBack = () => {
+    if (step > 1) {
+      setStep(step - 1);
+    } else {
+      navigation.goBack();
+    }
+  };
+
+  const StepIndicator = () => (
+    <View style={styles.stepIndicatorContainer}>
+      <View style={styles.stepRow}>
+        {[1, 2].map(item => (
+          <View key={item} style={styles.stepItem}>
+            <LinearGradient
+              colors={
+                item <= step
+                  ? [Colors.gradient1, Colors.gradient2]
+                  : ['#E5E7EB', '#E5E7EB']
+              }
+              style={styles.stepCircle}>
+              <Text
+                style={[
+                  styles.stepNumber,
+                  {color: item <= step ? '#FFFFFF' : Colors.secondaryText},
+                ]}>
+                {item}
+              </Text>
+            </LinearGradient>
+            <Text
+              style={[
+                styles.stepLabel,
+                {color: item <= step ? Colors.gradient1 : Colors.secondaryText},
+              ]}>
+              {item === 1 ? 'Job Details' : 'Finalize'}
+            </Text>
+            {/* {item < 2 && (
+              <View
+                style={[
+                  styles.stepLine,
+                  {backgroundColor: step > item ? Colors.gradient1 : '#E5E7EB'},
+                ]}
+              />
+            )} */}
+          </View>
+        ))}
       </View>
+    </View>
+  );
+
+  return (
+    <View style={styles.safeArea}>
+      <StatusBar
+        backgroundColor={Colors.gradient1}
+        barStyle="light-content"
+        translucent
+      />
+
+      {/* Header */}
+      <LinearGradient
+        colors={[Colors.gradient1, Colors.gradient2]}
+        style={styles.header}>
+        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+          <Feather name="arrow-left" size={24} color="#FFFFFF" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>
+          {jobId ? 'Edit Job' : 'Post New Job'}
+        </Text>
+        <View style={{width: 40}} />
+      </LinearGradient>
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
-        keyboardShouldPersistTaps="always"
-        style={{backgroundColor: Colors.background}}>
+        keyboardShouldPersistTaps="always">
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={styles.safeArea}>
-            {/* Field Container */}
-            <View style={styles.container}>
-              <InfoHeader text="Post your cleaning job by providing following details!" />
-              <View style={{marginTop: RFPercentage(1.5)}}>
-                {/* Title */}
-                <InputField
-                  placeholder="Job Title e.g, Garden Cleaning"
-                  customStyle={{width: '100%'}}
-                  value={jobTitle}
-                  onChangeText={setJobTitle}
-                />
-                {/* Describe */}
-                <View>
-                  <DescriptionField
-                    placeholder="Description of the cleaning job"
-                    count={true}
-                    value={Description}
-                    onChangeText={setDescription}
-                    maxLength={200}
+          <View style={styles.contentContainer}>
+            {/* Step Indicator */}
+            <StepIndicator />
+
+            {/* Progress Info */}
+            <View style={styles.progressInfo}>
+              <MaterialCommunityIcons
+                name="information-outline"
+                size={20}
+                color={Colors.gradient1}
+              />
+              <Text style={styles.progressText}>
+                {step === 1
+                  ? 'Step 1 of 2: Tell us about your job'
+                  : 'Step 2 of 2: Finalize your job post'}
+              </Text>
+            </View>
+
+            {/* Step 1: Job Details */}
+            {step === 1 && (
+              <View style={styles.stepContainer}>
+                {/* Job Title Card */}
+                <View style={styles.card}>
+                  <View style={styles.cardHeader}>
+                    <MaterialCommunityIcons
+                      name="pencil-outline"
+                      size={22}
+                      color={Colors.gradient1}
+                    />
+                    <Text style={styles.cardTitle}>Job Title</Text>
+                  </View>
+                  <InputField
+                    placeholder="e.g., Garden Cleaning, Window Washing"
+                    customStyle={styles.inputField}
+                    value={jobTitle}
+                    onChangeText={setJobTitle}
                   />
+                  <Text style={styles.cardHint}>
+                    Be specific to attract the right professionals
+                  </Text>
                 </View>
 
-                <TouchableOpacity
-                  onPress={() =>
-                    navigation.navigate('Location', {location: true})
-                  }
-                  activeOpacity={0.8}
-                  style={styles.container2}>
-                  <Text
-                    style={{
-                      color:
-                        Location || userLocation?.name
-                          ? Colors.inputTextColor
-                          : Colors.placeholderColor,
-                      fontSize: RFPercentage(1.8),
-                      fontFamily: Fonts.fontRegular,
-                    }}>
-                    {userLocation?.name
-                      ? userLocation.name
-                      : Location
-                      ? Location
-                      : 'Enter City/Town you want services at'}
-                  </Text>
-                </TouchableOpacity>
-
-                {/* Service Type */}
-                <CustomDropDown
-                  placeholder={jobId ? selectedType ?? '' : 'Service Type'}
-                  data={data1}
-                  placeholderColor={
-                    jobId
-                      ? {color: Colors.inputTextColor}
-                      : {color: Colors.placeholderColor}
-                  }
-                  setValue={handleSelectedItem}
-                />
-
-                {/* Budget */}
-                <InputField
-                  placeholder="Budget e.g; $120"
-                  customStyle={{width: '100%', marginTop: RFPercentage(2)}}
-                  value={budget}
-                  onChangeText={handleBudgetChange}
-                  type={'numeric'}
-                />
-
-                {/* Date Picker */}
-                <View style={styles.dateContainer}>
-                  <TouchableOpacity
-                    activeOpacity={1}
-                    onPress={() => setOpen(true)}
-                    style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <Image
-                      source={Icons.calendar}
-                      resizeMode="contain"
-                      style={{width: RFPercentage(2), height: RFPercentage(2)}}
+                {/* Description Card */}
+                <View style={styles.card}>
+                  <View style={styles.cardHeader}>
+                    <MaterialCommunityIcons
+                      name="text-box-outline"
+                      size={22}
+                      color={Colors.gradient1}
                     />
-                    <Text
-                      style={[
-                        styles.dateText,
-                        {
-                          color: formattedDate
-                            ? Colors.inputTextColor
-                            : Colors.placeholderColor,
-                        },
-                      ]}>
-                      {formattedDate || 'Job Due Date and Time'}
-                    </Text>
+                    <Text style={styles.cardTitle}>Job Description</Text>
+                  </View>
+                  <View style={styles.descriptionContainer}>
+                    <TextInput
+                      style={styles.descriptionInput}
+                      placeholder="Describe what needs to be done..."
+                      placeholderTextColor={Colors.placeholderColor}
+                      multiline
+                      numberOfLines={4}
+                      maxLength={200}
+                      value={Description}
+                      onChangeText={setDescription}
+                    />
+                    <View style={styles.charCounter}>
+                      <Text style={styles.charText}>
+                        {Description.length}/200 characters
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Service Type Card */}
+                <View style={styles.card}>
+                  <View style={styles.cardHeader}>
+                    <MaterialCommunityIcons
+                      name="tools"
+                      size={22}
+                      color={Colors.gradient1}
+                    />
+                    <Text style={styles.cardTitle}>Service Type</Text>
+                  </View>
+                  <CustomDropDown
+                    placeholder={selectedType || 'Select service type'}
+                    data={serviceTypes}
+                    placeholderColor={
+                      selectedType
+                        ? Colors.inputTextColor
+                        : Colors.placeholderColor
+                    }
+                    setValue={handleSelectedItem}
+                  />
+                  {selectedService && (
+                    <View style={styles.selectedService}>
+                      <MaterialCommunityIcons
+                        name={selectedService.icon}
+                        size={18}
+                        color={Colors.gradient1}
+                      />
+                      <Text style={styles.selectedServiceText}>
+                        {selectedService.label}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+
+                {/* Next Button */}
+                <GradientButton
+                  title="Continue"
+                  style={styles.continueButton}
+                  onPress={handleNext}
+                  loading={loading}
+                />
+              </View>
+            )}
+
+            {/* Step 2: Finalize Details */}
+            {step === 2 && (
+              <View style={styles.stepContainer}>
+                {/* Location Card */}
+                <View style={styles.card}>
+                  <View style={styles.cardHeader}>
+                    <Ionicons
+                      name="location-outline"
+                      size={22}
+                      color={Colors.gradient1}
+                    />
+                    <Text style={styles.cardTitle}>Location</Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() =>
+                      navigation.navigate('Location', {location: true})
+                    }
+                    activeOpacity={0.7}
+                    style={styles.locationButton}>
+                    <View style={styles.locationContent}>
+                      <Ionicons name="pin" size={20} color={Colors.gradient1} />
+                      <Text
+                        style={[
+                          styles.locationText,
+                          {
+                            color:
+                              userLocation?.name || Location
+                                ? Colors.inputTextColor
+                                : Colors.placeholderColor,
+                          },
+                        ]}>
+                        {userLocation?.name || Location || 'Select location'}
+                      </Text>
+                    </View>
+                    <Feather
+                      name="chevron-right"
+                      size={20}
+                      color={Colors.secondaryText}
+                    />
                   </TouchableOpacity>
                 </View>
-                <DatePicker
-                  modal
-                  open={open}
-                  date={date || new Date()}
-                  minimumDate={new Date()} // This prevents selecting past dates
-                  onConfirm={date => {
-                    setOpen(false);
-                    setDate(date);
-                  }}
-                  onCancel={() => {
-                    setOpen(false);
-                  }}
-                />
 
-                {/* Special Remarks */}
-                <View>
-                  <Text style={styles.remarksText}>
-                    Leave any special remarks (Optional)
+                {/* Budget Card */}
+                <View style={styles.card}>
+                  <View style={styles.cardHeader}>
+                    <MaterialCommunityIcons
+                      name="cash"
+                      size={22}
+                      color={Colors.gradient1}
+                    />
+                    <Text style={styles.cardTitle}>Budget</Text>
+                   
+                  </View>
+
+                  <InputField
+                    placeholder="Amount"
+                    customStyle={styles.budgetInput}
+                    value={budget}
+                    onChangeText={handleBudgetChange}
+                    type={'numeric'}
+                  />
+                  <Text style={styles.budgetHint}>
+                    Estimated cost for the service ($)
                   </Text>
-                  <DescriptionField
-                    placeholder="Any Special Remarks"
-                    style={{height: RFPercentage(11)}}
-                    count={false}
-                    value={remarks}
-                    onChangeText={setRemarks}
-                    maxLength={80}
+                </View>
+
+                {/* Schedule Card */}
+                <View style={styles.card}>
+                  <View style={styles.cardHeader}>
+                    <MaterialCommunityIcons
+                      name="calendar-clock"
+                      size={22}
+                      color={Colors.gradient1}
+                    />
+                    <Text style={styles.cardTitle}>Schedule</Text>
+                  </View>
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    onPress={() => setOpen(true)}
+                    style={styles.dateButton}>
+                    <View style={styles.dateContent}>
+                      <MaterialCommunityIcons
+                        name="calendar-outline"
+                        size={20}
+                        color={Colors.gradient1}
+                      />
+                      <Text
+                        style={[
+                          styles.dateText,
+                          {
+                            color: formattedDate
+                              ? Colors.inputTextColor
+                              : Colors.placeholderColor,
+                          },
+                        ]}>
+                        {formattedDate || 'Select date and time'}
+                      </Text>
+                    </View>
+                    <Feather
+                      name="chevron-right"
+                      size={20}
+                      color={Colors.secondaryText}
+                    />
+                  </TouchableOpacity>
+                  <Text style={styles.dateHint}>
+                    When do you need this service completed?
+                  </Text>
+                </View>
+
+                {/* Special Instructions Card */}
+                <View style={styles.card}>
+                  <View style={styles.cardHeader}>
+                    <MaterialCommunityIcons
+                      name="message-text-outline"
+                      size={22}
+                      color={Colors.gradient1}
+                    />
+                    <Text style={styles.cardTitle}>Special Instructions</Text>
+                  </View>
+                  <View style={styles.remarksContainer}>
+                    <TextInput
+                      style={styles.remarksInput}
+                      placeholder="Any additional requirements or notes..."
+                      placeholderTextColor={Colors.placeholderColor}
+                      multiline
+                      numberOfLines={3}
+                      maxLength={80}
+                      value={remarks}
+                      onChangeText={setRemarks}
+                    />
+                    <View style={styles.remarksCounter}>
+                      <Text style={styles.remarksCharText}>
+                        Optional • {remarks.length}/80 characters
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Summary Card */}
+                <View style={styles.summaryCard}>
+                  <Text style={styles.summaryTitle}>Job Summary</Text>
+                  <View style={styles.summaryContent}>
+                    <View style={styles.summaryRow}>
+                      <Text style={styles.summaryLabel}>Service:</Text>
+                      <Text style={styles.summaryValue}>
+                        {selectedType || 'Not selected'}
+                      </Text>
+                    </View>
+                    <View style={styles.summaryRow}>
+                      <Text style={styles.summaryLabel}>Budget:</Text>
+                      <Text style={styles.summaryValue}>
+                        {budget || 'Not set'}
+                      </Text>
+                    </View>
+                    <View style={styles.summaryRow}>
+                      <Text style={styles.summaryLabel}>Due Date:</Text>
+                      <Text style={styles.summaryValue}>
+                        {formattedDate || 'Not set'}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Action Buttons */}
+                <View style={styles.actionButtons}>
+                  <TouchableOpacity
+                    onPress={() => setStep(1)}
+                    style={styles.backButtonSecondary}>
+                    <Text style={styles.backButtonText}>Back</Text>
+                  </TouchableOpacity>
+                  <GradientButton
+                    title={jobId ? 'Update Job' : 'Post Job Now'}
+                    style={styles.postButton}
+                    onPress={postJob}
+                    loading={loading}
+                    disabled={loading}
+                    textStyle={{fontSize: RFPercentage(1.8)}}
                   />
                 </View>
               </View>
+            )}
 
-              {/* Button Container */}
-              <View style={{alignSelf: 'center', marginTop: RFPercentage(3)}}>
-                <GradientButton
-                  title={jobId ? 'Edit Job' : 'Make Job Live'}
-                  textStyle={{fontSize: RFPercentage(1.8)}}
-                  onPress={postJob}
-                  loading={loading}
-                  disabled={loading}
-                />
-              </View>
-            </View>
+            <DatePicker
+              modal
+              open={open}
+              date={date || new Date()}
+              minimumDate={new Date()}
+              mode="datetime"
+              onConfirm={date => {
+                setOpen(false);
+                setDate(date);
+              }}
+              onCancel={() => {
+                setOpen(false);
+              }}
+            />
           </View>
         </TouchableWithoutFeedback>
       </ScrollView>
-    </>
+    </View>
   );
 };
 
@@ -332,75 +670,330 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: Colors.background,
-    paddingTop: RFPercentage(0),
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: RFPercentage(2),
+    paddingTop: Platform.OS === 'ios' ? RFPercentage(8) : RFPercentage(4),
+    paddingBottom: RFPercentage(2),
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  headerTitle: {
+    color: '#FFFFFF',
+    fontSize: RFPercentage(2),
+    fontFamily: Fonts.semiBold,
   },
   scrollContainer: {
     flexGrow: 1,
-    paddingBottom: RFPercentage(24),
+    paddingBottom: RFPercentage(20),
   },
-  container2: {
-    width: '100%',
-    alignSelf: 'center',
-    height: RFPercentage(6.5),
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: Colors.inputFieldColor,
-    borderRadius: RFPercentage(1.3),
+  contentContainer: {
+    flex: 1,
+    paddingHorizontal: RFPercentage(2),
+    paddingTop: RFPercentage(2),
+  },
+  stepIndicatorContainer: {
+    marginBottom: RFPercentage(2),
+  },
+  stepRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'center',
-    marginTop: RFPercentage(2),
-    paddingHorizontal: RFPercentage(1.5),
   },
-  container: {
-    width: '90%',
-    alignSelf: 'center',
-    paddingTop: RFPercentage(3),
+  stepItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    position: 'relative',
   },
-  infoText: {
-    color: Colors.gradient1,
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
-    left: 5,
-    top: 1,
-  },
-  textArea: {
-    width: '100%',
-    height: RFPercentage(12),
-    borderWidth: 1,
-    borderColor: Colors.inputFieldColor,
+  stepCircle: {
+    width: RFPercentage(4),
+    height: RFPercentage(4),
     borderRadius: RFPercentage(2),
-    marginVertical: RFPercentage(1.5),
-    paddingHorizontal: RFPercentage(1),
-    paddingTop: RFPercentage(0.8),
-  },
-  textInput: {
-    color: Colors.primaryText,
-    fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.6),
-    paddingVertical: 0,
-    marginVertical: 0,
-    textAlignVertical: 'center',
-    includeFontPadding: false,
-  },
-  dateContainer: {
-    width: '100%',
-    height: RFPercentage(6.5),
-    borderWidth: 1,
-    borderColor: Colors.inputFieldColor,
-    borderRadius: RFPercentage(1.3),
-    marginVertical: RFPercentage(1),
-    paddingHorizontal: RFPercentage(1.5),
+    alignItems: 'center',
     justifyContent: 'center',
+  },
+  stepNumber: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontMedium,
+  },
+  stepLabel: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: Fonts.fontMedium,
+    marginLeft: RFPercentage(0.8),
+    marginRight: RFPercentage(1),
+    // bottom:RFPercentage(1)
+  },
+  stepLine: {
+    width: RFPercentage(13),
+    height: 2,
+    position: 'absolute',
+    right: -RFPercentage(3),
+    zIndex: -1,
+  },
+  progressInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0F9FF',
+    padding: RFPercentage(1.5),
+    borderRadius: 12,
+    marginBottom: RFPercentage(2),
+    gap: RFPercentage(1),
+  },
+  progressText: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontMedium,
+    color: Colors.gradient1,
+    flex: 1,
+  },
+  stepContainer: {
+    marginBottom: RFPercentage(4),
+  },
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: RFPercentage(2),
+    marginBottom: RFPercentage(2),
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: RFPercentage(1.5),
+    gap: RFPercentage(1),
+  },
+  cardTitle: {
+    fontSize: RFPercentage(1.8),
+    fontFamily: Fonts.fontMedium,
+    color: Colors.primaryText,
+  },
+  inputField: {
+    width: '100%',
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  cardHint: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: Fonts.fontRegular,
+    color: Colors.secondaryText,
+    marginTop: RFPercentage(1),
+  },
+  descriptionContainer: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    padding: RFPercentage(1.5),
+  },
+  descriptionInput: {
+    color: Colors.inputTextColor,
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontRegular,
+    textAlignVertical: 'top',
+    minHeight: RFPercentage(10),
+    maxHeight: RFPercentage(15),
+  },
+  charCounter: {
+    alignItems: 'flex-end',
+    marginTop: RFPercentage(0.5),
+  },
+  charText: {
+    fontSize: RFPercentage(1.2),
+    fontFamily: Fonts.fontRegular,
+    color: Colors.secondaryText,
+  },
+  selectedService: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0F9FF',
+    padding: RFPercentage(1),
+    borderRadius: 8,
+    marginTop: RFPercentage(1),
+    gap: RFPercentage(0.8),
+    alignSelf: 'flex-start',
+  },
+  selectedServiceText: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: Fonts.fontMedium,
+    color: Colors.gradient1,
+  },
+  continueButton: {
+    marginTop: RFPercentage(2),
+    width: '50%',
+    alignSelf: 'center',
+  },
+  locationButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#F8FAFC',
+    padding: RFPercentage(1.5),
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  locationContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: RFPercentage(1),
+    flex: 1,
+  },
+  locationText: {
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontRegular,
+    flex: 1,
+  },
+  budgetContainer: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    padding: RFPercentage(1.5),
+  },
+  budgetInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  currencySymbol: {
+    fontSize: RFPercentage(1.7),
+    color: Colors.placeholderColor,
+    // marginRight: RFPercentage(0.5),
+  },
+  budgetInput: {
+    width:"100%"
+    // flex: 1,
+    // backgroundColor: 'transparent',
+    // borderWidth: 0,
+    // paddingHorizontal: 0,
+  },
+  budgetHint: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: Fonts.fontRegular,
+    color: Colors.secondaryText,
+    marginTop: RFPercentage(0.5),
+  },
+  dateButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#F8FAFC',
+    padding: RFPercentage(1.5),
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  dateContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: RFPercentage(1),
+    flex: 1,
   },
   dateText: {
-    color: Colors.inputTextColor,
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.8),
-    left: 5,
-    top: 1.5,
+    flex: 1,
   },
-  remarksText: {
-    fontFamily: Fonts.fontMedium,
+  dateHint: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: Fonts.fontRegular,
+    color: Colors.secondaryText,
+    marginTop: RFPercentage(1),
+  },
+  remarksContainer: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    padding: RFPercentage(1.5),
+  },
+  remarksInput: {
+    color: Colors.inputTextColor,
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontRegular,
+    textAlignVertical: 'top',
+    minHeight: RFPercentage(8),
+  },
+  remarksCounter: {
+    alignItems: 'flex-end',
+    marginTop: RFPercentage(0.5),
+  },
+  remarksCharText: {
+    fontSize: RFPercentage(1.2),
+    fontFamily: Fonts.fontRegular,
+    color: Colors.secondaryText,
+  },
+  summaryCard: {
+    backgroundColor: '#F0F9FF',
+    borderRadius: 16,
+    padding: RFPercentage(2),
+    marginBottom: RFPercentage(2),
+    borderWidth: 1,
+    borderColor: '#BAE6FD',
+  },
+  summaryTitle: {
     fontSize: RFPercentage(1.8),
+    fontFamily: Fonts.fontMedium,
+    color: Colors.gradient1,
+    marginBottom: RFPercentage(1.5),
+  },
+  summaryContent: {
+    gap: RFPercentage(1),
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  summaryLabel: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontMedium,
     color: Colors.primaryText,
+    width: RFPercentage(10),
+  },
+  summaryValue: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontRegular,
+    color: Colors.gradient1,
+    flex: 1,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    gap: RFPercentage(1.5),
+    marginTop: RFPercentage(1),
+  },
+  backButtonSecondary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    padding: RFPercentage(1.6),
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: Colors.gradient1,
+    flex: 0.7,
+    gap: RFPercentage(0.5),
+  },
+  backButtonText: {
+    fontSize: RFPercentage(1.7),
+    fontFamily: Fonts.semiBold,
+    color: Colors.gradient1,
+  },
+  postButton: {
+    flex: 2,
+    borderRadius: 20,
   },
 });
