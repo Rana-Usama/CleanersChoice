@@ -169,13 +169,13 @@ const Availability = ({navigation}: any) => {
   };
 
   const handleSetAvailability = () => {
-    const selectedDays = availabilityData.filter(day => day.checked);
-    if (selectedDays.length === 0) {
+    const selectedDays = availabilityData?.filter(day => day.checked);
+    if (selectedDays?.length === 0) {
       return;
     }
 
     setLoading(true);
-    dispatch(cleanerAvailability(availabilityData));
+    dispatch(cleanerAvailability(selectedDays));
     setTimeout(() => {
       setLoading(false);
       navigation.navigate('ServiceOne');
