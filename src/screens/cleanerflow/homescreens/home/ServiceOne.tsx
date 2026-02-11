@@ -34,6 +34,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Octicons from 'react-native-vector-icons/Octicons';
 import {setUserLocation} from '../../../../redux/location/Actions';
 import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
+import { connect } from 'formik';
 
 const {width} = Dimensions.get('window');
 
@@ -370,6 +371,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                     onChangeText={text => dispatch(cleanerDescription(text))}
                     maxLength={200}
                     style={styles.descriptionInput}
+                    textInput={{fontSize:13}}
                   />
                 </View>
               </Animated.View>
@@ -403,12 +405,12 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                         <Text
                           style={[
                             styles.availabilityValue,
-                            !available.length &&
+                            !available?.length &&
                               !serviceData?.availability?.length &&
                               styles.placeholderText,
                           ]}>
-                          {available.length > 0 || serviceAvailabilityLength > 0
-                            ? `${availableDays} days set`
+                          {available?.length > 0 || serviceAvailabilityLength > 0
+                            ? `${  available?.length || availableDays } days set`
                             : 'Set your working days & hours'}
                         </Text>
                       </View>
@@ -763,7 +765,7 @@ const styles = StyleSheet.create({
     padding: 16,
     minHeight: 120,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.4),
     color: '#374151',
   },
   availabilityCard: {
@@ -871,7 +873,7 @@ const styles = StyleSheet.create({
   },
   dropdownText: {
     color: '#6B7280',
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
     marginLeft: 12,
   },
