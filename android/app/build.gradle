@@ -19,12 +19,19 @@ android {
         applicationId "com.cleanerschoice"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 19
-        versionName "2.3.0"
+        versionCode 21
+        versionName "2.5.0"
         multiDexEnabled true
 
         ndk {
             abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+        }
+
+         externalNativeBuild {
+            cmake {
+                arguments "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
+                cppFlags "-fuse-ld=lld"
+            }
         }
     }
 
@@ -45,6 +52,9 @@ android {
             minifyEnabled enableProguardInReleaseBuilds
             shrinkResources false
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+            ndk {
+                debugSymbolLevel 'FULL'
+            }
         }
         debug {
             signingConfig signingConfigs.release
@@ -59,6 +69,21 @@ android {
             include "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
             universalApk true
         }
+    }
+
+     packagingOptions {
+        jniLibs {
+            useLegacyPackaging = false
+        }
+        pickFirst 'lib/x86/libc++_shared.so'
+        pickFirst 'lib/x86_64/libc++_shared.so'
+        pickFirst 'lib/armeabi-v7a/libc++_shared.so'
+        pickFirst 'lib/arm64-v8a/libc++_shared.so'
+    }
+    
+    // ADD THIS
+    buildFeatures {
+        buildConfig = true
     }
 }
 

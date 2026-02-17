@@ -83,6 +83,8 @@ const Messages = ({navigation}: any) => {
 
   // Fetch chats
   const fetchChats = async () => {
+    if (!userId) return; // 🛑 guard
+
     try {
       const snapshot = await firestore()
         .collection('Chats')
@@ -123,38 +125,35 @@ const Messages = ({navigation}: any) => {
   // Filter
   useFocusEffect(
     useCallback(() => {
-      let unsubscribe: any;
-      fetchChats();
-      if (userId) {
-        let query = firestore()
-          .collection('Chats')
-          .where('participants', 'array-contains', userId)
-          .orderBy('lastMessageTimestamp', 'desc');
+      if (!userId) return; // 🛑 important
 
-        unsubscribe = query.onSnapshot(async snapshot => {
-          try {
-            const allChats = await Promise.all(
-              snapshot.docs.map(async doc => await getChatData(doc)),
-            );
+      const query = firestore()
+        .collection('Chats')
+        .where('participants', 'array-contains', userId)
+        .orderBy('lastMessageTimestamp', 'desc');
 
-            const filteredChats = unread
-              ? allChats.filter(
-                  chat =>
-                    chat.lastMessage?.unread === true &&
-                    chat.lastMessage?.senderId !== userId &&
-                    chat.lastMessage?.receiver === userId,
-                )
-              : allChats;
+      const unsubscribe = query.onSnapshot(async snapshot => {
+        try {
+          const allChats = await Promise.all(
+            snapshot.docs.map(async doc => await getChatData(doc)),
+          );
 
-            setChats(filteredChats);
-          } catch (error) {
-            console.error('Error in snapshot:', error);
-          }
-        });
-      }
-      return () => {
-        if (unsubscribe) unsubscribe();
-      };
+          const filteredChats = unread
+            ? allChats.filter(
+                chat =>
+                  chat.lastMessage?.unread === true &&
+                  chat.lastMessage?.senderId !== userId &&
+                  chat.lastMessage?.receiver === userId,
+              )
+            : allChats;
+
+          setChats(filteredChats);
+        } catch (error) {
+          console.error('Error in snapshot:', error);
+        }
+      });
+
+      return () => unsubscribe();
     }, [userId, unread]),
   );
 
@@ -223,7 +222,9 @@ const Messages = ({navigation}: any) => {
     }
   }
 
-  fetchCurrentUserName();
+  useEffect(() => {
+    fetchCurrentUserName();
+  }, []);
 
   const unreadCount = chats.filter(
     chat => chat.lastMessage?.unread && userId === chat.lastMessage?.receiver,

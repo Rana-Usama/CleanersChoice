@@ -512,7 +512,6 @@ const PostJob = ({route}: any) => {
                       color={Colors.gradient1}
                     />
                     <Text style={styles.cardTitle}>Budget</Text>
-                   
                   </View>
 
                   <InputField
@@ -676,7 +675,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: RFPercentage(2),
-    paddingTop: Platform.OS === 'ios' ? RFPercentage(8) : RFPercentage(4),
+    paddingTop: Platform.OS === 'ios' ? RFPercentage(8) : RFPercentage(6),
     paddingBottom: RFPercentage(2),
   },
   backButton: {
@@ -766,9 +765,11 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
+    // elevation: 3,
     borderWidth: 1,
     borderColor: '#F3F4F6',
+
+    borderBottomWidth: 2,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -875,7 +876,7 @@ const styles = StyleSheet.create({
     // marginRight: RFPercentage(0.5),
   },
   budgetInput: {
-    width:"100%"
+    width: '100%',
     // flex: 1,
     // backgroundColor: 'transparent',
     // borderWidth: 0,
@@ -980,7 +981,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#FFFFFF',
-    padding: RFPercentage(1.6),
+    padding: RFPercentage(1.4),
     borderRadius: 20,
     borderWidth: 1,
     borderColor: Colors.gradient1,

@@ -905,7 +905,10 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 12,
-    elevation: 5,
+    // elevation: 5,
+     borderWidth: 1,
+    borderColor: '#F3F4F6',
+    borderBottomWidth: 2,
   },
   serviceBadge: {
     flexDirection: 'row',
@@ -1008,7 +1011,10 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
+    // elevation: 3,
+     borderWidth: 1,
+    borderColor: '#F3F4F6',
+    borderBottomWidth: 2,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -1180,8 +1186,11 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: -4},
     shadowOpacity: 0.1,
     shadowRadius: 8,
-    elevation: 10,
+    // elevation: 10,
     paddingBottom: Platform.OS === 'ios' ? RFPercentage(4) : RFPercentage(2),
+    borderTopWidth:1,
+    borderTopColor:"#eaeaeaff"
+
   },
   priceContainer: {
     flex: 1,

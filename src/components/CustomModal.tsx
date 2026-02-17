@@ -90,9 +90,10 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.15,
     shadowRadius: 12,
-    elevation: 8,
+    // elevation: 8,
     borderWidth: 1,
     borderColor: 'rgba(229, 231, 235, 0.8)',
+    borderBottomWidth:3
   },
   iconContainer: {
     marginBottom: RFPercentage(2),

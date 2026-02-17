@@ -401,6 +401,7 @@ const CheckAvailability = ({route, navigation}: any) => {
           <Text style={styles.filterTitle}>Filter by</Text>
           <ScrollView
             horizontal
+            contentContainerStyle={{paddingHorizontal:RFPercentage(2)}}
             showsHorizontalScrollIndicator={false}
             style={styles.filterScroll}>
             {[
@@ -664,7 +665,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   gradientHeader: {
-    paddingTop: Platform.OS === 'ios' ? RFPercentage(7) : RFPercentage(5),
+    paddingTop: Platform.OS === 'ios' ? RFPercentage(7) : RFPercentage(6),
     paddingBottom: RFPercentage(2),
     paddingHorizontal: RFPercentage(2),
     // borderBottomLeftRadius: 30,
@@ -704,7 +705,10 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 12,
-    elevation: 5,
+    // elevation: 5,
+     borderWidth: 1,
+    borderColor: '#F3F4F6',
+    borderBottomWidth: 2,
   },
   profileContainer: {
     flexDirection: 'row',
@@ -809,7 +813,10 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
+    // elevation: 3,
+     borderWidth: 1,
+    borderColor: '#F3F4F6',
+    borderBottomWidth: 2,
   },
   filterTitle: {
     fontSize: RFPercentage(1.6),
@@ -853,7 +860,10 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
+    // elevation: 3,
+     borderWidth: 1,
+    borderColor: '#F3F4F6',
+    borderBottomWidth: 2,
   },
   summaryHeader: {
     flexDirection: 'row',
@@ -904,7 +914,10 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
+    // elevation: 3,
+     borderWidth: 1,
+    borderColor: '#F3F4F6',
+    borderBottomWidth: 2,
   },
   timeSlotsHeader: {
     flexDirection: 'row',
@@ -1018,7 +1031,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
+    // elevation: 3,
   },
   emptyStateTitle: {
     fontSize: RFPercentage(1.8),
@@ -1043,7 +1056,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
+    // elevation: 3,
   },
   detailedListHeader: {
     flexDirection: 'row',
@@ -1069,7 +1082,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
+    // elevation: 3,
   },
   bottomActionTitle: {
     fontSize: RFPercentage(1.6),
