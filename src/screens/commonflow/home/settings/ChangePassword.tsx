@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   gradientHeader: {
-    paddingTop: Platform.OS === 'ios' ? RFPercentage(7) : RFPercentage(5),
+    paddingTop: Platform.OS === 'ios' ? RFPercentage(7) : RFPercentage(7),
     paddingBottom: RFPercentage(2),
     paddingHorizontal: RFPercentage(2),
     // borderBottomLeftRadius: 30,

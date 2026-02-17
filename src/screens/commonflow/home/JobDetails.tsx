@@ -550,7 +550,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   gradientHeader: {
-    paddingTop: Platform.OS === 'ios' ? RFPercentage(8) : RFPercentage(4),
+    paddingTop: Platform.OS === 'ios' ? RFPercentage(8) : RFPercentage(6),
     // paddingBottom: RFPercentage(1),
     paddingHorizontal: RFPercentage(2),
   },
@@ -623,11 +623,12 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
+    // elevation: 3,
     borderWidth: 1,
     borderColor: '#F3F4F6',
     flexDirection: 'row',
     marginTop: RFPercentage(1),
+    borderBottomWidth: 2,
   },
   quickInfoLabel: {
     color: Colors.secondaryText,
@@ -638,7 +639,7 @@ const styles = StyleSheet.create({
   quickInfoValue: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     textAlign: 'center',
     marginLeft: RFPercentage(1),
   },
@@ -651,9 +652,10 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
+    // elevation: 3,
     borderWidth: 1,
     borderColor: '#F3F4F6',
+    borderBottomWidth: 2,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -857,10 +859,10 @@ const styles = StyleSheet.create({
   },
   actionBar: {
     position: 'absolute',
-    bottom: 0,
+    bottom:  0,
     left: 0,
     right: 0,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#ffffffff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: RFPercentage(2),
@@ -869,7 +871,11 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: -4},
     shadowOpacity: 0.1,
     shadowRadius: 8,
-    elevation: 10,
+    height:RFPercentage(12),
+    justifyContent:"center",
+    borderTopWidth:1,
+     borderTopColor:"#eaeaeaff"
+    // elevation: 10,
   },
   actionButtons: {
     flexDirection: 'row',
@@ -898,7 +904,7 @@ const styles = StyleSheet.create({
   },
   messageButton: {
     width: '60%',
-    alignSelf:"center"
+    alignSelf: 'center',
   },
   messageButtonText: {
     fontSize: RFPercentage(1.6),

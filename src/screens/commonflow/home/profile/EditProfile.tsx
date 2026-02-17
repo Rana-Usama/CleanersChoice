@@ -500,9 +500,10 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
+    // elevation: 3,
     borderWidth: 1,
     borderColor: '#F3F4F6',
+    borderBottomWidth:3
   },
   formHeader: {
     flexDirection: 'row',

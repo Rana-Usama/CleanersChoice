@@ -231,9 +231,14 @@ const ServiceOne: React.FC = ({navigation}: any) => {
   };
 
   const progress = calculateProgress();
-
-  const availableDays =
+  // Add these after your other variables at the top
+  const reduxAvailableDays =
+    available?.filter((item: any) => item.checked).length ?? 0;
+  const firestoreAvailableDays =
     serviceData?.availability?.filter((item: any) => item.checked).length ?? 0;
+  const availableDays =
+    reduxAvailableDays > 0 ? reduxAvailableDays : firestoreAvailableDays;
+  const hasAvailability = availableDays > 0;
 
   const serviceAvailabilityLength = serviceData?.availability?.length ?? 0;
 
@@ -413,23 +418,17 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                         </Text>
                       </View>
                       <View style={styles.availabilityArrow}>
-                        {available.length > 0 ||
-                        serviceAvailabilityLength > 0 ? (
-                          <Octicons
-                            name="pencil"
+                        {hasAvailability ? (
+                          <MaterialIcons
+                            name="check-circle"
+                            size={24}
                             color={'#22C55E'}
-                            size={RFPercentage(2)}
                           />
                         ) : (
-                          <AntDesign
-                            name="right"
-                            size={RFPercentage(1.8)}
-                            color={
-                              available.length > 0 ||
-                              serviceAvailabilityLength > 0
-                                ? Colors.gradient1
-                                : '#9CA3AF'
-                            }
+                          <Ionicons
+                            name="time-outline"
+                            size={24}
+                            color={availableDays > 0 ? '#22C55E' : '#9CA3AF'}
                           />
                         )}
                       </View>
@@ -721,6 +720,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 8,
     // elevation: 3,
+    borderWidth: 1,
+    borderBottomWidth: 3,
+    borderColor: '#eeeeeeff',
   },
   cardHeader: {
     flexDirection: 'row',
@@ -775,6 +777,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 8,
     // elevation: 3,
+    borderWidth: 1,
+    borderBottomWidth: 3,
+    borderColor: '#d4f7ddff',
   },
   availabilityGradient: {
     padding: 18,
@@ -829,7 +834,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 8,
     // elevation: 3,
+    borderWidth: 1,
+    borderBottomWidth: 3,
+    borderColor: '#eeeeeeff',
   },
+
   selectedCount: {
     backgroundColor: '#EEF2FF',
     paddingHorizontal: 12,

@@ -210,7 +210,7 @@ const Premium = ({navigation}: any) => {
               size={RFPercentage(1.6)}
               color="#FFFFFF"
             />
-            <Text style={styles.popularText}>MOST POPULAR</Text>
+            <Text style={styles.popularText}>Standard Plan</Text>
           </View>
 
           {/* Price */}
@@ -398,11 +398,11 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
+    // elevation: 3,
   },
   popularText: {
     color: '#FFFFFF',
-    fontSize: RFPercentage(1.1),
+    fontSize: RFPercentage(1.3),
     fontFamily: Fonts.fontMedium,
   },
   priceSection: {

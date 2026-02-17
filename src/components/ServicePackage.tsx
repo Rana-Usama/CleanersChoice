@@ -65,7 +65,7 @@ const ServicePackage = (props: props) => {
             duration: 1500,
             useNativeDriver: true,
           }),
-        ])
+        ]),
       ).start();
     }
   }, []);
@@ -86,7 +86,6 @@ const ServicePackage = (props: props) => {
         props.isSelected && styles.selectedContainer,
         props.isFeatured && styles.featuredContainer,
       ]}>
-      
       {/* Shine Effect for Featured Packages */}
       {props.isFeatured && (
         <Animated.View
@@ -106,8 +105,7 @@ const ServicePackage = (props: props) => {
             colors={['#FFD700', '#FFA500']}
             style={styles.ribbonGradient}
             start={{x: 0, y: 0}}
-            end={{x: 1, y: 0}}
-          >
+            end={{x: 1, y: 0}}>
             <MaterialCommunityIcons name="crown" size={12} color="#FFFFFF" />
             <Text style={styles.ribbonText}>BEST VALUE</Text>
           </LinearGradient>
@@ -118,38 +116,36 @@ const ServicePackage = (props: props) => {
         activeOpacity={0.9}
         onPress={props.onPress}
         style={styles.touchableArea}>
-        
         {/* Header with Elegant Gradient */}
         <LinearGradient
-          colors={props.isFeatured ? 
-            [Colors.gradient1, Colors.gradient2] : 
-            ['#e0e9f3ff', '#F8FAFC']}
-          style={[
-            styles.header,
-            props.isFeatured && styles.featuredHeader
-          ]}
+          colors={
+            props.isFeatured
+              ? [Colors.gradient1, Colors.gradient2]
+              : ['#e0e9f3ff', '#F8FAFC']
+          }
+          style={[styles.header, props.isFeatured && styles.featuredHeader]}
           start={{x: 0, y: 0}}
-          end={{x: 1, y: 0}}
-        >
+          end={{x: 1, y: 0}}>
           {props.isFeatured && (
-            <MaterialCommunityIcons 
-              name="star" 
-              size={16} 
-              color="#FFFFFF" 
+            <MaterialCommunityIcons
+              name="star"
+              size={16}
+              color="#FFFFFF"
               style={styles.headerIcon}
             />
           )}
-          <Text style={[
-            styles.packageName,
-            props.isFeatured && styles.featuredPackageName
-          ]}>
+          <Text
+            style={[
+              styles.packageName,
+              props.isFeatured && styles.featuredPackageName,
+            ]}>
             {props.name}
           </Text>
           {props.isFeatured && (
-            <MaterialCommunityIcons 
-              name="star" 
-              size={16} 
-              color="#FFFFFF" 
+            <MaterialCommunityIcons
+              name="star"
+              size={16}
+              color="#FFFFFF"
               style={styles.headerIcon}
             />
           )}
@@ -159,16 +155,18 @@ const ServicePackage = (props: props) => {
         <View style={styles.content}>
           {/* Description */}
           <View style={styles.detailContainer}>
-            <MaterialCommunityIcons 
-              name="information-outline" 
-              size={14} 
-              color={props.isFeatured ? Colors.gradient1 : Colors.secondaryText} 
+            <MaterialCommunityIcons
+              name="information-outline"
+              size={14}
+              color={props.isFeatured ? Colors.gradient1 : Colors.secondaryText}
               style={styles.detailIcon}
             />
-            <Text style={[
-              styles.detailText,
-              props.isFeatured && styles.featuredDetailText
-            ]} numberOfLines={3}>
+            <Text
+              style={[
+                styles.detailText,
+                props.isFeatured && styles.featuredDetailText,
+              ]}
+              numberOfLines={3}>
               {props.detail}
             </Text>
           </View>
@@ -177,44 +175,50 @@ const ServicePackage = (props: props) => {
           {props.services && props.services.length > 0 && (
             <View style={styles.featuresSection}>
               <View style={styles.sectionHeader}>
-                <MaterialCommunityIcons 
-                  name="check-circle-outline" 
-                  size={14} 
-                  color={props.isFeatured ? Colors.gradient1 : Colors.primaryText} 
+                <MaterialCommunityIcons
+                  name="check-circle-outline"
+                  size={14}
+                  color={
+                    props.isFeatured ? Colors.gradient1 : Colors.primaryText
+                  }
                 />
-                <Text style={[
-                  styles.sectionTitle,
-                  props.isFeatured && styles.featuredSectionTitle
-                ]}>
+                <Text
+                  style={[
+                    styles.sectionTitle,
+                    props.isFeatured && styles.featuredSectionTitle,
+                  ]}>
                   INCLUDED SERVICES
                 </Text>
               </View>
-              
+
               <View style={styles.featuresList}>
                 {props.services.slice(0, 4).map((service, index) => (
                   <View key={service.id} style={styles.featureItem}>
                     <LinearGradient
-                      colors={props.isFeatured ? 
-                        [Colors.gradient1, Colors.gradient2] : 
-                        ['#E2E8F0', '#CBD5E1']}
-                      style={styles.featureIcon}
-                    >
-                      <Feather 
-                        name="check" 
-                        size={10} 
-                        color={props.isFeatured ? "#FFFFFF" : "#64748B"} 
+                      colors={
+                        props.isFeatured
+                          ? [Colors.gradient1, Colors.gradient2]
+                          : ['#E2E8F0', '#CBD5E1']
+                      }
+                      style={styles.featureIcon}>
+                      <Feather
+                        name="check"
+                        size={10}
+                        color={props.isFeatured ? '#FFFFFF' : '#64748B'}
                       />
                     </LinearGradient>
-                    <Text style={[
-                      styles.featureText,
-                      props.isFeatured && styles.featuredFeatureText
-                    ]} numberOfLines={1}>
+                    <Text
+                      style={[
+                        styles.featureText,
+                        props.isFeatured && styles.featuredFeatureText,
+                      ]}
+                      numberOfLines={1}>
                       {service.name}
                     </Text>
                   </View>
                 ))}
               </View>
-              
+
               {props.services.length > 4 && (
                 <View style={styles.moreFeatures}>
                   <Text style={styles.moreFeaturesText}>
@@ -227,67 +231,74 @@ const ServicePackage = (props: props) => {
 
           {/* Price Section */}
           <LinearGradient
-            colors={props.isFeatured ? 
-              ['rgba(77, 97, 239, 0.05)', 'rgba(77, 97, 239, 0.02)'] : 
-              ['#F8FAFC', '#F1F5F9']}
-            style={styles.priceSection}
-          >
+            colors={
+              props.isFeatured
+                ? ['rgba(77, 97, 239, 0.05)', 'rgba(77, 97, 239, 0.02)']
+                : ['#F8FAFC', '#F1F5F9']
+            }
+            style={styles.priceSection}>
             <View style={styles.priceRow}>
               <View>
-                <Text style={[
-                  styles.startsAtText,
-                  props.isFeatured && styles.featuredStartsAtText
-                ]}>
+                <Text
+                  style={[
+                    styles.startsAtText,
+                    props.isFeatured && styles.featuredStartsAtText,
+                  ]}>
                   STARTING FROM
                 </Text>
                 <View style={styles.priceContainer}>
-                  <Text style={[
-                    styles.currencySymbol,
-                    props.isFeatured && styles.featuredCurrencySymbol
-                  ]}>
+                  <Text
+                    style={[
+                      styles.currencySymbol,
+                      props.isFeatured && styles.featuredCurrencySymbol,
+                    ]}>
                     $
                   </Text>
-                  <Text style={[
-                    styles.priceText,
-                    props.isFeatured && styles.featuredPriceText
-                  ]} numberOfLines={1}>
+                  <Text
+                    style={[
+                      styles.priceText,
+                      props.isFeatured && styles.featuredPriceText,
+                    ]}
+                    numberOfLines={1}>
                     {props.price}
                   </Text>
-                  <Text style={[
-                    styles.priceSuffix,
-                    props.isFeatured && styles.featuredPriceSuffix
-                  ]}>
+                  <Text
+                    style={[
+                      styles.priceSuffix,
+                      props.isFeatured && styles.featuredPriceSuffix,
+                    ]}>
                     /service
                   </Text>
                 </View>
               </View>
-              
+
               <TouchableOpacity
                 style={[
                   styles.selectButton,
-                  props.isFeatured && styles.featuredSelectButton
+                  props.isFeatured && styles.featuredSelectButton,
                 ]}
                 activeOpacity={0.8}
-                onPress={props.onPress}
-              >
+                onPress={props.onPress}>
                 <LinearGradient
-                  colors={props.isFeatured ? 
-                    [Colors.gradient1, Colors.gradient2] : 
-                    ['#7b93b1ff', '#dde8f6ff']}
+                  colors={
+                    props.isFeatured
+                      ? [Colors.gradient1, Colors.gradient2]
+                      : ['#7b93b1ff', '#dde8f6ff']
+                  }
                   style={styles.selectButtonGradient}
                   start={{x: 0, y: 0}}
-                  end={{x: 1, y: 0}}
-                >
-                  <Text style={[
-                    styles.selectButtonText,
-                    props.isFeatured && styles.featuredSelectButtonText
-                  ]}>
+                  end={{x: 1, y: 0}}>
+                  <Text
+                    style={[
+                      styles.selectButtonText,
+                      props.isFeatured && styles.featuredSelectButtonText,
+                    ]}>
                     {props.isFeatured ? 'SELECT' : 'VIEW'}
                   </Text>
                 </LinearGradient>
               </TouchableOpacity>
             </View>
-            
+
             {props.isFeatured && (
               <View style={styles.savingsBadge}>
                 <Feather name="trending-up" size={10} color="#FFFFFF" />
@@ -327,24 +338,26 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.08,
     shadowRadius: 16,
-    elevation: 8,
+    // elevation: 8,
     borderWidth: 1.5,
     borderColor: '#F1F5F9',
     overflow: 'hidden',
+
+    borderBottomWidth: 2,
   },
   selectedContainer: {
     borderColor: Colors.gradient1,
     shadowColor: Colors.gradient1,
     shadowOpacity: 0.15,
     shadowRadius: 20,
-    elevation: 12,
+    // elevation: 12,
   },
   featuredContainer: {
     borderColor: Colors.gradient1,
     shadowColor: Colors.gradient1,
     shadowOpacity: 0.2,
     shadowRadius: 24,
-    elevation: 16,
+    // elevation: 16,
     transform: [{scale: 1.02}],
   },
   shineEffect: {
@@ -554,7 +567,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.3,
     shadowRadius: 4,
-    elevation: 4,
+    // elevation: 4,
   },
   selectButtonText: {
     color: '#FFFFFF',
