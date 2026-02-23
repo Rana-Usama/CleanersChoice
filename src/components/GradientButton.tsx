@@ -14,7 +14,7 @@ interface Props {
   onPress: () => void;
   disabled?: boolean;
   color?: string;
-  title: string;
+  title: any;
   style?: object;
   loading?: boolean;
   textStyle?: object;
