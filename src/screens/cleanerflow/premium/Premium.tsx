@@ -25,6 +25,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import {showToast} from '../../../utils/ToastMessage';
 import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import * as RNIap from 'react-native-iap';
+import {useAppleIAP} from '../../../hooks/useAppleIAP';
 
 const {width} = Dimensions.get('window');
 
@@ -34,6 +36,8 @@ const services = [
   {id: 3, name: 'List your services'},
   {id: 4, name: 'Cancel any time'},
 ];
+
+const productId = 'cleaner.premium.monthly.V1';
 
 const Premium = ({navigation}: any) => {
   const {initPaymentSheet, presentPaymentSheet} = useStripe();
@@ -65,6 +69,34 @@ const Premium = ({navigation}: any) => {
 
     fetchUserData();
   }, [user?.email]);
+
+  const {productPrice, iapLoading, purchaseWithApple} = useAppleIAP(
+    // onSuccess callback
+    () => {
+      showToast({
+        type: 'success',
+        title: 'Subscription',
+        message: 'Subscription activated successfully!',
+      });
+      navigation.navigate('CleanerNavigator');
+    },
+    // onError callback
+    (msg: string) => {
+      showToast({
+        type: 'error',
+        title: 'Purchase Failed',
+        message: msg,
+      });
+    },
+  );
+
+  const handleSubscribe = async () => {
+    if (Platform.OS === 'ios') {
+      await purchaseWithApple(); // ← Apple IAP for iOS
+    } else {
+      await openPaymentSheet(); // ← Stripe for Android
+    }
+  };
 
   // Fetching payment intent
   const fetchSetupIntent = async () => {
@@ -166,6 +198,16 @@ const Premium = ({navigation}: any) => {
       });
       setModalVisible2(true);
     }
+  };
+
+  const getButtonTitle = () => {
+    const isRenew =
+      currentUser?.cancelSubscription === true &&
+      currentUser?.subscriptionEndDate < Date.now();
+
+    if (isRenew) return 'Renew Subscription';
+    if (Platform.OS === 'ios') return `Subscribe ${productPrice}/mo`;
+    return 'Proceed To Payment';
   };
 
   return (
@@ -272,7 +314,10 @@ const Premium = ({navigation}: any) => {
       {/* Fixed Action Section */}
       <View style={styles.actionSection}>
         <View style={styles.actionContent}>
-          <TouchableOpacity onPress={() => navigation.navigate('SignIn')} activeOpacity={0.8} style={styles.totalContainer}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('SignIn')}
+            activeOpacity={0.8}
+            style={styles.totalContainer}>
             <Text style={styles.totalLabel}>Back</Text>
           </TouchableOpacity>
 
@@ -284,7 +329,7 @@ const Premium = ({navigation}: any) => {
                 : 'Proceed To Payment'
             }
             textStyle={styles.buttonText}
-            onPress={openPaymentSheet}
+            onPress={handleSubscribe}
             style={styles.subscribeButton}
             loading={loading}
             disabled={loading}
@@ -575,18 +620,17 @@ const styles = StyleSheet.create({
   },
   totalContainer: {
     flex: 1,
-    borderWidth:1,
-    height:RFPercentage(5.5),
-    borderColor:Colors.gradient1,
-    borderRadius:RFPercentage(2),
-    alignItems:"center",
-    justifyContent:"center"
+    borderWidth: 1,
+    height: RFPercentage(5.5),
+    borderColor: Colors.gradient1,
+    borderRadius: RFPercentage(2),
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   totalLabel: {
     color: Colors.gradient1,
     fontSize: RFPercentage(1.6),
     fontFamily: Fonts.semiBold,
- 
   },
   totalPrice: {
     color: Colors.gradient1,
@@ -595,7 +639,7 @@ const styles = StyleSheet.create({
   },
   subscribeButton: {
     flex: 2,
-    borderRadius:RFPercentage(2),
+    borderRadius: RFPercentage(2),
   },
   buttonText: {
     fontSize: RFPercentage(1.6),
