@@ -1,4 +1,4 @@
-import {useState, useEffect, useCallback} from 'react';
+import {useState, useEffect, useCallback, useRef} from 'react';
 import {
   initConnection,
   endConnection,
@@ -13,7 +13,21 @@ import {
 import auth from '@react-native-firebase/auth';
 
 const PRODUCT_ID = 'cleaner.premium.monthly.V1';
-const API_BASE = 'https://cleaners-choice-server.vercel.app';
+
+// TODO: Switch back to production URL before release
+// const API_BASE = 'https://cleaners-choice-server.vercel.app';
+const API_BASE = 'http://localhost:3000';
+
+/** Returns true if the error represents a user cancellation (including simulator quirks) */
+const isCancellation = (codeOrMessage: string | undefined): boolean => {
+  if (!codeOrMessage) return false;
+  const lower = codeOrMessage.toLowerCase();
+  return (
+    codeOrMessage === 'E_USER_CANCELLED' ||
+    lower.includes('skerrordomain error 2') ||
+    lower.includes('cancel')
+  );
+};
 
 interface UseAppleIAPReturn {
   productPrice: string;
@@ -31,6 +45,12 @@ export function useAppleIAP(
   const [iapLoading, setIapLoading] = useState(false);
   const [iapError, setIapError] = useState<string | null>(null);
   const user = auth().currentUser;
+
+  // Refs to avoid stale closures in listeners
+  const onSuccessRef = useRef(onSuccess);
+  const onErrorRef = useRef(onError);
+  useEffect(() => { onSuccessRef.current = onSuccess; }, [onSuccess]);
+  useEffect(() => { onErrorRef.current = onError; }, [onError]);
 
   useEffect(() => {
     let purchaseSub: any;
@@ -63,8 +83,9 @@ export function useAppleIAP(
         // Product found — set price
         const product = subs[0];
         console.log('Product loaded:', product.productId);
-        console.log('Price:', product?.localizedPrice);
-        setProductPrice(product?.localizedPrice || '$15.99');
+        const price = (product as any)?.localizedPrice ?? (product as any)?.displayPrice;
+        console.log('Price:', price);
+        setProductPrice(price || '$15.99');
         setIapError(null);
 
         // 3. Listen for purchase updates
@@ -78,8 +99,11 @@ export function useAppleIAP(
               return;
             }
             
-            if (!user?.uid) {
+            const currentUser = auth().currentUser;
+            if (!currentUser?.uid) {
               console.error('User not authenticated');
+              setIapLoading(false);
+              onErrorRef.current('User not authenticated');
               return;
             }
 
@@ -90,7 +114,7 @@ export function useAppleIAP(
               const response = await fetch(`${API_BASE}/api/apple-validate`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({receipt, uid: user.uid}),
+                body: JSON.stringify({receipt, uid: currentUser.uid}),
               });
 
               const result = await response.json();
@@ -106,12 +130,12 @@ export function useAppleIAP(
               console.log('Transaction finished');
 
               setIapLoading(false);
-              onSuccess();
+              onSuccessRef.current();
               
             } catch (err: any) {
               console.error('Purchase validation error:', err);
               setIapLoading(false);
-              onError(err.message || 'Purchase validation failed');
+              onErrorRef.current(err.message || 'Purchase validation failed');
             }
           },
         );
@@ -120,11 +144,11 @@ export function useAppleIAP(
         errorSub = purchaseErrorListener((error: PurchaseError) => {
           console.error('Purchase error:', error.code, error.message);
           setIapLoading(false);
-          
-          if (error.code !== 'E_USER_CANCELLED') {
-            onError(error.message || 'Purchase failed');
+
+          if (isCancellation(error.code) || isCancellation(error.message)) {
+            console.log('User cancelled purchase (listener)');
           } else {
-            console.log(' User cancelled purchase');
+            onErrorRef.current(error.message || 'Purchase failed');
           }
         });
 
@@ -159,14 +183,16 @@ export function useAppleIAP(
       await requestSubscription({sku: PRODUCT_ID});
       
     } catch (err: any) {
-      console.error(' requestSubscription error:', err);
+      console.error('requestSubscription error:', err);
       setIapLoading(false);
-      
-      if (err.code !== 'E_USER_CANCELLED') {
-        onError(err.message || 'Purchase failed');
+
+      if (isCancellation(err.code) || isCancellation(err.message)) {
+        console.log('User cancelled purchase (catch)');
+      } else {
+        onErrorRef.current(err.message || 'Purchase failed');
       }
     }
-  }, [iapError, onSuccess, onError]);
+  }, [iapError]);
 
   const initIAP = useCallback(async () => {
     // Already initialized in useEffect
