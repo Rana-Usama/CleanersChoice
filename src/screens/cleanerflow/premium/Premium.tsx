@@ -179,6 +179,7 @@ const Premium = ({navigation}: any) => {
       if (user?.uid) {
         await firestore().collection('Users').doc(user.uid).update({
           subscription: true,
+          subscriptionProvider: 'stripe',
           subscriptionId: result.subscriptionId,
           cancelSubscription: false,
           subscriptionEndDate: periodEndTimestamp,
@@ -200,12 +201,13 @@ const Premium = ({navigation}: any) => {
     }
   };
 
-  const getButtonTitle = () => {
-    const isRenew =
-      currentUser?.cancelSubscription === true &&
-      currentUser?.subscriptionEndDate < Date.now();
+  const endDate = currentUser?.subscriptionEndDate;
+  const hasEndDate = typeof endDate === 'number' && endDate > 0;
+  const isExpired = hasEndDate && endDate < Date.now();
+  const showRenewUI = hasEndDate && isExpired;
 
-    if (isRenew) return 'Renew Subscription';
+  const getButtonTitle = () => {
+    if (showRenewUI) return 'Renew Subscription';
     if (Platform.OS === 'ios') return `Subscribe ${productPrice}/mo`;
     return 'Proceed To Payment';
   };
@@ -225,8 +227,7 @@ const Premium = ({navigation}: any) => {
         showsVerticalScrollIndicator={false}>
         {/* Header Section */}
         <View style={styles.headerContainer}>
-          {currentUser?.cancelSubscription === true &&
-          currentUser?.subscriptionEndDate < Date.now() ? (
+          {showRenewUI ? (
             <>
               <Text style={styles.premiumTitle}>Renew Premium Account</Text>
               <Text style={styles.premiumSubtitle}>
@@ -258,7 +259,7 @@ const Premium = ({navigation}: any) => {
           {/* Price */}
           <View style={styles.priceSection}>
             <Text style={styles.priceText}>
-              $15
+              $20
               <Text style={styles.priceDecimal}>.99</Text>
             </Text>
             <Text style={styles.pricePeriod}>per month</Text>
@@ -323,8 +324,7 @@ const Premium = ({navigation}: any) => {
 
           <GradientButton
             title={
-              currentUser?.cancelSubscription === true &&
-              currentUser?.subscriptionEndDate < Date.now()
+              showRenewUI
                 ? 'Renew Subscription'
                 : 'Proceed To Payment'
             }

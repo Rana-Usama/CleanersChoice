@@ -11,12 +11,11 @@ import {
   PurchaseError,
 } from 'react-native-iap';
 import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 
 const PRODUCT_ID = 'cleaner.premium.monthly.V1';
 
-// TODO: Switch back to production URL before release
-// const API_BASE = 'https://cleaners-choice-server.vercel.app';
-const API_BASE = 'http://localhost:3000';
+const API_BASE = 'https://cleaners-choice-server.vercel.app';
 
 /** Returns true if the error represents a user cancellation (including simulator quirks) */
 const isCancellation = (codeOrMessage: string | undefined): boolean => {
@@ -82,6 +81,7 @@ export function useAppleIAP(
 
         // Product found — set price
         const product = subs[0];
+        console.log('Product loaded:', product);
         console.log('Product loaded:', product.productId);
         const price = (product as any)?.localizedPrice ?? (product as any)?.displayPrice;
         console.log('Price:', price);
@@ -121,6 +121,7 @@ export function useAppleIAP(
               console.log('Backend response:', result);
 
               if (!result.success) {
+
                 throw new Error(result.error || 'Validation failed');
               }
 
@@ -128,6 +129,16 @@ export function useAppleIAP(
               console.log(' Receipt valid, finishing transaction...');
               await finishTransaction({purchase, isConsumable: false});
               console.log('Transaction finished');
+
+              // 6. Update Firestore with Apple subscription info
+              await firestore().collection('Users').doc(currentUser.uid).update({
+                subscription: true,
+                subscriptionProvider: 'apple',
+                cancelSubscription: false,
+                subscriptionId: purchase.transactionId || '',
+                originalTransactionId: result.originalTransactionId || purchase.transactionId || '',
+              });
+              console.log('Firestore updated with Apple subscription');
 
               setIapLoading(false);
               onSuccessRef.current();

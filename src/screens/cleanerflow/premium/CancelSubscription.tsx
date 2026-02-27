@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   StatusBar,
   ScrollView,
+  Linking,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -40,7 +41,10 @@ const CancelSubscription = () => {
   const [isLoading2, setIsLoading2] = useState(false);
   const [cancel, setCancel] = useState(null);
   const [subscriptionId, setSubscriptionId] = useState(null);
+  const [subscriptionProvider, setSubscriptionProvider] = useState<string | null>(null);
   const user = auth().currentUser;
+
+  const isApple = subscriptionProvider === 'apple';
 
   // Fetching user data
   useEffect(() => {
@@ -53,14 +57,28 @@ const CancelSubscription = () => {
         const userData = userDoc.data();
         setSubscriptionId(userData?.subscriptionId);
         setCancel(userData?.cancelSubscription);
+        setSubscriptionProvider(userData?.subscriptionProvider || null);
       }
     };
 
     fetchSubscriptionId();
   }, [user?.uid]);
 
-  // Cancel subscription
+  // Cancel subscription — branches on provider
   const cancelSubscription = async () => {
+    if (isApple) {
+      // Apple: open App Store subscription management
+      Linking.openURL('https://apps.apple.com/account/subscriptions');
+      showToast({
+        type: 'info',
+        title: 'Manage Subscription',
+        message: 'Manage your subscription in the App Store.',
+      });
+      navigation.goBack();
+      return;
+    }
+
+    // Stripe flow
     if (!subscriptionId) {
       showToast({
         type: 'error',
@@ -298,8 +316,9 @@ const CancelSubscription = () => {
               </View>
 
               <Text style={styles.modalNote}>
-                Your subscription will remain active until the end of the
-                current billing period.
+                {isApple
+                  ? 'You will be redirected to the App Store to manage your subscription.'
+                  : 'Your subscription will remain active until the end of the current billing period.'}
               </Text>
 
               {/* Modal Buttons */}
