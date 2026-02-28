@@ -218,8 +218,8 @@ const Availability = ({navigation}: any) => {
             progress={completionPercentage}
             width={width - 80}
             height={6}
-            color="#FFFFFF"
-            unfilledColor="rgba(255,255,255,0.3)"
+            color={Colors.white}
+            unfilledColor={Colors.whiteOverlay30}
             borderWidth={0}
             borderRadius={10}
             style={styles.progressBar}
@@ -324,7 +324,7 @@ const Availability = ({navigation}: any) => {
             {selectedDaysCount === 0 && (
               <View style={styles.tipsCard}>
                 <View style={styles.tipsHeader}>
-                  <FontAwesome name="lightbulb-o" size={18} color="#F59E0B" />
+                  <FontAwesome name="lightbulb-o" size={18} color={Colors.amber500} />
                   <Text style={styles.tipsTitle}>Pro Tip</Text>
                 </View>
                 <Text style={styles.tipsText}>
@@ -350,7 +350,7 @@ const Availability = ({navigation}: any) => {
                   <MaterialIcons
                     name="check-circle"
                     size={16}
-                    color="#10B981"
+                    color={Colors.success}
                   />
                   <Text style={styles.bulkButtonText}>Select All</Text>
                 </TouchableOpacity>
@@ -365,7 +365,7 @@ const Availability = ({navigation}: any) => {
                   <MaterialIcons
                     name="remove-circle"
                     size={16}
-                    color="#EF4444"
+                    color={Colors.red500}
                   />
                   <Text style={styles.bulkButtonText}>Clear All</Text>
                 </TouchableOpacity>
@@ -405,12 +405,12 @@ const Availability = ({navigation}: any) => {
                 <LinearGradient
                   colors={
                     selectedDaysCount === 0
-                      ? ['#E5E7EB', '#D1D5DB']
+                      ? [Colors.gray200, Colors.gray300]
                       : [Colors.gradient1, Colors.gradient2]
                   }
                   style={styles.buttonGradient}>
                   {loading ? (
-                    <ActivityIndicator color="#FFFFFF" />
+                    <ActivityIndicator color={Colors.white} />
                   ) : (
                     <>
                       <Text style={styles.buttonText}>
@@ -441,14 +441,14 @@ const Availability = ({navigation}: any) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
   },
   gradientHeader: {
     paddingTop: Platform.OS === 'ios' ? 40 : 0,
     paddingBottom: 20,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 12,
@@ -457,7 +457,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: RFPercentage(2.2),
     fontFamily: Fonts.semiBold,
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   progressSection: {
     marginTop: 15,
@@ -472,13 +472,13 @@ const styles = StyleSheet.create({
   progressTitle: {
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.6),
-    color: '#FFFFFF',
+    color: Colors.white,
     opacity: 0.9,
   },
   progressPercent: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.8),
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   progressBar: {
     marginTop: 4,
@@ -500,20 +500,20 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontRegular,
-    color: '#6B7280',
+    color: Colors.placeholderColor,
   },
   instructionsCard: {
     marginHorizontal: 20,
     marginTop: 24,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: 16,
     padding: 20,
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
     borderWidth: 1,
-    borderColor: '#d3e7f7ff',
+    borderColor: Colors.skyBlue100,
     // elevation: 3,
   },
   instructionsHeader: {
@@ -528,20 +528,20 @@ const styles = StyleSheet.create({
   instructionsTitle: {
     fontSize: RFPercentage(1.8),
     fontFamily: Fonts.semiBold,
-    color: '#1F2937',
+    color: Colors.gray800,
     marginBottom: 4,
   },
   instructionsSubtitle: {
     fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
-    color: '#6B7280',
+    color: Colors.placeholderColor,
     lineHeight: 20,
   },
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#F9FAFB',
+    backgroundColor: Colors.gray50,
     borderRadius: 12,
     padding: 16,
   },
@@ -558,12 +558,12 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: RFPercentage(1.3),
     fontFamily: Fonts.fontMedium,
-    color: '#6B7280',
+    color: Colors.placeholderColor,
   },
   statDivider: {
     width: 1,
     height: 30,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: Colors.gray200,
   },
   daysContainer: {
     marginHorizontal: 20,
@@ -572,13 +572,13 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: RFPercentage(1.8),
     fontFamily: Fonts.semiBold,
-    color: '#1F2937',
+    color: Colors.gray800,
     marginBottom: 6,
   },
   sectionSubtitle: {
     fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
-    color: '#6B7280',
+    color: Colors.placeholderColor,
     marginBottom: 20,
   },
   daysList: {
@@ -590,11 +590,11 @@ const styles = StyleSheet.create({
   tipsCard: {
     marginHorizontal: 20,
     marginTop: 20,
-    backgroundColor: '#FFFBEB',
+    backgroundColor: Colors.amberBg50,
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#FDE68A',
+    borderColor: Colors.amberBorder,
   },
   tipsHeader: {
     flexDirection: 'row',
@@ -604,13 +604,13 @@ const styles = StyleSheet.create({
   tipsTitle: {
     fontSize: RFPercentage(1.6),
     fontFamily: Fonts.semiBold,
-    color: '#92400E',
+    color: Colors.amberDarkText,
     marginLeft: 8,
   },
   tipsText: {
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
-    color: '#92400E',
+    color: Colors.amberDarkText,
     lineHeight: 20,
   },
   bulkActions: {
@@ -620,7 +620,7 @@ const styles = StyleSheet.create({
   bulkTitle: {
     fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
-    color: '#374151',
+    color: Colors.gray700,
     marginBottom: 12,
   },
   bulkButtons: {
@@ -631,17 +631,17 @@ const styles = StyleSheet.create({
   bulkButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F3F4F6',
+    backgroundColor: Colors.lightGrayBg,
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: Colors.gray200,
   },
   bulkButtonText: {
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontMedium,
-    color: '#374151',
+    color: Colors.gray700,
     marginLeft: 6,
   },
   buttonContainer: {
@@ -675,7 +675,7 @@ const styles = StyleSheet.create({
   buttonText: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.7),
-    color: '#FFFFFF',
+    color: Colors.white,
     marginRight: 10,
   },
   buttonIcon: {
@@ -684,7 +684,7 @@ const styles = StyleSheet.create({
   requirementsText: {
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
-    color: '#6B7280',
+    color: Colors.placeholderColor,
     textAlign: 'center',
     marginTop: 12,
   },

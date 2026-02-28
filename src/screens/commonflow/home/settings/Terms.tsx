@@ -73,7 +73,7 @@ const Terms: React.FC = ({navigation}: any) => {
             style={styles.backButton}>
             <Feather
               name="arrow-left"
-              color="#FFFFFF"
+              color={Colors.white}
               size={RFPercentage(2.4)}
             />
           </TouchableOpacity>
@@ -147,7 +147,7 @@ const Terms: React.FC = ({navigation}: any) => {
             <MaterialCommunityIcons
               name="alert-circle-outline"
               size={RFPercentage(3)}
-              color="#F59E0B"
+              color={Colors.amber500}
             />
           </View>
           <Text style={styles.acceptanceTitle}>Important Notice</Text>
@@ -200,10 +200,10 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(2.25),
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: Colors.whiteOverlay20,
   },
   headerTitle: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontSize: RFPercentage(1.8),
     fontFamily: Fonts.semiBold,
   },
@@ -212,30 +212,30 @@ const styles = StyleSheet.create({
     paddingBottom: RFPercentage(20),
   },
   introCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     marginHorizontal: RFPercentage(2),
     marginTop: RFPercentage(2),
     borderRadius: 16,
     padding: RFPercentage(2.5),
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
     // elevation: 3,
     borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: Colors.lightGrayBg,
     alignItems: 'center',
   },
   introIcon: {
     width: RFPercentage(6),
     height: RFPercentage(6),
     borderRadius: RFPercentage(3),
-    backgroundColor: 'rgba(161, 198, 241, 0.1)',
+    backgroundColor: Colors.blueTintBg,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: RFPercentage(1.5),
     borderWidth: 2,
-    borderColor: 'rgba(161, 198, 241, 0.2)',
+    borderColor: Colors.blueTintBorder,
   },
   introTitle: {
     color: Colors.primaryText,
@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
     gap: RFPercentage(0.5),
     paddingTop: RFPercentage(1),
     borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
+    borderTopColor: Colors.lightGrayBg,
     width: '100%',
     justifyContent: 'center',
   },
@@ -275,31 +275,31 @@ const styles = StyleSheet.create({
     gap: RFPercentage(1.5),
   },
   termCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: 12,
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.05,
     shadowRadius: 4,
     // elevation: 2,
     borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: Colors.lightGrayBg,
     overflow: 'hidden',
   },
   termHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: RFPercentage(2),
-    backgroundColor: '#F9FAFB',
+    backgroundColor: Colors.gray50,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    borderBottomColor: Colors.lightGrayBg,
     gap: RFPercentage(1),
   },
   termIcon: {
     width: RFPercentage(3.5),
     height: RFPercentage(3.5),
     borderRadius: RFPercentage(1),
-    backgroundColor: 'rgba(161, 198, 241, 0.1)',
+    backgroundColor: Colors.blueTintBg,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -326,33 +326,33 @@ const styles = StyleSheet.create({
     lineHeight: RFPercentage(2.2),
   },
   acceptanceCard: {
-    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+    backgroundColor: Colors.amberOverlay10,
     marginHorizontal: RFPercentage(2),
     marginTop: RFPercentage(2),
     borderRadius: 16,
     padding: RFPercentage(2.5),
     borderWidth: 1,
-    borderColor: 'rgba(245, 158, 11, 0.2)',
+    borderColor: Colors.amberOverlay20,
     alignItems: 'center',
   },
   warningIcon: {
     width: RFPercentage(5),
     height: RFPercentage(5),
     borderRadius: RFPercentage(2.5),
-    backgroundColor: 'rgba(245, 158, 11, 0.2)',
+    backgroundColor: Colors.amberOverlay20,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: RFPercentage(1),
   },
   acceptanceTitle: {
-    color: '#92400E',
+    color: Colors.amberDarkText,
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.8),
     marginBottom: RFPercentage(0.8),
     textAlign: 'center',
   },
   acceptanceText: {
-    color: '#92400E',
+    color: Colors.amberDarkText,
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.5),
     textAlign: 'center',

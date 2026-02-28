@@ -322,7 +322,7 @@ const CheckAvailability = ({route, navigation}: any) => {
             style={styles.backButton}>
             <Feather
               name="arrow-left"
-              color="#FFFFFF"
+              color={Colors.white}
               size={RFPercentage(2.4)}
             />
           </TouchableOpacity>
@@ -347,7 +347,7 @@ const CheckAvailability = ({route, navigation}: any) => {
                 <MaterialCommunityIcons
                   name="check-decagram"
                   size={12}
-                  color="#FFFFFF"
+                  color={Colors.white}
                 />
               </View>
             </View>
@@ -380,7 +380,7 @@ const CheckAvailability = ({route, navigation}: any) => {
                       nextAvailable.isToday ? 'calendar-star' : 'calendar-blank'
                     }
                     size={16}
-                    color="#FFFFFF"
+                    color={Colors.white}
                   />
                   <Text style={styles.nextDayText}>
                     {nextAvailable.isToday ? 'Today' : nextAvailable.fullDay}
@@ -421,7 +421,7 @@ const CheckAvailability = ({route, navigation}: any) => {
                   name={filter.icon}
                   size={16}
                   color={
-                    selectedFilter === filter.id ? '#FFFFFF' : Colors.gradient1
+                    selectedFilter === filter.id ? Colors.white : Colors.gradient1
                   }
                 />
                 <Text
@@ -489,10 +489,10 @@ const CheckAvailability = ({route, navigation}: any) => {
               return (
                 <View key={index} style={styles.timeSlotGroup}>
                   <LinearGradient
-                    colors={["#cedeeaff", "#8aa0b5ff"]}
+                    colors={[Colors.slateBlueLight, Colors.slateBlue]}
                     style={styles.timeSlotHeader}>
                     <View style={styles.timeSlotTime}>
-                      <Ionicons name="time" size={16} color="#FFFFFF" />
+                      <Ionicons name="time" size={16} color={Colors.white} />
                       <Text style={styles.timeSlotText}>
                         {firstDay.formattedFromTime} -{' '}
                         {firstDay.formattedToTime}
@@ -520,7 +520,7 @@ const CheckAvailability = ({route, navigation}: any) => {
                               }
                               size={14}
                               color={
-                                isToday(day.day) ? '#FFFFFF' : Colors.gradient1
+                                isToday(day.day) ? Colors.white : Colors.gradient1
                               }
                             />
                             <Text
@@ -629,7 +629,7 @@ const CheckAvailability = ({route, navigation}: any) => {
               style={styles.contactGradient}
               start={{x: 0, y: 0}}
               end={{x: 1, y: 0}}>
-              <Feather name="message-circle" size={18} color="#FFFFFF" />
+              <Feather name="message-circle" size={18} color={Colors.white} />
               <Text style={styles.contactButtonText}>Contact Provider</Text>
             </LinearGradient>
           </TouchableOpacity>
@@ -682,10 +682,10 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(2.25),
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: Colors.whiteOverlay20,
   },
   headerTitle: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontSize: RFPercentage(1.8),
     fontFamily: Fonts.semiBold,
   },
@@ -697,17 +697,17 @@ const styles = StyleSheet.create({
     paddingBottom: RFPercentage(4),
   },
   providerCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: 20,
     padding: RFPercentage(2),
     marginTop: RFPercentage(2),
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 12,
     // elevation: 5,
      borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: Colors.lightGrayBg,
     borderBottomWidth: 2,
   },
   profileContainer: {
@@ -737,7 +737,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderColor: Colors.white,
   },
   providerInfo: {
     flex: 1,
@@ -755,7 +755,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: Colors.lightGrayBg,
     marginVertical: RFPercentage(1.5),
   },
   nextAvailableContainer: {
@@ -786,10 +786,10 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(0.5),
   },
   todayBadge: {
-    backgroundColor: '#F59E0B',
+    backgroundColor: Colors.amber500,
   },
   nextDayText: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontSize: RFPercentage(1.3),
     fontFamily: Fonts.fontMedium,
   },
@@ -805,17 +805,17 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   filterCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: 20,
     padding: RFPercentage(2),
     marginTop: RFPercentage(2),
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
     // elevation: 3,
      borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: Colors.lightGrayBg,
     borderBottomWidth: 2,
   },
   filterTitle: {
@@ -835,7 +835,7 @@ const styles = StyleSheet.create({
     paddingVertical: RFPercentage(0.8),
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: Colors.gray200,
     marginRight: RFPercentage(1),
     gap: RFPercentage(0.5),
   },
@@ -849,20 +849,20 @@ const styles = StyleSheet.create({
     color: Colors.gradient1,
   },
   filterButtonTextActive: {
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   summaryCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: 20,
     padding: RFPercentage(2),
     marginTop: RFPercentage(2),
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
     // elevation: 3,
      borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: Colors.lightGrayBg,
     borderBottomWidth: 2,
   },
   summaryHeader: {
@@ -903,20 +903,20 @@ const styles = StyleSheet.create({
   statDivider: {
     width: 1,
     height: '70%',
-    backgroundColor: '#F3F4F6',
+    backgroundColor: Colors.lightGrayBg,
   },
   timeSlotsCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: 20,
     padding: RFPercentage(2),
     marginTop: RFPercentage(2),
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
     // elevation: 3,
      borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: Colors.lightGrayBg,
     borderBottomWidth: 2,
   },
   timeSlotsHeader: {
@@ -935,7 +935,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: Colors.lightGrayBg,
   },
   timeSlotHeader: {
     flexDirection: 'row',
@@ -949,18 +949,18 @@ const styles = StyleSheet.create({
     gap: RFPercentage(0.5),
   },
   timeSlotText: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontMedium,
   },
   daysCountBadge: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: Colors.whiteOverlay20,
     paddingHorizontal: RFPercentage(0.8),
     paddingVertical: RFPercentage(0.3),
     borderRadius: 12,
   },
   daysCountText: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontSize: RFPercentage(1.1),
     fontFamily: Fonts.fontMedium,
   },
@@ -973,7 +973,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: RFPercentage(0.8),
     borderBottomWidth: 1,
-    borderBottomColor: '#F9FAFB',
+    borderBottomColor: Colors.gray50,
   },
   dayInfo: {
     flexDirection: 'row',
@@ -983,7 +983,7 @@ const styles = StyleSheet.create({
   dayBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F3F4F6',
+    backgroundColor: Colors.lightGrayBg,
     paddingHorizontal: RFPercentage(0.8),
     paddingVertical: RFPercentage(0.3),
     borderRadius: 12,
@@ -998,16 +998,16 @@ const styles = StyleSheet.create({
     color: Colors.primaryText,
   },
   todayDayText: {
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   todayIndicator: {
-    backgroundColor: '#FFEDD5',
+    backgroundColor: Colors.orangeBg50,
     paddingHorizontal: RFPercentage(0.6),
     paddingVertical: RFPercentage(0.2),
     borderRadius: 8,
   },
   todayIndicatorText: {
-    color: '#EA580C',
+    color: Colors.orange600,
     fontSize: RFPercentage(1),
     fontFamily: Fonts.fontMedium,
   },
@@ -1022,12 +1022,12 @@ const styles = StyleSheet.create({
     color: Colors.secondaryText,
   },
   emptyState: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: 20,
     padding: RFPercentage(3),
     marginTop: RFPercentage(2),
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
@@ -1048,11 +1048,11 @@ const styles = StyleSheet.create({
     lineHeight: RFPercentage(2),
   },
   detailedListCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: 20,
     padding: RFPercentage(2),
     marginTop: RFPercentage(2),
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
@@ -1073,12 +1073,12 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(1),
   },
   bottomActionCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: 20,
     padding: RFPercentage(2),
     marginTop: RFPercentage(2),
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
@@ -1111,7 +1111,7 @@ const styles = StyleSheet.create({
     gap: RFPercentage(0.8),
   },
   contactButtonText: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
   },

@@ -77,28 +77,28 @@ const ProfileCompletionCongratulations = ({completionPercentage = 100}) => {
       title: 'Service Details',
       description: 'Location, description & services',
       icon: 'map-marker-check',
-      color: '#4CAF50',
+      color: Colors.materialGreen,
     },
     {
       step: 2,
       title: 'Service Gallery',
       description: 'Uploaded showcase photos',
       icon: 'image-multiple',
-      color: '#2196F3',
+      color: Colors.materialBlue,
     },
     {
       step: 3,
       title: 'Service Packages',
       description: 'Pricing & package setup',
       icon: 'package-variant',
-      color: '#9C27B0',
+      color: Colors.materialPurple,
     },
     {
       step: 4,
       title: 'Availability',
       description: 'Working hours & schedule',
       icon: 'calendar-check',
-      color: '#FF9800',
+      color: Colors.materialOrange,
     },
   ];
 
@@ -107,25 +107,25 @@ const ProfileCompletionCongratulations = ({completionPercentage = 100}) => {
       icon: 'star-circle',
       title: 'Featured',
       description: 'Priority in search results',
-      color: '#FFD700',
+      color: Colors.gold,
     },
     {
       icon: 'trending-up',
       title: 'Higher Bookings',
       description: 'More jobs daily',
-      color: '#4CAF50',
+      color: Colors.materialGreen,
     },
     {
       icon: 'badge-account',
       title: 'Trusted',
       description: 'Verified provider',
-      color: '#2196F3',
+      color: Colors.materialBlue,
     },
     {
       icon: 'cash-multiple',
       title: 'Steady Income',
       description: 'Regular contracts',
-      color: '#9C27B0',
+      color: Colors.materialPurple,
     },
   ];
 
@@ -188,9 +188,9 @@ const ProfileCompletionCongratulations = ({completionPercentage = 100}) => {
             {completionPercentage === 100 && (
               <Animated.View
                 style={[styles.sparkleContainer, {opacity: fadeValue}]}>
-                <Ionicons name="sparkles" size={16} color="#FFD700" />
+                <Ionicons name="sparkles" size={16} color={Colors.gold} />
                 <Text style={styles.perfectText}>Ready to Start Cleaning!</Text>
-                <Ionicons name="sparkles" size={16} color="#FFD700" />
+                <Ionicons name="sparkles" size={16} color={Colors.gold} />
               </Animated.View>
             )}
           </View>
@@ -227,7 +227,7 @@ const ProfileCompletionCongratulations = ({completionPercentage = 100}) => {
                       <Text style={styles.stepTitle}>{step.title}</Text>
                       <Text style={styles.stepDesc}>{step.description}</Text>
                     </View>
-                    <Icon name="check-circle" size={16} color="#4CAF50" />
+                    <Icon name="check-circle" size={16} color={Colors.materialGreen} />
                   </View>
                 ))}
               </Animated.View>
@@ -337,7 +337,7 @@ const ProfileCompletionCongratulations = ({completionPercentage = 100}) => {
           {/* Celebration Footer */}
           {completionPercentage === 100 && (
             <View style={styles.celebrationFooter}>
-              <Icon name="party-popper" size={16} color="#FFD700" />
+              <Icon name="party-popper" size={16} color={Colors.gold} />
               <Text style={styles.celebrationText}>
                 You're now a verified cleaning service provider!
               </Text>
@@ -352,7 +352,7 @@ const ProfileCompletionCongratulations = ({completionPercentage = 100}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: Colors.white,
   },
   backgroundGradient: {
     position: 'absolute',
@@ -380,21 +380,21 @@ const styles = StyleSheet.create({
   title: {
     fontSize: RFPercentage(2.5),
     fontFamily: Fonts.semiBold,
-    color: 'white',
+    color: Colors.white,
     textAlign: 'center',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: Colors.whiteOverlay90,
     textAlign: 'center',
     marginBottom: 10,
   },
   sparkleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 215, 0, 0.2)',
+    backgroundColor: Colors.goldOverlay20,
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 15,
@@ -403,15 +403,15 @@ const styles = StyleSheet.create({
   perfectText: {
     fontSize: RFPercentage(1.3),
     fontFamily: Fonts.semiBold,
-    color: '#FFD700',
+    color: Colors.gold,
     marginHorizontal: 6,
   },
   progressSection: {
-    backgroundColor: 'white',
+    backgroundColor: Colors.white,
     padding: 15,
     borderRadius: 15,
     marginBottom: 15,
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 6,
@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
   progressTitle: {
     fontSize: RFPercentage(1.6),
     fontFamily: Fonts.semiBold,
-    color: '#1F2937',
+    color: Colors.gray800,
   },
   percentageContainer: {
     flexDirection: 'row',
@@ -440,7 +440,7 @@ const styles = StyleSheet.create({
   },
   progressContainer: {
     height: 6,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: Colors.lightGray,
     borderRadius: 3,
     overflow: 'hidden',
   },
@@ -450,16 +450,16 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   collapsibleContainer: {
-    backgroundColor: 'white',
+    backgroundColor: Colors.white,
     borderRadius: 15,
     padding: 15,
     marginBottom: 15,
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 6,
     borderWidth: 1,
-    borderColor: '#e2f0fbff',
+    borderColor: Colors.skyBlueBorder,
   },
   collapsibleHeader: {
     flexDirection: 'row',
@@ -470,7 +470,7 @@ const styles = StyleSheet.create({
   collapsibleTitle: {
     fontSize: RFPercentage(1.6),
     fontFamily: Fonts.semiBold,
-    color: '#3c5475ff',
+    color: Colors.navyText,
   },
   stepsGrid: {
     marginTop: 10,
@@ -478,7 +478,7 @@ const styles = StyleSheet.create({
   stepItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8F9FF',
+    backgroundColor: Colors.ghostWhite,
     padding: 12,
     borderRadius: 10,
     marginBottom: 8,
@@ -497,12 +497,12 @@ const styles = StyleSheet.create({
   stepTitle: {
     fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
-    color: '#374151',
+    color: Colors.gray700,
   },
   stepDesc: {
     fontSize: RFPercentage(1.3),
     fontFamily: Fonts.fontRegular,
-    color: '#6B7280',
+    color: Colors.placeholderColor,
     marginTop: 2,
   },
   benefitsGrid: {
@@ -513,7 +513,7 @@ const styles = StyleSheet.create({
   },
   benefitItem: {
     width: '48%',
-    backgroundColor: '#F8F9FF',
+    backgroundColor: Colors.ghostWhite,
     padding: 12,
     borderRadius: 10,
     marginBottom: 8,
@@ -530,14 +530,14 @@ const styles = StyleSheet.create({
   benefitTitle: {
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontMedium,
-    color: '#374151',
+    color: Colors.gray700,
     textAlign: 'center',
     marginBottom: 4,
   },
   benefitDesc: {
     fontSize: RFPercentage(1.2),
     fontFamily: Fonts.fontRegular,
-    color: '#6B7280',
+    color: Colors.placeholderColor,
     textAlign: 'center',
   },
   statsGrid: {
@@ -547,7 +547,7 @@ const styles = StyleSheet.create({
   },
   statItem: {
     flex: 1,
-    backgroundColor: '#F8F9FF',
+    backgroundColor: Colors.ghostWhite,
     padding: 12,
     borderRadius: 10,
     marginHorizontal: 4,
@@ -562,10 +562,10 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: RFPercentage(1.2),
     fontFamily: Fonts.fontRegular,
-    color: '#6B7280',
+    color: Colors.placeholderColor,
   },
   nextStepsSummary: {
-    backgroundColor: '#F0F9FF',
+    backgroundColor: Colors.skyBlueBg,
     padding: 15,
     borderRadius: 15,
     marginBottom: 15,
@@ -594,7 +594,7 @@ const styles = StyleSheet.create({
   pointText: {
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
-    color: '#374151',
+    color: Colors.gray700,
     flex: 1,
   },
   buttonContainer: {
@@ -619,14 +619,14 @@ const styles = StyleSheet.create({
   primaryButtonText: {
     fontSize: RFPercentage(1.7),
     fontFamily: Fonts.semiBold,
-    color: 'white',
+    color: Colors.white,
     marginLeft: 8,
   },
   secondaryButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'white',
+    backgroundColor: Colors.white,
     paddingVertical: 14,
     borderRadius: 100,
     borderWidth: 2,
@@ -642,7 +642,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255, 215, 0, 0.1)',
+    backgroundColor: Colors.goldOverlay10,
     padding: 10,
     borderRadius: 10,
     marginTop: 5,
@@ -650,7 +650,7 @@ const styles = StyleSheet.create({
   celebrationText: {
     fontSize: RFPercentage(1.3),
     fontFamily: Fonts.semiBold,
-    color: '#FFA000',
+    color: Colors.amberDark,
     marginLeft: 8,
   },
 });

@@ -94,7 +94,7 @@ const ResetPassword: React.FC = ({navigation}: any) => {
             style={styles.backButton}>
             <Feather
               name="arrow-left"
-              color="#FFFFFF"
+              color={Colors.white}
               size={RFPercentage(2.4)}
             />
           </TouchableOpacity>
@@ -191,7 +191,7 @@ const ResetPassword: React.FC = ({navigation}: any) => {
                         <MaterialCommunityIcons
                           name="check-circle"
                           size={RFPercentage(3)}
-                          color="#10B981"
+                          color={Colors.success}
                         />
                       </View>
                       <Text style={styles.successTitle}>
@@ -206,7 +206,7 @@ const ResetPassword: React.FC = ({navigation}: any) => {
                       <TouchableOpacity
                         onPress={() => navigation.navigate('SignIn')}
                         style={styles.backToLoginButton}>
-                        <Feather name="log-in" size={18} color="#FFFFFF" />
+                        <Feather name="log-in" size={18} color={Colors.white} />
                         <Text style={styles.backToLoginText}>
                           Back to Login
                         </Text>
@@ -296,10 +296,10 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(2.25),
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: Colors.whiteOverlay20,
   },
   headerTitle: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontSize: RFPercentage(1.8),
     fontFamily: Fonts.semiBold,
   },
@@ -320,12 +320,12 @@ const styles = StyleSheet.create({
     width: RFPercentage(10),
     height: RFPercentage(10),
     borderRadius: RFPercentage(5),
-    backgroundColor: 'rgba(161, 198, 241, 0.1)',
+    backgroundColor: Colors.blueTintBg,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: RFPercentage(2),
     borderWidth: 2,
-    borderColor: 'rgba(161, 198, 241, 0.2)',
+    borderColor: Colors.blueTintBorder,
   },
   illustrationTitle: {
     color: Colors.primaryText,
@@ -346,16 +346,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: RFPercentage(2),
   },
   inputCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: 16,
     padding: RFPercentage(2),
-    shadowColor: '#66738dff',
+    shadowColor: Colors.cardShadow,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 16,
     // elevation: 18,
     borderWidth: 1,
-    borderColor: '#e8edf8ff',
+    borderColor: Colors.cardBorder,
     marginBottom: RFPercentage(2),
   },
   inputHeader: {
@@ -371,9 +371,9 @@ const styles = StyleSheet.create({
   },
   inputField: {
     width: '100%',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: Colors.inputBg,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: Colors.inputBorder,
   },
   errorContainer: {
     flexDirection: 'row',
@@ -389,11 +389,11 @@ const styles = StyleSheet.create({
     lineHeight:RFPercentage(1.5)
   },
   successCard: {
-    backgroundColor: '#D1FAE5',
+    backgroundColor: Colors.successBg,
     borderRadius: 16,
     padding: RFPercentage(2.5),
     borderWidth: 1,
-    borderColor: '#A7F3D0',
+    borderColor: Colors.successBorder,
     marginBottom: RFPercentage(2),
     alignItems: 'center',
   },
@@ -401,14 +401,14 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(1.5),
   },
   successTitle: {
-    color: '#065F46',
+    color: Colors.successText,
     fontSize: RFPercentage(1.9),
     fontFamily: Fonts.fontMedium,
     marginBottom: RFPercentage(1),
     textAlign: 'center',
   },
   successText: {
-    color: '#065F46',
+    color: Colors.successText,
     fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
     textAlign: 'center',
@@ -418,14 +418,14 @@ const styles = StyleSheet.create({
   backToLoginButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: "#10B981",
+    backgroundColor: Colors.success,
     paddingHorizontal: RFPercentage(2),
     paddingVertical: RFPercentage(1),
     borderRadius: 12,
     gap: RFPercentage(0.8),
   },
   backToLoginText: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
   },
@@ -457,12 +457,12 @@ const styles = StyleSheet.create({
   securityNote: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: Colors.inputBg,
     marginHorizontal: RFPercentage(2),
     padding: RFPercentage(2),
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: Colors.inputBorder,
     gap: RFPercentage(1),
     marginBottom: RFPercentage(2),
   },

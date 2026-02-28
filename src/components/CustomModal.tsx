@@ -28,7 +28,7 @@ const CustomModal = (props: props) => {
         <View style={styles.iconContainer}>
           <AntDesign
             name="checkcircle"
-            color="#10B981"
+            color={Colors.success}
             size={RFPercentage(5)}
           />
         </View>
@@ -79,20 +79,20 @@ const styles = StyleSheet.create({
     width: width * 0.85,
     maxWidth: RFPercentage(42),
     borderRadius: RFPercentage(2.5),
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     alignSelf: 'center',
     alignItems: 'center',
     justifyContent: 'center',
     position: 'absolute',
     paddingHorizontal: RFPercentage(3),
     paddingVertical: RFPercentage(4),
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.15,
     shadowRadius: 12,
     // elevation: 8,
     borderWidth: 1,
-    borderColor: 'rgba(229, 231, 235, 0.8)',
+    borderColor: Colors.grayBorderOverlay80,
     borderBottomWidth:3
   },
   iconContainer: {
@@ -100,11 +100,11 @@ const styles = StyleSheet.create({
     width: RFPercentage(7),
     height: RFPercentage(7),
     borderRadius: RFPercentage(3.5),
-    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+    backgroundColor: Colors.successOverlay10,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: 'rgba(16, 185, 129, 0.2)',
+    borderColor: Colors.successOverlay20,
   },
   modalTitle: {
     color: Colors.primaryText,
@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
   cancelButton: {
     height: RFPercentage(5.3),
     borderRadius: RFPercentage(100),
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderWidth: 1,
     borderColor: Colors.gradient1,
     width: RFPercentage(16),

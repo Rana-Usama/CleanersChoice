@@ -276,8 +276,8 @@ const ServiceThree: React.FC = ({navigation}: any) => {
             progress={1}
             width={width - 80}
             height={6}
-            color="#FFFFFF"
-            unfilledColor="rgba(255,255,255,0.3)"
+            color={Colors.white}
+            unfilledColor={Colors.whiteOverlay30}
             borderWidth={0}
             borderRadius={10}
             style={styles.progressBar}
@@ -301,11 +301,11 @@ const ServiceThree: React.FC = ({navigation}: any) => {
           <Animated.View>
             <View style={styles.completionCard}>
               <LinearGradient
-                colors={['#F0FDF4', '#DCFCE7']}
+                colors={[Colors.greenBg50, Colors.greenBg100]}
                 style={styles.completionGradient}>
                 <View style={styles.completionContent}>
                   <View style={styles.completionIconContainer}>
-                    <Octicons name="package" size={24} color="#22C55E" />
+                    <Octicons name="package" size={24} color={Colors.green500} />
                   </View>
                   <View style={styles.completionTextContainer}>
                     <Text style={styles.completionTitle}>Package Progress</Text>
@@ -322,8 +322,8 @@ const ServiceThree: React.FC = ({navigation}: any) => {
                       progress={progress}
                       size={50}
                       thickness={4}
-                      color={progress === 1 ? '#22C55E' : Colors.gradient1}
-                      unfilledColor="#E5E7EB"
+                      color={progress === 1 ? Colors.green500 : Colors.gradient1}
+                      unfilledColor={Colors.gray200}
                       borderWidth={0}>
                       <Text style={styles.progressCircleText}>
                         {validPackagesCount}/3
@@ -339,7 +339,7 @@ const ServiceThree: React.FC = ({navigation}: any) => {
           <Animated.View>
             <View style={styles.instructionsCard}>
               <View style={styles.instructionsHeader}>
-                <FontAwesome name="lightbulb-o" size={20} color="#F59E0B" />
+                <FontAwesome name="lightbulb-o" size={20} color={Colors.amber500} />
                 <Text style={styles.instructionsTitle}>Pricing Tips</Text>
               </View>
               <View style={styles.instructionsContent}>
@@ -390,8 +390,8 @@ const ServiceThree: React.FC = ({navigation}: any) => {
                   <LinearGradient
                     colors={
                       pkg.details && pkg.price
-                        ? ['#EEF2FF', '#f7fbffff']
-                        : ['#FFFFFF', '#F9FAFB']
+                        ? [Colors.indigoBg50, Colors.blueBg75]
+                        : [Colors.white, Colors.gray50]
                     }
                     style={styles.packageHeaderGradient}>
                     <View style={styles.packageHeaderContent}>
@@ -420,7 +420,7 @@ const ServiceThree: React.FC = ({navigation}: any) => {
                             <AntDesign
                               name="delete"
                               size={16}
-                              color="#EF4444"
+                              color={Colors.red500}
                             />
                           </TouchableOpacity>
                         )}
@@ -431,7 +431,7 @@ const ServiceThree: React.FC = ({navigation}: any) => {
                               : 'keyboard-arrow-down'
                           }
                           size={24}
-                          color="#6B7280"
+                          color={Colors.placeholderColor}
                         />
                       </View>
                     </View>
@@ -443,7 +443,7 @@ const ServiceThree: React.FC = ({navigation}: any) => {
                     entering={ZoomIn.duration(300)}
                     style={styles.packageContent}>
                     <LinearGradient
-                      colors={['#FFFFFF', '#F8FAFF']}
+                      colors={[Colors.white, Colors.blueBg50]}
                       style={styles.packageContentGradient}>
                       {/* Package Details */}
                       <View style={styles.inputSection}>
@@ -469,7 +469,7 @@ const ServiceThree: React.FC = ({navigation}: any) => {
                             <MaterialIcons
                               name="error-outline"
                               size={16}
-                              color="#EF4444"
+                              color={Colors.red500}
                             />
                             <Text style={styles.errorText}>
                               {errors[pkg.id].details}
@@ -505,7 +505,7 @@ const ServiceThree: React.FC = ({navigation}: any) => {
                             <MaterialIcons
                               name="error-outline"
                               size={16}
-                              color="#EF4444"
+                              color={Colors.red500}
                             />
                             <Text style={styles.errorText}>
                               {errors[pkg.id].price}
@@ -521,7 +521,7 @@ const ServiceThree: React.FC = ({navigation}: any) => {
                             <AntDesign
                               name="checkcircle"
                               size={16}
-                              color="#22C55E"
+                              color={Colors.green500}
                             />
                             <Text style={styles.statusText}>Complete</Text>
                           </View>
@@ -530,7 +530,7 @@ const ServiceThree: React.FC = ({navigation}: any) => {
                             <MaterialIcons
                               name="info-outline"
                               size={16}
-                              color="#F59E0B"
+                              color={Colors.amber500}
                             />
                             <Text style={styles.statusText}>Incomplete</Text>
                           </View>
@@ -549,7 +549,7 @@ const ServiceThree: React.FC = ({navigation}: any) => {
                   onPress={addPackage}
                   style={styles.addPackageButton}>
                   <LinearGradient
-                    colors={['#FFFFFF', '#F8FAFF']}
+                    colors={[Colors.white, Colors.blueBg50]}
                     style={styles.addPackageGradient}>
                     <View style={styles.addPackageContent}>
                       <View style={styles.addIconContainer}>
@@ -570,7 +570,7 @@ const ServiceThree: React.FC = ({navigation}: any) => {
 
             {/* Package Limit Info */}
             <View style={styles.limitInfo}>
-              <MaterialIcons name="info-outline" size={16} color="#6B7280" />
+              <MaterialIcons name="info-outline" size={16} color={Colors.placeholderColor} />
               <Text style={styles.limitInfoText}>
                 You can add up to {MAX_PACKAGES} packages
               </Text>
@@ -590,12 +590,12 @@ const ServiceThree: React.FC = ({navigation}: any) => {
               <LinearGradient
                 colors={
                   validPackagesCount < 3
-                    ? ['#E5E7EB', '#D1D5DB']
+                    ? [Colors.gray200, Colors.gray300]
                     : [Colors.gradient1, Colors.gradient2]
                 }
                 style={styles.buttonGradient}>
                 {loading ? (
-                  <ActivityIndicator color="#FFFFFF" />
+                  <ActivityIndicator color={Colors.white} />
                 ) : (
                   <>
                     <Text style={styles.buttonText}>
@@ -611,7 +611,7 @@ const ServiceThree: React.FC = ({navigation}: any) => {
                       <AntDesign
                         name="check"
                         size={RFPercentage(2.2)}
-                        color="#FFFFFF"
+                        color={Colors.white}
                         style={styles.buttonIcon}
                       />
                     )}
@@ -690,14 +690,14 @@ export default ServiceThree;
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
   },
   gradientHeader: {
     paddingTop: Platform.OS === 'ios' ? 40 : 0,
     paddingBottom: 20,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 12,
@@ -706,7 +706,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: RFPercentage(2.2),
     fontFamily: Fonts.semiBold,
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   progressSection: {
     marginTop: 15,
@@ -721,13 +721,13 @@ const styles = StyleSheet.create({
   progressTitle: {
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.6),
-    color: '#FFFFFF',
+    color: Colors.white,
     opacity: 0.9,
   },
   progressPercent: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.8),
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   progressBar: {
     marginTop: 4,
@@ -745,7 +745,7 @@ const styles = StyleSheet.create({
   timeLineCard: {
     borderRadius: 20,
     padding: 15,
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.05,
     shadowRadius: 12,
@@ -756,7 +756,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     borderRadius: 16,
     overflow: 'hidden',
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.05,
     shadowRadius: 8,
@@ -774,7 +774,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+    backgroundColor: Colors.greenOverlay10,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -785,13 +785,13 @@ const styles = StyleSheet.create({
   completionTitle: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.8),
-    color: '#1F2937',
+    color: Colors.gray800,
     marginBottom: 4,
   },
   completionSubtitle: {
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.4),
-    color: '#6B7280',
+    color: Colors.placeholderColor,
   },
   progressCircle: {
     marginLeft: 16,
@@ -800,18 +800,18 @@ const styles = StyleSheet.create({
   progressCircleText: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.6),
-    color: '#22C55E',
+    color: Colors.green500,
     textAlign: 'center',
     marginTop: 2,
   },
   instructionsCard: {
     marginHorizontal: 20,
     marginTop: 16,
-    backgroundColor: '#FFFBEB',
+    backgroundColor: Colors.amberBg50,
     borderRadius: 16,
     padding: 20,
     borderWidth: 1,
-    borderColor: '#FDE68A',
+    borderColor: Colors.amberBorder,
   },
   instructionsHeader: {
     flexDirection: 'row',
@@ -821,7 +821,7 @@ const styles = StyleSheet.create({
   instructionsTitle: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.6),
-    color: '#92400E',
+    color: Colors.amberDarkText,
     marginLeft: 8,
   },
   instructionsContent: {
@@ -836,7 +836,7 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#F59E0B',
+    backgroundColor: Colors.amber500,
     marginTop: 8,
     marginRight: 12,
   },
@@ -844,7 +844,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.4),
-    color: '#92400E',
+    color: Colors.amberDarkText,
     lineHeight: 20,
   },
   packagesContainer: {
@@ -854,25 +854,25 @@ const styles = StyleSheet.create({
   packagesTitle: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(2),
-    color: '#1F2937',
+    color: Colors.gray800,
     marginBottom: 6,
   },
   packagesSubtitle: {
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.5),
-    color: '#6B7280',
+    color: Colors.placeholderColor,
     marginBottom: 20,
   },
   packageCardWrapper: {
     marginBottom: 16,
     borderRadius: 16,
     overflow: 'hidden',
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
     borderWidth: 1,
-    borderColor: '#e5ecfcff',
+    borderColor: Colors.lavenderBorder,
     // elevation: 3,
   },
   packageHeader: {
@@ -894,7 +894,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: 'rgba(149, 172, 183, 0.1)',
+    backgroundColor: Colors.grayBlueOverlay10,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -910,7 +910,7 @@ const styles = StyleSheet.create({
   packageTitle: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.6),
-    color: '#57667bff',
+    color: Colors.grayBlueDark,
   },
   packagePricePreview: {
     fontFamily: Fonts.semiBold,
@@ -921,7 +921,7 @@ const styles = StyleSheet.create({
   packagePlaceholder: {
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.4),
-    color: '#9CA3AF',
+    color: Colors.gray400,
     marginTop: 2,
   },
   packageActions: {
@@ -932,13 +932,13 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    backgroundColor: Colors.redOverlay10,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
   },
   packageContent: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
   },
   packageContentGradient: {
     padding: 20,
@@ -957,28 +957,28 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.5),
-    color: '#374151',
+    color: Colors.gray700,
   },
   charCount: {
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.3),
-    color: '#9CA3AF',
+    color: Colors.gray400,
   },
   minPriceHint: {
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.3),
-    color: '#22C55E',
+    color: Colors.green500,
   },
   descriptionField: {
-    backgroundColor: '#F9FAFB',
+    backgroundColor: Colors.gray50,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: Colors.gray200,
     borderRadius: 12,
     padding: 16,
     minHeight: 100,
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.4),
-    color: '#374151',
+    color: Colors.gray700,
   },
   priceInputContainer: {
     flexDirection: 'row',
@@ -987,28 +987,28 @@ const styles = StyleSheet.create({
   priceSymbol: {
     width: 50,
     height: 50,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: Colors.gray50,
     borderTopLeftRadius: 12,
     borderBottomLeftRadius: 12,
     borderWidth: 1,
     borderRightWidth: 0,
-    borderColor: '#E5E7EB',
+    borderColor: Colors.gray200,
     justifyContent: 'center',
     alignItems: 'center',
   },
   priceSymbolText: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.8),
-    color: '#374151',
+    color: Colors.gray700,
   },
   priceInput: {
     width: '60%',
     height: 50,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: Colors.gray50,
     borderTopLeftRadius: 0,
     borderBottomLeftRadius: 0,
     borderLeftWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: Colors.gray200,
     paddingLeft: 10,
   },
   errorContainer: {
@@ -1019,7 +1019,7 @@ const styles = StyleSheet.create({
   errorText: {
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.4),
-    color: '#EF4444',
+    color: Colors.red500,
     marginLeft: 6,
   },
   packageStatus: {
@@ -1028,7 +1028,7 @@ const styles = StyleSheet.create({
   statusComplete: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+    backgroundColor: Colors.greenOverlay10,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
@@ -1037,7 +1037,7 @@ const styles = StyleSheet.create({
   statusIncomplete: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+    backgroundColor: Colors.amberOverlay10,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
@@ -1046,7 +1046,7 @@ const styles = StyleSheet.create({
   statusText: {
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.4),
-    color: '#374151',
+    color: Colors.gray700,
     marginLeft: 6,
   },
   addPackageButton: {
@@ -1059,7 +1059,7 @@ const styles = StyleSheet.create({
   addPackageGradient: {
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: '#E5E7EB',
+    borderColor: Colors.gray200,
     borderStyle: 'dashed',
     height: 55,
     justifyContent: 'center',
@@ -1073,7 +1073,7 @@ const styles = StyleSheet.create({
     width: 26,
     height: 26,
     borderRadius: 12,
-    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+    backgroundColor: Colors.indigoOverlay10,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -1092,7 +1092,7 @@ const styles = StyleSheet.create({
   limitInfoText: {
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.4),
-    color: '#6B7280',
+    color: Colors.placeholderColor,
     marginLeft: 6,
   },
   buttonContainer: {
@@ -1126,7 +1126,7 @@ const styles = StyleSheet.create({
   buttonText: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.7),
-    color: '#FFFFFF',
+    color: Colors.white,
     marginRight: 10,
   },
   buttonIcon: {
@@ -1135,7 +1135,7 @@ const styles = StyleSheet.create({
   requirementsText: {
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.4),
-    color: '#6B7280',
+    color: Colors.placeholderColor,
     textAlign: 'center',
     marginTop: 12,
   },

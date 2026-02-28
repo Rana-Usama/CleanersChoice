@@ -78,7 +78,7 @@ const FilterModal = (props : any) => {
           <View style={{width: '100%', marginTop: RFPercentage(2)}}>
             <SearchField
               placeholder="Search Location"
-              customStyle={{borderColor: 'rgba(39, 38, 38, 0.29)'}}
+              customStyle={{borderColor: Colors.darkBorderOverlay29}}
               value={props.query}
               onChangeText={props.handleSearch}
             />
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
         width: '90%',
         height: RFPercentage(50),
         alignSelf: 'center',
-        backgroundColor: 'rgba(226, 238, 255, 0.9)',
+        backgroundColor: Colors.blueOverlayBg90,
         alignItems: 'center',
         borderRadius: RFPercentage(2.5),
         paddingHorizontal: RFPercentage(1.6),
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
       queryContainer: {
         top: RFPercentage(0.5),
         width: '100%',
-        backgroundColor: 'white',
+        backgroundColor: Colors.white,
         borderRadius: RFPercentage(1),
       },
       queryText: {
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
         width: '90%',
         height: '50%',
         alignSelf: 'center',
-        backgroundColor: 'rgba(226, 238, 255, 0.9)',
+        backgroundColor: Colors.blueOverlayBg90,
         alignItems: 'center',
         borderRadius: RFPercentage(2.5),
         top: RFPercentage(20),

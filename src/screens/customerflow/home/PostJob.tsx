@@ -288,13 +288,13 @@ const PostJob = ({route}: any) => {
               colors={
                 item <= step
                   ? [Colors.gradient1, Colors.gradient2]
-                  : ['#E5E7EB', '#E5E7EB']
+                  : [Colors.gray200, Colors.gray200]
               }
               style={styles.stepCircle}>
               <Text
                 style={[
                   styles.stepNumber,
-                  {color: item <= step ? '#FFFFFF' : Colors.secondaryText},
+                  {color: item <= step ? Colors.white : Colors.secondaryText},
                 ]}>
                 {item}
               </Text>
@@ -333,7 +333,7 @@ const PostJob = ({route}: any) => {
         colors={[Colors.gradient1, Colors.gradient2]}
         style={styles.header}>
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <Feather name="arrow-left" size={24} color="#FFFFFF" />
+          <Feather name="arrow-left" size={24} color={Colors.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>
           {jobId ? 'Edit Job' : 'Post New Job'}
@@ -684,10 +684,10 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: Colors.whiteOverlay20,
   },
   headerTitle: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontSize: RFPercentage(2),
     fontFamily: Fonts.semiBold,
   },
@@ -741,7 +741,7 @@ const styles = StyleSheet.create({
   progressInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F0F9FF',
+    backgroundColor: Colors.skyBlueBg,
     padding: RFPercentage(1.5),
     borderRadius: 12,
     marginBottom: RFPercentage(2),
@@ -757,17 +757,17 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(4),
   },
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: 16,
     padding: RFPercentage(2),
     marginBottom: RFPercentage(2),
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
     // elevation: 3,
     borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: Colors.lightGrayBg,
 
     borderBottomWidth: 2,
   },
@@ -784,9 +784,9 @@ const styles = StyleSheet.create({
   },
   inputField: {
     width: '100%',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: Colors.inputBg,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: Colors.inputBorder,
   },
   cardHint: {
     fontSize: RFPercentage(1.3),
@@ -795,10 +795,10 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(1),
   },
   descriptionContainer: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: Colors.inputBg,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: Colors.inputBorder,
     padding: RFPercentage(1.5),
   },
   descriptionInput: {
@@ -821,7 +821,7 @@ const styles = StyleSheet.create({
   selectedService: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F0F9FF',
+    backgroundColor: Colors.skyBlueBg,
     padding: RFPercentage(1),
     borderRadius: 8,
     marginTop: RFPercentage(1),
@@ -842,11 +842,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: Colors.inputBg,
     padding: RFPercentage(1.5),
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: Colors.inputBorder,
   },
   locationContent: {
     flexDirection: 'row',
@@ -892,11 +892,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: Colors.inputBg,
     padding: RFPercentage(1.5),
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: Colors.inputBorder,
   },
   dateContent: {
     flexDirection: 'row',
@@ -916,10 +916,10 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(1),
   },
   remarksContainer: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: Colors.inputBg,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: Colors.inputBorder,
     padding: RFPercentage(1.5),
   },
   remarksInput: {
@@ -939,12 +939,12 @@ const styles = StyleSheet.create({
     color: Colors.secondaryText,
   },
   summaryCard: {
-    backgroundColor: '#F0F9FF',
+    backgroundColor: Colors.skyBlueBg,
     borderRadius: 16,
     padding: RFPercentage(2),
     marginBottom: RFPercentage(2),
     borderWidth: 1,
-    borderColor: '#BAE6FD',
+    borderColor: Colors.skyBlue200,
   },
   summaryTitle: {
     fontSize: RFPercentage(1.8),
@@ -980,7 +980,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     padding: RFPercentage(1.4),
     borderRadius: 20,
     borderWidth: 1,

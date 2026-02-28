@@ -211,7 +211,7 @@ const Settings = ({navigation}: any) => {
           title="Settings"
           textStyle={styles.headerText}
           left={true}
-          arrowColor="#FFFFFF"
+          arrowColor={Colors.white}
           style={{backgroundColor: 'transparent'}}
           logo
           tintColor={'white'}
@@ -279,13 +279,13 @@ const Settings = ({navigation}: any) => {
               <ProfileField
                 text="Delete Account"
                 icon="account-remove"
-                color="#EF4444"
+                color={Colors.red500}
                 onPress={() => setModalVisible2(true)}
               />
               <ProfileField
                 text="Logout"
                 icon="earth-remove"
-                color="#EF4444"
+                color={Colors.red500}
                 onPress={() => setModalVisible(true)}
               />
             </View>
@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
     paddingBottom: 30,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 12,
@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: RFPercentage(2),
     fontFamily: Fonts.semiBold,
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   scrollContainer: {
     flexGrow: 1,
@@ -385,16 +385,16 @@ const styles = StyleSheet.create({
     paddingTop: RFPercentage(2),
   },
   sectionCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: 16,
     marginBottom: RFPercentage(2),
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
     // elevation: 3,
     borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: Colors.lightGrayBg,
     overflow: 'hidden',
     borderBottomWidth:3
   },
@@ -402,9 +402,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: RFPercentage(2),
-    backgroundColor: '#F9FAFB',
+    backgroundColor: Colors.gray50,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    borderBottomColor: Colors.lightGrayBg,
     gap: RFPercentage(1),
   },
   sectionTitle: {
@@ -417,12 +417,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   infoCard: {
-    backgroundColor: '#F9FAFB',
+    backgroundColor: Colors.gray50,
     borderRadius: 12,
     padding: RFPercentage(2),
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: Colors.gray200,
     marginTop: RFPercentage(1),
   },
   infoHeader: {

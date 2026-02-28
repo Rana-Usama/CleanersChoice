@@ -52,7 +52,7 @@ const SetAvailability: React.FC<SetAvailabilityProps> = ({
         isChecked={checked}
         onClick={() => onToggleCheckBox(day)}
         checkedCheckBoxColor={Colors.gradient1}
-        uncheckedCheckBoxColor={'rgba(164, 172, 188, 1)'}
+        uncheckedCheckBoxColor={Colors.checkboxGray}
       />
 
       <View style={styles.dayView}>
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(100),
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(164, 172, 188, 0.5)',
+    backgroundColor: Colors.checkboxGrayOverlay50,
   },
   dayText: {
     color: Colors.placeholderColor,
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(100),
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgb(231, 239, 245)',
+    backgroundColor: Colors.timePickerBg,
   },
   timeText: {
     color: Colors.placeholderColor,

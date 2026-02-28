@@ -176,7 +176,7 @@ const EditProfile = ({navigation}: any) => {
             style={styles.backButton}>
             <Feather
               name="arrow-left"
-              color="#FFFFFF"
+              color={Colors.white}
               size={RFPercentage(2.4)}
             />
           </TouchableOpacity>
@@ -220,7 +220,7 @@ const EditProfile = ({navigation}: any) => {
                       <MaterialCommunityIcons
                         name="camera"
                         size={RFPercentage(2.5)}
-                        color="#FFFFFF"
+                        color={Colors.white}
                       />
                     </View>
                   </View>
@@ -336,14 +336,14 @@ const EditProfile = ({navigation}: any) => {
             {/* Profile Tips */}
             <View style={styles.tipsCard}>
               <View style={styles.tipsHeader}>
-                <Feather name="info" size={20} color="#F59E0B" />
+                <Feather name="info" size={20} color={Colors.amber500} />
                 <Text style={styles.tipsTitle}>Profile Tips</Text>
               </View>
               <View style={styles.tipItem}>
                 <MaterialCommunityIcons
                   name="check-circle"
                   size={16}
-                  color="#10B981"
+                  color={Colors.success}
                 />
                 <Text style={styles.tipText}>
                   Use a clear, professional profile photo
@@ -353,7 +353,7 @@ const EditProfile = ({navigation}: any) => {
                 <MaterialCommunityIcons
                   name="check-circle"
                   size={16}
-                  color="#10B981"
+                  color={Colors.success}
                 />
                 <Text style={styles.tipText}>
                   Keep your contact information up to date
@@ -363,7 +363,7 @@ const EditProfile = ({navigation}: any) => {
                 <MaterialCommunityIcons
                   name="check-circle"
                   size={16}
-                  color="#10B981"
+                  color={Colors.success}
                 />
                 <Text style={styles.tipText}>
                   Changes may take a few moments to appear
@@ -403,10 +403,10 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(2.25),
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: Colors.whiteOverlay20,
   },
   headerTitle: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontSize: RFPercentage(1.8),
     fontFamily: Fonts.semiBold,
   },
@@ -430,7 +430,7 @@ const styles = StyleSheet.create({
     width: RFPercentage(16),
     height: RFPercentage(16),
     borderRadius: RFPercentage(8),
-    backgroundColor: '#F3F4F6',
+    backgroundColor: Colors.lightGrayBg,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 4,
@@ -454,7 +454,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: Colors.blackOverlay50,
     alignItems: 'center',
     paddingVertical: RFPercentage(0.5),
   },
@@ -477,13 +477,13 @@ const styles = StyleSheet.create({
   changePhotoButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F0F9FF',
+    backgroundColor: Colors.skyBlueBg,
     paddingHorizontal: RFPercentage(1.5),
     paddingVertical: RFPercentage(0.8),
     borderRadius: 20,
     gap: RFPercentage(0.5),
     borderWidth: 1,
-    borderColor: '#BAE6FD',
+    borderColor: Colors.skyBlue200,
   },
   changePhotoText: {
     color: Colors.gradient1,
@@ -491,18 +491,18 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.fontMedium,
   },
   formCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     marginHorizontal: RFPercentage(2),
     marginTop: RFPercentage(2),
     borderRadius: 16,
     padding: RFPercentage(2.5),
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
     // elevation: 3,
     borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: Colors.lightGrayBg,
     borderBottomWidth:3
   },
   formHeader: {
@@ -512,7 +512,7 @@ const styles = StyleSheet.create({
     gap: RFPercentage(1),
     paddingBottom: RFPercentage(1.5),
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    borderBottomColor: Colors.lightGrayBg,
   },
   formTitle: {
     color: Colors.primaryText,
@@ -535,9 +535,9 @@ const styles = StyleSheet.create({
   },
   inputField: {
     width: '100%',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: Colors.inputBg,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: Colors.inputBorder,
   },
   currentValue: {
     color: Colors.secondaryText,
@@ -549,11 +549,11 @@ const styles = StyleSheet.create({
   readOnlyField: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: Colors.inputBg,
     padding: RFPercentage(1.5),
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: Colors.inputBorder,
     gap: RFPercentage(1),
   },
   lockIcon: {
@@ -594,13 +594,13 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.fontMedium,
   },
   tipsCard: {
-    backgroundColor: '#fef5d0ff',
+    backgroundColor: Colors.creamYellow,
     marginHorizontal: RFPercentage(2),
     marginTop: RFPercentage(2),
     borderRadius: 16,
     padding: RFPercentage(2),
     borderWidth: 1,
-    borderColor: '#FDE68A',
+    borderColor: Colors.amberBorder,
     marginBottom: RFPercentage(2),
   },
   tipsHeader: {
@@ -610,7 +610,7 @@ const styles = StyleSheet.create({
     gap: RFPercentage(0.8),
   },
   tipsTitle: {
-    color: '#92400E',
+    color: Colors.amberDarkText,
     fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
   },
@@ -621,7 +621,7 @@ const styles = StyleSheet.create({
     gap: RFPercentage(0.8),
   },
   tipText: {
-    color: '#92400E',
+    color: Colors.amberDarkText,
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
     flex: 1,

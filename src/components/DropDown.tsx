@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     backgroundColor: 'transparent',
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(244, 244, 245, 1)',
+    borderBottomColor: Colors.zincBorder,
     paddingHorizontal: 15,
   },
   listItemText: {

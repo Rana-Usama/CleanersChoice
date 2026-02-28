@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginTop: Platform.OS === 'android' ? RFPercentage(0) : RFPercentage(0),
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(220, 220, 220, 1)',
+    borderBottomColor: Colors.grayBorder220,
     height:Platform.OS === 'ios' ? RFPercentage(8) : RFPercentage(13),
     paddingBottom: RFPercentage(1.8),
     backgroundColor: Colors.background,

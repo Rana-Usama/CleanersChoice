@@ -346,10 +346,10 @@ const Home = () => {
             title="Home"
             textStyle={styles.headerText}
             left={true}
-            arrowColor="#FFFFFF"
+            arrowColor={Colors.white}
             style={{backgroundColor: 'transparent'}}
             logo
-            tintColor={'white'}
+            tintColor={Colors.white}
           />
         </LinearGradient>
 
@@ -459,12 +459,12 @@ const Home = () => {
                     borderColor: Colors.inputFieldColor,
                     alignItems: 'center',
                     justifyContent: 'center',
-                    backgroundColor: rangeSelector ? Colors.gradient1 : 'white',
+                    backgroundColor: rangeSelector ? Colors.gradient1 : Colors.white,
                   }}>
                   <MaterialIcons
                     name="filter-list-alt"
                     size={RFPercentage(2.8)}
-                    color={rangeSelector ? 'white' : 'rgba(164, 173, 200, 1)'}
+                    color={rangeSelector ? Colors.white : Colors.coolGrayIcon}
                   />
                 </TouchableOpacity>
               </View>
@@ -498,8 +498,8 @@ const Home = () => {
                         size={25}
                         color={
                           categorySelection === item.id
-                            ? '#ffffffff'
-                            : 'rgba(164, 173, 200, 1)'
+                            ? Colors.white
+                            : Colors.coolGrayIcon
                         }
                       />
                     </View>
@@ -540,7 +540,7 @@ const Home = () => {
                         <MaterialIcons
                           name="admin-panel-settings"
                           size={16}
-                          color="#FFFFFF"
+                          color={Colors.white}
                         />
                         <Text style={styles.adminBadgeText}>Admin View</Text>
                       </View>
@@ -565,7 +565,7 @@ const Home = () => {
                       <MaterialIcons
                         name={adminViewAllServices ? 'public' : 'location-on'}
                         size={20}
-                        color="#4B5563"
+                        color={Colors.gray600}
                       />
                       <View style={styles.adminToggleTextContainer}>
                         <Text style={styles.adminToggleTitle}>
@@ -634,11 +634,11 @@ const Home = () => {
                 {noLocationForRegularUser && !adminViewingAllServices && (
                   <Text
                     style={{
-                      color: '#EF4444',
+                      color: Colors.red500,
                       fontFamily: Fonts.fontMedium,
                       fontSize: RFPercentage(1.3),
                       marginLeft: RFPercentage(1),
-                      backgroundColor: '#FEF2F2',
+                      backgroundColor: Colors.redBg50,
                       paddingHorizontal: 8,
                       paddingVertical: 2,
                       borderRadius: 10,
@@ -743,7 +743,7 @@ const Home = () => {
                                   <MaterialIcons
                                     name="price-change"
                                     size={RFPercentage(2.5)}
-                                    color="white"
+                                    color={Colors.white}
                                   />
                                   <Text style={styles.modalTitle}>
                                     Price Range
@@ -756,7 +756,7 @@ const Home = () => {
                                   <AntDesign
                                     name="close"
                                     size={RFPercentage(2.2)}
-                                    color="white"
+                                    color={Colors.white}
                                   />
                                 </TouchableOpacity>
                               </View>
@@ -816,7 +816,7 @@ const Home = () => {
                                   }}
                                   minimumTrackTintColor={Colors.gradient1}
                                   thumbTintColor={Colors.gradient1}
-                                  maximumTrackTintColor="#E8E8E8"
+                                  maximumTrackTintColor={Colors.sliderTrackGray}
                                 />
 
                                 {/* Price Markers */}
@@ -920,7 +920,7 @@ const styles = StyleSheet.create({
     paddingBottom: 25,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 12,
@@ -933,7 +933,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: RFPercentage(2),
     fontFamily: Fonts.semiBold,
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   headerContainer: {
     width: '90%',
@@ -973,7 +973,7 @@ const styles = StyleSheet.create({
     width: '90%',
     height: RFPercentage(52),
     alignSelf: 'center',
-    backgroundColor: 'rgba(226, 238, 255, 0.9)',
+    backgroundColor: Colors.blueOverlayBg90,
     alignItems: 'center',
     borderRadius: RFPercentage(2.5),
     paddingHorizontal: RFPercentage(1.6),
@@ -995,7 +995,7 @@ const styles = StyleSheet.create({
   queryContainer: {
     top: RFPercentage(0.5),
     width: '100%',
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    backgroundColor: Colors.whiteOverlay30,
     borderRadius: RFPercentage(2),
     height: RFPercentage(21),
     paddingVertical: RFPercentage(2),
@@ -1043,12 +1043,12 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(1),
 
     // Shadow for iOS
-    shadowColor: 'rgba(137, 148, 164, 1)',
+    shadowColor: Colors.shadowBlueGray,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     // elevation: 5,
-    borderColor: 'rgba(217, 228, 246, 1)',
+    borderColor: Colors.blueBorderLight,
   },
 
   categoryIcon: {
@@ -1076,9 +1076,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginTop: RFPercentage(1.5),
 
-    backgroundColor: '#fff',
+    backgroundColor: Colors.white,
     // Shadow (iOS) + Elevation (Android)
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -1150,7 +1150,7 @@ const styles = StyleSheet.create({
   },
   authModalContainer: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: Colors.blackOverlay50,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -1187,13 +1187,13 @@ const styles = StyleSheet.create({
   },
 
   priceBubble: {
-    backgroundColor: 'rgba(202, 217, 238, 0.44)',
+    backgroundColor: Colors.blueGrayOverlay44,
     paddingHorizontal: RFPercentage(3),
     paddingVertical: RFPercentage(1.5),
     borderRadius: RFPercentage(1),
     alignItems: 'center',
     // Shadow
-    shadowColor: 'rgba(130, 170, 193, 0.69)',
+    shadowColor: Colors.blueGrayShadow69,
     shadowOffset: {
       width: 0,
       height: 4,
@@ -1276,7 +1276,7 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    backgroundColor: Colors.blackOverlay40,
     justifyContent: 'center',
     alignItems: 'center',
     padding: RFPercentage(2),
@@ -1284,11 +1284,11 @@ const styles = StyleSheet.create({
   rangeModal: {
     width: '100%',
     maxWidth: 400,
-    backgroundColor: 'white',
+    backgroundColor: Colors.white,
     borderRadius: 20,
     overflow: 'hidden',
     elevation: 10,
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 10},
     shadowOpacity: 0.1,
     shadowRadius: 20,
@@ -1311,13 +1311,13 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: RFPercentage(2.2),
     fontFamily: Fonts.semiBold,
-    color: 'white',
+    color: Colors.white,
   },
   closeButton: {
     width: RFPercentage(3),
     height: RFPercentage(3),
     borderRadius: RFPercentage(1.5),
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: Colors.whiteOverlay20,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -1325,12 +1325,12 @@ const styles = StyleSheet.create({
     padding: RFPercentage(2),
   },
   priceDisplayCard: {
-    backgroundColor: '#F8F9FF',
+    backgroundColor: Colors.ghostWhite,
     borderRadius: 16,
     padding: RFPercentage(2),
     marginBottom: RFPercentage(2),
     borderWidth: 1,
-    borderColor: '#E8F0FE',
+    borderColor: Colors.lightBlueBorder,
   },
   priceDisplayHeader: {
     flexDirection: 'row',
@@ -1350,7 +1350,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   pricePillText: {
-    color: 'white',
+    color: Colors.white,
     fontSize: RFPercentage(1.6),
     fontFamily: Fonts.semiBold,
   },
@@ -1381,18 +1381,18 @@ const styles = StyleSheet.create({
   dashLine: {
     width: '100%',
     height: 1,
-    backgroundColor: '#E0E0E0',
+    backgroundColor: Colors.toggleGray,
     borderStyle: 'dashed',
     borderWidth: 1,
     borderRadius: 1,
   },
   sliderCard: {
-    backgroundColor: 'white',
+    backgroundColor: Colors.white,
     borderRadius: 16,
     padding: RFPercentage(2),
     marginBottom: RFPercentage(2),
     borderWidth: 1,
-    borderColor: '#F0F0F0',
+    borderColor: Colors.lightGray,
   },
   sliderTitle: {
     fontSize: RFPercentage(1.8),
@@ -1402,7 +1402,7 @@ const styles = StyleSheet.create({
   },
   sliderTrack: {
     height: 6,
-    backgroundColor: '#E8E8E8',
+    backgroundColor: Colors.sliderTrackGray,
     borderRadius: 3,
     marginBottom: RFPercentage(4),
     position: 'relative',
@@ -1421,7 +1421,7 @@ const styles = StyleSheet.create({
     width: RFPercentage(4),
     height: RFPercentage(4),
     borderRadius: RFPercentage(2),
-    backgroundColor: 'white',
+    backgroundColor: Colors.white,
     borderWidth: 3,
     borderColor: Colors.gradient1,
     justifyContent: 'center',
@@ -1447,7 +1447,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   thumbValueText: {
-    color: 'white',
+    color: Colors.white,
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.semiBold,
   },
@@ -1483,9 +1483,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: RFPercentage(1.3),
     paddingVertical: RFPercentage(0.8),
     borderRadius: 20,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: Colors.neutralGray,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: Colors.toggleGray,
   },
   quickButtonActive: {
     backgroundColor: Colors.gradient1,
@@ -1497,7 +1497,7 @@ const styles = StyleSheet.create({
     color: Colors.secondaryText,
   },
   quickButtonTextActive: {
-    color: 'white',
+    color: Colors.white,
   },
   actionButtonsContainer: {
     flexDirection: 'row',
@@ -1512,9 +1512,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: RFPercentage(1.5),
     borderRadius: 100,
-    backgroundColor: '#FFF5F5',
+    backgroundColor: Colors.lightRoseBg,
     borderWidth: 1,
-    borderColor: '#FFE0E0',
+    borderColor: Colors.lightRoseBorder,
     gap: RFPercentage(1),
     width: RFPercentage(18),
   },
@@ -1529,12 +1529,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: '5%',
   },
   adminToggleCard: {
-    backgroundColor: '#f5f8ffff',
+    backgroundColor: Colors.adminCardBg,
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#F3E8FF',
-    shadowColor: '#000',
+    borderColor: Colors.purple100,
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
@@ -1548,7 +1548,7 @@ const styles = StyleSheet.create({
   adminBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#10B981',
+    backgroundColor: Colors.success,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 16,
@@ -1557,24 +1557,24 @@ const styles = StyleSheet.create({
   adminBadgeText: {
     fontSize: RFPercentage(1.3),
     fontFamily: Fonts.fontMedium,
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   adminToggleSwitch: {
     width: 50,
     height: 24,
     borderRadius: 13,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: Colors.gray200,
     padding: 2,
     justifyContent: 'center',
   },
   adminToggleSwitchActive: {
-    backgroundColor: '#10B981',
+    backgroundColor: Colors.success,
   },
   adminToggleThumb: {
     width: 20,
     height: 20,
     borderRadius: 11,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     alignSelf: 'flex-start',
   },
   adminToggleThumbActive: {
@@ -1591,30 +1591,30 @@ const styles = StyleSheet.create({
   adminToggleTitle: {
     fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
-    color: '#1F2937',
+    color: Colors.gray800,
     marginBottom: 2,
   },
   adminToggleDescription: {
     fontSize: RFPercentage(1.3),
     fontFamily: Fonts.fontRegular,
-    color: '#6B7280',
+    color: Colors.placeholderColor,
   },
   adminStats: {
     marginTop: 12,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
+    borderTopColor: Colors.slate100,
   },
   adminStatText: {
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontMedium,
-    color: '#10B981',
+    color: Colors.success,
     marginBottom: 4,
   },
   adminStatSubText: {
     fontSize: RFPercentage(1.3),
     fontFamily: Fonts.fontRegular,
-    color: '#6B7280',
+    color: Colors.placeholderColor,
   },
   applyButton: {
     width: RFPercentage(18),

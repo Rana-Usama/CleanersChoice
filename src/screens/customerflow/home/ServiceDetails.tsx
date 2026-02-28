@@ -242,7 +242,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
                   style={styles.coverImage}
                 />
                 <LinearGradient
-                  colors={['transparent', 'rgba(0,0,0,0.1)', 'rgba(0,0,0,0.3)']}
+                  colors={['transparent', Colors.blackOverlay10, Colors.blackOverlay30]}
                   style={styles.imageGradient}
                 />
               </TouchableOpacity>
@@ -261,7 +261,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
               borderRadius: RFPercentage(100),
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: 'rgba(0,0,0,0.3)',
+              backgroundColor: Colors.blackOverlay30,
             }}>
             <Feather
               name="arrow-left"
@@ -316,7 +316,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
             <LinearGradient
               colors={[Colors.gradient1, Colors.gradient2]}
               style={styles.serviceBadge}>
-              <Ionicons name="sparkles" size={16} color="#FFFFFF" />
+              <Ionicons name="sparkles" size={16} color={Colors.white} />
               <Text style={styles.serviceBadgeText}>Premium Service</Text>
             </LinearGradient>
 
@@ -334,7 +334,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
                   <MaterialCommunityIcons
                     name="check-decagram"
                     size={12}
-                    color="#FFFFFF"
+                    color={Colors.white}
                   />
                 </View>
               </TouchableOpacity>
@@ -342,7 +342,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
               <View style={styles.serviceTitleContainer}>
                 <Text style={styles.serviceName}>{item.name}</Text>
                 {/* <View style={styles.ratingContainer}>
-                  <FontAwesome name="star" size={14} color="#FFD700" />
+                  <FontAwesome name="star" size={14} color={Colors.gold} />
                   <Text style={styles.ratingText}>5.0</Text>
                   <Text style={styles.reviewsText}>(24 reviews)</Text>
                 </View> */}
@@ -420,7 +420,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
               <Text style={styles.cardTitle}>Location</Text>
             </View>
             <View style={styles.locationContainer}>
-              <Ionicons name="pin" size={16} color="#EF4444" />
+              <Ionicons name="pin" size={16} color={Colors.red500} />
               <Text style={styles.locationText}>
                 {item?.location?.name || 'Location not specified'}
               </Text>
@@ -451,12 +451,12 @@ const ServiceDetails: React.FC = ({route}: any) => {
                 <Ionicons
                   name="calendar-clear-outline"
                   size={18}
-                  color="#FFFFFF"
+                  color={Colors.white}
                 />
                 <Text style={styles.availabilityButtonText}>
                   Check Availability Schedule
                 </Text>
-                <Feather name="chevron-right" size={18} color="#FFFFFF" />
+                <Feather name="chevron-right" size={18} color={Colors.white} />
               </LinearGradient>
             </TouchableOpacity>
           </View>
@@ -541,7 +541,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
                 <MaterialCommunityIcons
                   name="crown"
                   size={14}
-                  color="#FFFFFF"
+                  color={Colors.white}
                 />
                 <Text style={styles.bestValueText}>Best Value</Text>
               </View>
@@ -592,7 +592,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
                     <MaterialCommunityIcons
                       name="check-decagram"
                       size={14}
-                      color="#10B981"
+                      color={Colors.success}
                     />
                     <Text style={styles.statText}>Verified</Text>
                   </View>
@@ -600,7 +600,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
                     <MaterialCommunityIcons
                       name="star"
                       size={14}
-                      color="#FFD700"
+                      color={Colors.gold}
                     />
                     <Text style={styles.statText}>5.0 (24)</Text>
                   </View>
@@ -668,7 +668,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
               activeOpacity={0.8}
               onPress={() => setModalVisible(false)}
               style={styles.closeModalButton}>
-              <AntDesign name="close" size={24} color="#FFFFFF" />
+              <AntDesign name="close" size={24} color={Colors.white} />
             </TouchableOpacity>
             <Image
               source={item.image ? {uri: item.image} : IMAGES.defaultPic}
@@ -703,7 +703,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
         imageIndex={step}
         visible={visible}
         onRequestClose={() => setIsVisible(false)}
-        backgroundColor="rgba(0,0,0,0.9)"
+        backgroundColor={Colors.blackOverlay90}
         presentationStyle="fullScreen"
       />
 
@@ -724,7 +724,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
                 <TouchableOpacity
                   onPress={() => setPackageModalVisible(false)}
                   style={styles.packageModalClose}>
-                  <AntDesign name="close" size={24} color="#FFFFFF" />
+                  <AntDesign name="close" size={24} color={Colors.white} />
                 </TouchableOpacity>
               </LinearGradient>
 
@@ -833,7 +833,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: RFPercentage(2),
     fontFamily: Fonts.semiBold,
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   imageGalleryContainer: {
     height: RFPercentage(35),
@@ -860,13 +860,13 @@ const styles = StyleSheet.create({
     right: RFPercentage(2),
   },
   counterBadge: {
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: Colors.blackOverlay60,
     paddingHorizontal: RFPercentage(1),
     paddingVertical: RFPercentage(0.5),
     borderRadius: 12,
   },
   counterText: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontSize: RFPercentage(1.3),
     fontFamily: Fonts.fontMedium,
   },
@@ -889,7 +889,7 @@ const styles = StyleSheet.create({
     height: RFPercentage(1),
     borderRadius: RFPercentage(0.5),
     marginHorizontal: RFPercentage(0.3),
-    backgroundColor: 'rgba(255,255,255,0.5)',
+    backgroundColor: Colors.whiteOverlay50,
   },
   contentContainer: {
     paddingHorizontal: RFPercentage(2),
@@ -897,17 +897,17 @@ const styles = StyleSheet.create({
     paddingBottom: RFPercentage(15),
   },
   serviceHeaderCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: 20,
     padding: RFPercentage(2),
     marginBottom: RFPercentage(2),
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 12,
     // elevation: 5,
      borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: Colors.lightGrayBg,
     borderBottomWidth: 2,
   },
   serviceBadge: {
@@ -921,7 +921,7 @@ const styles = StyleSheet.create({
     gap: RFPercentage(0.5),
   },
   serviceBadgeText: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontSize: RFPercentage(1.3),
     fontFamily: Fonts.fontMedium,
   },
@@ -952,7 +952,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderColor: Colors.white,
   },
   serviceTitleContainer: {
     flex: 1,
@@ -984,7 +984,7 @@ const styles = StyleSheet.create({
     width: RFPercentage(4.5),
     height: RFPercentage(4.5),
     borderRadius: RFPercentage(2.25),
-    backgroundColor: '#F3F4F6',
+    backgroundColor: Colors.lightGrayBg,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1003,17 +1003,17 @@ const styles = StyleSheet.create({
     color: Colors.secondaryText,
   },
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: 20,
     padding: RFPercentage(2),
     marginBottom: RFPercentage(2),
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
     // elevation: 3,
      borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: Colors.lightGrayBg,
     borderBottomWidth: 2,
   },
   cardHeader: {
@@ -1042,11 +1042,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: RFPercentage(0.8),
-    backgroundColor: '#F8FAFC',
+    backgroundColor: Colors.inputBg,
     padding: RFPercentage(1.2),
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: Colors.inputBorder,
   },
   locationText: {
     fontSize: RFPercentage(1.5),
@@ -1066,7 +1066,7 @@ const styles = StyleSheet.create({
     gap: RFPercentage(1),
   },
   availabilityButtonText: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
   },
@@ -1078,13 +1078,13 @@ const styles = StyleSheet.create({
   serviceChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: Colors.inputBg,
     paddingHorizontal: RFPercentage(1.2),
     paddingVertical: RFPercentage(0.8),
     borderRadius: 20,
     gap: RFPercentage(0.5),
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: Colors.inputBorder,
   },
   serviceChipText: {
     fontSize: RFPercentage(1.4),
@@ -1122,14 +1122,14 @@ const styles = StyleSheet.create({
   bestValueBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F59E0B',
+    backgroundColor: Colors.amber500,
     paddingHorizontal: RFPercentage(1),
     paddingVertical: RFPercentage(0.5),
     borderRadius: 12,
     gap: RFPercentage(0.3),
   },
   bestValueText: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontSize: RFPercentage(1.2),
     fontFamily: Fonts.fontMedium,
   },
@@ -1175,21 +1175,21 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: RFPercentage(2),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: -4},
     shadowOpacity: 0.1,
     shadowRadius: 8,
     // elevation: 10,
     paddingBottom: Platform.OS === 'ios' ? RFPercentage(4) : RFPercentage(2),
     borderTopWidth:1,
-    borderTopColor:"#eaeaeaff"
+    borderTopColor: Colors.lightGray200
 
   },
   priceContainer: {
@@ -1215,7 +1215,7 @@ const styles = StyleSheet.create({
   },
   fullScreenModal: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.9)',
+    backgroundColor: Colors.blackOverlay90,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1227,7 +1227,7 @@ const styles = StyleSheet.create({
     width: RFPercentage(4),
     height: RFPercentage(4),
     borderRadius: RFPercentage(2),
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: Colors.whiteOverlay20,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1249,7 +1249,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   packageModalContent: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: '80%',
@@ -1263,7 +1263,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 24,
   },
   packageModalTitle: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontSize: RFPercentage(1.8),
     fontFamily: Fonts.semiBold,
   },
@@ -1341,7 +1341,7 @@ const styles = StyleSheet.create({
   packageModalFooter: {
     padding: RFPercentage(2),
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
+    borderTopColor: Colors.gray200,
   },
   selectPackageButton: {
     marginBottom: RFPercentage(1),

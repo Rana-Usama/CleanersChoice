@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
     height: RFPercentage(1),
     borderRadius: RFPercentage(2),
     marginHorizontal: 3,
-    backgroundColor: 'rgba(209, 213, 219, 1)',
+    backgroundColor: Colors.gray300,
   },
   buttonWrapper: {
     width: '100%',

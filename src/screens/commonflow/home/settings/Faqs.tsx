@@ -149,7 +149,7 @@ const FAQS: React.FC = ({navigation}: any) => {
             style={styles.backButton}>
             <Feather
               name="arrow-left"
-              color="#FFFFFF"
+              color={Colors.white}
               size={RFPercentage(2.4)}
             />
           </TouchableOpacity>
@@ -184,7 +184,7 @@ const FAQS: React.FC = ({navigation}: any) => {
             <MaterialCommunityIcons
               name="account-group"
               size={RFPercentage(1.6)}
-              color="#FFFFFF"
+              color={Colors.white}
             />
             <Text style={styles.categoryText}>For Everyone</Text>
           </View>
@@ -192,7 +192,7 @@ const FAQS: React.FC = ({navigation}: any) => {
             <MaterialCommunityIcons
               name="account"
               size={RFPercentage(1.6)}
-              color="#FFFFFF"
+              color={Colors.white}
             />
             <Text style={styles.categoryText}>For Customers</Text>
           </View>
@@ -200,7 +200,7 @@ const FAQS: React.FC = ({navigation}: any) => {
             <MaterialCommunityIcons
               name="account-hard-hat"
               size={RFPercentage(1.6)}
-              color="#FFFFFF"
+              color={Colors.white}
             />
             <Text style={styles.categoryText}>For Cleaners</Text>
           </View>
@@ -296,10 +296,10 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(2.25),
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: Colors.whiteOverlay20,
   },
   headerTitle: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontSize: RFPercentage(1.8),
     fontFamily: Fonts.semiBold,
     textAlign: 'center',
@@ -311,30 +311,30 @@ const styles = StyleSheet.create({
     paddingBottom: RFPercentage(20),
   },
   introCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     marginHorizontal: RFPercentage(2),
     marginTop: RFPercentage(2),
     borderRadius: 16,
     padding: RFPercentage(2.5),
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
     // elevation: 3,
     borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: Colors.lightGrayBg,
     alignItems: 'center',
   },
   introIcon: {
     width: RFPercentage(6),
     height: RFPercentage(6),
     borderRadius: RFPercentage(3),
-    backgroundColor: 'rgba(161, 198, 241, 0.1)',
+    backgroundColor: Colors.blueTintBg,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: RFPercentage(1.5),
     borderWidth: 2,
-    borderColor: 'rgba(161, 198, 241, 0.2)',
+    borderColor: Colors.blueTintBorder,
   },
   introTitle: {
     color: Colors.primaryText,
@@ -367,7 +367,7 @@ const styles = StyleSheet.create({
     gap: RFPercentage(0.5),
   },
   categoryText: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontSize: RFPercentage(1.2),
     fontFamily: Fonts.fontMedium,
   },
@@ -379,19 +379,19 @@ const styles = StyleSheet.create({
     gap: RFPercentage(1.2),
   },
   faqCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: 12,
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.05,
     shadowRadius: 4,
     // elevation: 2,
     borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: Colors.lightGrayBg,
     overflow: 'hidden',
   },
   faqCardExpanded: {
-    borderColor: '#d9e3f6ff',
+    borderColor: Colors.lavenderSoft,
     shadowColor: Colors.gradient1,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
@@ -407,7 +407,7 @@ const styles = StyleSheet.create({
     width: RFPercentage(3.5),
     height: RFPercentage(3.5),
     borderRadius: RFPercentage(1),
-    backgroundColor: 'rgba(161, 198, 241, 0.1)',
+    backgroundColor: Colors.blueTintBg,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -424,7 +424,7 @@ const styles = StyleSheet.create({
     paddingBottom: RFPercentage(2),
     paddingTop: RFPercentage(0.5),
     borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
+    borderTopColor: Colors.lightGrayBg,
     gap: RFPercentage(1.5),
   },
   answerIndicator: {
@@ -440,13 +440,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   helpCard: {
-    backgroundColor: '#F0F9FF',
+    backgroundColor: Colors.skyBlueBg,
     marginHorizontal: RFPercentage(2),
     marginTop: RFPercentage(2),
     borderRadius: 16,
     padding: RFPercentage(2.5),
     borderWidth: 1,
-    borderColor: '#BAE6FD',
+    borderColor: Colors.skyBlue200,
     alignItems: 'center',
     marginBottom: RFPercentage(2),
   },
@@ -470,11 +470,11 @@ const styles = StyleSheet.create({
   contactInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     padding: RFPercentage(1.2),
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: Colors.inputBorder,
     gap: RFPercentage(0.8),
   },
   contactText: {

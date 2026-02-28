@@ -52,25 +52,25 @@ const styles = StyleSheet.create({
     borderTopColor: Colors.inputFieldColor,
   },
   success: {
-    backgroundColor: 'white',
+    backgroundColor: Colors.white,
     borderLeftColor: Colors.gradient1,
   },
   error: {
-    backgroundColor: 'white',
-    borderLeftColor: '#dc3545',
+    backgroundColor: Colors.white,
+    borderLeftColor: Colors.toastError,
   },
   info: {
-    backgroundColor: 'white',
-    borderLeftColor: '#17a2b8',
+    backgroundColor: Colors.white,
+    borderLeftColor: Colors.toastInfo,
   },
   text1: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.8),
-    color: '#000',
+    color: Colors.black,
   },
   text2: {
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.6),
-    color: '#000',
+    color: Colors.black,
   },
 });

@@ -281,7 +281,7 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
                 style={styles.imagePreview}
               />
               <LinearGradient
-                colors={['transparent', 'rgba(0,0,0,0.7)']}
+                colors={['transparent', Colors.blackOverlay70]}
                 style={styles.imageOverlay}>
                 <TouchableOpacity
                   onPress={() => removeImage(index)}
@@ -289,13 +289,13 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
                   <MaterialIcons
                     name="delete-outline"
                     size={20}
-                    color="#FFFFFF"
+                    color={Colors.white}
                   />
                 </TouchableOpacity>
               </LinearGradient>
               {selectedImages[index]?.local && (
                 <View style={styles.uploadStatus}>
-                  <ActivityIndicator size="small" color="#FFFFFF" />
+                  <ActivityIndicator size="small" color={Colors.white} />
                 </View>
               )}
             </>
@@ -334,7 +334,7 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
           textStyle={styles.headerText}
           left={true}
           style={{backgroundColor: 'transparent'}}
-          arrowColor={'white'}
+          arrowColor={Colors.white}
         />
 
         {/* Progress Section */}
@@ -350,8 +350,8 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
             progress={(uploadedCount / 6) * 100}
             width={width - 80}
             height={6}
-            color="#FFFFFF"
-            unfilledColor="rgba(255,255,255,0.3)"
+            color={Colors.white}
+            unfilledColor={Colors.whiteOverlay30}
             borderWidth={0}
             borderRadius={10}
             style={styles.progressBar}
@@ -365,7 +365,7 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
         {/* Gallery Stats */}
         <Animated.View style={styles.statsCard}>
           <LinearGradient
-            colors={['#F0F7FF', '#E6F0FF']}
+            colors={[Colors.blueBg150, Colors.blueBg250]}
             style={styles.statsGradient}>
             <View style={styles.statsContent}>
               <View style={styles.statItem}>
@@ -460,7 +460,7 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
           <Animated.View>
             <View style={styles.tipsCard}>
               <View style={styles.tipsHeader}>
-                <MaterialIcons name="lightbulb" size={20} color="#F59E0B" />
+                <MaterialIcons name="lightbulb" size={20} color={Colors.amber500} />
                 <Text style={styles.tipsTitle}>Pro Tip</Text>
               </View>
               <Text style={styles.tipsText}>
@@ -487,12 +487,12 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
             <LinearGradient
               colors={
                 uploadedCount === 0
-                  ? ['#E5E7EB', '#D1D5DB']
+                  ? [Colors.gray200, Colors.gray300]
                   : [Colors.gradient1, Colors.gradient2]
               }
               style={styles.buttonGradient}>
               {loading ? (
-                <ActivityIndicator color="#FFFFFF" />
+                <ActivityIndicator color={Colors.white} />
               ) : (
                 <>
                   <Text style={styles.buttonText}>
@@ -503,7 +503,7 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
                   <AntDesign
                     name="arrowright"
                     size={RFPercentage(2)}
-                    color="#FFFFFF"
+                    color={Colors.white}
                     style={styles.buttonIcon}
                   />
                 </>
@@ -529,14 +529,14 @@ export default ServiceTwo;
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
   },
   gradientHeader: {
     paddingTop: Platform.OS === 'ios' ? 40 : 0,
     paddingBottom: 20,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 12,
@@ -545,7 +545,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: RFPercentage(2.2),
     fontFamily: Fonts.semiBold,
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   progressSection: {
     marginTop: 15,
@@ -560,13 +560,13 @@ const styles = StyleSheet.create({
   progressTitle: {
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.6),
-    color: '#FFFFFF',
+    color: Colors.white,
     opacity: 0.9,
   },
   progressPercent: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.8),
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   progressBar: {
     marginTop: 4,
@@ -584,7 +584,7 @@ const styles = StyleSheet.create({
   timeLineCard: {
     borderRadius: 20,
     padding: 15,
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.05,
     shadowRadius: 12,
@@ -595,7 +595,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     borderRadius: 16,
     overflow: 'hidden',
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.05,
     shadowRadius: 8,
@@ -623,20 +623,20 @@ const styles = StyleSheet.create({
   statLabel: {
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.4),
-    color: '#6B7280',
+    color: Colors.placeholderColor,
   },
   statDivider: {
     width: 1,
     height: 40,
-    backgroundColor: 'rgba(99, 102, 241, 0.2)',
+    backgroundColor: Colors.indigoOverlay20,
   },
   instructionsCard: {
     marginHorizontal: 20,
     marginTop: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: 16,
     padding: 20,
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
@@ -656,7 +656,7 @@ const styles = StyleSheet.create({
   instructionsTitle: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.8),
-    color: '#1F2937',
+    color: Colors.gray800,
     marginLeft: RFPercentage(1),
   },
   instructionsList: {
@@ -679,7 +679,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.5),
-    color: '#6B7280',
+    color: Colors.placeholderColor,
     lineHeight: 22,
   },
   galleryContainer: {
@@ -689,13 +689,13 @@ const styles = StyleSheet.create({
   galleryTitle: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(2),
-    color: '#1F2937',
+    color: Colors.gray800,
     marginBottom: 6,
   },
   gallerySubtitle: {
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.5),
-    color: '#6B7280',
+    color: Colors.placeholderColor,
     marginBottom: 20,
   },
   loadingContainer: {
@@ -707,7 +707,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.5),
-    color: '#6B7280',
+    color: Colors.placeholderColor,
   },
   galleryGrid: {
     paddingBottom: 10,
@@ -720,7 +720,7 @@ const styles = StyleSheet.create({
     width: (width - 60) / 2,
     borderRadius: 16,
     overflow: 'hidden',
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -729,7 +729,7 @@ const styles = StyleSheet.create({
   imageTouchable: {
     width: '100%',
     height: 180,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: Colors.gray50,
     borderRadius: 16,
     overflow: 'hidden',
   },
@@ -737,13 +737,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F3F4F6',
+    backgroundColor: Colors.lightGrayBg,
   },
   uploadingText: {
     marginTop: 8,
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.4),
-    color: '#6B7280',
+    color: Colors.placeholderColor,
   },
   imagePreview: {
     width: '100%',
@@ -763,7 +763,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: 'rgba(239, 68, 68, 0.9)',
+    backgroundColor: Colors.redOverlay90,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -771,7 +771,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 10,
     right: 10,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: Colors.blackOverlay50,
     width: 30,
     height: 30,
     borderRadius: 15,
@@ -782,9 +782,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F9FAFB',
+    backgroundColor: Colors.gray50,
     borderWidth: 2,
-    borderColor: '#E5E7EB',
+    borderColor: Colors.gray200,
     borderStyle: 'dashed',
     borderRadius: 16,
   },
@@ -792,7 +792,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+    backgroundColor: Colors.indigoOverlay10,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
@@ -800,22 +800,22 @@ const styles = StyleSheet.create({
   addImageText: {
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.5),
-    color: '#374151',
+    color: Colors.gray700,
     marginBottom: 4,
   },
   addImageSubtext: {
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.3),
-    color: '#9CA3AF',
+    color: Colors.gray400,
   },
   tipsCard: {
     marginHorizontal: 20,
     marginTop: 16,
-    backgroundColor: '#FFFBEB',
+    backgroundColor: Colors.amberBg50,
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#FDE68A',
+    borderColor: Colors.amberBorder,
   },
   tipsHeader: {
     flexDirection: 'row',
@@ -825,13 +825,13 @@ const styles = StyleSheet.create({
   tipsTitle: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.6),
-    color: '#92400E',
+    color: Colors.amberDarkText,
     marginLeft: 8,
   },
   tipsText: {
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.4),
-    color: '#92400E',
+    color: Colors.amberDarkText,
     lineHeight: 20,
   },
   buttonContainer: {
@@ -865,7 +865,7 @@ const styles = StyleSheet.create({
   buttonText: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.7),
-    color: '#FFFFFF',
+    color: Colors.white,
     marginRight: 10,
   },
   buttonIcon: {
@@ -874,7 +874,7 @@ const styles = StyleSheet.create({
   requirementsText: {
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.4),
-    color: '#6B7280',
+    color: Colors.placeholderColor,
     textAlign: 'center',
     marginTop: 12,
   },

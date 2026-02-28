@@ -399,13 +399,13 @@ const SignUp: React.FC = ({navigation}: any) => {
                     }}>
                     <Ionicons
                       name="chevron-back-circle-sharp"
-                      color={'rgba(178, 204, 228, 1)'}
+                      color={Colors.iconMuted}
                       size={RFPercentage(2.4)}
                     />
                     <Text
                       style={[
                         styles.signIn,
-                        {color: 'rgba(134, 154, 173, 1)'},
+                        {color: Colors.textMuted},
                       ]}>
                       Back
                     </Text>
@@ -483,9 +483,9 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(10),
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(243, 244, 246, 1)',
+    backgroundColor: Colors.lightGrayBg,
     borderWidth: 1.8,
-    borderColor: 'rgba(64, 123, 255, 1)',
+    borderColor: Colors.gradient1,
   },
   imgStyle: {
     width: RFPercentage(12.5),

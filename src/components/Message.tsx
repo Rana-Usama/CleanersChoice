@@ -43,7 +43,7 @@ const Message = (props: props) => {
           <Text
             style={[
               styles.messageText,
-              {color: props.unread ? Colors.gradient1 : 'rgba(75, 85, 99, 1)'},
+              {color: props.unread ? Colors.gradient1 : Colors.gray600},
             ]}>
             {props.message
               ? props.message
@@ -61,7 +61,7 @@ const Message = (props: props) => {
         <Text
           style={[
             styles.timeText,
-            {color: props.unread ? Colors.gradient1 : 'rgba(75, 85, 99, 1)'},
+            {color: props.unread ? Colors.gradient1 : Colors.gray600},
           ]}>
           {props.time}
         </Text>
@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(100),
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(229, 231, 235, 0.3)',
+    backgroundColor: Colors.grayBorderOverlay30,
   },
   messageContainer: {
     flexDirection: 'row',
@@ -111,12 +111,12 @@ const styles = StyleSheet.create({
     left: RFPercentage(1),
   },
   nameText: {
-    color: 'rgba(55, 65, 81, 1)',
+    color: Colors.gray700,
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.8),
   },
   messageText: {
-    color: 'rgba(75, 85, 99, 1)',
+    color: Colors.gray600,
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.6),
     marginTop: RFPercentage(0.3),
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     width: RFPercentage(0.9),
     height: RFPercentage(0.9),
     borderRadius: RFPercentage(100),
-    backgroundColor: 'blue',
+    backgroundColor: Colors.pureBlue,
     position: 'absolute',
     right: 0,
     top: RFPercentage(2.7),

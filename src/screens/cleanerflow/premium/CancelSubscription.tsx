@@ -10,6 +10,7 @@ import {
   StatusBar,
   ScrollView,
   Linking,
+  Platform,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -149,7 +150,7 @@ const CancelSubscription = () => {
                 <MaterialCommunityIcons
                   name="alert-circle"
                   size={RFPercentage(1.5)}
-                  color="#EF4444"
+                  color={Colors.red500}
                 />
               </View>
               <Text style={styles.titleText}>Cancel Premium Subscription</Text>
@@ -165,7 +166,7 @@ const CancelSubscription = () => {
               <MaterialCommunityIcons
                 name="crown"
                 size={RFPercentage(1.6)}
-                color="#FFFFFF"
+                color={Colors.white}
               />
               <Text style={styles.currentBadgeText}>CURRENT PLAN</Text>
             </View>
@@ -194,7 +195,7 @@ const CancelSubscription = () => {
                   <MaterialCommunityIcons
                     name="check-circle"
                     size={RFPercentage(2.2)}
-                    color="#10B981"
+                    color={Colors.success}
                     style={styles.featureIcon}
                   />
                   <Text style={styles.featureText}>{item.name}</Text>
@@ -208,7 +209,7 @@ const CancelSubscription = () => {
             <MaterialCommunityIcons
               name="information"
               size={RFPercentage(2.5)}
-              color="#F59E0B"
+              color={Colors.amber500}
               style={styles.warningIcon}
             />
             <View style={styles.warningContent}>
@@ -270,7 +271,7 @@ const CancelSubscription = () => {
                 <MaterialCommunityIcons
                   name="alert-circle-outline"
                   size={RFPercentage(4)}
-                  color="#EF4444"
+                  color={Colors.red500}
                 />
                 <Text style={styles.modalTitle}>Confirm Cancellation</Text>
               </View>
@@ -285,7 +286,7 @@ const CancelSubscription = () => {
                   <MaterialCommunityIcons
                     name="close-circle"
                     size={RFPercentage(2)}
-                    color="#EF4444"
+                    color={Colors.red500}
                   />
                   <Text style={styles.warningItemText}>
                     Access to the Job Portal
@@ -296,7 +297,7 @@ const CancelSubscription = () => {
                   <MaterialCommunityIcons
                     name="close-circle"
                     size={RFPercentage(2)}
-                    color="#EF4444"
+                    color={Colors.red500}
                   />
                   <Text style={styles.warningItemText}>
                     Chat with customers feature
@@ -307,7 +308,7 @@ const CancelSubscription = () => {
                   <MaterialCommunityIcons
                     name="close-circle"
                     size={RFPercentage(2)}
-                    color="#EF4444"
+                    color={Colors.red500}
                   />
                   <Text style={styles.warningItemText}>
                     All premium features until reactivation
@@ -330,7 +331,7 @@ const CancelSubscription = () => {
                   onPress={() => setModalVisible(false)}
                 />
                 <GradientButton
-                  title="Cancel"
+                  title={Platform.OS === 'ios' ? 'Manage Plan' : 'Cancel Subscription'}
                   onPress={() => {
                     setIsLoading2(true);
                     setTimeout(() => {
@@ -387,11 +388,11 @@ const styles = StyleSheet.create({
     width: RFPercentage(2.5),
     height: RFPercentage(2.5),
     borderRadius: RFPercentage(4),
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    backgroundColor: Colors.redOverlay10,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: 'rgba(239, 68, 68, 0.2)',
+    borderColor: Colors.redOverlay20,
     right:RFPercentage(1)
   },
   titleText: {
@@ -411,17 +412,17 @@ const styles = StyleSheet.create({
     marginTop:RFPercentage(1)
   },
   planCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: RFPercentage(2),
     padding: RFPercentage(2.5),
     marginBottom: RFPercentage(2),
-    shadowColor: 'rgba(0, 0, 0, 0.1)',
+    shadowColor: Colors.blackOverlay10,
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.2,
     shadowRadius: 12,
     // elevation: 8,
     borderWidth: 1,
-    borderColor: 'rgba(229, 231, 235, 0.8)',
+    borderColor: Colors.grayBorderOverlay80,
     position: 'relative',
   },
   currentBadge: {
@@ -435,14 +436,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: RFPercentage(0.5),
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 4,
     // elevation: 3,
   },
   currentBadgeText: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontSize: RFPercentage(1.1),
     fontFamily: Fonts.fontMedium,
   },
@@ -475,17 +476,17 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(0.5),
   },
   featuresCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: RFPercentage(2),
     padding: RFPercentage(2.5),
     marginBottom: RFPercentage(2),
-    shadowColor: 'rgba(0, 0, 0, 0.1)',
+    shadowColor: Colors.blackOverlay10,
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 8,
     // elevation: 4,
     borderWidth: 1,
-    borderColor: 'rgba(229, 231, 235, 0.8)',
+    borderColor: Colors.grayBorderOverlay80,
   },
   featuresTitle: {
     color: Colors.primaryText,
@@ -494,14 +495,14 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(1.5),
     paddingBottom: RFPercentage(1),
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(229, 231, 235, 0.8)',
+    borderBottomColor: Colors.grayBorderOverlay80,
   },
   featureItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: RFPercentage(1),
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(244, 244, 245, 1)',
+    borderBottomColor: Colors.zincBorder,
   },
   featureIcon: {
     marginRight: RFPercentage(1.5),
@@ -513,14 +514,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   warningNote: {
-    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+    backgroundColor: Colors.amberOverlay10,
     borderRadius: RFPercentage(2),
     padding: RFPercentage(2),
     flexDirection: 'row',
     alignItems: 'flex-start',
     marginBottom: RFPercentage(3),
     borderWidth: 1,
-    borderColor: 'rgba(245, 158, 11, 0.2)',
+    borderColor: Colors.amberOverlay20,
   },
   warningIcon: {
     marginRight: RFPercentage(1.5),
@@ -530,13 +531,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   warningTitle: {
-    color: '#92400E',
+    color: Colors.amberDarkText,
     fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
     marginBottom: RFPercentage(0.5),
   },
   warningText: {
-    color: '#92400E',
+    color: Colors.amberDarkText,
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
     lineHeight: RFPercentage(2),
@@ -587,19 +588,19 @@ const styles = StyleSheet.create({
   confirmationModal: {
     width: '90%',
     borderRadius: RFPercentage(2),
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     alignSelf: 'center',
     position: 'absolute',
     paddingHorizontal: RFPercentage(3.5),
     paddingVertical: RFPercentage(3),
     top: RFPercentage(20),
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.2,
     shadowRadius: 12,
     // elevation: 8,
     borderWidth: 1,
-    borderColor: 'rgba(229, 231, 235, 0.8)',
+    borderColor: Colors.grayBorderOverlay80,
   },
   modalHeader: {
     alignItems: 'center',
@@ -650,12 +651,12 @@ const styles = StyleSheet.create({
   },
   modalCancelButton: {
    width:RFPercentage(16),
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderWidth: 1.2,
-    borderColor: "#a7acb2ff",
+    borderColor: Colors.modalBorderGray,
   },
   modalCancelButtonText: {
-    color: "#888b8fff",
+    color: Colors.modalTextGray,
     fontSize: RFPercentage(1.5),
     fontFamily: Fonts.semiBold,
   },
@@ -666,7 +667,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: '100%',
     height: '100%',
-    backgroundColor: 'rgba(89, 92, 96, 0.8)',
+    backgroundColor: Colors.darkOverlay80,
     alignItems: 'center',
     justifyContent: 'center',
   },

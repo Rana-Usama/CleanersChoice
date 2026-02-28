@@ -317,10 +317,10 @@ const Dashboard: React.FC = ({navigation}: any) => {
           title="Dashboard"
           textStyle={styles.headerText}
           left={true}
-          arrowColor="#FFFFFF"
+          arrowColor={Colors.white}
           style={{backgroundColor: 'transparent'}}
           logo
-          tintColor={'white'}
+          tintColor={Colors.white}
         />
       </LinearGradient>
 
@@ -335,13 +335,13 @@ const Dashboard: React.FC = ({navigation}: any) => {
           entering={FadeInDown.duration(600)}
           style={styles.profileCard}>
           <LinearGradient
-            colors={['#FFFFFF', '#F8FAFF']}
+            colors={[Colors.white, Colors.blueBg50]}
             style={styles.profileGradient}>
             <View style={styles.profileSection}>
               <TouchableOpacity activeOpacity={1}>
                 <View style={styles.avatarContainer}>
                   {loading ? (
-                    <ActivityIndicator size="large" color="#667eea" />
+                    <ActivityIndicator size="large" color={Colors.primaryBlue} />
                   ) : (
                     <>
                       <Image
@@ -365,7 +365,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
                       <MaterialIcons
                         name="security"
                         size={14}
-                        color="#FFFFFF"
+                        color={Colors.white}
                       />
                       <Text style={styles.adminText}>Admin</Text>
                     </View>
@@ -408,7 +408,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
                 width={null}
                 height={8}
                 color={Colors.gradient1}
-                unfilledColor="#E5E7EB"
+                unfilledColor={Colors.gray200}
                 borderWidth={0}
                 borderRadius={20}
                 style={styles.progressBar}
@@ -419,7 +419,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
 
         {loading3 ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#597cd3ff" />
+            <ActivityIndicator size="large" color={Colors.blueMedium} />
           </View>
         ) : (
           <>
@@ -428,7 +428,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
                 {/* Availability Overview Card */}
                 <View style={styles.overviewCard}>
                   <LinearGradient
-                    colors={['#edf1f5ff', '#cdd1daff']}
+                    colors={[Colors.skeletonLight, Colors.skeletonDark]}
                     style={styles.overviewGradient}>
                     <View style={styles.availabilityOverview}>
                       <View style={styles.availabilityOverviewItem}>
@@ -461,7 +461,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
                       <MaterialIcons
                         name="schedule"
                         size={20}
-                        color="rgba(165, 169, 176, 1)"
+                        color={Colors.grayMuted}
                       />
                       <Text style={styles.nextAvailableText}>
                         Next available: {availabilitySummary.nextAvailable}
@@ -512,7 +512,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
                         
                         style={styles.serviceCard}>
                         <LinearGradient
-                          colors={['#F8FAFF', '#f4f7fcff']}
+                          colors={[Colors.blueBg50, Colors.blueBg100]}
                           style={styles.serviceGradient}>
                           <View style={styles.serviceIconContainer}>
                             <Image
@@ -573,7 +573,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
                         entering={ZoomIn.delay(index * 150)}
                         style={styles.packageCard}>
                         <LinearGradient
-                          colors={['#f4f7feff', '#F8FAFF']}
+                          colors={[Colors.blueBg100b, Colors.blueBg50]}
                           style={styles.packageGradient}>
                           <View style={styles.packageHeader}>
                             <Text style={styles.packageName}>
@@ -643,7 +643,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
                                 <MaterialIcons
                                   name="schedule"
                                   size={14}
-                                  color="#4B5563"
+                                  color={Colors.gray600}
                                 />
                                 <Text style={styles.timeText}>
                                   {formatTime(item.fromTime)} -{' '}
@@ -670,7 +670,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
                       <MaterialIcons
                         name="calendar-today"
                         size={40}
-                        color="#CBD5E1"
+                        color={Colors.slate300}
                       />
                       <Text style={styles.noAvailabilityText}>
                         No availability set
@@ -687,7 +687,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
                 entering={FadeInUp.duration(600)}
                 style={styles.emptyStateContainer}>
                 <LinearGradient
-                  colors={['#FFFFFF', '#F8FAFF']}
+                  colors={[Colors.white, Colors.blueBg50]}
                   style={styles.emptyStateCard}>
                   <View style={styles.emptyStateIcon}>
                     <Image
@@ -709,7 +709,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
                     onPress={handleNext}
                     disabled={loading2}>
                     {loading2 ? (
-                      <ActivityIndicator color="#FFFFFF" />
+                      <ActivityIndicator color={Colors.white} />
                     ) : (
                       <>
                         <Text style={styles.ctaButtonText}>
@@ -737,14 +737,14 @@ export default Dashboard;
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#ffffffff',
+    backgroundColor: Colors.white,
   },
   gradientHeader: {
     paddingTop: Platform.OS === 'ios' ? 40 : 0,
     paddingBottom: 30,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 12,
@@ -756,10 +756,10 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: RFPercentage(2),
     fontFamily: Fonts.semiBold,
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   editButtonText: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.6),
   },
@@ -771,7 +771,7 @@ const styles = StyleSheet.create({
     marginTop: -40,
     marginHorizontal: 20,
     borderRadius: 24,
-    shadowColor: '#667eea',
+    shadowColor: Colors.primaryBlue,
     shadowOffset: {width: 0, height: 10},
     shadowOpacity: 0.2,
     shadowRadius: 20,
@@ -795,7 +795,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     borderWidth: 2,
     borderColor: Colors.gradient1,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: Colors.lightGrayBg,
   },
   cameraBadge: {
     position: 'absolute',
@@ -808,7 +808,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderColor: Colors.white,
   },
   profileInfo: {
     marginLeft: 16,
@@ -817,13 +817,13 @@ const styles = StyleSheet.create({
   name: {
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(2),
-    color: '#1F2937',
+    color: Colors.gray800,
     marginBottom: 12,
   },
   availabilityStats: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8FAFF',
+    backgroundColor: Colors.blueBg50,
     padding: 12,
     borderRadius: 16,
     gap: 12,
@@ -840,7 +840,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#E0EAFF',
+    backgroundColor: Colors.blueBg300,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -853,14 +853,14 @@ const styles = StyleSheet.create({
   availabilityLabel: {
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.2),
-    color: '#6B7280',
+    color: Colors.placeholderColor,
     marginTop: 2,
     textAlign: 'center',
   },
   availabilityDivider: {
     width: 1,
     height: 40,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: Colors.gray200,
   },
   progressSection: {
     marginTop: 8,
@@ -874,7 +874,7 @@ const styles = StyleSheet.create({
   progressTitle: {
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.6),
-    color: '#4B5563',
+    color: Colors.gray600,
   },
   progressPercent: {
     fontFamily: Fonts.semiBold,
@@ -895,12 +895,12 @@ const styles = StyleSheet.create({
     marginTop: 20,
     borderRadius: 20,
     overflow: 'hidden',
-    shadowColor: '#667eea',
+    shadowColor: Colors.primaryBlue,
     shadowOffset: {width: 0, height: 5},
     shadowOpacity: 0.2,
     shadowRadius: 15,
       borderWidth: 1,
-    borderColor:"#F0F7FF"
+    borderColor: Colors.blueBg150
     // elevation: 8,
   },
   overviewGradient: {
@@ -934,20 +934,20 @@ const styles = StyleSheet.create({
   overviewLabel: {
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.4),
-    color: 'rgba(165, 169, 176, 1)',
+    color: Colors.grayMuted,
     textAlign: 'center',
   },
   overviewDividerVertical: {
     width: 1,
     height: 60,
-    backgroundColor: 'rgba(255,255,255,0.3)',
+    backgroundColor: Colors.whiteOverlay30,
     marginHorizontal: 16,
   },
   nextAvailableContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.48)',
+    backgroundColor: Colors.whiteOverlay48,
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 12,
@@ -956,21 +956,21 @@ const styles = StyleSheet.create({
   nextAvailableText: {
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.4),
-    color: 'rgba(165, 169, 176, 1)',
+    color: Colors.grayMuted,
     marginLeft: 8,
   },
   sectionCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     marginHorizontal: 20,
     marginTop: 16,
     borderRadius: 20,
     padding: 20,
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 10,
       borderWidth: 1,
-    borderColor:"#F0F7FF"
+    borderColor: Colors.blueBg150
     // elevation: 3,
   },
   cardHeader: {
@@ -982,12 +982,12 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.8),
-    color: '#576373ff',
+    color: Colors.grayBlueText,
   },
   editButton: {
     padding: 6,
     borderRadius: 8,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: Colors.lightGrayBg,
   },
   smallEditIcon: {
     width: 16,
@@ -996,18 +996,18 @@ const styles = StyleSheet.create({
   description: {
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.6),
-    color: '#6B7280',
+    color: Colors.placeholderColor,
     lineHeight: 22,
   },
   readMore: {
     fontFamily: Fonts.semiBold,
-    color: '#6190e2ff',
+    color: Colors.blueSoft,
     fontSize: RFPercentage(1.6),
   },
   seeAll: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.5),
-    color: '#667eea',
+    color: Colors.primaryBlue,
   },
   servicesGrid: {
     flexDirection: 'row',
@@ -1019,12 +1019,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderRadius: 16,
     overflow: 'hidden',
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 6,
       borderWidth: 1,
-    borderColor:"#F0F7FF"
+    borderColor: Colors.blueBg150
     // elevation: 2,
   },
   serviceGradient: {
@@ -1035,7 +1035,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 100,
-    backgroundColor: '#ffffffff',
+    backgroundColor: Colors.white,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
@@ -1049,7 +1049,7 @@ const styles = StyleSheet.create({
   serviceName: {
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.5),
-    color: '#374151',
+    color: Colors.gray700,
   },
   showMoreButton: {
     flexDirection: 'row',
@@ -1057,19 +1057,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 12,
     padding: 12,
-    backgroundColor: '#F8FAFF',
+    backgroundColor: Colors.blueBg50,
     borderRadius: 12,
   },
   showMoreText: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.5),
-    color: '#667eea',
+    color: Colors.primaryBlue,
     marginRight: 8,
   },
   chevronIcon: {
     width: 14,
     height: 14,
-    tintColor: '#667eea',
+    tintColor: Colors.primaryBlue,
   },
   packagesContainer: {
     paddingRight: 20,
@@ -1080,14 +1080,14 @@ const styles = StyleSheet.create({
     marginRight: 12,
     borderRadius: 12,
     overflow: 'hidden',
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 8,
     // elevation: 4,
     height: RFPercentage(30),
       borderWidth: 1,
-    borderColor:"#F0F7FF"
+    borderColor: Colors.blueBg150
   },
   packageGradient: {
     padding: 16,
@@ -1102,11 +1102,11 @@ const styles = StyleSheet.create({
   packageName: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.6),
-    color: '#1F2937',
+    color: Colors.gray800,
     flex: 1,
   },
   priceTag: {
-    backgroundColor: '#10B981',
+    backgroundColor: Colors.success,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
@@ -1116,12 +1116,12 @@ const styles = StyleSheet.create({
   priceText: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.4),
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   packageDescription: {
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.4),
-    color: '#6B7280',
+    color: Colors.placeholderColor,
     lineHeight: 18,
     marginVertical: 24,
   },
@@ -1129,11 +1129,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#e9edfaff',
+    backgroundColor: Colors.lavenderBg,
     paddingVertical: 8,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: Colors.gray200,
     position: 'absolute',
     bottom: 20,
     alignSelf: 'center',
@@ -1142,18 +1142,18 @@ const styles = StyleSheet.create({
   selectButtonText: {
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.4),
-    color: '#374151',
+    color: Colors.gray700,
     marginRight: 8,
   },
   arrowIcon: {
     width: 12,
     height: 12,
-    tintColor: '#374151',
+    tintColor: Colors.gray700,
   },
   availabilityButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F0F7FF',
+    backgroundColor: Colors.blueBg150,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
@@ -1161,23 +1161,23 @@ const styles = StyleSheet.create({
   availabilityButtonText: {
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.4),
-    color: '#667eea',
+    color: Colors.primaryBlue,
     marginRight: 6,
   },
   editIcon: {
     width: 12,
     height: 12,
-    tintColor: '#667eea',
+    tintColor: Colors.primaryBlue,
   },
   detailedAvailability: {
     gap: 12,
   },
   timeSlotCard: {
-    backgroundColor: '#F8FAFF',
+    backgroundColor: Colors.blueBg50,
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: Colors.gray200,
   },
   timeSlotHeader: {
     flexDirection: 'row',
@@ -1188,7 +1188,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: Colors.gray200,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -1199,12 +1199,12 @@ const styles = StyleSheet.create({
   dayIndicatorText: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.6),
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   dayText: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.6),
-    color: '#1F2937',
+    color: Colors.gray800,
     flex: 1,
   },
   timeSlot: {
@@ -1215,24 +1215,24 @@ const styles = StyleSheet.create({
   timeText: {
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.4),
-    color: '#4B5563',
+    color: Colors.gray600,
   },
   availabilityStatus: {
     alignItems: 'flex-end',
   },
   statusIndicator: {
-    backgroundColor: '#FEF2F2',
+    backgroundColor: Colors.redBg50,
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
   },
   statusIndicatorActive: {
-    backgroundColor: '#DCFCE7',
+    backgroundColor: Colors.greenBg100,
   },
   statusText: {
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.3),
-    color: '#374151',
+    color: Colors.gray700,
   },
   noAvailabilityContainer: {
     alignItems: 'center',
@@ -1241,14 +1241,14 @@ const styles = StyleSheet.create({
   noAvailabilityText: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.6),
-    color: '#374151',
+    color: Colors.gray700,
     marginTop: 12,
     marginBottom: 4,
   },
   noAvailabilitySubtext: {
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.4),
-    color: '#6B7280',
+    color: Colors.placeholderColor,
     textAlign: 'center',
   },
   emptyStateContainer: {
@@ -1259,19 +1259,19 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     padding: 30,
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 10},
     shadowOpacity: 0.1,
     shadowRadius: 20,
 
     borderWidth: 1,
-    borderColor:"#F0F7FF"
+    borderColor: Colors.blueBg150
   },
   emptyStateIcon: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: '#F0F7FF',
+    backgroundColor: Colors.blueBg150,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
@@ -1279,19 +1279,19 @@ const styles = StyleSheet.create({
   dashboardIcon: {
     width: 50,
     height: 50,
-    tintColor: '#667eea',
+    tintColor: Colors.primaryBlue,
   },
   emptyStateTitle: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(2.2),
-    color: '#1F2937',
+    color: Colors.gray800,
     textAlign: 'center',
     marginBottom: 12,
   },
   emptyStateText: {
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.6),
-    color: '#6B7280',
+    color: Colors.placeholderColor,
     textAlign: 'center',
     lineHeight: 22,
     marginBottom: 24,
@@ -1309,13 +1309,13 @@ const styles = StyleSheet.create({
   ctaButtonText: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.5),
-    color: '#FFFFFF',
+    color: Colors.white,
     marginRight: 12,
   },
   ctaArrow: {
     width: 16,
     height: 16,
-    tintColor: '#FFFFFF',
+    tintColor: Colors.white,
   },
 
   nameContainer: {
@@ -1328,7 +1328,7 @@ const styles = StyleSheet.create({
   adminBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#10B981', // Green color for admin
+    backgroundColor: Colors.success, // Green color for admin
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
@@ -1339,6 +1339,6 @@ const styles = StyleSheet.create({
   adminText: {
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.2),
-    color: '#FFFFFF',
+    color: Colors.white,
   },
 });
