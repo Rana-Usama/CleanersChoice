@@ -12,7 +12,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {RFPercentage} from 'react-native-responsive-fontsize';
-import {Fonts} from '../constants/Themes';
+import {Fonts, Colors} from '../constants/Themes';
 
 const {width} = Dimensions.get('window');
 
@@ -60,14 +60,14 @@ const RemovePackageModal: React.FC<RemovePackageModalProps> = ({
               style={[styles.modalContainer, isClosing && styles.modalClosing]}>
               {/* Modal Header */}
               <LinearGradient
-                colors={['#FEF2F2', '#FEE2E2']}
+                colors={[Colors.redBg50, Colors.redBg100]}
                 style={styles.modalHeader}>
                 <View style={styles.iconContainer}>
                   <View style={styles.iconBackground}>
                     <MaterialIcons
                       name="delete-outline"
                       size={RFPercentage(3)}
-                      color="#DC2626"
+                      color={Colors.dangerRed}
                     />
                   </View>
                 </View>
@@ -86,7 +86,7 @@ const RemovePackageModal: React.FC<RemovePackageModalProps> = ({
                     <AntDesign
                       name="exclamationcircle"
                       size={20}
-                      color="#DC2626"
+                      color={Colors.dangerRed}
                     />
                   </View>
                   <Text style={styles.warningText}>
@@ -100,7 +100,7 @@ const RemovePackageModal: React.FC<RemovePackageModalProps> = ({
                     <MaterialIcons
                       name="info-outline"
                       size={16}
-                      color="#6B7280"
+                      color={Colors.placeholderColor}
                     />
                     <Text style={styles.infoText}>
                       Package numbering will be rearranged automatically
@@ -110,7 +110,7 @@ const RemovePackageModal: React.FC<RemovePackageModalProps> = ({
                     <MaterialIcons
                       name="info-outline"
                       size={16}
-                      color="#6B7280"
+                      color={Colors.placeholderColor}
                     />
                     <Text style={styles.infoText}>
                       You can always add a new package later
@@ -126,7 +126,7 @@ const RemovePackageModal: React.FC<RemovePackageModalProps> = ({
                   onPress={handleClose}
                   activeOpacity={0.7}>
                   <LinearGradient
-                    colors={['#F9FAFB', '#F3F4F6']}
+                    colors={[Colors.gray50, Colors.lightGrayBg]}
                     style={styles.cancelButtonGradient}>
                     <Text style={styles.cancelButtonText}>Cancel</Text>
                   </LinearGradient>
@@ -137,7 +137,7 @@ const RemovePackageModal: React.FC<RemovePackageModalProps> = ({
                   onPress={handleConfirm}
                   activeOpacity={0.7}>
                   <LinearGradient
-                    colors={['#db3333ff', '#cb5b5bff']}
+                    colors={[Colors.dangerGradient1, Colors.dangerGradient2]}
                     style={styles.removeButtonGradient}>
                     <Text style={styles.removeButtonText}>Remove Package</Text>
                   </LinearGradient>
@@ -154,17 +154,17 @@ const RemovePackageModal: React.FC<RemovePackageModalProps> = ({
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: Colors.blackOverlay50,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
   },
   modalContainer: {
     width: width * 0.9,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: 24,
     overflow: 'hidden',
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {
       width: 0,
       height: 10,
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: '#FECACA',
+    borderBottomColor: Colors.redBorder200,
   },
   iconContainer: {
     marginBottom: 16,
@@ -192,23 +192,23 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: 'rgba(220, 38, 38, 0.1)',
+    backgroundColor: Colors.dangerRedOverlay10,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#FECACA',
+    borderColor: Colors.redBorder200,
   },
   modalTitle: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(2),
-    color: '#DC2626',
+    color: Colors.dangerRed,
     marginBottom: 8,
     textAlign: 'center',
   },
   modalSubtitle: {
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.5),
-    color: '#7F1D1D',
+    color: Colors.darkRed900,
     textAlign: 'center',
     lineHeight: 20,
   },
@@ -217,12 +217,12 @@ const styles = StyleSheet.create({
   },
   warningContainer: {
     flexDirection: 'row',
-    backgroundColor: '#FEF2F2',
+    backgroundColor: Colors.redBg50,
     padding: 16,
     borderRadius: 12,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: '#FECACA',
+    borderColor: Colors.redBorder200,
   },
   warningIcon: {
     marginRight: 12,
@@ -232,15 +232,15 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.4),
-    color: '#7F1D1D',
+    color: Colors.darkRed900,
     lineHeight: 20,
   },
   infoContainer: {
-    backgroundColor: '#F9FAFB',
+    backgroundColor: Colors.gray50,
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: Colors.gray200,
   },
   infoItem: {
     flexDirection: 'row',
@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.4),
-    color: '#6B7280',
+    color: Colors.placeholderColor,
     marginLeft: 10,
     lineHeight: 20,
   },
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: Colors.gray200,
   },
   cancelButtonGradient: {
     paddingVertical: 14,
@@ -275,13 +275,13 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.8),
-    color: '#374151',
+    color: Colors.gray700,
   },
   removeButton: {
     flex: 1,
     borderRadius: 100,
     overflow: 'hidden',
-    shadowColor: '#DC2626',
+    shadowColor: Colors.dangerRed,
     shadowOffset: {
       width: 0,
       height: 4,
@@ -302,7 +302,7 @@ const styles = StyleSheet.create({
   removeButtonText: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.7),
-    color: '#FFFFFF',
+    color: Colors.white,
   },
 });
 

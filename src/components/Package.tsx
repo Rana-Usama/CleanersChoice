@@ -56,7 +56,7 @@ const Package = (props: props) => {
         
         {/* Header with Gradient Background */}
         <LinearGradient
-          colors={props.isSelected ? [Colors.gradient1, Colors.gradient2] : ['#fcfcfcff', '#fafafaff']}
+          colors={props.isSelected ? [Colors.gradient1, Colors.gradient2] : [Colors.packageGradient1, Colors.packageGradient2]}
           style={styles.header}
         >
           <Text style={[
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     marginHorizontal: RFPercentage(0.8),
     marginVertical: RFPercentage(1),
     // Shadow
-    shadowColor: 'rgba(140, 161, 189, 0.8)',
+    shadowColor: Colors.packageShadow,
     shadowOffset: {
       width: 0,
       height: 4,
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 8,
     borderWidth: 1.5,
-    borderColor: 'rgba(226, 232, 240, 0.8)',
+    borderColor: Colors.slateBorderOverlay80,
   },
   selectedContainer: {
     borderColor: Colors.gradient1,
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     position: 'relative',
     borderBottomWidth:1,
-    borderBottomColor:"rgba(197, 215, 232, 1)"
+    borderBottomColor: Colors.packageHeaderBorder
   },
   packageName: {
     color: Colors.primaryText,
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
     paddingVertical: RFPercentage(0.4),
     borderRadius: RFPercentage(1),
     // Shadow
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
   },
   priceDivider: {
     height: 1,
-    backgroundColor: 'rgba(226, 232, 240, 0.8)',
+    backgroundColor: Colors.slateBorderOverlay80,
     marginBottom: RFPercentage(1.2),
   },
   priceContainer: {

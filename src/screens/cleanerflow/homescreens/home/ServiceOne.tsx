@@ -260,7 +260,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
           left={true}
           right={false}
           style={{backgroundColor: 'transparent'}}
-          arrowColor={'white'}
+          arrowColor={Colors.white}
         />
 
         {/* Progress Section */}
@@ -275,8 +275,8 @@ const ServiceOne: React.FC = ({navigation}: any) => {
             progress={progress}
             width={width - 80}
             height={6}
-            color="#FFFFFF"
-            unfilledColor="rgba(255,255,255,0.3)"
+            color={Colors.white}
+            unfilledColor={Colors.whiteOverlay30}
             borderWidth={0}
             borderRadius={10}
             style={styles.progressBar}
@@ -306,8 +306,8 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                   <LinearGradient
                     colors={
                       serviceData?.location?.name || userLocation?.name
-                        ? ['#EFF6FF', '#e6effcff']
-                        : ['#FFFFFF', '#F9FAFB']
+                        ? [Colors.blueBg200, Colors.blueBg200b]
+                        : [Colors.white, Colors.gray50]
                     }
                     style={styles.locationGradient}>
                     <View style={styles.locationContent}>
@@ -341,7 +341,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                           color={
                             userLocation?.name || serviceData?.location?.name
                               ? Colors.secondaryText
-                              : '#9CA3AF'
+                              : Colors.gray400
                           }
                         />
                       </View>
@@ -389,8 +389,8 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                     colors={
                       available.length > 0 ||
                       (serviceData?.availability?.length ?? 0) > 0
-                        ? ['#F0FDF4', '#DCFCE7']
-                        : ['#FFFFFF', '#F9FAFB']
+                        ? [Colors.greenBg50, Colors.greenBg100]
+                        : [Colors.white, Colors.gray50]
                     }
                     style={styles.availabilityGradient}>
                     <View style={styles.availabilityContent}>
@@ -422,13 +422,13 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                           <MaterialIcons
                             name="check-circle"
                             size={24}
-                            color={'#22C55E'}
+                            color={Colors.green500}
                           />
                         ) : (
                           <Ionicons
                             name="time-outline"
                             size={24}
-                            color={availableDays > 0 ? '#22C55E' : '#9CA3AF'}
+                            color={availableDays > 0 ? Colors.green500 : Colors.gray400}
                           />
                         )}
                       </View>
@@ -466,11 +466,11 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                     searchInputPlaceholderText="Search services..."
                     altFontFamily={Fonts.fontRegular}
                     // tagRemoveIconColor={Colors.gradient1}
-                    tagBorderColor="#E5E7EB"
+                    tagBorderColor={Colors.gray200}
                     tagTextColor={Colors.gradient1}
                     selectedItemTextColor={Colors.gradient1}
                     selectedItemIconColor={Colors.gradient1}
-                    itemTextColor="#6B7280"
+                    itemTextColor={Colors.placeholderColor}
                     displayKey="name"
                     searchInputStyle={styles.searchInput}
                     styleRowList={styles.rowList}
@@ -516,7 +516,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                                 <AntDesign
                                   name="close"
                                   size={12}
-                                  color="#6B7280"
+                                color={Colors.placeholderColor}
                                 />
                               </TouchableOpacity>
                             </View>
@@ -545,7 +545,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                   <LinearGradient
                     colors={
                       progress < 1
-                        ? ['#E5E7EB', '#D1D5DB']
+                        ? [Colors.gray200, Colors.gray300]
                         : [Colors.gradient1, Colors.gradient2]
                     }
                     style={styles.buttonGradient}>
@@ -563,7 +563,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                         <AntDesign
                           name="arrowright"
                           size={RFPercentage(2)}
-                          color="#FFFFFF"
+                          color={Colors.white}
                           style={styles.buttonIcon}
                         />
                       </>
@@ -592,14 +592,14 @@ export default ServiceOne;
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
   },
   gradientHeader: {
     paddingTop: Platform.OS === 'ios' ? 40 : 0,
     paddingBottom: 20,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 12,
@@ -608,7 +608,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: RFPercentage(2.2),
     fontFamily: Fonts.semiBold,
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   progressSection: {
     marginTop: 15,
@@ -623,13 +623,13 @@ const styles = StyleSheet.create({
   progressTitle: {
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.6),
-    color: '#FFFFFF',
+    color: Colors.white,
     opacity: 0.9,
   },
   progressPercent: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.8),
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   progressBar: {
     marginTop: 4,
@@ -647,7 +647,7 @@ const styles = StyleSheet.create({
   timeLineCard: {
     borderRadius: 20,
     padding: 15,
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.05,
     shadowRadius: 12,
@@ -661,7 +661,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginBottom: 16,
     overflow: 'hidden',
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
@@ -679,7 +679,7 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 100,
-    backgroundColor: 'rgba(99, 177, 241, 0.1)',
+    backgroundColor: Colors.blueOverlay10,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -695,7 +695,7 @@ const styles = StyleSheet.create({
   locationLabel: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.7),
-    color: '#1F2937',
+    color: Colors.gray800,
     marginBottom: 4,
   },
   locationValue: {
@@ -704,25 +704,25 @@ const styles = StyleSheet.create({
     color: Colors.secondaryText,
   },
   placeholderText: {
-    color: '#9CA3AF',
+    color: Colors.gray400,
     fontFamily: Fonts.fontRegular,
   },
   locationArrow: {
     paddingLeft: 10,
   },
   sectionCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: 16,
     padding: 20,
     marginBottom: 16,
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
     // elevation: 3,
     borderWidth: 1,
     borderBottomWidth: 3,
-    borderColor: '#eeeeeeff',
+    borderColor: Colors.borderLight,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -743,11 +743,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.8),
-    color: '#1F2937',
+    color: Colors.gray800,
     marginLeft: RFPercentage(1.5),
   },
   counterContainer: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: Colors.lightGrayBg,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
@@ -755,31 +755,31 @@ const styles = StyleSheet.create({
   counterText: {
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.4),
-    color: '#6B7280',
+    color: Colors.placeholderColor,
   },
   descriptionInput: {
-    backgroundColor: '#F9FAFB',
+    backgroundColor: Colors.gray50,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: Colors.gray200,
     borderRadius: 12,
     padding: 16,
     minHeight: 120,
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.6),
-    color: '#374151',
+    color: Colors.gray700,
   },
   availabilityCard: {
     borderRadius: 16,
     marginBottom: 16,
     overflow: 'hidden',
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
     // elevation: 3,
     borderWidth: 1,
     borderBottomWidth: 3,
-    borderColor: '#d4f7ddff',
+    borderColor: Colors.greenBorder,
   },
   availabilityGradient: {
     padding: 18,
@@ -793,14 +793,14 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 100,
-    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+    backgroundColor: Colors.greenOverlay10,
     justifyContent: 'center',
     alignItems: 'center',
   },
   availabilityIcon: {
     width: 18,
     height: 18,
-    tintColor: '#22C55E',
+    tintColor: Colors.green500,
   },
   availabilityTextContainer: {
     flex: 1,
@@ -809,13 +809,13 @@ const styles = StyleSheet.create({
   availabilityLabel: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.7),
-    color: '#1F2937',
+    color: Colors.gray800,
     marginBottom: 4,
   },
   availabilityValue: {
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.5),
-    color: '#22C55E',
+    color: Colors.green500,
   },
   availabilityArrow: {
     paddingLeft: 10,
@@ -825,22 +825,22 @@ const styles = StyleSheet.create({
     height: 16,
   },
   servicesCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: 16,
     padding: 20,
     marginBottom: 16,
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
     // elevation: 3,
     borderWidth: 1,
     borderBottomWidth: 3,
-    borderColor: '#eeeeeeff',
+    borderColor: Colors.borderLight,
   },
 
   selectedCount: {
-    backgroundColor: '#EEF2FF',
+    backgroundColor: Colors.indigoBg50,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
@@ -853,33 +853,33 @@ const styles = StyleSheet.create({
   dropdownMenu: {
     borderWidth: 1,
     borderRadius: 10,
-    borderColor: '#E5E7EB',
-    backgroundColor: '#F9FAFB',
+    borderColor: Colors.gray200,
+    backgroundColor: Colors.gray50,
   },
   searchInput: {
-    color: '#374151',
+    color: Colors.gray700,
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.6),
   },
   rowList: {
     paddingVertical: RFPercentage(1.1),
     borderBottomWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: Colors.lightGrayBg,
   },
   itemsContainer: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: 12,
     padding: 8,
     maxHeight: 250,
   },
   dropdownTextSelected: {
-    color: '#6B7280',
+    color: Colors.placeholderColor,
     fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
     marginLeft: 12,
   },
   dropdownText: {
-    color: '#6B7280',
+    color: Colors.placeholderColor,
     fontSize: RFPercentage(1.3),
     fontFamily: Fonts.fontRegular,
     marginLeft: 12,
@@ -903,7 +903,7 @@ const styles = StyleSheet.create({
   serviceTag: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F3F4F6',
+    backgroundColor: Colors.lightGrayBg,
     borderRadius: 16,
     paddingHorizontal: 12,
     paddingVertical: 8,
@@ -922,7 +922,7 @@ const styles = StyleSheet.create({
   hintText: {
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.4),
-    color: '#9CA3AF',
+    color: Colors.gray400,
     marginTop: 12,
     textAlign: 'center',
   },
@@ -956,7 +956,7 @@ const styles = StyleSheet.create({
   buttonText: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.7),
-    color: '#FFFFFF',
+    color: Colors.white,
     marginRight: 10,
   },
   buttonIcon: {
@@ -965,7 +965,7 @@ const styles = StyleSheet.create({
   progressHint: {
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.4),
-    color: '#6B7280',
+    color: Colors.placeholderColor,
     textAlign: 'center',
     marginTop: 12,
   },

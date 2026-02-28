@@ -251,7 +251,7 @@ const Premium = ({navigation}: any) => {
             <MaterialCommunityIcons
               name="star"
               size={RFPercentage(1.6)}
-              color="#FFFFFF"
+              color={Colors.white}
             />
             <Text style={styles.popularText}>Standard Plan</Text>
           </View>
@@ -278,7 +278,7 @@ const Premium = ({navigation}: any) => {
                   <MaterialCommunityIcons
                     name="check-circle"
                     size={RFPercentage(2.2)}
-                    color="#10B981"
+                    color={Colors.success}
                     style={styles.featureIcon}
                   />
                   <Text style={styles.featureText}>{item.name}</Text>
@@ -293,7 +293,7 @@ const Premium = ({navigation}: any) => {
               <MaterialCommunityIcons
                 name="shield-check"
                 size={RFPercentage(2)}
-                color="#10B981"
+                color={Colors.success}
               />
               <Text style={styles.trustText}>Secure Payment</Text>
             </View>
@@ -391,12 +391,12 @@ const styles = StyleSheet.create({
     width: RFPercentage(8),
     height: RFPercentage(8),
     borderRadius: RFPercentage(4),
-    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+    backgroundColor: Colors.amberOverlay10,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: RFPercentage(2),
     borderWidth: 2,
-    borderColor: 'rgba(245, 158, 11, 0.2)',
+    borderColor: Colors.amberOverlay20,
   },
   premiumTitle: {
     color: Colors.brown,
@@ -414,17 +414,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: RFPercentage(4),
   },
   pricingCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     marginHorizontal: RFPercentage(2),
     borderRadius: RFPercentage(2),
     padding: RFPercentage(2.5),
-    shadowColor: 'rgba(0, 0, 0, 0.1)',
+    shadowColor: Colors.blackOverlay10,
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.2,
     shadowRadius: 12,
     elevation: 8,
     borderWidth: 1,
-    borderColor: 'rgba(229, 231, 235, 0.8)',
+    borderColor: Colors.grayBorderOverlay80,
     position: 'relative',
     marginBottom: RFPercentage(2),
   },
@@ -439,14 +439,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: RFPercentage(0.5),
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 4,
     // elevation: 3,
   },
   popularText: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontSize: RFPercentage(1.3),
     fontFamily: Fonts.fontMedium,
   },
@@ -485,7 +485,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: RFPercentage(1),
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(229, 231, 235, 0.5)',
+    borderBottomColor: Colors.grayBorderOverlay50,
   },
   featureIcon: {
     marginRight: RFPercentage(1.5),
@@ -502,7 +502,7 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(2),
     paddingTop: RFPercentage(2),
     borderTopWidth: 1,
-    borderTopColor: 'rgba(229, 231, 235, 0.8)',
+    borderTopColor: Colors.grayBorderOverlay80,
   },
   trustItem: {
     alignItems: 'center',
@@ -514,20 +514,20 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(0.5),
   },
   statsCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     marginHorizontal: RFPercentage(2),
     borderRadius: RFPercentage(2),
     padding: RFPercentage(2),
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    shadowColor: 'rgba(0, 0, 0, 0.1)',
+    shadowColor: Colors.blackOverlay10,
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
     borderWidth: 1,
-    borderColor: 'rgba(229, 231, 235, 0.8)',
+    borderColor: Colors.grayBorderOverlay80,
     marginBottom: RFPercentage(2),
   },
   statItem: {
@@ -537,7 +537,7 @@ const styles = StyleSheet.create({
   statDivider: {
     width: 1,
     height: RFPercentage(4),
-    backgroundColor: 'rgba(229, 231, 235, 0.8)',
+    backgroundColor: Colors.grayBorderOverlay80,
   },
   statNumber: {
     color: Colors.gradient1,
@@ -552,12 +552,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   testimonialCard: {
-    backgroundColor: 'rgba(244, 248, 252, 0.9)',
+    backgroundColor: Colors.testimonialBg,
     marginHorizontal: RFPercentage(2),
     borderRadius: RFPercentage(2),
     padding: RFPercentage(2.5),
     borderWidth: 1,
-    borderColor: 'rgba(219, 222, 226, 0.6)',
+    borderColor: Colors.testimonialBorder,
     marginBottom: RFPercentage(2),
   },
   quoteIcon: {
@@ -601,12 +601,12 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: RFPercentage(2),
     paddingBottom: Platform.OS === 'ios' ? RFPercentage(4) : RFPercentage(2),
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: -4},
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -671,7 +671,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: '100%',
     height: '100%',
-    backgroundColor: 'rgba(89, 92, 96, 0.8)',
+    backgroundColor: Colors.darkOverlay80,
     alignItems: 'center',
     justifyContent: 'center',
   },

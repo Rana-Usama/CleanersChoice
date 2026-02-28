@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
     width: RFPercentage(38),
     borderWidth: 1.4,
     borderColor: Colors.gradient2,
-    backgroundColor: 'rgba(249, 252, 255, 1)',
+    backgroundColor: Colors.selectionBg,
   },
   nextButtonText: {
     fontSize: Platform.OS === 'ios' ? RFPercentage(1.7) : RFPercentage(1.7),

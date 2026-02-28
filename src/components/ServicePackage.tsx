@@ -102,11 +102,11 @@ const ServicePackage = (props: props) => {
       {props.isFeatured && (
         <View style={styles.featuredRibbon}>
           <LinearGradient
-            colors={['#FFD700', '#FFA500']}
+            colors={[Colors.gold, Colors.orange500]}
             style={styles.ribbonGradient}
             start={{x: 0, y: 0}}
             end={{x: 1, y: 0}}>
-            <MaterialCommunityIcons name="crown" size={12} color="#FFFFFF" />
+            <MaterialCommunityIcons name="crown" size={12} color={Colors.white} />
             <Text style={styles.ribbonText}>BEST VALUE</Text>
           </LinearGradient>
         </View>
@@ -121,7 +121,7 @@ const ServicePackage = (props: props) => {
           colors={
             props.isFeatured
               ? [Colors.gradient1, Colors.gradient2]
-              : ['#e0e9f3ff', '#F8FAFC']
+              : [Colors.packageHeaderGradient, Colors.inputBg]
           }
           style={[styles.header, props.isFeatured && styles.featuredHeader]}
           start={{x: 0, y: 0}}
@@ -130,7 +130,7 @@ const ServicePackage = (props: props) => {
             <MaterialCommunityIcons
               name="star"
               size={16}
-              color="#FFFFFF"
+              color={Colors.white}
               style={styles.headerIcon}
             />
           )}
@@ -145,7 +145,7 @@ const ServicePackage = (props: props) => {
             <MaterialCommunityIcons
               name="star"
               size={16}
-              color="#FFFFFF"
+              color={Colors.white}
               style={styles.headerIcon}
             />
           )}
@@ -198,13 +198,13 @@ const ServicePackage = (props: props) => {
                       colors={
                         props.isFeatured
                           ? [Colors.gradient1, Colors.gradient2]
-                          : ['#E2E8F0', '#CBD5E1']
+                          : [Colors.inputBorder, Colors.slate300]
                       }
                       style={styles.featureIcon}>
                       <Feather
                         name="check"
                         size={10}
-                        color={props.isFeatured ? '#FFFFFF' : '#64748B'}
+                        color={props.isFeatured ? Colors.white : Colors.slate500}
                       />
                     </LinearGradient>
                     <Text
@@ -233,8 +233,8 @@ const ServicePackage = (props: props) => {
           <LinearGradient
             colors={
               props.isFeatured
-                ? ['rgba(77, 97, 239, 0.05)', 'rgba(77, 97, 239, 0.02)']
-                : ['#F8FAFC', '#F1F5F9']
+                ? [Colors.primaryBlueOverlay05, Colors.primaryBlueOverlay02]
+                : [Colors.inputBg, Colors.slate100]
             }
             style={styles.priceSection}>
             <View style={styles.priceRow}>
@@ -283,7 +283,7 @@ const ServicePackage = (props: props) => {
                   colors={
                     props.isFeatured
                       ? [Colors.gradient1, Colors.gradient2]
-                      : ['#7b93b1ff', '#dde8f6ff']
+                      : [Colors.packageBtnGradient1, Colors.packageBtnGradient2]
                   }
                   style={styles.selectButtonGradient}
                   start={{x: 0, y: 0}}
@@ -301,7 +301,7 @@ const ServicePackage = (props: props) => {
 
             {props.isFeatured && (
               <View style={styles.savingsBadge}>
-                <Feather name="trending-up" size={10} color="#FFFFFF" />
+                <Feather name="trending-up" size={10} color={Colors.white} />
                 <Text style={styles.savingsText}>Save 15% vs basic</Text>
               </View>
             )}
@@ -327,11 +327,11 @@ export default ServicePackage;
 const styles = StyleSheet.create({
   container: {
     width: width * 0.7,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: 20,
     marginHorizontal: RFPercentage(1),
     marginVertical: RFPercentage(1),
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {
       width: 0,
       height: 6,
@@ -340,7 +340,7 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     // elevation: 8,
     borderWidth: 1.5,
-    borderColor: '#F1F5F9',
+    borderColor: Colors.slate100,
     overflow: 'hidden',
 
     borderBottomWidth: 2,
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    backgroundColor: Colors.whiteOverlay40,
     zIndex: 1,
   },
   featuredRibbon: {
@@ -386,7 +386,7 @@ const styles = StyleSheet.create({
     gap: RFPercentage(0.4),
   },
   ribbonText: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontFamily: Fonts.fontBold,
     fontSize: RFPercentage(1.1),
     letterSpacing: 0.5,
@@ -400,12 +400,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(226, 232, 240, 0.5)',
+    borderBottomColor: Colors.slateBorderOverlay50,
     flexDirection: 'row',
     gap: RFPercentage(1),
   },
   featuredHeader: {
-    borderBottomColor: 'rgba(255, 255, 255, 0.2)',
+    borderBottomColor: Colors.whiteOverlay20,
   },
   headerIcon: {
     opacity: 0.8,
@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   featuredPackageName: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontFamily: Fonts.fontBold,
     fontSize: RFPercentage(2),
   },
@@ -442,7 +442,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   featuredDetailText: {
-    color: '#475569',
+    color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
   },
   featuresSection: {
@@ -485,14 +485,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   featuredFeatureText: {
-    color: '#1E293B',
+    color: Colors.slate900,
     fontFamily: Fonts.fontSemiBold,
   },
   moreFeatures: {
     marginTop: RFPercentage(1),
     paddingTop: RFPercentage(1),
     borderTopWidth: 1,
-    borderTopColor: '#E2E8F0',
+    borderTopColor: Colors.inputBorder,
   },
   moreFeaturesText: {
     color: Colors.gradient1,
@@ -551,7 +551,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.3),
   },
   featuredPriceSuffix: {
-    color: '#64748B',
+    color: Colors.slate500,
   },
   selectButton: {
     borderRadius: 8,
@@ -570,19 +570,19 @@ const styles = StyleSheet.create({
     // elevation: 4,
   },
   selectButtonText: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.3),
     letterSpacing: 0.5,
   },
   featuredSelectButtonText: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontFamily: Fonts.fontBold,
   },
   savingsBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#10B981',
+    backgroundColor: Colors.success,
     alignSelf: 'flex-start',
     paddingHorizontal: RFPercentage(1),
     paddingVertical: RFPercentage(0.4),
@@ -591,7 +591,7 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(1),
   },
   savingsText: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.1),
   },

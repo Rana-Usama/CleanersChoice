@@ -246,7 +246,7 @@ const Messages = ({navigation}: any) => {
           title="Messages"
           textStyle={styles.headerText}
           left={true}
-          arrowColor="#FFFFFF"
+          arrowColor={Colors.white}
           style={{backgroundColor: 'transparent'}}
           logo
           tintColor={'white'}
@@ -285,7 +285,7 @@ const Messages = ({navigation}: any) => {
                   colors={
                     all
                       ? [Colors.gradient1, Colors.gradient2]
-                      : ['#FFFFFF', '#dae2f6ff']
+                      : [Colors.white, Colors.lavenderFilterBg]
                   }
                   style={styles.filterGradient}>
                   <Text
@@ -311,7 +311,7 @@ const Messages = ({navigation}: any) => {
                   colors={
                     unread
                       ? [Colors.gradient1, Colors.gradient2]
-                      : ['#FFFFFF', '#dae2f6ff']
+                      : [Colors.white, Colors.lavenderFilterBg]
                   }
                   style={styles.filterGradient}>
                   <Text
@@ -422,14 +422,14 @@ const Messages = ({navigation}: any) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
   },
   gradientHeader: {
     paddingTop: Platform.OS === 'ios' ? 40 : 0,
     paddingBottom: 30,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 12,
@@ -441,16 +441,16 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: RFPercentage(2),
     fontFamily: Fonts.semiBold,
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   unreadBadge: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     width: 24,
     height: 24,
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -475,13 +475,13 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: RFPercentage(2),
     fontFamily: Fonts.semiBold,
-    color: '#1F2937',
+    color: Colors.gray800,
     marginBottom: 4,
   },
   sectionSubtitle: {
     fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
-    color: '#6B7280',
+    color: Colors.placeholderColor,
     marginBottom: 20,
   },
   filtersContainer: {
@@ -493,7 +493,7 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 12,
     overflow: 'hidden',
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
@@ -514,7 +514,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(224, 234, 253, 1)',
+    backgroundColor: Colors.filterIconBg,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
@@ -522,15 +522,15 @@ const styles = StyleSheet.create({
   filterButtonText: {
     fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
-    color: '#374151',
+    color: Colors.gray700,
     textAlign: 'center',
   },
   filterButtonTextActive: {
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   activeFilterCard: {
     marginTop: 16,
-    backgroundColor: '#F8FAFF',
+    backgroundColor: Colors.blueBg50,
     borderRadius: 16,
     padding: 16,
   },
@@ -542,7 +542,7 @@ const styles = StyleSheet.create({
   activeFilterText: {
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontMedium,
-    color: '#4B5563',
+    color: Colors.gray600,
     flex: 1,
   },
   messagesSection: {
@@ -558,13 +558,13 @@ const styles = StyleSheet.create({
   messagesTitle: {
     fontSize: RFPercentage(1.7),
     fontFamily: Fonts.semiBold,
-    color: '#1F2937',
+    color: Colors.gray800,
   },
   messagesCount: {
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontMedium,
     color: Colors.gradient1,
-    backgroundColor: '#EEF2FF',
+    backgroundColor: Colors.indigoBg50,
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
@@ -578,7 +578,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
-    color: '#6B7280',
+    color: Colors.placeholderColor,
   },
   noMessagesContainer: {
     alignItems: 'center',
@@ -603,7 +603,7 @@ const styles = StyleSheet.create({
   startChatText: {
     fontSize: RFPercentage(1.6),
     fontFamily: Fonts.semiBold,
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   messagesList: {
     marginTop: 8,
@@ -612,19 +612,19 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   messageCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: 16,
     marginBottom: 12,
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 3,
     borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: Colors.lightGrayBg,
   },
   unreadMessageCard: {
-    backgroundColor: '#F8FAFF',
+    backgroundColor: Colors.blueBg50,
     borderColor: Colors.gradient1 + '20',
     shadowColor: Colors.gradient1,
     shadowOpacity: 0.1,
@@ -654,7 +654,7 @@ const styles = StyleSheet.create({
   newMessageText: {
     fontSize: RFPercentage(1.6),
     fontFamily: Fonts.semiBold,
-    color: '#FFFFFF',
+    color: Colors.white,
   },
 });
 

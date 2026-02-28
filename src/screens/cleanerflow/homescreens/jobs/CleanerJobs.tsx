@@ -298,7 +298,7 @@ const CleanerJobs = () => {
   if (initializingLocation) {
     return (
       <SafeAreaView style={styles.safeArea}>
-        <StatusBar backgroundColor="#FFFFFF" barStyle="dark-content" />
+        <StatusBar backgroundColor={Colors.white} barStyle="dark-content" />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={Colors.gradient1} />
           <Text style={styles.loadingText}>Fetching your location...</Text>
@@ -323,10 +323,10 @@ const CleanerJobs = () => {
           title="Available Jobs"
           textStyle={styles.headerText}
           left={true}
-          arrowColor="#FFFFFF"
+          arrowColor={Colors.white}
           style={{backgroundColor: 'transparent'}}
           logo
-          tintColor={'white'}
+          tintColor={Colors.white}
         />
       </LinearGradient>
 
@@ -359,7 +359,7 @@ const CleanerJobs = () => {
                   colors={
                     selectedLocation?.name
                       ? [Colors.gradient1, Colors.gradient2]
-                      : ['#FFFFFF', '#dae2f6ff']
+                      : [Colors.white, Colors.lavenderFilterBg]
                   }
                   style={styles.filterGradient}>
                   <View style={styles.filterIconContainer}>
@@ -383,7 +383,7 @@ const CleanerJobs = () => {
                   activeOpacity={0.7}
                   onPress={() => dispatch(clearFilterLocation())}
                   style={styles.removeFilter}>
-                  <AntDesign name="closecircle" size={16} color="#94A3B8" />
+                  <AntDesign name="closecircle" size={16} color={Colors.slate400} />
                 </TouchableOpacity>
               )}
             </View>
@@ -401,7 +401,7 @@ const CleanerJobs = () => {
                   colors={
                     rangeSelector
                       ? [Colors.gradient1, Colors.gradient2]
-                      : ['#FFFFFF', '#dae2f6ff']
+                      : [Colors.white, Colors.lavenderFilterBg]
                   }
                   style={styles.filterGradient}>
                   <View style={styles.filterIconContainer}>
@@ -425,7 +425,7 @@ const CleanerJobs = () => {
                   activeOpacity={0.7}
                   onPress={() => setRangeSelector(false)}
                   style={styles.removeFilter}>
-                  <AntDesign name="closecircle" size={16} color="#94A3B8" />
+                  <AntDesign name="closecircle" size={16} color={Colors.slate400} />
                 </TouchableOpacity>
               )}
             </View>
@@ -448,7 +448,7 @@ const CleanerJobs = () => {
                   colors={
                     serviceType
                       ? [Colors.gradient1, Colors.gradient2]
-                      : ['#FFFFFF', '#dae2f6ff']
+                      : [Colors.white, Colors.lavenderFilterBg]
                   }
                   style={styles.filterGradient}>
                   <View style={styles.filterIconContainer}>
@@ -472,7 +472,7 @@ const CleanerJobs = () => {
                   activeOpacity={0.7}
                   onPress={() => setServiceType(false)}
                   style={styles.removeFilter}>
-                  <AntDesign name="closecircle" size={16} color="#94A3B8" />
+                  <AntDesign name="closecircle" size={16} color={Colors.slate400} />
                 </TouchableOpacity>
               )}
             </View>
@@ -486,7 +486,7 @@ const CleanerJobs = () => {
             <View style={styles.activeFiltersList}>
               {selectedLocation?.name && (
                 <View style={styles.activeFilterTag}>
-                  <Ionicons name="location" size={14} color="#FFFFFF" />
+                  <Ionicons name="location" size={14} color={Colors.white} />
                   <Text style={styles.activeFilterText}>
                     {selectedLocation.name}
                   </Text>
@@ -497,7 +497,7 @@ const CleanerJobs = () => {
                   <MaterialIcons
                     name="attach-money"
                     size={14}
-                    color="#FFFFFF"
+                    color={Colors.white}
                   />
                   <Text style={styles.activeFilterText}>
                     Up to ${priceRange[0]}
@@ -509,7 +509,7 @@ const CleanerJobs = () => {
                   <MaterialIcons
                     name="cleaning-services"
                     size={14}
-                    color="#FFFFFF"
+                    color={Colors.white}
                   />
                   <Text style={styles.activeFilterText}>{selectedType}</Text>
                 </View>
@@ -526,7 +526,7 @@ const CleanerJobs = () => {
                 <MaterialIcons
                   name="admin-panel-settings"
                   size={16}
-                  color="#FFFFFF"
+                  color={Colors.white}
                 />
                 <Text style={styles.adminBadgeText}>Admin Mode</Text>
               </View>
@@ -535,7 +535,7 @@ const CleanerJobs = () => {
             <View style={styles.adminToggleCard}>
               <View style={styles.adminToggleRow}>
                 <View style={styles.adminToggleInfo}>
-                  <MaterialIcons name="public" size={20} color="#4B5563" />
+                  <MaterialIcons name="public" size={20} color={Colors.gray600} />
                   <View style={styles.adminToggleTextContainer}>
                     <Text style={styles.adminToggleTitle}>View All Jobs</Text>
                     <Text style={styles.adminToggleDescription}>
@@ -605,7 +605,7 @@ const CleanerJobs = () => {
               <MaterialIcons
                 name="location-off"
                 size={RFPercentage(8)}
-                color="#CBD5E1"
+                color={Colors.slate300}
               />
               <Text style={styles.noLocationTitle}>
                 {isAdmin && adminViewAllJobs
@@ -708,7 +708,7 @@ const CleanerJobs = () => {
                         activeOpacity={0.7}
                         style={styles.modalCloseButton}
                         onPress={() => setModalVisible2(false)}>
-                        <AntDesign name="close" size={22} color="#6B7280" />
+                        <AntDesign name="close" size={22} color={Colors.placeholderColor} />
                       </TouchableOpacity>
                     </View>
 
@@ -739,7 +739,7 @@ const CleanerJobs = () => {
                         }}
                         minimumTrackTintColor={Colors.gradient1}
                         thumbTintColor={Colors.gradient1}
-                        maximumTrackTintColor="#E5E7EB"
+                        maximumTrackTintColor={Colors.gray200}
                       />
                       <View style={styles.sliderLabels}>
                         <Text style={styles.sliderMin}>$10</Text>
@@ -758,7 +758,7 @@ const CleanerJobs = () => {
                           colors={[Colors.gradient1, Colors.gradient2]}
                           style={styles.applyButtonGradient}>
                           {priceLoading ? (
-                            <ActivityIndicator color="#FFFFFF" />
+                            <ActivityIndicator color={Colors.white} />
                           ) : (
                             <>
                               <Text style={styles.applyButtonText}>
@@ -767,7 +767,7 @@ const CleanerJobs = () => {
                               <AntDesign
                                 name="check"
                                 size={18}
-                                color="#FFFFFF"
+                                color={Colors.white}
                               />
                             </>
                           )}
@@ -811,7 +811,7 @@ const CleanerJobs = () => {
                 <TouchableOpacity
                   style={styles.modalCloseButton}
                   onPress={() => setModalVisible3(false)}>
-                  <AntDesign name="close" size={22} color="#6B7280" />
+                  <AntDesign name="close" size={22} color={Colors.placeholderColor} />
                 </TouchableOpacity>
               </View>
 
@@ -847,10 +847,10 @@ const CleanerJobs = () => {
                             <MaterialIcons
                               name="check-circle-outline"
                               size={20}
-                              color="#9CA3AF"
+                              color={Colors.gray400}
                             />
                             <Text style={styles.resultText}>{item}</Text>
-                            <AntDesign name="right" size={16} color="#9CA3AF" />
+                            <AntDesign name="right" size={16} color={Colors.gray400} />
                           </TouchableOpacity>
                         )}
                         ItemSeparatorComponent={() => (
@@ -862,7 +862,7 @@ const CleanerJobs = () => {
                         <MaterialIcons
                           name="search-off"
                           size={RFPercentage(5)}
-                          color="#CBD5E1"
+                          color={Colors.slate300}
                         />
                         <Text style={styles.noResultsTitle}>
                           No services found
@@ -889,7 +889,7 @@ const CleanerJobs = () => {
                       <MaterialIcons
                         name="check-circle"
                         size={16}
-                        color="#10B981"
+                        color={Colors.success}
                       />
                       <Text style={styles.tipText}>Search by service type</Text>
                     </View>
@@ -897,7 +897,7 @@ const CleanerJobs = () => {
                       <MaterialIcons
                         name="check-circle"
                         size={16}
-                        color="#10B981"
+                        color={Colors.success}
                       />
                       <Text style={styles.tipText}>
                         Browse available categories
@@ -907,7 +907,7 @@ const CleanerJobs = () => {
                       <MaterialIcons
                         name="check-circle"
                         size={16}
-                        color="#10B981"
+                        color={Colors.success}
                       />
                       <Text style={styles.tipText}>
                         Select one to apply filter
@@ -927,7 +927,7 @@ const CleanerJobs = () => {
                     <MaterialIcons
                       name="check-circle"
                       size={20}
-                      color="#10B981"
+                      color={Colors.success}
                     />
                     <Text style={styles.selectedTypeText}>{selectedType}</Text>
                     <TouchableOpacity
@@ -935,7 +935,7 @@ const CleanerJobs = () => {
                         setSelectedType('');
                         setQuery2('');
                       }}>
-                      <AntDesign name="close" size={16} color="#94A3B8" />
+                      <AntDesign name="close" size={16} color={Colors.slate400} />
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -954,11 +954,11 @@ const CleanerJobs = () => {
                     colors={[Colors.gradient1, Colors.gradient2]}
                     style={styles.applyButtonGradient}>
                     {loactionLoading ? (
-                      <ActivityIndicator color="#FFFFFF" />
+                      <ActivityIndicator color={Colors.white} />
                     ) : (
                       <>
                         <Text style={styles.applyButtonText}>Apply Filter</Text>
-                        <AntDesign name="check" size={18} color="#FFFFFF" />
+                        <AntDesign name="check" size={18} color={Colors.white} />
                       </>
                     )}
                   </LinearGradient>
@@ -975,14 +975,14 @@ const CleanerJobs = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
   },
   gradientHeader: {
     paddingTop: Platform.OS === 'ios' ? 40 : 0,
     paddingBottom: 30,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 12,
@@ -995,7 +995,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: RFPercentage(2),
     fontFamily: Fonts.semiBold,
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   scrollContent: {
     flexGrow: 1,
@@ -1005,13 +1005,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
   },
   loadingText: {
     marginTop: 12,
     fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
-    color: '#6B7280',
+    color: Colors.placeholderColor,
   },
   filtersSection: {
     paddingHorizontal: 20,
@@ -1020,13 +1020,13 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: RFPercentage(2),
     fontFamily: Fonts.semiBold,
-    color: '#1F2937',
+    color: Colors.gray800,
     marginBottom: 4,
   },
   sectionSubtitle: {
     fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
-    color: '#6B7280',
+    color: Colors.placeholderColor,
     marginBottom: 20,
   },
   filtersContainer: {
@@ -1040,7 +1040,7 @@ const styles = StyleSheet.create({
     width: (width - 60) / 3,
     borderRadius: 12,
     overflow: 'hidden',
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
@@ -1062,7 +1062,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(224, 234, 253, 1)',
+    backgroundColor: Colors.filterIconBg,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
@@ -1070,19 +1070,19 @@ const styles = StyleSheet.create({
   filterButtonText: {
     fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
-    color: '#374151',
+    color: Colors.gray700,
   },
   filterButtonTextActive: {
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   removeFilter: {
     position: 'absolute',
     top: -8,
     right: -8,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: 10,
     padding: 2,
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.1,
     shadowRadius: 2,
@@ -1091,14 +1091,14 @@ const styles = StyleSheet.create({
   activeFiltersCard: {
     marginHorizontal: 20,
     marginTop: 16,
-    backgroundColor: '#F8FAFF',
+    backgroundColor: Colors.blueBg50,
     borderRadius: 16,
     padding: 16,
   },
   activeFiltersTitle: {
     fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
-    color: '#4B5563',
+    color: Colors.gray600,
     marginBottom: 12,
   },
   activeFiltersList: {
@@ -1118,7 +1118,7 @@ const styles = StyleSheet.create({
   activeFilterText: {
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontMedium,
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   jobsSection: {
     marginTop: 24,
@@ -1133,14 +1133,14 @@ const styles = StyleSheet.create({
   jobsTitle: {
     fontSize: RFPercentage(1.7),
     fontFamily: Fonts.semiBold,
-    color: '#1F2937',
+    color: Colors.gray800,
     width: '50%',
   },
   jobsCount: {
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontMedium,
     color: Colors.gradient1,
-    backgroundColor: '#EEF2FF',
+    backgroundColor: Colors.indigoBg50,
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
@@ -1154,7 +1154,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
-    color: '#6B7280',
+    color: Colors.placeholderColor,
   },
   noLocationContainer: {
     alignItems: 'center',
@@ -1163,14 +1163,14 @@ const styles = StyleSheet.create({
   noLocationTitle: {
     fontSize: RFPercentage(1.8),
     fontFamily: Fonts.semiBold,
-    color: '#374151',
+    color: Colors.gray700,
     marginTop: 16,
     marginBottom: 8,
   },
   noLocationText: {
     fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
-    color: '#6B7280',
+    color: Colors.placeholderColor,
     textAlign: 'center',
     lineHeight: 22,
   },
@@ -1185,7 +1185,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#F8FAFF',
+    backgroundColor: Colors.blueBg50,
     paddingVertical: 12,
     borderRadius: 12,
     marginTop: 8,
@@ -1209,11 +1209,11 @@ const styles = StyleSheet.create({
   priceModal: {
     width: width - 40,
     alignSelf: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: 20,
     padding: 24,
     marginTop: '50%',
-    shadowColor: '#3c5c87ff',
+    shadowColor: Colors.navyShadow,
     shadowOffset: {width: 0, height: 10},
     shadowOpacity: 0.1,
     shadowRadius: 20,
@@ -1222,7 +1222,7 @@ const styles = StyleSheet.create({
   serviceModal: {
     width: width - 40,
     alignSelf: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: 20,
     padding: 24,
 
@@ -1232,7 +1232,7 @@ const styles = StyleSheet.create({
     marginTop: 'auto',
     marginBottom: 'auto',
 
-    shadowColor: '#3c5c87ff',
+    shadowColor: Colors.navyShadow,
     shadowOffset: {width: 0, height: 10},
     shadowOpacity: 0.1,
     shadowRadius: 20,
@@ -1247,7 +1247,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#EEF2FF',
+    backgroundColor: Colors.indigoBg50,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
@@ -1258,19 +1258,19 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: RFPercentage(1.8),
     fontFamily: Fonts.semiBold,
-    color: '#1F2937',
+    color: Colors.gray800,
     marginBottom: 4,
   },
   modalSubtitle: {
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
-    color: '#6B7280',
+    color: Colors.placeholderColor,
   },
   modalCloseButton: {
     padding: 4,
   },
   priceDisplayCard: {
-    backgroundColor: '#F8FAFF',
+    backgroundColor: Colors.blueBg50,
     borderRadius: 16,
     padding: 20,
     alignItems: 'center',
@@ -1279,7 +1279,7 @@ const styles = StyleSheet.create({
   priceLabel: {
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontMedium,
-    color: '#6B7280',
+    color: Colors.placeholderColor,
     marginBottom: 4,
   },
   priceValue: {
@@ -1291,7 +1291,7 @@ const styles = StyleSheet.create({
   priceHint: {
     fontSize: RFPercentage(1.3),
     fontFamily: Fonts.fontRegular,
-    color: '#9CA3AF',
+    color: Colors.gray400,
     textAlign: 'center',
   },
   sliderContainer: {
@@ -1309,12 +1309,12 @@ const styles = StyleSheet.create({
   sliderMin: {
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
-    color: '#6B7280',
+    color: Colors.placeholderColor,
   },
   sliderMax: {
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
-    color: '#6B7280',
+    color: Colors.placeholderColor,
   },
   searchContainer: {
     // marginBottom: 20,
@@ -1322,17 +1322,17 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   searchInput: {
-    backgroundColor: '#F9FAFB',
-    borderColor: '#E5E7EB',
+    backgroundColor: Colors.gray50,
+    borderColor: Colors.gray200,
     width: '100%',
   },
   resultsContainer: {
     flex: 1,
     minHeight: 200,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: Colors.gray50,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: Colors.gray200,
   },
   resultsList: {
     flex: 1,
@@ -1348,11 +1348,11 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
-    color: '#374151',
+    color: Colors.gray700,
   },
   separator: {
     height: 1,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: Colors.gray200,
     marginHorizontal: 16,
   },
   noResults: {
@@ -1362,7 +1362,7 @@ const styles = StyleSheet.create({
   noResultsText: {
     fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
-    color: '#9CA3AF',
+    color: Colors.gray400,
   },
   selectedTypeContainer: {
     marginTop: 20,
@@ -1371,25 +1371,25 @@ const styles = StyleSheet.create({
   selectedTypeLabel: {
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontMedium,
-    color: '#6B7280',
+    color: Colors.placeholderColor,
     marginBottom: 8,
   },
   selectedTypeCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F0FDF4',
+    backgroundColor: Colors.greenBg50,
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#DCFCE7',
+    borderColor: Colors.greenBg100,
     gap: 12,
   },
   selectedTypeText: {
     flex: 1,
     fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
-    color: '#166534',
+    color: Colors.green800,
   },
   modalButtonContainer: {
     marginTop: 8,
@@ -1415,28 +1415,28 @@ const styles = StyleSheet.create({
   applyButtonText: {
     fontSize: RFPercentage(1.7),
     fontFamily: Fonts.semiBold,
-    color: '#FFFFFF',
+    color: Colors.white,
   },
 
   emptySearchContainer: {
     alignItems: 'center',
     paddingVertical: 30,
     paddingHorizontal: 20,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: Colors.gray50,
     borderRadius: 12,
     marginVertical: 16,
   },
   emptySearchTitle: {
     fontSize: RFPercentage(1.8),
     fontFamily: Fonts.semiBold,
-    color: '#374151',
+    color: Colors.gray700,
     marginTop: 16,
     marginBottom: 8,
   },
   emptySearchText: {
     fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
-    color: '#6B7280',
+    color: Colors.placeholderColor,
     textAlign: 'center',
     lineHeight: 22,
     marginBottom: 20,
@@ -1453,13 +1453,13 @@ const styles = StyleSheet.create({
   tipText: {
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
-    color: '#6B7280',
+    color: Colors.placeholderColor,
   },
 
   noResultsTitle: {
     fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
-    color: '#374151',
+    color: Colors.gray700,
     marginTop: 12,
     marginBottom: 4,
   },
@@ -1476,7 +1476,7 @@ const styles = StyleSheet.create({
   adminBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#10B981', // Purple color for admin
+    backgroundColor: Colors.success, // Purple color for admin
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
@@ -1485,14 +1485,14 @@ const styles = StyleSheet.create({
   adminBadgeText: {
     fontSize: RFPercentage(1.3),
     fontFamily: Fonts.fontMedium,
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   adminToggleCard: {
-    backgroundColor: '#f5f8ffff', // Light purple background
+    backgroundColor: Colors.adminCardBg, // Light purple background
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#F3E8FF',
+    borderColor: Colors.purple100,
     paddingVertical: 12,
     justifyContent: 'center',
   },
@@ -1513,30 +1513,30 @@ const styles = StyleSheet.create({
   adminToggleTitle: {
     fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
-    color: '#1F2937',
+    color: Colors.gray800,
     marginBottom: 2,
   },
   adminToggleDescription: {
     fontSize: RFPercentage(1.3),
     fontFamily: Fonts.fontRegular,
-    color: '#6B7280',
+    color: Colors.placeholderColor,
   },
   toggleSwitch: {
     width: 50,
     height: 24,
     borderRadius: 14,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: Colors.gray200,
     padding: 2,
     justifyContent: 'center',
   },
   toggleSwitchActive: {
-    backgroundColor: '#10B981',
+    backgroundColor: Colors.success,
   },
   toggleCircle: {
     width: 20,
     height: 20,
     borderRadius: 12,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     alignSelf: 'flex-start',
   },
   toggleCircleActive: {
@@ -1545,7 +1545,7 @@ const styles = StyleSheet.create({
   adminStats: {
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
+    borderTopColor: Colors.slate100,
   },
   adminStatItem: {
     alignItems: 'center',
@@ -1553,13 +1553,13 @@ const styles = StyleSheet.create({
   adminStatNumber: {
     fontSize: RFPercentage(2),
     fontFamily: Fonts.semiBold,
-    color: '#10B981',
+    color: Colors.success,
     marginBottom: 4,
   },
   adminStatLabel: {
     fontSize: RFPercentage(1.3),
     fontFamily: Fonts.fontRegular,
-    color: '#6B7280',
+    color: Colors.placeholderColor,
   },
 
   // Updated styles for jobs header
@@ -1567,13 +1567,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   adminIndicator: {
-    color: '#8B5CF6',
+    color: Colors.violet500,
     fontSize: RFPercentage(1.4),
   },
   adminSubtitle: {
     fontSize: RFPercentage(1.2),
     fontFamily: Fonts.fontRegular,
-    color: '#6B7280',
+    color: Colors.placeholderColor,
     marginTop: 2,
   },
 });

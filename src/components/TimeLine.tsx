@@ -16,13 +16,13 @@ const TimeLine = (props:Props) => {
           <View style={styles.stepInner}></View>
         </View>
 
-        <View style={[styles.line, {backgroundColor : props.stepTwo ? Colors.gradient1 : 'rgba(209, 213, 219, 1)'}]}></View>
+        <View style={[styles.line, {backgroundColor : props.stepTwo ? Colors.gradient1 : Colors.gray300}]}></View>
 
         <View style={styles.stepOuter}>
           <View style={styles.stepInner}></View>
         </View>
 
-        <View style={[styles.line, {backgroundColor : props.stepThree ? Colors.gradient1 : 'rgba(209, 213, 219, 1)'}]}></View>
+        <View style={[styles.line, {backgroundColor : props.stepThree ? Colors.gradient1 : Colors.gray300}]}></View>
 
         <View style={styles.stepOuter}>
           <View style={styles.stepInner}></View>
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
   },
   line: {
     height: 2,
-    backgroundColor: 'rgba(209, 213, 219, 1)',
+    backgroundColor: Colors.gray300,
     flex:1
   },
   textContainer: {
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(0.5),
   },
   textStyle: {
-    color: 'rgba(75, 85, 99, 1)',
+    color: Colors.gray600,
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.4),
   },

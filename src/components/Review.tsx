@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
     bottom: 2,
   },
   reviewText: {
-    color: 'rgba(75, 85, 99, 1)',
+    color: Colors.gray600,
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.3),
     marginTop: RFPercentage(0.1),
@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
     right: 3,
   },
   rating: {
-    color: 'rgba(0, 0, 0, 1)',
+    color: Colors.black,
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.3),
     top: 1,

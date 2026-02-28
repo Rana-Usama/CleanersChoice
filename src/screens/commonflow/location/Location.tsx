@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 12,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: Colors.borderGray,
     width: '90%',
   },
   suggestionsContainer: {
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     maxHeight: RFPercentage(40),
     elevation: 20,
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: Colors.lightGray,
   },
   description: {color: 'black', fontSize: RFPercentage(1.7)},
   buttonWrapper: {

@@ -205,10 +205,10 @@ const Jobs = ({navigation}: any) => {
           title="My Posted Jobs"
           textStyle={styles.headerText}
           left={true}
-          arrowColor="#FFFFFF"
+          arrowColor={Colors.white}
           style={{backgroundColor: 'transparent'}}
           logo
-          tintColor={'white'}
+          tintColor={Colors.white}
           rightText="Post Job"
           onPress={() => navigation.navigate('PostJob', {jobId: null})}
           right
@@ -228,7 +228,7 @@ const Jobs = ({navigation}: any) => {
         {/* Stats Overview */}
         <View style={styles.statsCard}>
           <LinearGradient
-            colors={['#FFFFFF', '#F8FAFF']}
+            colors={[Colors.white, Colors.blueBg50]}
             style={styles.statsGradient}>
             <Text style={styles.statsTitle}>Job Overview</Text>
             <Text style={styles.statsSubtitle}>Track your job postings</Text>
@@ -253,7 +253,7 @@ const Jobs = ({navigation}: any) => {
                   <MaterialIcons
                     name="check-circle"
                     size={20}
-                    color="#10B981"
+                    color={Colors.success}
                   />
                 </View>
                 <Text style={[styles.statValue, styles.activeStatValue]}>
@@ -267,7 +267,7 @@ const Jobs = ({navigation}: any) => {
               <View style={styles.statItem}>
                 <View
                   style={[styles.statIconContainer, styles.completedStatIcon]}>
-                  <MaterialIcons name="done-all" size={20} color="#667eea" />
+                  <MaterialIcons name="done-all" size={20} color={Colors.primaryBlue} />
                 </View>
                 <Text style={[styles.statValue, styles.completedStatValue]}>
                   {jobStats.completed}
@@ -296,7 +296,7 @@ const Jobs = ({navigation}: any) => {
                   colors={
                     active
                       ? [Colors.gradient1, Colors.gradient2]
-                      : ['#FFFFFF', '#dae2f6ff']
+                      : [Colors.white, Colors.lavenderFilterBg]
                   }
                   style={styles.filterGradient}>
                   <Text
@@ -322,7 +322,7 @@ const Jobs = ({navigation}: any) => {
                   colors={
                     completed
                       ? [Colors.gradient1, Colors.gradient2]
-                      : ['#FFFFFF', '#dae2f6ff']
+                      : [Colors.white, Colors.lavenderFilterBg]
                   }
                   style={styles.filterGradient}>
                   <Text
@@ -386,7 +386,7 @@ const Jobs = ({navigation}: any) => {
                   <LinearGradient
                     colors={[Colors.gradient1, Colors.gradient2]}
                     style={styles.postJobGradient}>
-                    <MaterialIcons name="add" size={20} color="#FFFFFF" />
+                    <MaterialIcons name="add" size={20} color={Colors.white} />
                     <Text style={styles.postJobText}>Post New Job</Text>
                   </LinearGradient>
                 </TouchableOpacity>
@@ -429,7 +429,7 @@ const Jobs = ({navigation}: any) => {
           <LinearGradient
             colors={[Colors.gradient1, Colors.gradient2]}
             style={styles.newJobGradient}>
-            <MaterialIcons name="add" size={24} color="#FFFFFF" />
+            <MaterialIcons name="add" size={24} color={Colors.white} />
           </LinearGradient>
         </TouchableOpacity>
       )}
@@ -458,14 +458,14 @@ export default Jobs;
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
   },
   gradientHeader: {
     paddingTop: Platform.OS === 'ios' ? 40 : 0,
     paddingBottom: 30,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 12,
@@ -477,7 +477,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: RFPercentage(2),
     fontFamily: Fonts.semiBold,
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   scrollContent: {
     flexGrow: 1,
@@ -487,7 +487,7 @@ const styles = StyleSheet.create({
     marginTop: 30,
     marginHorizontal: 20,
     borderRadius: 24,
-    shadowColor: '#667eea',
+    shadowColor: Colors.primaryBlue,
     shadowOffset: {width: 0, height: 10},
     shadowOpacity: 0.2,
     shadowRadius: 20,
@@ -500,19 +500,19 @@ const styles = StyleSheet.create({
   statsTitle: {
     fontSize: RFPercentage(2),
     fontFamily: Fonts.semiBold,
-    color: '#1F2937',
+    color: Colors.gray800,
     marginBottom: 4,
   },
   statsSubtitle: {
     fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
-    color: '#6B7280',
+    color: Colors.placeholderColor,
     marginBottom: 20,
   },
   statsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8FAFF',
+    backgroundColor: Colors.blueBg50,
     padding: 16,
     borderRadius: 16,
     gap: 12,
@@ -531,10 +531,10 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   activeStatIcon: {
-    backgroundColor: '#DCFCE7',
+    backgroundColor: Colors.greenBg100,
   },
   completedStatIcon: {
-    backgroundColor: '#E0EAFF',
+    backgroundColor: Colors.blueBg300,
   },
   statValue: {
     fontFamily: Fonts.semiBold,
@@ -543,7 +543,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   activeStatValue: {
-    color: '#10B981',
+    color: Colors.success,
   },
   completedStatValue: {
     color: Colors.gradient1,
@@ -551,12 +551,12 @@ const styles = StyleSheet.create({
   statLabel: {
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.3),
-    color: '#6B7280',
+    color: Colors.placeholderColor,
   },
   statDivider: {
     width: 1,
     height: 40,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: Colors.gray200,
   },
   filtersSection: {
     paddingHorizontal: 20,
@@ -565,13 +565,13 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: RFPercentage(2),
     fontFamily: Fonts.semiBold,
-    color: '#1F2937',
+    color: Colors.gray800,
     marginBottom: 4,
   },
   sectionSubtitle: {
     fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
-    color: '#6B7280',
+    color: Colors.placeholderColor,
     marginBottom: 20,
   },
   filtersContainer: {
@@ -582,7 +582,7 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 12,
     overflow: 'hidden',
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
@@ -605,7 +605,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(224, 234, 253, 1)',
+    backgroundColor: Colors.filterIconBg,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
@@ -613,15 +613,15 @@ const styles = StyleSheet.create({
   filterButtonText: {
     fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
-    color: '#374151',
+    color: Colors.gray700,
     textAlign: 'center',
   },
   filterButtonTextActive: {
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   activeFilterCard: {
     marginTop: 16,
-    backgroundColor: '#F8FAFF',
+    backgroundColor: Colors.blueBg50,
     borderRadius: 16,
     padding: 16,
   },
@@ -633,7 +633,7 @@ const styles = StyleSheet.create({
   activeFilterText: {
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontMedium,
-    color: '#4B5563',
+    color: Colors.gray600,
     flex: 1,
   },
   jobsSection: {
@@ -649,13 +649,13 @@ const styles = StyleSheet.create({
   jobsTitle: {
     fontSize: RFPercentage(1.7),
     fontFamily: Fonts.semiBold,
-    color: '#1F2937',
+    color: Colors.gray800,
   },
   jobsCount: {
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontMedium,
     color: Colors.gradient1,
-    backgroundColor: '#EEF2FF',
+    backgroundColor: Colors.indigoBg50,
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
@@ -669,7 +669,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
-    color: '#6B7280',
+    color: Colors.placeholderColor,
   },
   noJobsContainer: {
     alignItems: 'center',
@@ -693,7 +693,7 @@ const styles = StyleSheet.create({
   postJobText: {
     fontSize: RFPercentage(1.6),
     fontFamily: Fonts.semiBold,
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   jobsList: {
     marginTop: 8,
@@ -702,16 +702,16 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   jobCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: 16,
     marginBottom: 12,
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 3,
     borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: Colors.lightGrayBg,
   },
   activeJobCard: {
     borderLeftWidth: 4,
@@ -719,7 +719,7 @@ const styles = StyleSheet.create({
   },
   completedJobCard: {
     borderLeftWidth: 4,
-    borderLeftColor: '#667eea',
+    borderLeftColor: Colors.primaryBlue,
   },
   newJobButton: {
     position: 'absolute',
@@ -745,7 +745,7 @@ const styles = StyleSheet.create({
   newJobText: {
     fontSize: RFPercentage(1.6),
     fontFamily: Fonts.semiBold,
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   modalContainer: {
     position: 'absolute',

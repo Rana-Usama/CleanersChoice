@@ -139,7 +139,7 @@ const CheckAvailable: React.FC<CheckAvailableProps> = ({
           <MaterialCommunityIcons
             name="check-circle"
             size={14}
-            color="#FFFFFF"
+            color={Colors.white}
           />
           <Text style={styles.availableText}>Available</Text>
         </LinearGradient>
@@ -155,21 +155,21 @@ const styles = StyleSheet.create({
     width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: 16,
     padding: RFPercentage(1.5),
     marginBottom: RFPercentage(1),
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
     borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: Colors.lightGrayBg,
     justifyContent: 'space-between',
   },
   todayContainer: {
-    backgroundColor: '#F0F9FF',
+    backgroundColor: Colors.skyBlueBg,
     borderColor: Colors.gradient1,
     borderWidth: 1.5,
     shadowColor: Colors.gradient1,
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
     width: RFPercentage(5),
     height: RFPercentage(5),
     borderRadius: RFPercentage(2.5),
-    backgroundColor: '#F3F4F6',
+    backgroundColor: Colors.lightGrayBg,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: RFPercentage(1),
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
     marginBottom: -2,
   },
   todayDayText: {
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   dayNumber: {
     fontSize: RFPercentage(1.4),
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
     color: Colors.primaryText,
   },
   todayDayNumber: {
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   dayInfo: {
     flexDirection: 'column',
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
   todayBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FEF3C7',
+    backgroundColor: Colors.amberBg100,
     paddingHorizontal: RFPercentage(0.6),
     paddingVertical: RFPercentage(0.2),
     borderRadius: 8,
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
     position:"absolute"
   },
   todayBadgeText: {
-    color: '#92400E',
+    color: Colors.amberDarkText,
     fontSize: RFPercentage(1),
     fontFamily: Fonts.fontMedium,
   },
@@ -247,12 +247,12 @@ const styles = StyleSheet.create({
   timeSlot: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: Colors.inputBg,
     paddingHorizontal: RFPercentage(1),
     paddingVertical: RFPercentage(0.8),
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: Colors.inputBorder,
   },
   timeIconContainer: {
     marginRight: RFPercentage(0.5),
@@ -289,19 +289,19 @@ const styles = StyleSheet.create({
     gap: RFPercentage(0.3),
   },
   availableText: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontSize: RFPercentage(1.1),
     fontFamily: Fonts.fontMedium,
   },
   scheduledBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ECFDF5',
+    backgroundColor: Colors.greenBg75,
     paddingHorizontal: RFPercentage(0.8),
     paddingVertical: RFPercentage(0.4),
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#D1FAE5',
+    borderColor: Colors.successBg,
     gap: RFPercentage(0.3),
   },
   scheduledText: {

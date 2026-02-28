@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
   circle: {
     position: 'absolute',
     borderRadius: RFPercentage(50),
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: Colors.whiteOverlay10,
   },
   circle1: {
     width: RFPercentage(40),
@@ -204,11 +204,11 @@ const styles = StyleSheet.create({
     width: RFPercentage(16),
     height: RFPercentage(16),
     borderRadius: RFPercentage(8),
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: Colors.whiteOverlay20,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 4,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderColor: Colors.whiteOverlay30,
   },
   checkmarkOverlay: {
     position: 'absolute',
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
     bottom: RFPercentage(-1),
     right: RFPercentage(-1),
     // Shadow
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {
       width: 0,
       height: 4,
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
     lineHeight: RFPercentage(3.8),
   },
   subtitle: {
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: Colors.whiteOverlay80,
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.8),
     textAlign: 'center',
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
   },
   statCard: {
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    backgroundColor: Colors.whiteOverlay15,
     padding: RFPercentage(2),
     borderRadius: RFPercentage(2),
     flex: 0.48,
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(0.3),
   },
   statDescription: {
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: Colors.whiteOverlay70,
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.3),
     textAlign: 'center',
@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginBottom: RFPercentage(2),
     // Shadow
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {
       width: 0,
       height: 8,

@@ -234,11 +234,11 @@ const Chat = ({navigation, route}: any) => {
                   {...props}
                   wrapperStyle={{
                     left: {
-                      backgroundColor: 'rgba(232, 235, 238, 1)',
+                      backgroundColor: Colors.coolGray200,
                       padding: RFPercentage(0.6),
                     },
                     right: {
-                      backgroundColor: 'rgba(115, 162, 199, 1)',
+                      backgroundColor: Colors.steelBlue,
                       padding: RFPercentage(0.6),
                     },
                   }}
@@ -259,7 +259,7 @@ const Chat = ({navigation, route}: any) => {
               renderInputToolbar={props => (
                 <View
                   style={{
-                    backgroundColor: 'rgba(248, 248, 248, 1)',
+                    backgroundColor: Colors.offWhite,
                     width: '100%',
                     minHeight:
                       Platform.OS === 'ios'
@@ -276,7 +276,7 @@ const Chat = ({navigation, route}: any) => {
                       <TextInput
                         style={styles.customTextInput}
                         placeholder="Type a message"
-                        placeholderTextColor={'rgba(178, 177, 177, 1)'}
+                        placeholderTextColor={Colors.warmGray400}
                         value={message}
                         onChangeText={setMessage}
                         multiline={true}
@@ -332,11 +332,11 @@ const Chat = ({navigation, route}: any) => {
                       width: RFPercentage(5),
                       height: RFPercentage(5),
                       borderRadius: RFPercentage(50),
-                      backgroundColor: 'rgba(208, 209, 211, 1)',
+                      backgroundColor: Colors.coolGray300,
                       alignItems: 'center',
                       justifyContent: 'center',
                       borderWidth: 1,
-                      borderColor: 'rgba(188, 189, 191, 1)',
+                      borderColor: Colors.warmGray350,
                     }}>
                     <Text
                       style={{
@@ -405,7 +405,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(100),
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(229, 231, 235, 0.3)',
+    backgroundColor: Colors.grayBorderOverlay30,
   },
   profileContainer: {
     width: '100%',
@@ -413,7 +413,7 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(7),
     justifyContent: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(226, 227, 230, 1)',
+    borderBottomColor: Colors.coolGray250,
     alignSelf: 'center',
     paddingBottom: RFPercentage(1),
   },
@@ -449,9 +449,9 @@ const styles = StyleSheet.create({
     borderTopWidth: RFPercentage(0.1),
     alignSelf: 'center',
     width: '90%',
-    backgroundColor: 'rgba(219, 221, 222, 0.5)',
-    borderColor: 'rgba(234, 232, 232, 0.9)',
-    borderTopColor: 'rgba(234, 232, 232, 0.9)',
+    backgroundColor: Colors.silverOverlay50,
+    borderColor: Colors.warmGrayOverlay90,
+    borderTopColor: Colors.warmGrayOverlay90,
     bottom: Platform.OS === 'ios' ? RFPercentage(1) : 0,
     paddingVertical: RFPercentage(1.4),
   },

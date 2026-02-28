@@ -74,26 +74,26 @@ const Profile = ({navigation}: any) => {
     switch (role?.toLowerCase()) {
       case 'cleaner':
         return {
-          backgroundColor: 'rgba(236, 245, 251, 0.9)',
+          backgroundColor: Colors.lightBlueOverlay90,
           color: Colors.gradient1,
           icon: 'sparkles',
         };
       case 'customer':
         return {
-          backgroundColor: 'rgba(236, 245, 251, 0.9)',
+          backgroundColor: Colors.lightBlueOverlay90,
           color: Colors.gradient1,
           icon: 'person',
         };
       case 'admin':
         return {
-          backgroundColor: 'rgba(245, 158, 11, 0.1)',
-          color: '#F59E0B',
+          backgroundColor: Colors.amberOverlay10,
+          color: Colors.amber500,
           icon: 'shield-checkmark',
         };
       default:
         return {
-          backgroundColor: 'rgba(156, 163, 175, 0.1)',
-          color: '#6B7280',
+          backgroundColor: Colors.grayOverlay10,
+          color: Colors.placeholderColor,
           icon: 'person-circle',
         };
     }
@@ -115,7 +115,7 @@ const Profile = ({navigation}: any) => {
           title="Your Profile"
           textStyle={styles.headerText}
           left={true}
-          arrowColor="#FFFFFF"
+          arrowColor={Colors.white}
           style={{backgroundColor: 'transparent'}}
           logo
           tintColor={'white'}
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     paddingBottom: 30,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 12,
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: RFPercentage(2),
     fontFamily: Fonts.semiBold,
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   profileHeader: {
     alignItems: 'center',
@@ -236,13 +236,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: RFPercentage(2),
     marginTop: RFPercentage(1),
-    shadowColor: 'rgba(0, 0, 0, 0.1)',
+    shadowColor: Colors.blackOverlay10,
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 12,
     elevation: 8,
     borderWidth: 1,
-    borderColor: 'rgba(229, 231, 235, 0.8)',
+    borderColor: Colors.grayBorderOverlay80,
   },
   avatarContainer: {
     marginBottom: RFPercentage(2),
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
     width: RFPercentage(2),
     height: RFPercentage(2),
     borderRadius: RFPercentage(1),
-    backgroundColor: '#10B981',
+    backgroundColor: Colors.success,
     borderWidth: 2,
     borderColor: 'white',
   },
@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   nameText: {
-    color: '#445368ff',
+    color: Colors.blueGray700,
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(2.2),
     marginBottom: RFPercentage(1),
@@ -307,13 +307,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: RFPercentage(2),
     padding: RFPercentage(2),
-    shadowColor: 'rgba(0, 0, 0, 0.05)',
+    shadowColor: Colors.blackOverlay05,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
     borderWidth: 1,
-    borderColor: 'rgba(229, 231, 235, 0.6)',
+    borderColor: Colors.grayBorderOverlay60,
   },
   statsContainer: {
     flexDirection: 'row',
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: RFPercentage(3),
     paddingVertical: RFPercentage(2),
-    backgroundColor: 'rgba(249, 250, 251, 0.8)',
+    backgroundColor: Colors.gray50Overlay80,
     borderRadius: RFPercentage(1.5),
     marginHorizontal: RFPercentage(-1),
   },
@@ -330,13 +330,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   statNumber: {
-    color: '#1F2937',
+    color: Colors.gray800,
     fontFamily: Fonts.fontBold,
     fontSize: RFPercentage(2.2),
     marginBottom: RFPercentage(0.5),
   },
   statLabel: {
-    color: '#6B7280',
+    color: Colors.placeholderColor,
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.4),
     textAlign: 'center',
@@ -344,6 +344,6 @@ const styles = StyleSheet.create({
   statDivider: {
     width: 1,
     height: '60%',
-    backgroundColor: 'rgba(229, 231, 235, 0.8)',
+    backgroundColor: Colors.grayBorderOverlay80,
   },
 });

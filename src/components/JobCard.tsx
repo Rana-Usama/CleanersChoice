@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
   shadowContainer: {
     width: '100%',
     alignSelf: 'center',
-    shadowColor: 'rgba(182, 196, 215, 0.15)',
+    shadowColor: Colors.shadowBlueGrayLight,
     shadowOffset: {width: 0, height: 8},
     shadowOpacity: 0.25,
     shadowRadius: 12,
@@ -106,10 +106,10 @@ const styles = StyleSheet.create({
   container: {
     width: '100%',
     borderWidth: 1,
-    borderColor: 'rgba(199, 212, 234, 0.5)',
+    borderColor: Colors.blueBorderOverlay50,
     borderRadius: RFPercentage(2),
     padding: RFPercentage(2),
-    backgroundColor: 'white',
+    backgroundColor: Colors.white,
     overflow: 'hidden',
   },
   header: {
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   nameText: {
-    color: 'rgba(64, 79, 101, 1)',
+    color: Colors.slateText,
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.9),
     flex: 1,
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     padding: RFPercentage(0.5),
-    backgroundColor: 'rgba(68, 119, 239, 0.1)',
+    backgroundColor: Colors.primaryBlueOverlay10,
     borderRadius: RFPercentage(1),
     marginLeft: RFPercentage(1),
   },
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     height: RFPercentage(2),
   },
   detailsSection: {
-    backgroundColor: 'rgba(249, 250, 251, 0.9)',
+    backgroundColor: Colors.gray50Overlay90,
     borderRadius: RFPercentage(1),
     padding: RFPercentage(1.5),
     marginBottom: RFPercentage(1.5),
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     borderTopWidth: 1,
-    borderTopColor: 'rgba(229, 231, 235, 0.5)',
+    borderTopColor: Colors.grayBorderOverlay50,
     paddingTop: RFPercentage(1.5),
   },
   priceSection: {
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
   ctaButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(149, 205, 248, 0.1)',
+    backgroundColor: Colors.lightBlueOverlay10,
     paddingHorizontal: RFPercentage(1.2),
     paddingVertical: RFPercentage(0.8),
     borderRadius: RFPercentage(1),

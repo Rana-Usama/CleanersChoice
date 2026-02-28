@@ -175,36 +175,36 @@ const JobDetails = ({route, navigation}: any) => {
       switch (status) {
         case 'active':
           return {
-            color: '#10B981',
-            bgColor: '#D1FAE5',
+            color: Colors.success,
+            bgColor: Colors.successBg,
             text: 'Active',
             icon: 'check-circle',
           };
         case 'completed':
           return {
-            color: '#6366F1',
-            bgColor: '#E0E7FF',
+            color: Colors.indigo500,
+            bgColor: Colors.indigoBg100,
             text: 'Completed',
             icon: 'check-circle',
           };
         case 'pending':
           return {
-            color: '#F59E0B',
-            bgColor: '#FEF3C7',
+            color: Colors.amber500,
+            bgColor: Colors.amberBg100,
             text: 'Pending',
             icon: 'clock',
           };
         case 'cancelled':
           return {
-            color: '#EF4444',
-            bgColor: '#FEE2E2',
+            color: Colors.red500,
+            bgColor: Colors.redBg100,
             text: 'Cancelled',
             icon: 'close-circle',
           };
         default:
           return {
             color: Colors.gradient1,
-            bgColor: '#E0F2FE',
+            bgColor: Colors.skyBlueBg100,
             text: status,
             icon: 'information',
           };
@@ -302,7 +302,7 @@ const JobDetails = ({route, navigation}: any) => {
           <TouchableOpacity
             onPress={() => navigation.goBack()}
             style={styles.backButton}>
-            <Feather name="arrow-left" size={24} color="#FFFFFF" />
+            <Feather name="arrow-left" size={24} color={Colors.white} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Job Details</Text>
           <View style={{width: 40}} />
@@ -385,14 +385,14 @@ const JobDetails = ({route, navigation}: any) => {
         {/* Location Card */}
         <InfoCard title="Location" icon="map-marker-outline">
           <View style={styles.locationContainer}>
-            <Ionicons name="location" size={20} color="#EF4444" />
+            <Ionicons name="location" size={20} color={Colors.red500} />
             <Text style={styles.locationText}>
               {item.location?.name || 'Location not specified'}
             </Text>
           </View>
           {item.location?.coordinates && (
             <TouchableOpacity style={styles.viewMapButton}>
-              <Feather name="map" size={16} color="#FFFFFF" />
+              <Feather name="map" size={16} color={Colors.white} />
               <Text style={styles.viewMapText}>View on Map</Text>
             </TouchableOpacity>
           )}
@@ -435,7 +435,7 @@ const JobDetails = ({route, navigation}: any) => {
                   </View>
                 </View>
                 {/* <View style={styles.userRating}>
-                  <FontAwesome name="star" size={14} color="#FBBF24" />
+                  <FontAwesome name="star" size={14} color={Colors.amber400} />
                   <Text style={styles.ratingText}>4.8</Text>
                   <Text style={styles.reviewsText}>(24 reviews)</Text>
                 </View> */}
@@ -464,12 +464,12 @@ const JobDetails = ({route, navigation}: any) => {
                     <MaterialCommunityIcons
                       name="check-decagram"
                       size={14}
-                      color="#10B981"
+                      color={Colors.success}
                     />
                     <Text style={styles.statText}>Verified</Text>
                   </View>
                   <View style={styles.statItem}>
-                    <FontAwesome name="star" size={14} color="#FBBF24" />
+                    <FontAwesome name="star" size={14} color={Colors.amber400} />
                     <Text style={styles.statText}>4.9 (56)</Text>
                   </View>
                   <View style={styles.statItem}>
@@ -532,7 +532,7 @@ const JobDetails = ({route, navigation}: any) => {
             <MaterialCommunityIcons
               name="check-circle"
               size={RFPercentage(2.5)}
-              color="#10B981"
+              color={Colors.success}
             />
             <Text style={styles.completedText}>Job Completed</Text>
           </View>
@@ -566,10 +566,10 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: Colors.whiteOverlay20,
   },
   headerTitle: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontSize: RFPercentage(2),
     fontFamily: Fonts.semiBold,
   },
@@ -579,7 +579,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   jobTitle: {
-    color: '#5e687bff',
+    color: Colors.blueGray600,
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(2),
     flex: 1,
@@ -614,18 +614,18 @@ const styles = StyleSheet.create({
   },
   quickInfoCard: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: 16,
     padding: RFPercentage(1.5),
     alignItems: 'center',
     marginHorizontal: RFPercentage(0.5),
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
     // elevation: 3,
     borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: Colors.lightGrayBg,
     flexDirection: 'row',
     marginTop: RFPercentage(1),
     borderBottomWidth: 2,
@@ -644,17 +644,17 @@ const styles = StyleSheet.create({
     marginLeft: RFPercentage(1),
   },
   infoCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: 16,
     padding: RFPercentage(2),
     marginBottom: RFPercentage(2),
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 8,
     // elevation: 3,
     borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: Colors.lightGrayBg,
     borderBottomWidth: 2,
   },
   cardHeader: {
@@ -667,7 +667,7 @@ const styles = StyleSheet.create({
     width: RFPercentage(3.5),
     height: RFPercentage(3.5),
     borderRadius: RFPercentage(1),
-    backgroundColor: '#F0F9FF',
+    backgroundColor: Colors.skyBlueBg,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -698,11 +698,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: RFPercentage(1),
-    backgroundColor: '#F8FAFC',
+    backgroundColor: Colors.inputBg,
     padding: RFPercentage(1.5),
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: Colors.inputBorder,
   },
   locationText: {
     fontSize: RFPercentage(1.5),
@@ -721,7 +721,7 @@ const styles = StyleSheet.create({
     gap: RFPercentage(0.5),
   },
   viewMapText: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontMedium,
   },
@@ -744,18 +744,18 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(0.3),
   },
   timelineDotPending: {
-    backgroundColor: '#E5E7EB',
+    backgroundColor: Colors.gray200,
   },
   timelineInnerDot: {
     width: RFPercentage(1),
     height: RFPercentage(1),
     borderRadius: RFPercentage(0.5),
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
   },
   timelineConnector: {
     width: 2,
     height: RFPercentage(3),
-    backgroundColor: '#E5E7EB',
+    backgroundColor: Colors.gray200,
     marginLeft: RFPercentage(1.1),
     marginVertical: 2,
   },
@@ -862,19 +862,19 @@ const styles = StyleSheet.create({
     bottom:  0,
     left: 0,
     right: 0,
-    backgroundColor: '#ffffffff',
+    backgroundColor: Colors.white,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: RFPercentage(2),
     paddingBottom: Platform.OS === 'ios' ? RFPercentage(4) : RFPercentage(2),
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {width: 0, height: -4},
     shadowOpacity: 0.1,
     shadowRadius: 8,
     height:RFPercentage(12),
     justifyContent:"center",
     borderTopWidth:1,
-     borderTopColor:"#eaeaeaff"
+     borderTopColor: Colors.lightGray200,
     // elevation: 10,
   },
   actionButtons: {
@@ -883,7 +883,7 @@ const styles = StyleSheet.create({
   },
   editButton: {
     // flex: 0.5,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderWidth: 1,
     borderColor: Colors.gradient1,
     borderRadius: 20,
@@ -914,15 +914,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#D1FAE5',
+    backgroundColor: Colors.successBg,
     padding: RFPercentage(1.8),
     borderRadius: 100,
     borderWidth: 1,
-    borderColor: '#A7F3D0',
+    borderColor: Colors.successBorder,
     gap: RFPercentage(1),
   },
   completedText: {
-    color: '#065F46',
+    color: Colors.successText,
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.6),
   },
