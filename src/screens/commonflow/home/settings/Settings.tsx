@@ -7,6 +7,7 @@ import {
   Platform,
   StatusBar,
   ScrollView,
+  Linking,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -30,10 +31,13 @@ import moment from 'moment';
 const Settings = ({navigation}: any) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
+  const [modalVisible3, setModalVisible3] = useState(false);
   const [role, setuserRole] = useState('');
   const [loading, setLoading] = useState(false);
   useExitAppOnBack();
   const [subscriptionId, setSubscriptionId] = useState(null);
+  const [subscription, setSubscription] = useState(false);
+  const [cancelSubscription, setCancelSubscription] = useState(false);
 
   const [appVersion, setAppVersion] = useState('');
   const [buildNumber, setBuildNumber] = useState('');
@@ -81,8 +85,11 @@ const Settings = ({navigation}: any) => {
       const userDoc = await firestore().collection('Users').doc(user.uid).get();
       if (userDoc.exists) {
         const userData = userDoc.data();
+        console.log('User data fetched for role and subscription:', userData);
         setSubscriptionId(userData?.subscriptionId);
         setuserRole(userData?.role);
+        setSubscription(userData?.subscription ?? false);
+        setCancelSubscription(userData?.cancelSubscription ?? false);
       }
     } catch (error) {}
   };
@@ -280,7 +287,17 @@ const Settings = ({navigation}: any) => {
                 text="Delete Account"
                 icon="account-remove"
                 color={Colors.red500}
-                onPress={() => setModalVisible2(true)}
+                onPress={() => {
+                  if (
+                    Platform.OS === 'ios' &&
+                    subscription === true &&
+                    cancelSubscription === false
+                  ) {
+                    setModalVisible3(true);
+                    return;
+                  }
+                  setModalVisible2(true);
+                }}
               />
               <ProfileField
                 text="Logout"
@@ -320,6 +337,31 @@ const Settings = ({navigation}: any) => {
               onPress2={logOut}
               loader={loading}
               buttonTitle="Logout"
+            />
+          </View>
+        </TouchableWithoutFeedback>
+      )}
+
+      {/* Active Subscription Modal (iOS) */}
+      {modalVisible3 && (
+        <TouchableWithoutFeedback>
+          <View style={styles.modalContainer}>
+            <BlurView
+              style={styles.blurView}
+              blurType="light"
+              blurAmount={10}
+            />
+            <CustomModal
+              title="Subscription Active"
+              subTitle="You currently have an active subscription. Please cancel your subscription first before deleting your account."
+              iconName="alert-circle-outline"
+              iconColor={Colors.red500}
+              onPress={() => setModalVisible3(false)}
+              onPress2={() => {
+                setModalVisible3(false);
+                Linking.openURL('https://apps.apple.com/account/subscriptions');
+              }}
+              buttonTitle="Manage Plan"
             />
           </View>
         </TouchableWithoutFeedback>

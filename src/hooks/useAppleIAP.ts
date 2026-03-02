@@ -16,6 +16,7 @@ import firestore from '@react-native-firebase/firestore';
 const PRODUCT_ID = 'cleaner.premium.monthly.V1';
 
 const API_BASE = 'https://cleaners-choice-server.vercel.app';
+// const API_BASE = 'http://localhost:3000';
 
 /** Returns true if the error represents a user cancellation (including simulator quirks) */
 const isCancellation = (codeOrMessage: string | undefined): boolean => {
@@ -40,7 +41,7 @@ export function useAppleIAP(
   onSuccess: () => void,
   onError: (msg: string) => void,
 ): UseAppleIAPReturn {
-  const [productPrice, setProductPrice] = useState('$15.99');
+  const [productPrice, setProductPrice] = useState('$20.99');
   const [iapLoading, setIapLoading] = useState(false);
   const [iapError, setIapError] = useState<string | null>(null);
   const user = auth().currentUser;
