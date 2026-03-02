@@ -18,6 +18,8 @@ interface props {
   loader?: boolean;
   subTitle: string;
   buttonTitle?: string;
+  iconName?: string;
+  iconColor?: string;
 }
 
 const CustomModal = (props: props) => {
@@ -32,6 +34,16 @@ const CustomModal = (props: props) => {
             size={RFPercentage(5)}
           />
         </View>
+      )}
+
+      {/* Custom Icon */}
+      {!props.passwordModal && props.iconName && (
+        <MaterialCommunityIcons
+          name={props.iconName}
+          color={props.iconColor || Colors.red500}
+          size={RFPercentage(4)}
+          style={{marginBottom: RFPercentage(1)}}
+        />
       )}
 
       {/* Title */}
@@ -111,7 +123,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(2.1),
     textAlign: 'center',
-    marginBottom: RFPercentage(1),
+    marginBottom: RFPercentage(2),
     lineHeight: RFPercentage(2.8),
   },
   modalText: {
@@ -119,7 +131,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontRegular,
     color: Colors.secondaryText,
-    marginTop: RFPercentage(1.5),
+    marginTop: 0,
     marginBottom: RFPercentage(3),
     lineHeight: RFPercentage(2.4),
     paddingHorizontal: RFPercentage(1),
