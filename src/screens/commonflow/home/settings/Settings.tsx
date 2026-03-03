@@ -93,7 +93,10 @@ const Settings = ({navigation}: any) => {
       }
     } catch (error) {}
   };
-  userRole();
+
+  useEffect(() => {
+    userRole();
+  }, []);
 
   const deleteAccount = async () => {
     setLoading(true);
@@ -438,7 +441,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.lightGrayBg,
     overflow: 'hidden',
-    borderBottomWidth:3
+    borderBottomWidth: 3,
   },
   sectionHeader: {
     flexDirection: 'row',

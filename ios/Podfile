@@ -2,7 +2,7 @@
 $RNFirebaseAsStaticFramework = true
 
 # Ensure correct Node binary (using nvm)
-ENV['NODE_BINARY'] = '/Users/macbookpro/.nvm/versions/node/v24.7.0/bin/node'
+ENV['NODE_BINARY'] = `which node`.strip
 # DISABLE New Architecture completely - this is required for react-native-maps 1.25.x
 ENV['RCT_NEW_ARCH_ENABLED'] = '0'
 

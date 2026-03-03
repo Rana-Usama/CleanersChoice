@@ -4,7 +4,6 @@
 <dict>
 	<key>aps-environment</key>
 	<string>development</string>
-	<key>com.apple.developer.in-app-purchases</key>
-	<true/>
+	
 </dict>
 </plist>
