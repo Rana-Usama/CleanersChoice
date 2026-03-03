@@ -34,7 +34,7 @@ interface UseAppleIAPReturn {
   iapLoading: boolean;
   initIAP: () => Promise<void>;
   purchaseWithApple: () => Promise<void>;
-  iapError: string | null; 
+  iapError: string | null;
 }
 
 export function useAppleIAP(
@@ -49,8 +49,12 @@ export function useAppleIAP(
   // Refs to avoid stale closures in listeners
   const onSuccessRef = useRef(onSuccess);
   const onErrorRef = useRef(onError);
-  useEffect(() => { onSuccessRef.current = onSuccess; }, [onSuccess]);
-  useEffect(() => { onErrorRef.current = onError; }, [onError]);
+  useEffect(() => {
+    onSuccessRef.current = onSuccess;
+  }, [onSuccess]);
+  useEffect(() => {
+    onErrorRef.current = onError;
+  }, [onError]);
 
   useEffect(() => {
     let purchaseSub: any;
@@ -68,13 +72,14 @@ export function useAppleIAP(
 
         if (subs.length === 0) {
           // CRITICAL: Product not found
-          const errorMsg = 
+          const errorMsg =
             'Product not available. Make sure:\n' +
             '1. Subscription is submitted in App Store Connect\n' +
             '2. Bundle ID matches\n' +
             '3. Wait 15-30 min after submission\n' +
-            '4. Product ID is exactly: ' + PRODUCT_ID;
-          
+            '4. Product ID is exactly: ' +
+            PRODUCT_ID;
+
           console.error('error........... ' + errorMsg);
           setIapError(errorMsg);
           return;
@@ -84,7 +89,8 @@ export function useAppleIAP(
         const product = subs[0];
         console.log('Product loaded:', product);
         console.log('Product loaded:', product.productId);
-        const price = (product as any)?.localizedPrice ?? (product as any)?.displayPrice;
+        const price =
+          (product as any)?.localizedPrice ?? (product as any)?.displayPrice;
         console.log('Price:', price);
         setProductPrice(price || '$15.99');
         setIapError(null);
@@ -94,12 +100,12 @@ export function useAppleIAP(
           async (purchase: SubscriptionPurchase) => {
             console.log('Purchase received:', purchase.productId);
             const receipt = purchase.transactionReceipt;
-            
+
             if (!receipt) {
               console.error(' No receipt in purchase');
               return;
             }
-            
+
             const currentUser = auth().currentUser;
             if (!currentUser?.uid) {
               console.error('User not authenticated');
@@ -110,7 +116,7 @@ export function useAppleIAP(
 
             try {
               console.log('Validating receipt with backend...');
-              
+
               // 4. Validate with backend
               const response = await fetch(`${API_BASE}/api/apple-validate`, {
                 method: 'POST',
@@ -122,7 +128,6 @@ export function useAppleIAP(
               console.log('Backend response:', result);
 
               if (!result.success) {
-
                 throw new Error(result.error || 'Validation failed');
               }
 
@@ -132,18 +137,23 @@ export function useAppleIAP(
               console.log('Transaction finished');
 
               // 6. Update Firestore with Apple subscription info
-              await firestore().collection('Users').doc(currentUser.uid).update({
-                subscription: true,
-                subscriptionProvider: 'apple',
-                cancelSubscription: false,
-                subscriptionId: purchase.transactionId || '',
-                originalTransactionId: result.originalTransactionId || purchase.transactionId || '',
-              });
+              await firestore()
+                .collection('Users')
+                .doc(currentUser.uid)
+                .update({
+                  subscription: true,
+                  subscriptionProvider: 'apple',
+                  cancelSubscription: false,
+                  subscriptionId: purchase.transactionId || '',
+                  originalTransactionId:
+                    result.originalTransactionId ||
+                    purchase.transactionId ||
+                    '',
+                });
               console.log('Firestore updated with Apple subscription');
 
               setIapLoading(false);
               onSuccessRef.current();
-              
             } catch (err: any) {
               console.error('Purchase validation error:', err);
               setIapLoading(false);
@@ -163,7 +173,6 @@ export function useAppleIAP(
             onErrorRef.current(error.message || 'Purchase failed');
           }
         });
-
       } catch (err: any) {
         console.error(' IAP init error:', err);
         setIapError(err.message);
@@ -190,10 +199,10 @@ export function useAppleIAP(
     try {
       console.log('Starting purchase flow for:', PRODUCT_ID);
       setIapLoading(true);
-      
+
       // This triggers StoreKit — result comes via purchaseUpdatedListener
-      await requestSubscription({sku: PRODUCT_ID});
-      
+      const req = await requestSubscription({sku: PRODUCT_ID});
+      console.log('requestSubscription:', req);
     } catch (err: any) {
       console.error('requestSubscription error:', err);
       setIapLoading(false);

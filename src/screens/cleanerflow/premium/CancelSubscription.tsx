@@ -343,6 +343,7 @@ const CancelSubscription = () => {
                   style={styles.modalConfirmButton}
                   loading={isLoading2}
                   disabled={isLoading2}
+                  textStyle={{fontSize:RFPercentage(1.6)}}
                 />
               </View>
             </View>
