@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     color: Colors.white,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     fontFamily: Fonts.semiBold,
   },
   scrollContainer: {
@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
   introText: {
     color: Colors.secondaryText,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     // textAlign: 'center',
     lineHeight: RFPercentage(2.4),
     marginBottom: RFPercentage(1.5),
@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
   },
   lastUpdatedText: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
   },
   sectionsContainer: {
@@ -389,7 +389,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     flex: 1,
     lineHeight: RFPercentage(2.2),
   },
@@ -403,7 +403,7 @@ const styles = StyleSheet.create({
   sectionText: {
     color: Colors.secondaryText,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     lineHeight: RFPercentage(2.2),
   },
   contactCard: {
@@ -428,13 +428,13 @@ const styles = StyleSheet.create({
   contactTitle: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     marginBottom: RFPercentage(0.8),
   },
   contactText: {
     color: Colors.secondaryText,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     textAlign: 'center',
     lineHeight: RFPercentage(2.2),
     marginBottom: RFPercentage(1.5),
@@ -451,7 +451,7 @@ const styles = StyleSheet.create({
   },
   emailText: {
     color: Colors.gradient1,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
   },
 });

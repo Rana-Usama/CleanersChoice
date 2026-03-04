@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
   text: {
     color: Colors.gradient1,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     left: RFPercentage(1),
   },
 });

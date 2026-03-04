@@ -686,7 +686,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     color: Colors.white,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     fontFamily: Fonts.semiBold,
   },
   placeholderView: {
@@ -743,13 +743,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   providerName: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     fontFamily: Fonts.semiBold,
     color: Colors.primaryText,
     marginBottom: RFPercentage(0.3),
   },
   providerTag: {
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
     color: Colors.secondaryText,
   },
@@ -768,7 +768,7 @@ const styles = StyleSheet.create({
     gap: RFPercentage(0.5),
   },
   nextAvailableTitle: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
     color: Colors.primaryText,
   },
@@ -790,16 +790,16 @@ const styles = StyleSheet.create({
   },
   nextDayText: {
     color: Colors.white,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontMedium,
   },
   nextTimeText: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
     color: Colors.gradient1,
   },
   noAvailabilityText: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
     color: Colors.secondaryText,
     fontStyle: 'italic',
@@ -819,7 +819,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
   },
   filterTitle: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
     color: Colors.primaryText,
     marginBottom: RFPercentage(1),
@@ -844,7 +844,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.gradient1,
   },
   filterButtonText: {
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontMedium,
     color: Colors.gradient1,
   },
@@ -872,7 +872,7 @@ const styles = StyleSheet.create({
     gap: RFPercentage(0.8),
   },
   summaryTitle: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
     color: Colors.primaryText,
   },
@@ -886,16 +886,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   statValue: {
-    fontSize: RFPercentage(2.5),
+    fontSize: RFPercentage(2.6),
     fontFamily: Fonts.semiBold,
     color: Colors.gradient1,
   },
   statValueMinutes: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     fontFamily: Fonts.fontMedium,
   },
   statLabel: {
-    fontSize: RFPercentage(1.2),
+    fontSize: RFPercentage(1.3),
     fontFamily: Fonts.fontRegular,
     color: Colors.secondaryText,
     marginTop: RFPercentage(0.3),
@@ -926,7 +926,7 @@ const styles = StyleSheet.create({
     gap: RFPercentage(0.8),
   },
   timeSlotsTitle: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
     color: Colors.primaryText,
   },
@@ -950,7 +950,7 @@ const styles = StyleSheet.create({
   },
   timeSlotText: {
     color: Colors.white,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
   },
   daysCountBadge: {
@@ -961,7 +961,7 @@ const styles = StyleSheet.create({
   },
   daysCountText: {
     color: Colors.white,
-    fontSize: RFPercentage(1.1),
+    fontSize: RFPercentage(1.2),
     fontFamily: Fonts.fontMedium,
   },
   daysList: {
@@ -993,7 +993,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.gradient1,
   },
   dayText: {
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontMedium,
     color: Colors.primaryText,
   },
@@ -1008,7 +1008,7 @@ const styles = StyleSheet.create({
   },
   todayIndicatorText: {
     color: Colors.orange600,
-    fontSize: RFPercentage(1),
+    fontSize: RFPercentage(1.1),
     fontFamily: Fonts.fontMedium,
   },
   timeIndicator: {
@@ -1017,7 +1017,7 @@ const styles = StyleSheet.create({
     gap: RFPercentage(0.3),
   },
   timeIndicatorText: {
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
     color: Colors.secondaryText,
   },
@@ -1034,13 +1034,13 @@ const styles = StyleSheet.create({
     // elevation: 3,
   },
   emptyStateTitle: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     fontFamily: Fonts.fontMedium,
     color: Colors.primaryText,
     marginTop: RFPercentage(1),
   },
   emptyStateText: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
     color: Colors.secondaryText,
     textAlign: 'center',
@@ -1065,7 +1065,7 @@ const styles = StyleSheet.create({
     gap: RFPercentage(0.8),
   },
   detailedListTitle: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
     color: Colors.primaryText,
   },
@@ -1085,13 +1085,13 @@ const styles = StyleSheet.create({
     // elevation: 3,
   },
   bottomActionTitle: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
     color: Colors.primaryText,
     marginBottom: RFPercentage(0.5),
   },
   bottomActionText: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
     color: Colors.secondaryText,
     textAlign: 'center',
@@ -1112,7 +1112,7 @@ const styles = StyleSheet.create({
   },
   contactButtonText: {
     color: Colors.white,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
   },
   authModalContainer: {

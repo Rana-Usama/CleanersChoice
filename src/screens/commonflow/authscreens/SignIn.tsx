@@ -154,7 +154,7 @@ const SignIn: React.FC = () => {
                           }}>
                           <Text
                             style={{
-                              fontSize: RFPercentage(1.5),
+                              fontSize: RFPercentage(1.6),
                               fontFamily: Fonts.fontRegular,
                               color: Colors.error,
                               textAlign: 'left',
@@ -186,7 +186,7 @@ const SignIn: React.FC = () => {
                           }}>
                           <Text
                             style={{
-                              fontSize: RFPercentage(1.5),
+                              fontSize: RFPercentage(1.6),
                               fontFamily: Fonts.fontRegular,
                               color: Colors.error,
                               textAlign: 'left',
@@ -294,13 +294,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   radioLabel: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     color: Colors.primaryText,
     marginLeft: RFPercentage(0.8),
     fontFamily: Fonts.fontRegular,
   },
   forgotPassword: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     color: Colors.primaryText,
     fontFamily: Fonts.fontRegular,
     // bottom: 1.5,
@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
   heading: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(2.2),
+    fontSize: RFPercentage(2.3),
     textAlign: 'center',
     marginTop: RFPercentage(1),
   },
@@ -343,12 +343,12 @@ const styles = StyleSheet.create({
   },
   bottomText: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     fontFamily: Fonts.fontRegular,
   },
   signUp: {
     color: Colors.gradient1,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     fontFamily: Fonts.fontMedium,
     left: 3,
   },

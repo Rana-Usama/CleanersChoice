@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     color: Colors.white,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     fontFamily: Fonts.semiBold,
   },
   keyboardContainer: {
@@ -329,14 +329,14 @@ const styles = StyleSheet.create({
   },
   illustrationTitle: {
     color: Colors.primaryText,
-    fontSize: RFPercentage(2.2),
+    fontSize: RFPercentage(2.3),
     fontFamily: Fonts.semiBold,
     textAlign: 'center',
     marginBottom: RFPercentage(1),
   },
   illustrationText: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontRegular,
     textAlign: 'center',
     lineHeight: RFPercentage(2.4),
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     color: Colors.primaryText,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
   },
   inputField: {
@@ -383,7 +383,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: Colors.error,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
     flex: 1,
     lineHeight:RFPercentage(1.5)
@@ -402,14 +402,14 @@ const styles = StyleSheet.create({
   },
   successTitle: {
     color: Colors.successText,
-    fontSize: RFPercentage(1.9),
+    fontSize: RFPercentage(2.0),
     fontFamily: Fonts.fontMedium,
     marginBottom: RFPercentage(1),
     textAlign: 'center',
   },
   successText: {
     color: Colors.successText,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontRegular,
     textAlign: 'center',
     lineHeight: RFPercentage(2.2),
@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
   },
   backToLoginText: {
     color: Colors.white,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
   },
   buttonSection: {
@@ -438,7 +438,7 @@ const styles = StyleSheet.create({
     alignSelf:"center"
   },
   resetButtonText: {
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     fontFamily: Fonts.fontMedium,
     lineHeight:RFPercentage(1.9)
   },
@@ -451,7 +451,7 @@ const styles = StyleSheet.create({
   },
   cancelButtonText: {
     color: Colors.gradient1,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
   },
   securityNote: {
@@ -468,7 +468,7 @@ const styles = StyleSheet.create({
   },
   securityText: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
     flex: 1,
     lineHeight: RFPercentage(2),

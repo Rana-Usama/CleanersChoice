@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     color: Colors.white,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     fontFamily: Fonts.semiBold,
     textAlign: 'center',
     flex: 1,
@@ -339,14 +339,14 @@ const styles = StyleSheet.create({
   introTitle: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.9),
+    fontSize: RFPercentage(2.0),
     marginBottom: RFPercentage(1),
     textAlign: 'center',
   },
   introText: {
     color: Colors.secondaryText,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     textAlign: 'justify',
     lineHeight: RFPercentage(2.2),
   },
@@ -368,7 +368,7 @@ const styles = StyleSheet.create({
   },
   categoryText: {
     color: Colors.white,
-    fontSize: RFPercentage(1.2),
+    fontSize: RFPercentage(1.3),
     fontFamily: Fonts.fontMedium,
   },
   faqsContainer: {
@@ -414,7 +414,7 @@ const styles = StyleSheet.create({
   questionText: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     flex: 1,
     lineHeight: RFPercentage(2.2),
   },
@@ -435,7 +435,7 @@ const styles = StyleSheet.create({
   answerText: {
     color: Colors.secondaryText,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     lineHeight: RFPercentage(2.2),
     flex: 1,
   },
@@ -456,13 +456,13 @@ const styles = StyleSheet.create({
   helpTitle: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     marginBottom: RFPercentage(0.8),
   },
   helpText: {
     color: Colors.secondaryText,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     textAlign: 'center',
     lineHeight: RFPercentage(2.2),
     marginBottom: RFPercentage(1.5),
@@ -479,7 +479,7 @@ const styles = StyleSheet.create({
   },
   contactText: {
     color: Colors.gradient1,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
   },
 });

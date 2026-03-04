@@ -570,7 +570,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     color: Colors.white,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     fontFamily: Fonts.semiBold,
   },
   headerSummary: {
@@ -581,7 +581,7 @@ const styles = StyleSheet.create({
   jobTitle: {
     color: Colors.blueGray600,
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     flex: 1,
     marginRight: RFPercentage(1),
     lineHeight: RFPercentage(2.8),
@@ -596,7 +596,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.2),
+    fontSize: RFPercentage(1.3),
   },
   scrollViewContent: {
     flexGrow: 1,
@@ -633,13 +633,13 @@ const styles = StyleSheet.create({
   quickInfoLabel: {
     color: Colors.secondaryText,
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     marginLeft: RFPercentage(0.5),
   },
   quickInfoValue: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     textAlign: 'center',
     marginLeft: RFPercentage(1),
   },
@@ -672,12 +672,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   cardTitle: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     fontFamily: Fonts.fontMedium,
     color: Colors.primaryText,
   },
   descriptionText: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontRegular,
     color: Colors.secondaryText,
     lineHeight: RFPercentage(2.2),
@@ -691,7 +691,7 @@ const styles = StyleSheet.create({
   },
   readMoreText: {
     color: Colors.gradient1,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
   },
   locationContainer: {
@@ -705,7 +705,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.inputBorder,
   },
   locationText: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontRegular,
     color: Colors.primaryText,
     flex: 1,
@@ -722,7 +722,7 @@ const styles = StyleSheet.create({
   },
   viewMapText: {
     color: Colors.white,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
   },
   timelineContainer: {
@@ -763,13 +763,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   timelineTitle: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
     color: Colors.primaryText,
     marginBottom: RFPercentage(0.3),
   },
   timelineTime: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
     color: Colors.secondaryText,
   },
@@ -789,13 +789,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   userName: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     fontFamily: Fonts.fontMedium,
     color: Colors.primaryText,
     marginBottom: RFPercentage(0.3),
   },
   userRole: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
     color: Colors.secondaryText,
     marginBottom: RFPercentage(0.5),
@@ -812,7 +812,7 @@ const styles = StyleSheet.create({
     gap: RFPercentage(0.3),
   },
   userMetaText: {
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
     color: Colors.secondaryText,
   },
@@ -822,13 +822,13 @@ const styles = StyleSheet.create({
     gap: RFPercentage(0.3),
   },
   ratingText: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
     color: Colors.primaryText,
     marginLeft: RFPercentage(0.3),
   },
   reviewsText: {
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
     color: Colors.secondaryText,
     marginLeft: RFPercentage(0.3),
@@ -844,12 +844,12 @@ const styles = StyleSheet.create({
     gap: RFPercentage(0.3),
   },
   statText: {
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
     color: Colors.secondaryText,
   },
   remarksText: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontRegular,
     color: Colors.secondaryText,
     lineHeight: RFPercentage(2.2),
@@ -891,7 +891,7 @@ const styles = StyleSheet.create({
   },
   editButtonText: {
     color: Colors.gradient1,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     fontFamily: Fonts.semiBold,
   },
   completeButton: {
@@ -899,7 +899,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   completeButtonText: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
   },
   messageButton: {
@@ -907,7 +907,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   messageButtonText: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
   },
   completedState: {
@@ -924,6 +924,6 @@ const styles = StyleSheet.create({
   completedText: {
     color: Colors.successText,
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
   },
 });

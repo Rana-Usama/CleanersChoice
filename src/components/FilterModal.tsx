@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
       },
       sliderLabel: {
         color: Colors.secondaryText,
-        fontSize: RFPercentage(1.8),
+        fontSize: RFPercentage(1.9),
         fontFamily: Fonts.semiBold,
       },
       flatListContainer: {
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
       applyLocation: {
         color: Colors.secondaryText,
         fontFamily: Fonts.fontMedium,
-        fontSize: RFPercentage(1.8),
+        fontSize: RFPercentage(1.9),
       },
       queryContainer: {
         top: RFPercentage(0.5),
@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
       },
       queryText: {
         padding: RFPercentage(2),
-        fontSize: RFPercentage(1.6),
+        fontSize: RFPercentage(1.7),
         borderBottomWidth: 1,
         borderBottomColor: Colors.inputFieldColor,
         fontFamily: Fonts.fontRegular,
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
       range: {
         textAlign: 'center',
         fontFamily: Fonts.fontMedium,
-        fontSize: RFPercentage(1.7),
+        fontSize: RFPercentage(1.8),
         color: Colors.primaryText,
       },
 });

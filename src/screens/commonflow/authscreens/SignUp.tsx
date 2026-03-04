@@ -452,7 +452,7 @@ const styles = StyleSheet.create({
     left: RFPercentage(3),
   },
   errorText: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontRegular,
     color: Colors.error,
     textAlign: 'left',
@@ -467,7 +467,7 @@ const styles = StyleSheet.create({
   title: {
     color: Colors.primaryText,
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     textAlign: 'center',
   },
   imgContainer: {
@@ -495,7 +495,7 @@ const styles = StyleSheet.create({
   imgText: {
     color: Colors.secondaryText,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     textAlign: 'center',
   },
   uploadedImg: {
@@ -525,7 +525,7 @@ const styles = StyleSheet.create({
   },
   radioLabel: {
     color: Colors.primaryText,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontRegular,
     marginLeft: RFPercentage(0.8),
   },
@@ -543,12 +543,12 @@ const styles = StyleSheet.create({
   },
   bottomText: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     fontFamily: Fonts.fontRegular,
   },
   signIn: {
     color: Colors.gradient1,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     fontFamily: Fonts.fontMedium,
     left: 3,
   },

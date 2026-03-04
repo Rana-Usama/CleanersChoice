@@ -543,7 +543,7 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   headerText: {
-    fontSize: RFPercentage(2.2),
+    fontSize: RFPercentage(2.3),
     fontFamily: Fonts.semiBold,
     color: Colors.white,
   },
@@ -559,13 +559,13 @@ const styles = StyleSheet.create({
   },
   progressTitle: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     color: Colors.white,
     opacity: 0.9,
   },
   progressPercent: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     color: Colors.white,
   },
   progressBar: {
@@ -616,13 +616,13 @@ const styles = StyleSheet.create({
   },
   statNumber: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(2.5),
+    fontSize: RFPercentage(2.6),
     color: Colors.gradient1,
     marginBottom: 4,
   },
   statLabel: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     color: Colors.placeholderColor,
   },
   statDivider: {
@@ -655,7 +655,7 @@ const styles = StyleSheet.create({
   },
   instructionsTitle: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     color: Colors.gray800,
     marginLeft: RFPercentage(1),
   },
@@ -678,7 +678,7 @@ const styles = StyleSheet.create({
   instructionText: {
     flex: 1,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     color: Colors.placeholderColor,
     lineHeight: 22,
   },
@@ -688,13 +688,13 @@ const styles = StyleSheet.create({
   },
   galleryTitle: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     color: Colors.gray800,
     marginBottom: 6,
   },
   gallerySubtitle: {
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     color: Colors.placeholderColor,
     marginBottom: 20,
   },
@@ -706,7 +706,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     color: Colors.placeholderColor,
   },
   galleryGrid: {
@@ -742,7 +742,7 @@ const styles = StyleSheet.create({
   uploadingText: {
     marginTop: 8,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     color: Colors.placeholderColor,
   },
   imagePreview: {
@@ -799,13 +799,13 @@ const styles = StyleSheet.create({
   },
   addImageText: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     color: Colors.gray700,
     marginBottom: 4,
   },
   addImageSubtext: {
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     color: Colors.gray400,
   },
   tipsCard: {
@@ -824,13 +824,13 @@ const styles = StyleSheet.create({
   },
   tipsTitle: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     color: Colors.amberDarkText,
     marginLeft: 8,
   },
   tipsText: {
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     color: Colors.amberDarkText,
     lineHeight: 20,
   },
@@ -864,7 +864,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     color: Colors.white,
     marginRight: 10,
   },
@@ -873,7 +873,7 @@ const styles = StyleSheet.create({
   },
   requirementsText: {
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     color: Colors.placeholderColor,
     textAlign: 'center',
     marginTop: 12,

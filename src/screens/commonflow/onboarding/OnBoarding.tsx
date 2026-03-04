@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: Colors.primaryText,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     fontFamily: Fonts.semiBold,
     textAlign: 'center',
     marginTop: RFPercentage(2),
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
   },
   description: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     fontFamily: Fonts.fontRegular,
     textAlign: 'center',
   },

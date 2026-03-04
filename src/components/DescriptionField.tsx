@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
   textInput: {
     color: Colors.inputTextColor,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     paddingVertical: 0,
     marginVertical: 0,
     textAlign: 'left',
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: RFPercentage(0.5),
     right: RFPercentage(1),
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
   },
 });

@@ -148,7 +148,7 @@ const ChangePasswordV2 = ({navigation}: any) => {
                         }}>
                         <Text
                           style={{
-                            fontSize: RFPercentage(1.5),
+                            fontSize: RFPercentage(1.6),
                             fontFamily: Fonts.fontRegular,
                             color: Colors.error,
                             textAlign: 'left',
@@ -184,7 +184,7 @@ const ChangePasswordV2 = ({navigation}: any) => {
                         }}>
                         <Text
                           style={{
-                            fontSize: RFPercentage(1.5),
+                            fontSize: RFPercentage(1.6),
                             fontFamily: Fonts.fontRegular,
                             color: Colors.error,
                             textAlign: 'left',
@@ -220,7 +220,7 @@ const ChangePasswordV2 = ({navigation}: any) => {
                         }}>
                         <Text
                           style={{
-                            fontSize: RFPercentage(1.5),
+                            fontSize: RFPercentage(1.6),
                             fontFamily: Fonts.fontRegular,
                             color: Colors.error,
                             textAlign: 'left',
@@ -308,13 +308,13 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     color: Colors.white,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     fontFamily: Fonts.semiBold,
   },
   label: {
     color: Colors.brown,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
   },
   absolute: {
     position: 'absolute',

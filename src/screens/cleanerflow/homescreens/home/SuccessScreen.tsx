@@ -378,14 +378,14 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   title: {
-    fontSize: RFPercentage(2.5),
+    fontSize: RFPercentage(2.6),
     fontFamily: Fonts.semiBold,
     color: Colors.white,
     textAlign: 'center',
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     fontFamily: Fonts.fontMedium,
     color: Colors.whiteOverlay90,
     textAlign: 'center',
@@ -401,7 +401,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   perfectText: {
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.semiBold,
     color: Colors.gold,
     marginHorizontal: 6,
@@ -424,7 +424,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   progressTitle: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.semiBold,
     color: Colors.gray800,
   },
@@ -433,7 +433,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   percentageText: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     fontFamily: Fonts.semiBold,
     color: Colors.gradient1,
     marginRight: 6,
@@ -468,7 +468,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   collapsibleTitle: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.semiBold,
     color: Colors.navyText,
   },
@@ -495,12 +495,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   stepTitle: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
     color: Colors.gray700,
   },
   stepDesc: {
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
     color: Colors.placeholderColor,
     marginTop: 2,
@@ -528,14 +528,14 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   benefitTitle: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
     color: Colors.gray700,
     textAlign: 'center',
     marginBottom: 4,
   },
   benefitDesc: {
-    fontSize: RFPercentage(1.2),
+    fontSize: RFPercentage(1.3),
     fontFamily: Fonts.fontRegular,
     color: Colors.placeholderColor,
     textAlign: 'center',
@@ -554,13 +554,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statValue: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     fontFamily: Fonts.semiBold,
     color: Colors.gradient1,
     marginBottom: 4,
   },
   statLabel: {
-    fontSize: RFPercentage(1.2),
+    fontSize: RFPercentage(1.3),
     fontFamily: Fonts.fontRegular,
     color: Colors.placeholderColor,
   },
@@ -571,7 +571,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   summaryTitle: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.semiBold,
     color: Colors.gradient1,
     marginBottom: 10,
@@ -592,7 +592,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   pointText: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
     color: Colors.gray700,
     flex: 1,
@@ -617,7 +617,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   primaryButtonText: {
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     fontFamily: Fonts.semiBold,
     color: Colors.white,
     marginLeft: 8,
@@ -633,7 +633,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.gradient1,
   },
   secondaryButtonText: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.semiBold,
     color: Colors.gradient1,
     marginLeft: 8,
@@ -648,7 +648,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   celebrationText: {
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.semiBold,
     color: Colors.amberDark,
     marginLeft: 8,

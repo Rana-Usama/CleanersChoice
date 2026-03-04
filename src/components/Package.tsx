@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
   packageName: {
     color: Colors.primaryText,
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     textAlign: 'center',
   },
   selectedPackageName: {
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
   selectedBadgeText: {
     color: Colors.gradient1,
     fontFamily: Fonts.fontBold,
-    fontSize: RFPercentage(1.1),
+    fontSize: RFPercentage(1.2),
   },
   content: {
     flex: 1,
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
   detailText: {
     color: Colors.secondaryText,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     lineHeight: RFPercentage(1.8),
     textAlign: 'left',
   },
@@ -235,13 +235,13 @@ const styles = StyleSheet.create({
   featureText: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     flex: 1,
   },
   moreFeaturesText: {
     color: Colors.gradient1,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     textAlign: 'center',
     marginTop: RFPercentage(0.5),
     fontStyle: 'italic',
@@ -263,19 +263,19 @@ const styles = StyleSheet.create({
   startsAtText: {
     color: Colors.secondaryText,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     marginRight: RFPercentage(0.4),
   },
   priceText: {
     color: Colors.gradient1,
     fontFamily: Fonts.fontBold,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     marginRight: RFPercentage(0.3),
   },
   priceSuffix: {
     color: Colors.secondaryText,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.2),
+    fontSize: RFPercentage(1.3),
   },
   selectionIndicator: {
     position: 'absolute',

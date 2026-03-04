@@ -407,7 +407,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     color: Colors.white,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     fontFamily: Fonts.semiBold,
   },
   keyboardContainer: {
@@ -464,13 +464,13 @@ const styles = StyleSheet.create({
   },
   profileName: {
     color: Colors.primaryText,
-    fontSize: RFPercentage(2.2),
+    fontSize: RFPercentage(2.3),
     fontFamily: Fonts.semiBold,
     marginBottom: RFPercentage(0.5),
   },
   profileRole: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontRegular,
     marginBottom: RFPercentage(1.5),
   },
@@ -487,7 +487,7 @@ const styles = StyleSheet.create({
   },
   changePhotoText: {
     color: Colors.gradient1,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
   },
   formCard: {
@@ -516,7 +516,7 @@ const styles = StyleSheet.create({
   },
   formTitle: {
     color: Colors.primaryText,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     fontFamily: Fonts.fontMedium,
   },
   inputSection: {
@@ -530,7 +530,7 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     color: Colors.primaryText,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
   },
   inputField: {
@@ -541,7 +541,7 @@ const styles = StyleSheet.create({
   },
   currentValue: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
     marginTop: RFPercentage(0.5),
     fontStyle: 'italic',
@@ -561,13 +561,13 @@ const styles = StyleSheet.create({
   },
   readOnlyText: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontRegular,
     flex: 1,
   },
   fieldHint: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
     marginTop: RFPercentage(0.5),
     fontStyle: 'italic',
@@ -581,7 +581,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   updateButtonText: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
   },
   cancelButton: {
@@ -590,7 +590,7 @@ const styles = StyleSheet.create({
   },
   cancelButtonText: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
   },
   tipsCard: {
@@ -611,7 +611,7 @@ const styles = StyleSheet.create({
   },
   tipsTitle: {
     color: Colors.amberDarkText,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
   },
   tipItem: {
@@ -622,7 +622,7 @@ const styles = StyleSheet.create({
   },
   tipText: {
     color: Colors.amberDarkText,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
     flex: 1,
     lineHeight: RFPercentage(2),

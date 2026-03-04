@@ -462,7 +462,7 @@ const ServiceThree: React.FC = ({navigation}: any) => {
                             handleInputChange(pkg.id, 'details', text)
                           }
                           style={styles.descriptionField}
-                          textInput={{fontSize: RFPercentage(1.4)}}
+                          textInput={{fontSize: RFPercentage(1.5)}}
                         />
                         {errors[pkg.id]?.details && (
                           <View style={styles.errorContainer}>
@@ -704,7 +704,7 @@ const styles = StyleSheet.create({
     // elevation: 8,
   },
   headerText: {
-    fontSize: RFPercentage(2.2),
+    fontSize: RFPercentage(2.3),
     fontFamily: Fonts.semiBold,
     color: Colors.white,
   },
@@ -720,13 +720,13 @@ const styles = StyleSheet.create({
   },
   progressTitle: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     color: Colors.white,
     opacity: 0.9,
   },
   progressPercent: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     color: Colors.white,
   },
   progressBar: {
@@ -784,13 +784,13 @@ const styles = StyleSheet.create({
   },
   completionTitle: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     color: Colors.gray800,
     marginBottom: 4,
   },
   completionSubtitle: {
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     color: Colors.placeholderColor,
   },
   progressCircle: {
@@ -799,7 +799,7 @@ const styles = StyleSheet.create({
   },
   progressCircleText: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     color: Colors.green500,
     textAlign: 'center',
     marginTop: 2,
@@ -820,7 +820,7 @@ const styles = StyleSheet.create({
   },
   instructionsTitle: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     color: Colors.amberDarkText,
     marginLeft: 8,
   },
@@ -843,7 +843,7 @@ const styles = StyleSheet.create({
   tipText: {
     flex: 1,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     color: Colors.amberDarkText,
     lineHeight: 20,
   },
@@ -853,13 +853,13 @@ const styles = StyleSheet.create({
   },
   packagesTitle: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     color: Colors.gray800,
     marginBottom: 6,
   },
   packagesSubtitle: {
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     color: Colors.placeholderColor,
     marginBottom: 20,
   },
@@ -900,7 +900,7 @@ const styles = StyleSheet.create({
   },
   packageNumber: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     color: Colors.gradient1,
   },
   packageTitleContainer: {
@@ -909,18 +909,18 @@ const styles = StyleSheet.create({
   },
   packageTitle: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     color: Colors.grayBlueDark,
   },
   packagePricePreview: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     color: Colors.gradient1,
     marginTop: 2,
   },
   packagePlaceholder: {
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     color: Colors.gray400,
     marginTop: 2,
   },
@@ -956,17 +956,17 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     color: Colors.gray700,
   },
   charCount: {
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     color: Colors.gray400,
   },
   minPriceHint: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     color: Colors.green500,
   },
   descriptionField: {
@@ -977,7 +977,7 @@ const styles = StyleSheet.create({
     padding: 16,
     minHeight: 100,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     color: Colors.gray700,
   },
   priceInputContainer: {
@@ -998,7 +998,7 @@ const styles = StyleSheet.create({
   },
   priceSymbolText: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     color: Colors.gray700,
   },
   priceInput: {
@@ -1018,7 +1018,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     color: Colors.red500,
     marginLeft: 6,
   },
@@ -1045,7 +1045,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     color: Colors.gray700,
     marginLeft: 6,
   },
@@ -1080,7 +1080,7 @@ const styles = StyleSheet.create({
   },
   addPackageText: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     color: Colors.gradient1,
   },
   limitInfo: {
@@ -1091,7 +1091,7 @@ const styles = StyleSheet.create({
   },
   limitInfoText: {
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     color: Colors.placeholderColor,
     marginLeft: 6,
   },
@@ -1125,7 +1125,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     color: Colors.white,
     marginRight: 10,
   },
@@ -1134,7 +1134,7 @@ const styles = StyleSheet.create({
   },
   requirementsText: {
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     color: Colors.placeholderColor,
     textAlign: 'center',
     marginTop: 12,

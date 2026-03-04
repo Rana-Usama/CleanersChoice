@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
   title: {
     color: Colors.primaryText,
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(2.5),
+    fontSize: RFPercentage(2.6),
     textAlign: 'center',
   },
   selectionContainer: {
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
   description: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     textAlign: 'center',
     width: '80%',
   },
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
   guestText: {
     color: Colors.gradient1,
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     textDecorationLine: 'underline',
   },
   imageContainer: {
@@ -169,12 +169,12 @@ const styles = StyleSheet.create({
   },
   bottomText: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     fontFamily: Fonts.fontRegular,
   },
   signIn: {
     color: Colors.gradient1,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     fontFamily: Fonts.fontMedium,
     left: 3,
   },

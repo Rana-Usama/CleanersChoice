@@ -754,14 +754,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   headerText: {
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     fontFamily: Fonts.semiBold,
     color: Colors.white,
   },
   editButtonText: {
     color: Colors.white,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
   },
   scrollContent: {
     marginTop: RFPercentage(8),
@@ -816,7 +816,7 @@ const styles = StyleSheet.create({
   },
   name: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     color: Colors.gray800,
     marginBottom: 12,
   },
@@ -846,13 +846,13 @@ const styles = StyleSheet.create({
   },
   availabilityValue: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     color: Colors.gradient1,
     textAlign: 'center',
   },
   availabilityLabel: {
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.2),
+    fontSize: RFPercentage(1.3),
     color: Colors.placeholderColor,
     marginTop: 2,
     textAlign: 'center',
@@ -873,12 +873,12 @@ const styles = StyleSheet.create({
   },
   progressTitle: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     color: Colors.gray600,
   },
   progressPercent: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     color: Colors.gradient1,
   },
   progressBar: {
@@ -918,14 +918,14 @@ const styles = StyleSheet.create({
   },
   overviewNumber: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(2.4),
+    fontSize: RFPercentage(2.5),
     color: Colors.secondaryText,
     marginTop: 8,
     marginBottom: 4,
   },
   overviewSchedule: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     color: Colors.secondaryText,
     marginTop: 8,
     marginBottom: 4,
@@ -933,7 +933,7 @@ const styles = StyleSheet.create({
   },
   overviewLabel: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     color: Colors.grayMuted,
     textAlign: 'center',
   },
@@ -955,7 +955,7 @@ const styles = StyleSheet.create({
   },
   nextAvailableText: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     color: Colors.grayMuted,
     marginLeft: 8,
   },
@@ -981,7 +981,7 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     color: Colors.grayBlueText,
   },
   editButton: {
@@ -995,18 +995,18 @@ const styles = StyleSheet.create({
   },
   description: {
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     color: Colors.placeholderColor,
     lineHeight: 22,
   },
   readMore: {
     fontFamily: Fonts.semiBold,
     color: Colors.blueSoft,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
   },
   seeAll: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     color: Colors.primaryBlue,
   },
   servicesGrid: {
@@ -1048,7 +1048,7 @@ const styles = StyleSheet.create({
   },
   serviceName: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     color: Colors.gray700,
   },
   showMoreButton: {
@@ -1062,7 +1062,7 @@ const styles = StyleSheet.create({
   },
   showMoreText: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     color: Colors.primaryBlue,
     marginRight: 8,
   },
@@ -1101,7 +1101,7 @@ const styles = StyleSheet.create({
   },
   packageName: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     color: Colors.gray800,
     flex: 1,
   },
@@ -1115,12 +1115,12 @@ const styles = StyleSheet.create({
   },
   priceText: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     color: Colors.white,
   },
   packageDescription: {
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     color: Colors.placeholderColor,
     lineHeight: 18,
     marginVertical: 24,
@@ -1141,7 +1141,7 @@ const styles = StyleSheet.create({
   },
   selectButtonText: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     color: Colors.gray700,
     marginRight: 8,
   },
@@ -1160,7 +1160,7 @@ const styles = StyleSheet.create({
   },
   availabilityButtonText: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     color: Colors.primaryBlue,
     marginRight: 6,
   },
@@ -1198,12 +1198,12 @@ const styles = StyleSheet.create({
   },
   dayIndicatorText: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     color: Colors.white,
   },
   dayText: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     color: Colors.gray800,
     flex: 1,
   },
@@ -1214,7 +1214,7 @@ const styles = StyleSheet.create({
   },
   timeText: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     color: Colors.gray600,
   },
   availabilityStatus: {
@@ -1231,7 +1231,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     color: Colors.gray700,
   },
   noAvailabilityContainer: {
@@ -1240,14 +1240,14 @@ const styles = StyleSheet.create({
   },
   noAvailabilityText: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     color: Colors.gray700,
     marginTop: 12,
     marginBottom: 4,
   },
   noAvailabilitySubtext: {
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     color: Colors.placeholderColor,
     textAlign: 'center',
   },
@@ -1283,14 +1283,14 @@ const styles = StyleSheet.create({
   },
   emptyStateTitle: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(2.2),
+    fontSize: RFPercentage(2.3),
     color: Colors.gray800,
     textAlign: 'center',
     marginBottom: 12,
   },
   emptyStateText: {
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     color: Colors.placeholderColor,
     textAlign: 'center',
     lineHeight: 22,
@@ -1308,7 +1308,7 @@ const styles = StyleSheet.create({
   },
   ctaButtonText: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     color: Colors.white,
     marginRight: 12,
   },
@@ -1338,7 +1338,7 @@ const styles = StyleSheet.create({
 
   adminText: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.2),
+    fontSize: RFPercentage(1.3),
     color: Colors.white,
   },
 });

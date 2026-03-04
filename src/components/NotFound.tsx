@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
   noServiceText: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     textAlign: 'center',
     marginTop: RFPercentage(1),
   },

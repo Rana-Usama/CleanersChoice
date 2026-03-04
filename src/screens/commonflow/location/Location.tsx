@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
   },
   input: {
     height: RFPercentage(6),
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     backgroundColor: 'white',
     color: 'black',
     borderRadius: 8,
@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.lightGray,
   },
-  description: {color: 'black', fontSize: RFPercentage(1.7)},
+  description: {color: 'black', fontSize: RFPercentage(1.8)},
   buttonWrapper: {
     position: 'absolute',
     bottom: RFPercentage(5),
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
   },
   applyButtonText: {
     color: 'white',
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     fontFamily: 'Poppins-Medium',
   },
 });

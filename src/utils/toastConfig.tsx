@@ -65,12 +65,12 @@ const styles = StyleSheet.create({
   },
   text1: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     color: Colors.black,
   },
   text2: {
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     color: Colors.black,
   },
 });

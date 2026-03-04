@@ -316,7 +316,7 @@ const Home = () => {
               marginTop: 10,
               color: Colors.secondaryText,
               fontFamily: Fonts.fontMedium,
-              fontSize: RFPercentage(1.6),
+              fontSize: RFPercentage(1.7),
             }}>
             Fetching Your Current Location...
           </Text>
@@ -384,7 +384,7 @@ const Home = () => {
                     <Text
                       style={{
                         fontFamily: Fonts.fontMedium,
-                        fontSize: RFPercentage(1.5),
+                        fontSize: RFPercentage(1.6),
                         color: Colors.secondaryText,
                       }}>
                       Location
@@ -402,7 +402,7 @@ const Home = () => {
                       <Text
                         style={{
                           fontFamily: Fonts.semiBold,
-                          fontSize: RFPercentage(1.6),
+                          fontSize: RFPercentage(1.7),
                           color: Colors.secondaryText,
                         }}>
                         {selectedLocation?.name
@@ -607,7 +607,7 @@ const Home = () => {
                   style={{
                     color: Colors.primaryText,
                     fontFamily: Fonts.fontMedium,
-                    fontSize: RFPercentage(1.8),
+                    fontSize: RFPercentage(1.9),
                   }}>
                   {adminViewingAllServices
                     ? 'All Services'
@@ -623,7 +623,7 @@ const Home = () => {
                     style={{
                       color: Colors.secondaryText,
                       fontFamily: Fonts.fontRegular,
-                      fontSize: RFPercentage(1.5),
+                      fontSize: RFPercentage(1.6),
                       marginLeft: RFPercentage(1),
                     }}>
                     {selectedLocation.name.length > 30
@@ -636,7 +636,7 @@ const Home = () => {
                     style={{
                       color: Colors.red500,
                       fontFamily: Fonts.fontMedium,
-                      fontSize: RFPercentage(1.3),
+                      fontSize: RFPercentage(1.4),
                       marginLeft: RFPercentage(1),
                       backgroundColor: Colors.redBg50,
                       paddingHorizontal: 8,
@@ -931,7 +931,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   headerText: {
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     fontFamily: Fonts.semiBold,
     color: Colors.white,
   },
@@ -950,7 +950,7 @@ const styles = StyleSheet.create({
   postJobText: {
     color: Colors.gradient1,
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
   },
   noServiceContainer: {
     alignItems: 'center',
@@ -965,7 +965,7 @@ const styles = StyleSheet.create({
   noServiceText: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     textAlign: 'center',
     marginTop: RFPercentage(1),
   },
@@ -990,7 +990,7 @@ const styles = StyleSheet.create({
   applyLocation: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
   },
   queryContainer: {
     top: RFPercentage(0.5),
@@ -1002,7 +1002,7 @@ const styles = StyleSheet.create({
   },
   queryText: {
     padding: RFPercentage(2),
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     borderBottomWidth: 1,
     borderBottomColor: Colors.inputFieldColor,
     fontFamily: Fonts.fontRegular,
@@ -1012,7 +1012,7 @@ const styles = StyleSheet.create({
   range: {
     textAlign: 'center',
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     color: Colors.primaryText,
   },
   searchContainer: {
@@ -1030,7 +1030,7 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(3),
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
   },
   categoryBox: {
     width: RFPercentage(7),
@@ -1057,7 +1057,7 @@ const styles = StyleSheet.create({
   },
   categoryText: {
     color: Colors.primaryText,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     textAlign: 'center',
     top: RFPercentage(0.9),
   },
@@ -1085,7 +1085,7 @@ const styles = StyleSheet.create({
   },
 
   filterText: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
   },
   serviceColumnWrapper: {
     // justifyContent: 'space-between',
@@ -1118,7 +1118,7 @@ const styles = StyleSheet.create({
 
   sliderLabel: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.9),
+    fontSize: RFPercentage(2.0),
     fontFamily: Fonts.semiBold,
     marginTop: RFPercentage(1),
   },
@@ -1164,21 +1164,21 @@ const styles = StyleSheet.create({
   },
   authTitle: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(2.4),
+    fontSize: RFPercentage(2.5),
     color: Colors.primaryText,
   },
   authDesc: {
     marginTop: RFPercentage(1.5),
     textAlign: 'center',
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.9),
+    fontSize: RFPercentage(2.0),
     color: Colors.secondaryText,
     lineHeight: RFPercentage(2.8),
   },
   closeModalText: {
     color: Colors.gradient2,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
   },
 
   priceDisplayContainer: {
@@ -1206,14 +1206,14 @@ const styles = StyleSheet.create({
   priceLabel: {
     color: Colors.background,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     opacity: 0.9,
   },
 
   priceValue: {
     color: Colors.primaryText,
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(2.4),
+    fontSize: RFPercentage(2.5),
     marginTop: RFPercentage(0.2),
   },
 
@@ -1231,13 +1231,13 @@ const styles = StyleSheet.create({
 
   sliderMinLabel: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
   },
 
   sliderMaxLabel: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
   },
 
@@ -1256,7 +1256,7 @@ const styles = StyleSheet.create({
   rangeIndicatorText: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     textAlign: 'center',
   },
 
@@ -1309,7 +1309,7 @@ const styles = StyleSheet.create({
     gap: RFPercentage(1),
   },
   modalTitle: {
-    fontSize: RFPercentage(2.2),
+    fontSize: RFPercentage(2.3),
     fontFamily: Fonts.semiBold,
     color: Colors.white,
   },
@@ -1339,7 +1339,7 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(1.5),
   },
   priceDisplayTitle: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     fontFamily: Fonts.fontMedium,
     color: Colors.primaryText,
   },
@@ -1351,7 +1351,7 @@ const styles = StyleSheet.create({
   },
   pricePillText: {
     color: Colors.white,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.semiBold,
   },
   rangeDisplay: {
@@ -1363,13 +1363,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   rangeLabel: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontRegular,
     color: Colors.secondaryText,
     marginBottom: RFPercentage(0.5),
   },
   rangeValue: {
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     fontFamily: Fonts.semiBold,
     color: Colors.primaryText,
   },
@@ -1395,7 +1395,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.lightGray,
   },
   sliderTitle: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     fontFamily: Fonts.fontMedium,
     color: Colors.primaryText,
     marginBottom: RFPercentage(2),
@@ -1448,7 +1448,7 @@ const styles = StyleSheet.create({
   },
   thumbValueText: {
     color: Colors.white,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.semiBold,
   },
   sliderStyle: {
@@ -1461,7 +1461,7 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(1),
   },
   markerText: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
     color: Colors.secondaryText,
   },
@@ -1469,7 +1469,7 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(2),
   },
   quickSelectTitle: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     fontFamily: Fonts.fontMedium,
     color: Colors.primaryText,
     marginBottom: RFPercentage(1.5),
@@ -1492,7 +1492,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.gradient1,
   },
   quickButtonText: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
     color: Colors.secondaryText,
   },
@@ -1519,7 +1519,7 @@ const styles = StyleSheet.create({
     width: RFPercentage(18),
   },
   removeButtonText: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.semiBold,
     color: Colors.error,
   },
@@ -1555,7 +1555,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   adminBadgeText: {
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontMedium,
     color: Colors.white,
   },
@@ -1589,13 +1589,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   adminToggleTitle: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
     color: Colors.gray800,
     marginBottom: 2,
   },
   adminToggleDescription: {
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
     color: Colors.placeholderColor,
   },
@@ -1606,13 +1606,13 @@ const styles = StyleSheet.create({
     borderTopColor: Colors.slate100,
   },
   adminStatText: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
     color: Colors.success,
     marginBottom: 4,
   },
   adminStatSubText: {
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
     color: Colors.placeholderColor,
   },

@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   headerText: {
     color: Colors.primaryText,
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(2.4),
+    fontSize: RFPercentage(2.5),
     textAlign: 'center',
   },
   logo: {
@@ -126,6 +126,6 @@ const styles = StyleSheet.create({
   rightText: {
     color: Colors.background,
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
   },
 });

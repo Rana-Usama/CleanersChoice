@@ -475,7 +475,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   headerText: {
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     fontFamily: Fonts.semiBold,
     color: Colors.white,
   },
@@ -498,13 +498,13 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   statsTitle: {
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     fontFamily: Fonts.semiBold,
     color: Colors.gray800,
     marginBottom: 4,
   },
   statsSubtitle: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontRegular,
     color: Colors.placeholderColor,
     marginBottom: 20,
@@ -538,7 +538,7 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     color: Colors.gradient1,
     marginBottom: 4,
   },
@@ -550,7 +550,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     color: Colors.placeholderColor,
   },
   statDivider: {
@@ -563,13 +563,13 @@ const styles = StyleSheet.create({
     paddingTop: 24,
   },
   sectionTitle: {
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     fontFamily: Fonts.semiBold,
     color: Colors.gray800,
     marginBottom: 4,
   },
   sectionSubtitle: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontRegular,
     color: Colors.placeholderColor,
     marginBottom: 20,
@@ -611,7 +611,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   filterButtonText: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
     color: Colors.gray700,
     textAlign: 'center',
@@ -631,7 +631,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   activeFilterText: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
     color: Colors.gray600,
     flex: 1,
@@ -647,12 +647,12 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   jobsTitle: {
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     fontFamily: Fonts.semiBold,
     color: Colors.gray800,
   },
   jobsCount: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
     color: Colors.gradient1,
     backgroundColor: Colors.indigoBg50,
@@ -667,7 +667,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 12,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
     color: Colors.placeholderColor,
   },
@@ -691,7 +691,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   postJobText: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.semiBold,
     color: Colors.white,
   },
@@ -743,7 +743,7 @@ const styles = StyleSheet.create({
     height: 60,
   },
   newJobText: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.semiBold,
     color: Colors.white,
   },

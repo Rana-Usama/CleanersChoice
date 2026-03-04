@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
   textStyle: {
     color: Colors.gray600,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
   },
   textLeft: {
     right: 3,

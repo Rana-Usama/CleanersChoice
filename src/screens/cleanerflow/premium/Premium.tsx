@@ -11,6 +11,7 @@ import {
   ScrollView,
   Alert,
   Platform,
+  Linking
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -38,6 +39,8 @@ const services = [
 ];
 
 const productId = 'cleaner.premium.monthly.V1';
+const PRIVACY_URL = 'https://www.privacypolicies.com/live/9ed1413e-3736-4e66-8b11-61ea197e4e37';
+const EULA_URL = 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
 
 const Premium = ({navigation}: any) => {
   const {initPaymentSheet, presentPaymentSheet} = useStripe();
@@ -258,10 +261,14 @@ const Premium = ({navigation}: any) => {
 
           {/* Price */}
           <View style={styles.priceSection}>
-            <Text style={styles.priceText}>
-              $20
-              <Text style={styles.priceDecimal}>.99</Text>
-            </Text>
+            {Platform.OS === 'ios' ? (
+              <Text style={styles.priceText}>{productPrice}</Text>
+            ) : (
+              <Text style={styles.priceText}>
+                $20
+                <Text style={styles.priceDecimal}>.99</Text>
+              </Text>
+            )}
             <Text style={styles.pricePeriod}>per month</Text>
           </View>
 
@@ -308,6 +315,25 @@ const Premium = ({navigation}: any) => {
           </View>
         </View>
 
+        {/* Legal Links - iOS only (App Store requirement) */}
+        {Platform.OS === 'ios' && (
+          <View style={styles.legalLinks}>
+            <Text style={styles.legalText}>
+              By subscribing, you agree to our{' '}
+              <Text
+                style={styles.link}
+                onPress={() => Linking.openURL(PRIVACY_URL)}>
+                Privacy Policy
+              </Text>
+              {' '}and{' '}
+              <Text style={styles.link} onPress={() => Linking.openURL(EULA_URL)}>
+                Terms of Use
+              </Text>
+              .
+            </Text>
+          </View>
+        )}
+
         {/* Bottom Spacer */}
         <View style={styles.spacer} />
       </ScrollView>
@@ -323,11 +349,7 @@ const Premium = ({navigation}: any) => {
           </TouchableOpacity>
 
           <GradientButton
-            title={
-              showRenewUI
-                ? 'Renew Subscription'
-                : 'Proceed To Payment'
-            }
+            title={getButtonTitle()}
             textStyle={styles.buttonText}
             onPress={handleSubscribe}
             style={styles.subscribeButton}
@@ -400,14 +422,14 @@ const styles = StyleSheet.create({
   },
   premiumTitle: {
     color: Colors.brown,
-    fontSize: RFPercentage(2.5),
+    fontSize: RFPercentage(2.6),
     fontFamily: Fonts.semiBold,
     textAlign: 'center',
     marginBottom: RFPercentage(1),
   },
   premiumSubtitle: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontRegular,
     textAlign: 'center',
     lineHeight: RFPercentage(2.2),
@@ -447,7 +469,7 @@ const styles = StyleSheet.create({
   },
   popularText: {
     color: Colors.white,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontMedium,
   },
   priceSection: {
@@ -458,15 +480,15 @@ const styles = StyleSheet.create({
   priceText: {
     color: Colors.brown,
     fontFamily: Fonts.fontBold,
-    fontSize: RFPercentage(4.5),
+    fontSize: RFPercentage(4.6),
   },
   priceDecimal: {
-    fontSize: RFPercentage(2.5),
+    fontSize: RFPercentage(2.6),
     fontFamily: Fonts.fontMedium,
   },
   pricePeriod: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontRegular,
     marginTop: RFPercentage(0.5),
   },
@@ -475,7 +497,7 @@ const styles = StyleSheet.create({
   },
   featuresTitle: {
     color: Colors.primaryText,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     fontFamily: Fonts.fontMedium,
     marginBottom: RFPercentage(1.5),
     paddingHorizontal: RFPercentage(0.5),
@@ -492,7 +514,7 @@ const styles = StyleSheet.create({
   },
   featureText: {
     color: Colors.primaryText,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontRegular,
     flex: 1,
   },
@@ -509,7 +531,7 @@ const styles = StyleSheet.create({
   },
   trustText: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.2),
+    fontSize: RFPercentage(1.3),
     fontFamily: Fonts.fontMedium,
     marginTop: RFPercentage(0.5),
   },
@@ -541,13 +563,13 @@ const styles = StyleSheet.create({
   },
   statNumber: {
     color: Colors.gradient1,
-    fontSize: RFPercentage(2.2),
+    fontSize: RFPercentage(2.3),
     fontFamily: Fonts.fontBold,
     marginBottom: RFPercentage(0.3),
   },
   statLabel: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
     textAlign: 'center',
   },
@@ -567,7 +589,7 @@ const styles = StyleSheet.create({
   },
   testimonialText: {
     color: Colors.primaryText,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontRegular,
     fontStyle: 'italic',
     lineHeight: RFPercentage(2.4),
@@ -585,12 +607,12 @@ const styles = StyleSheet.create({
   },
   authorName: {
     color: Colors.primaryText,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
   },
   authorRole: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
   },
   spacer: {
@@ -629,12 +651,12 @@ const styles = StyleSheet.create({
   },
   totalLabel: {
     color: Colors.gradient1,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.semiBold,
   },
   totalPrice: {
     color: Colors.gradient1,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     fontFamily: Fonts.fontBold,
   },
   subscribeButton: {
@@ -642,7 +664,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(2),
   },
   buttonText: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
   },
   signInButton: {
@@ -654,7 +676,7 @@ const styles = StyleSheet.create({
   },
   signInText: {
     color: Colors.gradient1,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
   },
   starContainer: {
@@ -675,4 +697,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  legalLinks: {
+  paddingHorizontal: RFPercentage(2),
+  marginBottom: RFPercentage(1),
+},
+legalText: {
+  fontSize: RFPercentage(1.2),
+  color: Colors.secondaryText,
+  textAlign: 'center',
+},
+link: {
+  color: Colors.gradient1,
+  textDecorationLine: 'underline',
+},
 });
