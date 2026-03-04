@@ -26,6 +26,7 @@ import NextButton from '../../../components/NextButton';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {showToast} from '../../../utils/ToastMessage';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {useAppleIAP} from '../../../hooks/useAppleIAP';
 
 const services = [
   {id: 1, name: 'Connect with cleaning customers'},
@@ -46,6 +47,11 @@ const CancelSubscription = () => {
   const user = auth().currentUser;
 
   const isApple = subscriptionProvider === 'apple';
+
+  const {productPrice} = useAppleIAP(
+    () => {},
+    () => {},
+  );
 
   // Fetching user data
   useEffect(() => {
@@ -174,10 +180,14 @@ const CancelSubscription = () => {
             <View style={styles.planContent}>
               <Text style={styles.planName}>Premium Business Account</Text>
               <View style={styles.priceSection}>
-                <Text style={styles.priceText}>
-                  $15
-                  <Text style={styles.priceDecimal}>.99</Text>
-                </Text>
+                {Platform.OS === 'ios' ? (
+                  <Text style={styles.priceText}>{productPrice}</Text>
+                ) : (
+                  <Text style={styles.priceText}>
+                    $20
+                    <Text style={styles.priceDecimal}>.99</Text>
+                  </Text>
+                )}
                 <Text style={styles.pricePeriod}>per month</Text>
               </View>
             </View>
