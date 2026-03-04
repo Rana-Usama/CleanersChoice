@@ -606,7 +606,7 @@ const styles = StyleSheet.create({
     // elevation: 8,
   },
   headerText: {
-    fontSize: RFPercentage(2.2),
+    fontSize: RFPercentage(2.3),
     fontFamily: Fonts.semiBold,
     color: Colors.white,
   },
@@ -622,13 +622,13 @@ const styles = StyleSheet.create({
   },
   progressTitle: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     color: Colors.white,
     opacity: 0.9,
   },
   progressPercent: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     color: Colors.white,
   },
   progressBar: {
@@ -694,13 +694,13 @@ const styles = StyleSheet.create({
   },
   locationLabel: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     color: Colors.gray800,
     marginBottom: 4,
   },
   locationValue: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     color: Colors.secondaryText,
   },
   placeholderText: {
@@ -742,7 +742,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     color: Colors.gray800,
     marginLeft: RFPercentage(1.5),
   },
@@ -754,7 +754,7 @@ const styles = StyleSheet.create({
   },
   counterText: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     color: Colors.placeholderColor,
   },
   descriptionInput: {
@@ -765,7 +765,7 @@ const styles = StyleSheet.create({
     padding: 16,
     minHeight: 120,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     color: Colors.gray700,
   },
   availabilityCard: {
@@ -808,13 +808,13 @@ const styles = StyleSheet.create({
   },
   availabilityLabel: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     color: Colors.gray800,
     marginBottom: 4,
   },
   availabilityValue: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     color: Colors.green500,
   },
   availabilityArrow: {
@@ -847,7 +847,7 @@ const styles = StyleSheet.create({
   },
   countText: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     color: Colors.gradient1,
   },
   dropdownMenu: {
@@ -859,7 +859,7 @@ const styles = StyleSheet.create({
   searchInput: {
     color: Colors.gray700,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
   },
   rowList: {
     paddingVertical: RFPercentage(1.1),
@@ -874,18 +874,18 @@ const styles = StyleSheet.create({
   },
   dropdownTextSelected: {
     color: Colors.placeholderColor,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
     marginLeft: 12,
   },
   dropdownText: {
     color: Colors.placeholderColor,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
     marginLeft: 12,
   },
   tagText: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
     color: Colors.secondaryText,
   },
@@ -921,7 +921,7 @@ const styles = StyleSheet.create({
   },
   hintText: {
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     color: Colors.gray400,
     marginTop: 12,
     textAlign: 'center',
@@ -955,7 +955,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     color: Colors.white,
     marginRight: 10,
   },
@@ -964,7 +964,7 @@ const styles = StyleSheet.create({
   },
   progressHint: {
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     color: Colors.placeholderColor,
     textAlign: 'center',
     marginTop: 12,

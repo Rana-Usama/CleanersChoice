@@ -439,7 +439,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   headerText: {
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     fontFamily: Fonts.semiBold,
     color: Colors.white,
   },
@@ -460,7 +460,7 @@ const styles = StyleSheet.create({
   },
   unreadBadgeText: {
     color: Colors.gradient1,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
     fontWeight: 'bold',
   },
@@ -473,13 +473,13 @@ const styles = StyleSheet.create({
     paddingTop: 24,
   },
   sectionTitle: {
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     fontFamily: Fonts.semiBold,
     color: Colors.gray800,
     marginBottom: 4,
   },
   sectionSubtitle: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontRegular,
     color: Colors.placeholderColor,
     marginBottom: 20,
@@ -520,7 +520,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   filterButtonText: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
     color: Colors.gray700,
     textAlign: 'center',
@@ -540,7 +540,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   activeFilterText: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
     color: Colors.gray600,
     flex: 1,
@@ -556,12 +556,12 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   messagesTitle: {
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     fontFamily: Fonts.semiBold,
     color: Colors.gray800,
   },
   messagesCount: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
     color: Colors.gradient1,
     backgroundColor: Colors.indigoBg50,
@@ -576,7 +576,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 12,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
     color: Colors.placeholderColor,
   },
@@ -601,7 +601,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   startChatText: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.semiBold,
     color: Colors.white,
   },
@@ -652,7 +652,7 @@ const styles = StyleSheet.create({
     minWidth: 180,
   },
   newMessageText: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.semiBold,
     color: Colors.white,
   },

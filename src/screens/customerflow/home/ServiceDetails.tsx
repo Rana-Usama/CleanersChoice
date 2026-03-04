@@ -785,7 +785,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
                 <GradientButton
                   title="Get Package Offer"
                   style={styles.selectPackageButton}
-                  textStyle={{fontSize: RFPercentage(1.6)}}
+                  textStyle={{fontSize: RFPercentage(1.7)}}
                   onPress={() => {
                     if (userFlow === 'Guest') {
                       setShowAuthModal(true);
@@ -831,7 +831,7 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'ios' ? 40 : 0,
   },
   headerText: {
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     fontFamily: Fonts.semiBold,
     color: Colors.white,
   },
@@ -867,7 +867,7 @@ const styles = StyleSheet.create({
   },
   counterText: {
     color: Colors.white,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontMedium,
   },
   dotsContainer: {
@@ -922,7 +922,7 @@ const styles = StyleSheet.create({
   },
   serviceBadgeText: {
     color: Colors.white,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontMedium,
   },
   serviceTitleRow: {
@@ -958,7 +958,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   serviceName: {
-    fontSize: RFPercentage(2.2),
+    fontSize: RFPercentage(2.3),
     fontFamily: Fonts.semiBold,
     color: Colors.primaryText,
     marginBottom: RFPercentage(0.3),
@@ -969,13 +969,13 @@ const styles = StyleSheet.create({
     gap: RFPercentage(0.3),
   },
   ratingText: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
     color: Colors.primaryText,
     marginLeft: RFPercentage(0.3),
   },
   reviewsText: {
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
     color: Colors.secondaryText,
     marginLeft: RFPercentage(0.5),
@@ -998,7 +998,7 @@ const styles = StyleSheet.create({
     gap: RFPercentage(0.5),
   },
   metaText: {
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
     color: Colors.secondaryText,
   },
@@ -1023,19 +1023,19 @@ const styles = StyleSheet.create({
     gap: RFPercentage(1),
   },
   cardTitle: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     fontFamily: Fonts.fontMedium,
     color: Colors.primaryText,
   },
   descriptionText: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontRegular,
     color: Colors.secondaryText,
     lineHeight: RFPercentage(2.2),
   },
   readMoreText: {
     color: Colors.gradient1,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
   },
   locationContainer: {
@@ -1049,7 +1049,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.inputBorder,
   },
   locationText: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontRegular,
     color: Colors.primaryText,
     flex: 1,
@@ -1067,7 +1067,7 @@ const styles = StyleSheet.create({
   },
   availabilityButtonText: {
     color: Colors.white,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
   },
   servicesGrid: {
@@ -1087,7 +1087,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.inputBorder,
   },
   serviceChipText: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
     color: Colors.primaryText,
   },
@@ -1100,7 +1100,7 @@ const styles = StyleSheet.create({
   },
   showMoreText: {
     color: Colors.gradient1,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
   },
   packagesHeader: {
@@ -1110,12 +1110,12 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(1.5),
   },
   startingFromText: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
     color: Colors.secondaryText,
   },
   startingPrice: {
-    fontSize: RFPercentage(2.4),
+    fontSize: RFPercentage(2.5),
     fontFamily: Fonts.semiBold,
     color: Colors.gradient1,
   },
@@ -1130,7 +1130,7 @@ const styles = StyleSheet.create({
   },
   bestValueText: {
     color: Colors.white,
-    fontSize: RFPercentage(1.2),
+    fontSize: RFPercentage(1.3),
     fontFamily: Fonts.fontMedium,
   },
   packagesScroll: {
@@ -1151,7 +1151,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   providerName: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
     color: Colors.primaryText,
     marginBottom: RFPercentage(0.5),
@@ -1166,7 +1166,7 @@ const styles = StyleSheet.create({
     gap: RFPercentage(0.3),
   },
   statText: {
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
     color: Colors.secondaryText,
   },
@@ -1196,12 +1196,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   startingFrom: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
     color: Colors.secondaryText,
   },
   bottomPrice: {
-    fontSize: RFPercentage(2.2),
+    fontSize: RFPercentage(2.3),
     fontFamily: Fonts.semiBold,
     color: Colors.gradient1,
   },
@@ -1210,7 +1210,7 @@ const styles = StyleSheet.create({
     marginLeft: RFPercentage(1),
   },
   actionButtonText: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
   },
   fullScreenModal: {
@@ -1264,7 +1264,7 @@ const styles = StyleSheet.create({
   },
   packageModalTitle: {
     color: Colors.white,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     fontFamily: Fonts.semiBold,
   },
   packageModalClose: {
@@ -1279,7 +1279,7 @@ const styles = StyleSheet.create({
   },
   packageModalPriceLabel: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
     marginBottom: RFPercentage(0.5),
   },
@@ -1289,18 +1289,18 @@ const styles = StyleSheet.create({
   },
   packageModalCurrency: {
     color: Colors.gradient1,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     fontFamily: Fonts.fontMedium,
   },
   packageModalPrice: {
     color: Colors.gradient1,
-    fontSize: RFPercentage(3.5),
+    fontSize: RFPercentage(3.6),
     fontFamily: Fonts.fontBold,
     marginHorizontal: RFPercentage(0.5),
   },
   packageModalPriceUnit: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontRegular,
   },
   packageDetailSection: {
@@ -1314,12 +1314,12 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: Colors.primaryText,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
   },
   packageDetailText: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontRegular,
     lineHeight: RFPercentage(2.2),
   },
@@ -1334,7 +1334,7 @@ const styles = StyleSheet.create({
   },
   serviceText: {
     color: Colors.primaryText,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontRegular,
     flex: 1,
   },
@@ -1353,7 +1353,7 @@ const styles = StyleSheet.create({
   },
   customizeText: {
     color: Colors.gradient1,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
   },
 });

@@ -388,7 +388,7 @@ const styles = StyleSheet.create({
   ribbonText: {
     color: Colors.white,
     fontFamily: Fonts.fontBold,
-    fontSize: RFPercentage(1.1),
+    fontSize: RFPercentage(1.2),
     letterSpacing: 0.5,
   },
   touchableArea: {
@@ -413,13 +413,13 @@ const styles = StyleSheet.create({
   packageName: {
     color: Colors.primaryText,
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     letterSpacing: 0.5,
   },
   featuredPackageName: {
     color: Colors.white,
     fontFamily: Fonts.fontBold,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
   },
   content: {
     flex: 1,
@@ -437,7 +437,7 @@ const styles = StyleSheet.create({
   detailText: {
     color: Colors.secondaryText,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     lineHeight: RFPercentage(2),
     flex: 1,
   },
@@ -457,7 +457,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     letterSpacing: 0.5,
   },
   featuredSectionTitle: {
@@ -481,7 +481,7 @@ const styles = StyleSheet.create({
   featureText: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     flex: 1,
   },
   featuredFeatureText: {
@@ -497,7 +497,7 @@ const styles = StyleSheet.create({
   moreFeaturesText: {
     color: Colors.gradient1,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     textAlign: 'center',
     fontStyle: 'italic',
   },
@@ -514,7 +514,7 @@ const styles = StyleSheet.create({
   startsAtText: {
     color: Colors.secondaryText,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.2),
+    fontSize: RFPercentage(1.3),
     letterSpacing: 0.5,
     marginBottom: RFPercentage(0.3),
   },
@@ -529,7 +529,7 @@ const styles = StyleSheet.create({
   currencySymbol: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     marginRight: RFPercentage(0.2),
   },
   featuredCurrencySymbol: {
@@ -538,17 +538,17 @@ const styles = StyleSheet.create({
   priceText: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontBold,
-    fontSize: RFPercentage(2.6),
+    fontSize: RFPercentage(2.7),
     marginRight: RFPercentage(0.3),
   },
   featuredPriceText: {
     color: Colors.gradient1,
-    fontSize: RFPercentage(2.8),
+    fontSize: RFPercentage(2.9),
   },
   priceSuffix: {
     color: Colors.secondaryText,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
   },
   featuredPriceSuffix: {
     color: Colors.slate500,
@@ -572,7 +572,7 @@ const styles = StyleSheet.create({
   selectButtonText: {
     color: Colors.white,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     letterSpacing: 0.5,
   },
   featuredSelectButtonText: {
@@ -593,7 +593,7 @@ const styles = StyleSheet.create({
   savingsText: {
     color: Colors.white,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.1),
+    fontSize: RFPercentage(1.2),
   },
   bottomIndicator: {
     height: RFPercentage(0.3),

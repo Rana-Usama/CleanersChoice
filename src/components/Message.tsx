@@ -113,18 +113,18 @@ const styles = StyleSheet.create({
   nameText: {
     color: Colors.gray700,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
   },
   messageText: {
     color: Colors.gray600,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     marginTop: RFPercentage(0.3),
   },
   timeText: {
     color: Colors.gradient1,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
   },
   unread: {
     width: RFPercentage(0.9),
@@ -138,6 +138,6 @@ const styles = StyleSheet.create({
   name: {
     color: Colors.gradient1,
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
   },
 });

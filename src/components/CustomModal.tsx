@@ -121,14 +121,14 @@ const styles = StyleSheet.create({
   modalTitle: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(2.1),
+    fontSize: RFPercentage(2.2),
     textAlign: 'center',
     marginBottom: RFPercentage(2),
     lineHeight: RFPercentage(2.8),
   },
   modalText: {
     textAlign: 'center',
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     fontFamily: Fonts.fontRegular,
     color: Colors.secondaryText,
     marginTop: 0,
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(1.3),
   },
   okButtonText: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
   },
   buttonContainer: {
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
     width: RFPercentage(16),
   },
   cancelButtonText: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
     color: Colors.gradient1,
   },
@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(100),
   },
   yesButtonText: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
   },
 });

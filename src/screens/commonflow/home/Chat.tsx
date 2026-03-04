@@ -246,12 +246,12 @@ const Chat = ({navigation, route}: any) => {
                     left: {
                       color: Colors.inputTextColor,
                       fontFamily: Fonts.fontRegular,
-                      fontSize: RFPercentage(1.8),
+                      fontSize: RFPercentage(1.9),
                     },
                     right: {
                       color: Colors.background,
                       fontFamily: Fonts.fontRegular,
-                      fontSize: RFPercentage(1.8),
+                      fontSize: RFPercentage(1.9),
                     },
                   }}
                 />
@@ -341,7 +341,7 @@ const Chat = ({navigation, route}: any) => {
                     <Text
                       style={{
                         color: Colors.primaryText,
-                        fontSize: RFPercentage(1.8),
+                        fontSize: RFPercentage(1.9),
                         fontFamily: 'Poppins_600SemiBold',
                       }}>
                       {receiverName?.[0] || '?'}
@@ -378,7 +378,7 @@ const styles = StyleSheet.create({
   },
   customTextInput: {
     color: Colors.inputTextColor,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     width: '90%',
     textAlignVertical: 'top',
     fontFamily: Fonts.fontRegular,
@@ -432,12 +432,12 @@ const styles = StyleSheet.create({
   noProfile: {
     color: Colors.gradient1,
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
   },
   receiverName: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     marginLeft: RFPercentage(2),
   },
   toolbar: {

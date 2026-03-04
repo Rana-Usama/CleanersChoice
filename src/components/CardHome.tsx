@@ -65,12 +65,12 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   title: {
-    fontSize: 18,
+    fontSize: RFPercentage(2.3),
     color: Colors.background,
     fontFamily: Fonts.semiBold,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: RFPercentage(1.8),
     color: Colors.buttonColor,
     lineHeight: 18,
     marginTop: 8,
@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: Colors.gradient1,
-    fontSize: 13,
+    fontSize: RFPercentage(1.7),
     marginRight: 6,
     fontFamily: Fonts.semiBold,
     lineHeight: RFPercentage(2),

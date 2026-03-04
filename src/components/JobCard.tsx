@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
   nameText: {
     color: Colors.slateText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.9),
+    fontSize: RFPercentage(2.0),
     flex: 1,
     lineHeight: RFPercentage(2.4),
   },
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
   detailText: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     flex: 1,
   },
   footer: {
@@ -175,13 +175,13 @@ const styles = StyleSheet.create({
   budgetText: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     marginRight: RFPercentage(0.5),
   },
   priceText: {
     color: Colors.gradient1,
     fontFamily: Fonts.fontBold,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     top:1
   },
   ctaButton: {
@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
   ctaText: {
     color: Colors.gradient1,
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     marginRight: RFPercentage(0.5),
   },
   arrowIcon: {

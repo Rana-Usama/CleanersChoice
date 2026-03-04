@@ -455,7 +455,7 @@ const styles = StyleSheet.create({
     // elevation: 8,
   },
   headerText: {
-    fontSize: RFPercentage(2.2),
+    fontSize: RFPercentage(2.3),
     fontFamily: Fonts.semiBold,
     color: Colors.white,
   },
@@ -471,13 +471,13 @@ const styles = StyleSheet.create({
   },
   progressTitle: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     color: Colors.white,
     opacity: 0.9,
   },
   progressPercent: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     color: Colors.white,
   },
   progressBar: {
@@ -498,7 +498,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   loadingText: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontRegular,
     color: Colors.placeholderColor,
   },
@@ -526,13 +526,13 @@ const styles = StyleSheet.create({
     marginLeft: 16,
   },
   instructionsTitle: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     fontFamily: Fonts.semiBold,
     color: Colors.gray800,
     marginBottom: 4,
   },
   instructionsSubtitle: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontRegular,
     color: Colors.placeholderColor,
     lineHeight: 20,
@@ -550,13 +550,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   statNumber: {
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     fontFamily: Fonts.semiBold,
     color: Colors.gradient1,
     marginBottom: 4,
   },
   statLabel: {
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontMedium,
     color: Colors.placeholderColor,
   },
@@ -570,13 +570,13 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   sectionTitle: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     fontFamily: Fonts.semiBold,
     color: Colors.gray800,
     marginBottom: 6,
   },
   sectionSubtitle: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontRegular,
     color: Colors.placeholderColor,
     marginBottom: 20,
@@ -602,13 +602,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   tipsTitle: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.semiBold,
     color: Colors.amberDarkText,
     marginLeft: 8,
   },
   tipsText: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
     color: Colors.amberDarkText,
     lineHeight: 20,
@@ -618,7 +618,7 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   bulkTitle: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
     color: Colors.gray700,
     marginBottom: 12,
@@ -639,7 +639,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.gray200,
   },
   bulkButtonText: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
     color: Colors.gray700,
     marginLeft: 6,
@@ -674,7 +674,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     color: Colors.white,
     marginRight: 10,
   },
@@ -682,7 +682,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   requirementsText: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
     color: Colors.placeholderColor,
     textAlign: 'center',

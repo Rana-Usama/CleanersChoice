@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.gradient1,
   },
   dayAbbreviation: {
-    fontSize: RFPercentage(1.2),
+    fontSize: RFPercentage(1.3),
     fontFamily: Fonts.fontMedium,
     color: Colors.secondaryText,
     marginBottom: -2,
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
     color: Colors.white,
   },
   dayNumber: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.semiBold,
     color: Colors.primaryText,
   },
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
   },
   dayFullName: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
     color: Colors.primaryText,
     marginBottom: RFPercentage(0.2),
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
   },
   todayBadgeText: {
     color: Colors.amberDarkText,
-    fontSize: RFPercentage(1),
+    fontSize: RFPercentage(1.1),
     fontFamily: Fonts.fontMedium,
   },
   timeSection: {
@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   timeText: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
     color: Colors.primaryText,
   },
@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
   },
   availableText: {
     color: Colors.white,
-    fontSize: RFPercentage(1.1),
+    fontSize: RFPercentage(1.2),
     fontFamily: Fonts.fontMedium,
   },
   scheduledBadge: {
@@ -306,7 +306,7 @@ const styles = StyleSheet.create({
   },
   scheduledText: {
     color: Colors.gradient1,
-    fontSize: RFPercentage(1.1),
+    fontSize: RFPercentage(1.2),
     fontFamily: Fonts.fontMedium,
   },
   chevronIcon: {

@@ -109,7 +109,7 @@ const ServicesCard: React.FC<ServicesCardProps> = ({
               <Text
                 style={{
                   fontFamily: Fonts.fontRegular,
-                  fontSize: RFPercentage(1.1),
+                  fontSize: RFPercentage(1.2),
                   color: Colors.secondaryText,
                 }}
               >
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
   priceBadgeText: {
     color: Colors.background,
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     textAlign: 'center',
     lineHeight: RFPercentage(1.5),
   },
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   serviceName: {
     color: Colors.primaryText,
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.9),
+    fontSize: RFPercentage(2.0),
     marginBottom: RFPercentage(0.4),
     lineHeight: RFPercentage(2.2),
   },
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
   locationText: {
     color: Colors.secondaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     flex: 1,
   },
   footer: {
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
   startingText: {
     color: Colors.secondaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
   },
   availabilityDot: {
     width: RFPercentage(1),

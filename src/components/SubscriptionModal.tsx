@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
     marginVertical: RFPercentage(4),
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     width: RFPercentage(34),
     textAlign: 'center',
     lineHeight: RFPercentage(2.4),

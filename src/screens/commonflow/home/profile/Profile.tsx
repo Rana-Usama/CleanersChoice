@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   headerText: {
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     fontFamily: Fonts.semiBold,
     color: Colors.white,
   },
@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
   nameText: {
     color: Colors.blueGray700,
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(2.2),
+    fontSize: RFPercentage(2.3),
     marginBottom: RFPercentage(1),
     textAlign: 'center',
   },
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
   },
   roleText: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     textTransform: 'capitalize',
   },
   actionsContainer: {
@@ -332,13 +332,13 @@ const styles = StyleSheet.create({
   statNumber: {
     color: Colors.gray800,
     fontFamily: Fonts.fontBold,
-    fontSize: RFPercentage(2.2),
+    fontSize: RFPercentage(2.3),
     marginBottom: RFPercentage(0.5),
   },
   statLabel: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     textAlign: 'center',
   },
   statDivider: {

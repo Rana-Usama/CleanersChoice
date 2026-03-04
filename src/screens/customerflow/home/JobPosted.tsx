@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
   successText: {
     color: Colors.background,
     fontFamily: Fonts.fontBold,
-    fontSize: RFPercentage(3.2),
+    fontSize: RFPercentage(3.3),
     marginBottom: RFPercentage(1.5),
     textAlign: 'center',
     lineHeight: RFPercentage(3.8),
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
   subtitle: {
     color: Colors.whiteOverlay80,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     textAlign: 'center',
     lineHeight: RFPercentage(2.4),
     marginBottom: RFPercentage(6),
@@ -263,19 +263,19 @@ const styles = StyleSheet.create({
   statNumber: {
     color: Colors.background,
     fontFamily: Fonts.fontBold,
-    fontSize: RFPercentage(2.4),
+    fontSize: RFPercentage(2.5),
     marginBottom: RFPercentage(0.5),
   },
   statLabel: {
     color: Colors.background,
     fontFamily: Fonts.fontSemiBold,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     marginBottom: RFPercentage(0.3),
   },
   statDescription: {
     color: Colors.whiteOverlay70,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     textAlign: 'center',
   },
   buttonContainer: {
@@ -307,7 +307,7 @@ const styles = StyleSheet.create({
   homeButtonText: {
     color: Colors.gradient1,
     fontFamily: Fonts.fontBold,
-    fontSize: RFPercentage(1.9),
+    fontSize: RFPercentage(2.0),
     marginRight: RFPercentage(1),
   },
   buttonIcon: {
@@ -320,7 +320,7 @@ const styles = StyleSheet.create({
   secondaryButtonText: {
     color: Colors.background,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     textDecorationLine: 'underline',
     opacity: 0.9,
   },

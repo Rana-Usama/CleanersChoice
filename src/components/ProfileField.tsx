@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
   text: {
     color: Colors.secondaryText,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     lineHeight: Platform.OS === 'ios' ? RFPercentage(2.3) : RFPercentage(2.3),
   },
 });

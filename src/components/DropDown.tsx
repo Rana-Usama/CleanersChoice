@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
   placeholderText: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
   },
   dropdownContainer: {
     backgroundColor: 'transparent',
@@ -144,6 +144,6 @@ const styles = StyleSheet.create({
   listItemText: {
     color: Colors.placeholderColor,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
   },
 });

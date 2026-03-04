@@ -331,7 +331,7 @@ const CancelSubscription = () => {
                   onPress={() => setModalVisible(false)}
                 />
                 <GradientButton
-                  title={Platform.OS === 'ios' ? 'Manage Plan' : 'Cancel Subscription'}
+                  title="Cancel"
                   onPress={() => {
                     setIsLoading2(true);
                     setTimeout(() => {
@@ -343,7 +343,7 @@ const CancelSubscription = () => {
                   style={styles.modalConfirmButton}
                   loading={isLoading2}
                   disabled={isLoading2}
-                  textStyle={{fontSize:RFPercentage(1.6)}}
+                  textStyle={{fontSize: RFPercentage(1.7)}}
                 />
               </View>
             </View>
@@ -398,14 +398,14 @@ const styles = StyleSheet.create({
   },
   titleText: {
     color: Colors.brown,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     fontFamily: Fonts.semiBold,
     textAlign: 'center',
    
   },
   subtitleText: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontRegular,
     textAlign: 'center',
     lineHeight: RFPercentage(2.2),
@@ -445,7 +445,7 @@ const styles = StyleSheet.create({
   },
   currentBadgeText: {
     color: Colors.white,
-    fontSize: RFPercentage(1.1),
+    fontSize: RFPercentage(1.2),
     fontFamily: Fonts.fontMedium,
   },
   planContent: {
@@ -454,7 +454,7 @@ const styles = StyleSheet.create({
   },
   planName: {
     color: Colors.primaryText,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     fontFamily: Fonts.fontMedium,
     marginBottom: RFPercentage(1.5),
   },
@@ -464,15 +464,15 @@ const styles = StyleSheet.create({
   priceText: {
     color: Colors.brown,
     fontFamily: Fonts.fontBold,
-    fontSize: RFPercentage(3.5),
+    fontSize: RFPercentage(3.6),
   },
   priceDecimal: {
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     fontFamily: Fonts.fontMedium,
   },
   pricePeriod: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontRegular,
     marginTop: RFPercentage(0.5),
   },
@@ -491,7 +491,7 @@ const styles = StyleSheet.create({
   },
   featuresTitle: {
     color: Colors.primaryText,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     fontFamily: Fonts.fontMedium,
     marginBottom: RFPercentage(1.5),
     paddingBottom: RFPercentage(1),
@@ -510,7 +510,7 @@ const styles = StyleSheet.create({
   },
   featureText: {
     color: Colors.primaryText,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontRegular,
     flex: 1,
   },
@@ -533,13 +533,13 @@ const styles = StyleSheet.create({
   },
   warningTitle: {
     color: Colors.amberDarkText,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
     marginBottom: RFPercentage(0.5),
   },
   warningText: {
     color: Colors.amberDarkText,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
     lineHeight: RFPercentage(2),
   },
@@ -551,7 +551,7 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(2),
   },
   cancelButtonText: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
   },
   backButton: {
@@ -563,7 +563,7 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     color: Colors.gradient1,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
   },
   starContainer: {
@@ -609,7 +609,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     color: Colors.primaryText,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     fontFamily: Fonts.semiBold,
     textAlign: 'center',
     marginTop: RFPercentage(1),
@@ -619,7 +619,7 @@ const styles = StyleSheet.create({
   },
   warningListTitle: {
     color: Colors.primaryText,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
     marginBottom: RFPercentage(1.5),
   },
@@ -631,14 +631,14 @@ const styles = StyleSheet.create({
   },
   warningItemText: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontRegular,
     flex: 1,
     lineHeight: RFPercentage(2),
   },
   modalNote: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
     textAlign: 'center',
     fontStyle: 'italic',
@@ -658,7 +658,7 @@ const styles = StyleSheet.create({
   },
   modalCancelButtonText: {
     color: Colors.modalTextGray,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.semiBold,
   },
   modalConfirmButton: {

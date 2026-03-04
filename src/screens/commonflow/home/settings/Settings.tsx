@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   headerText: {
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     fontFamily: Fonts.semiBold,
     color: Colors.white,
   },
@@ -454,7 +454,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: Colors.primaryText,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     fontFamily: Fonts.fontMedium,
   },
   fieldsContainer: {
@@ -478,12 +478,12 @@ const styles = StyleSheet.create({
   },
   infoTitle: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
   },
   infoText: {
     color: Colors.secondaryText,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
     textAlign: 'center',
   },

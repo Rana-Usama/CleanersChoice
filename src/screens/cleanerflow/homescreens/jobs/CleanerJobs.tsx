@@ -993,7 +993,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   headerText: {
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     fontFamily: Fonts.semiBold,
     color: Colors.white,
   },
@@ -1009,7 +1009,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 12,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
     color: Colors.placeholderColor,
   },
@@ -1018,13 +1018,13 @@ const styles = StyleSheet.create({
     paddingTop: 24,
   },
   sectionTitle: {
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     fontFamily: Fonts.semiBold,
     color: Colors.gray800,
     marginBottom: 4,
   },
   sectionSubtitle: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontRegular,
     color: Colors.placeholderColor,
     marginBottom: 20,
@@ -1068,7 +1068,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   filterButtonText: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
     color: Colors.gray700,
   },
@@ -1096,7 +1096,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   activeFiltersTitle: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
     color: Colors.gray600,
     marginBottom: 12,
@@ -1116,7 +1116,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   activeFilterText: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
     color: Colors.white,
   },
@@ -1131,13 +1131,13 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   jobsTitle: {
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     fontFamily: Fonts.semiBold,
     color: Colors.gray800,
     width: '50%',
   },
   jobsCount: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
     color: Colors.gradient1,
     backgroundColor: Colors.indigoBg50,
@@ -1152,7 +1152,7 @@ const styles = StyleSheet.create({
   },
   loadingJobsText: {
     marginTop: 12,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
     color: Colors.placeholderColor,
   },
@@ -1161,14 +1161,14 @@ const styles = StyleSheet.create({
     paddingVertical: 40,
   },
   noLocationTitle: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     fontFamily: Fonts.semiBold,
     color: Colors.gray700,
     marginTop: 16,
     marginBottom: 8,
   },
   noLocationText: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontRegular,
     color: Colors.placeholderColor,
     textAlign: 'center',
@@ -1192,7 +1192,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   viewMoreText: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
     color: Colors.gradient1,
   },
@@ -1256,13 +1256,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   modalTitle: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     fontFamily: Fonts.semiBold,
     color: Colors.gray800,
     marginBottom: 4,
   },
   modalSubtitle: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
     color: Colors.placeholderColor,
   },
@@ -1277,19 +1277,19 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   priceLabel: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
     color: Colors.placeholderColor,
     marginBottom: 4,
   },
   priceValue: {
-    fontSize: RFPercentage(3),
+    fontSize: RFPercentage(3.1),
     fontFamily: Fonts.semiBold,
     color: Colors.gradient1,
     marginBottom: 8,
   },
   priceHint: {
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
     color: Colors.gray400,
     textAlign: 'center',
@@ -1307,12 +1307,12 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   sliderMin: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
     color: Colors.placeholderColor,
   },
   sliderMax: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
     color: Colors.placeholderColor,
   },
@@ -1346,7 +1346,7 @@ const styles = StyleSheet.create({
   },
   resultText: {
     flex: 1,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
     color: Colors.gray700,
   },
@@ -1360,7 +1360,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   noResultsText: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontRegular,
     color: Colors.gray400,
   },
@@ -1369,7 +1369,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   selectedTypeLabel: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
     color: Colors.placeholderColor,
     marginBottom: 8,
@@ -1387,7 +1387,7 @@ const styles = StyleSheet.create({
   },
   selectedTypeText: {
     flex: 1,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
     color: Colors.green800,
   },
@@ -1413,7 +1413,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   applyButtonText: {
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     fontFamily: Fonts.semiBold,
     color: Colors.white,
   },
@@ -1427,14 +1427,14 @@ const styles = StyleSheet.create({
     marginVertical: 16,
   },
   emptySearchTitle: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     fontFamily: Fonts.semiBold,
     color: Colors.gray700,
     marginTop: 16,
     marginBottom: 8,
   },
   emptySearchText: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontRegular,
     color: Colors.placeholderColor,
     textAlign: 'center',
@@ -1451,13 +1451,13 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   tipText: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontRegular,
     color: Colors.placeholderColor,
   },
 
   noResultsTitle: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
     color: Colors.gray700,
     marginTop: 12,
@@ -1483,7 +1483,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   adminBadgeText: {
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontMedium,
     color: Colors.white,
   },
@@ -1511,13 +1511,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   adminToggleTitle: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
     color: Colors.gray800,
     marginBottom: 2,
   },
   adminToggleDescription: {
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
     color: Colors.placeholderColor,
   },
@@ -1551,13 +1551,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   adminStatNumber: {
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     fontFamily: Fonts.semiBold,
     color: Colors.success,
     marginBottom: 4,
   },
   adminStatLabel: {
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
     color: Colors.placeholderColor,
   },
@@ -1568,10 +1568,10 @@ const styles = StyleSheet.create({
   },
   adminIndicator: {
     color: Colors.violet500,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
   },
   adminSubtitle: {
-    fontSize: RFPercentage(1.2),
+    fontSize: RFPercentage(1.3),
     fontFamily: Fonts.fontRegular,
     color: Colors.placeholderColor,
     marginTop: 2,

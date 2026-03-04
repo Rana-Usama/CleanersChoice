@@ -200,14 +200,14 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     color: Colors.dangerRed,
     marginBottom: 8,
     textAlign: 'center',
   },
   modalSubtitle: {
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     color: Colors.darkRed900,
     textAlign: 'center',
     lineHeight: 20,
@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
   warningText: {
     flex: 1,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     color: Colors.darkRed900,
     lineHeight: 20,
   },
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
   infoText: {
     flex: 1,
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     color: Colors.placeholderColor,
     marginLeft: 10,
     lineHeight: 20,
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
   },
   cancelButtonText: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     color: Colors.gray700,
   },
   removeButton: {
@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
   },
   removeButtonText: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     color: Colors.white,
   },
 });
