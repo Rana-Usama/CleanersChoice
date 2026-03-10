@@ -15,18 +15,18 @@ export const autoDeleteExpiredJobs = onSchedule(
   async () => {
     const firestore = admin.firestore();
     const now = new Date();
-    const msIn90Days = 90 * 24 * 60 * 60 * 1000;
-    const ninetyDaysAgo = new Date(now.getTime() - msIn90Days);
+    const msIn30Days = 30 * 24 * 60 * 60 * 1000;
+    const thirtyDaysAgo = new Date(now.getTime() - msIn30Days);
 
     // Convert to Firestore Timestamp
-    const ninetyDaysAgoTimestamp =
-      admin.firestore.Timestamp.fromDate(ninetyDaysAgo);
+    const thirtyDaysAgoTimestamp =
+      admin.firestore.Timestamp.fromDate(thirtyDaysAgo);
 
     try {
       const expiredJobsSnapshot = await firestore
         .collection("Jobs")
         .where("status", "==", "active")
-        .where("createdAt2", "<=", ninetyDaysAgoTimestamp)
+        .where("createdAt2", "<=", thirtyDaysAgoTimestamp)
         .get();
 
       if (expiredJobsSnapshot.empty) {
