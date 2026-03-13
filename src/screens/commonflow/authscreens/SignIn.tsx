@@ -42,6 +42,27 @@ const SignIn: React.FC = () => {
     password: yup.string().required('Password is required'),
   });
 
+  const getAuthErrorMessage = (errorCode: string) => {
+    switch (errorCode) {
+      case 'auth/user-not-found':
+        return 'No account found with this email.';
+      case 'auth/wrong-password':
+        return 'Incorrect password. Please try again.';
+      case 'auth/invalid-email':
+        return 'Please enter a valid email address.';
+      case 'auth/invalid-credential':
+        return 'Invalid email or password.';
+      case 'auth/too-many-requests':
+        return 'Too many login attempts. Please try again later.';
+      case 'auth/user-disabled':
+        return 'This account has been disabled. Contact support.';
+      case 'auth/network-request-failed':
+        return 'Network error. Please check your internet connection.';
+      default:
+        return 'Something went wrong. Please try again.';
+    }
+  };
+
   // Sign In
   const handleSignIn = async (values: any) => {
     setLoading(true);
@@ -87,10 +108,12 @@ const SignIn: React.FC = () => {
         navigation.replace('Home');
       }
     } catch (error: any) {
+      const message = getAuthErrorMessage(error.code);
+
       showToast({
         type: 'error',
         title: 'Sign In Failed',
-        message: error.message,
+        message: message,
       });
     } finally {
       setLoading(false);

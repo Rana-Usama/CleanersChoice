@@ -43,7 +43,9 @@ const CancelSubscription = () => {
   const [isLoading2, setIsLoading2] = useState(false);
   const [cancel, setCancel] = useState(null);
   const [subscriptionId, setSubscriptionId] = useState(null);
-  const [subscriptionProvider, setSubscriptionProvider] = useState<string | null>(null);
+  const [subscriptionProvider, setSubscriptionProvider] = useState<
+    string | null
+  >(null);
   const user = auth().currentUser;
 
   const isApple = subscriptionProvider === 'apple';
@@ -73,7 +75,7 @@ const CancelSubscription = () => {
 
   // Cancel subscription — branches on provider
   const cancelSubscription = async () => {
-    if (isApple) {
+    if (isApple && Platform.OS === 'ios') {
       // Apple: open App Store subscription management
       Linking.openURL('https://apps.apple.com/account/subscriptions');
       showToast({
@@ -83,57 +85,59 @@ const CancelSubscription = () => {
       });
       navigation.goBack();
       return;
-    }
-
-    // Stripe flow
-    if (!subscriptionId) {
-      showToast({
-        type: 'error',
-        title: 'Error',
-        message: 'No active subscription found.',
-      });
-      return;
-    }
-    try {
-      setIsLoading(true);
-      const res = await fetch(
-        'https://cleaners-choice-server.vercel.app/api/cancel-subscription',
-        {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({subscriptionId}),
-        },
-      );
-      const text = await res.text();
+    } else {
+      if (!subscriptionId) {
+        showToast({
+          type: 'error',
+          title: 'Error',
+          message: 'No active subscription found.',
+        });
+        return;
+      }
       try {
-        const result = JSON.parse(text);
-        if (result.success) {
-          const {currentPeriodEnd} = result;
-          if (user?.uid) {
-            await firestore()
-              .collection('Users')
-              .doc(user.uid)
-              .update({
-                subscription: true,
-                subscriptionEndDate: currentPeriodEnd * 1000,
-                subscriptionId: subscriptionId,
-                cancelSubscription: true,
-              });
-          }
-          showToast({
-            type: 'success',
-            title: 'Cancel Subscription',
-            message: 'Subscription has been canceled successfully!',
-          });
-          navigation.goBack();
-        } else {
+        setIsLoading(true);
+        const res = await fetch(
+          'https://cleaners-choice-server.vercel.app/api/cancel-subscription',
+          {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({subscriptionId}),
+          },
+        );
+        const text = await res.text();
+        try {
+          const result = JSON.parse(text);
+          if (result.success) {
+            const {currentPeriodEnd} = result;
+            if (user?.uid) {
+              await firestore()
+                .collection('Users')
+                .doc(user.uid)
+                .update({
+                  subscription: true,
+                  subscriptionEndDate: currentPeriodEnd * 1000,
+                  subscriptionId: subscriptionId,
+                  cancelSubscription: true,
+                });
+            }
+            showToast({
+              type: 'success',
+              title: 'Cancel Subscription',
+              message: 'Subscription has been canceled successfully!',
+            });
+            navigation.goBack();
+          } else
+            (error: any) => {
+              console.error('Cancellation failed:', error || text);
+              setModalVisible2(true);
+            };
+        } catch (err) {
+          console.error('Error parsing response:', err, 'Response text:', text);
           setModalVisible2(true);
         }
-      } catch (err) {
-        setModalVisible2(true);
+      } finally {
+        setIsLoading(false);
       }
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -404,14 +408,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 2,
     borderColor: Colors.redOverlay20,
-    right:RFPercentage(1)
+    right: RFPercentage(1),
   },
   titleText: {
     color: Colors.brown,
     fontSize: RFPercentage(2.1),
     fontFamily: Fonts.semiBold,
     textAlign: 'center',
-   
   },
   subtitleText: {
     color: Colors.secondaryText,
@@ -420,7 +423,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: RFPercentage(2.2),
     paddingHorizontal: RFPercentage(2),
-    marginTop:RFPercentage(1)
+    marginTop: RFPercentage(1),
   },
   planCard: {
     backgroundColor: Colors.white,
@@ -661,7 +664,7 @@ const styles = StyleSheet.create({
     gap: RFPercentage(1.5),
   },
   modalCancelButton: {
-   width:RFPercentage(16),
+    width: RFPercentage(16),
     backgroundColor: Colors.white,
     borderWidth: 1.2,
     borderColor: Colors.modalBorderGray,

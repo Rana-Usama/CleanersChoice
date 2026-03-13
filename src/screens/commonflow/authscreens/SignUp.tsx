@@ -77,6 +77,25 @@ const SignUp: React.FC = ({navigation}: any) => {
       .catch(error => {});
   };
 
+  const getSignupErrorMessage = (errorCode: any) => {
+    switch (errorCode) {
+      case 'auth/email-already-in-use':
+        return 'An account with this email already exists. Please sign in instead.';
+      case 'auth/invalid-email':
+        return 'Please enter a valid email address.';
+      case 'auth/weak-password':
+        return 'Password should be at least 6 characters long.';
+      case 'auth/network-request-failed':
+        return 'Network error. Please check your internet connection.';
+      case 'auth/operation-not-allowed':
+        return 'Email/password accounts are not enabled.';
+      case 'auth/too-many-requests':
+        return 'Too many attempts. Please try again later.';
+      default:
+        return 'Something went wrong while creating your account.';
+    }
+  };
+
   // Sign Up
   const handleSignUp = async (values: any) => {
     if (!selected) {
@@ -143,11 +162,11 @@ const SignUp: React.FC = ({navigation}: any) => {
         userFlow?.userFlow === 'Customer' ? 'Home' : 'Premium',
       );
     } catch (error: any) {
-      console.log(error);
+      console.log('Signup Error:', error);
       showToast({
         type: 'error',
         title: 'Sign Up Failed',
-        message: error.message,
+        message: getSignupErrorMessage(error.code),
       });
     } finally {
       setLoading(false);
@@ -402,11 +421,7 @@ const SignUp: React.FC = ({navigation}: any) => {
                       color={Colors.iconMuted}
                       size={RFPercentage(2.4)}
                     />
-                    <Text
-                      style={[
-                        styles.signIn,
-                        {color: Colors.textMuted},
-                      ]}>
+                    <Text style={[styles.signIn, {color: Colors.textMuted}]}>
                       Back
                     </Text>
                   </TouchableOpacity>
