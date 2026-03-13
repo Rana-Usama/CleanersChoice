@@ -19,8 +19,8 @@ android {
         applicationId "com.cleanerschoice"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 21
-        versionName "2.5.0"
+        versionCode 22
+        versionName "2.4.1"
         multiDexEnabled true
         missingDimensionStrategy 'store', 'play'
 

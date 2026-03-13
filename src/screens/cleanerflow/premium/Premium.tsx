@@ -11,7 +11,7 @@ import {
   ScrollView,
   Alert,
   Platform,
-  Linking
+  Linking,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -39,8 +39,10 @@ const services = [
 ];
 
 const productId = 'cleaner.premium.monthly.V1';
-const PRIVACY_URL = 'https://www.privacypolicies.com/live/9ed1413e-3736-4e66-8b11-61ea197e4e37';
-const EULA_URL = 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
+const PRIVACY_URL =
+  'https://www.privacypolicies.com/live/9ed1413e-3736-4e66-8b11-61ea197e4e37';
+const EULA_URL =
+  'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
 
 const Premium = ({navigation}: any) => {
   const {initPaymentSheet, presentPaymentSheet} = useStripe();
@@ -323,10 +325,12 @@ const Premium = ({navigation}: any) => {
               <Text
                 style={styles.link}
                 onPress={() => Linking.openURL(PRIVACY_URL)}>
-                Privacy Policy
-              </Text>
-              {' '}and{' '}
-              <Text style={styles.link} onPress={() => Linking.openURL(EULA_URL)}>
+                Privacy Policy{`\n`}
+              </Text>{' '}
+              and{' '}
+              <Text
+                style={styles.link}
+                onPress={() => Linking.openURL(EULA_URL)}>
                 Terms of Use
               </Text>
               .
@@ -698,16 +702,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   legalLinks: {
-  paddingHorizontal: RFPercentage(2),
-  marginBottom: RFPercentage(1),
-},
-legalText: {
-  fontSize: RFPercentage(1.2),
-  color: Colors.secondaryText,
-  textAlign: 'center',
-},
-link: {
-  color: Colors.gradient1,
-  textDecorationLine: 'underline',
-},
+    paddingHorizontal: RFPercentage(2),
+    marginBottom: RFPercentage(1),
+  },
+  legalText: {
+    fontSize: RFPercentage(1.5),
+    color: Colors.secondaryText,
+    textAlign: 'center',
+    lineHeight: RFPercentage(2.4),
+    fontFamily: Fonts.fontRegular,
+  },
+  link: {
+    color: Colors.gradient1,
+    textDecorationLine: 'underline',
+  },
 });
