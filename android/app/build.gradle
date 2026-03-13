@@ -4,7 +4,6 @@ apply plugin: "com.facebook.react"
 apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
 apply plugin: "com.google.gms.google-services"
 
-// Enable Hermes to support 16 KB memory pages
 def hermesEnabled = true
 def enableProguardInReleaseBuilds = false
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
@@ -19,16 +18,16 @@ android {
         applicationId "com.cleanerschoice"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 22
-        versionName "2.4.1"
+        versionCode 23
+        versionName "2.4.2"
         multiDexEnabled true
         missingDimensionStrategy 'store', 'play'
 
         ndk {
-            abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+            abiFilters "armeabi-v7a", "arm64-v8a"
         }
 
-         externalNativeBuild {
+        externalNativeBuild {
             cmake {
                 arguments "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
                 cppFlags "-fuse-ld=lld"
@@ -62,17 +61,16 @@ android {
         }
     }
 
-    // Optional: create universal APK / AAB that supports all ABIs
     splits {
         abi {
             enable true
             reset()
-            include "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+            include "armeabi-v7a", "arm64-v8a"
             universalApk true
         }
     }
 
-     packagingOptions {
+    packagingOptions {
         jniLibs {
             useLegacyPackaging = false
         }
@@ -81,8 +79,7 @@ android {
         pickFirst 'lib/armeabi-v7a/libc++_shared.so'
         pickFirst 'lib/arm64-v8a/libc++_shared.so'
     }
-    
-    // ADD THIS
+
     buildFeatures {
         buildConfig = true
     }
@@ -90,17 +87,12 @@ android {
 
 react {
     autolinkLibrariesWithApp()
-    // Uncomment below if you're customizing:
-    // entryFile = file("../index.js")
-    // bundleAssetName = "index.android.bundle"
-    // extraPackagerArgs = []
 }
 
 dependencies {
     implementation "com.facebook.react:react-android"
 
     if (hermesEnabled.toBoolean()) {
-        // Hermes enabled → supports 16 KB pages
         implementation "com.facebook.react:hermes-android"
     } else {
         implementation jscFlavor
