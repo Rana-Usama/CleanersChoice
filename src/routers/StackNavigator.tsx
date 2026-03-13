@@ -35,6 +35,10 @@ import firestore from '@react-native-firebase/firestore';
 import Decider from './Decider';
 import Location from '../screens/commonflow/location/Location';
 import ProfileCompletionCongratulations from '../screens/cleanerflow/homescreens/home/SuccessScreen';
+import NotificationsScreen from '../screens/commonflow/home/NotificationsScreen';
+import CleanerProfile from '../screens/commonflow/home/profile/CleanerProfile';
+import JobManagement from '../screens/customerflow/home/JobManagement';
+import MyJobs from '../screens/cleanerflow/homescreens/jobs/MyJobs';
 
 export type RootStackParamList = {
   SplashOne: undefined;
@@ -77,6 +81,10 @@ export type RootStackParamList = {
   Messages: undefined;
   Location: undefined;
   CongratulationsScreen: undefined;
+  NotificationsScreen: undefined;
+  CleanerProfile: {cleanerId: string; jobId?: string};
+  JobManagement: {jobId: string; jobTitle: string};
+  MyJobs: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -131,6 +139,7 @@ const StackNavigator: React.FC = () => {
     prefixes: ['cleanerChoiceApp://'],
     config: {
       screens: {
+        NotificationsScreen: 'notifications',
         Home: {
           screens: {
             Messages: 'messages',
@@ -201,6 +210,11 @@ const StackNavigator: React.FC = () => {
             <Stack.Screen name="Messages" component={Messages} />
             <Stack.Screen name="Location" component={Location} />
             <Stack.Screen
+              name="NotificationsScreen"
+              component={NotificationsScreen}
+            />
+            <Stack.Screen name="CleanerProfile" component={CleanerProfile} />
+            <Stack.Screen
               name="CongratulationsScreen"
               component={ProfileCompletionCongratulations}
             />
@@ -215,6 +229,7 @@ const StackNavigator: React.FC = () => {
               component={CheckAvailability}
             />
             <Stack.Screen name="Jobs" component={Jobs} />
+            <Stack.Screen name="JobManagement" component={JobManagement} />
 
             {/* ----------------- Cleaner Flow ---------------- */}
             <Stack.Screen name="Premium" component={Premium} />
@@ -229,6 +244,7 @@ const StackNavigator: React.FC = () => {
               name="CancelSubscription"
               component={CancelSubscription}
             />
+            <Stack.Screen name="MyJobs" component={MyJobs} />
           </Stack.Navigator>
         )}
       </NavigationContainer>

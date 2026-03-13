@@ -27,6 +27,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import * as Progress from 'react-native-progress';
 import Animated, {FadeInDown, FadeInUp, ZoomIn} from 'react-native-reanimated';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import moment from 'moment';
 
 const items = [
@@ -88,8 +89,21 @@ const Dashboard: React.FC = ({navigation}: any) => {
     nextAvailable: '',
   });
   const [isAdmin, setIsAdmin] = useState(false);
+  const [unreadNotifCount, setUnreadNotifCount] = useState(0);
 
   useExitAppOnBack();
+
+  // Unread notifications count
+  useEffect(() => {
+    const uid = auth().currentUser?.uid;
+    if (!uid) return;
+    const unsubscribe = firestore()
+      .collection('Notifications')
+      .where('toUserId', '==', uid)
+      .where('read', '==', false)
+      .onSnapshot(snap => setUnreadNotifCount(snap?.size ?? 0));
+    return () => unsubscribe();
+  }, []);
 
   // On Refresh
   const onRefresh = () => {
@@ -322,6 +336,19 @@ const Dashboard: React.FC = ({navigation}: any) => {
           logo
           tintColor={Colors.white}
         />
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => navigation.navigate('NotificationsScreen')}
+          style={styles.bellButton}>
+          <Icon name="bell-outline" size={RFPercentage(2.8)} color={Colors.white} />
+          {unreadNotifCount > 0 && (
+            <View style={styles.bellBadge}>
+              <Text style={styles.bellBadgeText}>
+                {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
       </LinearGradient>
 
       <ScrollView
@@ -338,7 +365,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
             colors={[Colors.white, Colors.blueBg50]}
             style={styles.profileGradient}>
             <View style={styles.profileSection}>
-              <TouchableOpacity activeOpacity={1}>
+              <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('EditProfile')}>
                 <View style={styles.avatarContainer}>
                   {loading ? (
                     <ActivityIndicator size="large" color={Colors.primaryBlue} />
@@ -757,6 +784,29 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(2.1),
     fontFamily: Fonts.semiBold,
     color: Colors.white,
+  },
+  bellButton: {
+    position: 'absolute',
+    right: 20,
+    bottom: 35,
+    padding: 6,
+  },
+  bellBadge: {
+    position: 'absolute',
+    top: 2,
+    right: 2,
+    backgroundColor: Colors.red500,
+    borderRadius: 10,
+    minWidth: 18,
+    height: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  bellBadgeText: {
+    color: Colors.white,
+    fontSize: RFPercentage(1.3),
+    fontFamily: Fonts.fontMedium,
   },
   editButtonText: {
     color: Colors.white,

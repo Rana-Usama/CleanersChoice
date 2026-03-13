@@ -96,6 +96,7 @@ const Home = () => {
   const {location} = useCurrentLocation();
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminViewAllServices, setAdminViewAllServices] = useState(false);
+  const [unreadNotifCount, setUnreadNotifCount] = useState(0);
 
   const selectedLocation = useSelector(
     (state: any) =>
@@ -117,6 +118,18 @@ const Home = () => {
     }
     return () => clearTimeout(timer);
   }, [location]);
+
+  // Unread notifications count
+  useEffect(() => {
+    const uid = auth().currentUser?.uid;
+    if (!uid) return;
+    const unsubscribe = firestore()
+      .collection('Notifications')
+      .where('toUserId', '==', uid)
+      .where('read', '==', false)
+      .onSnapshot(snap => setUnreadNotifCount(snap?.size ?? 0));
+    return () => unsubscribe();
+  }, []);
 
   // On Refresh
   const onRefresh = () => {
@@ -351,6 +364,19 @@ const Home = () => {
             logo
             tintColor={Colors.white}
           />
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate('NotificationsScreen')}
+            style={styles.bellButton}>
+            <Icon name="bell-outline" size={RFPercentage(2.8)} color={Colors.white} />
+            {unreadNotifCount > 0 && (
+              <View style={styles.bellBadge}>
+                <Text style={styles.bellBadgeText}>
+                  {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
         </LinearGradient>
 
         <ScrollView
@@ -945,6 +971,29 @@ const styles = StyleSheet.create({
   logo: {
     width: RFPercentage(7),
     height: RFPercentage(7),
+  },
+  bellButton: {
+    position: 'absolute',
+    right: 20,
+    bottom: 30,
+    padding: 6,
+  },
+  bellBadge: {
+    position: 'absolute',
+    top: 2,
+    right: 2,
+    backgroundColor: Colors.red500,
+    borderRadius: 10,
+    minWidth: 18,
+    height: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  bellBadgeText: {
+    color: Colors.white,
+    fontSize: RFPercentage(1.3),
+    fontFamily: Fonts.fontMedium,
   },
 
   postJobText: {
