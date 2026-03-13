@@ -10,6 +10,7 @@ import {
   Dimensions,
   Platform,
   Animated,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useState, useEffect, useRef} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -28,8 +29,11 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import moment from 'moment';
+import {showToast} from '../../../utils/ToastMessage';
 
 const {width} = Dimensions.get('window');
+
+const SERVER_URL = 'https://cleaners-choice-server.vercel.app';
 
 const JobDetails = ({route, navigation}: any) => {
   const {item} = route.params;
@@ -37,10 +41,14 @@ const JobDetails = ({route, navigation}: any) => {
   const [loading, setLoading] = useState(false);
   const [loading2, setLoading2] = useState(false);
   const [loading3, setLoading3] = useState(false);
+  const [applyLoading, setApplyLoading] = useState(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const scrollY = useRef(new Animated.Value(0)).current;
   const [clientInfo, setClientInfo] = useState<any>(null);
   const [cleanerInfo, setCleanerInfo] = useState<any>(null);
+  const [hasApplied, setHasApplied] = useState(false);
+  const [isConfirmed, setIsConfirmed] = useState(false);
+  const [jobStatus, setJobStatus] = useState(item.status);
 
   // Format date
   const formatDate = (dateString: string) => {
@@ -89,6 +97,96 @@ const JobDetails = ({route, navigation}: any) => {
   };
   const chatId = generateChatId();
   const [existingChatId, setExistingChatId] = useState<string | null>(null);
+
+  // Check if cleaner has already applied or is confirmed
+  useEffect(() => {
+    const checkApplicationStatus = async () => {
+      if (userData?.role === 'Cleaner' && userId) {
+        try {
+          const jobDoc = await firestore()
+            .collection('Jobs')
+            .doc(item.id)
+            .get();
+          if (jobDoc.exists) {
+            const jobData = jobDoc.data();
+            const applicants = jobData?.applicants || [];
+            setHasApplied(applicants.includes(userId));
+            setIsConfirmed(jobData?.confirmedCleaner === userId);
+            setJobStatus(jobData?.status || item.status);
+          }
+        } catch (error) {
+          console.error('Error checking application status:', error);
+        }
+      }
+    };
+    checkApplicationStatus();
+  }, [item.id, userId, userData?.role]);
+
+  // Apply for job
+  const handleApplyJob = async () => {
+    if (!userId) return;
+    setApplyLoading(true);
+    try {
+      await firestore()
+        .collection('Jobs')
+        .doc(item.id)
+        .update({
+          applicants: firestore.FieldValue.arrayUnion(userId),
+        });
+
+      setHasApplied(true);
+
+      // Send notification to job owner
+      if (clientInfo?.fcmToken) {
+        try {
+          await fetch(`${SERVER_URL}/api/send-notification`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+              fcmToken: clientInfo.fcmToken,
+              title: 'New Job Application',
+              body: `${userData?.name} applied for "${item.title}"`,
+              data: {screen: 'notifications'},
+            }),
+          });
+        } catch (err) {
+          console.error('Error sending notification:', err);
+        }
+      }
+
+      // Store notification
+      try {
+        await firestore().collection('Notifications').add({
+          type: 'application',
+          fromUserId: userId,
+          toUserId: item.jobId,
+          jobId: item.id,
+          title: 'New Job Application',
+          body: `${userData?.name} applied for "${item.title}"`,
+          timestamp: firestore.FieldValue.serverTimestamp(),
+          read: false,
+          jobTitle: item.title,
+        });
+      } catch (err) {
+        console.error('Error storing notification:', err);
+      }
+
+      showToast({
+        type: 'success',
+        title: 'Application Sent',
+        message: 'You have applied for this job',
+      });
+    } catch (error) {
+      console.error('Error applying for job:', error);
+      showToast({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to apply for the job',
+      });
+    } finally {
+      setApplyLoading(false);
+    }
+  };
 
   // Fetch client info (job poster)
   useEffect(() => {
@@ -499,7 +597,7 @@ const JobDetails = ({route, navigation}: any) => {
 
       {/* Fixed Action Buttons */}
       <View style={styles.actionBar}>
-        {item.status === 'active' && userData.role === 'Customer' ? (
+        {(item.status === 'active' || jobStatus === 'active') && userData.role === 'Customer' ? (
           <View style={styles.actionButtons}>
             <NextButton
               title="Edit Job"
@@ -518,7 +616,79 @@ const JobDetails = ({route, navigation}: any) => {
               style={styles.completeButton}
             />
           </View>
-        ) : userData.role === 'Cleaner' && item.status === 'active' ? (
+        ) : (jobStatus === 'confirmed') && userData.role === 'Customer' ? (
+          <View style={styles.actionButtons}>
+            <GradientButton
+              title="Mark Complete"
+              textStyle={styles.completeButtonText}
+              onPress={() => markComplete(item.id, 'completed')}
+              loading={loading}
+              disabled={loading}
+              style={styles.completeButton}
+            />
+          </View>
+        ) : userData.role === 'Cleaner' && (item.status === 'active' || jobStatus === 'active') ? (
+          <View style={styles.cleanerActionButtons}>
+            {/* Apply Job Button */}
+            {!hasApplied ? (
+              <GradientButton
+                title="Apply Job"
+                textStyle={styles.messageButtonText}
+                onPress={handleApplyJob}
+                loading={applyLoading}
+                disabled={applyLoading}
+                style={styles.applyButton}
+              />
+            ) : (
+              <View style={styles.appliedState}>
+                <MaterialCommunityIcons
+                  name="check-circle"
+                  size={RFPercentage(2)}
+                  color={Colors.success}
+                />
+                <Text style={styles.appliedText}>Applied</Text>
+              </View>
+            )}
+
+            {/* Message Button - locked until confirmed */}
+            <TouchableOpacity
+              style={[
+                styles.messageLockedButton,
+                isConfirmed && styles.messageUnlockedButton,
+              ]}
+              activeOpacity={isConfirmed ? 0.7 : 1}
+              onPress={() => {
+                if (isConfirmed) {
+                  handleMessageClient();
+                } else {
+                  showToast({
+                    type: 'info',
+                    title: 'Message Locked',
+                    message: 'Available after job confirmation',
+                  });
+                }
+              }}>
+              {loading3 ? (
+                <ActivityIndicator size="small" color={Colors.white} />
+              ) : (
+                <>
+                  <MaterialCommunityIcons
+                    name={isConfirmed ? 'message-text' : 'message-lock'}
+                    size={RFPercentage(2)}
+                    color={isConfirmed ? Colors.white : Colors.secondaryText}
+                  />
+                  <Text
+                    style={[
+                      styles.messageLockedText,
+                      isConfirmed && styles.messageUnlockedText,
+                    ]}>
+                    {isConfirmed ? 'Message' : 'Message (Locked)'}
+                  </Text>
+                </>
+              )}
+            </TouchableOpacity>
+          </View>
+        ) : userData.role === 'Cleaner' && isConfirmed ? (
           <GradientButton
             title="Message Client"
             textStyle={styles.messageButtonText}
@@ -527,7 +697,7 @@ const JobDetails = ({route, navigation}: any) => {
             disabled={loading3}
             style={styles.messageButton}
           />
-        ) : item.status === 'completed' ? (
+        ) : item.status === 'completed' || jobStatus === 'completed' ? (
           <View style={styles.completedState}>
             <MaterialCommunityIcons
               name="check-circle"
@@ -925,5 +1095,55 @@ const styles = StyleSheet.create({
     color: Colors.successText,
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.7),
+  },
+  cleanerActionButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: RFPercentage(1),
+  },
+  applyButton: {
+    flex: 1,
+    borderRadius: 20,
+  },
+  appliedState: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.successBg,
+    paddingVertical: RFPercentage(1.5),
+    borderRadius: 20,
+    gap: RFPercentage(0.5),
+    borderWidth: 1,
+    borderColor: Colors.successBorder,
+  },
+  appliedText: {
+    color: Colors.success,
+    fontFamily: Fonts.semiBold,
+    fontSize: RFPercentage(1.6),
+  },
+  messageLockedButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.inputField,
+    paddingVertical: RFPercentage(1.5),
+    borderRadius: 20,
+    gap: RFPercentage(0.5),
+    borderWidth: 1,
+    borderColor: Colors.lightGrayBg,
+  },
+  messageUnlockedButton: {
+    backgroundColor: Colors.gradient1,
+    borderColor: Colors.gradient1,
+  },
+  messageLockedText: {
+    color: Colors.secondaryText,
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.4),
+  },
+  messageUnlockedText: {
+    color: Colors.white,
   },
 });

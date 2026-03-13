@@ -12,7 +12,7 @@ import messaging from '@react-native-firebase/messaging';
 const handleNotificationNavigation = screen => {
   if (!screen) return;
 
-  const supportedScreens = ['messages'];
+  const supportedScreens = ['messages', 'notifications'];
   if (supportedScreens.includes(screen.toLowerCase())) {
     Linking.openURL(`cleanerChoiceApp://${screen.toLowerCase()}`);
   }

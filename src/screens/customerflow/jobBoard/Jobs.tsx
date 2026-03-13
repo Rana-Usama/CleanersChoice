@@ -399,20 +399,47 @@ const Jobs = ({navigation}: any) => {
                 data={Jobs}
                 keyExtractor={item => item?.id.toString()}
                 renderItem={({item}) => (
-                  <JobCard
-                    name={getTruncatedText(item?.title)}
-                    location={getTruncatedText2(item?.location?.name)}
-                    price={item?.priceRange ?? ''}
-                    date={item?.createdAt}
-                    onPress={() =>
-                      navigation.navigate('JobDetails', {item: item})
-                    }
-                    onPress2={() => {
-                      setSelectedJobId(item?.id);
-                      setModalVisible(true);
-                    }}
-                    delete={completed ? false : true}
-                  />
+                  <View>
+                    <JobCard
+                      name={getTruncatedText(item?.title)}
+                      location={getTruncatedText2(item?.location?.name)}
+                      price={item?.priceRange ?? ''}
+                      date={item?.createdAt}
+                      onPress={() =>
+                        navigation.navigate('JobDetails', {item: item})
+                      }
+                      onPress2={() => {
+                        setSelectedJobId(item?.id);
+                        setModalVisible(true);
+                      }}
+                      delete={completed ? false : true}
+                    />
+                    {active && (
+                      <TouchableOpacity
+                        activeOpacity={0.7}
+                        style={styles.manageButton}
+                        onPress={() =>
+                          navigation.navigate('JobManagement', {
+                            jobId: item?.id,
+                            jobTitle: item?.title || 'Untitled Job',
+                          })
+                        }>
+                        <MaterialIcons
+                          name="people"
+                          size={18}
+                          color={Colors.gradient1}
+                        />
+                        <Text style={styles.manageButtonText}>
+                          Manage Applicants
+                        </Text>
+                        <MaterialIcons
+                          name="chevron-right"
+                          size={20}
+                          color={Colors.gradient1}
+                        />
+                      </TouchableOpacity>
+                    )}
+                  </View>
                 )}
                 contentContainerStyle={styles.jobsListContent}
               />
@@ -756,5 +783,20 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     position: 'absolute',
+  },
+  manageButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.skyBlueBg,
+    paddingVertical: RFPercentage(1),
+    borderRadius: RFPercentage(1),
+    marginTop: RFPercentage(0.5),
+    gap: RFPercentage(0.5),
+  },
+  manageButtonText: {
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.5),
+    color: Colors.gradient1,
   },
 });
