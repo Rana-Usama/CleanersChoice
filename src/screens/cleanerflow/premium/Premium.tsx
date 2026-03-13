@@ -14,6 +14,7 @@ import {
   Linking,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
 import HeaderComponent from '../../../components/HeaderComponent';
@@ -45,6 +46,7 @@ const EULA_URL =
   'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
 
 const Premium = ({navigation}: any) => {
+  const insets = useSafeAreaInsets();
   const {initPaymentSheet, presentPaymentSheet} = useStripe();
   const [loading, setLoading] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
@@ -343,7 +345,7 @@ const Premium = ({navigation}: any) => {
       </ScrollView>
 
       {/* Fixed Action Section */}
-      <View style={styles.actionSection}>
+      <View style={[styles.actionSection, {paddingBottom: insets.bottom + RFPercentage(0.5)}]}>
         <View style={styles.actionContent}>
           <TouchableOpacity
             onPress={() => navigation.navigate('SignIn')}
@@ -631,7 +633,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: RFPercentage(2),
-    paddingBottom: Platform.OS === 'ios' ? RFPercentage(4) : RFPercentage(2),
+    paddingBottom: RFPercentage(2),
     shadowColor: Colors.black,
     shadowOffset: {width: 0, height: -4},
     shadowOpacity: 0.1,
