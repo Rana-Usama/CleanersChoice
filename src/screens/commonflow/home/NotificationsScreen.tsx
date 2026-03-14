@@ -25,7 +25,7 @@ import moment from 'moment';
 
 interface NotificationItem {
   id: string;
-  type: 'application' | 'confirmation' | 'cancellation' | 'message';
+  type: 'application' | 'confirmation' | 'cancellation' | 'completion' | 'message';
   fromUserId: string;
   toUserId: string;
   jobId: string;
@@ -36,12 +36,32 @@ interface NotificationItem {
   fromUserName?: string;
   fromUserProfile?: string;
   jobTitle?: string;
+  applicantCount?: number;
 }
 
 const NotificationsScreen = ({navigation}: any) => {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+
+  const fetchExistingChatId = async (userId1: string, userId2: string) => {
+    try {
+      const chatsSnapshot = await firestore()
+        .collection('Chats')
+        .where('participants', 'array-contains', userId1)
+        .get();
+      for (const doc of chatsSnapshot.docs) {
+        const participants = doc.data().participants || [];
+        if (participants.includes(userId1) && participants.includes(userId2)) {
+          return doc.id;
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error('Error fetching existing chat ID:', error);
+      return null;
+    }
+  };
 
   const fetchNotifications = useCallback(async () => {
     const user = auth().currentUser;
@@ -99,10 +119,10 @@ const NotificationsScreen = ({navigation}: any) => {
 
     switch (item.type) {
       case 'application':
-        // Customer taps → go to cleaner's profile with job context
-        navigation.navigate('CleanerProfile', {
-          cleanerId: item.fromUserId,
+        // Customer taps → go to job management to see all applicants
+        navigation.navigate('JobManagement', {
           jobId: item.jobId,
+          jobTitle: item.jobTitle || '',
         });
         break;
       case 'confirmation':
@@ -136,25 +156,54 @@ const NotificationsScreen = ({navigation}: any) => {
           console.error('Error fetching job:', error);
         }
         break;
+      case 'completion':
+        // Cleaner taps → go to job details (completed job)
+        try {
+          const completedJobDoc = await firestore()
+            .collection('Jobs')
+            .doc(item.jobId)
+            .get();
+          if (completedJobDoc.exists) {
+            navigation.navigate('JobDetails', {
+              item: {id: completedJobDoc.id, ...completedJobDoc.data()},
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching job:', error);
+        }
+        break;
       case 'message':
         // Navigate to chat
         const user = auth().currentUser;
         if (user) {
-          const chatId = `${item.fromUserId}_${item.jobId}`;
           try {
             const fromUserDoc = await firestore()
               .collection('Users')
               .doc(item.fromUserId)
               .get();
             const fromUserData = fromUserDoc.data();
+            const currentUserDoc = await firestore()
+              .collection('Users')
+              .doc(user.uid)
+              .get();
+            const currentUserData = currentUserDoc.data();
+
+            // Find existing chat between users
+            const existingChatId = await fetchExistingChatId(
+              user.uid,
+              item.fromUserId,
+            );
+            const chatId =
+              existingChatId || `${user.uid}_${item.fromUserId}`;
+
             navigation.navigate('Chat', {
               chatId,
               senderId: user.uid,
-              senderName: '',
+              senderName: currentUserData?.name || '',
               receiver: item.fromUserId,
               receiverName: fromUserData?.name || '',
               receiverProfile: fromUserData?.profile || '',
-              senderProfile: '',
+              senderProfile: currentUserData?.profile || '',
               fcmToken: fromUserData?.fcmToken || '',
             });
           } catch (error) {
@@ -173,6 +222,8 @@ const NotificationsScreen = ({navigation}: any) => {
         return {name: 'check-circle-outline', color: Colors.success};
       case 'cancellation':
         return {name: 'close-circle-outline', color: Colors.red500};
+      case 'completion':
+        return {name: 'check-decagram', color: Colors.success};
       case 'message':
         return {name: 'message-text-outline', color: Colors.primaryBlue};
       default:
