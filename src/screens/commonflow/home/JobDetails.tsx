@@ -61,10 +61,56 @@ const JobDetails = ({route, navigation}: any) => {
   const markComplete = async (jobId: string, newStatus: string) => {
     setLoading(true);
     try {
+      const jobDoc = await firestore().collection('Jobs').doc(jobId).get();
+      const jobData = jobDoc.data();
+
       await firestore().collection('Jobs').doc(jobId).update({
         status: newStatus,
         updatedAt: new Date(),
       });
+
+      // Send completion notification to confirmed cleaner
+      if (jobData?.confirmedCleaner) {
+        const cleanerDoc = await firestore()
+          .collection('Users')
+          .doc(jobData.confirmedCleaner)
+          .get();
+        const cleanerData = cleanerDoc.data();
+
+        if (cleanerData?.fcmToken) {
+          try {
+            await fetch(`${SERVER_URL}/api/send-notification`, {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({
+                fcmToken: cleanerData.fcmToken,
+                title: 'Job Completed',
+                body: `"${item.title}" has been marked as completed`,
+                data: {screen: 'notifications'},
+              }),
+            });
+          } catch (err) {
+            console.error('Error sending notification:', err);
+          }
+        }
+
+        try {
+          await firestore().collection('Notifications').add({
+            type: 'completion',
+            fromUserId: userId,
+            toUserId: jobData.confirmedCleaner,
+            jobId: jobId,
+            title: 'Job Completed',
+            body: `"${item.title}" has been marked as completed`,
+            timestamp: firestore.FieldValue.serverTimestamp(),
+            read: false,
+            jobTitle: item.title,
+          });
+        } catch (err) {
+          console.error('Error storing notification:', err);
+        }
+      }
+
       showSuccess('Job marked as completed!');
       setTimeout(() => {
         navigation.goBack();
@@ -136,16 +182,23 @@ const JobDetails = ({route, navigation}: any) => {
 
       setHasApplied(true);
 
-      // Send notification to job owner
+      // Send push notification to job owner
       if (clientInfo?.fcmToken) {
         try {
+          // Get current applicant count for push body
+          const jobSnap = await firestore()
+            .collection('Jobs')
+            .doc(item.id)
+            .get();
+          const applicantCount = (jobSnap.data()?.applicants || []).length;
+
           await fetch(`${SERVER_URL}/api/send-notification`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
               fcmToken: clientInfo.fcmToken,
               title: 'New Job Application',
-              body: `${userData?.name} applied for "${item.title}"`,
+              body: `${applicantCount} cleaner${applicantCount !== 1 ? 's' : ''} applied for "${item.title}"`,
               data: {screen: 'notifications'},
             }),
           });
@@ -154,19 +207,40 @@ const JobDetails = ({route, navigation}: any) => {
         }
       }
 
-      // Store notification
+      // Store or update application notification (one per job)
       try {
-        await firestore().collection('Notifications').add({
-          type: 'application',
-          fromUserId: userId,
-          toUserId: item.jobId,
-          jobId: item.id,
-          title: 'New Job Application',
-          body: `${userData?.name} applied for "${item.title}"`,
-          timestamp: firestore.FieldValue.serverTimestamp(),
-          read: false,
-          jobTitle: item.title,
-        });
+        const existingNotif = await firestore()
+          .collection('Notifications')
+          .where('toUserId', '==', item.jobId)
+          .where('jobId', '==', item.id)
+          .where('type', '==', 'application')
+          .limit(1)
+          .get();
+
+        if (!existingNotif.empty) {
+          const notifDoc = existingNotif.docs[0];
+          const currentCount = notifDoc.data().applicantCount || 1;
+          const newCount = currentCount + 1;
+          await notifDoc.ref.update({
+            applicantCount: newCount,
+            body: `${newCount} cleaners applied for "${item.title}"`,
+            timestamp: firestore.FieldValue.serverTimestamp(),
+            read: false,
+          });
+        } else {
+          await firestore().collection('Notifications').add({
+            type: 'application',
+            fromUserId: userId,
+            toUserId: item.jobId,
+            jobId: item.id,
+            title: 'New Job Application',
+            body: `1 cleaner applied for "${item.title}"`,
+            timestamp: firestore.FieldValue.serverTimestamp(),
+            read: false,
+            jobTitle: item.title,
+            applicantCount: 1,
+          });
+        }
       } catch (err) {
         console.error('Error storing notification:', err);
       }

@@ -168,6 +168,8 @@ const MyJobs = ({navigation}: any) => {
                   .doc(job.jobId)
                   .get();
                 const ownerData = ownerDoc.data();
+
+                // Send push notification if FCM token available
                 if (ownerData?.fcmToken) {
                   try {
                     await fetch(`${SERVER_URL}/api/send-notification`, {
@@ -183,23 +185,23 @@ const MyJobs = ({navigation}: any) => {
                   } catch (err) {
                     console.error('Error sending notification:', err);
                   }
+                }
 
-                  // Store notification
-                  try {
-                    await firestore().collection('Notifications').add({
-                      type: 'cancellation',
-                      fromUserId: user.uid,
-                      toUserId: job.jobId,
-                      jobId: job.id,
-                      title: 'Cleaner Cancelled',
-                      body: `The cleaner has cancelled "${job.title}"`,
-                      timestamp: firestore.FieldValue.serverTimestamp(),
-                      read: false,
-                      jobTitle: job.title,
-                    });
-                  } catch (err) {
-                    console.error('Error storing notification:', err);
-                  }
+                // Store notification in Firestore (always)
+                try {
+                  await firestore().collection('Notifications').add({
+                    type: 'cancellation',
+                    fromUserId: user.uid,
+                    toUserId: job.jobId,
+                    jobId: job.id,
+                    title: 'Cleaner Cancelled',
+                    body: `The cleaner has cancelled "${job.title}"`,
+                    timestamp: firestore.FieldValue.serverTimestamp(),
+                    read: false,
+                    jobTitle: job.title,
+                  });
+                } catch (err) {
+                  console.error('Error storing notification:', err);
                 }
               }
 
