@@ -25,7 +25,7 @@ import moment from 'moment';
 
 interface NotificationItem {
   id: string;
-  type: 'application' | 'confirmation' | 'cancellation' | 'completion' | 'message';
+  type: 'application' | 'confirmation' | 'cancellation' | 'completion' | 'completion_request' | 'auto_complete' | 'message';
   fromUserId: string;
   toUserId: string;
   jobId: string;
@@ -172,6 +172,38 @@ const NotificationsScreen = ({navigation}: any) => {
           console.error('Error fetching job:', error);
         }
         break;
+      case 'completion_request':
+        // Customer taps → go to job details to confirm/reject
+        try {
+          const pendingJobDoc = await firestore()
+            .collection('Jobs')
+            .doc(item.jobId)
+            .get();
+          if (pendingJobDoc.exists) {
+            navigation.navigate('JobDetails', {
+              item: {id: pendingJobDoc.id, ...pendingJobDoc.data()},
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching job:', error);
+        }
+        break;
+      case 'auto_complete':
+        // Navigate to completed job details
+        try {
+          const autoJobDoc = await firestore()
+            .collection('Jobs')
+            .doc(item.jobId)
+            .get();
+          if (autoJobDoc.exists) {
+            navigation.navigate('JobDetails', {
+              item: {id: autoJobDoc.id, ...autoJobDoc.data()},
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching job:', error);
+        }
+        break;
       case 'message':
         // Navigate to chat
         const user = auth().currentUser;
@@ -224,6 +256,10 @@ const NotificationsScreen = ({navigation}: any) => {
         return {name: 'close-circle-outline', color: Colors.red500};
       case 'completion':
         return {name: 'check-decagram', color: Colors.success};
+      case 'completion_request':
+        return {name: 'clipboard-check-outline', color: Colors.amber500};
+      case 'auto_complete':
+        return {name: 'clock-check-outline', color: Colors.amber500};
       case 'message':
         return {name: 'message-text-outline', color: Colors.primaryBlue};
       default:
