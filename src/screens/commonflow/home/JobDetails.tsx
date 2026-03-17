@@ -123,6 +123,149 @@ const JobDetails = ({route, navigation}: any) => {
     }
   };
 
+  // Customer confirms cleaner's completion request
+  const confirmCompletion = async () => {
+    setLoading(true);
+    try {
+      await firestore().collection('Jobs').doc(item.id).update({
+        status: 'completed',
+        updatedAt: new Date(),
+      });
+      setJobStatus('completed');
+
+      // Notify the cleaner
+      const jobDoc = await firestore().collection('Jobs').doc(item.id).get();
+      const jobData = jobDoc.data();
+      if (jobData?.confirmedCleaner) {
+        const cleanerDoc = await firestore()
+          .collection('Users')
+          .doc(jobData.confirmedCleaner)
+          .get();
+        const cleanerData = cleanerDoc.data();
+
+        if (cleanerData?.fcmToken) {
+          try {
+            await fetch(`${SERVER_URL}/api/send-notification`, {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({
+                fcmToken: cleanerData.fcmToken,
+                title: 'Job Completed',
+                body: `"${item.title}" has been confirmed as completed`,
+                data: {screen: 'notifications'},
+              }),
+            });
+          } catch (err) {
+            console.error('Error sending notification:', err);
+          }
+        }
+
+        try {
+          await firestore().collection('Notifications').add({
+            type: 'completion',
+            fromUserId: userId,
+            toUserId: jobData.confirmedCleaner,
+            jobId: item.id,
+            title: 'Job Completed',
+            body: `"${item.title}" has been confirmed as completed`,
+            timestamp: firestore.FieldValue.serverTimestamp(),
+            read: false,
+            jobTitle: item.title,
+          });
+        } catch (err) {
+          console.error('Error storing notification:', err);
+        }
+      }
+
+      showToast({
+        type: 'success',
+        title: 'Confirmed',
+        message: 'Job has been marked as completed',
+      });
+      setTimeout(() => navigation.goBack(), 1500);
+    } catch (error) {
+      console.error('Error confirming completion:', error);
+      showToast({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to confirm completion',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Customer rejects cleaner's completion request
+  const rejectCompletion = async () => {
+    setLoading(true);
+    try {
+      await firestore().collection('Jobs').doc(item.id).update({
+        status: 'confirmed',
+        updatedAt: new Date(),
+      });
+      setJobStatus('confirmed');
+
+      // Notify the cleaner
+      const jobDoc = await firestore().collection('Jobs').doc(item.id).get();
+      const jobData = jobDoc.data();
+      if (jobData?.confirmedCleaner) {
+        const cleanerDoc = await firestore()
+          .collection('Users')
+          .doc(jobData.confirmedCleaner)
+          .get();
+        const cleanerData = cleanerDoc.data();
+
+        if (cleanerData?.fcmToken) {
+          try {
+            await fetch(`${SERVER_URL}/api/send-notification`, {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({
+                fcmToken: cleanerData.fcmToken,
+                title: 'Completion Declined',
+                body: `The customer has declined your completion request for "${item.title}"`,
+                data: {screen: 'notifications'},
+              }),
+            });
+          } catch (err) {
+            console.error('Error sending notification:', err);
+          }
+        }
+
+        try {
+          await firestore().collection('Notifications').add({
+            type: 'cancellation',
+            fromUserId: userId,
+            toUserId: jobData.confirmedCleaner,
+            jobId: item.id,
+            title: 'Completion Declined',
+            body: `The customer has declined your completion request for "${item.title}"`,
+            timestamp: firestore.FieldValue.serverTimestamp(),
+            read: false,
+            jobTitle: item.title,
+          });
+        } catch (err) {
+          console.error('Error storing notification:', err);
+        }
+      }
+
+      showToast({
+        type: 'info',
+        title: 'Declined',
+        message: 'Completion request has been declined',
+      });
+    } catch (error) {
+      console.error('Error rejecting completion:', error);
+      showToast({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to decline completion',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const dispatch = useDispatch();
   dispatch(setJobId(item.id));
 
@@ -147,7 +290,7 @@ const JobDetails = ({route, navigation}: any) => {
   // Check if cleaner has already applied or is confirmed
   useEffect(() => {
     const checkApplicationStatus = async () => {
-      if (userData?.role === 'Cleaner' && userId) {
+      if (userId) {
         try {
           const jobDoc = await firestore()
             .collection('Jobs')
@@ -155,10 +298,12 @@ const JobDetails = ({route, navigation}: any) => {
             .get();
           if (jobDoc.exists) {
             const jobData = jobDoc.data();
-            const applicants = jobData?.applicants || [];
-            setHasApplied(applicants.includes(userId));
-            setIsConfirmed(jobData?.confirmedCleaner === userId);
             setJobStatus(jobData?.status || item.status);
+            if (userData?.role === 'Cleaner') {
+              const applicants = jobData?.applicants || [];
+              setHasApplied(applicants.includes(userId));
+              setIsConfirmed(jobData?.confirmedCleaner === userId);
+            }
           }
         } catch (error) {
           console.error('Error checking application status:', error);
@@ -366,6 +511,13 @@ const JobDetails = ({route, navigation}: any) => {
             text: 'Pending',
             icon: 'clock',
           };
+        case 'pending_completion':
+          return {
+            color: Colors.amber500,
+            bgColor: Colors.amberBg100,
+            text: 'Awaiting Confirmation',
+            icon: 'clock-check-outline',
+          };
         case 'cancelled':
           return {
             color: Colors.red500,
@@ -493,7 +645,26 @@ const JobDetails = ({route, navigation}: any) => {
           <Text style={styles.jobTitle} numberOfLines={2}>
             {item.title}
           </Text>
-          <StatusBadge status={item.status} />
+          <View style={{alignItems: 'flex-end', gap: 4}}>
+            <StatusBadge status={jobStatus || item.status} />
+            {item.autoCompleted && (
+              <View
+                style={[
+                  styles.statusBadge,
+                  {backgroundColor: Colors.amberBg100},
+                ]}>
+                <MaterialCommunityIcons
+                  name="clock-check-outline"
+                  size={RFPercentage(1.4)}
+                  color={Colors.amber500}
+                />
+                <Text
+                  style={[styles.statusText, {color: Colors.amber500}]}>
+                  Auto-confirmed
+                </Text>
+              </View>
+            )}
+          </View>
         </View>
 
         {/* Quick Info Cards */}
@@ -690,6 +861,25 @@ const JobDetails = ({route, navigation}: any) => {
               style={styles.completeButton}
             />
           </View>
+        ) : (jobStatus === 'pending_completion') && userData.role === 'Customer' ? (
+          <View style={styles.actionButtons}>
+            <NextButton
+              title="Decline"
+              onPress={rejectCompletion}
+              textStyle={styles.editButtonText}
+              disabled={loading}
+              loading={false}
+              style={styles.editButton}
+            />
+            <GradientButton
+              title="Confirm Completion"
+              textStyle={styles.completeButtonText}
+              onPress={confirmCompletion}
+              loading={loading}
+              disabled={loading}
+              style={styles.completeButton}
+            />
+          </View>
         ) : (jobStatus === 'confirmed') && userData.role === 'Customer' ? (
           <View style={styles.actionButtons}>
             <GradientButton
@@ -724,53 +914,53 @@ const JobDetails = ({route, navigation}: any) => {
               </View>
             )}
 
-            {/* Message Button - locked until confirmed */}
-            <TouchableOpacity
-              style={[
-                styles.messageLockedButton,
-                isConfirmed && styles.messageUnlockedButton,
-              ]}
-              activeOpacity={isConfirmed ? 0.7 : 1}
-              onPress={() => {
-                if (isConfirmed) {
-                  handleMessageClient();
-                } else {
-                  showToast({
-                    type: 'info',
-                    title: 'Message Locked',
-                    message: 'Available after job confirmation',
-                  });
-                }
-              }}>
-              {loading3 ? (
-                <ActivityIndicator size="small" color={Colors.white} />
-              ) : (
-                <>
-                  <MaterialCommunityIcons
-                    name={isConfirmed ? 'message-text' : 'message-lock'}
-                    size={RFPercentage(2)}
-                    color={isConfirmed ? Colors.white : Colors.secondaryText}
-                  />
-                  <Text
-                    style={[
-                      styles.messageLockedText,
-                      isConfirmed && styles.messageUnlockedText,
-                    ]}>
-                    {isConfirmed ? 'Message' : 'Message (Locked)'}
-                  </Text>
-                </>
-              )}
-            </TouchableOpacity>
+            {/* Message Button - only shown when confirmed */}
+            {isConfirmed && (
+              <TouchableOpacity
+                style={styles.messageUnlockedButton}
+                activeOpacity={0.7}
+                onPress={handleMessageClient}>
+                {loading3 ? (
+                  <ActivityIndicator size="small" color={Colors.white} />
+                ) : (
+                  <>
+                    <MaterialCommunityIcons
+                      name="message-text"
+                      size={RFPercentage(2)}
+                      color={Colors.white}
+                    />
+                    <Text style={[styles.messageLockedText, styles.messageUnlockedText]}>
+                      Message
+                    </Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            )}
+          </View>
+        ) : userData.role === 'Cleaner' && isConfirmed && jobStatus === 'pending_completion' ? (
+          <View style={styles.actionButtons}>
+            <View style={styles.completedState}>
+              <MaterialCommunityIcons
+                name="clock-check-outline"
+                size={RFPercentage(2)}
+                color={Colors.amber500}
+              />
+              <Text style={[styles.completedText, {color: Colors.amber500}]}>
+                Awaiting Confirmation
+              </Text>
+            </View>
           </View>
         ) : userData.role === 'Cleaner' && isConfirmed ? (
-          <GradientButton
-            title="Message Client"
-            textStyle={styles.messageButtonText}
-            onPress={handleMessageClient}
-            loading={loading3}
-            disabled={loading3}
-            style={styles.messageButton}
-          />
+          <View style={styles.actionButtons}>
+            <GradientButton
+              title="Message Client"
+              textStyle={styles.messageButtonText}
+              onPress={handleMessageClient}
+              loading={loading3}
+              disabled={loading3}
+              style={[styles.messageButton, {flex: 1}]}
+            />
+          </View>
         ) : item.status === 'completed' || jobStatus === 'completed' ? (
           <View style={styles.completedState}>
             <MaterialCommunityIcons

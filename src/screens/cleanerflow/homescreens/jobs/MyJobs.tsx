@@ -36,6 +36,7 @@ interface Job {
   status?: string;
   jobId?: string;
   confirmedCleaner?: string;
+  autoCompleted?: boolean;
 }
 
 const MyJobs = ({navigation}: any) => {
@@ -46,6 +47,7 @@ const MyJobs = ({navigation}: any) => {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [cancelLoading, setCancelLoading] = useState<string | null>(null);
+  const [completeLoading, setCompleteLoading] = useState<string | null>(null);
   const [jobStats, setJobStats] = useState({
     active: 0,
     completed: 0,
@@ -61,12 +63,26 @@ const MyJobs = ({navigation}: any) => {
     try {
       let snapshot;
       if (activeTab === 'active') {
-        snapshot = await firestore()
+        const confirmedSnap = await firestore()
           .collection('Jobs')
           .where('confirmedCleaner', '==', user.uid)
           .where('status', '==', 'confirmed')
           .orderBy('createdAt', 'desc')
           .get();
+        const pendingSnap = await firestore()
+          .collection('Jobs')
+          .where('confirmedCleaner', '==', user.uid)
+          .where('status', '==', 'pending_completion')
+          .orderBy('createdAt', 'desc')
+          .get();
+        const allDocs = [...confirmedSnap.docs, ...pendingSnap.docs];
+        const jobsList = allDocs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Job[];
+        setJobs(jobsList);
+        setLoading(false);
+        return;
       } else if (activeTab === 'completed') {
         snapshot = await firestore()
           .collection('Jobs')
@@ -137,6 +153,97 @@ const MyJobs = ({navigation}: any) => {
     setRefreshing(true);
     Promise.all([fetchMyJobs(), fetchJobStats()]).finally(() =>
       setRefreshing(false),
+    );
+  };
+
+  const handleMarkCompleted = async (job: Job) => {
+    const user = auth().currentUser;
+    if (!user) return;
+
+    Alert.alert(
+      'Mark as Completed',
+      `Mark "${job.title}" as completed? The customer will be notified to confirm.`,
+      [
+        {text: 'No', style: 'cancel'},
+        {
+          text: 'Yes',
+          onPress: async () => {
+            setCompleteLoading(job.id);
+            try {
+              await firestore().collection('Jobs').doc(job.id).update({
+                status: 'pending_completion',
+                completionRequestedAt:
+                  firestore.FieldValue.serverTimestamp(),
+              });
+
+              if (job.jobId) {
+                const userDoc = await firestore()
+                  .collection('Users')
+                  .doc(user.uid)
+                  .get();
+                const cleanerName = userDoc.data()?.name || 'Your cleaner';
+
+                const ownerDoc = await firestore()
+                  .collection('Users')
+                  .doc(job.jobId)
+                  .get();
+                const ownerData = ownerDoc.data();
+
+                if (ownerData?.fcmToken) {
+                  try {
+                    await fetch(`${SERVER_URL}/api/send-notification`, {
+                      method: 'POST',
+                      headers: {'Content-Type': 'application/json'},
+                      body: JSON.stringify({
+                        fcmToken: ownerData.fcmToken,
+                        title: 'Completion Request',
+                        body: `${cleanerName} has marked "${job.title}" as completed. Confirm?`,
+                        data: {screen: 'notifications'},
+                      }),
+                    });
+                  } catch (err) {
+                    console.error('Error sending notification:', err);
+                  }
+                }
+
+                try {
+                  await firestore().collection('Notifications').add({
+                    type: 'completion_request',
+                    fromUserId: user.uid,
+                    toUserId: job.jobId,
+                    jobId: job.id,
+                    title: 'Completion Request',
+                    body: `${cleanerName} has marked "${job.title}" as completed. Confirm?`,
+                    timestamp: firestore.FieldValue.serverTimestamp(),
+                    read: false,
+                    jobTitle: job.title,
+                  });
+                } catch (err) {
+                  console.error('Error storing notification:', err);
+                }
+              }
+
+              showToast({
+                type: 'success',
+                title: 'Completion Requested',
+                message: 'The customer has been notified to confirm',
+              });
+
+              fetchMyJobs();
+              fetchJobStats();
+            } catch (error) {
+              console.error('Error marking job as completed:', error);
+              showToast({
+                type: 'error',
+                title: 'Error',
+                message: 'Failed to request completion',
+              });
+            } finally {
+              setCompleteLoading(null);
+            }
+          },
+        },
+      ],
     );
   };
 
@@ -406,24 +513,73 @@ const MyJobs = ({navigation}: any) => {
               delete={activeTab === 'active'}
             />
             {activeTab === 'active' && (
-              <TouchableOpacity
-                style={styles.cancelJobBtn}
-                activeOpacity={0.7}
-                onPress={() => handleCancelJob(item)}
-                disabled={cancelLoading === item.id}>
-                {cancelLoading === item.id ? (
-                  <ActivityIndicator size="small" color={Colors.red500} />
-                ) : (
-                  <>
+              <View style={styles.activeJobActions}>
+                {item.status === 'pending_completion' ? (
+                  <View style={[styles.completeJobBtn, {opacity: 0.6}]}>
                     <MaterialCommunityIcons
-                      name="close-circle-outline"
+                      name="clock-outline"
                       size={RFPercentage(1.8)}
-                      color={Colors.red500}
+                      color={Colors.amber500}
                     />
-                    <Text style={styles.cancelJobBtnText}>Cancel Job</Text>
-                  </>
+                    <Text
+                      style={[
+                        styles.completeJobBtnText,
+                        {color: Colors.amber500},
+                      ]}>
+                      Awaiting Confirmation
+                    </Text>
+                  </View>
+                ) : (
+                  <TouchableOpacity
+                    style={styles.completeJobBtn}
+                    activeOpacity={0.7}
+                    onPress={() => handleMarkCompleted(item)}
+                    disabled={completeLoading === item.id}>
+                    {completeLoading === item.id ? (
+                      <ActivityIndicator size="small" color={Colors.success} />
+                    ) : (
+                      <>
+                        <MaterialCommunityIcons
+                          name="check-circle-outline"
+                          size={RFPercentage(1.8)}
+                          color={Colors.success}
+                        />
+                        <Text style={styles.completeJobBtnText}>
+                          Mark as Completed
+                        </Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
                 )}
-              </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.cancelJobBtn}
+                  activeOpacity={0.7}
+                  onPress={() => handleCancelJob(item)}
+                  disabled={cancelLoading === item.id}>
+                  {cancelLoading === item.id ? (
+                    <ActivityIndicator size="small" color={Colors.red500} />
+                  ) : (
+                    <>
+                      <MaterialCommunityIcons
+                        name="close-circle-outline"
+                        size={RFPercentage(1.8)}
+                        color={Colors.red500}
+                      />
+                      <Text style={styles.cancelJobBtnText}>Cancel Job</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              </View>
+            )}
+            {activeTab === 'completed' && item.autoCompleted && (
+              <View style={styles.autoConfirmedTag}>
+                <MaterialCommunityIcons
+                  name="clock-check-outline"
+                  size={RFPercentage(1.6)}
+                  color={Colors.amber500}
+                />
+                <Text style={styles.autoConfirmedText}>Auto-confirmed</Text>
+              </View>
             )}
           </View>
         )}
@@ -575,14 +731,50 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.redBg100,
     paddingVertical: RFPercentage(1.2),
     borderRadius: RFPercentage(1),
-    marginTop: RFPercentage(-0.5),
-    marginBottom: RFPercentage(1),
     gap: RFPercentage(0.5),
+    flex: 1,
   },
   cancelJobBtnText: {
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.5),
     color: Colors.red500,
+  },
+  activeJobActions: {
+    flexDirection: 'row',
+    gap: RFPercentage(1),
+    marginTop: RFPercentage(-0.5),
+    marginBottom: RFPercentage(1),
+  },
+  completeJobBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.successBg,
+    paddingVertical: RFPercentage(1.2),
+    borderRadius: RFPercentage(1),
+    gap: RFPercentage(0.5),
+    flex: 1,
+  },
+  completeJobBtnText: {
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.5),
+    color: Colors.success,
+  },
+  autoConfirmedTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.amberBg100,
+    paddingVertical: RFPercentage(0.8),
+    borderRadius: RFPercentage(1),
+    marginTop: RFPercentage(-0.5),
+    marginBottom: RFPercentage(1),
+    gap: RFPercentage(0.5),
+  },
+  autoConfirmedText: {
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.4),
+    color: Colors.amber500,
   },
   loadingContainer: {
     alignItems: 'center',
