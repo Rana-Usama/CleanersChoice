@@ -34,6 +34,7 @@ interface Job {
   location?: {name?: string};
   priceRange?: string;
   createdAt?: any;
+  status?: string;
 }
 
 const Jobs = ({navigation}: any) => {
@@ -105,7 +106,7 @@ const Jobs = ({navigation}: any) => {
       const activeSnapshot = await firestore()
         .collection('Jobs')
         .where('jobId', '==', user.uid)
-        .where('status', '==', 'active')
+        .where('status', 'in', ['active', 'expired', 'unconfirmed'])
         .get();
 
       const completedSnapshot = await firestore()
@@ -130,10 +131,21 @@ const Jobs = ({navigation}: any) => {
     if (!user) return;
     setLoading(true);
     try {
-      const snapshot = await firestore()
+      let query = firestore()
         .collection('Jobs')
-        .where('jobId', '==', user.uid)
-        .where('status', '==', status)
+        .where('jobId', '==', user.uid);
+
+      if (status === 'active') {
+        query = query.where(
+          'status',
+          'in',
+          ['active', 'expired', 'unconfirmed'],
+        );
+      } else {
+        query = query.where('status', '==', status);
+      }
+
+      const snapshot = await query
         .orderBy('createdAt2', 'desc')
         .get();
 
@@ -414,7 +426,19 @@ const Jobs = ({navigation}: any) => {
                       }}
                       delete={completed ? false : true}
                     />
-                    {active && (
+                    {active &&
+                      (item?.status === 'expired' ||
+                        item?.status === 'unconfirmed') && (
+                        <View style={styles.expiredTag}>
+                          <MaterialIcons
+                            name="error-outline"
+                            size={16}
+                            color={Colors.orange600}
+                          />
+                          <Text style={styles.expiredTagText}>Expired</Text>
+                        </View>
+                      )}
+                    {active && item?.status === 'active' && (
                       <TouchableOpacity
                         activeOpacity={0.7}
                         style={styles.manageButton}
@@ -778,6 +802,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: '100%',
     height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   blurView: {
     width: '100%',
@@ -798,5 +824,20 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.5),
     color: Colors.gradient1,
+  },
+  expiredTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.orangeBg50,
+    paddingVertical: RFPercentage(0.8),
+    borderRadius: RFPercentage(1),
+    marginTop: RFPercentage(0.5),
+    gap: RFPercentage(0.5),
+  },
+  expiredTagText: {
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.4),
+    color: Colors.orange600,
   },
 });

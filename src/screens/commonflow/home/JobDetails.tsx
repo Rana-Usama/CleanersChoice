@@ -1,4 +1,5 @@
 import {
+  Alert,
   Image,
   SafeAreaView,
   ScrollView,
@@ -266,6 +267,47 @@ const JobDetails = ({route, navigation}: any) => {
     }
   };
 
+  // Delete expired/unconfirmed job
+  const handleDeleteJob = () => {
+    Alert.alert(
+      'Delete Job',
+      'Are you sure you want to delete this job?',
+      [
+        {text: 'Cancel', style: 'cancel'},
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            setLoading(true);
+            try {
+              await firestore().collection('Jobs').doc(item.id).delete();
+              showToast({
+                type: 'success',
+                title: 'Job Deleted',
+                message: 'Job has been deleted successfully',
+              });
+              navigation.goBack();
+            } catch (error) {
+              console.error('Error deleting job:', error);
+              showToast({
+                type: 'error',
+                title: 'Error',
+                message: 'Failed to delete job',
+              });
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ],
+    );
+  };
+
+  // Navigate to PostJob in repost mode
+  const handleRepostJob = () => {
+    navigation.navigate('PostJob', {jobId: item.id, repost: true});
+  };
+
   const dispatch = useDispatch();
   dispatch(setJobId(item.id));
 
@@ -524,6 +566,20 @@ const JobDetails = ({route, navigation}: any) => {
             bgColor: Colors.redBg100,
             text: 'Cancelled',
             icon: 'close-circle',
+          };
+        case 'expired':
+          return {
+            color: Colors.orange600,
+            bgColor: Colors.orangeBg50,
+            text: 'Expired',
+            icon: 'clock-alert-outline',
+          };
+        case 'unconfirmed':
+          return {
+            color: Colors.orange600,
+            bgColor: Colors.orangeBg50,
+            text: 'Unconfirmed',
+            icon: 'account-alert-outline',
           };
         default:
           return {
@@ -842,7 +898,26 @@ const JobDetails = ({route, navigation}: any) => {
 
       {/* Fixed Action Buttons */}
       <View style={styles.actionBar}>
-        {(item.status === 'active' || jobStatus === 'active') && userData.role === 'Customer' ? (
+        {(jobStatus === 'expired' || jobStatus === 'unconfirmed') && userData.role === 'Customer' ? (
+          <View style={styles.actionButtons}>
+            <NextButton
+              title="Delete Job"
+              onPress={handleDeleteJob}
+              textStyle={styles.editButtonText}
+              disabled={loading}
+              loading={false}
+              style={styles.editButton}
+            />
+            <GradientButton
+              title="Repost Job"
+              textStyle={styles.completeButtonText}
+              onPress={handleRepostJob}
+              loading={loading2}
+              disabled={loading2}
+              style={styles.completeButton}
+            />
+          </View>
+        ) : (item.status === 'active' || jobStatus === 'active') && userData.role === 'Customer' ? (
           <View style={styles.actionButtons}>
             <NextButton
               title="Edit Job"
