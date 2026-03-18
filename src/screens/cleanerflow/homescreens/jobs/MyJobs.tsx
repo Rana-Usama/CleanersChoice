@@ -505,12 +505,8 @@ const MyJobs = ({navigation}: any) => {
               onPress={() =>
                 navigation.navigate('JobDetails', {item: item})
               }
-              onPress2={() => {
-                if (activeTab === 'active') {
-                  handleCancelJob(item);
-                }
-              }}
-              delete={activeTab === 'active'}
+              onPress2={() => {}}
+              delete={false}
             />
             {activeTab === 'active' && (
               <View style={styles.activeJobActions}>

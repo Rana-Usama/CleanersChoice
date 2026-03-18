@@ -206,3 +206,211 @@ async function sendAutoCompleteNotification(
       error);
   }
 }
+
+// Runs every hour — handles job expiry scenarios
+// Scenario A: No applicants after scheduled time → "expired"
+// Scenario B: Applicants but no confirmation → "unconfirmed"
+export const handleJobExpiry = onSchedule(
+  {
+    schedule: "0 * * * *",
+    timeZone: "America/New_York",
+    retryCount: 3,
+    memory: "256MiB",
+  },
+  async () => {
+    const db = admin.firestore();
+    const now = new Date();
+    const msIn3Hours = 3 * 60 * 60 * 1000;
+    const msIn2Hours = 2 * 60 * 60 * 1000;
+
+    try {
+      const batch = db.batch();
+      let updateCount = 0;
+      const notificationPromises: Promise<void>[] = [];
+
+      // Part 1: Process active jobs (pre-expiry warning + status change)
+      const activeSnap = await db
+        .collection("Jobs")
+        .where("status", "==", "active")
+        .get();
+
+      for (const doc of activeSnap.docs) {
+        const data = doc.data();
+        const scheduledDate = data.createdAt;
+        if (!scheduledDate) continue;
+
+        const parsedDate = parseScheduledDate(scheduledDate);
+        if (!parsedDate) continue;
+
+        const timeUntilScheduled = parsedDate.getTime() - now.getTime();
+        const timeSinceScheduled = now.getTime() - parsedDate.getTime();
+        const applicants: string[] = data.applicants || [];
+        const confirmedCleaner = data.confirmedCleaner;
+        const ownerId = data.jobId;
+        const jobTitle = data.title || "Untitled Job";
+
+        // Skip jobs with a confirmed cleaner (handled by autoCompleteJobs)
+        if (confirmedCleaner) continue;
+
+        // Scenario B pre-warning: 3 hours before scheduled time
+        if (
+          timeUntilScheduled > 0 &&
+          timeUntilScheduled <= msIn3Hours &&
+          applicants.length > 0 &&
+          !data.expiryWarningNotified
+        ) {
+          batch.update(doc.ref, {expiryWarningNotified: true});
+          updateCount++;
+          if (ownerId) {
+            notificationPromises.push(
+              sendExpiryNotification(
+                db,
+                doc.id,
+                jobTitle,
+                ownerId,
+                "expiry_warning",
+                "Confirm Your Applicants",
+                `Your job "${jobTitle}" is expiring soon. You have ${
+                  applicants.length
+                } applicant${
+                  applicants.length !== 1 ? "s" : ""
+                } but haven't confirmed anyone. Please confirm before the job expires.`
+              )
+            );
+          }
+          continue;
+        }
+
+        // Job has not yet reached scheduled time
+        if (timeSinceScheduled <= 0) continue;
+
+        // Scenario A: No applicants — mark as expired
+        if (applicants.length === 0) {
+          batch.update(doc.ref, {
+            status: "expired",
+            expiredAt: admin.firestore.FieldValue.serverTimestamp(),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
+          updateCount++;
+        }
+        // Scenario B: Applicants but no confirmation — mark as unconfirmed
+        else {
+          batch.update(doc.ref, {
+            status: "unconfirmed",
+            expiredAt: admin.firestore.FieldValue.serverTimestamp(),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
+          updateCount++;
+          if (ownerId) {
+            notificationPromises.push(
+              sendExpiryNotification(
+                db,
+                doc.id,
+                jobTitle,
+                ownerId,
+                "unconfirmed",
+                "Job Expired \u2014 Unconfirmed",
+                `Your job "${jobTitle}" has expired. You had ${
+                  applicants.length
+                } applicant${
+                  applicants.length !== 1 ? "s" : ""
+                } but didn't confirm anyone.`
+              )
+            );
+          }
+        }
+      }
+
+      // Part 2: Send repost notification for expired jobs (2h after expiry)
+      const expiredSnap = await db
+        .collection("Jobs")
+        .where("status", "==", "expired")
+        .get();
+
+      for (const doc of expiredSnap.docs) {
+        const data = doc.data();
+        if (data.repostNotificationSent) continue;
+
+        const scheduledDate = data.createdAt;
+        if (!scheduledDate) continue;
+        const parsedDate = parseScheduledDate(scheduledDate);
+        if (!parsedDate) continue;
+
+        const timeSinceScheduled = now.getTime() - parsedDate.getTime();
+        if (timeSinceScheduled < msIn2Hours) continue;
+
+        batch.update(doc.ref, {repostNotificationSent: true});
+        updateCount++;
+
+        const ownerId = data.jobId;
+        const jobTitle = data.title || "Untitled Job";
+
+        if (ownerId) {
+          notificationPromises.push(
+            sendExpiryNotification(
+              db,
+              doc.id,
+              jobTitle,
+              ownerId,
+              "expired",
+              "Job Expired",
+              `Your job "${jobTitle}" has expired. No cleaners applied. Would you like to repost it?`
+            )
+          );
+        }
+      }
+
+      if (updateCount > 0) {
+        await batch.commit();
+        await Promise.allSettled(notificationPromises);
+        console.log(`Job expiry: processed ${updateCount} updates`);
+      } else {
+        console.log("Job expiry: no updates needed");
+      }
+    } catch (error) {
+      console.error("Error handling job expiry:", error);
+      throw error;
+    }
+  }
+);
+
+async function sendExpiryNotification(
+  db: admin.firestore.Firestore,
+  jobId: string,
+  jobTitle: string,
+  toUserId: string,
+  type: string,
+  title: string,
+  body: string
+): Promise<void> {
+  try {
+    const userDoc = await db.collection("Users").doc(toUserId).get();
+    const userData = userDoc.data();
+
+    await db.collection("Notifications").add({
+      type,
+      fromUserId: "system",
+      toUserId,
+      jobId,
+      title,
+      body,
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      read: false,
+      jobTitle,
+    });
+
+    if (userData?.fcmToken) {
+      const message: admin.messaging.Message = {
+        token: userData.fcmToken,
+        notification: {title, body},
+        data: {screen: "notifications"},
+      };
+      await admin.messaging().send(message);
+    }
+  } catch (error) {
+    console.error(
+      `Error sending expiry notification to ${toUserId}:`,
+      error
+    );
+  }
+}

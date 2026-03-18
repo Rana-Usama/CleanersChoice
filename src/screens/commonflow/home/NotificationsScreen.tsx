@@ -25,7 +25,7 @@ import moment from 'moment';
 
 interface NotificationItem {
   id: string;
-  type: 'application' | 'confirmation' | 'cancellation' | 'completion' | 'completion_request' | 'auto_complete' | 'message';
+  type: 'application' | 'confirmation' | 'cancellation' | 'completion' | 'completion_request' | 'auto_complete' | 'expired' | 'expiry_warning' | 'unconfirmed' | 'message';
   fromUserId: string;
   toUserId: string;
   jobId: string;
@@ -204,6 +204,45 @@ const NotificationsScreen = ({navigation}: any) => {
           console.error('Error fetching job:', error);
         }
         break;
+      case 'expired':
+        // Navigate to expired job details (repost/delete)
+        try {
+          const expiredJobDoc = await firestore()
+            .collection('Jobs')
+            .doc(item.jobId)
+            .get();
+          if (expiredJobDoc.exists) {
+            navigation.navigate('JobDetails', {
+              item: {id: expiredJobDoc.id, ...expiredJobDoc.data()},
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching job:', error);
+        }
+        break;
+      case 'unconfirmed':
+        // Navigate to unconfirmed job details
+        try {
+          const unconfirmedJobDoc = await firestore()
+            .collection('Jobs')
+            .doc(item.jobId)
+            .get();
+          if (unconfirmedJobDoc.exists) {
+            navigation.navigate('JobDetails', {
+              item: {id: unconfirmedJobDoc.id, ...unconfirmedJobDoc.data()},
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching job:', error);
+        }
+        break;
+      case 'expiry_warning':
+        // Navigate to job management to confirm applicants
+        navigation.navigate('JobManagement', {
+          jobId: item.jobId,
+          jobTitle: item.jobTitle || '',
+        });
+        break;
       case 'message':
         // Navigate to chat
         const user = auth().currentUser;
@@ -260,6 +299,12 @@ const NotificationsScreen = ({navigation}: any) => {
         return {name: 'clipboard-check-outline', color: Colors.amber500};
       case 'auto_complete':
         return {name: 'clock-check-outline', color: Colors.amber500};
+      case 'expired':
+        return {name: 'clock-alert-outline', color: Colors.orange600};
+      case 'expiry_warning':
+        return {name: 'alert-circle-outline', color: Colors.amber500};
+      case 'unconfirmed':
+        return {name: 'account-alert-outline', color: Colors.orange600};
       case 'message':
         return {name: 'message-text-outline', color: Colors.primaryBlue};
       default:

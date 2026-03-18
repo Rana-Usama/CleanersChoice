@@ -117,7 +117,7 @@ const serviceTypesWithIcons = [
 ];
 
 const PostJob = ({route}: any) => {
-  const {jobId} = route.params;
+  const {jobId, repost} = route.params || {};
 
   const navigation = useNavigation<any>();
   const [date, setDate] = useState<Date | null>(null);
@@ -156,6 +156,16 @@ const PostJob = ({route}: any) => {
       return;
     }
 
+    const budgetValue = parseInt(budget.replace(/[^0-9]/g, ''), 10);
+    if (!budgetValue || budgetValue < 1) {
+      showToast({
+        type: 'info',
+        title: 'Invalid Amount',
+        message: 'Budget must be greater than 0',
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const jobData: any = {
@@ -175,12 +185,26 @@ const PostJob = ({route}: any) => {
         jobData.createdAt = moment(date).format('YYYY-MM-DD  HH:mm A');
       }
 
+      // Reset job fields when reposting an expired job
+      if (repost) {
+        jobData.applicants = [];
+        jobData.confirmedCleaner = firestore.FieldValue.delete();
+        jobData.cancelledCleaners = [];
+        jobData.expiredAt = firestore.FieldValue.delete();
+        jobData.repostNotificationSent = firestore.FieldValue.delete();
+        jobData.expiryWarningNotified = firestore.FieldValue.delete();
+        jobData.autoCompleted = firestore.FieldValue.delete();
+        jobData.completionRequestedAt = firestore.FieldValue.delete();
+      }
+
       if (jobId) {
         await firestore().collection('Jobs').doc(jobId).update(jobData);
         showToast({
           type: 'success',
-          title: 'Success',
-          message: 'Job updated successfully',
+          title: repost ? 'Job Reposted!' : 'Success',
+          message: repost
+            ? 'Your job is now live again'
+            : 'Job updated successfully',
         });
         navigation.navigate('Home');
       } else {
@@ -220,7 +244,9 @@ const PostJob = ({route}: any) => {
         setSelectedType(jobData?.type || null);
         setBudget(jobData?.priceRange ? `$${jobData.priceRange}` : '');
         setRemarks(jobData?.remarks || '');
-        setDate(moment(jobData?.createdAt, 'YYYY-MM-DD  HH:mm A').toDate());
+        if (!repost) {
+          setDate(moment(jobData?.createdAt, 'YYYY-MM-DD  HH:mm A').toDate());
+        }
 
         const service = serviceTypesWithIcons.find(
           s => s.label === jobData?.type,
@@ -239,7 +265,7 @@ const PostJob = ({route}: any) => {
   }, []);
 
   const handleBudgetChange = (text: any) => {
-    const numeric = text.replace(/[^0-9]/g, '');
+    const numeric = text.replace(/[^0-9]/g, '').replace(/^0+/, '');
     setBudget(numeric ? `$${numeric}` : '');
   };
 
@@ -336,7 +362,7 @@ const PostJob = ({route}: any) => {
           <Feather name="arrow-left" size={24} color={Colors.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>
-          {jobId ? 'Edit Job' : 'Post New Job'}
+          {repost ? 'Repost Job' : jobId ? 'Edit Job' : 'Post New Job'}
         </Text>
         <View style={{width: 40}} />
       </LinearGradient>
