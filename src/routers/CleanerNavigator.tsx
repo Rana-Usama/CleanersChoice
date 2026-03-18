@@ -21,7 +21,6 @@ import Settings from '../screens/commonflow/home/settings/Settings';
 import Messages from '../screens/commonflow/home/Messages';
 import {useUnreadMessages} from '../utils/UnreadMessagesContext';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {SafeAreaView} from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const Tab = createBottomTabNavigator();
@@ -34,44 +33,22 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
   const [isKeyboardVisible, setKeyboardVisible] = useState<boolean>(false);
   const screenFocused = useIsFocused();
   const {unreadCount} = useUnreadMessages();
-
   const [_, forceUpdate] = useState(0);
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     forceUpdate(n => n + 1);
   }, [unreadCount]);
 
-  // useEffect(() => {
-  //   const backAction = () => {
-  //     if (screenFocused) {
-  //       navigation.goBack();
-  //       return true;
-  //     }
-  //     return false;
-  //   };
-
-  //   const backHandler = BackHandler.addEventListener(
-  //     'hardwareBackPress',
-  //     backAction,
-  //   );
-
-  //   return () => backHandler.remove();
-  // }, [screenFocused, navigation]);
-
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       'keyboardDidShow',
-      () => {
-        setKeyboardVisible(true);
-      },
+      () => setKeyboardVisible(true),
     );
     const keyboardDidHideListener = Keyboard.addListener(
       'keyboardDidHide',
-      () => {
-        setKeyboardVisible(false);
-      },
+      () => setKeyboardVisible(false),
     );
-
     return () => {
       keyboardDidShowListener.remove();
       keyboardDidHideListener.remove();
@@ -80,121 +57,126 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
 
   if (isKeyboardVisible) return null;
 
-  const insets = useSafeAreaInsets();
+  // Handles both gesture nav (Android 10+) and 3-button nav on all Android variants
+  const bottomInset = insets.bottom;
 
   return (
-    <SafeAreaView
-      edges={['bottom']}
-      style={{backgroundColor: 'rgba(241, 245, 249, 1)'}}>
-      <View style={[styles.tabBarContainer]}>
-        <View style={styles.labelContainer}>
-          {state.routes.map((route, index) => {
-            const {options} = descriptors[route.key];
-            const label =
-              options.tabBarLabel !== undefined
-                ? options.tabBarLabel
-                : route.name;
-            const isFocused = state.index === index;
-            return (
-              <TouchableOpacity
-                activeOpacity={0.8}
-                key={index}
-                onPress={() => navigation.navigate(route.name)}
-                style={[styles.tabButton]}>
-                {route.name === 'Home' ? (
-                  <View
-                    style={{
-                      bottom:
-                        Platform.OS === 'android'
-                          ? RFPercentage(3)
-                          : RFPercentage(2.5),
-                    }}>
-                    <Image
-                      source={isFocused ? Icons.home : Icons.homeInactive}
-                      style={styles.middle}
-                      resizeMode="contain"
-                    />
-                  </View>
-                ) : route.name === 'Messages' ? (
-                  <View>
-                    <Image
-                      source={isFocused ? Icons.msgActive : Icons.msg}
-                      style={styles.imgStyle}
-                      resizeMode="contain"
-                    />
-                    {unreadCount > 0 && (
-                      <View
-                        style={[
-                          styles.count,
-                          unreadCount > 9 && {
-                            paddingHorizontal: RFPercentage(0.5),
-                            minWidth: RFPercentage(2.8),
-                          },
-                        ]}>
-                        <Text
-                          style={{
-                            color: 'white',
-                            fontSize: RFPercentage(1.4),
-                            fontFamily: Fonts.fontRegular,
-                          }}>
-                          {unreadCount > 9 ? '9+' : unreadCount}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                ) : route.name === 'Job List' ? (
-                  <Image
-                    source={isFocused ? Icons.jobActive : Icons.job}
-                    style={styles.imgStyle}
-                    resizeMode="contain"
-                  />
-                ) : route.name === 'Settings' ? (
-                  <Image
-                    source={isFocused ? Icons.settingActive : Icons.settings}
-                    style={styles.imgStyle}
-                    resizeMode="contain"
-                  />
-                ) : route.name === 'My Jobs' ? (
-                  <MaterialCommunityIcons
-                    name={isFocused ? 'briefcase-check' : 'briefcase-check-outline'}
-                    size={RFPercentage(2.8)}
-                    color={isFocused ? Colors.gradient2 : Colors.secondaryText}
-                  />
-                ) : (
-                  <Image
-                    source={isFocused ? Icons.profileActive : Icons.profile}
-                    style={styles.imgStyle}
-                    resizeMode="contain"
-                  />
-                )}
-                <Text
-                  numberOfLines={1}
+    <View
+      style={[
+        styles.tabBarContainer,
+        {
+          height: RFPercentage(9) + bottomInset,
+          paddingBottom: bottomInset,
+        },
+      ]}>
+      <View style={styles.labelContainer}>
+        {state.routes.map((route, index) => {
+          const {options} = descriptors[route.key];
+          const label =
+            options.tabBarLabel !== undefined
+              ? options.tabBarLabel
+              : route.name;
+          const isFocused = state.index === index;
+
+          return (
+            <TouchableOpacity
+              activeOpacity={0.8}
+              key={index}
+              onPress={() => navigation.navigate(route.name)}
+              style={[styles.tabButton]}>
+              {route.name === 'Home' ? (
+                <View
                   style={{
-                    color: isFocused ? Colors.gradient2 : Colors.secondaryText,
-                    fontSize: RFPercentage(1.5),
-                    top:
-                      route.name === 'Home'
-                        ? RFPercentage(-2.1)
-                        : RFPercentage(0.5),
-                    fontFamily: Fonts.fontMedium,
+                    bottom:
+                      Platform.OS === 'android'
+                        ? RFPercentage(3)
+                        : RFPercentage(2.5),
                   }}>
-                  {typeof label === 'function'
-                    ? label({
-                        focused: isFocused,
-                        color: isFocused
-                          ? Colors.gradient2
-                          : Colors.secondaryText,
-                        position: 'below-icon',
-                        children: route.name,
-                      })
-                    : label}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+                  <Image
+                    source={isFocused ? Icons.home : Icons.homeInactive}
+                    style={styles.middle}
+                    resizeMode="contain"
+                  />
+                </View>
+              ) : route.name === 'Messages' ? (
+                <View>
+                  <Image
+                    source={isFocused ? Icons.msgActive : Icons.msg}
+                    style={styles.imgStyle}
+                    resizeMode="contain"
+                  />
+                  {unreadCount > 0 && (
+                    <View
+                      style={[
+                        styles.count,
+                        unreadCount > 9 && {
+                          paddingHorizontal: RFPercentage(0.5),
+                          minWidth: RFPercentage(2.8),
+                        },
+                      ]}>
+                      <Text
+                        style={{
+                          color: 'white',
+                          fontSize: RFPercentage(1.4),
+                          fontFamily: Fonts.fontRegular,
+                        }}>
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              ) : route.name === 'Job List' ? (
+                <Image
+                  source={isFocused ? Icons.jobActive : Icons.job}
+                  style={styles.imgStyle}
+                  resizeMode="contain"
+                />
+              ) : route.name === 'Settings' ? (
+                <Image
+                  source={isFocused ? Icons.settingActive : Icons.settings}
+                  style={styles.imgStyle}
+                  resizeMode="contain"
+                />
+              ) : route.name === 'My Jobs' ? (
+                <MaterialCommunityIcons
+                  name={isFocused ? 'briefcase-check' : 'briefcase-check-outline'}
+                  size={RFPercentage(2.8)}
+                  color={isFocused ? Colors.gradient2 : Colors.secondaryText}
+                />
+              ) : (
+                <Image
+                  source={isFocused ? Icons.profileActive : Icons.profile}
+                  style={styles.imgStyle}
+                  resizeMode="contain"
+                />
+              )}
+              <Text
+                numberOfLines={1}
+                style={{
+                  color: isFocused ? Colors.gradient2 : Colors.secondaryText,
+                  fontSize: RFPercentage(1.5),
+                  top:
+                    route.name === 'Home'
+                      ? RFPercentage(-2.1)
+                      : RFPercentage(0.5),
+                  fontFamily: Fonts.fontMedium,
+                }}>
+                {typeof label === 'function'
+                  ? label({
+                      focused: isFocused,
+                      color: isFocused
+                        ? Colors.gradient2
+                        : Colors.secondaryText,
+                      position: 'below-icon',
+                      children: route.name,
+                    })
+                  : label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -223,10 +205,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(241, 245, 249, 1)',
     alignItems: 'center',
     justifyContent: 'center',
-    height: RFPercentage(9),
-    position: 'absolute',
-    bottom: 0,
     width: '100%',
+    // NOTE: Removed position: 'absolute' and bottom: 0.
+    // React Navigation renders the tab bar below screen content naturally,
+    // so letting it flow prevents it from hiding behind Android nav buttons.
+    // Height and paddingBottom are set dynamically via insets.bottom above.
   },
   tabButton: {
     alignItems: 'center',
@@ -240,9 +223,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
-    height: '100%',
+    height: RFPercentage(9),
     bottom: RFPercentage(0.5),
-    // top: RFPercentage(1),
   },
   middle: {
     width: RFPercentage(7.5),

@@ -11,9 +11,10 @@ import {
   ScrollView,
   Alert,
   Platform,
-  Linking
+  Linking,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
 import HeaderComponent from '../../../components/HeaderComponent';
@@ -39,10 +40,13 @@ const services = [
 ];
 
 const productId = 'cleaner.premium.monthly.V1';
-const PRIVACY_URL = 'https://www.privacypolicies.com/live/9ed1413e-3736-4e66-8b11-61ea197e4e37';
-const EULA_URL = 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
+const PRIVACY_URL =
+  'https://www.privacypolicies.com/live/9ed1413e-3736-4e66-8b11-61ea197e4e37';
+const EULA_URL =
+  'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
 
 const Premium = ({navigation}: any) => {
+  const insets = useSafeAreaInsets();
   const {initPaymentSheet, presentPaymentSheet} = useStripe();
   const [loading, setLoading] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
@@ -323,10 +327,12 @@ const Premium = ({navigation}: any) => {
               <Text
                 style={styles.link}
                 onPress={() => Linking.openURL(PRIVACY_URL)}>
-                Privacy Policy
-              </Text>
-              {' '}and{' '}
-              <Text style={styles.link} onPress={() => Linking.openURL(EULA_URL)}>
+                Privacy Policy{`\n`}
+              </Text>{' '}
+              and{' '}
+              <Text
+                style={styles.link}
+                onPress={() => Linking.openURL(EULA_URL)}>
                 Terms of Use
               </Text>
               .
@@ -339,7 +345,7 @@ const Premium = ({navigation}: any) => {
       </ScrollView>
 
       {/* Fixed Action Section */}
-      <View style={styles.actionSection}>
+      <View style={[styles.actionSection, {paddingBottom: insets.bottom + RFPercentage(0.5)}]}>
         <View style={styles.actionContent}>
           <TouchableOpacity
             onPress={() => navigation.navigate('SignIn')}
@@ -627,7 +633,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: RFPercentage(2),
-    paddingBottom: Platform.OS === 'ios' ? RFPercentage(4) : RFPercentage(2),
+    paddingBottom: RFPercentage(2),
     shadowColor: Colors.black,
     shadowOffset: {width: 0, height: -4},
     shadowOpacity: 0.1,
@@ -698,16 +704,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   legalLinks: {
-  paddingHorizontal: RFPercentage(2),
-  marginBottom: RFPercentage(1),
-},
-legalText: {
-  fontSize: RFPercentage(1.2),
-  color: Colors.secondaryText,
-  textAlign: 'center',
-},
-link: {
-  color: Colors.gradient1,
-  textDecorationLine: 'underline',
-},
+    paddingHorizontal: RFPercentage(2),
+    marginBottom: RFPercentage(1),
+  },
+  legalText: {
+    fontSize: RFPercentage(1.5),
+    color: Colors.secondaryText,
+    textAlign: 'center',
+    lineHeight: RFPercentage(2.4),
+    fontFamily: Fonts.fontRegular,
+  },
+  link: {
+    color: Colors.gradient1,
+    textDecorationLine: 'underline',
+  },
 });
