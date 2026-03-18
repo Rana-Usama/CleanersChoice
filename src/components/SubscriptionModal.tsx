@@ -19,7 +19,7 @@ const SubscriptionModal = (props: Props) => {
         <AntDesign
           name={props.icon}
           color={Colors.gradient1}
-          size={RFPercentage(8)}
+          size={RFPercentage(6)}
         />
       </View>
 
