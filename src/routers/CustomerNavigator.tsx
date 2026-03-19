@@ -241,6 +241,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
+
     // NOTE: No position: 'absolute' or bottom: 0 here.
     // React Navigation renders the tab bar BELOW the screen content,
     // so letting it flow naturally prevents it from hiding behind
@@ -260,7 +261,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-around',
     height: RFPercentage(9),
-    bottom: RFPercentage(0.5),
+    // bottom: RFPercentage(0.5),
   },
   middle: {
     width: RFPercentage(7.5),
