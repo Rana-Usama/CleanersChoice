@@ -9,7 +9,7 @@ import {
   Platform,
   StatusBar,
   Image,
-  Alert,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import React, {useState, useCallback} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -25,6 +25,8 @@ import LinearGradient from 'react-native-linear-gradient';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {showToast} from '../../../utils/ToastMessage';
+import {BlurView} from '@react-native-community/blur';
+import CustomModal from '../../../components/CustomModal';
 
 const SERVER_URL = 'https://cleaners-choice-server.vercel.app';
 
@@ -47,6 +49,23 @@ const JobManagement = ({route, navigation}: any) => {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [jobData, setJobData] = useState<any>(null);
+  const [confirmModal, setConfirmModal] = useState<{
+    visible: boolean;
+    title: string;
+    subTitle: string;
+    iconName: string;
+    iconColor: string;
+    buttonTitle: string;
+    onConfirm: () => void;
+  }>({
+    visible: false,
+    title: '',
+    subTitle: '',
+    iconName: '',
+    iconColor: '',
+    buttonTitle: 'Yes',
+    onConfirm: () => {},
+  });
 
   const fetchJobData = useCallback(async () => {
     setLoading(true);
@@ -162,63 +181,62 @@ const JobManagement = ({route, navigation}: any) => {
     const user = auth().currentUser;
     if (!user) return;
 
-    Alert.alert(
-      'Confirm Cleaner',
-      `Are you sure you want to hire ${cleaner.name} for this job?`,
-      [
-        {text: 'Cancel', style: 'cancel'},
-        {
-          text: 'Confirm',
-          onPress: async () => {
-            setActionLoading(cleaner.uid);
-            try {
-              await firestore().collection('Jobs').doc(jobId).update({
-                confirmedCleaner: cleaner.uid,
-                status: 'confirmed',
-              });
+    setConfirmModal({
+      visible: true,
+      title: 'Confirm Cleaner',
+      subTitle: `Are you sure you want to hire ${cleaner.name} for this job?`,
+      iconName: 'account-check',
+      iconColor: Colors.success,
+      buttonTitle: 'Confirm',
+      onConfirm: async () => {
+        setConfirmModal(prev => ({...prev, visible: false}));
+        setActionLoading(cleaner.uid);
+        try {
+          await firestore().collection('Jobs').doc(jobId).update({
+            confirmedCleaner: cleaner.uid,
+            status: 'confirmed',
+          });
 
-              // Send notification to cleaner
-              if (cleaner.fcmToken) {
-                await sendNotification(
-                  cleaner.fcmToken,
-                  'Job Confirmed! 🎉',
-                  `You have been hired for "${jobTitle}"`,
-                  'notifications',
-                );
-              }
+          // Send notification to cleaner
+          if (cleaner.fcmToken) {
+            await sendNotification(
+              cleaner.fcmToken,
+              'Job Confirmed! 🎉',
+              `You have been hired for "${jobTitle}"`,
+              'notifications',
+            );
+          }
 
-              // Store notification
-              await storeNotification(
-                'confirmation',
-                user.uid,
-                cleaner.uid,
-                'Job Confirmed! 🎉',
-                `You have been hired for "${jobTitle}"`,
-                jobId,
-                jobTitle,
-              );
+          // Store notification
+          await storeNotification(
+            'confirmation',
+            user.uid,
+            cleaner.uid,
+            'Job Confirmed! 🎉',
+            `You have been hired for "${jobTitle}"`,
+            jobId,
+            jobTitle,
+          );
 
-              showToast({
-                type: 'success',
-                title: 'Cleaner Confirmed',
-                message: `${cleaner.name} has been hired for this job`,
-              });
+          showToast({
+            type: 'success',
+            title: 'Cleaner Confirmed',
+            message: `${cleaner.name} has been hired for this job`,
+          });
 
-              fetchJobData();
-            } catch (error) {
-              console.error('Error confirming cleaner:', error);
-              showToast({
-                type: 'error',
-                title: 'Error',
-                message: 'Failed to confirm cleaner',
-              });
-            } finally {
-              setActionLoading(null);
-            }
-          },
-        },
-      ],
-    );
+          fetchJobData();
+        } catch (error) {
+          console.error('Error confirming cleaner:', error);
+          showToast({
+            type: 'error',
+            title: 'Error',
+            message: 'Failed to confirm cleaner',
+          });
+        } finally {
+          setActionLoading(null);
+        }
+      },
+    });
   };
 
   // Cancel a confirmed cleaner
@@ -226,67 +244,65 @@ const JobManagement = ({route, navigation}: any) => {
     const user = auth().currentUser;
     if (!user || !confirmedCleaner) return;
 
-    Alert.alert(
-      'Cancel Cleaner',
-      `Are you sure you want to remove ${confirmedCleaner.name} from this job?`,
-      [
-        {text: 'No', style: 'cancel'},
-        {
-          text: 'Yes, Cancel',
-          style: 'destructive',
-          onPress: async () => {
-            setActionLoading('cancel');
-            try {
-              await firestore().collection('Jobs').doc(jobId).update({
-                confirmedCleaner: null,
-                status: 'active',
-                cancelledCleaners: firestore.FieldValue.arrayUnion(
-                  confirmedCleaner.uid,
-                ),
-              });
+    setConfirmModal({
+      visible: true,
+      title: 'Cancel Cleaner',
+      subTitle: `Are you sure you want to remove ${confirmedCleaner.name} from this job?`,
+      iconName: 'account-remove',
+      iconColor: Colors.red500,
+      buttonTitle: 'Yes, Cancel',
+      onConfirm: async () => {
+        setConfirmModal(prev => ({...prev, visible: false}));
+        setActionLoading('cancel');
+        try {
+          await firestore().collection('Jobs').doc(jobId).update({
+            confirmedCleaner: null,
+            status: 'active',
+            cancelledCleaners: firestore.FieldValue.arrayUnion(
+              confirmedCleaner.uid,
+            ),
+          });
 
-              // Send notification to cleaner
-              if (confirmedCleaner.fcmToken) {
-                await sendNotification(
-                  confirmedCleaner.fcmToken,
-                  'Job Cancelled',
-                  `Your assignment for "${jobTitle}" has been cancelled`,
-                  'notifications',
-                );
-              }
+          // Send notification to cleaner
+          if (confirmedCleaner.fcmToken) {
+            await sendNotification(
+              confirmedCleaner.fcmToken,
+              'Job Cancelled',
+              `Your assignment for "${jobTitle}" has been cancelled`,
+              'notifications',
+            );
+          }
 
-              // Store notification
-              await storeNotification(
-                'cancellation',
-                user.uid,
-                confirmedCleaner.uid,
-                'Job Cancelled',
-                `Your assignment for "${jobTitle}" has been cancelled`,
-                jobId,
-                jobTitle,
-              );
+          // Store notification
+          await storeNotification(
+            'cancellation',
+            user.uid,
+            confirmedCleaner.uid,
+            'Job Cancelled',
+            `Your assignment for "${jobTitle}" has been cancelled`,
+            jobId,
+            jobTitle,
+          );
 
-              showToast({
-                type: 'success',
-                title: 'Cleaner Removed',
-                message: 'The cleaner has been removed from this job',
-              });
+          showToast({
+            type: 'success',
+            title: 'Cleaner Removed',
+            message: 'The cleaner has been removed from this job',
+          });
 
-              fetchJobData();
-            } catch (error) {
-              console.error('Error cancelling cleaner:', error);
-              showToast({
-                type: 'error',
-                title: 'Error',
-                message: 'Failed to cancel cleaner',
-              });
-            } finally {
-              setActionLoading(null);
-            }
-          },
-        },
-      ],
-    );
+          fetchJobData();
+        } catch (error) {
+          console.error('Error cancelling cleaner:', error);
+          showToast({
+            type: 'error',
+            title: 'Error',
+            message: 'Failed to cancel cleaner',
+          });
+        } finally {
+          setActionLoading(null);
+        }
+      },
+    });
   };
 
   // Navigate to cleaner profile
@@ -502,7 +518,7 @@ const JobManagement = ({route, navigation}: any) => {
                 ) : (
                   <View style={styles.emptySection}>
                     <MaterialCommunityIcons
-                      name="account-question-outline"
+                      name="account-outline"
                       size={RFPercentage(4)}
                       color={Colors.secondaryText}
                     />
@@ -560,6 +576,33 @@ const JobManagement = ({route, navigation}: any) => {
           }
         />
       )}
+
+      {/* Confirm / Cancel Modal */}
+      {confirmModal.visible && (
+        <TouchableWithoutFeedback
+          onPress={() =>
+            setConfirmModal(prev => ({...prev, visible: false}))
+          }>
+          <View style={styles.modalOverlay}>
+            <BlurView
+              style={styles.blurView}
+              blurType="light"
+              blurAmount={5}
+            />
+            <CustomModal
+              title={confirmModal.title}
+              subTitle={confirmModal.subTitle}
+              iconName={confirmModal.iconName}
+              iconColor={confirmModal.iconColor}
+              buttonTitle={confirmModal.buttonTitle}
+              onPress={() =>
+                setConfirmModal(prev => ({...prev, visible: false}))
+              }
+              onPress2={confirmModal.onConfirm}
+            />
+          </View>
+        </TouchableWithoutFeedback>
+      )}
     </View>
   );
 };
@@ -570,6 +613,18 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: Colors.background,
+  },
+  modalOverlay: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  blurView: {
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
   },
   gradientHeader: {
     paddingTop: Platform.OS === 'ios' ? 40 : 0,

@@ -500,11 +500,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.lightGrayBg,
   },
-  unreadCard: {
-    borderColor: Colors.gradient1,
-    borderWidth: 1,
-    backgroundColor: Colors.skyBlueBg100 || '#f0f7ff',
-  },
+  unreadCard: {},
   iconContainer: {
     width: RFPercentage(5.5),
     height: RFPercentage(5.5),
