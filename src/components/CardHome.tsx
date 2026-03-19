@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.semiBold,
   },
   subtitle: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.6),
     color: Colors.buttonColor,
     lineHeight: 18,
     marginTop: 8,
@@ -80,18 +80,19 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 10,
     borderRadius: 100,
     width: 130,
     justifyContent: 'center',
     marginTop: 15,
+    height:RFPercentage(4)
   },
   buttonText: {
     color: Colors.gradient1,
     fontSize: RFPercentage(1.7),
-    marginRight: 6,
+    marginRight: 4,
     fontFamily: Fonts.semiBold,
-    lineHeight: RFPercentage(2),
+    lineHeight: RFPercentage(1.9),
+    top:2
   },
 });
 

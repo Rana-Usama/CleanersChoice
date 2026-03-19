@@ -1085,14 +1085,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     // elevation: 4,
-    height: RFPercentage(30),
+    height: RFPercentage(33),
       borderWidth: 1,
     borderColor: Colors.blueBg150
   },
   packageGradient: {
     padding: 16,
     borderRadius: 12,
-    height: RFPercentage(30),
+    height: RFPercentage(33),
   },
   packageHeader: {
     flexDirection: 'row',

@@ -450,14 +450,14 @@ const ServiceThree: React.FC = ({navigation}: any) => {
                         <View style={styles.inputLabelContainer}>
                           <Text style={styles.inputLabel}>Package Details</Text>
                           <Text style={styles.charCount}>
-                            {pkg.details.length}/120
+                            {pkg.details.length}/200
                           </Text>
                         </View>
                         <DescriptionField
                           placeholder="Describe what's included in this package..."
                           count={false}
                           value={pkg.details}
-                          maxLength={120}
+                          maxLength={200}
                           onChangeText={text =>
                             handleInputChange(pkg.id, 'details', text)
                           }
