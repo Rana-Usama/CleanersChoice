@@ -411,7 +411,7 @@ const Jobs = ({navigation}: any) => {
                 data={Jobs}
                 keyExtractor={item => item?.id.toString()}
                 renderItem={({item}) => (
-                  <View>
+                  <View key={item?.id.toString()}>
                     <JobCard
                       name={getTruncatedText(item?.title)}
                       location={getTruncatedText2(item?.location?.name)}
@@ -425,44 +425,45 @@ const Jobs = ({navigation}: any) => {
                         setModalVisible(true);
                       }}
                       delete={completed ? false : true}
+                      footer={
+                        active &&
+                        (item?.status === 'expired' ||
+                          item?.status === 'unconfirmed') ? (
+                          <View style={styles.expiredTag}>
+                            <MaterialIcons
+                              name="error-outline"
+                              size={16}
+                              color={Colors.orange600}
+                            />
+                            <Text style={styles.expiredTagText}>Expired</Text>
+                          </View>
+                        ) : active && item?.status === 'active' ? (
+                          <TouchableOpacity
+                            activeOpacity={0.7}
+                            style={styles.manageButton}
+                            onPress={() =>
+                              navigation.navigate('JobManagement', {
+                                jobId: item?.id,
+                                jobTitle: item?.title || 'Untitled Job',
+                              })
+                            }>
+                            <MaterialIcons
+                              name="people"
+                              size={18}
+                              color={Colors.gradient1}
+                            />
+                            <Text style={styles.manageButtonText}>
+                              Manage Applicants
+                            </Text>
+                            <MaterialIcons
+                              name="chevron-right"
+                              size={20}
+                              color={Colors.gradient1}
+                            />
+                          </TouchableOpacity>
+                        ) : undefined
+                      }
                     />
-                    {active &&
-                      (item?.status === 'expired' ||
-                        item?.status === 'unconfirmed') && (
-                        <View style={styles.expiredTag}>
-                          <MaterialIcons
-                            name="error-outline"
-                            size={16}
-                            color={Colors.orange600}
-                          />
-                          <Text style={styles.expiredTagText}>Expired</Text>
-                        </View>
-                      )}
-                    {active && item?.status === 'active' && (
-                      <TouchableOpacity
-                        activeOpacity={0.7}
-                        style={styles.manageButton}
-                        onPress={() =>
-                          navigation.navigate('JobManagement', {
-                            jobId: item?.id,
-                            jobTitle: item?.title || 'Untitled Job',
-                          })
-                        }>
-                        <MaterialIcons
-                          name="people"
-                          size={18}
-                          color={Colors.gradient1}
-                        />
-                        <Text style={styles.manageButtonText}>
-                          Manage Applicants
-                        </Text>
-                        <MaterialIcons
-                          name="chevron-right"
-                          size={20}
-                          color={Colors.gradient1}
-                        />
-                      </TouchableOpacity>
-                    )}
                   </View>
                 )}
                 contentContainerStyle={styles.jobsListContent}
@@ -818,6 +819,8 @@ const styles = StyleSheet.create({
     paddingVertical: RFPercentage(1),
     borderRadius: RFPercentage(1),
     marginTop: RFPercentage(0.5),
+    marginHorizontal: RFPercentage(2),
+    marginBottom: RFPercentage(1.5),
     gap: RFPercentage(0.5),
   },
   manageButtonText: {
@@ -833,6 +836,8 @@ const styles = StyleSheet.create({
     paddingVertical: RFPercentage(0.8),
     borderRadius: RFPercentage(1),
     marginTop: RFPercentage(0.5),
+    marginHorizontal: RFPercentage(2),
+    marginBottom: RFPercentage(1.5),
     gap: RFPercentage(0.5),
   },
   expiredTagText: {

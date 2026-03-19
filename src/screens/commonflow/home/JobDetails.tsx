@@ -8,6 +8,7 @@ import {
   View,
   StatusBar,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   Dimensions,
   Platform,
   Animated,
@@ -31,6 +32,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import moment from 'moment';
 import {showToast} from '../../../utils/ToastMessage';
+import {BlurView} from '@react-native-community/blur';
+import CustomModal from '../../../components/CustomModal';
 
 const {width} = Dimensions.get('window');
 
@@ -42,6 +45,24 @@ const JobDetails = ({route, navigation}: any) => {
   const [loading, setLoading] = useState(false);
   const [loading2, setLoading2] = useState(false);
   const [loading3, setLoading3] = useState(false);
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [confirmModal, setConfirmModal] = useState<{
+    visible: boolean;
+    title: string;
+    subTitle: string;
+    iconName: string;
+    iconColor: string;
+    buttonTitle: string;
+    onConfirm: () => void;
+  }>({
+    visible: false,
+    title: '',
+    subTitle: '',
+    iconName: '',
+    iconColor: '',
+    buttonTitle: 'Yes',
+    onConfirm: () => {},
+  });
   const [applyLoading, setApplyLoading] = useState(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -449,6 +470,93 @@ const JobDetails = ({route, navigation}: any) => {
     }
   };
 
+  // Cancel job (cleaner side)
+  const handleCancelCleanerJob = async () => {
+    setConfirmModal({
+      visible: true,
+      title: 'Cancel Job',
+      subTitle: `Are you sure you want to cancel "${item.title}"?`,
+      iconName: 'cancel',
+      iconColor: Colors.red500,
+      buttonTitle: 'Yes, Cancel',
+      onConfirm: async () => {
+        setConfirmModal(prev => ({...prev, visible: false}));
+        setCancelLoading(true);
+        try {
+          await firestore().collection('Jobs').doc(item.id).update({
+            confirmedCleaner: null,
+            status: 'active',
+            cancelledCleaners: firestore.FieldValue.arrayUnion(userId),
+          });
+
+          if (item.jobId) {
+            const cleanerDoc = await firestore()
+              .collection('Users')
+              .doc(userId)
+              .get();
+            const cleanerName =
+              cleanerDoc.data()?.name || 'The cleaner';
+
+            const ownerDoc = await firestore()
+              .collection('Users')
+              .doc(item.jobId)
+              .get();
+            const ownerData = ownerDoc.data();
+
+            if (ownerData?.fcmToken) {
+              try {
+                await fetch(`${SERVER_URL}/api/send-notification`, {
+                  method: 'POST',
+                  headers: {'Content-Type': 'application/json'},
+                  body: JSON.stringify({
+                    fcmToken: ownerData.fcmToken,
+                    title: 'Job Cancelled',
+                    body: `${cleanerName} has cancelled your job "${item.title}"`,
+                    data: {screen: 'notifications'},
+                  }),
+                });
+              } catch (err) {
+                console.error('Error sending notification:', err);
+              }
+            }
+
+            try {
+              await firestore().collection('Notifications').add({
+                type: 'cancellation',
+                fromUserId: userId,
+                toUserId: item.jobId,
+                jobId: item.id,
+                title: 'Job Cancelled',
+                body: `${cleanerName} has cancelled your job "${item.title}"`,
+                timestamp: firestore.FieldValue.serverTimestamp(),
+                read: false,
+                jobTitle: item.title,
+              });
+            } catch (err) {
+              console.error('Error storing notification:', err);
+            }
+          }
+
+          showToast({
+            type: 'success',
+            title: 'Job Cancelled',
+            message: 'You have cancelled this job',
+          });
+          navigation.goBack();
+        } catch (error) {
+          console.error('Error cancelling job:', error);
+          showToast({
+            type: 'error',
+            title: 'Error',
+            message: 'Failed to cancel job',
+          });
+        } finally {
+          setCancelLoading(false);
+        }
+      },
+    });
+  };
+
   // Fetch client info (job poster)
   useEffect(() => {
     const fetchClientInfo = async () => {
@@ -839,6 +947,22 @@ const JobDetails = ({route, navigation}: any) => {
                   <Text style={styles.reviewsText}>(24 reviews)</Text>
                 </View> */}
               </View>
+              {userData?.role === 'Cleaner' && isConfirmed && (
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  style={styles.clientMessageBtn}
+                  onPress={handleMessageClient}>
+                  {loading3 ? (
+                    <ActivityIndicator size="small" color={Colors.white} />
+                  ) : (
+                    <MaterialCommunityIcons
+                      name="message-text"
+                      size={RFPercentage(2.4)}
+                      color={Colors.white}
+                    />
+                  )}
+                </TouchableOpacity>
+              )}
             </View>
           </InfoCard>
         )}
@@ -1013,7 +1137,7 @@ const JobDetails = ({route, navigation}: any) => {
             )}
           </View>
         ) : userData.role === 'Cleaner' && isConfirmed && jobStatus === 'pending_completion' ? (
-          <View style={styles.actionButtons}>
+          <View style={[styles.actionButtons, {justifyContent: 'center'}]}>
             <View style={styles.completedState}>
               <MaterialCommunityIcons
                 name="clock-check-outline"
@@ -1027,13 +1151,21 @@ const JobDetails = ({route, navigation}: any) => {
           </View>
         ) : userData.role === 'Cleaner' && isConfirmed ? (
           <View style={styles.actionButtons}>
+            <NextButton
+              title="Cancel Job"
+              onPress={handleCancelCleanerJob}
+              textStyle={styles.editButtonText}
+              disabled={cancelLoading || loading}
+              loading={cancelLoading}
+              style={styles.editButton}
+            />
             <GradientButton
-              title="Message Client"
-              textStyle={styles.messageButtonText}
-              onPress={handleMessageClient}
-              loading={loading3}
-              disabled={loading3}
-              style={[styles.messageButton, {flex: 1}]}
+              title="Mark Complete"
+              textStyle={styles.completeButtonText}
+              onPress={() => markComplete(item.id, 'pending_completion')}
+              loading={loading}
+              disabled={loading || cancelLoading}
+              style={styles.completeButton}
             />
           </View>
         ) : item.status === 'completed' || jobStatus === 'completed' ? (
@@ -1047,6 +1179,33 @@ const JobDetails = ({route, navigation}: any) => {
           </View>
         ) : null}
       </View>
+
+      {/* Confirm Modal */}
+      {confirmModal.visible && (
+        <TouchableWithoutFeedback
+          onPress={() =>
+            setConfirmModal(prev => ({...prev, visible: false}))
+          }>
+          <View style={styles.modalOverlay}>
+            <BlurView
+              style={styles.blurView}
+              blurType="light"
+              blurAmount={5}
+            />
+            <CustomModal
+              title={confirmModal.title}
+              subTitle={confirmModal.subTitle}
+              iconName={confirmModal.iconName}
+              iconColor={confirmModal.iconColor}
+              buttonTitle={confirmModal.buttonTitle}
+              onPress={() =>
+                setConfirmModal(prev => ({...prev, visible: false}))
+              }
+              onPress2={confirmModal.onConfirm}
+            />
+          </View>
+        </TouchableWithoutFeedback>
+      )}
     </View>
   );
 };
@@ -1057,6 +1216,18 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: Colors.background,
+  },
+  modalOverlay: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  blurView: {
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
   },
   gradientHeader: {
     paddingTop: Platform.OS === 'ios' ? RFPercentage(8) : RFPercentage(6),
@@ -1287,6 +1458,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: RFPercentage(1.5),
   },
+  clientMessageBtn: {
+    width: RFPercentage(5),
+    height: RFPercentage(5),
+    borderRadius: RFPercentage(2.5),
+    backgroundColor: Colors.gradient1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 'auto',
+  },
   userAvatar: {
     width: RFPercentage(6),
     height: RFPercentage(6),
@@ -1423,6 +1603,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    alignSelf: 'center',
     backgroundColor: Colors.successBg,
     padding: RFPercentage(1.8),
     borderRadius: 100,

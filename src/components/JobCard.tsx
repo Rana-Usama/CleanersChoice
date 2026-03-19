@@ -11,15 +11,17 @@ interface props {
   location: string;
   price: string;
   onPress: () => void;
+  footer?: React.ReactNode;
 }
 
 const JobCard = (props: props) => {
   return (
     <View style={styles.shadowContainer}>
-      <TouchableOpacity
-        activeOpacity={0.9}
-        style={styles.container}
-        onPress={props.onPress}>
+      <View style={styles.container}>
+        <TouchableOpacity
+          activeOpacity={0.9}
+          style={styles.cardContent}
+          onPress={props.onPress}>
         {/* Header with delete button */}
         <View style={styles.header}>
           <View style={styles.titleContainer}>
@@ -83,7 +85,9 @@ const JobCard = (props: props) => {
             />
           </TouchableOpacity>
         </View>
-      </TouchableOpacity>
+        </TouchableOpacity>
+        {props.footer}
+      </View>
     </View>
   );
 };
@@ -108,9 +112,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.blueBorderOverlay50,
     borderRadius: RFPercentage(2),
-    padding: RFPercentage(2),
     backgroundColor: Colors.white,
     overflow: 'hidden',
+  },
+  cardContent: {
+    padding: RFPercentage(2),
   },
   header: {
     marginBottom: RFPercentage(1.5),

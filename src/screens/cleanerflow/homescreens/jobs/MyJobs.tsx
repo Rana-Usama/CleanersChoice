@@ -8,7 +8,7 @@ import {
   RefreshControl,
   Platform,
   StatusBar,
-  Alert,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import React, {useState, useCallback} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -24,6 +24,8 @@ import {showToast} from '../../../../utils/ToastMessage';
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {BlurView} from '@react-native-community/blur';
+import CustomModal from '../../../../components/CustomModal';
 
 const SERVER_URL = 'https://cleaners-choice-server.vercel.app';
 
@@ -52,6 +54,23 @@ const MyJobs = ({navigation}: any) => {
     active: 0,
     completed: 0,
     cancelled: 0,
+  });
+  const [confirmModal, setConfirmModal] = useState<{
+    visible: boolean;
+    title: string;
+    subTitle: string;
+    iconName: string;
+    iconColor: string;
+    buttonTitle: string;
+    onConfirm: () => void;
+  }>({
+    visible: false,
+    title: '',
+    subTitle: '',
+    iconName: '',
+    iconColor: '',
+    buttonTitle: 'Yes',
+    onConfirm: () => {},
   });
 
   useExitAppOnBack();
@@ -160,15 +179,16 @@ const MyJobs = ({navigation}: any) => {
     const user = auth().currentUser;
     if (!user) return;
 
-    Alert.alert(
-      'Mark as Completed',
-      `Mark "${job.title}" as completed? The customer will be notified to confirm.`,
-      [
-        {text: 'No', style: 'cancel'},
-        {
-          text: 'Yes',
-          onPress: async () => {
-            setCompleteLoading(job.id);
+    setConfirmModal({
+      visible: true,
+      title: 'Mark as Completed',
+      subTitle: `Mark "${job.title}" as completed? The customer will be notified to confirm.`,
+      iconName: 'check-circle-outline',
+      iconColor: Colors.success,
+      buttonTitle: 'Yes',
+      onConfirm: async () => {
+        setConfirmModal(prev => ({...prev, visible: false}));
+        setCompleteLoading(job.id);
             try {
               await firestore().collection('Jobs').doc(job.id).update({
                 status: 'pending_completion',
@@ -241,26 +261,24 @@ const MyJobs = ({navigation}: any) => {
             } finally {
               setCompleteLoading(null);
             }
-          },
-        },
-      ],
-    );
+      },
+    });
   };
 
   const handleCancelJob = async (job: Job) => {
     const user = auth().currentUser;
     if (!user) return;
 
-    Alert.alert(
-      'Cancel Job',
-      `Are you sure you want to cancel "${job.title}"?`,
-      [
-        {text: 'No', style: 'cancel'},
-        {
-          text: 'Yes, Cancel',
-          style: 'destructive',
-          onPress: async () => {
-            setCancelLoading(job.id);
+    setConfirmModal({
+      visible: true,
+      title: 'Cancel Job',
+      subTitle: `Are you sure you want to cancel "${job.title}"?`,
+      iconName: 'cancel',
+      iconColor: Colors.red500,
+      buttonTitle: 'Yes, Cancel',
+      onConfirm: async () => {
+        setConfirmModal(prev => ({...prev, visible: false}));
+        setCancelLoading(job.id);
             try {
               await firestore().collection('Jobs').doc(job.id).update({
                 confirmedCleaner: null,
@@ -270,6 +288,12 @@ const MyJobs = ({navigation}: any) => {
 
               // Send notification to job owner
               if (job.jobId) {
+                const cleanerDoc = await firestore()
+                  .collection('Users')
+                  .doc(user.uid)
+                  .get();
+                const cleanerName = cleanerDoc.data()?.name || 'The cleaner';
+
                 const ownerDoc = await firestore()
                   .collection('Users')
                   .doc(job.jobId)
@@ -284,8 +308,8 @@ const MyJobs = ({navigation}: any) => {
                       headers: {'Content-Type': 'application/json'},
                       body: JSON.stringify({
                         fcmToken: ownerData.fcmToken,
-                        title: 'Cleaner Cancelled',
-                        body: `The cleaner has cancelled "${job.title}"`,
+                        title: 'Job Cancelled',
+                        body: `${cleanerName} has cancelled your job "${job.title}"`,
                         data: {screen: 'notifications'},
                       }),
                     });
@@ -301,8 +325,8 @@ const MyJobs = ({navigation}: any) => {
                     fromUserId: user.uid,
                     toUserId: job.jobId,
                     jobId: job.id,
-                    title: 'Cleaner Cancelled',
-                    body: `The cleaner has cancelled "${job.title}"`,
+                    title: 'Job Cancelled',
+                    body: `${cleanerName} has cancelled your job "${job.title}"`,
                     timestamp: firestore.FieldValue.serverTimestamp(),
                     read: false,
                     jobTitle: job.title,
@@ -330,10 +354,8 @@ const MyJobs = ({navigation}: any) => {
             } finally {
               setCancelLoading(null);
             }
-          },
-        },
-      ],
-    );
+      },
+    });
   };
 
   const getTruncatedText = (text: string | null | undefined) => {
@@ -508,65 +530,6 @@ const MyJobs = ({navigation}: any) => {
               onPress2={() => {}}
               delete={false}
             />
-            {activeTab === 'active' && (
-              <View style={styles.activeJobActions}>
-                {item.status === 'pending_completion' ? (
-                  <View style={[styles.completeJobBtn, {opacity: 0.6}]}>
-                    <MaterialCommunityIcons
-                      name="clock-outline"
-                      size={RFPercentage(1.8)}
-                      color={Colors.amber500}
-                    />
-                    <Text
-                      style={[
-                        styles.completeJobBtnText,
-                        {color: Colors.amber500},
-                      ]}>
-                      Awaiting Confirmation
-                    </Text>
-                  </View>
-                ) : (
-                  <TouchableOpacity
-                    style={styles.completeJobBtn}
-                    activeOpacity={0.7}
-                    onPress={() => handleMarkCompleted(item)}
-                    disabled={completeLoading === item.id}>
-                    {completeLoading === item.id ? (
-                      <ActivityIndicator size="small" color={Colors.success} />
-                    ) : (
-                      <>
-                        <MaterialCommunityIcons
-                          name="check-circle-outline"
-                          size={RFPercentage(1.8)}
-                          color={Colors.success}
-                        />
-                        <Text style={styles.completeJobBtnText}>
-                          Mark as Completed
-                        </Text>
-                      </>
-                    )}
-                  </TouchableOpacity>
-                )}
-                <TouchableOpacity
-                  style={styles.cancelJobBtn}
-                  activeOpacity={0.7}
-                  onPress={() => handleCancelJob(item)}
-                  disabled={cancelLoading === item.id}>
-                  {cancelLoading === item.id ? (
-                    <ActivityIndicator size="small" color={Colors.red500} />
-                  ) : (
-                    <>
-                      <MaterialCommunityIcons
-                        name="close-circle-outline"
-                        size={RFPercentage(1.8)}
-                        color={Colors.red500}
-                      />
-                      <Text style={styles.cancelJobBtnText}>Cancel Job</Text>
-                    </>
-                  )}
-                </TouchableOpacity>
-              </View>
-            )}
             {activeTab === 'completed' && item.autoCompleted && (
               <View style={styles.autoConfirmedTag}>
                 <MaterialCommunityIcons
@@ -590,6 +553,33 @@ const MyJobs = ({navigation}: any) => {
           )
         }
       />
+
+      {/* Confirm Modal */}
+      {confirmModal.visible && (
+        <TouchableWithoutFeedback
+          onPress={() =>
+            setConfirmModal(prev => ({...prev, visible: false}))
+          }>
+          <View style={styles.modalOverlay}>
+            <BlurView
+              style={styles.blurView}
+              blurType="light"
+              blurAmount={5}
+            />
+            <CustomModal
+              title={confirmModal.title}
+              subTitle={confirmModal.subTitle}
+              iconName={confirmModal.iconName}
+              iconColor={confirmModal.iconColor}
+              buttonTitle={confirmModal.buttonTitle}
+              onPress={() =>
+                setConfirmModal(prev => ({...prev, visible: false}))
+              }
+              onPress2={confirmModal.onConfirm}
+            />
+          </View>
+        </TouchableWithoutFeedback>
+      )}
     </View>
   );
 };
@@ -600,6 +590,18 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: Colors.white,
+  },
+  modalOverlay: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  blurView: {
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
   },
   gradientHeader: {
     paddingTop: Platform.OS === 'ios' ? 40 : 0,
