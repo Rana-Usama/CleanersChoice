@@ -17,7 +17,7 @@ import Dashboard from '../screens/cleanerflow/homescreens/home/Dashboard';
 import CleanerJobs from '../screens/cleanerflow/homescreens/jobs/CleanerJobs';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import MyJobs from '../screens/cleanerflow/homescreens/jobs/MyJobs';
-import Settings from '../screens/commonflow/home/settings/Settings';
+import Invoices from '../screens/cleanerflow/homescreens/invoices/Invoices';
 import Messages from '../screens/commonflow/home/Messages';
 import {useUnreadMessages} from '../utils/UnreadMessagesContext';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -70,7 +70,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
         },
       ]}>
       <View style={styles.labelContainer}>
-        {state.routes.map((route, index) => {
+        {state.routes.filter(route => route.name !== 'Settings').map((route, index) => {
           const {options} = descriptors[route.key];
           const label =
             options.tabBarLabel !== undefined
@@ -131,11 +131,11 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                   style={styles.imgStyle}
                   resizeMode="contain"
                 />
-              ) : route.name === 'Settings' ? (
-                <Image
-                  source={isFocused ? Icons.settingActive : Icons.settings}
-                  style={styles.imgStyle}
-                  resizeMode="contain"
+              ) : route.name === 'Invoices' ? (
+                <MaterialCommunityIcons
+                  name={isFocused ? 'file-document' : 'file-document-outline'}
+                  size={RFPercentage(2.8)}
+                  color={isFocused ? Colors.gradient2 : Colors.secondaryText}
                 />
               ) : route.name === 'My Jobs' ? (
                 <MaterialCommunityIcons
@@ -192,7 +192,7 @@ const CleanerNavigator: React.FC = () => {
       <Tab.Screen name="Messages" component={Messages} />
       <Tab.Screen name="Job List" component={CleanerJobs} />
       <Tab.Screen name="Home" component={Dashboard} />
-      <Tab.Screen name="Settings" component={Settings} />
+      <Tab.Screen name="Invoices" component={Invoices} />
       <Tab.Screen name="My Jobs" component={MyJobs} />
     </Tab.Navigator>
   );

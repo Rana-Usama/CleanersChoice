@@ -39,6 +39,7 @@ import NotificationsScreen from '../screens/commonflow/home/NotificationsScreen'
 import CleanerProfile from '../screens/commonflow/home/profile/CleanerProfile';
 import JobManagement from '../screens/customerflow/home/JobManagement';
 import MyJobs from '../screens/cleanerflow/homescreens/jobs/MyJobs';
+import Settings from '../screens/commonflow/home/settings/Settings';
 
 export type RootStackParamList = {
   SplashOne: undefined;
@@ -245,6 +246,7 @@ const StackNavigator: React.FC = () => {
               component={CancelSubscription}
             />
             <Stack.Screen name="MyJobs" component={MyJobs} />
+            <Stack.Screen name="Settings" component={Settings} />
           </Stack.Navigator>
         )}
       </NavigationContainer>

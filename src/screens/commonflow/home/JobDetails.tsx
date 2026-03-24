@@ -71,6 +71,43 @@ const JobDetails = ({route, navigation}: any) => {
   const [hasApplied, setHasApplied] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [jobStatus, setJobStatus] = useState(item.status);
+  const [canMarkComplete, setCanMarkComplete] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState('');
+
+  // Check if 2 hours have passed since the scheduled job time
+  useEffect(() => {
+    const checkMarkCompleteEligibility = () => {
+      if (!item.createdAt) {
+        setCanMarkComplete(false);
+        return;
+      }
+      const scheduledTime = moment(item.createdAt, 'YYYY-MM-DD  HH:mm A');
+      if (!scheduledTime.isValid()) {
+        setCanMarkComplete(false);
+        return;
+      }
+      const eligibleTime = scheduledTime.clone().add(2, 'hours');
+      const now = moment();
+
+      if (now.isSameOrAfter(eligibleTime)) {
+        setCanMarkComplete(true);
+        setTimeRemaining('');
+      } else {
+        setCanMarkComplete(false);
+        const diff = eligibleTime.diff(now);
+        const duration = moment.duration(diff);
+        const hours = Math.floor(duration.asHours());
+        const minutes = duration.minutes();
+        setTimeRemaining(
+          hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`,
+        );
+      }
+    };
+
+    checkMarkCompleteEligibility();
+    const interval = setInterval(checkMarkCompleteEligibility, 60000);
+    return () => clearInterval(interval);
+  }, [item.createdAt]);
 
   // Format date
   const formatDate = (dateString: string) => {
@@ -1049,16 +1086,18 @@ const JobDetails = ({route, navigation}: any) => {
               textStyle={styles.editButtonText}
               disabled={loading2 || loading}
               loading={loading2}
-              style={styles.editButton}
+              style={[styles.editButton, !canMarkComplete && {flex: 1, width: undefined}]}
             />
-            <GradientButton
-              title="Mark Complete"
-              textStyle={styles.completeButtonText}
-              onPress={() => markComplete(item.id, 'completed')}
-              loading={loading}
-              disabled={loading}
-              style={styles.completeButton}
-            />
+            {canMarkComplete && (
+              <GradientButton
+                title="Mark Complete"
+                textStyle={styles.completeButtonText}
+                onPress={() => markComplete(item.id, 'completed')}
+                loading={loading}
+                disabled={loading}
+                style={styles.completeButton}
+              />
+            )}
           </View>
         ) : (jobStatus === 'pending_completion') && userData.role === 'Customer' ? (
           <View style={styles.actionButtons}>
@@ -1080,15 +1119,26 @@ const JobDetails = ({route, navigation}: any) => {
             />
           </View>
         ) : (jobStatus === 'confirmed') && userData.role === 'Customer' ? (
-          <View style={styles.actionButtons}>
-            <GradientButton
-              title="Mark Complete"
-              textStyle={styles.completeButtonText}
-              onPress={() => markComplete(item.id, 'completed')}
-              loading={loading}
-              disabled={loading}
-              style={styles.completeButton}
-            />
+          <View style={[styles.actionButtons, {justifyContent: 'center'}]}>
+            {canMarkComplete ? (
+              <GradientButton
+                title="Mark Complete"
+                textStyle={styles.completeButtonText}
+                onPress={() => markComplete(item.id, 'completed')}
+                loading={loading}
+                disabled={loading}
+                style={[styles.completeButton, {flex: 1}]}
+              />
+            ) : (
+              <View style={styles.completedState}>
+                <MaterialCommunityIcons
+                  name="account-check-outline"
+                  size={RFPercentage(2)}
+                  color={Colors.success}
+                />
+                <Text style={styles.completedText}>Cleaner Assigned</Text>
+              </View>
+            )}
           </View>
         ) : userData.role === 'Cleaner' && (item.status === 'active' || jobStatus === 'active') ? (
           <View style={styles.cleanerActionButtons}>
@@ -1157,16 +1207,18 @@ const JobDetails = ({route, navigation}: any) => {
               textStyle={styles.editButtonText}
               disabled={cancelLoading || loading}
               loading={cancelLoading}
-              style={styles.editButton}
+              style={[styles.editButton, !canMarkComplete && {flex: 1, width: undefined}]}
             />
-            <GradientButton
-              title="Mark Complete"
-              textStyle={styles.completeButtonText}
-              onPress={() => markComplete(item.id, 'pending_completion')}
-              loading={loading}
-              disabled={loading || cancelLoading}
-              style={styles.completeButton}
-            />
+            {canMarkComplete && (
+              <GradientButton
+                title="Mark Complete"
+                textStyle={styles.completeButtonText}
+                onPress={() => markComplete(item.id, 'pending_completion')}
+                loading={loading}
+                disabled={loading || cancelLoading}
+                style={styles.completeButton}
+              />
+            )}
           </View>
         ) : item.status === 'completed' || jobStatus === 'completed' ? (
           <View style={styles.completedState}>
@@ -1590,6 +1642,23 @@ const styles = StyleSheet.create({
   completeButtonText: {
     fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
+  },
+  markCompleteTimer: {
+    flex: 3,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.amberBg100,
+    paddingVertical: RFPercentage(1.5),
+    borderRadius: 20,
+    gap: RFPercentage(0.5),
+    borderWidth: 1,
+    borderColor: Colors.amber500,
+  },
+  markCompleteTimerText: {
+    color: Colors.amber500,
+    fontFamily: Fonts.semiBold,
+    fontSize: RFPercentage(1.5),
   },
   messageButton: {
     width: '60%',

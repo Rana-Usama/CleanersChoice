@@ -336,19 +336,27 @@ const Dashboard: React.FC = ({navigation}: any) => {
           logo
           tintColor={Colors.white}
         />
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => navigation.navigate('NotificationsScreen')}
-          style={styles.bellButton}>
-          <Icon name="bell-outline" size={RFPercentage(2.8)} color={Colors.white} />
-          {unreadNotifCount > 0 && (
-            <View style={styles.bellBadge}>
-              <Text style={styles.bellBadgeText}>
-                {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
-              </Text>
-            </View>
-          )}
-        </TouchableOpacity>
+        <View style={styles.rightButtons}>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate('Settings')}
+            style={styles.profileIconButton}>
+            <Icon name="account-outline" size={RFPercentage(2.4)} color={Colors.white} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate('NotificationsScreen')}
+            style={styles.bellButton}>
+            <Icon name="bell-outline" size={RFPercentage(2.4)} color={Colors.white} />
+            {unreadNotifCount > 0 && (
+              <View style={styles.bellBadge}>
+                <Text style={styles.bellBadgeText}>
+                  {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
       </LinearGradient>
 
       <ScrollView
@@ -785,15 +793,29 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.semiBold,
     color: Colors.white,
   },
-  bellButton: {
+  rightButtons: {
     position: 'absolute',
     right: 20,
-    bottom: 35,
+    bottom: 40,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  profileIconButton: {
     padding: 8,
     backgroundColor: 'rgba(255, 255, 255, 0.4)',
     borderRadius: 50,
-    width: RFPercentage(5),
-    height: RFPercentage(5),
+    width: RFPercentage(4.5),
+    height: RFPercentage(4.5),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bellButton: {
+    padding: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    borderRadius: 50,
+    width: RFPercentage(4.5),
+    height: RFPercentage(4.5),
     alignItems: 'center',
     justifyContent: 'center',
   },
