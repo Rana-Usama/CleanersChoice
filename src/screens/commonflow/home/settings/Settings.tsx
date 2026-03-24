@@ -3,6 +3,7 @@ import {
   StyleSheet,
   Text,
   View,
+  TouchableOpacity,
   TouchableWithoutFeedback,
   Platform,
   StatusBar,
@@ -12,7 +13,6 @@ import {
 import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, Icons} from '../../../../constants/Themes';
-import HeaderBack from '../../../../components/HeaderBack';
 import ProfileField from '../../../../components/ProfileField';
 import {BlurView} from '@react-native-community/blur';
 import CustomModal from '../../../../components/CustomModal';
@@ -217,21 +217,42 @@ const Settings = ({navigation}: any) => {
       <LinearGradient
         colors={[Colors.gradient1, Colors.gradient2]}
         style={styles.gradientHeader}>
-        <HeaderBack
-          title="Settings"
-          textStyle={styles.headerText}
-          left={true}
-          arrowColor={Colors.white}
-          style={{backgroundColor: 'transparent'}}
-          logo
-          tintColor={'white'}
-        />
+        <View style={styles.headerContent}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}>
+            <Feather name="arrow-left" size={24} color={Colors.white} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Settings</Text>
+          <View style={{width: 40}} />
+        </View>
       </LinearGradient>
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}>
         <View style={styles.container}>
+          {/* Edit Profile Section — Cleaner only */}
+          {role === 'Cleaner' && (
+            <View style={styles.sectionCard}>
+              <View style={styles.sectionHeader}>
+                <MaterialCommunityIcons
+                  name="account-edit"
+                  size={RFPercentage(2.5)}
+                  color={Colors.gradient1}
+                />
+                <Text style={styles.sectionTitle}>Profile</Text>
+              </View>
+              <View style={styles.fieldsContainer}>
+                <ProfileField
+                  text="Edit Profile"
+                  icon="account-edit-outline"
+                  onPress={() => navigation.navigate('EditProfile')}
+                />
+              </View>
+            </View>
+          )}
+
           {/* Help & Security Section */}
           <View style={styles.sectionCard}>
             <View style={styles.sectionHeader}>
@@ -403,23 +424,27 @@ const styles = StyleSheet.create({
   },
 
   gradientHeader: {
-    paddingTop: Platform.OS === 'ios' ? 40 : 0,
-    paddingBottom: 30,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-    shadowColor: Colors.black,
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
+    paddingTop: Platform.OS === 'ios' ? RFPercentage(8) : RFPercentage(6),
+    paddingHorizontal: RFPercentage(2),
+  },
+  headerContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
+    marginBottom: RFPercentage(2),
   },
-  headerText: {
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
+  headerTitle: {
+    color: Colors.white,
     fontSize: RFPercentage(2.1),
     fontFamily: Fonts.semiBold,
-    color: Colors.white,
   },
   scrollContainer: {
     flexGrow: 1,

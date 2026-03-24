@@ -106,7 +106,7 @@ const Jobs = ({navigation}: any) => {
       const activeSnapshot = await firestore()
         .collection('Jobs')
         .where('jobId', '==', user.uid)
-        .where('status', 'in', ['active', 'expired', 'unconfirmed'])
+        .where('status', 'in', ['active', 'confirmed', 'pending_completion', 'expired', 'unconfirmed'])
         .get();
 
       const completedSnapshot = await firestore()
@@ -139,7 +139,7 @@ const Jobs = ({navigation}: any) => {
         query = query.where(
           'status',
           'in',
-          ['active', 'expired', 'unconfirmed'],
+          ['active', 'confirmed', 'pending_completion', 'expired', 'unconfirmed'],
         );
       } else {
         query = query.where('status', '==', status);
@@ -459,6 +459,30 @@ const Jobs = ({navigation}: any) => {
                               name="chevron-right"
                               size={20}
                               color={Colors.gradient1}
+                            />
+                          </TouchableOpacity>
+                        ) : active && (item?.status === 'confirmed' || item?.status === 'pending_completion') ? (
+                          <TouchableOpacity
+                            activeOpacity={0.7}
+                            style={styles.manageButton}
+                            onPress={() =>
+                              navigation.navigate('JobManagement', {
+                                jobId: item?.id,
+                                jobTitle: item?.title || 'Untitled Job',
+                              })
+                            }>
+                            <MaterialIcons
+                              name="person-pin"
+                              size={18}
+                              color={Colors.success}
+                            />
+                            <Text style={[styles.manageButtonText, {color: Colors.success}]}>
+                              {item?.status === 'pending_completion' ? 'Awaiting Confirmation' : 'Cleaner Assigned'}
+                            </Text>
+                            <MaterialIcons
+                              name="chevron-right"
+                              size={20}
+                              color={Colors.success}
                             />
                           </TouchableOpacity>
                         ) : undefined

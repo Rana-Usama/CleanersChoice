@@ -19,6 +19,7 @@ import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import {useFocusEffect} from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
+import Feather from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import moment from 'moment';
@@ -288,7 +289,7 @@ const NotificationsScreen = ({navigation}: any) => {
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'application':
-        return {name: 'briefcase-plus-outline', color: Colors.gradient1};
+        return {name: 'briefcase-plus-outline', color: '#407BFF'};
       case 'confirmation':
         return {name: 'check-circle-outline', color: Colors.success};
       case 'cancellation':
@@ -394,13 +395,15 @@ const NotificationsScreen = ({navigation}: any) => {
       <LinearGradient
         colors={[Colors.gradient1, Colors.gradient2]}
         style={styles.gradientHeader}>
-        <HeaderBack
-          title="Notifications"
-          textStyle={styles.headerText}
-          left={true}
-          arrowColor={Colors.white}
-          style={{backgroundColor: 'transparent'}}
-        />
+        <View style={styles.headerContent}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}>
+            <Feather name="arrow-left" size={24} color={Colors.white} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Notifications</Text>
+          <View style={{width: 40}} />
+        </View>
       </LinearGradient>
 
       {unreadCount > 0 && (
@@ -451,23 +454,27 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   gradientHeader: {
-    paddingTop: Platform.OS === 'ios' ? 40 : 0,
-    paddingBottom: 30,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-    shadowColor: Colors.black,
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
+    paddingTop: Platform.OS === 'ios' ? RFPercentage(8) : RFPercentage(6),
+    paddingHorizontal: RFPercentage(2),
+  },
+  headerContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
+    marginBottom: RFPercentage(2),
   },
-  headerText: {
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.whiteOverlay20,
+  },
+  headerTitle: {
+    color: Colors.white,
     fontSize: RFPercentage(2.1),
     fontFamily: Fonts.semiBold,
-    color: Colors.white,
   },
   unreadBanner: {
     flexDirection: 'row',
