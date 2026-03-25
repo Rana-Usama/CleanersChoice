@@ -861,7 +861,7 @@ const JobDetails = ({route, navigation}: any) => {
                 />
                 <Text
                   style={[styles.statusText, {color: Colors.amber500}]}>
-                  Auto-confirmed
+                  Auto-completed
                 </Text>
               </View>
             )}
@@ -1199,7 +1199,7 @@ const JobDetails = ({route, navigation}: any) => {
               </Text>
             </View>
           </View>
-        ) : userData.role === 'Cleaner' && isConfirmed ? (
+        ) : userData.role === 'Cleaner' && isConfirmed && jobStatus !== 'completed' ? (
           <View style={styles.actionButtons}>
             <NextButton
               title="Cancel Job"
@@ -1221,13 +1221,23 @@ const JobDetails = ({route, navigation}: any) => {
             )}
           </View>
         ) : item.status === 'completed' || jobStatus === 'completed' ? (
-          <View style={styles.completedState}>
-            <MaterialCommunityIcons
-              name="check-circle"
-              size={RFPercentage(2.5)}
-              color={Colors.success}
-            />
-            <Text style={styles.completedText}>Job Completed</Text>
+          <View style={{alignItems: 'center', gap: RFPercentage(1.2)}}>
+            <View style={styles.completedState}>
+              <MaterialCommunityIcons
+                name="check-circle"
+                size={RFPercentage(2.5)}
+                color={Colors.success}
+              />
+              <Text style={styles.completedText}>Job Completed</Text>
+            </View>
+            {userData?.role === 'Cleaner' && (
+              <GradientButton
+                title="Generate Invoice"
+                onPress={() => navigation.navigate('InvoiceForm', {item})}
+                style={{width: '100%', borderRadius: RFPercentage(1.5), height: RFPercentage(5.5)}}
+                textStyle={{fontSize: RFPercentage(1.7), fontFamily: Fonts.semiBold}}
+              />
+            )}
           </View>
         ) : null}
       </View>
