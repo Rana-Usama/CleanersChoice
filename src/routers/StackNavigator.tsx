@@ -40,6 +40,8 @@ import CleanerProfile from '../screens/commonflow/home/profile/CleanerProfile';
 import JobManagement from '../screens/customerflow/home/JobManagement';
 import MyJobs from '../screens/cleanerflow/homescreens/jobs/MyJobs';
 import Settings from '../screens/commonflow/home/settings/Settings';
+import InvoiceForm from '../screens/cleanerflow/homescreens/invoices/InvoiceForm';
+import InvoicePreview from '../screens/cleanerflow/homescreens/invoices/InvoicePreview';
 
 export type RootStackParamList = {
   SplashOne: undefined;
@@ -86,6 +88,8 @@ export type RootStackParamList = {
   CleanerProfile: {cleanerId: string; jobId?: string};
   JobManagement: {jobId: string; jobTitle: string};
   MyJobs: undefined;
+  InvoiceForm: {item: any};
+  InvoicePreview: {formData: any; jobItem: any};
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -247,6 +251,8 @@ const StackNavigator: React.FC = () => {
             />
             <Stack.Screen name="MyJobs" component={MyJobs} />
             <Stack.Screen name="Settings" component={Settings} />
+            <Stack.Screen name="InvoiceForm" component={InvoiceForm} />
+            <Stack.Screen name="InvoicePreview" component={InvoicePreview} />
           </Stack.Navigator>
         )}
       </NavigationContainer>
