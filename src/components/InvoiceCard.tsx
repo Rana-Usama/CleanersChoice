@@ -14,20 +14,6 @@ interface Props {
 }
 
 const InvoiceCard: React.FC<Props> = ({invoice, onView, onShare, onDownload}) => {
-  const statusColor =
-    invoice.status === 'paid'
-      ? Colors.success
-      : invoice.status === 'sent'
-      ? Colors.gradient1
-      : Colors.amber500;
-
-  const statusBg =
-    invoice.status === 'paid'
-      ? Colors.successBg
-      : invoice.status === 'sent'
-      ? Colors.skyBlueBg100
-      : Colors.amberBg100;
-
   return (
     <View style={styles.shadowContainer}>
       <View style={styles.container}>
@@ -55,11 +41,6 @@ const InvoiceCard: React.FC<Props> = ({invoice, onView, onShare, onDownload}) =>
                   : ''}
               </Text>
             </View>
-          </View>
-          <View style={[styles.statusBadge, {backgroundColor: statusBg}]}>
-            <Text style={[styles.statusText, {color: statusColor}]}>
-              {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
-            </Text>
           </View>
         </View>
 
@@ -187,15 +168,6 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.4),
     color: Colors.secondaryText,
     marginTop: 2,
-  },
-  statusBadge: {
-    paddingHorizontal: RFPercentage(1.2),
-    paddingVertical: RFPercentage(0.4),
-    borderRadius: RFPercentage(0.8),
-  },
-  statusText: {
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.3),
   },
   detailsSection: {
     backgroundColor: Colors.gray50Overlay90,

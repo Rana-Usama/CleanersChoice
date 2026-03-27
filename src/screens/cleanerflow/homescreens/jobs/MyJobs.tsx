@@ -50,6 +50,7 @@ const MyJobs = ({navigation}: any) => {
   const [refreshing, setRefreshing] = useState(false);
   const [cancelLoading, setCancelLoading] = useState<string | null>(null);
   const [completeLoading, setCompleteLoading] = useState<string | null>(null);
+  const [invoicedJobIds, setInvoicedJobIds] = useState<Set<string>>(new Set());
   const [jobStats, setJobStats] = useState({
     active: 0,
     completed: 0,
@@ -109,6 +110,20 @@ const MyJobs = ({navigation}: any) => {
           .where('status', '==', 'completed')
           .orderBy('createdAt', 'desc')
           .get();
+
+        // Check which completed jobs already have invoices
+        const jobIds = snapshot.docs.map(doc => doc.id);
+        const invoicedIds = new Set<string>();
+        // Firestore 'in' supports max 30 items per query
+        for (let i = 0; i < jobIds.length; i += 30) {
+          const invSnap = await firestore()
+            .collection('Invoices')
+            .where('jobId', 'in', jobIds.slice(i, i + 30))
+            .where('cleanerId', '==', user.uid)
+            .get();
+          invSnap.docs.forEach(doc => invoicedIds.add(doc.data().jobId));
+        }
+        setInvoicedJobIds(invoicedIds);
       } else {
         // Cancelled - jobs where this cleaner was cancelled
         snapshot = await firestore()
@@ -518,7 +533,7 @@ const MyJobs = ({navigation}: any) => {
           </>
         }
         renderItem={({item}) => (
-          <View>
+          <View style={{position: 'relative'}}>
             <JobCard
               name={getTruncatedText(item?.title)}
               location={getTruncatedText2(item?.location?.name)}
@@ -529,15 +544,44 @@ const MyJobs = ({navigation}: any) => {
               }
               onPress2={() => {}}
               delete={false}
+              footer={
+                activeTab === 'completed' && !invoicedJobIds.has(item.id) ? (
+                  <View style={styles.completedFooter}>
+                    {item.autoCompleted && (
+                      <View style={styles.autoConfirmedTag}>
+                        <MaterialCommunityIcons
+                          name="clock-check-outline"
+                          size={RFPercentage(1.6)}
+                          color={Colors.amber500}
+                        />
+                        <Text style={styles.autoConfirmedText}>Auto-completed</Text>
+                      </View>
+                    )}
+                    <TouchableOpacity
+                      activeOpacity={0.7}
+                      onPress={() => navigation.navigate('InvoiceForm', {item})}
+                      style={styles.generateInvoiceBtn}>
+                      <MaterialCommunityIcons
+                        name="file-document-edit-outline"
+                        size={RFPercentage(1.8)}
+                        color={Colors.gradient1}
+                      />
+                      <Text style={styles.generateInvoiceBtnText}>
+                        Generate Invoice
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : undefined
+              }
             />
-            {activeTab === 'completed' && item.autoCompleted && (
-              <View style={styles.autoConfirmedTag}>
+            {activeTab === 'completed' && invoicedJobIds.has(item.id) && (
+              <View style={styles.invoiceGeneratedTag}>
                 <MaterialCommunityIcons
-                  name="clock-check-outline"
-                  size={RFPercentage(1.6)}
-                  color={Colors.amber500}
+                  name="check-circle-outline"
+                  size={RFPercentage(1.4)}
+                  color={Colors.success}
                 />
-                <Text style={styles.autoConfirmedText}>Auto-confirmed</Text>
+                <Text style={styles.invoiceGeneratedText}>Invoice Generated</Text>
               </View>
             )}
           </View>
@@ -765,14 +809,51 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.amberBg100,
     paddingVertical: RFPercentage(0.8),
     borderRadius: RFPercentage(1),
-    marginTop: RFPercentage(-0.5),
-    marginBottom: RFPercentage(1),
     gap: RFPercentage(0.5),
   },
   autoConfirmedText: {
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.4),
     color: Colors.amber500,
+  },
+  completedFooter: {
+    paddingHorizontal: RFPercentage(2),
+    paddingBottom: RFPercentage(1.5),
+    gap: RFPercentage(0.8),
+  },
+  generateInvoiceBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.primaryBlueOverlay10,
+    paddingVertical: RFPercentage(1.2),
+    borderRadius: RFPercentage(1),
+    gap: RFPercentage(0.5),
+    borderWidth: 1,
+    borderColor: Colors.blueBorderOverlay20,
+  },
+  generateInvoiceBtnText: {
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.5),
+    color: Colors.gradient1,
+  },
+  invoiceGeneratedTag: {
+    position: 'absolute',
+    top: RFPercentage(2.8),
+    right: RFPercentage(2),
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.successBg,
+    paddingVertical: RFPercentage(0.35),
+    paddingHorizontal: RFPercentage(0.9),
+    borderRadius: RFPercentage(2),
+    gap: RFPercentage(0.4),
+    zIndex: 10,
+  },
+  invoiceGeneratedText: {
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.2),
+    color: Colors.success,
   },
   loadingContainer: {
     alignItems: 'center',

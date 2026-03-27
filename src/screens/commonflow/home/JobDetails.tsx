@@ -73,6 +73,28 @@ const JobDetails = ({route, navigation}: any) => {
   const [jobStatus, setJobStatus] = useState(item.status);
   const [canMarkComplete, setCanMarkComplete] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState('');
+  const [invoiceExists, setInvoiceExists] = useState(false);
+
+  // Check if invoice already generated for this job (cleaner only)
+  useEffect(() => {
+    const checkInvoice = async () => {
+      const user = auth().currentUser;
+      if (!user || userData?.role !== 'Cleaner') return;
+      if (item.status !== 'completed') return;
+      try {
+        const snap = await firestore()
+          .collection('Invoices')
+          .where('jobId', '==', item.id)
+          .where('cleanerId', '==', user.uid)
+          .limit(1)
+          .get();
+        setInvoiceExists(!snap.empty);
+      } catch (e) {
+        // silently ignore
+      }
+    };
+    checkInvoice();
+  }, [item.id, item.status, userData?.role]);
 
   // Check if 2 hours have passed since the scheduled job time
   useEffect(() => {
@@ -1222,21 +1244,34 @@ const JobDetails = ({route, navigation}: any) => {
           </View>
         ) : item.status === 'completed' || jobStatus === 'completed' ? (
           <View style={{alignItems: 'center', gap: RFPercentage(1.2)}}>
-            <View style={styles.completedState}>
-              <MaterialCommunityIcons
-                name="check-circle"
-                size={RFPercentage(2.5)}
-                color={Colors.success}
-              />
-              <Text style={styles.completedText}>Job Completed</Text>
-            </View>
+            {userData?.role !== 'Cleaner' && (
+              <View style={styles.completedState}>
+                <MaterialCommunityIcons
+                  name="check-circle"
+                  size={RFPercentage(2.5)}
+                  color={Colors.success}
+                />
+                <Text style={styles.completedText}>Job Completed</Text>
+              </View>
+            )}
             {userData?.role === 'Cleaner' && (
-              <GradientButton
-                title="Generate Invoice"
-                onPress={() => navigation.navigate('InvoiceForm', {item})}
-                style={{width: '100%', borderRadius: RFPercentage(1.5), height: RFPercentage(5.5)}}
-                textStyle={{fontSize: RFPercentage(1.7), fontFamily: Fonts.semiBold}}
-              />
+              invoiceExists ? (
+                <View style={styles.invoiceGeneratedTag}>
+                  <MaterialCommunityIcons
+                    name="check-circle-outline"
+                    size={RFPercentage(2)}
+                    color={Colors.success}
+                  />
+                  <Text style={styles.invoiceGeneratedText}>Invoice Generated</Text>
+                </View>
+              ) : (
+                <GradientButton
+                  title="Generate Invoice"
+                  onPress={() => navigation.navigate('InvoiceForm', {item})}
+                  style={{width: '100%', borderRadius: RFPercentage(1.5), height: RFPercentage(5.5)}}
+                  textStyle={{fontSize: RFPercentage(1.7), fontFamily: Fonts.semiBold}}
+                />
+              )
             )}
           </View>
         ) : null}
@@ -1692,6 +1727,23 @@ const styles = StyleSheet.create({
   },
   completedText: {
     color: Colors.successText,
+    fontFamily: Fonts.semiBold,
+    fontSize: RFPercentage(1.7),
+  },
+  invoiceGeneratedTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'stretch',
+    backgroundColor: Colors.successBg,
+    paddingVertical: RFPercentage(1.4),
+    borderRadius: RFPercentage(1.5),
+    borderWidth: 1,
+    borderColor: Colors.successBorder,
+    gap: RFPercentage(0.8),
+  },
+  invoiceGeneratedText: {
+    color: Colors.success,
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.7),
   },

@@ -32,8 +32,8 @@ import {
   paginateInvoices,
   generateInvoicePdf,
   shareInvoicePdf,
+  invoiceToFormData,
 } from '../../../../services/invoiceService';
-import {InvoiceFormData} from '../../../../types/invoice';
 
 const PER_PAGE = 10;
 
@@ -115,21 +115,8 @@ const Invoices = ({navigation}: any) => {
   const paginated = paginateInvoices(filtered, currentPage, PER_PAGE);
 
   const handleView = (invoice: Invoice) => {
-    // Convert stored invoice to form data for preview
-    const formData: InvoiceFormData = {
-      invoiceId: invoice.invoiceId,
-      dueDate: new Date(invoice.dueDate),
-      jobPostName: invoice.jobPostName,
-      description: invoice.description,
-      price: invoice.price,
-      fromName: invoice.fromName,
-      fromEmail: invoice.fromEmail,
-      cleanerCompanyName: invoice.cleanerCompanyName,
-      toName: invoice.toName,
-      toEmail: invoice.toEmail,
-    };
     navigation.navigate('InvoicePreview', {
-      formData,
+      formData: invoiceToFormData(invoice),
       jobItem: {id: invoice.jobId, jobId: invoice.customerId},
     });
   };
@@ -137,20 +124,7 @@ const Invoices = ({navigation}: any) => {
   const handleDownloadOrShare = async (invoice: Invoice, action: 'download' | 'share') => {
     setActionLoading(invoice.id || null);
     try {
-      const formData: InvoiceFormData = {
-        invoiceId: invoice.invoiceId,
-        dueDate: new Date(invoice.dueDate),
-        jobPostName: invoice.jobPostName,
-        description: invoice.description,
-        price: invoice.price,
-        fromName: invoice.fromName,
-        fromEmail: invoice.fromEmail,
-        cleanerCompanyName: invoice.cleanerCompanyName,
-        toName: invoice.toName,
-        toEmail: invoice.toEmail,
-      };
-
-      const pdfPath = await generateInvoicePdf(formData);
+      const pdfPath = await generateInvoicePdf(invoiceToFormData(invoice));
 
       if (action === 'share') {
         await shareInvoicePdf(pdfPath, invoice.invoiceId);
@@ -226,35 +200,6 @@ const Invoices = ({navigation}: any) => {
         }
         ListHeaderComponent={
           <>
-            {/* Stats */}
-            <View style={styles.statsCard}>
-              <LinearGradient
-                colors={[Colors.white, Colors.blueBg50]}
-                style={styles.statsGradient}>
-                <Text style={styles.statsTitle}>Invoice Summary</Text>
-                <View style={styles.statsRow}>
-                  <View style={styles.statItem}>
-                    <Text style={styles.statValue}>{allInvoices.length}</Text>
-                    <Text style={styles.statLabel}>Total</Text>
-                  </View>
-                  <View style={styles.statDivider} />
-                  <View style={styles.statItem}>
-                    <Text style={styles.statValue}>
-                      {allInvoices.filter(i => i.status === 'sent').length}
-                    </Text>
-                    <Text style={styles.statLabel}>Sent</Text>
-                  </View>
-                  <View style={styles.statDivider} />
-                  <View style={styles.statItem}>
-                    <Text style={styles.statValue}>
-                      {allInvoices.filter(i => i.status === 'paid').length}
-                    </Text>
-                    <Text style={styles.statLabel}>Paid</Text>
-                  </View>
-                </View>
-              </LinearGradient>
-            </View>
-
             {/* Search Bar */}
             <View style={styles.searchContainer}>
               <View style={styles.searchBar}>
@@ -505,50 +450,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingBottom: 100,
     paddingHorizontal: RFPercentage(2),
-  },
-  statsCard: {
-    marginTop: 20,
-    borderRadius: 24,
-    shadowColor: Colors.primaryBlue,
-    shadowOffset: {width: 0, height: 10},
-    shadowOpacity: 0.2,
-    shadowRadius: 20,
-    elevation: 10,
-  },
-  statsGradient: {
-    borderRadius: 24,
-    padding: 20,
-  },
-  statsTitle: {
-    fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(2),
-    color: Colors.primaryText,
-    marginBottom: RFPercentage(1.5),
-  },
-  statsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-  },
-  statItem: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  statValue: {
-    fontFamily: Fonts.fontBold,
-    fontSize: RFPercentage(2.3),
-    color: Colors.primaryText,
-  },
-  statLabel: {
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.4),
-    color: Colors.secondaryText,
-    marginTop: 2,
-  },
-  statDivider: {
-    width: 1,
-    height: '60%',
-    backgroundColor: Colors.grayBorderOverlay80,
   },
   searchContainer: {
     flexDirection: 'row',

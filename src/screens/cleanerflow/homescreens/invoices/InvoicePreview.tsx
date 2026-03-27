@@ -23,6 +23,8 @@ import {
   generateInvoicePdf,
   shareInvoicePdf,
   saveInvoiceToFirestore,
+  checkExistingInvoiceForJob,
+  generateInvoiceId,
 } from '../../../../services/invoiceService';
 
 const InvoicePreview = ({route, navigation}: any) => {
@@ -33,12 +35,28 @@ const InvoicePreview = ({route, navigation}: any) => {
   const handleGenerateAndShare = async () => {
     setGenerating(true);
     try {
-      // Generate PDF
-      const pdfPath = await generateInvoicePdf(formData);
+      // Check if invoice already exists for this job
+      const existingInvoice = await checkExistingInvoiceForJob(jobItem.id);
+      if (existingInvoice) {
+        showToast({
+          type: 'error',
+          title: 'Invoice Exists',
+          message: `Invoice ${existingInvoice.invoiceId} already generated for this job`,
+        });
+        navigation.navigate('CleanerNavigator', {screen: 'Invoices'});
+        return;
+      }
+
+      // Generate unique invoice ID at save time
+      const uniqueInvoiceId = generateInvoiceId();
+      const finalFormData = {...formData, invoiceId: uniqueInvoiceId};
+
+      // Generate PDF with the final unique invoice ID
+      const pdfPath = await generateInvoicePdf(finalFormData);
 
       // Save to Firestore
       await saveInvoiceToFirestore(
-        formData,
+        finalFormData,
         jobItem.id,
         jobItem.jobId,
         pdfPath,
@@ -52,7 +70,7 @@ const InvoicePreview = ({route, navigation}: any) => {
 
       // Share PDF
       try {
-        await shareInvoicePdf(pdfPath, formData.invoiceId);
+        await shareInvoicePdf(pdfPath, finalFormData.invoiceId);
       } catch (shareErr: any) {
         // User may dismiss the share sheet, which is fine
         if (
