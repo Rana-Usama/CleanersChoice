@@ -26,6 +26,7 @@ import {InvoiceFormData, InvoiceValidationErrors} from '../../../../types/invoic
 import {
   createInvoiceDraftFromJob,
   validateInvoiceForm,
+  checkExistingInvoiceForJob,
 } from '../../../../services/invoiceService';
 
 const InvoiceForm = ({route, navigation}: any) => {
@@ -55,6 +56,18 @@ const InvoiceForm = ({route, navigation}: any) => {
       const user = auth().currentUser;
       if (!user) return;
 
+      // Check if invoice already exists for this job
+      const existingInvoice = await checkExistingInvoiceForJob(item.id);
+      if (existingInvoice) {
+        showToast({
+          type: 'error',
+          title: 'Invoice Exists',
+          message: `Invoice ${existingInvoice.invoiceId} already generated for this job`,
+        });
+        navigation.goBack();
+        return;
+      }
+
       // Fetch cleaner data
       const cleanerDoc = await firestore()
         .collection('Users')
@@ -69,7 +82,7 @@ const InvoiceForm = ({route, navigation}: any) => {
         .get();
       const customerData = customerDoc.data();
 
-      const draft = await createInvoiceDraftFromJob(
+      const draft = createInvoiceDraftFromJob(
         item,
         cleanerData,
         customerData,
