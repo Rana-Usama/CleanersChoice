@@ -28,7 +28,7 @@ import {
 } from '../../../../services/invoiceService';
 
 const InvoicePreview = ({route, navigation}: any) => {
-  const {formData, jobItem}: {formData: InvoiceFormData; jobItem: any} =
+  const {formData, jobItem, viewOnly}: {formData: InvoiceFormData; jobItem: any; viewOnly?: boolean} =
     route.params;
   const [generating, setGenerating] = useState(false);
 
@@ -130,7 +130,7 @@ const InvoicePreview = ({route, navigation}: any) => {
               color={Colors.gradient1}
             />
             <Text style={styles.companyName}>
-              {formData.cleanerCompanyName}
+              Cleaner Choice
             </Text>
             <Text style={styles.companySubtitle}>
               Professional Cleaning Services
@@ -223,22 +223,24 @@ const InvoicePreview = ({route, navigation}: any) => {
       </ScrollView>
 
       {/* Bottom Actions */}
-      <View style={styles.actionBar}>
-        <NextButton
-          title="Edit"
-          onPress={() => navigation.goBack()}
-          style={styles.editButton}
-          textStyle={styles.editButtonText}
-        />
-        <GradientButton
-          title={generating ? 'Generating...' : 'Generate & Share'}
-          onPress={handleGenerateAndShare}
-          loading={generating}
-          disabled={generating}
-          style={styles.generateButton}
-          textStyle={styles.generateButtonText}
-        />
-      </View>
+      {!viewOnly && (
+        <View style={styles.actionBar}>
+          <NextButton
+            title="Edit"
+            onPress={() => navigation.goBack()}
+            style={styles.editButton}
+            textStyle={styles.editButtonText}
+          />
+          <GradientButton
+            title={generating ? 'Generating...' : 'Generate & Share'}
+            onPress={handleGenerateAndShare}
+            loading={generating}
+            disabled={generating}
+            style={styles.generateButton}
+            textStyle={styles.generateButtonText}
+          />
+        </View>
+      )}
     </View>
   );
 };
