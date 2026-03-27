@@ -118,6 +118,7 @@ const Invoices = ({navigation}: any) => {
     navigation.navigate('InvoicePreview', {
       formData: invoiceToFormData(invoice),
       jobItem: {id: invoice.jobId, jobId: invoice.customerId},
+      viewOnly: true,
     });
   };
 
