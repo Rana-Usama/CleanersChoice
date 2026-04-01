@@ -21,7 +21,7 @@ import Invoices from '../screens/cleanerflow/homescreens/invoices/Invoices';
 import Messages from '../screens/commonflow/home/Messages';
 import {useUnreadMessages} from '../utils/UnreadMessagesContext';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const Tab = createBottomTabNavigator();
 
@@ -132,22 +132,22 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                   resizeMode="contain"
                 />
               ) : route.name === 'Invoices' ? (
-                <MaterialCommunityIcons
-                  name={isFocused ? 'file-document' : 'file-document-outline'}
-                  size={RFPercentage(2.8)}
+                <Ionicons
+                  name="document-text-outline"
+                  size={RFPercentage(2.5)}
                   color={isFocused ? Colors.gradient2 : Colors.secondaryText}
                 />
               ) : route.name === 'My Jobs' ? (
-                <MaterialCommunityIcons
-                  name={isFocused ? 'briefcase-check' : 'briefcase-check-outline'}
-                  size={RFPercentage(2.8)}
+                <Ionicons
+                  name="briefcase-outline"
+                  size={RFPercentage(2.5)}
                   color={isFocused ? Colors.gradient2 : Colors.secondaryText}
                 />
               ) : (
-                <Image
-                  source={isFocused ? Icons.profileActive : Icons.profile}
-                  style={styles.imgStyle}
-                  resizeMode="contain"
+                <Ionicons
+                  name="settings-outline"
+                  size={RFPercentage(2.5)}
+                  color={isFocused ? Colors.gradient2 : Colors.secondaryText}
                 />
               )}
               <Text

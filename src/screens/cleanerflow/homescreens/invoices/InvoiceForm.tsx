@@ -218,7 +218,7 @@ const InvoiceForm = ({route, navigation}: any) => {
                 size={RFPercentage(2.2)}
                 color={Colors.gradient1}
               />
-              <Text style={styles.sectionTitle}>From (You)</Text>
+              <Text style={styles.sectionTitle}>From</Text>
             </View>
             <FormField
               label="Company Name"
@@ -252,7 +252,7 @@ const InvoiceForm = ({route, navigation}: any) => {
                 size={RFPercentage(2.2)}
                 color={Colors.gradient1}
               />
-              <Text style={styles.sectionTitle}>Bill To (Customer)</Text>
+              <Text style={styles.sectionTitle}>Bill To</Text>
             </View>
             <FormField
               label="Customer Name"
@@ -296,12 +296,13 @@ const InvoiceForm = ({route, navigation}: any) => {
               multiline
             />
             <FormField
-              label="Price ($)"
+              label="Price"
               value={form.price}
               onChangeText={v => updateField('price', v)}
               error={errors.price}
               placeholder="0.00"
               keyboardType="numeric"
+              prefix="$"
             />
           </View>
 
@@ -331,6 +332,7 @@ const FormField = ({
   placeholder,
   keyboardType,
   multiline,
+  prefix,
 }: {
   label: string;
   value: string;
@@ -339,23 +341,29 @@ const FormField = ({
   placeholder?: string;
   keyboardType?: any;
   multiline?: boolean;
+  prefix?: string;
 }) => (
   <View style={styles.fieldContainer}>
     <Text style={styles.fieldLabel}>{label}</Text>
-    <TextInput
-      style={[
-        styles.textInput,
-        error && styles.inputError,
-        multiline && {height: RFPercentage(10), textAlignVertical: 'top'},
-      ]}
-      value={value}
-      onChangeText={onChangeText}
-      placeholder={placeholder}
-      placeholderTextColor={Colors.placeholderColor}
-      keyboardType={keyboardType}
-      multiline={multiline}
-      autoCapitalize="none"
-    />
+    <View style={[styles.inputRow, error && styles.inputError]}>
+      {prefix ? (
+        <Text style={styles.inputPrefix}>{prefix}</Text>
+      ) : null}
+      <TextInput
+        style={[
+          styles.textInput,
+          prefix && {flex: 1, borderWidth: 0, paddingLeft: 0},
+          multiline && {height: RFPercentage(10), textAlignVertical: 'top'},
+        ]}
+        value={value}
+        onChangeText={onChangeText}
+        placeholder={placeholder}
+        placeholderTextColor={Colors.placeholderColor}
+        keyboardType={keyboardType}
+        multiline={multiline}
+        autoCapitalize="none"
+      />
+    </View>
     {error && <Text style={styles.errorText}>{error}</Text>}
   </View>
 );
@@ -457,6 +465,22 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.5),
     color: Colors.secondaryText,
     marginBottom: RFPercentage(0.5),
+  },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.inputBg,
+    borderWidth: 1,
+    borderColor: Colors.inputBorder,
+    borderRadius: RFPercentage(1.2),
+    overflow: 'hidden',
+  },
+  inputPrefix: {
+    paddingLeft: RFPercentage(1.3),
+    paddingRight: 0,
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.7),
+    color: Colors.inputTextColor,
   },
   textInput: {
     backgroundColor: Colors.inputBg,

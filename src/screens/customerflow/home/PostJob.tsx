@@ -147,7 +147,7 @@ const PostJob = ({route}: any) => {
     const user = auth().currentUser;
     if (!user) return;
 
-    if (!jobTitle || !userLocation || !budget || !selectedType || !date) {
+    if (!jobTitle.trim() || !userLocation || !budget || !selectedType || !date) {
       showToast({
         type: 'info',
         title: 'Job Post',
@@ -169,12 +169,12 @@ const PostJob = ({route}: any) => {
     setLoading(true);
     try {
       const jobData: any = {
-        title: jobTitle,
-        description: Description,
+        title: jobTitle.trim(),
+        description: Description.trim(),
         type: selectedType,
         location: userLocation,
         priceRange: budget.replace(/[^0-9]/g, ''),
-        remarks: remarks || '',
+        remarks: remarks ? remarks.trim() : '',
         jobId: user.uid,
         status: 'active',
         createdAt2: new Date(),
@@ -477,13 +477,7 @@ const PostJob = ({route}: any) => {
                   )}
                 </View>
 
-                {/* Next Button */}
-                <GradientButton
-                  title="Continue"
-                  style={styles.continueButton}
-                  onPress={handleNext}
-                  loading={loading}
-                />
+                {/* Next Button removed — rendered in fixed bottom bar */}
               </View>
             )}
 
@@ -649,22 +643,7 @@ const PostJob = ({route}: any) => {
                   </View>
                 </View>
 
-                {/* Action Buttons */}
-                <View style={styles.actionButtons}>
-                  <TouchableOpacity
-                    onPress={() => setStep(1)}
-                    style={styles.backButtonSecondary}>
-                    <Text style={styles.backButtonText}>Back</Text>
-                  </TouchableOpacity>
-                  <GradientButton
-                    title={jobId ? 'Update Job' : 'Post Job Now'}
-                    style={styles.postButton}
-                    onPress={postJob}
-                    loading={loading}
-                    disabled={loading}
-                    textStyle={{fontSize: RFPercentage(1.9)}}
-                  />
-                </View>
+                {/* Action Buttons removed — rendered in fixed bottom bar */}
               </View>
             )}
 
@@ -685,6 +664,34 @@ const PostJob = ({route}: any) => {
           </View>
         </TouchableWithoutFeedback>
       </ScrollView>
+
+      {/* Fixed bottom action bar */}
+      <View style={styles.bottomBar}>
+        {step === 1 ? (
+          <GradientButton
+            title="Continue"
+            style={styles.bottomBarButton}
+            onPress={handleNext}
+            loading={loading}
+          />
+        ) : (
+          <View style={styles.actionButtons}>
+            <TouchableOpacity
+              onPress={() => setStep(1)}
+              style={styles.backButtonSecondary}>
+              <Text style={styles.backButtonText}>Back</Text>
+            </TouchableOpacity>
+            <GradientButton
+              title={jobId ? 'Update Job' : 'Post Job Now'}
+              style={styles.postButton}
+              onPress={postJob}
+              loading={loading}
+              disabled={loading}
+              textStyle={{fontSize: RFPercentage(1.9)}}
+            />
+          </View>
+        )}
+      </View>
     </View>
   );
 };
@@ -719,7 +726,7 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
-    paddingBottom: RFPercentage(20),
+    paddingBottom: RFPercentage(12),
   },
   contentContainer: {
     flex: 1,
@@ -1000,14 +1007,36 @@ const styles = StyleSheet.create({
   actionButtons: {
     flexDirection: 'row',
     gap: RFPercentage(1.5),
-    marginTop: RFPercentage(1),
+    flex: 1,
+  },
+  bottomBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: Colors.white,
+    paddingHorizontal: RFPercentage(2),
+    paddingTop: RFPercentage(1.5),
+    paddingBottom: Platform.OS === 'ios' ? RFPercentage(4) : RFPercentage(2),
+    borderTopWidth: 1,
+    borderTopColor: Colors.lightGrayBg,
+    shadowColor: Colors.black,
+    shadowOffset: {width: 0, height: -3},
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 10,
+  },
+  bottomBarButton: {
+    width: '75%',
+    alignSelf: 'center',
+    borderRadius: 20,
   },
   backButtonSecondary: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: Colors.white,
-    padding: RFPercentage(1.4),
+    height: RFPercentage(5.6),
     borderRadius: 20,
     borderWidth: 1,
     borderColor: Colors.gradient1,

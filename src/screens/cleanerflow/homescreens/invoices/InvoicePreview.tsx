@@ -17,7 +17,6 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import moment from 'moment';
 import {showToast} from '../../../../utils/ToastMessage';
 import GradientButton from '../../../../components/GradientButton';
-import NextButton from '../../../../components/NextButton';
 import {InvoiceFormData} from '../../../../types/invoice';
 import {
   generateInvoicePdf,
@@ -167,9 +166,6 @@ const InvoicePreview = ({route, navigation}: any) => {
               <Text style={styles.partyLabel}>FROM</Text>
               <Text style={styles.partyName}>{formData.fromName}</Text>
               <Text style={styles.partyDetail}>{formData.fromEmail}</Text>
-              <Text style={styles.partyDetail}>
-                {formData.cleanerCompanyName}
-              </Text>
             </View>
             <View style={styles.partyDivider}>
               <Feather name="arrow-right" size={20} color={Colors.gray300} />
@@ -225,12 +221,12 @@ const InvoicePreview = ({route, navigation}: any) => {
       {/* Bottom Actions */}
       {!viewOnly && (
         <View style={styles.actionBar}>
-          <NextButton
-            title="Edit"
-            onPress={() => navigation.goBack()}
+          <TouchableOpacity
             style={styles.editButton}
-            textStyle={styles.editButtonText}
-          />
+            onPress={() => navigation.goBack()}
+            activeOpacity={0.8}>
+            <Text style={styles.editButtonText}>Edit</Text>
+          </TouchableOpacity>
           <GradientButton
             title={generating ? 'Generating...' : 'Generate & Share'}
             onPress={handleGenerateAndShare}
@@ -444,7 +440,7 @@ const styles = StyleSheet.create({
   },
   totalAmount: {
     fontFamily: Fonts.fontBold,
-    fontSize: RFPercentage(2.8),
+    fontSize: RFPercentage(2.3),
     color: Colors.gradient1,
   },
   invoiceFooter: {
@@ -484,16 +480,22 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   editButton: {
-    flex: 1,
-    width: undefined,
-    borderRadius: RFPercentage(1.5),
+    flex: 2,
     height: RFPercentage(6),
+    borderRadius: RFPercentage(1.5),
+    borderWidth: 1.5,
+    borderColor: Colors.gradient1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.white,
   },
   editButtonText: {
     fontSize: RFPercentage(1.7),
+    fontFamily: Fonts.fontMedium,
+    color: Colors.gradient1,
   },
   generateButton: {
-    flex: 2,
+    flex: 3,
     width: undefined,
     borderRadius: RFPercentage(1.5),
     height: RFPercentage(6),

@@ -986,8 +986,8 @@ const styles = StyleSheet.create({
   },
   bellBadge: {
     position: 'absolute',
-    top: 2,
-    right: 2,
+    top: -4,
+    right: -4,
     backgroundColor: Colors.red500,
     borderRadius: 10,
     minWidth: 18,

@@ -15,9 +15,10 @@ import {StripeProvider} from '@stripe/stripe-react-native';
 import {PUBLISHABLE_KEY} from '@env';
 import {ThemeProvider} from '@rneui/themed';
 import messaging from '@react-native-firebase/messaging';
-import notifee from '@notifee/react-native';
+import notifee, {EventType} from '@notifee/react-native';
 import {UnreadMessagesProvider} from './src/utils/UnreadMessagesContext';
 import {toastConfig} from './src/utils/toastConfig';
+import ReactNativeBlobUtil from 'react-native-blob-util';
 
 const App: React.FC = () => {
   console.log('Running in', __DEV__ ? 'DEBUG' : 'RELEASE');
@@ -78,6 +79,26 @@ const App: React.FC = () => {
       unsubscribeOnMessage();
       unsubscribeToken();
     };
+  }, []);
+
+  // Handle notifee notification tap in foreground (e.g. invoice download)
+  useEffect(() => {
+    return notifee.onForegroundEvent(({type, detail}) => {
+      if (
+        type === EventType.PRESS &&
+        detail.notification?.data?.type === 'invoice_download'
+      ) {
+        const {contentUri, mimeType} = detail.notification.data;
+        if (contentUri && Platform.OS === 'android') {
+          ReactNativeBlobUtil.android
+            .actionViewIntent(
+              String(contentUri),
+              String(mimeType || 'application/pdf'),
+            )
+            .catch(() => {});
+        }
+      }
+    });
   }, []);
 
   // Display foreground notifications

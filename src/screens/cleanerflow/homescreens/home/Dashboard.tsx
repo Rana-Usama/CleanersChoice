@@ -821,8 +821,8 @@ const styles = StyleSheet.create({
   },
   bellBadge: {
     position: 'absolute',
-    top: 2,
-    right: 2,
+    top: -4,
+    right: -4,
     backgroundColor: Colors.red500,
     borderRadius: 10,
     minWidth: 18,
@@ -1163,14 +1163,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     // elevation: 4,
-    height: RFPercentage(30),
+    height: RFPercentage(34),
       borderWidth: 1,
     borderColor: Colors.blueBg150
   },
   packageGradient: {
     padding: 16,
     borderRadius: 12,
-    height: RFPercentage(30),
+    height: RFPercentage(34),
   },
   packageHeader: {
     flexDirection: 'row',

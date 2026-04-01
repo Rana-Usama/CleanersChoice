@@ -1,4 +1,4 @@
-import {StyleSheet, Text, View, Dimensions} from 'react-native';
+import {StyleSheet, Text, View, Dimensions, TouchableOpacity} from 'react-native';
 import React from 'react';
 import GradientButton from './GradientButton';
 import NextButton from './NextButton';
@@ -20,6 +20,7 @@ interface props {
   buttonTitle?: string;
   iconName?: string;
   iconColor?: string;
+  hidePrimaryButton?: boolean;
 }
 
 const CustomModal = (props: props) => {
@@ -61,6 +62,21 @@ const CustomModal = (props: props) => {
             style={styles.okButton}
             textStyle={styles.okButtonText}
           />
+        </View>
+      ) : props.hidePrimaryButton ? (
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={props.onPress3 ?? (() => {})}
+            style={styles.splitButton}>
+            <Text style={styles.cancelButtonText}>Back</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={props.onPress ?? (() => {})}
+            style={styles.splitCancelButton}>
+            <Text style={styles.splitCancelButtonText}>Cancel</Text>
+          </TouchableOpacity>
         </View>
       ) : (
         <View style={styles.buttonContainer}>
@@ -154,7 +170,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    width: '100%',
+    alignSelf: 'stretch',
     gap: RFPercentage(1.5),
   },
   cancelButton: {
@@ -164,6 +180,31 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.gradient1,
     width: RFPercentage(16),
+  },
+  splitButton: {
+    flex: 1,
+    height: RFPercentage(5),
+    borderRadius: RFPercentage(100),
+    backgroundColor: Colors.white,
+    borderWidth: 1,
+    borderColor: Colors.gradient1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  splitCancelButton: {
+    flex: 1,
+    height: RFPercentage(5),
+    borderRadius: RFPercentage(100),
+    backgroundColor: Colors.red500,
+    borderWidth: 1,
+    borderColor: Colors.red500,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  splitCancelButtonText: {
+    fontSize: RFPercentage(1.7),
+    fontFamily: Fonts.fontMedium,
+    color: Colors.white,
   },
   cancelButtonText: {
     fontSize: RFPercentage(1.7),
