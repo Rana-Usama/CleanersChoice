@@ -20,6 +20,7 @@ import NotFound from '../../../../components/NotFound';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Feather from 'react-native-vector-icons/Feather';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import DatePicker from 'react-native-date-picker';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import {useFocusEffect} from '@react-navigation/native';
@@ -32,6 +33,7 @@ import {
   paginateInvoices,
   generateInvoicePdf,
   shareInvoicePdf,
+  downloadInvoicePdf,
   invoiceToFormData,
 } from '../../../../services/invoiceService';
 
@@ -130,11 +132,14 @@ const Invoices = ({navigation}: any) => {
       if (action === 'share') {
         await shareInvoicePdf(pdfPath, invoice.invoiceId);
       } else {
-        showToast({
-          type: 'success',
-          title: 'Downloaded',
-          message: `Invoice saved to ${pdfPath}`,
-        });
+        await downloadInvoicePdf(pdfPath, invoice.invoiceId);
+        if (Platform.OS === 'android') {
+          showToast({
+            type: 'success',
+            title: 'Downloaded',
+            message: 'Invoice Downloaded Successfully ',
+          });
+        }
       }
     } catch (error: any) {
       if (
@@ -153,11 +158,22 @@ const Invoices = ({navigation}: any) => {
   };
 
   const onDateFilterChange = (_event: any, selectedDate?: Date) => {
-    setShowFilterPicker(Platform.OS === 'ios');
+    // iOS spinner stays inline until filter panel is closed
+    setShowFilterPicker(true);
     if (selectedDate) {
       setFilterDate(selectedDate);
       setCurrentPage(1);
     }
+  };
+
+  const onAndroidDateConfirm = (selectedDate: Date) => {
+    setShowFilterPicker(false);
+    setFilterDate(selectedDate);
+    setCurrentPage(1);
+  };
+
+  const onAndroidDateCancel = () => {
+    setShowFilterPicker(false);
   };
 
   const clearDateFilter = () => {
@@ -241,7 +257,7 @@ const Invoices = ({navigation}: any) => {
                   filterDate && styles.filterButtonActive,
                 ]}>
                 <MaterialCommunityIcons
-                  name="calendar-filter"
+                  name="filter-outline"
                   size={RFPercentage(2.2)}
                   color={filterDate ? Colors.white : Colors.gradient1}
                 />
@@ -304,11 +320,11 @@ const Invoices = ({navigation}: any) => {
                   )}
                 </View>
 
-                {showFilterPicker && (
+                {showFilterPicker && Platform.OS === 'ios' && (
                   <DateTimePicker
                     value={filterDate || new Date()}
                     mode="date"
-                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                    display="spinner"
                     onChange={onDateFilterChange}
                   />
                 )}
@@ -417,6 +433,18 @@ const Invoices = ({navigation}: any) => {
           ) : null
         }
       />
+
+      {/* Android: use react-native-date-picker modal (native dialog doesn't crash) */}
+      {Platform.OS === 'android' && (
+        <DatePicker
+          modal
+          open={showFilterPicker}
+          date={filterDate || new Date()}
+          mode="date"
+          onConfirm={onAndroidDateConfirm}
+          onCancel={onAndroidDateCancel}
+        />
+      )}
     </View>
   );
 };

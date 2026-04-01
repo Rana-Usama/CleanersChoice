@@ -57,6 +57,7 @@ const JobManagement = ({route, navigation}: any) => {
     iconName: string;
     iconColor: string;
     buttonTitle: string;
+    hidePrimaryButton?: boolean;
     onConfirm: () => void;
   }>({
     visible: false,
@@ -252,6 +253,7 @@ const JobManagement = ({route, navigation}: any) => {
       iconName: 'account-remove',
       iconColor: Colors.red500,
       buttonTitle: 'Yes, Cancel',
+      hidePrimaryButton: true,
       onConfirm: async () => {
         setConfirmModal(prev => ({...prev, visible: false}));
         setActionLoading('cancel');
@@ -503,69 +505,52 @@ const JobManagement = ({route, navigation}: any) => {
           renderItem={null}
           ListHeaderComponent={
             <>
-              {/* Confirmed Cleaner Section */}
-              <View style={styles.sectionContainer}>
-                <View style={styles.sectionHeader}>
-                  <MaterialCommunityIcons
-                    name="account-check"
-                    size={RFPercentage(2.2)}
-                    color={Colors.success}
-                  />
-                  <Text style={styles.sectionTitle}>Confirmed Cleaner</Text>
-                </View>
-                {confirmedCleaner ? (
-                  renderCleanerCard({
-                    item: confirmedCleaner,
-                    isConfirmed: true,
-                  })
-                ) : (
-                  <View style={styles.emptySection}>
+              {confirmedCleaner ? (
+                /* ── Confirmed Cleaner Section (shown when a cleaner is hired) ── */
+                <View style={styles.sectionContainer}>
+                  <View style={styles.sectionHeader}>
                     <MaterialCommunityIcons
-                      name="account-outline"
-                      size={RFPercentage(4)}
-                      color={Colors.secondaryText}
+                      name="account-check"
+                      size={RFPercentage(2.2)}
+                      color={Colors.success}
                     />
-                    <Text style={styles.emptySectionText}>
-                      No cleaner confirmed yet
+                    <Text style={styles.sectionTitle}>Confirmed Cleaner</Text>
+                  </View>
+                  {renderCleanerCard({item: confirmedCleaner, isConfirmed: true})}
+                </View>
+              ) : (
+                /* ── Applicants Section (shown when no cleaner is confirmed yet) ── */
+                <View style={styles.sectionContainer}>
+                  <View style={styles.sectionHeader}>
+                    <MaterialCommunityIcons
+                      name="account-group"
+                      size={RFPercentage(2.2)}
+                      color={Colors.gradient1}
+                    />
+                    <Text style={styles.sectionTitle}>
+                      Applicants ({applicants.length})
                     </Text>
                   </View>
-                )}
-              </View>
-
-              {/* Applicants Section */}
-              <View style={styles.sectionContainer}>
-                <View style={styles.sectionHeader}>
-                  <MaterialCommunityIcons
-                    name="account-group"
-                    size={RFPercentage(2.2)}
-                    color={Colors.gradient1}
-                  />
-                  <Text style={styles.sectionTitle}>
-                    Applicants ({applicants.length})
-                  </Text>
-                </View>
-                {applicants.length === 0 ? (
-                  <View style={styles.emptySection}>
-                    <MaterialCommunityIcons
-                      name="account-off-outline"
-                      size={RFPercentage(4)}
-                      color={Colors.secondaryText}
-                    />
-                    <Text style={styles.emptySectionText}>
-                      No applicants yet
-                    </Text>
-                  </View>
-                ) : (
-                  applicants.map(applicant => (
-                    <View key={applicant.uid}>
-                      {renderCleanerCard({
-                        item: applicant,
-                        isConfirmed: false,
-                      })}
+                  {applicants.length === 0 ? (
+                    <View style={styles.emptySection}>
+                      <MaterialCommunityIcons
+                        name="account-off-outline"
+                        size={RFPercentage(4)}
+                        color={Colors.secondaryText}
+                      />
+                      <Text style={styles.emptySectionText}>
+                        No applicants yet
+                      </Text>
                     </View>
-                  ))
-                )}
-              </View>
+                  ) : (
+                    applicants.map(applicant => (
+                      <View key={applicant.uid}>
+                        {renderCleanerCard({item: applicant, isConfirmed: false})}
+                      </View>
+                    ))
+                  )}
+                </View>
+              )}
             </>
           }
           contentContainerStyle={styles.listContent}
@@ -598,9 +583,9 @@ const JobManagement = ({route, navigation}: any) => {
               iconName={confirmModal.iconName}
               iconColor={confirmModal.iconColor}
               buttonTitle={confirmModal.buttonTitle}
-              onPress={() =>
-                setConfirmModal(prev => ({...prev, visible: false}))
-              }
+              hidePrimaryButton={confirmModal.hidePrimaryButton}
+              onPress3={() => setConfirmModal(prev => ({...prev, visible: false}))}
+              onPress={confirmModal.onConfirm}
               onPress2={confirmModal.onConfirm}
             />
           </View>
@@ -694,11 +679,6 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(1),
     borderWidth: 1,
     borderColor: Colors.lightGrayBg,
-    shadowColor: Colors.black,
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 3,
   },
   cleanerInfo: {
     flexDirection: 'row',

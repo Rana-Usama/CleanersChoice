@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 12,
     elevation: 12,
-    marginTop: RFPercentage(2),
+    marginTop: RFPercentage(1.2),
     borderRadius: RFPercentage(2),
     backgroundColor: 'transparent',
   },

@@ -53,6 +53,7 @@ const JobDetails = ({route, navigation}: any) => {
     iconName: string;
     iconColor: string;
     buttonTitle: string;
+    hidePrimaryButton?: boolean;
     onConfirm: () => void;
   }>({
     visible: false,
@@ -61,6 +62,7 @@ const JobDetails = ({route, navigation}: any) => {
     iconName: '',
     iconColor: '',
     buttonTitle: 'Yes',
+    hidePrimaryButton: false,
     onConfirm: () => {},
   });
   const [applyLoading, setApplyLoading] = useState(false);
@@ -74,6 +76,18 @@ const JobDetails = ({route, navigation}: any) => {
   const [canMarkComplete, setCanMarkComplete] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState('');
   const [invoiceExists, setInvoiceExists] = useState(false);
+
+  const showActionBar =
+    !(
+      ((item.status === 'active' || jobStatus === 'active') &&
+        userData.role === 'Customer' &&
+        !canMarkComplete) ||
+      (userData.role === 'Cleaner' &&
+        isConfirmed &&
+        jobStatus === 'pending_completion') ||
+      item.status === 'completed' ||
+      jobStatus === 'completed'
+    );
 
   // Check if invoice already generated for this job (cleaner only)
   useEffect(() => {
@@ -538,6 +552,7 @@ const JobDetails = ({route, navigation}: any) => {
       iconName: 'cancel',
       iconColor: Colors.red500,
       buttonTitle: 'Yes, Cancel',
+      hidePrimaryButton: true,
       onConfirm: async () => {
         setConfirmModal(prev => ({...prev, visible: false}));
         setCancelLoading(true);
@@ -852,12 +867,23 @@ const JobDetails = ({route, navigation}: any) => {
             <Feather name="arrow-left" size={24} color={Colors.white} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Job Details</Text>
-          <View style={{width: 40}} />
+          {(item.status === 'active' || jobStatus === 'active') && userData?.role === 'Customer' ? (
+            <TouchableOpacity
+              onPress={handleEditButton}
+              style={styles.backButton}>
+              <Feather name="edit-2" size={18} color={Colors.white} />
+            </TouchableOpacity>
+          ) : (
+            <View style={{width: 40}} />
+          )}
         </View>
       </LinearGradient>
 
       <ScrollView
-        contentContainerStyle={styles.scrollViewContent}
+        contentContainerStyle={[
+          styles.scrollViewContent,
+          {paddingBottom: showActionBar ? RFPercentage(15) : RFPercentage(3)},
+        ]}
         showsVerticalScrollIndicator={false}
         onScroll={Animated.event(
           [{nativeEvent: {contentOffset: {y: scrollY}}}],
@@ -869,8 +895,7 @@ const JobDetails = ({route, navigation}: any) => {
             {item.title}
           </Text>
           <View style={{alignItems: 'flex-end', gap: 4}}>
-            <StatusBadge status={jobStatus || item.status} />
-            {item.autoCompleted && (
+            {item.autoCompleted ? (
               <View
                 style={[
                   styles.statusBadge,
@@ -886,6 +911,8 @@ const JobDetails = ({route, navigation}: any) => {
                   Auto-completed
                 </Text>
               </View>
+            ) : (
+              <StatusBadge status={jobStatus || item.status} />
             )}
           </View>
         </View>
@@ -1080,6 +1107,7 @@ const JobDetails = ({route, navigation}: any) => {
       </ScrollView>
 
       {/* Fixed Action Buttons */}
+      {showActionBar && (
       <View style={styles.actionBar}>
         {(jobStatus === 'expired' || jobStatus === 'unconfirmed') && userData.role === 'Customer' ? (
           <View style={styles.actionButtons}>
@@ -1101,15 +1129,7 @@ const JobDetails = ({route, navigation}: any) => {
             />
           </View>
         ) : (item.status === 'active' || jobStatus === 'active') && userData.role === 'Customer' ? (
-          <View style={styles.actionButtons}>
-            <NextButton
-              title="Edit Job"
-              onPress={handleEditButton}
-              textStyle={styles.editButtonText}
-              disabled={loading2 || loading}
-              loading={loading2}
-              style={[styles.editButton, !canMarkComplete && {flex: 1, width: undefined}]}
-            />
+          <View style={[styles.actionButtons, {justifyContent: 'center'}]}>
             {canMarkComplete && (
               <GradientButton
                 title="Mark Complete"
@@ -1117,7 +1137,7 @@ const JobDetails = ({route, navigation}: any) => {
                 onPress={() => markComplete(item.id, 'completed')}
                 loading={loading}
                 disabled={loading}
-                style={styles.completeButton}
+                style={[styles.completeButton, {flex: 1}]}
               />
             )}
           </View>
@@ -1209,28 +1229,26 @@ const JobDetails = ({route, navigation}: any) => {
             )}
           </View>
         ) : userData.role === 'Cleaner' && isConfirmed && jobStatus === 'pending_completion' ? (
-          <View style={[styles.actionButtons, {justifyContent: 'center'}]}>
-            <View style={styles.completedState}>
-              <MaterialCommunityIcons
-                name="clock-check-outline"
-                size={RFPercentage(2)}
-                color={Colors.amber500}
-              />
-              <Text style={[styles.completedText, {color: Colors.amber500}]}>
-                Awaiting Confirmation
-              </Text>
-            </View>
-          </View>
+          null
         ) : userData.role === 'Cleaner' && isConfirmed && jobStatus !== 'completed' ? (
-          <View style={styles.actionButtons}>
-            <NextButton
-              title="Cancel Job"
+          <View style={[styles.actionButtons, !canMarkComplete && {justifyContent: 'center'}]}>
+            <TouchableOpacity
+              activeOpacity={0.8}
               onPress={handleCancelCleanerJob}
-              textStyle={styles.editButtonText}
               disabled={cancelLoading || loading}
-              loading={cancelLoading}
-              style={[styles.editButton, !canMarkComplete && {flex: 1, width: undefined}]}
-            />
+              style={[
+                styles.editButton,
+                {borderColor: Colors.red500},
+                canMarkComplete
+                  ? {flex: 1, maxWidth: undefined, paddingHorizontal: RFPercentage(1.5)}
+                  : {flex: 1, paddingHorizontal: undefined},
+              ]}>
+              {cancelLoading ? (
+                <ActivityIndicator size="small" color={Colors.red500} />
+              ) : (
+                <Text style={[styles.editButtonText, {color: Colors.red500}]}>Cancel Job</Text>
+              )}
+            </TouchableOpacity>
             {canMarkComplete && (
               <GradientButton
                 title="Mark Complete"
@@ -1243,39 +1261,10 @@ const JobDetails = ({route, navigation}: any) => {
             )}
           </View>
         ) : item.status === 'completed' || jobStatus === 'completed' ? (
-          <View style={{alignItems: 'center', gap: RFPercentage(1.2)}}>
-            {userData?.role !== 'Cleaner' && (
-              <View style={styles.completedState}>
-                <MaterialCommunityIcons
-                  name="check-circle"
-                  size={RFPercentage(2.5)}
-                  color={Colors.success}
-                />
-                <Text style={styles.completedText}>Job Completed</Text>
-              </View>
-            )}
-            {userData?.role === 'Cleaner' && (
-              invoiceExists ? (
-                <View style={styles.invoiceGeneratedTag}>
-                  <MaterialCommunityIcons
-                    name="check-circle-outline"
-                    size={RFPercentage(2)}
-                    color={Colors.success}
-                  />
-                  <Text style={styles.invoiceGeneratedText}>Invoice Generated</Text>
-                </View>
-              ) : (
-                <GradientButton
-                  title="Generate Invoice"
-                  onPress={() => navigation.navigate('InvoiceForm', {item})}
-                  style={{width: '100%', borderRadius: RFPercentage(1.5), height: RFPercentage(5.5)}}
-                  textStyle={{fontSize: RFPercentage(1.7), fontFamily: Fonts.semiBold}}
-                />
-              )
-            )}
-          </View>
+          null
         ) : null}
       </View>
+      )}
 
       {/* Confirm Modal */}
       {confirmModal.visible && (
@@ -1295,9 +1284,11 @@ const JobDetails = ({route, navigation}: any) => {
               iconName={confirmModal.iconName}
               iconColor={confirmModal.iconColor}
               buttonTitle={confirmModal.buttonTitle}
-              onPress={() =>
-                setConfirmModal(prev => ({...prev, visible: false}))
-              }
+              hidePrimaryButton={confirmModal.hidePrimaryButton}
+              onPress3={() => setConfirmModal(prev => ({...prev, visible: false}))}
+              onPress={confirmModal.hidePrimaryButton
+                ? confirmModal.onConfirm
+                : () => setConfirmModal(prev => ({...prev, visible: false}))}
               onPress2={confirmModal.onConfirm}
             />
           </View>
@@ -1410,13 +1401,13 @@ const styles = StyleSheet.create({
   quickInfoLabel: {
     color: Colors.secondaryText,
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     marginLeft: RFPercentage(0.5),
   },
   quickInfoValue: {
     color: Colors.primaryText,
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     textAlign: 'center',
     marginLeft: RFPercentage(1),
   },
@@ -1668,12 +1659,13 @@ const styles = StyleSheet.create({
     gap: RFPercentage(1.5),
   },
   editButton: {
-    // flex: 0.5,
     backgroundColor: Colors.white,
     borderWidth: 1,
     borderColor: Colors.gradient1,
     borderRadius: 20,
-    width: RFPercentage(15),
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: RFPercentage(5.6),
   },
   editButtonText: {
     color: Colors.gradient1,
@@ -1681,7 +1673,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.semiBold,
   },
   completeButton: {
-    flex: 3,
+    flex: 2,
     borderRadius: 20,
   },
   completeButtonText: {

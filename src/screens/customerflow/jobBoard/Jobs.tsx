@@ -372,9 +372,6 @@ const Jobs = ({navigation}: any) => {
             <Text style={styles.jobsTitle}>
               {active ? 'Active Job Postings' : 'Completed Jobs'}
             </Text>
-            <Text style={styles.jobsCount}>
-              {Jobs.length} job{Jobs.length !== 1 ? 's' : ''}
-            </Text>
           </View>
 
           {loading ? (
@@ -477,7 +474,7 @@ const Jobs = ({navigation}: any) => {
                               color={Colors.success}
                             />
                             <Text style={[styles.manageButtonText, {color: Colors.success}]}>
-                              {item?.status === 'pending_completion' ? 'Awaiting Confirmation' : 'Cleaner Assigned'}
+                              {item?.status === 'pending_completion' ? 'Awaiting Confirmation' : 'Cleaner Confirmed'}
                             </Text>
                             <MaterialIcons
                               name="chevron-right"
@@ -713,14 +710,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   jobsSection: {
-    marginTop: 24,
+    marginTop: 10,
     paddingHorizontal: 20,
   },
   jobsHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 0,
   },
   jobsTitle: {
     fontSize: RFPercentage(1.8),
@@ -749,16 +746,17 @@ const styles = StyleSheet.create({
   },
   noJobsContainer: {
     alignItems: 'center',
-    paddingVertical: 40,
+    marginTop: -50,
+    paddingBottom: 40,
   },
   postJobButton: {
-    marginTop: 24,
+    marginTop: 10,
     borderRadius: 100,
     overflow: 'hidden',
     width: '55%',
   },
   postJobGradient: {
-    paddingVertical: 16,
+    paddingVertical: 11,
     paddingHorizontal: 24,
     borderRadius: 12,
     flexDirection: 'row',
@@ -799,7 +797,7 @@ const styles = StyleSheet.create({
   },
   newJobButton: {
     position: 'absolute',
-    bottom: 90,
+    bottom: 40,
     right: 20,
     borderRadius: 50,
     overflow: 'hidden',

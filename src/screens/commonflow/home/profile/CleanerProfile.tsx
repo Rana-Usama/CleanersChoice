@@ -564,17 +564,17 @@ const styles = StyleSheet.create({
   },
   packageName: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     color: Colors.primaryText,
   },
   packagePrice: {
     fontFamily: Fonts.fontBold,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     color: Colors.gradient1,
   },
   packageDetails: {
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     color: Colors.secondaryText,
   },
   gallery: {
