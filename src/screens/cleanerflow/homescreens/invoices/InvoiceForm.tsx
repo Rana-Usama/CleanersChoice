@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
   Text,
@@ -9,14 +9,13 @@ import {
   ActivityIndicator,
   Platform,
   StatusBar,
-  KeyboardAvoidingView,
+  Keyboard,
 } from 'react-native';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts} from '../../../../constants/Themes';
 import LinearGradient from 'react-native-linear-gradient';
 import Feather from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
@@ -28,6 +27,7 @@ import {
   validateInvoiceForm,
   checkExistingInvoiceForJob,
 } from '../../../../services/invoiceService';
+import {useSoftInputAdjustNothing} from '../../../../hooks/useSoftInputMode';
 
 const InvoiceForm = ({route, navigation}: any) => {
   const {item} = route.params;
@@ -45,7 +45,25 @@ const InvoiceForm = ({route, navigation}: any) => {
     toEmail: '',
   });
   const [errors, setErrors] = useState<InvoiceValidationErrors>({});
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  useSoftInputAdjustNothing();
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener('keyboardDidShow', (e) => {
+      setKeyboardVisible(true);
+      setKeyboardHeight(e.endCoordinates.height);
+    });
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardHeight(0);
+      setKeyboardVisible(false);
+    });
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   useEffect(() => {
     loadDraft();
@@ -121,13 +139,6 @@ const InvoiceForm = ({route, navigation}: any) => {
     navigation.navigate('InvoicePreview', {formData: form, jobItem: item});
   };
 
-  const onDateChange = (_event: any, selectedDate?: Date) => {
-    setShowDatePicker(Platform.OS === 'ios');
-    if (selectedDate) {
-      updateField('dueDate', selectedDate);
-    }
-  };
-
   if (loading) {
     return (
       <View style={[styles.safeArea, {alignItems: 'center', justifyContent: 'center'}]}>
@@ -159,13 +170,16 @@ const InvoiceForm = ({route, navigation}: any) => {
         </View>
       </LinearGradient>
 
-      <KeyboardAvoidingView
-        style={{flex: 1}}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollContent,
+          keyboardHeight > 0 && {
+            paddingBottom: keyboardHeight + RFPercentage(12),
+          },
+        ]}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive">
           {/* Invoice ID (read-only) */}
           <View style={styles.sectionCard}>
             <View style={styles.sectionHeader}>
@@ -181,7 +195,7 @@ const InvoiceForm = ({route, navigation}: any) => {
             </View>
           </View>
 
-          {/* Due Date */}
+          {/* Date */}
           <View style={styles.sectionCard}>
             <View style={styles.sectionHeader}>
               <MaterialCommunityIcons
@@ -189,25 +203,13 @@ const InvoiceForm = ({route, navigation}: any) => {
                 size={RFPercentage(2.2)}
                 color={Colors.gradient1}
               />
-              <Text style={styles.sectionTitle}>Due Date</Text>
+              <Text style={styles.sectionTitle}>Date</Text>
             </View>
-            <TouchableOpacity
-              onPress={() => setShowDatePicker(true)}
-              style={styles.inputContainer}>
-              <Text style={styles.inputText}>
+            <View style={[styles.inputContainer, styles.disabledInput]}>
+              <Text style={styles.disabledText}>
                 {moment(form.dueDate).format('MMM DD, YYYY')}
               </Text>
-              <Feather name="calendar" size={18} color={Colors.secondaryText} />
-            </TouchableOpacity>
-            {showDatePicker && (
-              <DateTimePicker
-                value={form.dueDate}
-                mode="date"
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                onChange={onDateChange}
-                minimumDate={new Date()}
-              />
-            )}
+            </View>
           </View>
 
           {/* From Section */}
@@ -221,18 +223,14 @@ const InvoiceForm = ({route, navigation}: any) => {
               <Text style={styles.sectionTitle}>From</Text>
             </View>
             <FormField
-              label="Company Name"
+              label="Name"
               value={form.cleanerCompanyName}
-              onChangeText={v => updateField('cleanerCompanyName', v)}
+              onChangeText={v => {
+                updateField('cleanerCompanyName', v);
+                updateField('fromName', v);
+              }}
               error={errors.cleanerCompanyName}
-              placeholder="Your company name"
-            />
-            <FormField
-              label="Full Name"
-              value={form.fromName}
-              onChangeText={v => updateField('fromName', v)}
-              error={errors.fromName}
-              placeholder="Your full name"
+              placeholder="Company / Business name"
             />
             <FormField
               label="Email"
@@ -308,17 +306,15 @@ const InvoiceForm = ({route, navigation}: any) => {
 
           <View style={{height: RFPercentage(2)}} />
         </ScrollView>
-      </KeyboardAvoidingView>
-
-      {/* Bottom Action */}
-      <View style={styles.actionBar}>
-        <GradientButton
-          title="Preview Invoice"
-          onPress={handlePreview}
-          style={styles.previewButton}
-          textStyle={styles.previewButtonText}
-        />
-      </View>
+        {/* Bottom Action */}
+        <View style={styles.actionBar}>
+            <GradientButton
+              title="Preview Invoice"
+              onPress={handlePreview}
+              style={styles.previewButton}
+              textStyle={styles.previewButtonText}
+            />
+          </View>
     </View>
   );
 };
@@ -352,7 +348,7 @@ const FormField = ({
       <TextInput
         style={[
           styles.textInput,
-          prefix && {flex: 1, borderWidth: 0, paddingLeft: 0},
+          prefix && {paddingLeft: 0},
           multiline && {height: RFPercentage(10), textAlignVertical: 'top'},
         ]}
         value={value}
@@ -483,10 +479,7 @@ const styles = StyleSheet.create({
     color: Colors.inputTextColor,
   },
   textInput: {
-    backgroundColor: Colors.inputBg,
-    borderWidth: 1,
-    borderColor: Colors.inputBorder,
-    borderRadius: RFPercentage(1.2),
+    flex: 1,
     paddingHorizontal: RFPercentage(1.5),
     paddingVertical: RFPercentage(1.2),
     fontFamily: Fonts.fontRegular,

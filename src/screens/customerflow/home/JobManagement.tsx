@@ -50,6 +50,8 @@ const JobManagement = ({route, navigation}: any) => {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [jobData, setJobData] = useState<any>(null);
+  const [cancelledCleaners, setCancelledCleaners] = useState<string[]>([]);
+  const [selfCancelledCleaners, setSelfCancelledCleaners] = useState<string[]>([]);
   const [confirmModal, setConfirmModal] = useState<{
     visible: boolean;
     title: string;
@@ -57,7 +59,6 @@ const JobManagement = ({route, navigation}: any) => {
     iconName: string;
     iconColor: string;
     buttonTitle: string;
-    hidePrimaryButton?: boolean;
     onConfirm: () => void;
   }>({
     visible: false,
@@ -79,6 +80,8 @@ const JobManagement = ({route, navigation}: any) => {
       }
       const job = jobDoc.data();
       setJobData(job);
+      setCancelledCleaners(job?.cancelledCleaners || []);
+      setSelfCancelledCleaners(job?.selfCancelledCleaners || []);
 
       // Fetch confirmed cleaner info
       if (job?.confirmedCleaner) {
@@ -186,7 +189,7 @@ const JobManagement = ({route, navigation}: any) => {
     setConfirmModal({
       visible: true,
       title: 'Confirm Cleaner',
-      subTitle: `Are you sure you want to hire ${cleaner.name} for this job?`,
+      subTitle: `Once you confirm ${cleaner.name}, your job listing will no longer be visible to other cleaners. Are you sure you want to proceed?`,
       iconName: 'account-check',
       iconColor: Colors.success,
       buttonTitle: 'Confirm',
@@ -249,11 +252,10 @@ const JobManagement = ({route, navigation}: any) => {
     setConfirmModal({
       visible: true,
       title: 'Cancel Cleaner',
-      subTitle: `Are you sure you want to remove ${confirmedCleaner.name} from this job?`,
+      subTitle: `If you cancel ${confirmedCleaner.name}, your job will become active again. Other cleaners will be able to apply, and previously applied cleaners will still be visible in the applicants list — you can confirm any of them. Are you sure?`,
       iconName: 'account-remove',
       iconColor: Colors.red500,
-      buttonTitle: 'Yes, Cancel',
-      hidePrimaryButton: true,
+      buttonTitle: 'Yes',
       onConfirm: async () => {
         setConfirmModal(prev => ({...prev, visible: false}));
         setActionLoading('cancel');
@@ -363,9 +365,11 @@ const JobManagement = ({route, navigation}: any) => {
   const renderCleanerCard = ({
     item,
     isConfirmed,
+    isWithdrawn,
   }: {
     item: CleanerData;
     isConfirmed: boolean;
+    isWithdrawn?: boolean;
   }) => (
     <View style={styles.cleanerCard}>
       <View style={styles.cleanerInfo}>
@@ -380,17 +384,31 @@ const JobManagement = ({route, navigation}: any) => {
           <Text style={styles.cleanerEmail} numberOfLines={1}>
             {item.email}
           </Text>
-          {isConfirmed && (
+          {isWithdrawn && (
+            <View style={styles.cancelledBeforeBadge}>
+              <MaterialCommunityIcons
+                name="account-cancel"
+                size={RFPercentage(1.5)}
+                color={Colors.red500}
+              />
+              <Text style={styles.cancelledBeforeBadgeText}>
+                Cleaner left this job before
+              </Text>
+            </View>
+          )}
+        </View>
+        {isConfirmed && (
+          <View style={styles.tagsContainer}>
             <View style={styles.confirmedBadge}>
               <MaterialCommunityIcons
                 name="check-decagram"
-                size={RFPercentage(1.4)}
+                size={RFPercentage(1.5)}
                 color={Colors.success}
               />
               <Text style={styles.confirmedBadgeText}>Confirmed</Text>
             </View>
-          )}
-        </View>
+          </View>
+        )}
       </View>
 
       <View style={styles.actionButtons}>
@@ -400,7 +418,7 @@ const JobManagement = ({route, navigation}: any) => {
           onPress={() => handleViewProfile(item.uid)}>
           <MaterialCommunityIcons
             name="account-eye"
-            size={RFPercentage(1.8)}
+            size={RFPercentage(2)}
             color={Colors.gradient1}
           />
           <Text style={styles.viewProfileText}>View Profile</Text>
@@ -412,7 +430,7 @@ const JobManagement = ({route, navigation}: any) => {
           onPress={() => handleMessageCleaner(item)}>
           <MaterialCommunityIcons
             name="message-text-outline"
-            size={RFPercentage(1.8)}
+            size={RFPercentage(2)}
             color={Colors.primaryBlue}
           />
           <Text style={styles.messageBtnText}>Message</Text>
@@ -430,7 +448,7 @@ const JobManagement = ({route, navigation}: any) => {
               <>
                 <MaterialCommunityIcons
                   name="close-circle-outline"
-                  size={RFPercentage(1.8)}
+                  size={RFPercentage(2)}
                   color={Colors.red500}
                 />
                 <Text style={styles.cancelBtnText}>Cancel</Text>
@@ -449,7 +467,7 @@ const JobManagement = ({route, navigation}: any) => {
               <>
                 <MaterialCommunityIcons
                   name="check-circle-outline"
-                  size={RFPercentage(1.8)}
+                  size={RFPercentage(2)}
                   color={Colors.success}
                 />
                 <Text style={styles.confirmBtnText}>Confirm</Text>
@@ -516,7 +534,11 @@ const JobManagement = ({route, navigation}: any) => {
                     />
                     <Text style={styles.sectionTitle}>Confirmed Cleaner</Text>
                   </View>
-                  {renderCleanerCard({item: confirmedCleaner, isConfirmed: true})}
+                  {renderCleanerCard({
+                    item: confirmedCleaner,
+                    isConfirmed: true,
+                    isWithdrawn: cancelledCleaners.includes(confirmedCleaner.uid) || selfCancelledCleaners.includes(confirmedCleaner.uid),
+                  })}
                 </View>
               ) : (
                 /* ── Applicants Section (shown when no cleaner is confirmed yet) ── */
@@ -545,7 +567,11 @@ const JobManagement = ({route, navigation}: any) => {
                   ) : (
                     applicants.map(applicant => (
                       <View key={applicant.uid}>
-                        {renderCleanerCard({item: applicant, isConfirmed: false})}
+                        {renderCleanerCard({
+                          item: applicant,
+                          isConfirmed: false,
+                          isWithdrawn: cancelledCleaners.includes(applicant.uid) || selfCancelledCleaners.includes(applicant.uid),
+                        })}
                       </View>
                     ))
                   )}
@@ -583,9 +609,8 @@ const JobManagement = ({route, navigation}: any) => {
               iconName={confirmModal.iconName}
               iconColor={confirmModal.iconColor}
               buttonTitle={confirmModal.buttonTitle}
-              hidePrimaryButton={confirmModal.hidePrimaryButton}
-              onPress3={() => setConfirmModal(prev => ({...prev, visible: false}))}
-              onPress={confirmModal.onConfirm}
+              cancelButtonTitle="No"
+              onPress={() => setConfirmModal(prev => ({...prev, visible: false}))}
               onPress2={confirmModal.onConfirm}
             />
           </View>
@@ -675,53 +700,69 @@ const styles = StyleSheet.create({
   cleanerCard: {
     backgroundColor: Colors.white,
     borderRadius: RFPercentage(1.5),
-    padding: RFPercentage(1.5),
-    marginBottom: RFPercentage(1),
+    padding: RFPercentage(2),
+    marginBottom: RFPercentage(1.2),
     borderWidth: 1,
     borderColor: Colors.lightGrayBg,
   },
   cleanerInfo: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: RFPercentage(1.2),
+    alignItems: 'flex-start',
+    marginBottom: RFPercentage(1.5),
   },
   cleanerAvatar: {
-    width: RFPercentage(6),
-    height: RFPercentage(6),
-    borderRadius: RFPercentage(3),
+    width: RFPercentage(7),
+    height: RFPercentage(7),
+    borderRadius: RFPercentage(3.5),
     borderWidth: 2,
     borderColor: Colors.gradient1,
-    marginRight: RFPercentage(1.2),
+    marginRight: RFPercentage(1.4),
   },
   cleanerDetails: {
     flex: 1,
   },
   cleanerName: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(2),
     color: Colors.primaryText,
   },
   cleanerEmail: {
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.6),
     color: Colors.secondaryText,
-    marginTop: RFPercentage(0.2),
+    marginTop: RFPercentage(0.3),
+  },
+  tagsContainer: {
+    alignItems: 'flex-end',
+    gap: RFPercentage(0.5),
+    justifyContent: 'flex-start',
+    marginTop: -RFPercentage(1.5),
+    marginRight: -RFPercentage(1),
   },
   confirmedBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.successBg,
-    paddingHorizontal: RFPercentage(0.8),
-    paddingVertical: RFPercentage(0.3),
-    borderRadius: RFPercentage(0.5),
-    marginTop: RFPercentage(0.4),
-    alignSelf: 'flex-start',
+    paddingHorizontal: RFPercentage(0.9),
+    paddingVertical: RFPercentage(0.4),
+    borderRadius: RFPercentage(0.6),
     gap: RFPercentage(0.3),
   },
   confirmedBadgeText: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.2),
+    fontSize: RFPercentage(1.3),
     color: Colors.success,
+  },
+  cancelledBeforeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: RFPercentage(0.3),
+    marginTop: RFPercentage(0.3),
+  },
+  cancelledBeforeBadgeText: {
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.3),
+    color: Colors.red500,
   },
   actionButtons: {
     flexDirection: 'row',
@@ -733,13 +774,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: Colors.skyBlueBg,
-    paddingVertical: RFPercentage(1),
+    paddingVertical: RFPercentage(1.3),
     borderRadius: RFPercentage(0.8),
     gap: RFPercentage(0.4),
   },
   viewProfileText: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.5),
     color: Colors.gradient1,
   },
   messageBtn: {
@@ -748,13 +789,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#e8f0fe',
-    paddingVertical: RFPercentage(1),
+    paddingVertical: RFPercentage(1.3),
     borderRadius: RFPercentage(0.8),
     gap: RFPercentage(0.4),
   },
   messageBtnText: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.5),
     color: Colors.primaryBlue,
   },
   confirmBtn: {
@@ -763,13 +804,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: Colors.successBg,
-    paddingVertical: RFPercentage(1),
+    paddingVertical: RFPercentage(1.3),
     borderRadius: RFPercentage(0.8),
     gap: RFPercentage(0.4),
   },
   confirmBtnText: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.5),
     color: Colors.success,
   },
   cancelBtn: {
@@ -778,13 +819,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: Colors.redBg100,
-    paddingVertical: RFPercentage(1),
+    paddingVertical: RFPercentage(1.3),
     borderRadius: RFPercentage(0.8),
     gap: RFPercentage(0.4),
   },
   cancelBtnText: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.5),
     color: Colors.red500,
   },
   emptySection: {

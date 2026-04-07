@@ -50,7 +50,7 @@ export const createInvoiceDraftFromJob = (
     jobPostName: job.title || '',
     description: job.description || '',
     price: job.priceRange || '',
-    fromName: cleanerData?.name || '',
+    fromName: cleanerData?.companyName || cleanerData?.name || '',
     fromEmail: cleanerData?.email || '',
     cleanerCompanyName: cleanerData?.companyName || cleanerData?.name || '',
     toName: customerData?.name || '',
@@ -67,14 +67,15 @@ export const validateInvoiceForm = (
 
   if (!form.jobPostName.trim()) errors.jobPostName = 'Job name is required';
   if (!form.price.trim()) errors.price = 'Price is required';
-  if (!form.fromName.trim()) errors.fromName = 'Your name is required';
+  if (!form.cleanerCompanyName.trim())
+    errors.cleanerCompanyName = 'Name is required';
   if (!form.fromEmail.trim()) {
     errors.fromEmail = 'Your email is required';
   } else if (!EMAIL_REGEX.test(form.fromEmail)) {
     errors.fromEmail = 'Invalid email format';
   }
   if (!form.cleanerCompanyName.trim())
-    errors.cleanerCompanyName = 'Company name is required';
+    errors.cleanerCompanyName = 'Name is required';
   if (!form.toName.trim()) errors.toName = 'Customer name is required';
   if (!form.toEmail.trim()) {
     errors.toEmail = 'Customer email is required';
@@ -112,20 +113,20 @@ export const generateInvoiceHtml = (invoice: InvoiceFormData): string => {
     .details-table td { padding: 16px; border-bottom: 1px solid #F1F5F9; font-size: 14px; color: #475569; }
     .details-table .description { color: #475569; font-size: 13px; margin-top: 4px; }
     .total-section { display: flex; justify-content: flex-end; margin-top: 16px; }
-    .total-box { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 20px 32px; min-width: 250px; }
+    .total-box { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px 32px; min-width: 250px; }
     .total-row { display: flex; justify-content: space-between; align-items: center; }
     .total-label { font-size: 16px; font-weight: 600; color: #475569; }
     .total-amount { font-size: 28px; font-weight: 700; color: #407BFF; }
-    .due-date-section { margin-bottom: 32px; padding: 12px 16px; background: #FFFBEB; border-left: 4px solid #F59E0B; border-radius: 0 4px 4px 0; }
-    .due-date-section span { font-size: 13px; color: #92400E; }
-    .due-date-section strong { color: #78350F; }
+    .due-date-section { margin-bottom: 32px; padding: 12px 16px; background: #F8FAFC; border-left: 4px solid #94A3B8; border-radius: 0 4px 4px 0; }
+    .due-date-section span { font-size: 13px; color: #475569; }
+    .due-date-section strong { color: #1E293B; }
     .footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid #E2E8F0; text-align: center; font-size: 12px; color: #475569; }
   </style>
 </head>
 <body>
   <div class="invoice-header">
     <div>
-      <div class="company-name">Cleaner Choice</div>
+      <div class="company-name">Cleaners Choice</div>
       <p style="font-size:13px;color:#475569;">Professional cleaning service</p>
     </div>
     <div>
@@ -135,7 +136,7 @@ export const generateInvoiceHtml = (invoice: InvoiceFormData): string => {
   </div>
 
   <div class="due-date-section">
-    <span>Due Date: <strong>${escapeHtml(dueDate)}</strong></span>
+    <span>Date: <strong>${escapeHtml(dueDate)}</strong></span>
   </div>
 
   <div class="info-section">
@@ -145,7 +146,7 @@ export const generateInvoiceHtml = (invoice: InvoiceFormData): string => {
       <p>${escapeHtml(invoice.fromEmail)}</p>
     </div>
     <div class="info-block" style="text-align:right;">
-      <h3>Bill To</h3>
+      <h3>Billed To</h3>
       <p class="name">${escapeHtml(invoice.toName)}</p>
       <p>${escapeHtml(invoice.toEmail)}</p>
     </div>
@@ -181,8 +182,7 @@ export const generateInvoiceHtml = (invoice: InvoiceFormData): string => {
   </div>
 
   <div class="footer">
-    <p>Thank you for choosing Cleaner Choice</p>
-    <p style="margin-top:4px;">Powered by Cleaner Choice App</p>
+    <p style="margin-top:4px;">Powered by Cleaners Choice App</p>
   </div>
 </body>
 </html>`;

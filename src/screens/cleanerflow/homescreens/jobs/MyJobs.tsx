@@ -290,7 +290,7 @@ const MyJobs = ({navigation}: any) => {
       subTitle: `Are you sure you want to cancel "${job.title}"?`,
       iconName: 'cancel',
       iconColor: Colors.red500,
-      buttonTitle: 'Yes, Cancel',
+      buttonTitle: 'Yes',
       onConfirm: async () => {
         setConfirmModal(prev => ({...prev, visible: false}));
         setCancelLoading(job.id);
@@ -299,6 +299,7 @@ const MyJobs = ({navigation}: any) => {
                 confirmedCleaner: null,
                 status: 'active',
                 cancelledCleaners: firestore.FieldValue.arrayUnion(user.uid),
+                selfCancelledCleaners: firestore.FieldValue.arrayUnion(user.uid),
               });
 
               // Send notification to job owner
@@ -547,16 +548,6 @@ const MyJobs = ({navigation}: any) => {
               footer={
                 activeTab === 'completed' && !invoicedJobIds.has(item.id) ? (
                   <View style={styles.completedFooter}>
-                    {item.autoCompleted && (
-                      <View style={styles.autoConfirmedTag}>
-                        <MaterialCommunityIcons
-                          name="clock-check-outline"
-                          size={RFPercentage(1.6)}
-                          color={Colors.amber500}
-                        />
-                        <Text style={styles.autoConfirmedText}>Auto-completed</Text>
-                      </View>
-                    )}
                     <TouchableOpacity
                       activeOpacity={0.7}
                       onPress={() => navigation.navigate('InvoiceForm', {item})}
@@ -616,6 +607,7 @@ const MyJobs = ({navigation}: any) => {
               iconName={confirmModal.iconName}
               iconColor={confirmModal.iconColor}
               buttonTitle={confirmModal.buttonTitle}
+              cancelButtonTitle="No"
               onPress={() =>
                 setConfirmModal(prev => ({...prev, visible: false}))
               }

@@ -347,9 +347,6 @@ const Messages = ({navigation}: any) => {
             <Text style={styles.messagesTitle}>
               {unread ? 'Unread Messages' : 'All Conversations'}
             </Text>
-            <Text style={styles.messagesCount}>
-              {chats.length} chat{chats.length !== 1 ? 's' : ''}
-            </Text>
           </View>
 
           {loading2 ? (
@@ -546,14 +543,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   messagesSection: {
-    marginTop: 24,
+    marginTop: 15,
     paddingHorizontal: 20,
   },
   messagesHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: -10,
   },
   messagesTitle: {
     fontSize: RFPercentage(1.8),

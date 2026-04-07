@@ -19,7 +19,6 @@ import InvoiceCard from '../../../../components/InvoiceCard';
 import NotFound from '../../../../components/NotFound';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Feather from 'react-native-vector-icons/Feather';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import DatePicker from 'react-native-date-picker';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
@@ -45,11 +44,14 @@ const Invoices = ({navigation}: any) => {
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [showDateFilter, setShowDateFilter] = useState(false);
-  const [filterDate, setFilterDate] = useState<Date | null>(null);
-  const [filterMode, setFilterMode] = useState<'day' | 'month' | 'year'>('day');
-  const [showFilterPicker, setShowFilterPicker] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  // Date range filter
+  const [showFilterPanel, setShowFilterPanel] = useState(false);
+  const [dateFrom, setDateFrom] = useState<Date | null>(null);
+  const [dateTo, setDateTo] = useState<Date | null>(null);
+  const [showFromPicker, setShowFromPicker] = useState(false);
+  const [showToPicker, setShowToPicker] = useState(false);
 
   useExitAppOnBack();
 
@@ -95,21 +97,16 @@ const Invoices = ({navigation}: any) => {
   // Apply search filter
   let filtered = filterInvoices(allInvoices, searchQuery);
 
-  // Apply date filter
-  if (filterDate) {
+  // Apply date range filter
+  if (dateFrom || dateTo) {
     filtered = filtered.filter(inv => {
       const invDate = inv.createdAt?.toDate
         ? moment(inv.createdAt.toDate())
         : moment(inv.createdAt);
       if (!invDate.isValid()) return false;
-
-      if (filterMode === 'day') {
-        return invDate.isSame(moment(filterDate), 'day');
-      } else if (filterMode === 'month') {
-        return invDate.isSame(moment(filterDate), 'month');
-      } else {
-        return invDate.isSame(moment(filterDate), 'year');
-      }
+      if (dateFrom && invDate.isBefore(moment(dateFrom).startOf('day'))) return false;
+      if (dateTo && invDate.isAfter(moment(dateTo).endOf('day'))) return false;
+      return true;
     });
   }
 
@@ -157,30 +154,32 @@ const Invoices = ({navigation}: any) => {
     }
   };
 
-  const onDateFilterChange = (_event: any, selectedDate?: Date) => {
-    // iOS spinner stays inline until filter panel is closed
-    setShowFilterPicker(true);
-    if (selectedDate) {
-      setFilterDate(selectedDate);
-      setCurrentPage(1);
-    }
-  };
-
-  const onAndroidDateConfirm = (selectedDate: Date) => {
-    setShowFilterPicker(false);
-    setFilterDate(selectedDate);
+  const onFromDateConfirm = (selectedDate: Date) => {
+    setShowFromPicker(false);
+    setDateFrom(selectedDate);
     setCurrentPage(1);
   };
 
-  const onAndroidDateCancel = () => {
-    setShowFilterPicker(false);
+  const onToDateConfirm = (selectedDate: Date) => {
+    setShowToPicker(false);
+    setDateTo(selectedDate);
+    setCurrentPage(1);
   };
 
   const clearDateFilter = () => {
-    setFilterDate(null);
-    setShowDateFilter(false);
+    setDateFrom(null);
+    setDateTo(null);
+    setCurrentPage(1);
+    setShowFilterPanel(false);
+  };
+
+  const resetDates = () => {
+    setDateFrom(null);
+    setDateTo(null);
     setCurrentPage(1);
   };
+
+  const hasActiveFilters = !!dateFrom || !!dateTo;
 
   return (
     <View style={styles.container}>
@@ -251,83 +250,71 @@ const Invoices = ({navigation}: any) => {
               </View>
               <TouchableOpacity
                 activeOpacity={0.7}
-                onPress={() => setShowDateFilter(!showDateFilter)}
+                onPress={() => {
+                  if (hasActiveFilters) {
+                    clearDateFilter();
+                  } else {
+                    setShowFilterPanel(prev => !prev);
+                  }
+                }}
                 style={[
                   styles.filterButton,
-                  filterDate && styles.filterButtonActive,
+                  (showFilterPanel || hasActiveFilters) && styles.filterButtonActive,
                 ]}>
                 <MaterialCommunityIcons
-                  name="filter-outline"
+                  name={hasActiveFilters ? 'filter-off-outline' : 'filter-outline'}
                   size={RFPercentage(2.2)}
-                  color={filterDate ? Colors.white : Colors.gradient1}
+                  color={(showFilterPanel || hasActiveFilters) ? Colors.white : Colors.gradient1}
                 />
               </TouchableOpacity>
             </View>
 
-            {/* Date Filter Panel */}
-            {showDateFilter && (
-              <View style={styles.filterPanel}>
-                <View style={styles.filterModeRow}>
-                  {(['day', 'month', 'year'] as const).map(mode => (
-                    <TouchableOpacity
-                      key={mode}
-                      activeOpacity={0.7}
-                      onPress={() => {
-                        setFilterMode(mode);
-                        setFilterDate(null);
-                      }}
-                      style={[
-                        styles.filterModeBtn,
-                        filterMode === mode && styles.filterModeBtnActive,
-                      ]}>
-                      <Text
-                        style={[
-                          styles.filterModeText,
-                          filterMode === mode && styles.filterModeTextActive,
-                        ]}>
-                        {mode.charAt(0).toUpperCase() + mode.slice(1)}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
+            {/* Date Range */}
+            {showFilterPanel && (
+            <View style={styles.dateRangeContainer}>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => setShowFromPicker(true)}
+                style={styles.dateRangeButton}>
+                <Feather name="calendar" size={RFPercentage(1.8)} color={Colors.gradient1} />
+                <Text style={styles.dateRangeText}>
+                  {dateFrom ? moment(dateFrom).format('MMM DD, YYYY') : 'From Date'}
+                </Text>
+              </TouchableOpacity>
 
-                <View style={styles.filterActions}>
-                  <TouchableOpacity
-                    onPress={() => setShowFilterPicker(true)}
-                    style={styles.selectDateBtn}>
-                    <Feather
-                      name="calendar"
-                      size={16}
-                      color={Colors.gradient1}
-                    />
-                    <Text style={styles.selectDateText}>
-                      {filterDate
-                        ? filterMode === 'day'
-                          ? moment(filterDate).format('MMM DD, YYYY')
-                          : filterMode === 'month'
-                          ? moment(filterDate).format('MMM YYYY')
-                          : moment(filterDate).format('YYYY')
-                        : `Select ${filterMode}`}
-                    </Text>
-                  </TouchableOpacity>
-                  {filterDate && (
-                    <TouchableOpacity
-                      onPress={clearDateFilter}
-                      style={styles.clearFilterBtn}>
-                      <Feather name="x" size={16} color={Colors.red500} />
-                      <Text style={styles.clearFilterText}>Clear</Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
+              <View style={styles.dateRangeSeparator}>
+                <Feather name="arrow-right" size={RFPercentage(1.8)} color={Colors.secondaryText} />
+              </View>
 
-                {showFilterPicker && Platform.OS === 'ios' && (
-                  <DateTimePicker
-                    value={filterDate || new Date()}
-                    mode="date"
-                    display="spinner"
-                    onChange={onDateFilterChange}
-                  />
-                )}
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => setShowToPicker(true)}
+                style={styles.dateRangeButton}>
+                <Feather name="calendar" size={RFPercentage(1.8)} color={Colors.gradient1} />
+                <Text style={styles.dateRangeText}>
+                  {dateTo ? moment(dateTo).format('MMM DD, YYYY') : 'To Date'}
+                </Text>
+              </TouchableOpacity>
+
+            </View>
+            )}
+
+            {/* Active filters chip */}
+            {hasActiveFilters && (
+              <View style={styles.filterChip}>
+                <Feather name="filter" size={14} color={Colors.gradient1} />
+                <Text style={styles.filterChipText}>
+                  {[
+                    dateFrom ? `From ${moment(dateFrom).format('MMM DD, YYYY')}` : '',
+                    dateTo ? `To ${moment(dateTo).format('MMM DD, YYYY')}` : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}{' '}
+                  — {filtered.length} invoice{filtered.length !== 1 ? 's' : ''}
+                </Text>
+                <TouchableOpacity onPress={resetDates}>
+                  <Feather name="x" size={16} color={Colors.red500} />
+                </TouchableOpacity>
               </View>
             )}
 
@@ -363,7 +350,7 @@ const Invoices = ({navigation}: any) => {
           ) : (
             <NotFound
               text={
-                searchQuery || filterDate
+                searchQuery || hasActiveFilters
                   ? 'No invoices match your filters'
                   : 'No invoices yet\nGenerate your first invoice from a completed job'
               }
@@ -434,17 +421,25 @@ const Invoices = ({navigation}: any) => {
         }
       />
 
-      {/* Android: use react-native-date-picker modal (native dialog doesn't crash) */}
-      {Platform.OS === 'android' && (
-        <DatePicker
-          modal
-          open={showFilterPicker}
-          date={filterDate || new Date()}
-          mode="date"
-          onConfirm={onAndroidDateConfirm}
-          onCancel={onAndroidDateCancel}
-        />
-      )}
+      {/* Date pickers */}
+      <DatePicker
+        modal
+        open={showFromPicker}
+        date={dateFrom || new Date()}
+        mode="date"
+        maximumDate={dateTo || undefined}
+        onConfirm={onFromDateConfirm}
+        onCancel={() => setShowFromPicker(false)}
+      />
+      <DatePicker
+        modal
+        open={showToPicker}
+        date={dateTo || new Date()}
+        mode="date"
+        minimumDate={dateFrom || undefined}
+        onConfirm={onToDateConfirm}
+        onCancel={() => setShowToPicker(false)}
+      />
     </View>
   );
 };
@@ -518,75 +513,56 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.gradient1,
     borderColor: Colors.gradient1,
   },
-  filterPanel: {
-    backgroundColor: Colors.white,
-    borderRadius: RFPercentage(1.5),
-    padding: RFPercentage(1.5),
+  dateRangeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: RFPercentage(1),
-    borderWidth: 1,
-    borderColor: Colors.lightGrayBg,
+    gap: RFPercentage(0.5),
   },
-  filterModeRow: {
-    flexDirection: 'row',
-    gap: RFPercentage(0.8),
-    marginBottom: RFPercentage(1.2),
-  },
-  filterModeBtn: {
-    flex: 1,
-    paddingVertical: RFPercentage(0.8),
-    borderRadius: RFPercentage(0.8),
-    backgroundColor: Colors.gray50,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: Colors.lightGrayBg,
-  },
-  filterModeBtnActive: {
-    backgroundColor: Colors.gradient1,
-    borderColor: Colors.gradient1,
-  },
-  filterModeText: {
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.4),
-    color: Colors.secondaryText,
-  },
-  filterModeTextActive: {
-    color: Colors.white,
-  },
-  filterActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: RFPercentage(1),
-  },
-  selectDateBtn: {
+  dateRangeButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: RFPercentage(0.6),
-    backgroundColor: Colors.inputBg,
+    backgroundColor: Colors.white,
+    borderRadius: RFPercentage(1.2),
+    paddingHorizontal: RFPercentage(1.2),
+    height: RFPercentage(5),
     borderWidth: 1,
     borderColor: Colors.inputBorder,
-    borderRadius: RFPercentage(0.8),
-    paddingHorizontal: RFPercentage(1.2),
-    paddingVertical: RFPercentage(1),
+    gap: RFPercentage(0.6),
   },
-  selectDateText: {
+  dateRangeText: {
+    flex: 1,
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.5),
+    color: Colors.inputTextColor,
+  },
+  dateRangeSeparator: {
+    paddingHorizontal: RFPercentage(0.3),
+  },
+  dateRangeClear: {
+    width: RFPercentage(4),
+    height: RFPercentage(5),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  filterChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: RFPercentage(0.8),
+    backgroundColor: Colors.white,
+    borderRadius: RFPercentage(1),
+    paddingHorizontal: RFPercentage(1.5),
+    paddingVertical: RFPercentage(1),
+    marginTop: RFPercentage(1),
+    borderWidth: 1,
+    borderColor: Colors.inputBorder,
+  },
+  filterChipText: {
+    flex: 1,
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.5),
     color: Colors.primaryText,
-  },
-  clearFilterBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: RFPercentage(1),
-    paddingVertical: RFPercentage(0.8),
-    borderRadius: RFPercentage(0.8),
-    backgroundColor: Colors.redBg50,
-  },
-  clearFilterText: {
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.4),
-    color: Colors.red500,
   },
   resultHeader: {
     marginTop: RFPercentage(2),

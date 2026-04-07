@@ -12,7 +12,7 @@ export const showToast = ({
     text1: title,
     text2: message,
     position: 'top',
-    visibilityTime: 5000,
+    visibilityTime: 3000,
     topOffset: RFPercentage(8),
     autoHide: true,
   });

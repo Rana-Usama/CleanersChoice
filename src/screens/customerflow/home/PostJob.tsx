@@ -13,7 +13,7 @@ import {
   Dimensions,
   TextInput,
 } from 'react-native';
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, Icons} from '../../../constants/Themes';
 import HeaderBack from '../../../components/HeaderBack';
@@ -33,6 +33,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import Feather from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import {useSoftInputAdjustNothing} from '../../../hooks/useSoftInputMode';
 
 const {width} = Dimensions.get('window');
 
@@ -134,7 +135,27 @@ const PostJob = ({route}: any) => {
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
   const [selectedService, setSelectedService] = useState<any>(null);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const scrollViewRef = useRef<ScrollView>(null);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
   const userLocation = useSelector((state: any) => state?.location?.location);
+
+  useSoftInputAdjustNothing();
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener('keyboardDidShow', (e) => {
+      setKeyboardVisible(true);
+      setKeyboardHeight(e.endCoordinates.height);
+    });
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardHeight(0);
+      setKeyboardVisible(false);
+    });
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   const handleSelectedItem = (item: any) => {
     setSelectedType(item.label);
@@ -368,9 +389,16 @@ const PostJob = ({route}: any) => {
       </LinearGradient>
 
       <ScrollView
+        ref={scrollViewRef}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContainer}
-        keyboardShouldPersistTaps="always">
+        contentContainerStyle={[
+          styles.scrollContainer,
+          keyboardHeight > 0 && {
+            paddingBottom: keyboardHeight + RFPercentage(12),
+          },
+        ]}
+        keyboardShouldPersistTaps="always"
+        keyboardDismissMode="interactive">
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.contentContainer}>
             {/* Step Indicator */}
@@ -667,30 +695,30 @@ const PostJob = ({route}: any) => {
 
       {/* Fixed bottom action bar */}
       <View style={styles.bottomBar}>
-        {step === 1 ? (
-          <GradientButton
-            title="Continue"
-            style={styles.bottomBarButton}
-            onPress={handleNext}
-            loading={loading}
-          />
-        ) : (
-          <View style={styles.actionButtons}>
-            <TouchableOpacity
-              onPress={() => setStep(1)}
-              style={styles.backButtonSecondary}>
-              <Text style={styles.backButtonText}>Back</Text>
-            </TouchableOpacity>
+          {step === 1 ? (
             <GradientButton
-              title={jobId ? 'Update Job' : 'Post Job Now'}
-              style={styles.postButton}
-              onPress={postJob}
+              title="Continue"
+              style={styles.bottomBarButton}
+              onPress={handleNext}
               loading={loading}
-              disabled={loading}
-              textStyle={{fontSize: RFPercentage(1.9)}}
             />
-          </View>
-        )}
+          ) : (
+            <View style={styles.actionButtons}>
+              <TouchableOpacity
+                onPress={() => setStep(1)}
+                style={styles.backButtonSecondary}>
+                <Text style={styles.backButtonText}>Back</Text>
+              </TouchableOpacity>
+              <GradientButton
+                title={jobId ? 'Update Job' : 'Post Job Now'}
+                style={styles.postButton}
+                onPress={postJob}
+                loading={loading}
+                disabled={loading}
+                textStyle={{fontSize: RFPercentage(1.9)}}
+              />
+            </View>
+          )}
       </View>
     </View>
   );
