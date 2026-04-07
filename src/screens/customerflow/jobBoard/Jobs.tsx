@@ -40,6 +40,7 @@ interface Job {
 const Jobs = ({navigation}: any) => {
   const [active, setActive] = useState(true);
   const [completed, setCompleted] = useState(false);
+  const [expired, setExpired] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [Jobs, setJobs] = useState<Job[]>([]);
   const [status, setStatus] = useState('active');
@@ -52,6 +53,7 @@ const Jobs = ({navigation}: any) => {
   const [jobStats, setJobStats] = useState({
     active: 0,
     completed: 0,
+    expired: 0,
     total: 0,
   });
 
@@ -82,12 +84,21 @@ const Jobs = ({navigation}: any) => {
     setStatus('active');
     setActive(true);
     setCompleted(false);
+    setExpired(false);
   };
 
   const toggle2 = () => {
     setStatus('completed');
     setActive(false);
     setCompleted(true);
+    setExpired(false);
+  };
+
+  const toggle3 = () => {
+    setStatus('expired');
+    setActive(false);
+    setCompleted(false);
+    setExpired(true);
   };
 
   useFocusEffect(
@@ -106,7 +117,7 @@ const Jobs = ({navigation}: any) => {
       const activeSnapshot = await firestore()
         .collection('Jobs')
         .where('jobId', '==', user.uid)
-        .where('status', 'in', ['active', 'confirmed', 'pending_completion', 'expired', 'unconfirmed'])
+        .where('status', 'in', ['active', 'confirmed', 'pending_completion'])
         .get();
 
       const completedSnapshot = await firestore()
@@ -115,10 +126,17 @@ const Jobs = ({navigation}: any) => {
         .where('status', '==', 'completed')
         .get();
 
+      const expiredSnapshot = await firestore()
+        .collection('Jobs')
+        .where('jobId', '==', user.uid)
+        .where('status', 'in', ['expired', 'unconfirmed'])
+        .get();
+
       setJobStats({
         active: activeSnapshot.size,
         completed: completedSnapshot.size,
-        total: activeSnapshot.size + completedSnapshot.size,
+        expired: expiredSnapshot.size,
+        total: activeSnapshot.size + completedSnapshot.size + expiredSnapshot.size,
       });
     } catch (error) {
       console.error('Error fetching job stats:', error);
@@ -139,7 +157,13 @@ const Jobs = ({navigation}: any) => {
         query = query.where(
           'status',
           'in',
-          ['active', 'confirmed', 'pending_completion', 'expired', 'unconfirmed'],
+          ['active', 'confirmed', 'pending_completion'],
+        );
+      } else if (status === 'expired') {
+        query = query.where(
+          'status',
+          'in',
+          ['expired', 'unconfirmed'],
         );
       } else {
         query = query.where('status', '==', status);
@@ -255,7 +279,7 @@ const Jobs = ({navigation}: any) => {
                   />
                 </View>
                 <Text style={styles.statValue}>{jobStats.total}</Text>
-                <Text style={styles.statLabel}>Total Jobs</Text>
+                <Text style={styles.statLabel} numberOfLines={1}>Total Jobs</Text>
               </View>
 
               <View style={styles.statDivider} />
@@ -271,7 +295,7 @@ const Jobs = ({navigation}: any) => {
                 <Text style={[styles.statValue, styles.activeStatValue]}>
                   {jobStats.active}
                 </Text>
-                <Text style={styles.statLabel}>Active</Text>
+                <Text style={styles.statLabel} numberOfLines={1}>Active</Text>
               </View>
 
               <View style={styles.statDivider} />
@@ -284,7 +308,20 @@ const Jobs = ({navigation}: any) => {
                 <Text style={[styles.statValue, styles.completedStatValue]}>
                   {jobStats.completed}
                 </Text>
-                <Text style={styles.statLabel}>Completed</Text>
+                <Text style={styles.statLabel} numberOfLines={1}>Completed</Text>
+              </View>
+
+              <View style={styles.statDivider} />
+
+              <View style={styles.statItem}>
+                <View
+                  style={[styles.statIconContainer, {backgroundColor: Colors.orangeBg50}]}>
+                  <MaterialIcons name="timer-off" size={20} color={Colors.orange600} />
+                </View>
+                <Text style={[styles.statValue, {color: Colors.orange600}]}>
+                  {jobStats.expired}
+                </Text>
+                <Text style={styles.statLabel} numberOfLines={1}>Expired</Text>
               </View>
             </View>
           </LinearGradient>
@@ -347,6 +384,32 @@ const Jobs = ({navigation}: any) => {
                 </LinearGradient>
               </TouchableOpacity>
             </Animated.View>
+
+            <Animated.View style={{transform: [{scale: scaleAnim}]}}>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={toggle3}
+                style={[
+                  styles.filterButton,
+                  expired && styles.filterButtonActive,
+                ]}>
+                <LinearGradient
+                  colors={
+                    expired
+                      ? [Colors.gradient1, Colors.gradient2]
+                      : [Colors.white, Colors.lavenderFilterBg]
+                  }
+                  style={styles.filterGradient}>
+                  <Text
+                    style={[
+                      styles.filterButtonText,
+                      expired && styles.filterButtonTextActive,
+                    ]}>
+                    Expired
+                  </Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </Animated.View>
           </View>
 
           {/* Active Filter Info */}
@@ -356,6 +419,10 @@ const Jobs = ({navigation}: any) => {
               <Text style={styles.activeFilterText}>
                 {active
                   ? `Showing ${Jobs.length} active job${
+                      Jobs.length !== 1 ? 's' : ''
+                    }`
+                  : expired
+                  ? `Showing ${Jobs.length} expired job${
                       Jobs.length !== 1 ? 's' : ''
                     }`
                   : `Showing ${Jobs.length} completed job${
@@ -370,7 +437,7 @@ const Jobs = ({navigation}: any) => {
         <View style={styles.jobsSection}>
           <View style={styles.jobsHeader}>
             <Text style={styles.jobsTitle}>
-              {active ? 'Active Job Postings' : 'Completed Jobs'}
+              {active ? 'Active Job Postings' : expired ? 'Expired Jobs' : 'Completed Jobs'}
             </Text>
           </View>
 
@@ -385,6 +452,8 @@ const Jobs = ({navigation}: any) => {
                 text={
                   active
                     ? 'No active jobs posted\nPost a job to get started'
+                    : expired
+                    ? 'No expired jobs'
                     : 'No completed jobs yet'
                 }
               />
@@ -423,16 +492,18 @@ const Jobs = ({navigation}: any) => {
                       }}
                       delete={completed ? false : true}
                       footer={
-                        active &&
-                        (item?.status === 'expired' ||
-                          item?.status === 'unconfirmed') ? (
+                        expired ? (
                           <View style={styles.expiredTag}>
                             <MaterialIcons
                               name="error-outline"
                               size={16}
                               color={Colors.orange600}
                             />
-                            <Text style={styles.expiredTagText}>Expired</Text>
+                            <Text style={styles.expiredTagText}>
+                              {item?.status === 'unconfirmed'
+                                ? 'Unconfirmed'
+                                : 'Expired'}
+                            </Text>
                           </View>
                         ) : active && item?.status === 'active' ? (
                           <TouchableOpacity
@@ -595,13 +666,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   statIconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: '#E0EAFF',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   activeStatIcon: {
     backgroundColor: Colors.greenBg100,
@@ -623,8 +694,9 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.3),
     color: Colors.placeholderColor,
+    textAlign: 'center',
   },
   statDivider: {
     width: 1,

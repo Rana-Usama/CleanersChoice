@@ -18,6 +18,7 @@ interface props {
   loader?: boolean;
   subTitle: string;
   buttonTitle?: string;
+  cancelButtonTitle?: string;
   iconName?: string;
   iconColor?: string;
   hidePrimaryButton?: boolean;
@@ -69,19 +70,19 @@ const CustomModal = (props: props) => {
             activeOpacity={0.8}
             onPress={props.onPress3 ?? (() => {})}
             style={styles.splitButton}>
-            <Text style={styles.cancelButtonText}>Back</Text>
+            <Text style={styles.cancelButtonText}>Cancel</Text>
           </TouchableOpacity>
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={props.onPress ?? (() => {})}
             style={styles.splitCancelButton}>
-            <Text style={styles.splitCancelButtonText}>Cancel</Text>
+            <Text style={styles.splitCancelButtonText}>Remove</Text>
           </TouchableOpacity>
         </View>
       ) : (
         <View style={styles.buttonContainer}>
           <NextButton
-            title="Cancel"
+            title={props.cancelButtonTitle ?? 'Cancel'}
             onPress={props.onPress ?? (() => {})}
             style={styles.cancelButton}
             textStyle={styles.cancelButtonText}
@@ -195,7 +196,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: RFPercentage(5),
     borderRadius: RFPercentage(100),
-    backgroundColor: Colors.red500,
+    backgroundColor: Colors.white,
     borderWidth: 1,
     borderColor: Colors.red500,
     alignItems: 'center',
@@ -204,7 +205,7 @@ const styles = StyleSheet.create({
   splitCancelButtonText: {
     fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
-    color: Colors.white,
+    color: Colors.red500,
   },
   cancelButtonText: {
     fontSize: RFPercentage(1.7),

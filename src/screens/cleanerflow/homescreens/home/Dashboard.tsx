@@ -341,7 +341,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
             activeOpacity={0.8}
             onPress={() => navigation.navigate('Settings')}
             style={styles.profileIconButton}>
-            <Icon name="account-outline" size={RFPercentage(2.4)} color={Colors.white} />
+            <Icon name="cog-outline" size={RFPercentage(2.4)} color={Colors.white} />
           </TouchableOpacity>
           <TouchableOpacity
             activeOpacity={0.8}

@@ -49,7 +49,7 @@ export const autoDeleteExpiredJobs = onSchedule(
 );
 
 // Runs every hour — auto-completes confirmed/pending_completion jobs
-// 48 hours after their scheduled date
+// 72 hours after their scheduled date
 export const autoCompleteJobs = onSchedule(
   {
     schedule: "0 * * * *",
@@ -60,7 +60,7 @@ export const autoCompleteJobs = onSchedule(
   async () => {
     const db = admin.firestore();
     const now = new Date();
-    const msIn48Hours = 48 * 60 * 60 * 1000;
+    const msIn72Hours = 72 * 60 * 60 * 1000;
 
     try {
       // Query confirmed and pending_completion jobs
@@ -91,7 +91,7 @@ export const autoCompleteJobs = onSchedule(
         if (!parsedDate) continue;
 
         const elapsed = now.getTime() - parsedDate.getTime();
-        if (elapsed < msIn48Hours) continue;
+        if (elapsed < msIn72Hours) continue;
 
         // Auto-complete this job
         batch.update(doc.ref, {
@@ -128,7 +128,7 @@ export const autoCompleteJobs = onSchedule(
         await Promise.allSettled(notificationPromises);
         console.log(` Auto-completed ${count} jobs`);
       } else {
-        console.log("No jobs past 48hr threshold");
+        console.log("No jobs past 72hr threshold");
       }
     } catch (error) {
       console.error(" Error auto-completing jobs:", error);
@@ -183,7 +183,7 @@ async function sendAutoCompleteNotification(
       toUserId,
       jobId,
       title: "Job Auto-Completed",
-      body: `"${jobTitle}" has been automatically completed (48hrs past scheduled date)`,
+      body: `"${jobTitle}" has been automatically completed (72hrs past scheduled date)`,
       timestamp: admin.firestore.FieldValue.serverTimestamp(),
       read: false,
       jobTitle,
@@ -221,7 +221,7 @@ export const handleJobExpiry = onSchedule(
     const db = admin.firestore();
     const now = new Date();
     const msIn3Hours = 3 * 60 * 60 * 1000;
-    const msIn2Hours = 2 * 60 * 60 * 1000;
+    const msIn2Point5Hours = 2.5 * 60 * 60 * 1000;
 
     try {
       const batch = db.batch();
@@ -337,7 +337,7 @@ export const handleJobExpiry = onSchedule(
         if (!parsedDate) continue;
 
         const timeSinceScheduled = now.getTime() - parsedDate.getTime();
-        if (timeSinceScheduled < msIn2Hours) continue;
+        if (timeSinceScheduled < msIn2Point5Hours) continue;
 
         batch.update(doc.ref, {repostNotificationSent: true});
         updateCount++;

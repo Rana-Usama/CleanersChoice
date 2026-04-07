@@ -53,7 +53,6 @@ const JobDetails = ({route, navigation}: any) => {
     iconName: string;
     iconColor: string;
     buttonTitle: string;
-    hidePrimaryButton?: boolean;
     onConfirm: () => void;
   }>({
     visible: false,
@@ -62,7 +61,6 @@ const JobDetails = ({route, navigation}: any) => {
     iconName: '',
     iconColor: '',
     buttonTitle: 'Yes',
-    hidePrimaryButton: false,
     onConfirm: () => {},
   });
   const [applyLoading, setApplyLoading] = useState(false);
@@ -547,12 +545,11 @@ const JobDetails = ({route, navigation}: any) => {
   const handleCancelCleanerJob = async () => {
     setConfirmModal({
       visible: true,
-      title: 'Cancel Job',
-      subTitle: `Are you sure you want to cancel "${item.title}"?`,
+      title: 'Cancel My Spot',
+      subTitle: `If you cancel, you'll still appear in the applicants list — no need to re-apply. The customer can confirm you again anytime.`,
       iconName: 'cancel',
       iconColor: Colors.red500,
-      buttonTitle: 'Yes, Cancel',
-      hidePrimaryButton: true,
+      buttonTitle: 'Yes',
       onConfirm: async () => {
         setConfirmModal(prev => ({...prev, visible: false}));
         setCancelLoading(true);
@@ -561,6 +558,7 @@ const JobDetails = ({route, navigation}: any) => {
             confirmedCleaner: null,
             status: 'active',
             cancelledCleaners: firestore.FieldValue.arrayUnion(userId),
+            selfCancelledCleaners: firestore.FieldValue.arrayUnion(userId),
           });
 
           if (item.jobId) {
@@ -1178,7 +1176,7 @@ const JobDetails = ({route, navigation}: any) => {
                   size={RFPercentage(2)}
                   color={Colors.success}
                 />
-                <Text style={styles.completedText}>Cleaner Assigned</Text>
+                <Text style={styles.completedText}>Cleaner Confirmed</Text>
               </View>
             )}
           </View>
@@ -1240,13 +1238,13 @@ const JobDetails = ({route, navigation}: any) => {
                 styles.editButton,
                 {borderColor: Colors.red500},
                 canMarkComplete
-                  ? {flex: 1, maxWidth: undefined, paddingHorizontal: RFPercentage(1.5)}
-                  : {flex: 1, paddingHorizontal: undefined},
+                  ? {flex: 1, maxWidth: undefined, paddingHorizontal: RFPercentage(1)}
+                  : {flex: 1, paddingHorizontal: RFPercentage(1.5)},
               ]}>
               {cancelLoading ? (
                 <ActivityIndicator size="small" color={Colors.red500} />
               ) : (
-                <Text style={[styles.editButtonText, {color: Colors.red500}]}>Cancel Job</Text>
+                <Text style={[styles.editButtonText, {color: Colors.red500}]}>Cancel My Spot</Text>
               )}
             </TouchableOpacity>
             {canMarkComplete && (
@@ -1284,11 +1282,8 @@ const JobDetails = ({route, navigation}: any) => {
               iconName={confirmModal.iconName}
               iconColor={confirmModal.iconColor}
               buttonTitle={confirmModal.buttonTitle}
-              hidePrimaryButton={confirmModal.hidePrimaryButton}
-              onPress3={() => setConfirmModal(prev => ({...prev, visible: false}))}
-              onPress={confirmModal.hidePrimaryButton
-                ? confirmModal.onConfirm
-                : () => setConfirmModal(prev => ({...prev, visible: false}))}
+              cancelButtonTitle="No"
+              onPress={() => setConfirmModal(prev => ({...prev, visible: false}))}
               onPress2={confirmModal.onConfirm}
             />
           </View>
@@ -1669,7 +1664,7 @@ const styles = StyleSheet.create({
   },
   editButtonText: {
     color: Colors.gradient1,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.65),
     fontFamily: Fonts.semiBold,
   },
   completeButton: {
