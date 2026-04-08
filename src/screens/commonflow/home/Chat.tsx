@@ -10,6 +10,9 @@ import {
   ImageBackground,
   TouchableWithoutFeedback,
   Platform,
+  ActivityIndicator,
+  Linking,
+  Alert,
 } from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import {
@@ -19,11 +22,23 @@ import {
   IMessage,
 } from 'react-native-gifted-chat';
 import firestore from '@react-native-firebase/firestore';
+import storage from '@react-native-firebase/storage';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, IMAGES} from '../../../constants/Themes';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Feather from 'react-native-vector-icons/Feather';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useFocusEffect} from '@react-navigation/native';
+import DocumentPicker from 'react-native-document-picker';
+import ReactNativeBlobUtil from 'react-native-blob-util';
+import {
+  PendingAttachment,
+  ChatAttachment,
+  ALLOWED_MIME_TYPES,
+  MAX_FILE_SIZE_BYTES,
+  MAX_FILE_SIZE_LABEL,
+  ALLOWED_EXTENSIONS_LABEL,
+} from '../../../types/chat';
 
 const Chat = ({navigation, route}: any) => {
   const [messages, setMessages] = useState<IMessage[]>([]);
@@ -40,6 +55,10 @@ const Chat = ({navigation, route}: any) => {
   } = route.params;
 
   const [message, setMessage] = useState('');
+  const [pendingAttachment, setPendingAttachment] =
+    useState<PendingAttachment | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [isSending, setIsSending] = useState(false);
 
   // Fetch chats
   useEffect(() => {
@@ -51,15 +70,20 @@ const Chat = ({navigation, route}: any) => {
       .onSnapshot(snapshot => {
         const newMessages = snapshot.docs.map(doc => {
           const data = doc.data();
-          return {
+          const msg: any = {
             _id: doc.id,
-            text: data.text,
+            text: data.text || '',
             createdAt: data.timestamp?.toDate() || new Date(),
             user: {
               _id: data.senderId,
               name: data.senderName,
             },
           };
+          if (data.type === 'attachment' && data.attachment) {
+            msg.attachment = data.attachment;
+            msg.messageType = 'attachment';
+          }
+          return msg;
         });
 
         setMessages(GiftedChat.append([], newMessages).filter(Boolean));
@@ -68,57 +92,232 @@ const Chat = ({navigation, route}: any) => {
     return () => unsubscribe();
   }, [chatId]);
 
-  // Send Message
-  const onSend = useCallback(
-    async (messagesToSend: IMessage[] = []) => {
-      const message = messagesToSend[0];
-      if (!message || !message.text?.trim()) {
+  const sanitizeFileName = (name: string): string => {
+    return name
+      .replace(/[^a-zA-Z0-9._-]/g, '_')
+      .replace(/_{2,}/g, '_')
+      .slice(0, 100);
+  };
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const getDocIcon = (mimeType: string): string => {
+    if (mimeType === 'application/pdf') return 'file-pdf-box';
+    if (
+      mimeType === 'application/msword' ||
+      mimeType ===
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    )
+      return 'file-word-box';
+    if (mimeType === 'text/plain') return 'file-document-outline';
+    return 'file-document';
+  };
+
+  const getDocColor = (mimeType: string): string => {
+    if (mimeType === 'application/pdf') return '#E53935';
+    if (
+      mimeType === 'application/msword' ||
+      mimeType ===
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    )
+      return '#1565C0';
+    if (mimeType === 'text/plain') return '#616161';
+    return Colors.gradient1;
+  };
+
+  const handlePickDocument = async () => {
+    try {
+      const result = await DocumentPicker.pick({
+        type: ALLOWED_MIME_TYPES as unknown as string[],
+        copyTo: 'cachesDirectory',
+      });
+      const file = result[0];
+      if (!file) return;
+
+      const mimeType = file.type || 'application/octet-stream';
+      if (
+        !ALLOWED_MIME_TYPES.includes(mimeType as (typeof ALLOWED_MIME_TYPES)[number])
+      ) {
+        Alert.alert(
+          'Unsupported File',
+          `Only ${ALLOWED_EXTENSIONS_LABEL} files are supported.`,
+        );
         return;
       }
-      const timestamp = new Date();
-      const localTimestamp = new Date(); // For UI until server timestamp comes back
-      const newMessage = {
-        _id: `${Date.now()}`, // temp unique id for UI
-        text: message.text,
-        createdAt: localTimestamp,
-        user: {
-          _id: senderId,
-          name: senderName,
-          avatar: senderProfile,
-        },
-      };
 
-      setMessages(previousMessages =>
-        GiftedChat.append(previousMessages, [newMessage]),
+      const fileSize = file.size || 0;
+      if (fileSize === 0) {
+        Alert.alert('Invalid File', 'The selected file appears to be empty.');
+        return;
+      }
+      if (fileSize > MAX_FILE_SIZE_BYTES) {
+        Alert.alert(
+          'File Too Large',
+          `Maximum file size is ${MAX_FILE_SIZE_LABEL}. Selected file is ${formatFileSize(fileSize)}.`,
+        );
+        return;
+      }
+
+      setPendingAttachment({
+        uri: file.fileCopyUri || file.uri,
+        name: file.name || 'document',
+        mimeType,
+        size: fileSize,
+      });
+    } catch (err: any) {
+      if (!DocumentPicker.isCancel(err)) {
+        Alert.alert('Error', 'Failed to pick document. Please try again.');
+      }
+    }
+  };
+
+  const uploadAttachment = async (
+    attachment: PendingAttachment,
+  ): Promise<ChatAttachment> => {
+    const safeName = sanitizeFileName(attachment.name);
+    const storagePath = `chat-attachments/${chatId}/${Date.now()}_${safeName}`;
+    const ref = storage().ref(storagePath);
+
+    const task = ref.putFile(attachment.uri, {
+      contentType: attachment.mimeType,
+    });
+
+    task.on('state_changed', snapshot => {
+      const progress = Math.round(
+        (snapshot.bytesTransferred / snapshot.totalBytes) * 100,
       );
-      setMessage('');
-      const firestoreMessage = {
-        text: message.text,
-        timestamp,
-        senderId,
-        senderName,
-        unread: true,
-        chatId,
-        receiver,
-      };
+      setUploadProgress(progress);
+    });
+
+    await task;
+    const downloadUrl = await ref.getDownloadURL();
+    setUploadProgress(null);
+
+    return {
+      url: downloadUrl,
+      name: attachment.name,
+      mimeType: attachment.mimeType,
+      size: attachment.size,
+    };
+  };
+
+  const handleOpenAttachment = async (url: string, fileName: string) => {
+    try {
+      const {dirs} = ReactNativeBlobUtil.fs;
+      const filePath = `${dirs.CacheDir}/${sanitizeFileName(fileName)}`;
+
+      const res = await ReactNativeBlobUtil.config({
+        fileCache: true,
+        path: filePath,
+      }).fetch('GET', url);
+
+      if (Platform.OS === 'ios') {
+        ReactNativeBlobUtil.ios.openDocument(res.path());
+      } else {
+        ReactNativeBlobUtil.android.actionViewIntent(
+          res.path(),
+          'application/pdf',
+        );
+      }
+    } catch {
+      // Fallback: open in browser
+      Linking.openURL(url).catch(() =>
+        Alert.alert('Error', 'Unable to open this file.'),
+      );
+    }
+  };
+
+  // Send Message (text or attachment)
+  const onSend = useCallback(
+    async (messagesToSend: IMessage[] = []) => {
+      const msg = messagesToSend[0];
+      const hasText = msg?.text?.trim();
+      const hasAttachment = !!pendingAttachment;
+
+      if (!hasText && !hasAttachment) return;
+
+      setIsSending(true);
+      const timestamp = new Date();
 
       try {
+        let attachmentData: ChatAttachment | undefined;
+
+        // Upload attachment if present
+        if (pendingAttachment) {
+          try {
+            attachmentData = await uploadAttachment(pendingAttachment);
+          } catch {
+            Alert.alert(
+              'Upload Failed',
+              'Failed to upload attachment. Please check your connection and try again.',
+            );
+            setIsSending(false);
+            setUploadProgress(null);
+            return;
+          }
+        }
+
+        const isAttachment = !!attachmentData;
+        const displayText = isAttachment
+          ? `${attachmentData!.name}`
+          : msg?.text || '';
+
+        // Optimistic UI update
+        const newMessage: any = {
+          _id: `${Date.now()}`,
+          text: displayText,
+          createdAt: timestamp,
+          user: {_id: senderId, name: senderName, avatar: senderProfile},
+        };
+        if (isAttachment) {
+          newMessage.attachment = attachmentData;
+          newMessage.messageType = 'attachment';
+        }
+        setMessages(prev => GiftedChat.append(prev, [newMessage]));
+        setMessage('');
+        setPendingAttachment(null);
+
+        // Build Firestore message
+        const firestoreMessage: any = {
+          text: displayText,
+          timestamp,
+          senderId,
+          senderName,
+          unread: true,
+          chatId,
+          receiver,
+          type: isAttachment ? 'attachment' : 'text',
+        };
+        if (isAttachment) {
+          firestoreMessage.attachment = attachmentData;
+        }
+
         const chatRef = firestore().collection('Chats').doc(chatId);
         await chatRef.collection('Messages').add(firestoreMessage);
-        const participants = [senderId, receiver];
-
         await chatRef.set(
           {
             lastMessage: firestoreMessage,
             lastMessageTimestamp: timestamp,
-            participants,
+            participants: [senderId, receiver],
           },
           {merge: true},
         );
-        await sendPushNotification(message.text);
-      } catch (e) {}
+
+        const pushBody = isAttachment
+          ? `📎 Sent a document: ${attachmentData!.name}`
+          : msg?.text || '';
+        await sendPushNotification(pushBody);
+      } catch {
+        Alert.alert('Error', 'Failed to send message. Please try again.');
+      } finally {
+        setIsSending(false);
+      }
     },
-    [chatId, senderId, senderName, receiver],
+    [chatId, senderId, senderName, receiver, senderProfile, pendingAttachment],
   );
 
   // Mark message as read
@@ -229,33 +428,83 @@ const Chat = ({navigation, route}: any) => {
                 avatar: senderProfile,
               }}
               showAvatarForEveryMessage={true}
-              renderBubble={props => (
-                <Bubble
-                  {...props}
-                  wrapperStyle={{
-                    left: {
-                      backgroundColor: Colors.coolGray200,
-                      padding: RFPercentage(0.6),
-                    },
-                    right: {
-                      backgroundColor: Colors.steelBlue,
-                      padding: RFPercentage(0.6),
-                    },
-                  }}
-                  textStyle={{
-                    left: {
-                      color: Colors.inputTextColor,
-                      fontFamily: Fonts.fontRegular,
-                      fontSize: RFPercentage(1.9),
-                    },
-                    right: {
-                      color: Colors.background,
-                      fontFamily: Fonts.fontRegular,
-                      fontSize: RFPercentage(1.9),
-                    },
-                  }}
-                />
-              )}
+              renderBubble={props => {
+                const currentMsg = props.currentMessage as any;
+                const isAttachmentMsg = currentMsg?.messageType === 'attachment' && currentMsg?.attachment;
+                const isRight = currentMsg?.user?._id === senderId;
+
+                if (isAttachmentMsg) {
+                  const att = currentMsg.attachment as ChatAttachment;
+                  return (
+                    <TouchableOpacity
+                      activeOpacity={0.7}
+                      onPress={() => handleOpenAttachment(att.url, att.name)}
+                      style={[
+                        styles.attachmentBubble,
+                        isRight
+                          ? styles.attachmentBubbleRight
+                          : styles.attachmentBubbleLeft,
+                      ]}>
+                      <MaterialCommunityIcons
+                        name={getDocIcon(att.mimeType)}
+                        size={RFPercentage(4)}
+                        color={isRight ? Colors.background : getDocColor(att.mimeType)}
+                      />
+                      <View style={styles.attachmentBubbleInfo}>
+                        <Text
+                          style={[
+                            styles.attachmentBubbleName,
+                            {color: isRight ? Colors.background : Colors.primaryText},
+                          ]}
+                          numberOfLines={2}>
+                          {att.name}
+                        </Text>
+                        <Text
+                          style={[
+                            styles.attachmentBubbleSize,
+                            {color: isRight ? 'rgba(255,255,255,0.7)' : Colors.secondaryText},
+                          ]}>
+                          {formatFileSize(att.size)} •{' '}
+                          {att.mimeType.split('/').pop()?.toUpperCase()}
+                        </Text>
+                      </View>
+                      <MaterialCommunityIcons
+                        name="download"
+                        size={RFPercentage(2.2)}
+                        color={isRight ? 'rgba(255,255,255,0.7)' : Colors.gradient1}
+                      />
+                    </TouchableOpacity>
+                  );
+                }
+
+                return (
+                  <Bubble
+                    {...props}
+                    wrapperStyle={{
+                      left: {
+                        backgroundColor: Colors.coolGray200,
+                        padding: RFPercentage(0.6),
+                      },
+                      right: {
+                        backgroundColor: Colors.steelBlue,
+                        padding: RFPercentage(0.6),
+                      },
+                    }}
+                    textStyle={{
+                      left: {
+                        color: Colors.inputTextColor,
+                        fontFamily: Fonts.fontRegular,
+                        fontSize: RFPercentage(1.9),
+                      },
+                      right: {
+                        color: Colors.background,
+                        fontFamily: Fonts.fontRegular,
+                        fontSize: RFPercentage(1.9),
+                      },
+                    }}
+                  />
+                );
+              }}
               renderInputToolbar={props => (
                 <View
                   style={{
@@ -266,30 +515,98 @@ const Chat = ({navigation, route}: any) => {
                         ? RFPercentage(12)
                         : RFPercentage(9),
                     justifyContent: 'center',
-                    maxHeight: RFPercentage(18),
+                    maxHeight: RFPercentage(24),
                     paddingVertical: RFPercentage(2),
                   }}>
+                  {/* Upload progress bar */}
+                  {uploadProgress !== null && (
+                    <View style={styles.uploadProgressContainer}>
+                      <View style={styles.uploadProgressBar}>
+                        <View
+                          style={[
+                            styles.uploadProgressFill,
+                            {width: `${uploadProgress}%`},
+                          ]}
+                        />
+                      </View>
+                      <Text style={styles.uploadProgressText}>
+                        Uploading... {uploadProgress}%
+                      </Text>
+                    </View>
+                  )}
+
+                  {/* Pending attachment preview */}
+                  {pendingAttachment && (
+                    <View style={styles.attachmentPreview}>
+                      <MaterialCommunityIcons
+                        name={getDocIcon(pendingAttachment.mimeType)}
+                        size={RFPercentage(3)}
+                        color={getDocColor(pendingAttachment.mimeType)}
+                      />
+                      <View style={styles.attachmentPreviewInfo}>
+                        <Text
+                          style={styles.attachmentPreviewName}
+                          numberOfLines={1}>
+                          {pendingAttachment.name}
+                        </Text>
+                        <Text style={styles.attachmentPreviewSize}>
+                          {formatFileSize(pendingAttachment.size)}
+                        </Text>
+                      </View>
+                      <TouchableOpacity
+                        onPress={() => setPendingAttachment(null)}
+                        hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
+                        <MaterialCommunityIcons
+                          name="close-circle"
+                          size={RFPercentage(2.5)}
+                          color={Colors.red500}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  )}
+
                   <InputToolbar
                     {...props}
                     containerStyle={styles.toolbar}
                     renderComposer={() => (
-                      <TextInput
-                        style={styles.customTextInput}
-                        placeholder="Type a message"
-                        placeholderTextColor={Colors.warmGray400}
-                        value={message}
-                        onChangeText={setMessage}
-                        multiline={true}
-                        scrollEnabled={true}
-                        textAlignVertical="top"
-                      />
+                      <View style={styles.composerRow}>
+                        <TouchableOpacity
+                          activeOpacity={0.7}
+                          onPress={handlePickDocument}
+                          disabled={isSending}
+                          hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
+                          style={styles.attachButton}>
+                          <MaterialCommunityIcons
+                            name="paperclip"
+                            size={RFPercentage(2.5)}
+                            color={
+                              pendingAttachment
+                                ? Colors.gradient1
+                                : Colors.warmGray400
+                            }
+                          />
+                        </TouchableOpacity>
+                        <TextInput
+                          style={styles.customTextInput}
+                          placeholder="Type a message"
+                          placeholderTextColor={Colors.warmGray400}
+                          value={message}
+                          onChangeText={setMessage}
+                          multiline={true}
+                          scrollEnabled={true}
+                          textAlignVertical="top"
+                          editable={!isSending}
+                        />
+                      </View>
                     )}
                     renderSend={() => (
                       <TouchableOpacity
                         activeOpacity={0.8}
                         style={styles.sendButton}
                         hitSlop={{top: 15, bottom: 15, left: 15, right: 15}}
+                        disabled={isSending}
                         onPress={() => {
+                          if (isSending) return;
                           onSend([
                             {
                               _id: `${Date.now()}`,
@@ -302,11 +619,18 @@ const Chat = ({navigation, route}: any) => {
                             },
                           ]);
                         }}>
-                        <Feather
-                          name="send"
-                          size={RFPercentage(2.5)}
-                          color={Colors.gradient1}
-                        />
+                        {isSending ? (
+                          <ActivityIndicator
+                            size="small"
+                            color={Colors.gradient1}
+                          />
+                        ) : (
+                          <Feather
+                            name="send"
+                            size={RFPercentage(2.5)}
+                            color={Colors.gradient1}
+                          />
+                        )}
                       </TouchableOpacity>
                     )}
                   />
@@ -379,12 +703,20 @@ const styles = StyleSheet.create({
   customTextInput: {
     color: Colors.inputTextColor,
     fontSize: RFPercentage(1.9),
-    width: '90%',
+    flex: 1,
     textAlignVertical: 'top',
     fontFamily: Fonts.fontRegular,
     paddingVertical: 0,
     marginVertical: 0,
     lineHeight: RFPercentage(3),
+  },
+  composerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '90%',
+  },
+  attachButton: {
+    marginRight: RFPercentage(1),
   },
   sendButton: {
     justifyContent: 'center',
@@ -454,6 +786,86 @@ const styles = StyleSheet.create({
     borderTopColor: Colors.warmGrayOverlay90,
     bottom: Platform.OS === 'ios' ? RFPercentage(1) : 0,
     paddingVertical: RFPercentage(1.4),
+  },
+  // Attachment preview (above input)
+  attachmentPreview: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.silverOverlay50,
+    marginHorizontal: '5%',
+    marginBottom: RFPercentage(1),
+    paddingHorizontal: RFPercentage(1.5),
+    paddingVertical: RFPercentage(1),
+    borderRadius: RFPercentage(1.5),
+    borderWidth: 1,
+    borderColor: Colors.warmGrayOverlay90,
+  },
+  attachmentPreviewInfo: {
+    flex: 1,
+    marginLeft: RFPercentage(1),
+    marginRight: RFPercentage(1),
+  },
+  attachmentPreviewName: {
+    color: Colors.primaryText,
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.6),
+  },
+  attachmentPreviewSize: {
+    color: Colors.secondaryText,
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.3),
+    marginTop: 2,
+  },
+  // Upload progress
+  uploadProgressContainer: {
+    marginHorizontal: '5%',
+    marginBottom: RFPercentage(0.8),
+  },
+  uploadProgressBar: {
+    height: 3,
+    backgroundColor: Colors.coolGray200,
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  uploadProgressFill: {
+    height: '100%',
+    backgroundColor: Colors.gradient1,
+  },
+  uploadProgressText: {
+    color: Colors.secondaryText,
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.2),
+    marginTop: 2,
+    textAlign: 'center',
+  },
+  // Attachment message bubble
+  attachmentBubble: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: RFPercentage(1.5),
+    paddingVertical: RFPercentage(1.2),
+    borderRadius: RFPercentage(1.8),
+    maxWidth: RFPercentage(35),
+    marginBottom: RFPercentage(0.5),
+  },
+  attachmentBubbleLeft: {
+    backgroundColor: Colors.coolGray200,
+  },
+  attachmentBubbleRight: {
+    backgroundColor: Colors.steelBlue,
+  },
+  attachmentBubbleInfo: {
+    flex: 1,
+    marginHorizontal: RFPercentage(1),
+  },
+  attachmentBubbleName: {
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.6),
+  },
+  attachmentBubbleSize: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.2),
+    marginTop: 2,
   },
 });
 
