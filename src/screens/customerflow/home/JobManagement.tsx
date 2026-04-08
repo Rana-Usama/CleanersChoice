@@ -366,10 +366,12 @@ const JobManagement = ({route, navigation}: any) => {
     item,
     isConfirmed,
     isWithdrawn,
+    isSelfCancelled,
   }: {
     item: CleanerData;
     isConfirmed: boolean;
     isWithdrawn?: boolean;
+    isSelfCancelled?: boolean;
   }) => (
     <View style={styles.cleanerCard}>
       <View style={styles.cleanerInfo}>
@@ -389,10 +391,10 @@ const JobManagement = ({route, navigation}: any) => {
               <MaterialCommunityIcons
                 name="account-cancel"
                 size={RFPercentage(1.5)}
-                color={Colors.red500}
+                color={isSelfCancelled ? Colors.red500 : Colors.orange500}
               />
-              <Text style={styles.cancelledBeforeBadgeText}>
-                Cleaner left this job before
+              <Text style={[styles.cancelledBeforeBadgeText, !isSelfCancelled && {color: Colors.orange500}]}>
+                {isSelfCancelled ? 'Cleaner left this job before' : 'You had cancelled this cleaner before'}
               </Text>
             </View>
           )}
@@ -538,6 +540,7 @@ const JobManagement = ({route, navigation}: any) => {
                     item: confirmedCleaner,
                     isConfirmed: true,
                     isWithdrawn: cancelledCleaners.includes(confirmedCleaner.uid) || selfCancelledCleaners.includes(confirmedCleaner.uid),
+                    isSelfCancelled: selfCancelledCleaners.includes(confirmedCleaner.uid),
                   })}
                 </View>
               ) : (
@@ -571,6 +574,7 @@ const JobManagement = ({route, navigation}: any) => {
                           item: applicant,
                           isConfirmed: false,
                           isWithdrawn: cancelledCleaners.includes(applicant.uid) || selfCancelledCleaners.includes(applicant.uid),
+                          isSelfCancelled: selfCancelledCleaners.includes(applicant.uid),
                         })}
                       </View>
                     ))
