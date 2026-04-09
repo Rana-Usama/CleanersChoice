@@ -60,6 +60,7 @@ const JobManagement = ({route, navigation}: any) => {
     iconColor: string;
     buttonTitle: string;
     onConfirm: () => void;
+    svgIconType?: 'confirm' | 'cancel';
   }>({
     visible: false,
     title: '',
@@ -68,6 +69,7 @@ const JobManagement = ({route, navigation}: any) => {
     iconColor: '',
     buttonTitle: 'Yes',
     onConfirm: () => {},
+    svgIconType: undefined,
   });
 
   const fetchJobData = useCallback(async () => {
@@ -189,9 +191,10 @@ const JobManagement = ({route, navigation}: any) => {
     setConfirmModal({
       visible: true,
       title: 'Confirm Cleaner',
-      subTitle: `Once you confirm ${cleaner.name}, your job listing will no longer be visible to other cleaners. Are you sure you want to proceed?`,
-      iconName: 'account-check',
-      iconColor: Colors.success,
+      subTitle: `Confirming ${cleaner.name} will remove this job from other cleaners.\n\nAre you sure you want to continue?`,
+      iconName: '',
+      iconColor: '',
+      svgIconType: 'confirm' as const,
       buttonTitle: 'Confirm',
       onConfirm: async () => {
         setConfirmModal(prev => ({...prev, visible: false}));
@@ -251,10 +254,11 @@ const JobManagement = ({route, navigation}: any) => {
 
     setConfirmModal({
       visible: true,
-      title: 'Cancel Cleaner',
-      subTitle: `If you cancel ${confirmedCleaner.name}, your job will become active again. Other cleaners will be able to apply, and previously applied cleaners will still be visible in the applicants list — you can confirm any of them. Are you sure?`,
-      iconName: 'account-remove',
-      iconColor: Colors.red500,
+      title: 'Cancel Cleaner?',
+      subTitle: `Canceling ${confirmedCleaner.name} reopens the job, other cleaners can apply, and current applicants stay.\n\nAre you sure you want to continue?`,
+      iconName: '',
+      iconColor: '',
+      svgIconType: 'cancel' as const,
       buttonTitle: 'Yes',
       onConfirm: async () => {
         setConfirmModal(prev => ({...prev, visible: false}));
@@ -612,6 +616,7 @@ const JobManagement = ({route, navigation}: any) => {
               subTitle={confirmModal.subTitle}
               iconName={confirmModal.iconName}
               iconColor={confirmModal.iconColor}
+              svgIconType={confirmModal.svgIconType}
               buttonTitle={confirmModal.buttonTitle}
               cancelButtonTitle="No"
               onPress={() => setConfirmModal(prev => ({...prev, visible: false}))}
