@@ -308,7 +308,7 @@ const Chat = ({navigation, route}: any) => {
         );
 
         const pushBody = isAttachment
-          ? `📎 Sent a document: ${attachmentData!.name}`
+          ? ` Sent a document: ${attachmentData!.name}`
           : msg?.text || '';
         await sendPushNotification(pushBody);
       } catch {
