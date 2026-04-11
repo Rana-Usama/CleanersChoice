@@ -92,7 +92,7 @@ const JobPosted = () => {
 
         {/* Subtitle */}
         <Text style={styles.subtitle}>
-          Your job has been posted and is now visible to service providers
+          Your job has be posted and is now visible to service providers
         </Text>
 
         {/* Stats Cards */}
@@ -239,13 +239,13 @@ const styles = StyleSheet.create({
     lineHeight: RFPercentage(3.8),
   },
   subtitle: {
-    color: Colors.whiteOverlay80,
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.9),
+    color: '#FFFFFF',
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.8),
     textAlign: 'center',
-    lineHeight: RFPercentage(2.4),
+    lineHeight: RFPercentage(2.8),
     marginBottom: RFPercentage(6),
-    maxWidth: '90%',
+    maxWidth: '80%',
   },
   statsContainer: {
     flexDirection: 'row',

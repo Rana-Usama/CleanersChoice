@@ -339,12 +339,6 @@ const Dashboard: React.FC = ({navigation}: any) => {
         <View style={styles.rightButtons}>
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => navigation.navigate('Settings')}
-            style={styles.profileIconButton}>
-            <Icon name="cog-outline" size={RFPercentage(2.4)} color={Colors.white} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            activeOpacity={0.8}
             onPress={() => navigation.navigate('NotificationsScreen')}
             style={styles.bellButton}>
             <Icon name="bell-outline" size={RFPercentage(2.4)} color={Colors.white} />
@@ -355,6 +349,12 @@ const Dashboard: React.FC = ({navigation}: any) => {
                 </Text>
               </View>
             )}
+          </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate('Settings')}
+            style={styles.profileIconButton}>
+            <Icon name="cog-outline" size={RFPercentage(2.4)} color={Colors.white} />
           </TouchableOpacity>
         </View>
       </LinearGradient>
@@ -463,7 +463,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
                 {/* Availability Overview Card */}
                 <View style={styles.overviewCard}>
                   <LinearGradient
-                    colors={[Colors.skeletonLight, Colors.skeletonDark]}
+                    colors={[Colors.white, Colors.white]}
                     style={styles.overviewGradient}>
                     <View style={styles.availabilityOverview}>
                       <View style={styles.availabilityOverviewItem}>
@@ -496,10 +496,14 @@ const Dashboard: React.FC = ({navigation}: any) => {
                       <MaterialIcons
                         name="schedule"
                         size={20}
-                        color={Colors.grayMuted}
+                        color="#407BFF"
+                        style={styles.nextAvailableIcon}
                       />
                       <Text style={styles.nextAvailableText}>
-                        Next available: {availabilitySummary.nextAvailable}
+                        <Text style={styles.nextAvailablePrefix}>
+                          Next available:
+                        </Text>{' '}
+                        {availabilitySummary.nextAvailable}
                       </Text>
                     </View>
                   </LinearGradient>
@@ -803,7 +807,7 @@ const styles = StyleSheet.create({
   },
   profileIconButton: {
     padding: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    backgroundColor: Colors.whiteOverlay20,
     borderRadius: 50,
     width: RFPercentage(4.5),
     height: RFPercentage(4.5),
@@ -812,7 +816,7 @@ const styles = StyleSheet.create({
   },
   bellButton: {
     padding: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    backgroundColor: Colors.whiteOverlay20,
     borderRadius: 50,
     width: RFPercentage(4.5),
     height: RFPercentage(4.5),
@@ -1016,26 +1020,35 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   overviewDividerVertical: {
-    width: 1,
+    width: 1.5,
     height: 60,
-    backgroundColor: Colors.whiteOverlay30,
+    backgroundColor: '#5763730D',
     marginHorizontal: 16,
   },
   nextAvailableContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
     backgroundColor: Colors.whiteOverlay48,
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: '#5763730D',
     marginTop: 8,
+  },
+  nextAvailableIcon: {
+    marginTop: 1,
   },
   nextAvailableText: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.7),
     color: Colors.grayMuted,
-    marginLeft: 8,
+    marginLeft: 5,
+    flex: 1,
+  },
+  nextAvailablePrefix: {
+    color: '#407BFF',
   },
   sectionCard: {
     backgroundColor: Colors.white,

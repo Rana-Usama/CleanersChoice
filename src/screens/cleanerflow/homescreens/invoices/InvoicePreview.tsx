@@ -257,9 +257,8 @@ const InvoicePreview = ({route, navigation}: any) => {
             <Text style={styles.editButtonText}>Edit</Text>
           </TouchableOpacity>
           <GradientButton
-            title={generating ? 'Generating...' : 'Generate & Share'}
+            title={'Generate & Share'}
             onPress={handleGenerateAndShare}
-            loading={generating}
             disabled={generating}
             style={styles.generateButton}
             textStyle={styles.generateButtonText}
@@ -271,9 +270,8 @@ const InvoicePreview = ({route, navigation}: any) => {
       {viewOnly && (
         <View style={styles.actionBar}>
           <GradientButton
-            title={downloading ? 'Downloading...' : 'Download Invoice'}
+            title={'Download Invoice'}
             onPress={handleDownload}
-            loading={downloading}
             disabled={downloading}
             style={styles.downloadButton}
             textStyle={styles.generateButtonText}

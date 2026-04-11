@@ -403,6 +403,7 @@ const MyJobs = ({navigation}: any) => {
   };
 
   const tabConfig = getTabConfig();
+  const tabPillColors = ['rgba(84, 137, 255, 0.05)', 'rgba(84, 137, 255, 0.05)'];
 
   return (
     <View style={styles.safeArea}>
@@ -506,11 +507,7 @@ const MyJobs = ({navigation}: any) => {
                     activeTab === tab && styles.tabButtonActive,
                   ]}>
                   <LinearGradient
-                    colors={
-                      activeTab === tab
-                        ? [Colors.gradient1, Colors.gradient2]
-                        : [Colors.white, Colors.lavenderFilterBg]
-                    }
+                    colors={tabPillColors}
                     style={styles.tabGradient}>
                     <Text
                       style={[
@@ -731,6 +728,8 @@ const styles = StyleSheet.create({
     paddingVertical: RFPercentage(1.2),
     alignItems: 'center',
     borderRadius: RFPercentage(1.2),
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.02)',
   },
   tabText: {
     fontFamily: Fonts.fontMedium,
@@ -738,7 +737,7 @@ const styles = StyleSheet.create({
     color: Colors.secondaryText,
   },
   tabTextActive: {
-    color: Colors.white,
+    color: Colors.gradient1,
     fontFamily: Fonts.semiBold,
   },
   sectionHeader: {

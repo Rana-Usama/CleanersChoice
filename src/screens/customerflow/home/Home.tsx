@@ -977,7 +977,7 @@ const styles = StyleSheet.create({
     right: 20,
     bottom: 35,
     padding: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    backgroundColor: Colors.whiteOverlay20,
     borderRadius: 50,
     width: RFPercentage(4.5),
     height: RFPercentage(4.5),

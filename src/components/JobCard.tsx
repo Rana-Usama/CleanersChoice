@@ -134,14 +134,14 @@ const styles = StyleSheet.create({
     lineHeight: RFPercentage(2.4),
   },
   deleteButton: {
-    padding: RFPercentage(0.5),
+    padding: RFPercentage(1),
     backgroundColor: Colors.primaryBlueOverlay10,
-    borderRadius: RFPercentage(1),
+    borderRadius: RFPercentage(1.2),
     marginLeft: RFPercentage(1),
   },
   deleteIcon: {
-    width: RFPercentage(2),
-    height: RFPercentage(2),
+    width: RFPercentage(2.7),
+    height: RFPercentage(2.7),
   },
   detailsSection: {
     backgroundColor: Colors.gray50Overlay90,

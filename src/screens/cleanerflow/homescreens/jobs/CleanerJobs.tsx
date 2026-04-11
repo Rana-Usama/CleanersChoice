@@ -38,7 +38,9 @@ import haversine from 'haversine';
 import {clearFilterLocation} from '../../../../redux/location/Actions';
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import LocationIcon from '../../../../assets/svg/LocationIcon';
+import DollarIcon from '../../../../assets/svg/DollarIcon';
+import TypeIcon from '../../../../assets/svg/TypeIcon';
 
 const {width} = Dimensions.get('window');
 
@@ -359,14 +361,18 @@ const CleanerJobs = () => {
                   colors={
                     selectedLocation?.name
                       ? [Colors.gradient1, Colors.gradient2]
-                      : [Colors.white, Colors.lavenderFilterBg]
+                      : ['rgba(84, 137, 255, 0.05)', 'rgba(84, 137, 255, 0.05)']
                   }
                   style={styles.filterGradient}>
-                  <View style={styles.filterIconContainer}>
-                    <Ionicons
-                      name="location"
-                      size={RFPercentage(2)}
-                      color={Colors.gradient1}
+                  <View
+                    style={[
+                      styles.filterIconContainer,
+                      selectedLocation?.name && styles.locationFilterIconActive,
+                    ]}>
+                    <LocationIcon
+                      width={RFPercentage(2.5)}
+                      height={RFPercentage(2.5)}
+                      color={selectedLocation?.name ? '#FFFFFF' : Colors.gradient1}
                     />
                   </View>
                   <Text
@@ -401,14 +407,18 @@ const CleanerJobs = () => {
                   colors={
                     rangeSelector
                       ? [Colors.gradient1, Colors.gradient2]
-                      : [Colors.white, Colors.lavenderFilterBg]
+                      : ['rgba(84, 137, 255, 0.05)', 'rgba(84, 137, 255, 0.05)']
                   }
                   style={styles.filterGradient}>
-                  <View style={styles.filterIconContainer}>
-                    <MaterialIcons
-                      name="attach-money"
-                      size={RFPercentage(2)}
-                      color={Colors.gradient1}
+                  <View
+                    style={[
+                      styles.filterIconContainer,
+                      rangeSelector && styles.locationFilterIconActive,
+                    ]}>
+                    <DollarIcon
+                      width={RFPercentage(2.5)}
+                      height={RFPercentage(2.5)}
+                      color={rangeSelector ? '#FFFFFF' : Colors.gradient1}
                     />
                   </View>
                   <Text
@@ -448,14 +458,18 @@ const CleanerJobs = () => {
                   colors={
                     serviceType
                       ? [Colors.gradient1, Colors.gradient2]
-                      : [Colors.white, Colors.lavenderFilterBg]
+                      : ['rgba(84, 137, 255, 0.05)', 'rgba(84, 137, 255, 0.05)']
                   }
                   style={styles.filterGradient}>
-                  <View style={styles.filterIconContainer}>
-                    <MaterialIcons
-                      name="cleaning-services"
-                      size={RFPercentage(2)}
-                      color={Colors.gradient1}
+                  <View
+                    style={[
+                      styles.filterIconContainer,
+                      serviceType && styles.locationFilterIconActive,
+                    ]}>
+                    <TypeIcon
+                      width={RFPercentage(2.4)}
+                      height={RFPercentage(2.4)}
+                      color={serviceType ? '#FFFFFF' : Colors.gradient1}
                     />
                   </View>
                   <Text
@@ -486,7 +500,12 @@ const CleanerJobs = () => {
             <View style={styles.activeFiltersList}>
               {selectedLocation?.name && (
                 <View style={styles.activeFilterTag}>
-                  <Ionicons name="location" size={14} color={Colors.white} />
+                  <LocationIcon
+                    width={18}
+                    height={18}
+                    color={Colors.gray700}
+                    strokeWidth={2}
+                  />
                   <Text style={styles.activeFilterText}>
                     {selectedLocation.name}
                   </Text>
@@ -494,24 +513,27 @@ const CleanerJobs = () => {
               )}
               {rangeSelector && (
                 <View style={styles.activeFilterTag}>
-                  <MaterialIcons
-                    name="attach-money"
-                    size={14}
-                    color={Colors.white}
+                  <DollarIcon
+                    width={18}
+                    height={18}
+                    color={Colors.gray700}
+                    strokeWidth={2}
                   />
                   <Text style={styles.activeFilterText}>
-                    Up to ${priceRange[0]}
+                    ${priceRange[0]}
                   </Text>
                 </View>
               )}
-              {serviceType && selectedType && (
+              {serviceType && (selectedType || query2) && (
                 <View style={styles.activeFilterTag}>
-                  <MaterialIcons
-                    name="cleaning-services"
-                    size={14}
-                    color={Colors.white}
+                  <TypeIcon
+                    width={18}
+                    height={18}
+                    color={Colors.gray700}
                   />
-                  <Text style={styles.activeFilterText}>{selectedType}</Text>
+                  <Text style={styles.activeFilterText}>
+                    {selectedType || query2}
+                  </Text>
                 </View>
               )}
             </View>
@@ -530,6 +552,19 @@ const CleanerJobs = () => {
                 />
                 <Text style={styles.adminBadgeText}>Admin Mode</Text>
               </View>
+              <TouchableOpacity
+                onPress={() => setAdminViewAllJobs(prev => !prev)}
+                style={[
+                  styles.toggleSwitch,
+                  adminViewAllJobs && styles.toggleSwitchActive,
+                ]}>
+                <View
+                  style={[
+                    styles.toggleCircle,
+                    adminViewAllJobs && styles.toggleCircleActive,
+                  ]}
+                />
+              </TouchableOpacity>
             </View>
 
             <View style={styles.adminToggleCard}>
@@ -545,20 +580,6 @@ const CleanerJobs = () => {
                     </Text>
                   </View>
                 </View>
-
-                <TouchableOpacity
-                  onPress={() => setAdminViewAllJobs(prev => !prev)}
-                  style={[
-                    styles.toggleSwitch,
-                    adminViewAllJobs && styles.toggleSwitchActive,
-                  ]}>
-                  <View
-                    style={[
-                      styles.toggleCircle,
-                      adminViewAllJobs && styles.toggleCircleActive,
-                    ]}
-                  />
-                </TouchableOpacity>
               </View>
 
               {adminViewAllJobs && (
@@ -579,7 +600,10 @@ const CleanerJobs = () => {
         <View style={styles.jobsSection}>
           <View style={styles.jobsHeader}>
             <View style={styles.jobsTitleContainer}>
-              <Text style={styles.jobsTitle}>
+              <Text
+                style={styles.jobsTitle}
+                numberOfLines={1}
+                ellipsizeMode="tail">
                 {isAdmin && adminViewAllJobs
                   ? 'All Active Jobs'
                   : selectedLocation?.name
@@ -588,10 +612,12 @@ const CleanerJobs = () => {
               </Text>
             </View>
             {!noLocation && (
-              <Text style={styles.jobsCount}>
-                {sortedJobs?.length} job
-                {sortedJobs?.length !== 1 ? 's' : ''}
-              </Text>
+              <View style={styles.jobsCount}>
+                <Text style={styles.jobsCountText}>
+                  {sortedJobs?.length} Job
+                  {sortedJobs?.length !== 1 ? 's' : ''}
+                </Text>
+              </View>
             )}
           </View>
 
@@ -1059,13 +1085,16 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   filterIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     backgroundColor: Colors.filterIconBg,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
+  },
+  locationFilterIconActive: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
   },
   filterButtonText: {
     fontSize: RFPercentage(1.6),
@@ -1091,59 +1120,64 @@ const styles = StyleSheet.create({
   activeFiltersCard: {
     marginHorizontal: 20,
     marginTop: 16,
-    backgroundColor: Colors.blueBg50,
-    borderRadius: 16,
-    padding: 16,
+    backgroundColor: '#407BFF0D',
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 18,
   },
   activeFiltersTitle: {
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     fontFamily: Fonts.fontMedium,
-    color: Colors.gray600,
+    color: Colors.gray800,
     marginBottom: 12,
   },
   activeFiltersList: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: 10,
   },
   activeFilterTag: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.gradient1,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    backgroundColor: '#407BFF1A',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
     borderRadius: 20,
-    gap: 6,
+    gap: 8,
   },
   activeFilterText: {
-    fontSize: RFPercentage(1.5),
-    fontFamily: Fonts.fontMedium,
-    color: Colors.white,
+    fontSize: RFPercentage(1.55),
+    fontFamily: Fonts.fontRegular,
+    color: Colors.gray600,
   },
   jobsSection: {
     marginTop: 24,
     paddingHorizontal: 20,
   },
   jobsHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: 8,
     marginBottom: 16,
   },
   jobsTitle: {
     fontSize: RFPercentage(1.8),
     fontFamily: Fonts.semiBold,
     color: Colors.gray800,
-    width: '50%',
+    width: '100%',
   },
   jobsCount: {
-    fontSize: RFPercentage(1.5),
-    fontFamily: Fonts.fontMedium,
-    color: Colors.gradient1,
     backgroundColor: Colors.indigoBg50,
     paddingHorizontal: 12,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 6,
+    overflow: 'hidden',
+    alignSelf: 'flex-start',
+  },
+  jobsCountText: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontMedium,
+    color: Colors.gradient1,
   },
   loadingJobsContainer: {
     height: 200,
@@ -1471,7 +1505,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 16,
   },
   adminBadge: {
     flexDirection: 'row',
@@ -1522,20 +1556,21 @@ const styles = StyleSheet.create({
     color: Colors.placeholderColor,
   },
   toggleSwitch: {
-    width: 50,
-    height: 24,
-    borderRadius: 14,
+    width: 46,
+    height: 22,
+    borderRadius: 12,
     backgroundColor: Colors.gray200,
     padding: 2,
     justifyContent: 'center',
+    marginRight: 3,
   },
   toggleSwitchActive: {
     backgroundColor: Colors.success,
   },
   toggleCircle: {
-    width: 20,
-    height: 20,
-    borderRadius: 12,
+    width: 18,
+    height: 18,
+    borderRadius: 10,
     backgroundColor: Colors.white,
     alignSelf: 'flex-start',
   },

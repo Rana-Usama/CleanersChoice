@@ -764,7 +764,7 @@ const styles = StyleSheet.create({
   },
   cancelledBeforeBadge: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: RFPercentage(0.3),
     marginTop: RFPercentage(0.3),
   },
@@ -772,6 +772,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.3),
     color: Colors.red500,
+    flexShrink: 1,
   },
   actionButtons: {
     flexDirection: 'row',

@@ -919,32 +919,47 @@ const JobDetails = ({route, navigation}: any) => {
         <View style={styles.quickInfoContainer}>
           <View style={styles.quickInfoRow}>
             <View style={styles.quickInfoCard}>
-              <MaterialCommunityIcons
-                name={getServiceIcon(item.type)}
-                size={RFPercentage(2.5)}
-                color={Colors.gradient1}
-              />
-              <Text style={styles.quickInfoLabel}>Service</Text>
+              <View style={styles.cardIcon}>
+                <MaterialCommunityIcons
+                  name={getServiceIcon(item.type)}
+                  size={RFPercentage(2)}
+                  color={Colors.gradient1}
+                  style={styles.quickInfoGlyph}
+                />
+              </View>
+              <Text style={[styles.cardTitle, styles.quickInfoLabel]}>
+                Service
+              </Text>
               <Text style={styles.quickInfoValue}>{item.type}</Text>
             </View>
 
             <View style={styles.quickInfoCard}>
-              <MaterialCommunityIcons
-                name="cash"
-                size={RFPercentage(2.5)}
-                color={Colors.gradient1}
-              />
-              <Text style={styles.quickInfoLabel}>Budget</Text>
+              <View style={styles.cardIcon}>
+                <MaterialCommunityIcons
+                  name="cash"
+                  size={RFPercentage(2.2)}
+                  color={Colors.gradient1}
+                  style={styles.quickInfoGlyph}
+                />
+              </View>
+              <Text style={[styles.cardTitle, styles.quickInfoLabel]}>
+                Budget
+              </Text>
               <Text style={styles.quickInfoValue}>${item.priceRange}</Text>
             </View>
 
             <View style={styles.quickInfoCard}>
-              <MaterialCommunityIcons
-                name="calendar-clock"
-                size={RFPercentage(2.5)}
-                color={Colors.gradient1}
-              />
-              <Text style={styles.quickInfoLabel}>Due Date</Text>
+              <View style={styles.cardIcon}>
+                <MaterialCommunityIcons
+                  name="calendar-clock"
+                  size={RFPercentage(2.1)}
+                  color={Colors.gradient1}
+                  style={styles.quickInfoGlyph}
+                />
+              </View>
+              <Text style={[styles.cardTitle, styles.quickInfoLabel]}>
+                Due Date
+              </Text>
               <Text style={styles.quickInfoValue} numberOfLines={2}>
                 {formatDate(item.createdAt)}
               </Text>
@@ -1393,16 +1408,16 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(1),
     borderBottomWidth: 2,
   },
+  quickInfoGlyph: {
+    opacity: 0.9,
+  },
   quickInfoLabel: {
-    color: Colors.secondaryText,
-    fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.8),
     marginLeft: RFPercentage(0.5),
   },
   quickInfoValue: {
     color: Colors.primaryText,
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.7),
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.6),
     textAlign: 'center',
     marginLeft: RFPercentage(1),
   },
