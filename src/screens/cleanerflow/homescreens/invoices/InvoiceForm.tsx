@@ -424,7 +424,7 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(1.5),
   },
   sectionTitle: {
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.8),
     color: Colors.primaryText,
   },

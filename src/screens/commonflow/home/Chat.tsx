@@ -8,7 +8,6 @@ import {
   Keyboard,
   StatusBar,
   ImageBackground,
-  TouchableWithoutFeedback,
   Platform,
   ActivityIndicator,
   Linking,
@@ -18,7 +17,6 @@ import React, {useCallback, useEffect, useState} from 'react';
 import {
   GiftedChat,
   InputToolbar,
-  Bubble,
   IMessage,
 } from 'react-native-gifted-chat';
 import firestore from '@react-native-firebase/firestore';
@@ -29,16 +27,21 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import Feather from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useFocusEffect} from '@react-navigation/native';
-import DocumentPicker from 'react-native-document-picker';
 import ReactNativeBlobUtil from 'react-native-blob-util';
+import ImageView from 'react-native-image-viewing';
+import PdfIcon from '../../../assets/svg/pdfIcon';
+import CancelIcon from '../../../assets/svg/CrossIcon';
+import AttachmentPickerCard from '../../../components/chat/AttachmentPickerCard';
+import {useAttachmentPicker} from '../../../hooks/useAttachmentPicker';
 import {
   PendingAttachment,
   ChatAttachment,
-  ALLOWED_MIME_TYPES,
-  MAX_FILE_SIZE_BYTES,
-  MAX_FILE_SIZE_LABEL,
-  ALLOWED_EXTENSIONS_LABEL,
 } from '../../../types/chat';
+import ChatTextBubble from '../../../components/chat/ChatTextBubble';
+import ChatDocumentBubble from '../../../components/chat/ChatDocumentBubble';
+import ChatImageBubble from '../../../components/chat/ChatImageBubble';
+import ChatDaySeparator from '../../../components/chat/ChatDaySeparator';
+import {formatTime, formatFileSize} from '../../../components/chat/chatStyles';
 
 const Chat = ({navigation, route}: any) => {
   const [messages, setMessages] = useState<IMessage[]>([]);
@@ -59,6 +62,29 @@ const Chat = ({navigation, route}: any) => {
     useState<PendingAttachment | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const [downloadedAttachments, setDownloadedAttachments] = useState<Set<string>>(new Set());
+  const [viewingImage, setViewingImage] = useState<string | null>(null);
+  const [showAttachPicker, setShowAttachPicker] = useState(false);
+
+  const {handlePickDocument, handlePickImage} =
+    useAttachmentPicker({onAttachmentSelected: setPendingAttachment});
+
+  // Check if attachment files already exist in cache
+  const checkIfDownloaded = useCallback(async (fileName: string, messageId: string) => {
+    try {
+      const {dirs} = ReactNativeBlobUtil.fs;
+      const filePath = `${dirs.CacheDir}/${sanitizeFileName(fileName)}`;
+      const exists = await ReactNativeBlobUtil.fs.exists(filePath);
+      if (exists) {
+        setDownloadedAttachments(prev => {
+          if (prev.has(messageId)) return prev;
+          const next = new Set(prev);
+          next.add(messageId);
+          return next;
+        });
+      }
+    } catch {}
+  }, []);
 
   // Fetch chats
   useEffect(() => {
@@ -99,80 +125,9 @@ const Chat = ({navigation, route}: any) => {
       .slice(0, 100);
   };
 
-  const formatFileSize = (bytes: number): string => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  };
-
-  const getDocIcon = (mimeType: string): string => {
-    if (mimeType === 'application/pdf') return 'file-pdf-box';
-    if (
-      mimeType === 'application/msword' ||
-      mimeType ===
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    )
-      return 'file-word-box';
-    if (mimeType === 'text/plain') return 'file-document-outline';
-    return 'file-document';
-  };
-
-  const getDocColor = (mimeType: string): string => {
-    if (mimeType === 'application/pdf') return '#E53935';
-    if (
-      mimeType === 'application/msword' ||
-      mimeType ===
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    )
-      return '#1565C0';
-    if (mimeType === 'text/plain') return '#616161';
-    return Colors.gradient1;
-  };
-
-  const handlePickDocument = async () => {
-    try {
-      const result = await DocumentPicker.pick({
-        type: ALLOWED_MIME_TYPES as unknown as string[],
-        copyTo: 'cachesDirectory',
-      });
-      const file = result[0];
-      if (!file) return;
-
-      const mimeType = file.type || 'application/octet-stream';
-      if (
-        !ALLOWED_MIME_TYPES.includes(mimeType as (typeof ALLOWED_MIME_TYPES)[number])
-      ) {
-        Alert.alert(
-          'Unsupported File',
-          `Only ${ALLOWED_EXTENSIONS_LABEL} files are supported.`,
-        );
-        return;
-      }
-
-      const fileSize = file.size || 0;
-      if (fileSize === 0) {
-        Alert.alert('Invalid File', 'The selected file appears to be empty.');
-        return;
-      }
-      if (fileSize > MAX_FILE_SIZE_BYTES) {
-        Alert.alert(
-          'File Too Large',
-          `Maximum file size is ${MAX_FILE_SIZE_LABEL}. Selected file is ${formatFileSize(fileSize)}.`,
-        );
-        return;
-      }
-
-      setPendingAttachment({
-        uri: file.fileCopyUri || file.uri,
-        name: file.name || 'document',
-        mimeType,
-        size: fileSize,
-      });
-    } catch (err: any) {
-      if (!DocumentPicker.isCancel(err)) {
-        Alert.alert('Error', 'Failed to pick document. Please try again.');
-      }
-    }
+  const handleAttachPress = () => {
+    Keyboard.dismiss();
+    setShowAttachPicker(true);
   };
 
   const uploadAttachment = async (
@@ -205,8 +160,17 @@ const Chat = ({navigation, route}: any) => {
     };
   };
 
-  const handleOpenAttachment = async (url: string, fileName: string) => {
+  const handleOpenAttachment = async (url: string, fileName: string, mimeType: string, messageId?: string) => {
     try {
+      // For images, just view in full screen
+      if (mimeType.startsWith('image/')) {
+        setViewingImage(url);
+        if (messageId) {
+          setDownloadedAttachments(prev => new Set(prev).add(messageId));
+        }
+        return;
+      }
+
       const {dirs} = ReactNativeBlobUtil.fs;
       const filePath = `${dirs.CacheDir}/${sanitizeFileName(fileName)}`;
 
@@ -220,14 +184,53 @@ const Chat = ({navigation, route}: any) => {
       } else {
         ReactNativeBlobUtil.android.actionViewIntent(
           res.path(),
-          'application/pdf',
+          mimeType,
         );
+      }
+      if (messageId) {
+        setDownloadedAttachments(prev => new Set(prev).add(messageId));
       }
     } catch {
       // Fallback: open in browser
       Linking.openURL(url).catch(() =>
         Alert.alert('Error', 'Unable to open this file.'),
       );
+    }
+  };
+
+  const handleDownloadAttachment = async (url: string, fileName: string, mimeType: string, messageId?: string) => {
+    try {
+      const safeName = sanitizeFileName(fileName);
+      const {dirs} = ReactNativeBlobUtil.fs;
+      const downloadDir = Platform.OS === 'ios'
+        ? dirs.DocumentDir
+        : dirs.DownloadDir;
+      const filePath = `${downloadDir}/${safeName}`;
+
+      const res = await ReactNativeBlobUtil.config({
+        fileCache: false,
+        path: filePath,
+        addAndroidDownloads: Platform.OS === 'android'
+          ? {
+              useDownloadManager: true,
+              notification: true,
+              title: fileName,
+              description: 'Downloading file...',
+              mime: mimeType,
+              path: filePath,
+            }
+          : undefined,
+      }).fetch('GET', url);
+
+      if (messageId) {
+        setDownloadedAttachments(prev => new Set(prev).add(messageId));
+      }
+
+      if (Platform.OS === 'ios') {
+        ReactNativeBlobUtil.ios.openDocument(res.path());
+      }
+    } catch {
+      Alert.alert('Download Failed', 'Unable to download this file. Please try again.');
     }
   };
 
@@ -262,9 +265,8 @@ const Chat = ({navigation, route}: any) => {
         }
 
         const isAttachment = !!attachmentData;
-        const displayText = isAttachment
-          ? `${attachmentData!.name}`
-          : msg?.text || '';
+        const textContent = msg?.text?.trim() || '';
+        const displayText = textContent || (isAttachment ? attachmentData!.name : '');
 
         // Optimistic UI update
         const newMessage: any = {
@@ -308,8 +310,12 @@ const Chat = ({navigation, route}: any) => {
         );
 
         const pushBody = isAttachment
-          ? ` Sent a document: ${attachmentData!.name}`
-          : msg?.text || '';
+          ? textContent
+            ? `📎 ${attachmentData!.name}: ${textContent}`
+            : attachmentData!.mimeType.startsWith('image/') 
+              ? `📷 Sent a photo`
+              : `📎 Sent a document: ${attachmentData!.name}`
+          : textContent;
         await sendPushNotification(pushBody);
       } catch {
         Alert.alert('Error', 'Failed to send message. Please try again.');
@@ -370,7 +376,7 @@ const Chat = ({navigation, route}: any) => {
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <>
       <View style={styles.screen}>
         <StatusBar
           barStyle={'dark-content'}
@@ -427,83 +433,133 @@ const Chat = ({navigation, route}: any) => {
                 name: senderName,
                 avatar: senderProfile,
               }}
+              listViewProps={{
+                keyboardShouldPersistTaps: 'handled',
+                keyboardDismissMode: 'on-drag',
+                showsVerticalScrollIndicator: false,
+              } as any}
               showAvatarForEveryMessage={true}
+              renderDay={(dayProps: any) => {
+                const {currentMessage, previousMessage} = dayProps;
+                if (!currentMessage?.createdAt) return null;
+                const currDate = currentMessage.createdAt instanceof Date
+                  ? currentMessage.createdAt
+                  : new Date(currentMessage.createdAt);
+                if (previousMessage?.createdAt) {
+                  const prevDate = previousMessage.createdAt instanceof Date
+                    ? previousMessage.createdAt
+                    : new Date(previousMessage.createdAt);
+                  if (currDate.toDateString() === prevDate.toDateString())
+                    return null;
+                }
+                return <ChatDaySeparator date={currDate} />;
+              }}
               renderBubble={props => {
                 const currentMsg = props.currentMessage as any;
-                const isAttachmentMsg = currentMsg?.messageType === 'attachment' && currentMsg?.attachment;
+                const isAttachmentMsg =
+                  currentMsg?.messageType === 'attachment' &&
+                  currentMsg?.attachment;
                 const isRight = currentMsg?.user?._id === senderId;
 
                 if (isAttachmentMsg) {
                   const att = currentMsg.attachment as ChatAttachment;
-                  return (
-                    <TouchableOpacity
-                      activeOpacity={0.7}
-                      onPress={() => handleOpenAttachment(att.url, att.name)}
-                      style={[
-                        styles.attachmentBubble,
-                        isRight
-                          ? styles.attachmentBubbleRight
-                          : styles.attachmentBubbleLeft,
-                      ]}>
-                      <MaterialCommunityIcons
-                        name={getDocIcon(att.mimeType)}
-                        size={RFPercentage(4)}
-                        color={isRight ? Colors.background : getDocColor(att.mimeType)}
-                      />
-                      <View style={styles.attachmentBubbleInfo}>
-                        <Text
-                          style={[
-                            styles.attachmentBubbleName,
-                            {color: isRight ? Colors.background : Colors.primaryText},
-                          ]}
-                          numberOfLines={2}>
-                          {att.name}
-                        </Text>
-                        <Text
-                          style={[
-                            styles.attachmentBubbleSize,
-                            {color: isRight ? 'rgba(255,255,255,0.7)' : Colors.secondaryText},
-                          ]}>
-                          {formatFileSize(att.size)} •{' '}
-                          {att.mimeType.split('/').pop()?.toUpperCase()}
-                        </Text>
+                  const msgText = currentMsg.text;
+                  const hasText =
+                    msgText &&
+                    msgText.trim() &&
+                    msgText.trim() !== att.name;
+                  const isDownloaded = downloadedAttachments.has(
+                    currentMsg._id,
+                  );
+                  const isImage = att.mimeType.startsWith('image/');
+                  const time = formatTime(currentMsg.createdAt);
+
+                  if (!isRight && !isDownloaded && !isImage) {
+                    checkIfDownloaded(att.name, currentMsg._id);
+                  }
+
+                  if (isImage) {
+                    return (
+                      <View>
+                        <ChatImageBubble
+                          attachment={att}
+                          isRight={isRight}
+                          isDownloaded={isDownloaded}
+                          time={time}
+                          onPress={() =>
+                            handleOpenAttachment(
+                              att.url,
+                              att.name,
+                              att.mimeType,
+                              currentMsg._id,
+                            )
+                          }
+                          onDownload={() =>
+                            handleDownloadAttachment(
+                              att.url,
+                              att.name,
+                              att.mimeType,
+                              currentMsg._id,
+                            )
+                          }
+                        />
+                        {hasText && (
+                          <ChatTextBubble
+                            bubbleProps={{
+                              ...props,
+                              currentMessage: {
+                                ...currentMsg,
+                                text: msgText.trim(),
+                              },
+                            }}
+                            showTime={false}
+                          />
+                        )}
                       </View>
-                      <MaterialCommunityIcons
-                        name="download"
-                        size={RFPercentage(2.2)}
-                        color={isRight ? 'rgba(255,255,255,0.7)' : Colors.gradient1}
+                    );
+                  }
+
+                  return (
+                    <View>
+                      <ChatDocumentBubble
+                        attachment={att}
+                        isRight={isRight}
+                        time={time}
+                        fileSize={formatFileSize(att.size)}
+                        onPress={() =>
+                          handleOpenAttachment(
+                            att.url,
+                            att.name,
+                            att.mimeType,
+                            currentMsg._id,
+                          )
+                        }
+                        onDownload={() =>
+                          handleDownloadAttachment(
+                            att.url,
+                            att.name,
+                            att.mimeType,
+                            currentMsg._id,
+                          )
+                        }
                       />
-                    </TouchableOpacity>
+                      {hasText && (
+                        <ChatTextBubble
+                          bubbleProps={{
+                            ...props,
+                            currentMessage: {
+                              ...currentMsg,
+                              text: msgText.trim(),
+                            },
+                          }}
+                          showTime={false}
+                        />
+                      )}
+                    </View>
                   );
                 }
 
-                return (
-                  <Bubble
-                    {...props}
-                    wrapperStyle={{
-                      left: {
-                        backgroundColor: Colors.coolGray200,
-                        padding: RFPercentage(0.6),
-                      },
-                      right: {
-                        backgroundColor: Colors.steelBlue,
-                        padding: RFPercentage(0.6),
-                      },
-                    }}
-                    textStyle={{
-                      left: {
-                        color: Colors.inputTextColor,
-                        fontFamily: Fonts.fontRegular,
-                        fontSize: RFPercentage(1.9),
-                      },
-                      right: {
-                        color: Colors.background,
-                        fontFamily: Fonts.fontRegular,
-                        fontSize: RFPercentage(1.9),
-                      },
-                    }}
-                  />
-                );
+                return <ChatTextBubble bubbleProps={props} />;
               }}
               renderInputToolbar={props => (
                 <View
@@ -518,31 +574,18 @@ const Chat = ({navigation, route}: any) => {
                     maxHeight: RFPercentage(24),
                     paddingVertical: RFPercentage(2),
                   }}>
-                  {/* Upload progress bar */}
-                  {uploadProgress !== null && (
-                    <View style={styles.uploadProgressContainer}>
-                      <View style={styles.uploadProgressBar}>
-                        <View
-                          style={[
-                            styles.uploadProgressFill,
-                            {width: `${uploadProgress}%`},
-                          ]}
-                        />
-                      </View>
-                      <Text style={styles.uploadProgressText}>
-                        Uploading... {uploadProgress}%
-                      </Text>
-                    </View>
-                  )}
-
                   {/* Pending attachment preview */}
                   {pendingAttachment && (
                     <View style={styles.attachmentPreview}>
-                      <MaterialCommunityIcons
-                        name={getDocIcon(pendingAttachment.mimeType)}
-                        size={RFPercentage(3)}
-                        color={getDocColor(pendingAttachment.mimeType)}
-                      />
+                      {pendingAttachment.mimeType.startsWith('image/') ? (
+                        <Image
+                          source={{uri: pendingAttachment.uri}}
+                          style={styles.attachmentPreviewImage}
+                          resizeMode="cover"
+                        />
+                      ) : (
+                        <PdfIcon width={32} height={32} />
+                      )}
                       <View style={styles.attachmentPreviewInfo}>
                         <Text
                           style={styles.attachmentPreviewName}
@@ -556,11 +599,7 @@ const Chat = ({navigation, route}: any) => {
                       <TouchableOpacity
                         onPress={() => setPendingAttachment(null)}
                         hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
-                        <MaterialCommunityIcons
-                          name="close-circle"
-                          size={RFPercentage(2.5)}
-                          color={Colors.red500}
-                        />
+                        <CancelIcon width={28} height={28} />
                       </TouchableOpacity>
                     </View>
                   )}
@@ -572,7 +611,7 @@ const Chat = ({navigation, route}: any) => {
                       <View style={styles.composerRow}>
                         <TouchableOpacity
                           activeOpacity={0.7}
-                          onPress={handlePickDocument}
+                          onPress={handleAttachPress}
                           disabled={isSending}
                           hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
                           style={styles.attachButton}>
@@ -677,7 +716,19 @@ const Chat = ({navigation, route}: any) => {
           </ImageBackground>
         </View>
       </View>
-    </TouchableWithoutFeedback>
+    <ImageView
+      images={viewingImage ? [{uri: viewingImage}] : []}
+      imageIndex={0}
+      visible={!!viewingImage}
+      onRequestClose={() => setViewingImage(null)}
+    />
+    <AttachmentPickerCard
+      visible={showAttachPicker}
+      onClose={() => setShowAttachPicker(false)}
+      onPickImage={handlePickImage}
+      onPickDocument={handlePickDocument}
+    />
+  </>
   );
 };
 
@@ -792,10 +843,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.silverOverlay50,
-    marginHorizontal: '5%',
-    marginBottom: RFPercentage(1),
+    width: 350,
+    height: 65,
+    alignSelf: 'center',
+    marginBottom: RFPercentage(2),
     paddingHorizontal: RFPercentage(1.5),
-    paddingVertical: RFPercentage(1),
     borderRadius: RFPercentage(1.5),
     borderWidth: 1,
     borderColor: Colors.warmGrayOverlay90,
@@ -838,35 +890,12 @@ const styles = StyleSheet.create({
     marginTop: 2,
     textAlign: 'center',
   },
-  // Attachment message bubble
-  attachmentBubble: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: RFPercentage(1.5),
-    paddingVertical: RFPercentage(1.2),
-    borderRadius: RFPercentage(1.8),
-    maxWidth: RFPercentage(35),
-    marginBottom: RFPercentage(0.5),
+  attachmentPreviewImage: {
+    width: 40,
+    height: 40,
+    borderRadius: RFPercentage(0.8),
   },
-  attachmentBubbleLeft: {
-    backgroundColor: Colors.coolGray200,
-  },
-  attachmentBubbleRight: {
-    backgroundColor: Colors.steelBlue,
-  },
-  attachmentBubbleInfo: {
-    flex: 1,
-    marginHorizontal: RFPercentage(1),
-  },
-  attachmentBubbleName: {
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.6),
-  },
-  attachmentBubbleSize: {
-    fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.2),
-    marginTop: 2,
-  },
+
 });
 
 export default Chat;

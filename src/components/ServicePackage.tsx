@@ -121,7 +121,7 @@ const ServicePackage = (props: props) => {
           colors={
             props.isFeatured
               ? [Colors.gradient1, Colors.gradient2]
-              : [Colors.packageHeaderGradient, Colors.inputBg]
+              : ['rgba(78, 132, 255, 0.05)', 'rgba(78, 132, 255, 0.05)']
           }
           style={[styles.header, props.isFeatured && styles.featuredHeader]}
           start={{x: 0, y: 0}}
@@ -234,7 +234,7 @@ const ServicePackage = (props: props) => {
             colors={
               props.isFeatured
                 ? [Colors.primaryBlueOverlay05, Colors.primaryBlueOverlay02]
-                : [Colors.inputBg, Colors.slate100]
+                : ['rgba(69, 84, 103, 0.05)', 'rgba(69, 84, 103, 0.05)']
             }
             style={styles.priceSection}>
             <View style={styles.priceRow}>
@@ -283,7 +283,7 @@ const ServicePackage = (props: props) => {
                   colors={
                     props.isFeatured
                       ? [Colors.gradient1, Colors.gradient2]
-                      : [Colors.packageBtnGradient1, Colors.packageBtnGradient2]
+                      : ['rgba(69, 84, 103, 0.1)', 'rgba(69, 84, 103, 0.1)']
                   }
                   style={styles.selectButtonGradient}
                   start={{x: 0, y: 0}}
@@ -570,7 +570,7 @@ const styles = StyleSheet.create({
     // elevation: 4,
   },
   selectButtonText: {
-    color: Colors.white,
+    color: '#000000',
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.4),
     letterSpacing: 0.5,

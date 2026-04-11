@@ -27,6 +27,7 @@ import {showToast} from '../../../utils/ToastMessage';
 import {useExitAppOnBack} from '../../../utils/ExitApp';
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import ProfileIcon from '../../../assets/svg/profileIcon';
 
 interface Job {
   id: string;
@@ -225,6 +226,8 @@ const Jobs = ({navigation}: any) => {
     return text.slice(0, maxChars).trim() + '... ';
   };
 
+  const filterPillColors = ['rgba(84, 137, 255, 0.05)', 'rgba(84, 137, 255, 0.05)'];
+
   return (
     <View style={styles.safeArea}>
       <StatusBar
@@ -342,11 +345,7 @@ const Jobs = ({navigation}: any) => {
                   active && styles.filterButtonActive,
                 ]}>
                 <LinearGradient
-                  colors={
-                    active
-                      ? [Colors.gradient1, Colors.gradient2]
-                      : [Colors.white, Colors.lavenderFilterBg]
-                  }
+                  colors={filterPillColors}
                   style={styles.filterGradient}>
                   <Text
                     style={[
@@ -368,11 +367,7 @@ const Jobs = ({navigation}: any) => {
                   completed && styles.filterButtonActive,
                 ]}>
                 <LinearGradient
-                  colors={
-                    completed
-                      ? [Colors.gradient1, Colors.gradient2]
-                      : [Colors.white, Colors.lavenderFilterBg]
-                  }
+                  colors={filterPillColors}
                   style={styles.filterGradient}>
                   <Text
                     style={[
@@ -394,11 +389,7 @@ const Jobs = ({navigation}: any) => {
                   expired && styles.filterButtonActive,
                 ]}>
                 <LinearGradient
-                  colors={
-                    expired
-                      ? [Colors.gradient1, Colors.gradient2]
-                      : [Colors.white, Colors.lavenderFilterBg]
-                  }
+                  colors={filterPillColors}
                   style={styles.filterGradient}>
                   <Text
                     style={[
@@ -539,11 +530,7 @@ const Jobs = ({navigation}: any) => {
                                 jobTitle: item?.title || 'Untitled Job',
                               })
                             }>
-                            <MaterialIcons
-                              name="person-pin"
-                              size={18}
-                              color={Colors.success}
-                            />
+                            <ProfileIcon width={15} height={15} />
                             <Text style={[styles.manageButtonText, {color: Colors.success}]}>
                               {item?.status === 'pending_completion' ? 'Awaiting Confirmation' : 'Cleaner Confirmed'}
                             </Text>
@@ -657,9 +644,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.blueBg50,
-    padding: 16,
+    padding: 10,
     borderRadius: 16,
-    gap: 12,
+    gap: 10,
   },
   statItem: {
     alignItems: 'center',
@@ -694,7 +681,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.15),
     color: Colors.placeholderColor,
     textAlign: 'center',
   },
@@ -745,6 +732,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 12,
     paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.02)',
   },
   filterIconContainer: {
     width: 40,
@@ -762,7 +751,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   filterButtonTextActive: {
-    color: Colors.white,
+    color: Colors.gradient1,
   },
   activeFilterCard: {
     marginTop: 16,

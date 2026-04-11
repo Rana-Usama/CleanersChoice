@@ -20,6 +20,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Feather from 'react-native-vector-icons/Feather';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import CalenderIcon from '../../../assets/svg/CalenderIcon';
 import moment from 'moment';
 import {useSelector} from 'react-redux';
 import CustomModal from '../../../components/CustomModal';
@@ -359,29 +360,24 @@ const CheckAvailability = ({route, navigation}: any) => {
 
           <View style={styles.divider} />
 
-          <View style={styles.nextAvailableContainer}>
-            <View style={styles.nextAvailableHeader}>
+          <View style={styles.nextAvailableBox}>
+            <View style={styles.nextAvailableContainer}>
+            <View style={styles.nextAvailableLeft}>
               <Ionicons
                 name="time-outline"
-                size={18}
+                size={20}
                 color={Colors.gradient1}
               />
-              <Text style={styles.nextAvailableTitle}>Next Available</Text>
+              <Text style={styles.nextAvailableTitle}>Next available</Text>
             </View>
             {nextAvailable ? (
-              <View style={styles.nextAvailableTime}>
+              <View style={styles.nextAvailableRight}>
                 <View
                   style={[
                     styles.nextDayBadge,
                     nextAvailable.isToday && styles.todayBadge,
                   ]}>
-                  <MaterialCommunityIcons
-                    name={
-                      nextAvailable.isToday ? 'calendar-star' : 'calendar-blank'
-                    }
-                    size={16}
-                    color={Colors.white}
-                  />
+                  <CalenderIcon width={16} height={16} />
                   <Text style={styles.nextDayText}>
                     {nextAvailable.isToday ? 'Today' : nextAvailable.fullDay}
                   </Text>
@@ -393,6 +389,7 @@ const CheckAvailability = ({route, navigation}: any) => {
                 No availability scheduled
               </Text>
             )}
+            </View>
           </View>
         </View>
 
@@ -489,10 +486,10 @@ const CheckAvailability = ({route, navigation}: any) => {
               return (
                 <View key={index} style={styles.timeSlotGroup}>
                   <LinearGradient
-                    colors={[Colors.slateBlueLight, Colors.slateBlue]}
+                    colors={['rgba(78, 132, 255, 0.1)', 'rgba(78, 132, 255, 0.1)']}
                     style={styles.timeSlotHeader}>
                     <View style={styles.timeSlotTime}>
-                      <Ionicons name="time" size={16} color={Colors.white} />
+                      <Ionicons name="time-outline" size={16} color="#8C919B" />
                       <Text style={styles.timeSlotText}>
                         {firstDay.formattedFromTime} -{' '}
                         {firstDay.formattedToTime}
@@ -509,25 +506,9 @@ const CheckAvailability = ({route, navigation}: any) => {
                     {days.map((day, dayIndex) => (
                       <View key={dayIndex} style={styles.dayItem}>
                         <View style={styles.dayInfo}>
-                          <View
-                            style={[
-                              styles.dayBadge,
-                              isToday(day.day) && styles.todayDayBadge,
-                            ]}>
-                            <MaterialCommunityIcons
-                              name={
-                                isToday(day.day) ? 'star' : 'calendar-blank'
-                              }
-                              size={14}
-                              color={
-                                isToday(day.day) ? Colors.white : Colors.gradient1
-                              }
-                            />
-                            <Text
-                              style={[
-                                styles.dayText,
-                                isToday(day.day) && styles.todayDayText,
-                              ]}>
+                          <View style={styles.dayBadge}>
+                            <CalenderIcon width={14} height={14} color="#407BFF" />
+                            <Text style={styles.dayText}>
                               {day.fullDay}
                             </Text>
                           </View>
@@ -758,8 +739,24 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.lightGrayBg,
     marginVertical: RFPercentage(1.5),
   },
+  nextAvailableBox: {
+    borderWidth: 1,
+    borderColor: Colors.lightGrayBg,
+    borderRadius: 14,
+    padding: RFPercentage(1.5),
+  },
   nextAvailableContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  nextAvailableLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: RFPercentage(0.5),
+  },
+  nextAvailableRight: {
+    alignItems: 'flex-end',
   },
   nextAvailableHeader: {
     flexDirection: 'row',
@@ -768,9 +765,9 @@ const styles = StyleSheet.create({
     gap: RFPercentage(0.5),
   },
   nextAvailableTitle: {
-    fontSize: RFPercentage(1.5),
-    fontFamily: Fonts.fontMedium,
-    color: Colors.primaryText,
+    fontSize: RFPercentage(1.7),
+    fontFamily: Fonts.fontRegular,
+    color: '#447FFF',
   },
   nextAvailableTime: {
     alignItems: 'center',
@@ -778,7 +775,7 @@ const styles = StyleSheet.create({
   nextDayBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.gradient1,
+    backgroundColor: Colors.amber500,
     paddingHorizontal: RFPercentage(1),
     paddingVertical: RFPercentage(0.5),
     borderRadius: 16,
@@ -794,9 +791,11 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.fontMedium,
   },
   nextTimeText: {
-    fontSize: RFPercentage(1.7),
-    fontFamily: Fonts.fontMedium,
-    color: Colors.gradient1,
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.fontRegular,
+    color: Colors.primaryText,
+    marginTop: RFPercentage(0.8),
+    textAlign: 'right',
   },
   noAvailabilityText: {
     fontSize: RFPercentage(1.5),
@@ -807,7 +806,7 @@ const styles = StyleSheet.create({
   filterCard: {
     backgroundColor: Colors.white,
     borderRadius: 20,
-    padding: RFPercentage(2),
+    paddingVertical: RFPercentage(2),
     marginTop: RFPercentage(2),
     shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 2},
@@ -822,11 +821,11 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
     color: Colors.primaryText,
-    marginBottom: RFPercentage(1),
+    marginBottom: RFPercentage(1.5),
+    paddingHorizontal: RFPercentage(2),
   },
   filterScroll: {
-    marginHorizontal: -RFPercentage(2),
-    paddingHorizontal: RFPercentage(2),
+    // marginHorizontal: -RFPercentage(2),
   },
   filterButton: {
     flexDirection: 'row',
@@ -891,8 +890,9 @@ const styles = StyleSheet.create({
     color: Colors.gradient1,
   },
   statValueMinutes: {
-    fontSize: RFPercentage(1.9),
-    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(2.6),
+    fontFamily: Fonts.semiBold,
+    color: Colors.gradient1,
   },
   statLabel: {
     fontSize: RFPercentage(1.3),
@@ -941,7 +941,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: RFPercentage(1.2),
+    paddingHorizontal: RFPercentage(1.2),
+    paddingVertical: RFPercentage(1.6),
   },
   timeSlotTime: {
     flexDirection: 'row',
@@ -949,18 +950,18 @@ const styles = StyleSheet.create({
     gap: RFPercentage(0.5),
   },
   timeSlotText: {
-    color: Colors.white,
+    color: '#8C919B',
     fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
   },
   daysCountBadge: {
-    backgroundColor: Colors.whiteOverlay20,
+    backgroundColor: 'rgba(64, 123, 255, 0.2)',
     paddingHorizontal: RFPercentage(0.8),
     paddingVertical: RFPercentage(0.3),
     borderRadius: 12,
   },
   daysCountText: {
-    color: Colors.white,
+    color: '#407BFF',
     fontSize: RFPercentage(1.2),
     fontFamily: Fonts.fontMedium,
   },
@@ -972,8 +973,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: RFPercentage(0.8),
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.gray50,
   },
   dayInfo: {
     flexDirection: 'row',
@@ -1001,13 +1000,13 @@ const styles = StyleSheet.create({
     color: Colors.white,
   },
   todayIndicator: {
-    backgroundColor: Colors.orangeBg50,
+    backgroundColor: 'rgba(255, 157, 0, 0.2)',
     paddingHorizontal: RFPercentage(0.6),
     paddingVertical: RFPercentage(0.2),
     borderRadius: 8,
   },
   todayIndicatorText: {
-    color: Colors.orange600,
+    color: '#F59C0D',
     fontSize: RFPercentage(1.1),
     fontFamily: Fonts.fontMedium,
   },
