@@ -192,7 +192,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
 
     // Calculate next available slot
     const today = moment();
-    const todayIndex = today.day() - 1; // moment days: 0=Sun, 1=Mon, etc.
+    const todayIndex = today.day() - 1; 
 
     let nextAvailableDay = '';
     let nextAvailableTime = '';

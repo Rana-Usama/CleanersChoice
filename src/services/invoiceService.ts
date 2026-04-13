@@ -217,15 +217,27 @@ export const generateInvoicePdf = async (
 };
 
 // Share a PDF file via the native share sheet
+// When user picks Email, the To/Subject/Body are pre-filled
 export const shareInvoicePdf = async (
   filePath: string,
   invoiceId: string,
+  toEmail?: string,
+  toName?: string,
+  jobTitle?: string,
 ): Promise<void> => {
+  const subject = jobTitle
+    ? `Invoice for ${jobTitle} – Invoice #${invoiceId}`
+    : `Invoice #${invoiceId}`;
+  const message = jobTitle
+    ? `Please find attached your invoice for "${jobTitle}" (Invoice #${invoiceId}).`
+    : `Please find attached your invoice (Invoice #${invoiceId}).`;
   await Share.open({
     url: `file://${filePath}`,
     type: 'application/pdf',
-    title: `Invoice ${invoiceId}`,
-    subject: `Invoice ${invoiceId}`,
+    title: subject,
+    subject,
+    email: toEmail || undefined,
+    message,
   });
 };
 
