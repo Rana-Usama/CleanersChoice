@@ -127,7 +127,7 @@ const Invoices = ({navigation}: any) => {
       const pdfPath = await generateInvoicePdf(invoiceToFormData(invoice));
 
       if (action === 'share') {
-        await shareInvoicePdf(pdfPath, invoice.invoiceId);
+        await shareInvoicePdf(pdfPath, invoice.invoiceId, invoice.toEmail, invoice.toName, invoice.jobPostName);
       } else {
         await downloadInvoicePdf(pdfPath, invoice.invoiceId);
         if (Platform.OS === 'android') {

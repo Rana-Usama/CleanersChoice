@@ -99,7 +99,7 @@ const InvoicePreview = ({route, navigation}: any) => {
 
       // Share PDF
       try {
-        await shareInvoicePdf(pdfPath, finalFormData.invoiceId);
+        await shareInvoicePdf(pdfPath, finalFormData.invoiceId, finalFormData.toEmail, finalFormData.toName, finalFormData.jobPostName);
       } catch (shareErr: any) {
         // User may dismiss the share sheet, which is fine
         if (
