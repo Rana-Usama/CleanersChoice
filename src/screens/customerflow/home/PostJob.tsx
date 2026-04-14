@@ -34,6 +34,8 @@ import Feather from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useSoftInputAdjustNothing} from '../../../hooks/useSoftInputMode';
+import DollarIcon from '../../../assets/svg/DollarIcon';
+import SquareFeetIcon from '../../../assets/svg/SquareFeetIcon';
 
 const {width} = Dimensions.get('window');
 
@@ -131,6 +133,11 @@ const PostJob = ({route}: any) => {
   const [Description, setDescription] = useState('');
   const [remarks, setRemarks] = useState('');
   const [budget, setBudget] = useState('');
+  const [budgetType, setBudgetType] = useState<'flat' | 'hourly' | 'sqft'>('flat');
+  const [hourlyRate, setHourlyRate] = useState('');
+  const [hours, setHours] = useState('');
+  const [pricePerSqFt, setPricePerSqFt] = useState('');
+  const [sqFt, setSqFt] = useState('');
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
@@ -168,7 +175,7 @@ const PostJob = ({route}: any) => {
     const user = auth().currentUser;
     if (!user) return;
 
-    if (!jobTitle.trim() || !userLocation || !budget || !selectedType || !date) {
+    if (!jobTitle.trim() || !userLocation || !selectedType || !date) {
       showToast({
         type: 'info',
         title: 'Job Post',
@@ -177,8 +184,21 @@ const PostJob = ({route}: any) => {
       return;
     }
 
-    const budgetValue = parseInt(budget.replace(/[^0-9]/g, ''), 10);
-    if (!budgetValue || budgetValue < 1) {
+    // Validate budget based on type
+    let computedBudget = 0;
+    if (budgetType === 'flat') {
+      computedBudget = parseInt(budget.replace(/[^0-9]/g, ''), 10) || 0;
+    } else if (budgetType === 'hourly') {
+      const rate = parseInt(hourlyRate.replace(/[^0-9]/g, ''), 10) || 0;
+      const hrs = parseInt(hours, 10) || 0;
+      computedBudget = rate * hrs;
+    } else if (budgetType === 'sqft') {
+      const ppsf = parseInt(pricePerSqFt.replace(/[^0-9]/g, ''), 10) || 0;
+      const sf = parseInt(sqFt, 10) || 0;
+      computedBudget = ppsf * sf;
+    }
+
+    if (!computedBudget || computedBudget < 1) {
       showToast({
         type: 'info',
         title: 'Invalid Amount',
@@ -194,12 +214,22 @@ const PostJob = ({route}: any) => {
         description: Description.trim(),
         type: selectedType,
         location: userLocation,
-        priceRange: budget.replace(/[^0-9]/g, ''),
+        priceRange: String(computedBudget),
+        budgetType: budgetType,
         remarks: remarks ? remarks.trim() : '',
         jobId: user.uid,
         status: 'active',
         createdAt2: new Date(),
       };
+
+      // Save budget type specific fields
+      if (budgetType === 'hourly') {
+        jobData.hourlyRate = hourlyRate.replace(/[^0-9]/g, '');
+        jobData.hours = hours;
+      } else if (budgetType === 'sqft') {
+        jobData.pricePerSqFt = pricePerSqFt.replace(/[^0-9]/g, '');
+        jobData.sqFt = sqFt;
+      }
 
       // only set createdAt if date is selected
       if (date) {
@@ -265,6 +295,24 @@ const PostJob = ({route}: any) => {
         setSelectedType(jobData?.type || null);
         setBudget(jobData?.priceRange ? `$${jobData.priceRange}` : '');
         setRemarks(jobData?.remarks || '');
+
+        // Load budget type fields
+        if (jobData?.budgetType) {
+          setBudgetType(jobData.budgetType);
+        }
+        if (jobData?.hourlyRate) {
+          setHourlyRate(`$${jobData.hourlyRate}`);
+        }
+        if (jobData?.hours) {
+          setHours(jobData.hours);
+        }
+        if (jobData?.pricePerSqFt) {
+          setPricePerSqFt(`$${jobData.pricePerSqFt}`);
+        }
+        if (jobData?.sqFt) {
+          setSqFt(jobData.sqFt);
+        }
+
         if (!repost) {
           setDate(moment(jobData?.createdAt, 'YYYY-MM-DD  HH:mm A').toDate());
         }
@@ -554,21 +602,177 @@ const PostJob = ({route}: any) => {
                 {/* Budget Card */}
                 <View style={styles.card}>
                   <View style={styles.cardHeader}>
-                    <MaterialCommunityIcons
-                      name="cash"
-                      size={22}
-                      color={Colors.gradient1}
-                    />
+                    <DollarIcon width={22} height={22} color={Colors.gradient1} />
                     <Text style={styles.cardTitle}>Budget</Text>
                   </View>
 
-                  <InputField
-                    placeholder="Amount"
-                    customStyle={styles.budgetInput}
-                    value={budget}
-                    onChangeText={handleBudgetChange}
-                    type={'numeric'}
-                  />
+                  {/* Budget Type Tabs */}
+                  <View style={styles.budgetTabs}>
+                    <TouchableOpacity
+                      activeOpacity={0.7}
+                      style={[
+                        styles.budgetTab,
+                        styles.budgetTabFlat,
+                        budgetType === 'flat' && styles.budgetTabActive,
+                      ]}
+                      onPress={() => setBudgetType('flat')}>
+                      <View style={[
+                        styles.budgetTabIconBox,
+                        budgetType === 'flat' && styles.budgetTabIconBoxActive,
+                      ]}>
+                        <DollarIcon
+                          width={16}
+                          height={16}
+                          color={budgetType === 'flat' ? '#4D85FE' : '#9CA3AF'}
+                        />
+                      </View>
+                      <Text
+                        numberOfLines={1}
+                        style={[
+                          styles.budgetTabText,
+                          budgetType === 'flat' && styles.budgetTabTextActive,
+                        ]}>
+                        Flat Rate
+                      </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      activeOpacity={0.7}
+                      style={[
+                        styles.budgetTab,
+                        styles.budgetTabHourly,
+                        budgetType === 'hourly' && styles.budgetTabActive,
+                      ]}
+                      onPress={() => setBudgetType('hourly')}>
+                      <View style={[
+                        styles.budgetTabIconBox,
+                        budgetType === 'hourly' && styles.budgetTabIconBoxActive,
+                      ]}>
+                        <MaterialCommunityIcons
+                          name="clock-outline"
+                          size={16}
+                          color={budgetType === 'hourly' ? '#4D85FE' : '#9CA3AF'}
+                        />
+                      </View>
+                      <Text
+                        numberOfLines={1}
+                        style={[
+                          styles.budgetTabText,
+                          budgetType === 'hourly' && styles.budgetTabTextActive,
+                        ]}>
+                        Hourly Rate
+                      </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      activeOpacity={0.7}
+                      style={[
+                        styles.budgetTab,
+                        styles.budgetTabSqft,
+                        budgetType === 'sqft' && styles.budgetTabActive,
+                      ]}
+                      onPress={() => setBudgetType('sqft')}>
+                      <View style={[
+                        styles.budgetTabIconBox,
+                        budgetType === 'sqft' && styles.budgetTabIconBoxActive,
+                      ]}>
+                        <SquareFeetIcon
+                          width={16}
+                          height={16}
+                          color={budgetType === 'sqft' ? '#4D85FE' : '#9CA3AF'}
+                        />
+                      </View>
+                      <Text
+                        numberOfLines={1}
+                        style={[
+                          styles.budgetTabText,
+                          budgetType === 'sqft' && styles.budgetTabTextActive,
+                        ]}>
+                        Square Footage
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* Flat Rate Fields */}
+                  {budgetType === 'flat' && (
+                    <View>
+                      <Text style={styles.budgetFieldLabel}>Total Price</Text>
+                      <InputField
+                        placeholder="$"
+                        customStyle={styles.budgetInput}
+                        value={budget}
+                        onChangeText={handleBudgetChange}
+                        type={'numeric'}
+                      />
+                    </View>
+                  )}
+
+                  {/* Hourly Rate Fields */}
+                  {budgetType === 'hourly' && (
+                    <View>
+                      <Text style={styles.budgetFieldLabel}>Rate per Hour</Text>
+                      <View style={styles.budgetRow}>
+                        <InputField
+                          placeholder="$"
+                          customStyle={styles.budgetInputHalf}
+                          value={hourlyRate}
+                          onChangeText={(text: string) => {
+                            const numeric = text.replace(/[^0-9]/g, '').replace(/^0+/, '');
+                            setHourlyRate(numeric ? `$${numeric}` : '');
+                          }}
+                          type={'numeric'}
+                        />
+                        <View style={styles.sqftInputWrapper}>
+                          <TextInput
+                            placeholder="0"
+                            placeholderTextColor={Colors.placeholderColor}
+                            style={styles.sqftTextInput}
+                            value={hours}
+                            onChangeText={(text: string) => {
+                              const numeric = text.replace(/[^0-9]/g, '').replace(/^0+/, '');
+                              setHours(numeric);
+                            }}
+                            keyboardType="numeric"
+                          />
+                          <Text style={styles.sqftSuffix}>Hours</Text>
+                        </View>
+                      </View>
+                    </View>
+                  )}
+
+                  {/* Square Footage Fields */}
+                  {budgetType === 'sqft' && (
+                    <View>
+                      <Text style={styles.budgetFieldLabel}>Price per Sq Ft</Text>
+                      <View style={styles.budgetRow}>
+                        <InputField
+                          placeholder="$"
+                          customStyle={styles.budgetInputHalf}
+                          value={pricePerSqFt}
+                          onChangeText={(text: string) => {
+                            const numeric = text.replace(/[^0-9]/g, '').replace(/^0+/, '');
+                            setPricePerSqFt(numeric ? `$${numeric}` : '');
+                          }}
+                          type={'numeric'}
+                        />
+                        <View style={styles.sqftInputWrapper}>
+                          <TextInput
+                            placeholder="0"
+                            placeholderTextColor={Colors.placeholderColor}
+                            style={styles.sqftTextInput}
+                            value={sqFt}
+                            onChangeText={(text: string) => {
+                              const numeric = text.replace(/[^0-9]/g, '').replace(/^0+/, '');
+                              setSqFt(numeric);
+                            }}
+                            keyboardType="numeric"
+                          />
+                          <Text style={styles.sqftSuffix}>Sq Ft</Text>
+                        </View>
+                      </View>
+                    </View>
+                  )}
+
                   <Text style={styles.budgetHint}>
                     Estimated cost for the service ($)
                   </Text>
@@ -659,7 +863,15 @@ const PostJob = ({route}: any) => {
                     <View style={styles.summaryRow}>
                       <Text style={styles.summaryLabel}>Budget:</Text>
                       <Text style={styles.summaryValue}>
-                        {budget || 'Not set'}
+                        {budgetType === 'flat'
+                          ? budget || 'Not set'
+                          : budgetType === 'hourly'
+                          ? hourlyRate && hours
+                            ? `${hourlyRate}/hr × ${hours}hrs`
+                            : 'Not set'
+                          : pricePerSqFt && sqFt
+                          ? `${pricePerSqFt}/sqft × ${sqFt}sqft`
+                          : 'Not set'}
                       </Text>
                     </View>
                     <View style={styles.summaryRow}>
@@ -938,16 +1150,113 @@ const styles = StyleSheet.create({
   },
   budgetInput: {
     width: '100%',
-    // flex: 1,
-    // backgroundColor: 'transparent',
-    // borderWidth: 0,
-    // paddingHorizontal: 0,
+    backgroundColor: 'transparent',
+    borderColor: '#9CA3AF1A',
   },
   budgetHint: {
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
     color: Colors.secondaryText,
     marginTop: RFPercentage(0.5),
+  },
+  budgetTabs: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginBottom: RFPercentage(1.5),
+  },
+  budgetTab: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 52,
+    paddingHorizontal: 6,
+    paddingVertical: 5,
+    borderRadius: 6,
+    gap: 3,
+    borderWidth: 1,
+    borderColor: '#9CA3AF1A',
+    backgroundColor: 'transparent',
+  },
+  budgetTabFlat: {
+    width: 92,
+  },
+  budgetTabHourly: {
+    flex: 1,
+    marginHorizontal: 5,
+    minWidth: 110,
+  },
+  budgetTabSqft: {
+    width: 126,
+  },
+  budgetTabActive: {
+    borderColor: '#4D85FE80',
+    backgroundColor: '#4D85FE1A',
+  },
+  budgetTabIconBox: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    backgroundColor: '#9CA3AF10',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  budgetTabIconBoxActive: {
+    backgroundColor: '#4D85FE10',
+  },
+  budgetTabText: {
+    fontSize: RFPercentage(1.34),
+    lineHeight: RFPercentage(1.6),
+    fontFamily: Fonts.fontMedium,
+    color: '#9CA3AF',
+    flexShrink: 1,
+    textAlign: 'center',
+    includeFontPadding: true,
+  },
+  budgetTabTextActive: {
+    color: '#4D85FE',
+  },
+  budgetFieldLabel: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontMedium,
+    color: Colors.primaryText,
+    marginBottom: RFPercentage(0.8),
+  },
+  budgetRow: {
+    flexDirection: 'row',
+    gap: RFPercentage(1),
+  },
+  budgetInputHalf: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#9CA3AF1A',
+  },
+  sqftInputWrapper: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: RFPercentage(6.5),
+    borderWidth: 1,
+    borderColor: '#9CA3AF1A',
+    borderRadius: RFPercentage(1.3),
+    backgroundColor: 'transparent',
+    paddingHorizontal: RFPercentage(1.5),
+    marginVertical: RFPercentage(1),
+  },
+  sqftTextInput: {
+    flex: 1,
+    color: Colors.inputTextColor,
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.8),
+    paddingVertical: 0,
+  },
+  sqftSuffix: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontMedium,
+    color: '#9CA3AF',
+    marginLeft: 4,
   },
   dateButton: {
     flexDirection: 'row',
