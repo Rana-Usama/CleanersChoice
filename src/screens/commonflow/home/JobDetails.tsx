@@ -150,6 +150,34 @@ const JobDetails = ({route, navigation}: any) => {
     );
   };
 
+  const parseNumericValue = (value: any) => {
+    const parsed = parseInt(String(value ?? '').replace(/[^0-9]/g, ''), 10);
+    return Number.isFinite(parsed) ? parsed : 0;
+  };
+
+  const getBudgetDisplayText = () => {
+    const total = parseNumericValue(item?.priceRange);
+    const totalText = total > 0 ? `$${total}` : 'Not set';
+
+    if (item?.budgetType === 'hourly') {
+      const rate = parseNumericValue(item?.hourlyRate);
+      const totalHours = parseNumericValue(item?.hours);
+      if (rate > 0 && totalHours > 0) {
+        return `$${rate}/hr × ${totalHours}hrs = ${totalText}`;
+      }
+    }
+
+    if (item?.budgetType === 'sqft') {
+      const pricePerSqFt = parseNumericValue(item?.pricePerSqFt);
+      const totalSqFt = parseNumericValue(item?.sqFt);
+      if (pricePerSqFt > 0 && totalSqFt > 0) {
+        return `$${pricePerSqFt}/sqft × ${totalSqFt}sqft = ${totalText}`;
+      }
+    }
+
+    return totalText;
+  };
+
   // Mark Complete
   const markComplete = async (jobId: string, newStatus: string) => {
     setLoading(true);
@@ -945,7 +973,11 @@ const JobDetails = ({route, navigation}: any) => {
               <Text style={[styles.cardTitle, styles.quickInfoLabel]}>
                 Budget
               </Text>
-              <Text style={styles.quickInfoValue}>${item.priceRange}</Text>
+              <Text
+                style={[styles.quickInfoValue, styles.quickInfoBudgetValue]}
+                numberOfLines={2}>
+                {getBudgetDisplayText()}
+              </Text>
             </View>
 
             <View style={styles.quickInfoCard}>
@@ -1419,6 +1451,11 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.6),
     textAlign: 'center',
+    marginLeft: RFPercentage(1),
+  },
+  quickInfoBudgetValue: {
+    flex: 1,
+    textAlign: 'left',
     marginLeft: RFPercentage(1),
   },
   infoCard: {

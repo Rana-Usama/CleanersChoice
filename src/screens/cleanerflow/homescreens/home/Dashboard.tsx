@@ -28,48 +28,75 @@ import * as Progress from 'react-native-progress';
 import Animated, {FadeInDown, FadeInUp, ZoomIn} from 'react-native-reanimated';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import Svg, {Path} from 'react-native-svg';
 import moment from 'moment';
+import WindowCleanIcon from '../../../../assets/svg/windowCleanIcon';
+import ChimneyIcon from '../../../../assets/svg/chimneyIcon';
+import CarpetIcon from '../../../../assets/svg/carpetIcon';
+import ResidentialIcon from '../../../../assets/svg/residentialIcon';
+import PressureIcon from '../../../../assets/svg/pressureIcon';
+import CarIcon from '../../../../assets/svg/carIcon';
+import LawnIcon from '../../../../assets/svg/lawnIcon';
+import OtherIcon from '../../../../assets/svg/otherIcon';
+import EditIcon from '../../../../assets/svg/editIcon';
+
+const AdminIcon = ({width = 12, height = 12}: {width?: number; height?: number}) => (
+  <Svg width={width} height={height} viewBox="0 0 14 14" fill="none">
+    <Path
+      d="m6.12 1.302-2.912 1.09c-.67.251-1.219 1.045-1.219 1.762v4.334c0 .689.455 1.593 1.01 2.007l2.508 1.873c.822.618 2.176.618 2.998 0l2.508-1.873c.555-.414 1.01-1.318 1.01-2.007V4.154c0-.717-.549-1.51-1.22-1.762l-2.91-1.09c-.496-.181-1.29-.181-1.774 0"
+      stroke="#fff"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <Path
+      d="M7 6.37h-.076a1.028 1.028 0 0 1 .04-2.053A1.028 1.028 0 0 1 7 6.37M5.839 8.003c-.56.373-.56.986 0 1.36.636.425 1.68.425 2.316 0 .56-.374.56-.987 0-1.36-.63-.426-1.674-.426-2.316 0"
+      stroke="#fff"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+);
 
 const items = [
   {
     id: '11',
     name: 'Window Cleaning',
-    icon: Icons.window,
+    Icon: WindowCleanIcon,
   },
   {
     id: '22',
     name: 'Chimney Cleaning',
-    icon: Icons.chimney,
+    Icon: ChimneyIcon,
   },
   {
     id: '33',
     name: 'Carpet Cleaning',
-    icon: Icons.carpet,
+    Icon: CarpetIcon,
   },
   {
     id: '44',
     name: 'Residential Cleaning',
-    icon: Icons.residential,
+    Icon: ResidentialIcon,
   },
   {
     id: '55',
     name: 'Pressure Washing',
-    icon: Icons.pressure,
+    Icon: PressureIcon,
   },
   {
     id: '66',
     name: 'Car Washing',
-    icon: Icons.car,
+    Icon: CarIcon,
   },
   {
     id: '77',
     name: 'Lawn Care',
-    icon: Icons.lawn,
+    Icon: LawnIcon,
   },
   {
     id: '88',
     name: 'Others',
-    icon: Icons.more,
+    Icon: OtherIcon,
   },
 ];
 
@@ -332,7 +359,11 @@ const Dashboard: React.FC = ({navigation}: any) => {
           textStyle={styles.headerText}
           left={true}
           arrowColor={Colors.white}
-          style={{backgroundColor: 'transparent'}}
+          style={{
+            backgroundColor: 'transparent',
+            borderBottomWidth: 0,
+            borderBottomColor: 'transparent',
+          }}
           logo
           tintColor={Colors.white}
         />
@@ -391,30 +422,24 @@ const Dashboard: React.FC = ({navigation}: any) => {
               <View style={styles.profileInfo}>
                 <View style={styles.nameContainer}>
                   <Text style={styles.name} numberOfLines={1}>
-                    {name && name?.length > 10
-                      ? `${name.substring(0, 10)}...`
-                      : name}
+                    {name || 'Cleaner'}
                   </Text>
                   {isAdmin && (
                     <View style={styles.adminBadge}>
-                      <MaterialIcons
-                        name="security"
-                        size={14}
-                        color={Colors.white}
-                      />
+                      <AdminIcon width={12} height={12} />
                       <Text style={styles.adminText}>Admin</Text>
                     </View>
                   )}
                 </View>
 
-                {/* Rest of the profile info... */}
+                {/* Stats row */}
                 <View style={styles.availabilityStats}>
                   <View style={styles.availabilityItem}>
                     <View>
                       <Text style={styles.availabilityValue}>
-                        {availabilitySummary.availableDays}
+                        {service?.type?.length || 0}
                       </Text>
-                      <Text style={styles.availabilityLabel}>Days Weekly</Text>
+                      <Text style={styles.availabilityLabel}>Services</Text>
                     </View>
                   </View>
 
@@ -460,55 +485,6 @@ const Dashboard: React.FC = ({navigation}: any) => {
           <>
             {profileCompletion === '100' ? (
               <Animated.View entering={FadeInUp.duration(600)}>
-                {/* Availability Overview Card */}
-                <View style={styles.overviewCard}>
-                  <LinearGradient
-                    colors={[Colors.white, Colors.white]}
-                    style={styles.overviewGradient}>
-                    <View style={styles.availabilityOverview}>
-                      <View style={styles.availabilityOverviewItem}>
-                        <Text style={styles.overviewNumber}>
-                          {availabilitySummary.availableDays}
-                        </Text>
-                        <Text style={styles.overviewLabel}>Availability</Text>
-                      </View>
-                      <View style={styles.overviewDividerVertical} />
-
-                      <View style={styles.availabilityOverviewItem}>
-                        <Text style={styles.overviewNumber}>
-                          {service?.type?.length}
-                        </Text>
-                        <Text style={styles.overviewLabel}>Services</Text>
-                      </View>
-
-                      <View style={styles.overviewDividerVertical} />
-
-                      <View style={styles.availabilityOverviewItem}>
-                        <Text style={styles.overviewNumber}>
-                          {service?.packages?.length || 0}
-                        </Text>
-                        <Text style={styles.overviewLabel}>Packages</Text>
-                      </View>
-                    </View>
-
-                    {/* Next Available Time */}
-                    <View style={styles.nextAvailableContainer}>
-                      <MaterialIcons
-                        name="schedule"
-                        size={20}
-                        color="#407BFF"
-                        style={styles.nextAvailableIcon}
-                      />
-                      <Text style={styles.nextAvailableText}>
-                        <Text style={styles.nextAvailablePrefix}>
-                          Next available:
-                        </Text>{' '}
-                        {availabilitySummary.nextAvailable}
-                      </Text>
-                    </View>
-                  </LinearGradient>
-                </View>
-
                 {/* Description Card */}
                 <View style={styles.sectionCard}>
                   <View style={styles.cardHeader}>
@@ -516,11 +492,29 @@ const Dashboard: React.FC = ({navigation}: any) => {
                     <TouchableOpacity
                       style={styles.editButton}
                       onPress={() => navigation.navigate('ServiceOne')}>
-                      <MaterialIcons
-                        name="edit-document"
-                        color={Colors.gradient1}
-                        size={RFPercentage(1.6)}
-                      />
+                      <Svg width={11} height={11} viewBox="0 0 10 10" fill="none">
+                        <Path
+                          d="M4.583.834H3.75C1.666.834.833 1.667.833 3.751v2.5c0 2.083.833 2.916 2.917 2.916h2.5c2.083 0 2.916-.833 2.916-2.916v-.834"
+                          stroke="#407BFF"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <Path
+                          d="M6.684 1.258 3.4 4.542a1.13 1.13 0 0 0-.275.55l-.179 1.254c-.066.454.254.77.709.708l1.254-.18c.175-.024.42-.15.55-.274l3.283-3.283c.567-.567.833-1.225 0-2.059-.833-.833-1.492-.566-2.058 0"
+                          stroke="#407BFF"
+                          strokeMiterlimit={10}
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <Path
+                          d="M6.213 1.729A2.98 2.98 0 0 0 8.27 3.787"
+                          stroke="#407BFF"
+                          strokeMiterlimit={10}
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </Svg>
+                      <Text style={styles.editButtonLabel}>Edit</Text>
                     </TouchableOpacity>
                   </View>
                   <Text style={styles.description}>
@@ -540,31 +534,33 @@ const Dashboard: React.FC = ({navigation}: any) => {
                   <View style={styles.cardHeader}>
                     <Text style={styles.cardTitle}>My Services</Text>
                     <TouchableOpacity
+                      style={styles.editButton}
                       onPress={() => navigation.navigate('ServiceOne')}>
-                      <Text style={styles.seeAll}>Edit All</Text>
+                      <EditIcon width={11} height={11} />
+                      <Text style={styles.editButtonLabel}>Edit</Text>
                     </TouchableOpacity>
                   </View>
                   <View style={styles.servicesGrid}>
-                    {serviceItems.map((item: any, index: number) => (
-                      <Animated.View
-                        key={index}
-                        
-                        style={styles.serviceCard}>
-                        <LinearGradient
-                          colors={[Colors.blueBg50, Colors.blueBg100]}
-                          style={styles.serviceGradient}>
-                          <View style={styles.serviceIconContainer}>
-                            <Image
-                              source={item.icon}
-                              style={styles.serviceIcon}
-                            />
+                    {serviceItems.map((item: any, index: number) => {
+                      const IconComp = item.Icon;
+                      if (!IconComp) return null;
+                      return (
+                        <Animated.View
+                          key={index}
+                          style={styles.serviceCard}>
+                          <View style={styles.serviceGradient}>
+                            <View style={styles.serviceIconContainer}>
+                              <IconComp width={25} height={25} />
+                            </View>
+                            <Text
+                              style={styles.serviceName}
+                              numberOfLines={1}>
+                              {item.name}
+                            </Text>
                           </View>
-                          <Text style={styles.serviceName} numberOfLines={1}>
-                            {item.name}
-                          </Text>
-                        </LinearGradient>
-                      </Animated.View>
-                    ))}
+                        </Animated.View>
+                      );
+                    })}
                   </View>
                   {service?.type?.length > 4 && (
                     <TouchableOpacity
@@ -597,9 +593,10 @@ const Dashboard: React.FC = ({navigation}: any) => {
                   <View style={[styles.cardHeader, {paddingHorizontal: 20}]}>
                     <Text style={styles.cardTitle}>Starting Packages</Text>
                     <TouchableOpacity
-                      activeOpacity={0.6}
+                      style={styles.editButton}
                       onPress={() => navigation.navigate('ServiceThree')}>
-                      <Text style={styles.seeAll}>Edit All</Text>
+                      <EditIcon width={11} height={11} />
+                      <Text style={styles.editButtonLabel}>Edit</Text>
                     </TouchableOpacity>
                   </View>
                   <ScrollView
@@ -611,9 +608,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
                         key={index}
                         entering={ZoomIn.delay(index * 150)}
                         style={styles.packageCard}>
-                        <LinearGradient
-                          colors={[Colors.blueBg100b, Colors.blueBg50]}
-                          style={styles.packageGradient}>
+                        <View style={styles.packageGradient}>
                           <View style={styles.packageHeader}>
                             <Text style={styles.packageName}>
                               Package {item.id}
@@ -624,6 +619,9 @@ const Dashboard: React.FC = ({navigation}: any) => {
                               </Text>
                             </View>
                           </View>
+                          <Text style={styles.packageIncludesLabel}>
+                            Includes:
+                          </Text>
                           <Text
                             style={styles.packageDescription}
                             numberOfLines={8}>
@@ -641,7 +639,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
                               style={styles.arrowIcon}
                             />
                           </TouchableOpacity>
-                        </LinearGradient>
+                        </View>
                       </Animated.View>
                     ))}
                   </ScrollView>
@@ -652,11 +650,10 @@ const Dashboard: React.FC = ({navigation}: any) => {
                   <View style={styles.cardHeader}>
                     <Text style={styles.cardTitle}>Weekly Availability</Text>
                     <TouchableOpacity
-                      activeOpacity={0.6}
-                      onPress={() => navigation.navigate('Availability')}
-                      style={styles.availabilityButton}>
-                      <Text style={styles.availabilityButtonText}>Edit</Text>
-                      <Image source={Icons.edit} style={styles.editIcon} />
+                      style={styles.editButton}
+                      onPress={() => navigation.navigate('Availability')}>
+                      <EditIcon width={11} height={11} />
+                      <Text style={styles.editButtonLabel}>Edit</Text>
                     </TouchableOpacity>
                   </View>
 
@@ -668,29 +665,11 @@ const Dashboard: React.FC = ({navigation}: any) => {
                         .map((item: any, index: number) => (
                           <View key={index} style={styles.timeSlotCard}>
                             <View style={styles.timeSlotHeader}>
-                              <View
-                                style={[
-                                  styles.dayIndicator,
-                                  item.checked && styles.dayIndicatorActive,
-                                ]}>
-                                <Text style={styles.dayIndicatorText}>
-                                  {item.day.charAt(0)}
-                                </Text>
-                              </View>
                               <Text style={styles.dayText}>{item.day}</Text>
-                              <View style={styles.timeSlot}>
-                                <MaterialIcons
-                                  name="schedule"
-                                  size={14}
-                                  color={Colors.gray600}
-                                />
-                                <Text style={styles.timeText}>
-                                  {formatTime(item.fromTime)} -{' '}
-                                  {formatTime(item.toTime)}
-                                </Text>
-                              </View>
-                            </View>
-                            <View style={styles.availabilityStatus}>
+                              <Text style={styles.timeText}>
+                                {formatTime(item.fromTime)} -{' '}
+                                {formatTime(item.toTime)}
+                              </Text>
                               <View
                                 style={[
                                   styles.statusIndicator,
@@ -779,8 +758,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   gradientHeader: {
-    paddingTop: Platform.OS === 'ios' ? 40 : 0,
-    paddingBottom: 30,
+    paddingTop: Platform.OS === 'ios' ? 50 : 20,
+    paddingBottom: 16,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
     shadowColor: Colors.black,
@@ -789,7 +768,7 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     paddingHorizontal: 20,
   },
   headerText: {
@@ -800,7 +779,7 @@ const styles = StyleSheet.create({
   rightButtons: {
     position: 'absolute',
     right: 20,
-    bottom: 40,
+    bottom: 25,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
@@ -872,10 +851,10 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   avatar: {
-    width: 100,
-    height: 100,
+    width: 108,
+    height: 108,
     borderRadius: 100,
-    borderWidth: 2,
+    borderWidth: 1.5,
     borderColor: Colors.gradient1,
     backgroundColor: Colors.lightGrayBg,
   },
@@ -897,15 +876,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   name: {
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(2.1),
+    fontFamily: Fonts.semiBold,
+    fontSize: RFPercentage(1.9),
     color: Colors.gray800,
-    marginBottom: 12,
+    flexShrink: 1,
+    marginRight: 8,
   },
   availabilityStats: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.blueBg50,
+    backgroundColor: '#F9FAFF',
     padding: 12,
     borderRadius: 16,
     gap: 12,
@@ -1060,8 +1040,8 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 10,
-      borderWidth: 1,
-    borderColor: Colors.blueBg150
+    borderWidth: 1,
+    borderColor: '#64748B1A',
     // elevation: 3,
   },
   cardHeader: {
@@ -1072,13 +1052,22 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.9),
-    color: Colors.grayBlueText,
+    fontSize: RFPercentage(2.1),
+    color: '#242B37',
   },
   editButton: {
-    padding: 6,
-    borderRadius: 8,
-    backgroundColor: Colors.lightGrayBg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    backgroundColor: '#EEF2FF',
+    gap: 5,
+  },
+  editButtonLabel: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.3),
+    color: '#407BFF',
   },
   smallEditIcon: {
     width: 16,
@@ -1086,14 +1075,14 @@ const styles = StyleSheet.create({
   },
   description: {
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.7),
-    color: Colors.placeholderColor,
-    lineHeight: 22,
+    fontSize: RFPercentage(1.6),
+    color: '#A5A9B0',
+    lineHeight: 23,
   },
   readMore: {
     fontFamily: Fonts.semiBold,
-    color: Colors.blueSoft,
-    fontSize: RFPercentage(1.7),
+    color: '#407BFF',
+    fontSize: RFPercentage(1.6),
   },
   seeAll: {
     fontFamily: Fonts.semiBold,
@@ -1104,9 +1093,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+    alignItems: 'flex-start',
   },
   serviceCard: {
-    width: '48%',
+    width: '49%',
     marginBottom: 12,
     borderRadius: 16,
     overflow: 'hidden',
@@ -1114,13 +1104,15 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 6,
-      borderWidth: 1,
-    borderColor: Colors.blueBg150
+    borderWidth: 1,
+    borderColor: '#2F354308',
     // elevation: 2,
   },
   serviceGradient: {
-    padding: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
     borderRadius: 16,
+    backgroundColor: '#447DFE0A',
   },
   serviceIconContainer: {
     width: 44,
@@ -1129,7 +1121,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 8,
     borderWidth: 1,
     borderColor: Colors.inputFieldColor,
   },
@@ -1139,8 +1131,8 @@ const styles = StyleSheet.create({
   },
   serviceName: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.6),
-    color: Colors.gray700,
+    fontSize: RFPercentage(1.5),
+    color: '#2F3543',
   },
   showMoreButton: {
     flexDirection: 'row',
@@ -1154,7 +1146,7 @@ const styles = StyleSheet.create({
   showMoreText: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.6),
-    color: Colors.primaryBlue,
+    color: '#407BFF',
     marginRight: 8,
   },
   chevronIcon: {
@@ -1177,13 +1169,14 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     // elevation: 4,
     height: RFPercentage(34),
-      borderWidth: 1,
-    borderColor: Colors.blueBg150
+    borderWidth: 1,
+    borderColor: '#2F354308',
   },
   packageGradient: {
     padding: 16,
     borderRadius: 12,
     height: RFPercentage(34),
+    backgroundColor: '#447DFE08',
   },
   packageHeader: {
     flexDirection: 'row',
@@ -1205,26 +1198,31 @@ const styles = StyleSheet.create({
     maxWidth:RFPercentage(8)
   },
   priceText: {
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.5),
     color: Colors.white,
+  },
+  packageIncludesLabel: {
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.5),
+    color: Colors.gray800,
+    marginTop: 16,
+    marginBottom: 4,
   },
   packageDescription: {
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.5),
-    color: Colors.placeholderColor,
+    color: '#6B7380B2',
     lineHeight: 18,
-    marginVertical: 24,
+    marginBottom: 24,
   },
   selectButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.lavenderBg,
+    backgroundColor: '#4554670D',
     paddingVertical: 8,
     borderRadius: 8,
-    borderWidth: 1,
-    borderColor: Colors.gray200,
     position: 'absolute',
     bottom: 20,
     alignSelf: 'center',
@@ -1233,13 +1231,13 @@ const styles = StyleSheet.create({
   selectButtonText: {
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.5),
-    color: Colors.gray700,
+    color: '#363E4B',
     marginRight: 8,
   },
   arrowIcon: {
-    width: 12,
-    height: 12,
-    tintColor: Colors.gray700,
+    width: 14,
+    height: 14,
+    tintColor: '#363E4B',
   },
   availabilityButton: {
     flexDirection: 'row',
@@ -1264,16 +1262,15 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   timeSlotCard: {
-    backgroundColor: Colors.blueBg50,
+    backgroundColor: '#447DFE05',
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: Colors.gray200,
+    borderColor: '#2F354308',
   },
   timeSlotHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
   },
   dayIndicator: {
     width: 32,
@@ -1296,7 +1293,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.7),
     color: Colors.gray800,
-    flex: 1,
+    minWidth: 50,
   },
   timeSlot: {
     flexDirection: 'row',
@@ -1307,6 +1304,8 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.5),
     color: Colors.gray600,
+    flex: 1,
+    marginHorizontal: 8,
   },
   availabilityStatus: {
     alignItems: 'flex-end',
@@ -1318,12 +1317,12 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   statusIndicatorActive: {
-    backgroundColor: Colors.greenBg100,
+    backgroundColor: '#12B8801A',
   },
   statusText: {
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.4),
-    color: Colors.gray700,
+    color: '#12B880',
   },
   noAvailabilityContainer: {
     alignItems: 'center',
@@ -1412,24 +1411,26 @@ const styles = StyleSheet.create({
   nameContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    flexWrap: 'nowrap',
     marginBottom: 12,
-    flexWrap: 'wrap',
+    width: '100%',
   },
 
   adminBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.success, // Green color for admin
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
     marginLeft: 8,
-    gap: 4,
+    flexShrink: 0,
+    gap: 3,
   },
 
   adminText: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.2),
     color: Colors.white,
   },
 });
