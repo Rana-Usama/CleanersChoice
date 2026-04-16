@@ -8,6 +8,11 @@ export interface Invoice {
   jobPostName: string;
   description: string;
   price: string;
+  budgetType?: 'flat' | 'hourly' | 'sqft';
+  hourlyRate?: string;
+  hours?: string;
+  pricePerSqFt?: string;
+  sqFt?: string;
   fromName: string;
   fromEmail: string;
   cleanerCompanyName: string;
@@ -25,6 +30,11 @@ export interface InvoiceFormData {
   jobPostName: string;
   description: string;
   price: string;
+  budgetType: 'flat' | 'hourly' | 'sqft';
+  hourlyRate: string;
+  hours: string;
+  pricePerSqFt: string;
+  sqFt: string;
   fromName: string;
   fromEmail: string;
   cleanerCompanyName: string;

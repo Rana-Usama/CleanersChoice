@@ -72,7 +72,7 @@ const InvoiceCard: React.FC<Props> = ({invoice, onView, onShare, onDownload}) =>
         <View style={styles.footer}>
           <View style={styles.priceSection}>
             <Text style={styles.budgetLabel}>Total</Text>
-            <Text style={styles.priceText}>${invoice.price}</Text>
+            <Text style={styles.priceText}>{invoice.price?.startsWith('$') ? invoice.price : `$${invoice.price}`}</Text>
           </View>
 
           <View style={styles.actions}>

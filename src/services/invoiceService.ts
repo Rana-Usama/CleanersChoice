@@ -50,6 +50,11 @@ export const createInvoiceDraftFromJob = (
     jobPostName: job.title || '',
     description: job.description || '',
     price: job.priceRange || '',
+    budgetType: job.budgetType || 'flat',
+    hourlyRate: job.hourlyRate ? `$${job.hourlyRate}` : '',
+    hours: job.hours || '',
+    pricePerSqFt: job.pricePerSqFt ? `$${job.pricePerSqFt}` : '',
+    sqFt: job.sqFt || '',
     fromName: cleanerData?.companyName || cleanerData?.name || '',
     fromEmail: cleanerData?.email || '',
     cleanerCompanyName: cleanerData?.companyName || cleanerData?.name || '',
@@ -109,9 +114,9 @@ export const generateInvoiceHtml = (invoice: InvoiceFormData): string => {
     .info-block p { font-size: 14px; color: #475569; line-height: 1.6; }
     .info-block .name { font-size: 16px; font-weight: 600; color: #1E293B; }
     .details-table { width: 100%; border-collapse: collapse; margin-bottom: 32px; }
-    .details-table th { background: #F1F5F9; padding: 12px 16px; text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748B; font-weight: 600; border-bottom: 2px solid #E2E8F0; }
-    .details-table td { padding: 16px; border-bottom: 1px solid #F1F5F9; font-size: 14px; color: #475569; }
-    .details-table .description { color: #475569; font-size: 13px; margin-top: 4px; }
+    .details-table th { background: #F1F5F9; padding: 12px 16px; text-align: left; font-size: 12px; letter-spacing: 0.5px; color: #4C5469; font-weight: 600; border-bottom: 2px solid #E2E8F0; }
+    .details-table td { padding: 16px; border-bottom: 1px solid #F1F5F9; font-size: 14px; color: #4C5469; font-weight: 500; }
+    .details-table .description { color: #9CA3AF; font-size: 13px; margin-top: 4px; font-weight: 400; }
     .total-section { display: flex; justify-content: flex-end; margin-top: 16px; }
     .total-box { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px 32px; min-width: 250px; }
     .total-row { display: flex; justify-content: space-between; align-items: center; }
@@ -155,9 +160,18 @@ export const generateInvoiceHtml = (invoice: InvoiceFormData): string => {
   <table class="details-table">
     <thead>
       <tr>
-        <th style="width:60%">Service</th>
-        <th style="width:20%;text-align:center;">Qty</th>
-        <th style="width:20%;text-align:right;">Amount</th>
+        ${invoice.budgetType === 'hourly' ? `
+        <th style="width:50%">Service</th>
+        <th style="width:25%;text-align:center;">Rate/hr</th>
+        <th style="width:25%;text-align:right;">Total hours</th>
+        ` : invoice.budgetType === 'sqft' ? `
+        <th style="width:50%">Service</th>
+        <th style="width:25%;text-align:left;">Rate/sqft</th>
+        <th style="width:25%;text-align:right;">Area/sqft</th>
+        ` : `
+        <th style="width:70%">Service</th>
+        <th style="width:30%;text-align:right;">Amount</th>
+        `}
       </tr>
     </thead>
     <tbody>
@@ -166,8 +180,15 @@ export const generateInvoiceHtml = (invoice: InvoiceFormData): string => {
           <strong>${escapeHtml(invoice.jobPostName)}</strong>
           ${invoice.description ? `<div class="description">${escapeHtml(invoice.description)}</div>` : ''}
         </td>
-        <td style="text-align:center;">1</td>
-        <td style="text-align:right;font-weight:600;">$${escapeHtml(invoice.price)}</td>
+        ${invoice.budgetType === 'hourly' ? `
+        <td style="text-align:center;font-weight:600;">${escapeHtml(invoice.hourlyRate)}/hr</td>
+        <td style="text-align:right;font-weight:600;">${String(invoice.hours || '0').padStart(2, '0')}</td>
+        ` : invoice.budgetType === 'sqft' ? `
+        <td style="text-align:left;font-weight:600;">${escapeHtml(invoice.pricePerSqFt)}</td>
+        <td style="text-align:right;font-weight:600;">${escapeHtml(invoice.sqFt || '0')}</td>
+        ` : `
+        <td style="text-align:right;font-weight:500;color:#4C5469;">${invoice.price.startsWith('$') ? invoice.price : `$${invoice.price}`}<br><span style="font-weight:400;font-size:12px;color:#9CA3AF;">Flat Rate</span></td>
+        `}
       </tr>
     </tbody>
   </table>
@@ -176,7 +197,7 @@ export const generateInvoiceHtml = (invoice: InvoiceFormData): string => {
     <div class="total-box">
       <div class="total-row">
         <span class="total-label">Total</span>
-        <span class="total-amount">$${escapeHtml(invoice.price)}</span>
+        <span class="total-amount">${invoice.price.startsWith('$') ? escapeHtml(invoice.price) : `$${escapeHtml(invoice.price)}`}</span>
       </div>
     </div>
   </div>
@@ -336,6 +357,11 @@ export const saveInvoiceToFirestore = async (
     jobPostName: formData.jobPostName,
     description: formData.description,
     price: formData.price,
+    budgetType: formData.budgetType,
+    hourlyRate: formData.hourlyRate,
+    hours: formData.hours,
+    pricePerSqFt: formData.pricePerSqFt,
+    sqFt: formData.sqFt,
     fromName: formData.fromName,
     fromEmail: formData.fromEmail,
     cleanerCompanyName: formData.cleanerCompanyName,
@@ -358,6 +384,11 @@ export const invoiceToFormData = (invoice: Invoice): InvoiceFormData => ({
   jobPostName: invoice.jobPostName,
   description: invoice.description,
   price: invoice.price,
+  budgetType: invoice.budgetType || 'flat',
+  hourlyRate: invoice.hourlyRate || '',
+  hours: invoice.hours || '',
+  pricePerSqFt: invoice.pricePerSqFt || '',
+  sqFt: invoice.sqFt || '',
   fromName: invoice.fromName,
   fromEmail: invoice.fromEmail,
   cleanerCompanyName: invoice.cleanerCompanyName,

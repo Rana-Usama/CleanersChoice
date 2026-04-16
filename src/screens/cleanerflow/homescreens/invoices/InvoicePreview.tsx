@@ -209,32 +209,95 @@ const InvoicePreview = ({route, navigation}: any) => {
 
           {/* Job Details Table */}
           <View style={styles.tableContainer}>
-            <View style={styles.tableHeader}>
-              <Text style={[styles.tableHeaderText, {flex: 2}]}>Service</Text>
-              <Text style={[styles.tableHeaderText, {flex: 1, textAlign: 'right'}]}>
-                Amount
-              </Text>
-            </View>
-            <View style={styles.tableRow}>
-              <View style={{flex: 2}}>
-                <Text style={styles.serviceName}>{formData.jobPostName}</Text>
-                {formData.description ? (
-                  <Text style={styles.serviceDescription} numberOfLines={3}>
-                    {formData.description}
+            {formData.budgetType === 'hourly' ? (
+              <>
+                <View style={styles.tableHeader}>
+                  <Text style={[styles.tableHeaderText, {flex: 2}]}>Service</Text>
+                  <Text style={[styles.tableHeaderText, {flex: 1.1, textAlign: 'center'}]}>
+                    Rate/hr
                   </Text>
-                ) : null}
-              </View>
-              <Text style={[styles.serviceAmount, {flex: 1, textAlign: 'right'}]}>
-                ${formData.price}
-              </Text>
-            </View>
+                  <Text style={[styles.tableHeaderText, {flex: 1.3, textAlign: 'right'}]} numberOfLines={1}>
+                    Total hours
+                  </Text>
+                </View>
+                <View style={styles.tableRow}>
+                  <View style={{flex: 2}}>
+                    <Text style={styles.serviceName}>{formData.jobPostName}</Text>
+                    {formData.description ? (
+                      <Text style={styles.serviceDescription} numberOfLines={3}>
+                        {formData.description}
+                      </Text>
+                    ) : null}
+                  </View>
+                  <Text style={[styles.serviceAmount, {flex: 1.1, textAlign: 'center'}]}>
+                    {formData.hourlyRate}/hr
+                  </Text>
+                  <Text style={[styles.serviceAmount, {flex: 1.3, textAlign: 'right'}]}>
+                    {formData.hours ? String(formData.hours).padStart(2, '0') : '00'}
+                  </Text>
+                </View>
+              </>
+            ) : formData.budgetType === 'sqft' ? (
+              <>
+                <View style={styles.tableHeader}>
+                  <Text style={[styles.tableHeaderText, {flex: 2}]}>Service</Text>
+                  <Text style={[styles.tableHeaderText, {flex: 1, textAlign: 'left', paddingLeft: RFPercentage(1)}]}>
+                    Rate/sqft
+                  </Text>
+                  <Text style={[styles.tableHeaderText, {flex: 1, textAlign: 'right'}]}>
+                    Area/sqft
+                  </Text>
+                </View>
+                <View style={styles.tableRow}>
+                  <View style={{flex: 2}}>
+                    <Text style={styles.serviceName}>{formData.jobPostName}</Text>
+                    {formData.description ? (
+                      <Text style={styles.serviceDescription} numberOfLines={3}>
+                        {formData.description}
+                      </Text>
+                    ) : null}
+                  </View>
+                  <Text style={[styles.serviceAmount, {flex: 1, textAlign: 'left', paddingLeft: RFPercentage(1)}]}>
+                    {formData.pricePerSqFt}
+                  </Text>
+                  <Text style={[styles.serviceAmount, {flex: 1, textAlign: 'right'}]}>
+                    {formData.sqFt || '0'}
+                  </Text>
+                </View>
+              </>
+            ) : (
+              <>
+                <View style={styles.tableHeader}>
+                  <Text style={[styles.tableHeaderText, {flex: 2}]}>Service</Text>
+                  <Text style={[styles.tableHeaderText, {flex: 1, textAlign: 'right'}]}>
+                    Amount
+                  </Text>
+                </View>
+                <View style={styles.tableRow}>
+                  <View style={{flex: 2}}>
+                    <Text style={styles.serviceName}>{formData.jobPostName}</Text>
+                    {formData.description ? (
+                      <Text style={styles.serviceDescription} numberOfLines={3}>
+                        {formData.description}
+                      </Text>
+                    ) : null}
+                  </View>
+                  <View style={{flex: 1, alignItems: 'flex-end'}}>
+                    <Text style={styles.serviceAmount}>
+                      {formData.price.startsWith('$') ? formData.price : `$${formData.price}`}
+                    </Text>
+                    <Text style={styles.budgetTypeLabel}>Flat Rate</Text>
+                  </View>
+                </View>
+              </>
+            )}
           </View>
 
           {/* Total */}
           <View style={styles.totalSection}>
             <View style={styles.totalBox}>
               <Text style={styles.totalLabel}>Total</Text>
-              <Text style={styles.totalAmount}>${formData.price}</Text>
+              <Text style={styles.totalAmount}>{formData.price.startsWith('$') ? formData.price : `$${formData.price}`}</Text>
             </View>
           </View>
 
@@ -431,10 +494,9 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.lightGrayBg,
   },
   tableHeaderText: {
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.3),
-    color: Colors.secondaryText,
-    textTransform: 'uppercase',
+    color: '#4C5469',
     letterSpacing: 0.5,
   },
   tableRow: {
@@ -444,20 +506,26 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   serviceName: {
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.6),
-    color: Colors.primaryText,
+    color: '#4C5469',
   },
   serviceDescription: {
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.4),
-    color: Colors.secondaryText,
+    color: '#9CA3AF',
     marginTop: 4,
   },
   serviceAmount: {
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.7),
-    color: Colors.primaryText,
+    color: '#4C5469',
+  },
+  budgetTypeLabel: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.3),
+    color: Colors.secondaryText,
+    marginTop: 2,
   },
   totalSection: {
     alignItems: 'flex-end',
