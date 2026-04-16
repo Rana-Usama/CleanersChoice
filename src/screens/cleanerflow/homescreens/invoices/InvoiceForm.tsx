@@ -21,6 +21,9 @@ import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import {showToast} from '../../../../utils/ToastMessage';
 import GradientButton from '../../../../components/GradientButton';
+import InputField from '../../../../components/InputField';
+import DollarIcon from '../../../../assets/svg/DollarIcon';
+import SquareFeetIcon from '../../../../assets/svg/SquareFeetIcon';
 import {InvoiceFormData, InvoiceValidationErrors} from '../../../../types/invoice';
 import {
   createInvoiceDraftFromJob,
@@ -38,6 +41,11 @@ const InvoiceForm = ({route, navigation}: any) => {
     jobPostName: '',
     description: '',
     price: '',
+    budgetType: 'flat',
+    hourlyRate: '',
+    hours: '',
+    pricePerSqFt: '',
+    sqFt: '',
     fromName: '',
     fromEmail: '',
     cleanerCompanyName: '',
@@ -45,6 +53,7 @@ const InvoiceForm = ({route, navigation}: any) => {
     toEmail: '',
   });
   const [errors, setErrors] = useState<InvoiceValidationErrors>({});
+  const [budgetErrors, setBudgetErrors] = useState<{price?: boolean; hourlyRate?: boolean; hours?: boolean; pricePerSqFt?: boolean; sqFt?: boolean}>({});
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
 
@@ -125,8 +134,56 @@ const InvoiceForm = ({route, navigation}: any) => {
     }
   };
 
+  const handleBudgetChange = (text: string) => {
+    const numeric = text.replace(/[^0-9]/g, '').replace(/^0+/, '');
+    updateField('price', numeric ? `$${numeric}` : '');
+    if (budgetErrors.price) setBudgetErrors(prev => ({...prev, price: undefined}));
+  };
+
+  const handleBudgetTypeChange = (type: 'flat' | 'hourly' | 'sqft') => {
+    updateField('budgetType', type);
+  };
+
+  // Compute the total price based on budget type for preview
+  const computePriceForPreview = (): InvoiceFormData => {
+    const data = {...form};
+    if (form.budgetType === 'hourly') {
+      const rate = parseInt(form.hourlyRate.replace(/[^0-9]/g, ''), 10) || 0;
+      const hrs = parseInt(form.hours, 10) || 0;
+      data.price = `$${rate * hrs}`;
+    } else if (form.budgetType === 'sqft') {
+      const ppsf = parseInt(form.pricePerSqFt.replace(/[^0-9]/g, ''), 10) || 0;
+      const sf = parseInt(form.sqFt, 10) || 0;
+      data.price = `$${ppsf * sf}`;
+    }
+    return data;
+  };
+
   const handlePreview = () => {
-    const validationErrors = validateInvoiceForm(form);
+    // Budget-specific validation
+    const newBudgetErrors: typeof budgetErrors = {};
+    if (form.budgetType === 'flat' && !form.price.trim()) {
+      newBudgetErrors.price = true;
+    }
+    if (form.budgetType === 'hourly') {
+      if (!form.hourlyRate.trim()) newBudgetErrors.hourlyRate = true;
+      if (!form.hours.trim()) newBudgetErrors.hours = true;
+    }
+    if (form.budgetType === 'sqft') {
+      if (!form.pricePerSqFt.trim()) newBudgetErrors.pricePerSqFt = true;
+      if (!form.sqFt.trim()) newBudgetErrors.sqFt = true;
+    }
+    if (Object.keys(newBudgetErrors).length > 0) {
+      setBudgetErrors(newBudgetErrors);
+      showToast({
+        type: 'error',
+        title: 'Validation Error',
+        message: 'Please fill in all required fields',
+      });
+      return;
+    }
+    const formToValidate = computePriceForPreview();
+    const validationErrors = validateInvoiceForm(formToValidate);
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       showToast({
@@ -136,7 +193,7 @@ const InvoiceForm = ({route, navigation}: any) => {
       });
       return;
     }
-    navigation.navigate('InvoicePreview', {formData: form, jobItem: item});
+    navigation.navigate('InvoicePreview', {formData: formToValidate, jobItem: item});
   };
 
   if (loading) {
@@ -166,7 +223,7 @@ const InvoiceForm = ({route, navigation}: any) => {
             <Feather name="arrow-left" size={24} color={Colors.white} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Create Invoice</Text>
-          <View style={{width: 40}} />
+          <View style={{width: RFPercentage(5)}} />
         </View>
       </LinearGradient>
 
@@ -293,15 +350,189 @@ const InvoiceForm = ({route, navigation}: any) => {
               placeholder="Add any notes..."
               multiline
             />
-            <FormField
-              label="Price"
-              value={form.price}
-              onChangeText={v => updateField('price', v)}
-              error={errors.price}
-              placeholder="0.00"
-              keyboardType="numeric"
-              prefix="$"
-            />
+          </View>
+
+          {/* Budget */}
+          <View style={styles.sectionCard}>
+            <View style={styles.sectionHeader}>
+              <DollarIcon width={RFPercentage(2.2)} height={RFPercentage(2.2)} color={Colors.gradient1} />
+              <Text style={styles.sectionTitle}>Budget</Text>
+            </View>
+
+            {/* Budget Type Tabs */}
+            <View style={styles.budgetTabs}>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={[
+                  styles.budgetTab,
+                  styles.budgetTabFlat,
+                  form.budgetType === 'flat' && styles.budgetTabActive,
+                ]}
+                onPress={() => handleBudgetTypeChange('flat')}>
+                <View style={[
+                  styles.budgetTabIconBox,
+                  form.budgetType === 'flat' && styles.budgetTabIconBoxActive,
+                ]}>
+                  <DollarIcon
+                    width={16}
+                    height={16}
+                    color={form.budgetType === 'flat' ? '#4D85FE' : '#9CA3AF'}
+                  />
+                </View>
+                <Text
+                  numberOfLines={1}
+                  style={[
+                    styles.budgetTabText,
+                    form.budgetType === 'flat' && styles.budgetTabTextActive,
+                  ]}>
+                  Flat Rate
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={[
+                  styles.budgetTab,
+                  styles.budgetTabHourly,
+                  form.budgetType === 'hourly' && styles.budgetTabActive,
+                ]}
+                onPress={() => handleBudgetTypeChange('hourly')}>
+                <View style={[
+                  styles.budgetTabIconBox,
+                  form.budgetType === 'hourly' && styles.budgetTabIconBoxActive,
+                ]}>
+                  <MaterialCommunityIcons
+                    name="clock-outline"
+                    size={16}
+                    color={form.budgetType === 'hourly' ? '#4D85FE' : '#9CA3AF'}
+                  />
+                </View>
+                <Text
+                  numberOfLines={1}
+                  style={[
+                    styles.budgetTabText,
+                    form.budgetType === 'hourly' && styles.budgetTabTextActive,
+                  ]}>
+                  Hourly Rate
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={[
+                  styles.budgetTab,
+                  styles.budgetTabSqft,
+                  form.budgetType === 'sqft' && styles.budgetTabActive,
+                ]}
+                onPress={() => handleBudgetTypeChange('sqft')}>
+                <View style={[
+                  styles.budgetTabIconBox,
+                  form.budgetType === 'sqft' && styles.budgetTabIconBoxActive,
+                ]}>
+                  <SquareFeetIcon
+                    width={16}
+                    height={16}
+                    color={form.budgetType === 'sqft' ? '#4D85FE' : '#9CA3AF'}
+                  />
+                </View>
+                <Text
+                  numberOfLines={1}
+                  style={[
+                    styles.budgetTabText,
+                    form.budgetType === 'sqft' && styles.budgetTabTextActive,
+                  ]}>
+                  Sq Footage
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Flat Rate Fields */}
+            {form.budgetType === 'flat' && (
+              <View>
+                <Text style={styles.budgetFieldLabel}>Total Price</Text>
+                <InputField
+                  placeholder="$"
+                  customStyle={[styles.budgetInput, budgetErrors.price && styles.budgetInputError]}
+                  value={form.price}
+                  onChangeText={handleBudgetChange}
+                  type={'numeric'}
+                />
+              </View>
+            )}
+
+            {/* Hourly Rate Fields */}
+            {form.budgetType === 'hourly' && (
+              <View>
+                <Text style={styles.budgetFieldLabel}>Rate per Hour</Text>
+                <View style={styles.budgetRow}>
+                  <InputField
+                    placeholder="$"
+                    customStyle={[styles.budgetInputHalf, budgetErrors.hourlyRate && styles.budgetInputError]}
+                    value={form.hourlyRate}
+                    onChangeText={(text: string) => {
+                      const numeric = text.replace(/[^0-9]/g, '').replace(/^0+/, '');
+                      updateField('hourlyRate', numeric ? `$${numeric}` : '');
+                      if (budgetErrors.hourlyRate) setBudgetErrors(prev => ({...prev, hourlyRate: undefined}));
+                    }}
+                    type={'numeric'}
+                  />
+                  <View style={[styles.sqftInputWrapper, budgetErrors.hours && styles.sqftInputWrapperError]}>
+                    <TextInput
+                      placeholder="0"
+                      placeholderTextColor={Colors.placeholderColor}
+                      style={styles.sqftTextInput}
+                      value={form.hours}
+                      onChangeText={(text: string) => {
+                        const numeric = text.replace(/[^0-9]/g, '').replace(/^0+/, '');
+                        updateField('hours', numeric);
+                        if (budgetErrors.hours) setBudgetErrors(prev => ({...prev, hours: undefined}));
+                      }}
+                      keyboardType="numeric"
+                    />
+                    <Text style={styles.sqftSuffix}>Hours</Text>
+                  </View>
+                </View>
+              </View>
+            )}
+
+            {/* Square Footage Fields */}
+            {form.budgetType === 'sqft' && (
+              <View>
+                <Text style={styles.budgetFieldLabel}>Price per Sq Ft</Text>
+                <View style={styles.budgetRow}>
+                  <InputField
+                    placeholder="$"
+                    customStyle={[styles.budgetInputHalf, budgetErrors.pricePerSqFt && styles.budgetInputError]}
+                    value={form.pricePerSqFt}
+                    onChangeText={(text: string) => {
+                      const numeric = text.replace(/[^0-9]/g, '').replace(/^0+/, '');
+                      updateField('pricePerSqFt', numeric ? `$${numeric}` : '');
+                      if (budgetErrors.pricePerSqFt) setBudgetErrors(prev => ({...prev, pricePerSqFt: undefined}));
+                    }}
+                    type={'numeric'}
+                  />
+                  <View style={[styles.sqftInputWrapper, budgetErrors.sqFt && styles.sqftInputWrapperError]}>
+                    <TextInput
+                      placeholder="0"
+                      placeholderTextColor={Colors.placeholderColor}
+                      style={styles.sqftTextInput}
+                      value={form.sqFt}
+                      onChangeText={(text: string) => {
+                        const numeric = text.replace(/[^0-9]/g, '').replace(/^0+/, '');
+                        updateField('sqFt', numeric);
+                        if (budgetErrors.sqFt) setBudgetErrors(prev => ({...prev, sqFt: undefined}));
+                      }}
+                      keyboardType="numeric"
+                    />
+                    <Text style={styles.sqftSuffix}>Sq Ft</Text>
+                  </View>
+                </View>
+              </View>
+            )}
+
+            <Text style={styles.budgetHint}>
+              Estimated cost for the service ($)
+            </Text>
           </View>
 
           <View style={{height: RFPercentage(2)}} />
@@ -382,9 +613,9 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(2),
   },
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: RFPercentage(5),
+    height: RFPercentage(5),
+    borderRadius: RFPercentage(2.5),
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(255,255,255,0.2)',
@@ -406,16 +637,16 @@ const styles = StyleSheet.create({
   },
   sectionCard: {
     backgroundColor: Colors.white,
-    borderRadius: 16,
+    borderRadius: RFPercentage(2),
     marginBottom: RFPercentage(2),
     padding: RFPercentage(2),
     borderWidth: 1,
     borderColor: Colors.lightGrayBg,
     shadowColor: Colors.black,
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: {width: 0, height: RFPercentage(0.25)},
     shadowOpacity: 0.05,
-    shadowRadius: 8,
-    borderBottomWidth: 3,
+    shadowRadius: RFPercentage(1),
+    borderBottomWidth: RFPercentage(0.4),
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -508,9 +739,9 @@ const styles = StyleSheet.create({
     borderTopColor: Colors.grayBorderOverlay50,
     alignItems: 'center',
     shadowColor: Colors.black,
-    shadowOffset: {width: 0, height: -3},
+    shadowOffset: {width: 0, height: RFPercentage(-0.4)},
     shadowOpacity: 0.05,
-    shadowRadius: 6,
+    shadowRadius: RFPercentage(0.8),
     elevation: 10,
   },
   previewButton: {
@@ -521,5 +752,123 @@ const styles = StyleSheet.create({
   previewButtonText: {
     fontSize: RFPercentage(1.9),
     fontFamily: Fonts.semiBold,
+  },
+  budgetTabs: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginBottom: RFPercentage(1.5),
+  },
+  budgetTab: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: RFPercentage(6.5),
+    paddingHorizontal: RFPercentage(0.8),
+    paddingVertical: RFPercentage(0.6),
+    borderRadius: RFPercentage(0.8),
+    gap: RFPercentage(0.4),
+    borderWidth: 1,
+    borderColor: '#9CA3AF1A',
+    backgroundColor: 'transparent',
+  },
+  budgetTabFlat: {
+    flex: 1,
+  },
+  budgetTabHourly: {
+    flex: 1,
+    marginHorizontal: RFPercentage(0.6),
+  },
+  budgetTabSqft: {
+    flex: 1,
+  },
+  budgetTabActive: {
+    borderColor: '#4D85FE80',
+    backgroundColor: '#4D85FE1A',
+  },
+  budgetTabIconBox: {
+    width: RFPercentage(3),
+    height: RFPercentage(3),
+    borderRadius: RFPercentage(0.8),
+    backgroundColor: '#9CA3AF10',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  budgetTabIconBoxActive: {
+    backgroundColor: '#4D85FE10',
+  },
+  budgetTabText: {
+    fontSize: RFPercentage(1.34),
+    lineHeight: RFPercentage(1.6),
+    fontFamily: Fonts.fontMedium,
+    color: '#9CA3AF',
+    flexShrink: 1,
+    textAlign: 'center',
+    includeFontPadding: true,
+  },
+  budgetTabTextActive: {
+    color: '#4D85FE',
+  },
+  budgetFieldLabel: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontMedium,
+    color: Colors.primaryText,
+    marginBottom: RFPercentage(0.8),
+  },
+  budgetInput: {
+    width: '100%',
+    height: RFPercentage(5.5),
+    backgroundColor: Colors.inputBg,
+    borderColor: Colors.inputBorder,
+  },
+  budgetInputError: {
+    borderColor: Colors.red500,
+    borderWidth: 1,
+  },
+  sqftInputWrapperError: {
+    borderColor: Colors.red500,
+  },
+  budgetRow: {
+    flexDirection: 'row',
+    gap: RFPercentage(1),
+  },
+  budgetInputHalf: {
+    flex: 1,
+    height: RFPercentage(5.5),
+    backgroundColor: Colors.inputBg,
+    borderWidth: 1,
+    borderColor: Colors.inputBorder,
+  },
+  sqftInputWrapper: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: RFPercentage(5.5),
+    borderWidth: 1,
+    borderColor: Colors.inputBorder,
+    borderRadius: RFPercentage(1.3),
+    backgroundColor: Colors.inputBg,
+    paddingHorizontal: RFPercentage(1.5),
+    marginVertical: RFPercentage(1),
+  },
+  sqftTextInput: {
+    flex: 1,
+    color: Colors.inputTextColor,
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.8),
+    paddingVertical: 0,
+  },
+  sqftSuffix: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontMedium,
+    color: '#9CA3AF',
+    marginLeft: RFPercentage(0.5),
+  },
+  budgetHint: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: Fonts.fontRegular,
+    color: Colors.secondaryText,
+    marginTop: RFPercentage(0.5),
   },
 });
