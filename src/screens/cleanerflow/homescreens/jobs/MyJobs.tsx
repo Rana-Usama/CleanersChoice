@@ -403,7 +403,6 @@ const MyJobs = ({navigation}: any) => {
   };
 
   const tabConfig = getTabConfig();
-  const tabPillColors = ['rgba(84, 137, 255, 0.05)', 'rgba(84, 137, 255, 0.05)'];
 
   return (
     <View style={styles.safeArea}>
@@ -452,7 +451,7 @@ const MyJobs = ({navigation}: any) => {
                     <View style={styles.statIconContainer}>
                       <MaterialIcons
                         name="work"
-                        size={20}
+                        size={RFPercentage(2.4)}
                         color={Colors.gradient1}
                       />
                     </View>
@@ -468,7 +467,7 @@ const MyJobs = ({navigation}: any) => {
                       ]}>
                       <MaterialIcons
                         name="done-all"
-                        size={20}
+                        size={RFPercentage(2.4)}
                         color={Colors.success}
                       />
                     </View>
@@ -484,7 +483,7 @@ const MyJobs = ({navigation}: any) => {
                       ]}>
                       <MaterialIcons
                         name="cancel"
-                        size={20}
+                        size={RFPercentage(2.4)}
                         color={Colors.red500}
                       />
                     </View>
@@ -504,11 +503,14 @@ const MyJobs = ({navigation}: any) => {
                   onPress={() => setActiveTab(tab)}
                   style={[
                     styles.tabButton,
+                    activeTab !== tab && styles.tabButtonInactive,
                     activeTab === tab && styles.tabButtonActive,
                   ]}>
-                  <LinearGradient
-                    colors={tabPillColors}
-                    style={styles.tabGradient}>
+                  <View
+                    style={[
+                      styles.tabGradient,
+                      activeTab === tab && styles.tabGradientActive,
+                    ]}>
                     <Text
                       style={[
                         styles.tabText,
@@ -516,7 +518,7 @@ const MyJobs = ({navigation}: any) => {
                       ]}>
                       {tab.charAt(0).toUpperCase() + tab.slice(1)}
                     </Text>
-                  </LinearGradient>
+                  </View>
                 </TouchableOpacity>
               ))}
             </View>
@@ -596,7 +598,7 @@ const MyJobs = ({navigation}: any) => {
             <BlurView
               style={styles.blurView}
               blurType="light"
-              blurAmount={5}
+              blurAmount={Math.round(RFPercentage(0.6))}
             />
             <CustomModal
               title={confirmModal.title}
@@ -637,18 +639,18 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
   gradientHeader: {
-    paddingTop: Platform.OS === 'ios' ? 40 : 0,
-    paddingBottom: 30,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    paddingTop: Platform.OS === 'ios' ? RFPercentage(4.9) : 0,
+    paddingBottom: RFPercentage(3.7),
+    borderBottomLeftRadius: RFPercentage(3),
+    borderBottomRightRadius: RFPercentage(3),
     shadowColor: Colors.black,
-    shadowOffset: {width: 0, height: 4},
+    shadowOffset: {width: 0, height: RFPercentage(0.5)},
     shadowOpacity: 0.1,
-    shadowRadius: 12,
+    shadowRadius: RFPercentage(1.5),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
+    paddingHorizontal: RFPercentage(2.5),
   },
   headerText: {
     fontSize: RFPercentage(2.1),
@@ -657,21 +659,21 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 100,
+    paddingBottom: RFPercentage(12.3),
     paddingHorizontal: RFPercentage(2),
   },
   statsCard: {
-    marginTop: 20,
-    borderRadius: 24,
+    marginTop: RFPercentage(2.5),
+    borderRadius: RFPercentage(3),
     shadowColor: Colors.primaryBlue,
-    shadowOffset: {width: 0, height: 10},
+    shadowOffset: {width: 0, height: RFPercentage(1.2)},
     shadowOpacity: 0.2,
-    shadowRadius: 20,
-    elevation: 10,
+    shadowRadius: RFPercentage(2.5),
+    elevation: RFPercentage(1.2),
   },
   statsGradient: {
-    borderRadius: 24,
-    padding: 20,
+    borderRadius: RFPercentage(3),
+    padding: RFPercentage(2.5),
   },
   statsTitle: {
     fontFamily: Fonts.semiBold,
@@ -689,13 +691,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   statIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+    width: RFPercentage(4.9),
+    height: RFPercentage(4.9),
+    borderRadius: RFPercentage(1.5),
     backgroundColor: Colors.skyBlueBg,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 8,
+    marginBottom: RFPercentage(1),
   },
   statValue: {
     fontFamily: Fonts.fontBold,
@@ -706,10 +708,10 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.4),
     color: Colors.secondaryText,
-    marginTop: 2,
+    marginTop: RFPercentage(0.25),
   },
   statDivider: {
-    width: 1,
+    width: RFPercentage(0.12),
     height: '60%',
     backgroundColor: Colors.grayBorderOverlay80,
   },
@@ -723,22 +725,28 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(1.2),
     overflow: 'hidden',
   },
+  tabButtonInactive: {
+    borderWidth: RFPercentage(0.2),
+    borderColor: '#00000007',
+  },
   tabButtonActive: {},
   tabGradient: {
     paddingVertical: RFPercentage(1.2),
     alignItems: 'center',
     borderRadius: RFPercentage(1.2),
-    borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.02)',
+    backgroundColor: '#5489FF0D',
+  },
+  tabGradientActive: {
+    backgroundColor: '#5489FF',
   },
   tabText: {
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.5),
-    color: Colors.secondaryText,
+    color: '#000000',
   },
   tabTextActive: {
-    color: Colors.gradient1,
-    fontFamily: Fonts.semiBold,
+    color: Colors.white,
+    fontFamily: Fonts.fontMedium,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -820,7 +828,7 @@ const styles = StyleSheet.create({
     paddingVertical: RFPercentage(1.2),
     borderRadius: RFPercentage(1),
     gap: RFPercentage(0.5),
-    borderWidth: 1,
+    borderWidth: RFPercentage(0.12),
     borderColor: Colors.blueBorderOverlay20,
   },
   generateInvoiceBtnText: {

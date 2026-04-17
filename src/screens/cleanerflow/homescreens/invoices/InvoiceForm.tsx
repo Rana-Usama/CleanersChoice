@@ -24,19 +24,22 @@ import GradientButton from '../../../../components/GradientButton';
 import InputField from '../../../../components/InputField';
 import DollarIcon from '../../../../assets/svg/DollarIcon';
 import SquareFeetIcon from '../../../../assets/svg/SquareFeetIcon';
+import DatePicker from 'react-native-date-picker';
 import {InvoiceFormData, InvoiceValidationErrors} from '../../../../types/invoice';
 import {
   createInvoiceDraftFromJob,
   validateInvoiceForm,
   checkExistingInvoiceForJob,
+  generateInvoiceId,
 } from '../../../../services/invoiceService';
 import {useSoftInputAdjustNothing} from '../../../../hooks/useSoftInputMode';
 
 const InvoiceForm = ({route, navigation}: any) => {
-  const {item} = route.params;
-  const [loading, setLoading] = useState(true);
+  const item = route.params?.item || null;
+  const isManualMode = !item;
+  const [loading, setLoading] = useState(!isManualMode);
   const [form, setForm] = useState<InvoiceFormData>({
-    invoiceId: '',
+    invoiceId: isManualMode ? generateInvoiceId() : '',
     dueDate: new Date(),
     jobPostName: '',
     description: '',
@@ -56,6 +59,7 @@ const InvoiceForm = ({route, navigation}: any) => {
   const [budgetErrors, setBudgetErrors] = useState<{price?: boolean; hourlyRate?: boolean; hours?: boolean; pricePerSqFt?: boolean; sqFt?: boolean}>({});
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   useSoftInputAdjustNothing();
 
@@ -75,7 +79,9 @@ const InvoiceForm = ({route, navigation}: any) => {
   }, []);
 
   useEffect(() => {
-    loadDraft();
+    if (!isManualMode) {
+      loadDraft();
+    }
   }, []);
 
   const loadDraft = async () => {
@@ -262,11 +268,15 @@ const InvoiceForm = ({route, navigation}: any) => {
               />
               <Text style={styles.sectionTitle}>Date</Text>
             </View>
-            <View style={[styles.inputContainer, styles.disabledInput]}>
-              <Text style={styles.disabledText}>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => setShowDatePicker(true)}
+              style={styles.inputContainer}>
+              <Text style={styles.inputText}>
                 {moment(form.dueDate).format('MMM DD, YYYY')}
               </Text>
-            </View>
+              <Feather name="calendar" size={RFPercentage(2)} color={Colors.gradient1} />
+            </TouchableOpacity>
           </View>
 
           {/* From Section */}
@@ -530,13 +540,36 @@ const InvoiceForm = ({route, navigation}: any) => {
               </View>
             )}
 
-            <Text style={styles.budgetHint}>
-              Estimated cost for the service ($)
-            </Text>
+            <View style={styles.budgetHintRow}>
+              <Text style={styles.budgetHint}>
+                Total cost for the service{' '}
+                <Text style={styles.budgetHintAmount}>
+                  {form.budgetType === 'flat'
+                    ? (form.price || '$0')
+                    : form.budgetType === 'hourly'
+                    ? `$${(parseInt(form.hourlyRate.replace(/[^0-9]/g, ''), 10) || 0) * (parseInt(form.hours, 10) || 0)}`
+                    : `$${(parseInt(form.pricePerSqFt.replace(/[^0-9]/g, ''), 10) || 0) * (parseInt(form.sqFt, 10) || 0)}`}
+                </Text>
+              </Text>
+            </View>
           </View>
 
           <View style={{height: RFPercentage(2)}} />
         </ScrollView>
+
+        <DatePicker
+          modal
+          open={showDatePicker}
+          date={form.dueDate instanceof Date ? form.dueDate : new Date()}
+          mode="date"
+          minimumDate={new Date(2025, 9, 1)}
+          maximumDate={new Date()}
+          onConfirm={(date) => {
+            setShowDatePicker(false);
+            updateField('dueDate', date);
+          }}
+          onCancel={() => setShowDatePicker(false)}
+        />
         {/* Bottom Action */}
         <View style={styles.actionBar}>
             <GradientButton
@@ -865,10 +898,19 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
     marginLeft: RFPercentage(0.5),
   },
+  budgetHintRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: RFPercentage(1),
+  },
   budgetHint: {
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
     color: Colors.secondaryText,
-    marginTop: RFPercentage(0.5),
+  },
+  budgetHintAmount: {
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.semiBold,
+    color: Colors.gradient1,
   },
 });

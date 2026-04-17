@@ -92,30 +92,20 @@ const ServicesCard: React.FC<ServicesCardProps> = ({
 
           {/* Location Row */}
           <View style={styles.locationContainer}>
-            <Image
-              source={Icons.location}
-              resizeMode="contain"
-              style={styles.locationIcon}
-            />
-            <Text style={styles.locationText} numberOfLines={1}>
-              {location?.name
-                ? location.name.length > 25
-                  ? `${location.name.substring(0, 25)}...`
-                  : location.name
-                : 'Location not specified'}
-            </Text>
-
-            <View style={{ position: 'absolute', right: 0 }}>
-              <Text
-                style={{
-                  fontFamily: Fonts.fontRegular,
-                  fontSize: RFPercentage(1.2),
-                  color: Colors.secondaryText,
-                }}
-              >
-                Posted on: {formattedDate}
+            <View style={styles.locationContent}>
+              <Image
+                source={Icons.location}
+                resizeMode="contain"
+                style={styles.locationIcon}
+              />
+              <Text style={styles.locationText} numberOfLines={1}>
+                {location?.name || 'Location not specified'}
               </Text>
             </View>
+
+            <Text style={styles.postedText} numberOfLines={1}>
+              Posted on: {formattedDate}
+            </Text>
           </View>
 
           {/* Footer */}
@@ -174,6 +164,8 @@ const styles = StyleSheet.create({
     right: RFPercentage(1.5),
     borderRadius: RFPercentage(1),
     overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
     shadowColor: Colors.gradient1,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,
@@ -182,15 +174,24 @@ const styles = StyleSheet.create({
   },
   priceGradient: {
     paddingHorizontal: RFPercentage(1.5),
-    paddingVertical: RFPercentage(1),
+    paddingVertical: RFPercentage(0.9),
+    minHeight: RFPercentage(3.4),
+    minWidth: RFPercentage(5),
     borderRadius: RFPercentage(0.5),
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   priceBadgeText: {
     color: Colors.background,
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.5),
     textAlign: 'center',
-    lineHeight: RFPercentage(1.5),
+    textAlignVertical: 'center',
+    includeFontPadding: false,
+    lineHeight:
+      Platform.OS === 'android'
+        ? RFPercentage(2)
+        : RFPercentage(1.8),
   },
   contentContainer: {
     padding: RFPercentage(2),
@@ -224,8 +225,16 @@ const styles = StyleSheet.create({
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: RFPercentage(1.5),
     paddingHorizontal: RFPercentage(0.2),
+  },
+  locationContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    minWidth: 0,
+    marginRight: RFPercentage(1),
   },
   locationIcon: {
     width: RFPercentage(1.6),
@@ -238,6 +247,12 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.5),
     flex: 1,
+  },
+  postedText: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.2),
+    color: Colors.secondaryText,
+    flexShrink: 0,
   },
   footer: {
     flexDirection: 'row',

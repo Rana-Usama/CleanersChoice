@@ -28,7 +28,7 @@ import {
 } from '../../../../services/invoiceService';
 
 const InvoicePreview = ({route, navigation}: any) => {
-  const {formData, jobItem, viewOnly}: {formData: InvoiceFormData; jobItem: any; viewOnly?: boolean} =
+  const {formData, jobItem, viewOnly}: {formData: InvoiceFormData; jobItem: any | null; viewOnly?: boolean} =
     route.params;
   const [generating, setGenerating] = useState(false);
   const [downloading, setDownloading] = useState(false);
@@ -64,16 +64,18 @@ const InvoicePreview = ({route, navigation}: any) => {
   const handleGenerateAndShare = async () => {
     setGenerating(true);
     try {
-      // Check if invoice already exists for this job
-      const existingInvoice = await checkExistingInvoiceForJob(jobItem.id);
-      if (existingInvoice) {
-        showToast({
-          type: 'error',
-          title: 'Invoice Exists',
-          message: `Invoice ${existingInvoice.invoiceId} already generated for this job`,
-        });
-        navigation.navigate('CleanerNavigator', {screen: 'Invoices'});
-        return;
+      // Check if invoice already exists for this job (only for job-based invoices)
+      if (jobItem?.id) {
+        const existingInvoice = await checkExistingInvoiceForJob(jobItem.id);
+        if (existingInvoice) {
+          showToast({
+            type: 'error',
+            title: 'Invoice Exists',
+            message: `Invoice ${existingInvoice.invoiceId} already generated for this job`,
+          });
+          navigation.navigate('CleanerNavigator', {screen: 'Invoices'});
+          return;
+        }
       }
 
       // Generate unique invoice ID at save time
@@ -86,8 +88,8 @@ const InvoicePreview = ({route, navigation}: any) => {
       // Save to Firestore
       await saveInvoiceToFirestore(
         finalFormData,
-        jobItem.id,
-        jobItem.jobId,
+        jobItem?.id || '',
+        jobItem?.jobId || '',
         pdfPath,
       );
 

@@ -340,12 +340,14 @@ export const saveInvoiceToFirestore = async (
   const user = auth().currentUser;
   if (!user) throw new Error('Not authenticated');
 
-  // Double-check: prevent duplicate invoice for the same job
-  const existing = await checkExistingInvoiceForJob(jobId);
-  if (existing) {
-    throw new Error(
-      `Invoice ${existing.invoiceId} already exists for this job`,
-    );
+  // Double-check: prevent duplicate invoice for the same job (skip for manual invoices)
+  if (jobId) {
+    const existing = await checkExistingInvoiceForJob(jobId);
+    if (existing) {
+      throw new Error(
+        `Invoice ${existing.invoiceId} already exists for this job`,
+      );
+    }
   }
 
   const invoiceData: Omit<Invoice, 'id'> = {

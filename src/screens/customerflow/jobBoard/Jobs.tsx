@@ -226,8 +226,6 @@ const Jobs = ({navigation}: any) => {
     return text.slice(0, maxChars).trim() + '... ';
   };
 
-  const filterPillColors = ['rgba(84, 137, 255, 0.05)', 'rgba(84, 137, 255, 0.05)'];
-
   return (
     <View style={styles.safeArea}>
       <StatusBar
@@ -345,7 +343,11 @@ const Jobs = ({navigation}: any) => {
                   active && styles.filterButtonActive,
                 ]}>
                 <LinearGradient
-                  colors={filterPillColors}
+                  colors={
+                    active
+                      ? ['#5489FF', '#5489FF']
+                      : ['rgba(84, 137, 255, 0.05)', 'rgba(84, 137, 255, 0.05)']
+                  }
                   style={styles.filterGradient}>
                   <Text
                     style={[
@@ -367,7 +369,11 @@ const Jobs = ({navigation}: any) => {
                   completed && styles.filterButtonActive,
                 ]}>
                 <LinearGradient
-                  colors={filterPillColors}
+                  colors={
+                    completed
+                      ? ['#5489FF', '#5489FF']
+                      : ['rgba(84, 137, 255, 0.05)', 'rgba(84, 137, 255, 0.05)']
+                  }
                   style={styles.filterGradient}>
                   <Text
                     style={[
@@ -389,7 +395,11 @@ const Jobs = ({navigation}: any) => {
                   expired && styles.filterButtonActive,
                 ]}>
                 <LinearGradient
-                  colors={filterPillColors}
+                  colors={
+                    expired
+                      ? ['#5489FF', '#5489FF']
+                      : ['rgba(84, 137, 255, 0.05)', 'rgba(84, 137, 255, 0.05)']
+                  }
                   style={styles.filterGradient}>
                   <Text
                     style={[
@@ -751,7 +761,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   filterButtonTextActive: {
-    color: Colors.gradient1,
+    color: Colors.white,
   },
   activeFilterCard: {
     marginTop: 16,

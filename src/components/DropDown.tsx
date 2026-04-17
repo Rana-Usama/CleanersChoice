@@ -27,26 +27,22 @@ const CustomDropDown: React.FC<Props> = (props: Props) => {
         activeOpacity={0.8}
         style={[
           styles.container,
-          styles.borderStyle,
-          open ? styles.borderOpen : styles.borderClosed,
+          styles.inputBorder,
+          open && styles.inputBorderOpen,
         ]}
         onPress={() => setOpen(!open)}>
         <View style={styles.rowContainer}>
           <Text
             style={[
               styles.placeholderText,
-              {
-                color: selectedLabel
-                  ? Colors.inputTextColor
-                  : props.placeholderColor,
-              },
+              {color: '#9CA3AF'},
             ]}>
             {selectedLabel || props.placeholder}
           </Text>
           <TouchableOpacity activeOpacity={0.8} onPress={() => setOpen(!open)}>
             <Entypo
-              name="chevron-small-down"
-              color={Colors.placeholderColor}
+              name="chevron-right"
+              color="#9CA3AF"
               size={22}
             />
           </TouchableOpacity>
@@ -58,7 +54,7 @@ const CustomDropDown: React.FC<Props> = (props: Props) => {
             data={props.data}
             keyExtractor={item => item.id.toString()}
             renderItem={({item, index}) => {
-              const isLastItem = index === props.data.length - 1;
+              const isSelected = selectedLabel === item.label;
               return (
                 <TouchableOpacity
                   activeOpacity={0.8}
@@ -67,11 +63,7 @@ const CustomDropDown: React.FC<Props> = (props: Props) => {
                     setSelectedLabel(item.label);
                     props.setValue && props.setValue(item);
                   }}>
-                  <View
-                    style={[
-                      styles.listItem,
-                      {borderBottomWidth: isLastItem ? 0 : 1},
-                    ]}>
+                  <View style={[styles.listItem, isSelected && styles.selectedListItem]}>
                     <Text style={styles.listItemText}>{item.label}</Text>
                   </View>
                 </TouchableOpacity>
@@ -91,24 +83,20 @@ const styles = StyleSheet.create({
     width: '100%',
     height: RFPercentage(6.5),
     borderRadius: RFPercentage(1.3),
-    marginTop: RFPercentage(2),
+    marginTop: RFPercentage(1),
     justifyContent: 'center',
     paddingHorizontal: RFPercentage(1.5),
+    backgroundColor: Colors.white,
   },
-  borderStyle: {
+  inputBorder: {
+    borderBottomWidth: 1,
     borderTopWidth: 1,
     borderLeftWidth: 1,
     borderRightWidth: 1,
-    borderLeftColor: Colors.inputFieldColor,
-    borderTopColor: Colors.inputFieldColor,
-    borderRightColor: Colors.inputFieldColor,
+    borderColor: '#9CA3AF1A',
   },
-  borderOpen: {
-    borderBottomWidth: 0,
-  },
-  borderClosed: {
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.inputFieldColor,
+  inputBorderOpen: {
+    borderColor: '#9CA3AF1A',
   },
   rowContainer: {
     flexDirection: 'row',
@@ -116,33 +104,33 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   placeholderText: {
-    color: Colors.placeholderColor,
+    color: '#9CA3AF',
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.9),
   },
   dropdownContainer: {
-    backgroundColor: 'transparent',
-    borderBottomLeftRadius: RFPercentage(2),
-    borderBottomRightRadius: RFPercentage(2),
-    bottom: 16,
+    marginTop: RFPercentage(1),
+    backgroundColor: Colors.white,
+    borderRadius: RFPercentage(1.3),
+    borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.inputFieldColor,
     borderLeftWidth: 1,
     borderRightWidth: 1,
-    borderRightColor: Colors.inputFieldColor,
-    borderLeftColor: Colors.inputFieldColor,
-    borderTopWidth: 1,
-    borderTopColor: Colors.inputFieldColor,
+    borderColor: '#9CA3AF1A',
+    paddingVertical: RFPercentage(0.8),
   },
   listItem: {
-    paddingVertical: 14,
+    paddingVertical: RFPercentage(1.5),
     backgroundColor: 'transparent',
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.zincBorder,
-    paddingHorizontal: 15,
+    borderRadius: RFPercentage(1.3),
+    paddingHorizontal: RFPercentage(1.5),
+    marginHorizontal: RFPercentage(1),
+  },
+  selectedListItem: {
+    backgroundColor: '#9CA3AF1A',
   },
   listItemText: {
-    color: Colors.placeholderColor,
+    color: '#9CA3AF',
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.7),
   },
