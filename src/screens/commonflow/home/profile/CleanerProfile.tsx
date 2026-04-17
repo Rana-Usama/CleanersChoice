@@ -259,21 +259,25 @@ const CleanerProfile = ({route, navigation}: any) => {
         <View style={styles.infoCard}>
           <Text style={styles.cardTitle}>Contact Information</Text>
           <View style={styles.infoRow}>
-            <MaterialCommunityIcons
-              name="email-outline"
-              size={RFPercentage(2)}
-              color={Colors.gradient1}
-            />
+            <View style={styles.contactIconBubble}>
+              <MaterialCommunityIcons
+                name="email-outline"
+                size={RFPercentage(1.8)}
+                color={Colors.gradient1}
+              />
+            </View>
             <Text style={styles.infoText}>
               {profile?.email || 'Not provided'}
             </Text>
           </View>
           <View style={styles.infoRow}>
-            <MaterialCommunityIcons
-              name="phone-outline"
-              size={RFPercentage(2)}
-              color={Colors.gradient1}
-            />
+            <View style={styles.contactIconBubble}>
+              <MaterialCommunityIcons
+                name="phone-outline"
+                size={RFPercentage(1.8)}
+                color={Colors.gradient1}
+              />
+            </View>
             <Text style={styles.infoText}>
               {profile?.phone || 'Not provided'}
             </Text>
@@ -535,6 +539,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: RFPercentage(1),
     marginBottom: RFPercentage(0.8),
+  },
+  contactIconBubble: {
+    width: RFPercentage(2.8),
+    height: RFPercentage(2.8),
+    borderRadius: RFPercentage(1.9),
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(84, 137, 255, 0.12)',
   },
   infoText: {
     fontFamily: Fonts.fontRegular,

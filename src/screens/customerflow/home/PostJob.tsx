@@ -472,11 +472,13 @@ const PostJob = ({route}: any) => {
                 {/* Job Title Card */}
                 <View style={styles.card}>
                   <View style={styles.cardHeader}>
-                    <MaterialCommunityIcons
-                      name="pencil-outline"
-                      size={22}
-                      color={Colors.gradient1}
-                    />
+                    <View style={styles.serviceTypeIconBubble}>
+                      <MaterialCommunityIcons
+                        name="pencil-outline"
+                        size={20}
+                        color={Colors.gradient1}
+                      />
+                    </View>
                     <Text style={styles.cardTitle}>Job Title</Text>
                   </View>
                   <InputField
@@ -493,11 +495,13 @@ const PostJob = ({route}: any) => {
                 {/* Description Card */}
                 <View style={styles.card}>
                   <View style={styles.cardHeader}>
-                    <MaterialCommunityIcons
-                      name="text-box-outline"
-                      size={22}
-                      color={Colors.gradient1}
-                    />
+                    <View style={styles.serviceTypeIconBubble}>
+                      <MaterialCommunityIcons
+                        name="text-box-outline"
+                        size={20}
+                        color={Colors.gradient1}
+                      />
+                    </View>
                     <Text style={styles.cardTitle}>Job Description</Text>
                   </View>
                   <View style={styles.descriptionContainer}>
@@ -520,13 +524,15 @@ const PostJob = ({route}: any) => {
                 </View>
 
                 {/* Service Type Card */}
-                <View style={styles.card}>
+                <View style={[styles.card, styles.serviceTypeCard]}>
                   <View style={styles.cardHeader}>
-                    <MaterialCommunityIcons
-                      name="tools"
-                      size={22}
-                      color={Colors.gradient1}
-                    />
+                    <View style={styles.serviceTypeIconBubble}>
+                      <MaterialCommunityIcons
+                        name="tools"
+                        size={22}
+                        color={Colors.gradient1}
+                      />
+                    </View>
                     <Text style={styles.cardTitle}>Service Type</Text>
                   </View>
                   <CustomDropDown
@@ -563,11 +569,13 @@ const PostJob = ({route}: any) => {
                 {/* Location Card */}
                 <View style={styles.card}>
                   <View style={styles.cardHeader}>
-                    <Ionicons
-                      name="location-outline"
-                      size={22}
-                      color={Colors.gradient1}
-                    />
+                    <View style={styles.serviceTypeIconBubble}>
+                      <Ionicons
+                        name="location-outline"
+                        size={20}
+                        color={Colors.gradient1}
+                      />
+                    </View>
                     <Text style={styles.cardTitle}>Location</Text>
                   </View>
                   <TouchableOpacity
@@ -602,7 +610,9 @@ const PostJob = ({route}: any) => {
                 {/* Budget Card */}
                 <View style={styles.card}>
                   <View style={styles.cardHeader}>
-                    <DollarIcon width={22} height={22} color={Colors.gradient1} />
+                    <View style={styles.serviceTypeIconBubble}>
+                      <DollarIcon width={20} height={20} color={Colors.gradient1} />
+                    </View>
                     <Text style={styles.cardTitle}>Budget</Text>
                   </View>
 
@@ -773,19 +783,30 @@ const PostJob = ({route}: any) => {
                     </View>
                   )}
 
-                  <Text style={styles.budgetHint}>
-                    Estimated cost for the service ($)
-                  </Text>
+                  <View style={styles.budgetHintRow}>
+                    <Text style={styles.budgetHint}>
+                      Total cost for the service{' '}
+                      <Text style={styles.budgetHintAmount}>
+                        {budgetType === 'flat'
+                          ? (budget || '$0')
+                          : budgetType === 'hourly'
+                          ? `$${(parseInt(hourlyRate.replace(/[^0-9]/g, ''), 10) || 0) * (parseInt(hours, 10) || 0)}`
+                          : `$${(parseInt(pricePerSqFt.replace(/[^0-9]/g, ''), 10) || 0) * (parseInt(sqFt, 10) || 0)}`}
+                      </Text>
+                    </Text>
+                  </View>
                 </View>
 
                 {/* Schedule Card */}
                 <View style={styles.card}>
                   <View style={styles.cardHeader}>
-                    <MaterialCommunityIcons
-                      name="calendar-clock"
-                      size={22}
-                      color={Colors.gradient1}
-                    />
+                    <View style={styles.serviceTypeIconBubble}>
+                      <MaterialCommunityIcons
+                        name="calendar-clock"
+                        size={20}
+                        color={Colors.gradient1}
+                      />
+                    </View>
                     <Text style={styles.cardTitle}>Schedule</Text>
                   </View>
                   <TouchableOpacity
@@ -824,11 +845,13 @@ const PostJob = ({route}: any) => {
                 {/* Special Instructions Card */}
                 <View style={styles.card}>
                   <View style={styles.cardHeader}>
-                    <MaterialCommunityIcons
-                      name="message-text-outline"
-                      size={22}
-                      color={Colors.gradient1}
-                    />
+                    <View style={styles.serviceTypeIconBubble}>
+                      <MaterialCommunityIcons
+                        name="message-text-outline"
+                        size={20}
+                        color={Colors.gradient1}
+                      />
+                    </View>
                     <Text style={styles.cardTitle}>Special Instructions</Text>
                   </View>
                   <View style={styles.remarksContainer}>
@@ -1044,11 +1067,23 @@ const styles = StyleSheet.create({
 
     borderBottomWidth: 2,
   },
+  serviceTypeCard: {
+    borderColor: '#9CA3AF1A',
+    borderBottomWidth: 1,
+  },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: RFPercentage(1.5),
     gap: RFPercentage(1),
+  },
+  serviceTypeIconBubble: {
+    width: RFPercentage(3.5),
+    height: RFPercentage(3.5),
+    borderRadius: RFPercentage(1),
+    backgroundColor: 'rgba(84, 137, 255, 0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   cardTitle: {
     fontSize: RFPercentage(1.9),
@@ -1060,6 +1095,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.inputBg,
     borderWidth: 1,
     borderColor: Colors.inputBorder,
+    marginTop: 0,
+    marginBottom: 0,
   },
   cardHint: {
     fontSize: RFPercentage(1.4),
@@ -1154,11 +1191,20 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.inputBg,
     borderColor: Colors.inputBorder,
   },
+  budgetHintRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: RFPercentage(1),
+  },
   budgetHint: {
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
     color: Colors.secondaryText,
-    marginTop: RFPercentage(0.5),
+  },
+  budgetHintAmount: {
+    fontSize: RFPercentage(1.6),
+    fontFamily: Fonts.semiBold,
+    color: Colors.gradient1,
   },
   budgetTabs: {
     flexDirection: 'row',

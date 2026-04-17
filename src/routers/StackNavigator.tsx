@@ -88,8 +88,8 @@ export type RootStackParamList = {
   CleanerProfile: {cleanerId: string; jobId?: string};
   JobManagement: {jobId: string; jobTitle: string};
   MyJobs: undefined;
-  InvoiceForm: {item: any};
-  InvoicePreview: {formData: any; jobItem: any};
+  InvoiceForm: {item: any | null};
+  InvoicePreview: {formData: any; jobItem: any | null};
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
