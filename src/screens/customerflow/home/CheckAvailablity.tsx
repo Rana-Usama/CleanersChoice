@@ -5,6 +5,7 @@ import {
   Text,
   View,
   Image,
+  Modal,
   StatusBar,
   TouchableOpacity,
   ScrollView,
@@ -23,8 +24,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import CalenderIcon from '../../../assets/svg/CalenderIcon';
 import moment from 'moment';
 import {useSelector} from 'react-redux';
-import CustomModal from '../../../components/CustomModal';
-import {BlurView} from '@react-native-community/blur';
+import GuestAuthModal from '../../../components/GuestAuthModal';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 
@@ -617,23 +617,14 @@ const CheckAvailability = ({route, navigation}: any) => {
         </View>
       </ScrollView>
 
-      {showAuthModal && (
-        <TouchableWithoutFeedback onPress={() => setShowAuthModal(false)}>
-          <View style={styles.authModalContainer}>
-            <BlurView style={styles.blurView} blurType="dark" blurAmount={10} />
-            <CustomModal
-              title="Login Required"
-              subTitle="You need to sign in or create an account to contact service providers and get custom offers."
-              onPress={() => setShowAuthModal(false)}
-              onPress2={() => {
-                setShowAuthModal(false);
-                navigation.navigate('UserSelection');
-              }}
-              buttonTitle="Continue to Login"
-            />
-          </View>
-        </TouchableWithoutFeedback>
-      )}
+      <GuestAuthModal
+        visible={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onContinue={() => {
+          setShowAuthModal(false);
+          navigation.navigate('UserSelection');
+        }}
+      />
     </View>
   );
 };
@@ -1113,14 +1104,5 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
-  },
-  authModalContainer: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 999,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  blurView: {
-    ...StyleSheet.absoluteFillObject,
   },
 });

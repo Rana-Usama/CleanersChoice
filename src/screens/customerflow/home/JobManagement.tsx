@@ -195,7 +195,7 @@ const JobManagement = ({route, navigation}: any) => {
       iconName: '',
       iconColor: '',
       svgIconType: 'confirm' as const,
-      buttonTitle: 'Confirm',
+      buttonTitle: 'Yes, Confirm',
       onConfirm: async () => {
         setConfirmModal(prev => ({...prev, visible: false}));
         setActionLoading(cleaner.uid);
@@ -259,7 +259,7 @@ const JobManagement = ({route, navigation}: any) => {
       iconName: '',
       iconColor: '',
       svgIconType: 'cancel' as const,
-      buttonTitle: 'Yes',
+      buttonTitle: 'Yes,Cancel',
       onConfirm: async () => {
         setConfirmModal(prev => ({...prev, visible: false}));
         setActionLoading('cancel');
@@ -618,7 +618,13 @@ const JobManagement = ({route, navigation}: any) => {
               iconColor={confirmModal.iconColor}
               svgIconType={confirmModal.svgIconType}
               buttonTitle={confirmModal.buttonTitle}
-              cancelButtonTitle="No"
+              cancelButtonTitle={
+                confirmModal.title === 'Confirm Cleaner'
+                  ? 'Not Now'
+                  : confirmModal.title === 'Cancel Cleaner?'
+                    ? 'Keep Cleaner'
+                    : 'No'
+              }
               onPress={() => setConfirmModal(prev => ({...prev, visible: false}))}
               onPress2={confirmModal.onConfirm}
             />

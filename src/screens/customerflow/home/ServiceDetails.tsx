@@ -32,7 +32,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import ImageView from 'react-native-image-viewing';
 import ServicePackage from '../../../components/ServicePackage';
 
-import CustomModal from '../../../components/CustomModal';
+import GuestAuthModal from '../../../components/GuestAuthModal';
 import {BlurView} from '@react-native-community/blur';
 
 const {width} = Dimensions.get('window');
@@ -680,23 +680,14 @@ const ServiceDetails: React.FC = ({route}: any) => {
       )}
 
       {/* Authentication Required Modal */}
-      {showAuthModal && (
-        <TouchableWithoutFeedback onPress={() => setShowAuthModal(false)}>
-          <View style={styles.authModalContainer}>
-            <BlurView style={styles.blurView} blurType="dark" blurAmount={10} />
-            <CustomModal
-              title="Login Required"
-              subTitle="You need to sign in or create an account to contact service providers and get custom offers."
-              onPress={() => setShowAuthModal(false)}
-              onPress2={() => {
-                setShowAuthModal(false);
-                navigation.navigate('UserSelection');
-              }}
-              buttonTitle="Continue to Login"
-            />
-          </View>
-        </TouchableWithoutFeedback>
-      )}
+      <GuestAuthModal
+        visible={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onContinue={() => {
+          setShowAuthModal(false);
+          navigation.navigate('UserSelection');
+        }}
+      />
 
       <ImageView
         images={imageObjects}
@@ -1234,12 +1225,6 @@ const styles = StyleSheet.create({
   fullScreenImage: {
     width: '90%',
     height: '90%',
-  },
-  authModalContainer: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 999,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   blurView: {
     ...StyleSheet.absoluteFillObject,

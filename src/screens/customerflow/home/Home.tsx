@@ -36,6 +36,7 @@ import NotFound from '../../../components/NotFound';
 import {useExitAppOnBack} from '../../../utils/ExitApp';
 import {useSelector} from 'react-redux';
 import CustomModal from '../../../components/CustomModal';
+import GuestAuthModal from '../../../components/GuestAuthModal';
 import {useCurrentLocation} from '../../../utils/userLocation';
 import haversine from 'haversine';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -364,19 +365,21 @@ const Home = () => {
             logo
             tintColor={Colors.white}
           />
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => navigation.navigate('NotificationsScreen')}
-            style={styles.bellButton}>
-            <Icon name="bell-outline" size={RFPercentage(2.4)} color={Colors.white} />
-            {unreadNotifCount > 0 && (
-              <View style={styles.bellBadge}>
-                <Text style={styles.bellBadgeText}>
-                  {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
-                </Text>
-              </View>
-            )}
-          </TouchableOpacity>
+          {userFlow !== 'Guest' && (
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => navigation.navigate('NotificationsScreen')}
+              style={styles.bellButton}>
+              <Icon name="bell-outline" size={RFPercentage(2.4)} color={Colors.white} />
+              {unreadNotifCount > 0 && (
+                <View style={styles.bellBadge}>
+                  <Text style={styles.bellBadgeText}>
+                    {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          )}
         </LinearGradient>
 
         <ScrollView
@@ -895,32 +898,14 @@ const Home = () => {
           </>
         )}
 
-        <Modal
-          transparent
+        <GuestAuthModal
           visible={showAuthModal}
-          animationType="fade"
-          onRequestClose={() => setShowAuthModal(false)}>
-          <TouchableWithoutFeedback onPress={() => setShowAuthModal(false)}>
-            <View style={styles.modalContainer}>
-              <BlurView
-                style={styles.blurView}
-                blurType="light"
-                blurAmount={5}
-                reducedTransparencyFallbackColor="white"
-              />
-              <CustomModal
-                title="Login Required!"
-                subTitle="You need to log in or create an account to access this feature."
-                onPress={() => setShowAuthModal(false)} // Cancel
-                onPress2={() => {
-                  setShowAuthModal(false);
-                  navigation.navigate('UserSelection'); // or 'Login'
-                }}
-                buttonTitle="Login"
-              />
-            </View>
-          </TouchableWithoutFeedback>
-        </Modal>
+          onClose={() => setShowAuthModal(false)}
+          onContinue={() => {
+            setShowAuthModal(false);
+            navigation.navigate('UserSelection');
+          }}
+        />
       </>
     </TouchableWithoutFeedback>
   );
@@ -1325,6 +1310,8 @@ const styles = StyleSheet.create({
   modalContainer: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 1000,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   blurView: {
     ...StyleSheet.absoluteFillObject,
@@ -1341,17 +1328,19 @@ const styles = StyleSheet.create({
     maxWidth: 400,
     backgroundColor: Colors.white,
     borderRadius: 20,
-    overflow: 'hidden',
     elevation: 10,
     shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 10},
     shadowOpacity: 0.1,
     shadowRadius: 20,
-    height: '65%',
+    maxHeight: '75%',
   },
   modalHeader: {
     paddingVertical: RFPercentage(2.5),
     paddingHorizontal: RFPercentage(2),
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    overflow: 'hidden',
   },
   headerContent: {
     flexDirection: 'row',
@@ -1378,6 +1367,7 @@ const styles = StyleSheet.create({
   },
   modalBody: {
     padding: RFPercentage(2),
+    paddingBottom: RFPercentage(3),
   },
   priceDisplayCard: {
     backgroundColor: Colors.ghostWhite,
@@ -1570,15 +1560,18 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.lightRoseBg,
     borderWidth: 1,
     borderColor: Colors.lightRoseBorder,
-    gap: RFPercentage(1),
-    width: RFPercentage(18),
+    gap: RFPercentage(0.8),
+    flex: 1,
+    paddingHorizontal: RFPercentage(1),
   },
   removeButtonText: {
     fontSize: RFPercentage(1.7),
     fontFamily: Fonts.semiBold,
     color: Colors.error,
   },
-  applyButtonWrapper: {},
+  applyButtonWrapper: {
+    flex: 1,
+  },
   adminToggleSection: {
     marginTop: RFPercentage(2),
     paddingHorizontal: '5%',
@@ -1613,6 +1606,9 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontMedium,
     color: Colors.white,
+    lineHeight: Platform.OS === 'android' ? RFPercentage(1.8) : undefined,
+    includeFontPadding: false,
+    textAlignVertical: 'center',
   },
   adminToggleSwitch: {
     width: 50,
@@ -1672,8 +1668,6 @@ const styles = StyleSheet.create({
     color: Colors.placeholderColor,
   },
   applyButton: {
-    width: RFPercentage(18),
-
-    // height: '100%',
+    width: '100%',
   },
 });

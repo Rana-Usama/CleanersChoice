@@ -236,92 +236,102 @@ const Chat = ({navigation, route}: any) => {
 
   // Send Message (text or attachment)
   const onSend = useCallback(
-    async (messagesToSend: IMessage[] = []) => {
+    (messagesToSend: IMessage[] = []) => {
       const msg = messagesToSend[0];
-      const hasText = msg?.text?.trim();
-      const hasAttachment = !!pendingAttachment;
+      const textContent = msg?.text?.trim() || '';
+      const attachmentSnapshot = pendingAttachment;
+      const hasText = !!textContent;
+      const hasAttachment = !!attachmentSnapshot;
 
       if (!hasText && !hasAttachment) return;
 
-      setIsSending(true);
       const timestamp = new Date();
+      const optimisticId = `${Date.now()}`;
 
-      try {
-        let attachmentData: ChatAttachment | undefined;
-
-        // Upload attachment if present
-        if (pendingAttachment) {
-          try {
-            attachmentData = await uploadAttachment(pendingAttachment);
-          } catch {
-            Alert.alert(
-              'Upload Failed',
-              'Failed to upload attachment. Please check your connection and try again.',
-            );
-            setIsSending(false);
-            setUploadProgress(null);
-            return;
-          }
-        }
-
-        const isAttachment = !!attachmentData;
-        const textContent = msg?.text?.trim() || '';
-        const displayText = textContent || (isAttachment ? attachmentData!.name : '');
-
-        // Optimistic UI update
-        const newMessage: any = {
-          _id: `${Date.now()}`,
-          text: displayText,
-          createdAt: timestamp,
-          user: {_id: senderId, name: senderName, avatar: senderProfile},
+      // Immediately show message & clear input
+      const optimisticMessage: any = {
+        _id: optimisticId,
+        text: textContent || (hasAttachment ? attachmentSnapshot!.name : ''),
+        createdAt: timestamp,
+        user: {_id: senderId, name: senderName, avatar: senderProfile},
+      };
+      if (hasAttachment) {
+        optimisticMessage.attachment = {
+          url: attachmentSnapshot!.uri,
+          name: attachmentSnapshot!.name,
+          mimeType: attachmentSnapshot!.mimeType,
+          size: attachmentSnapshot!.size,
         };
-        if (isAttachment) {
-          newMessage.attachment = attachmentData;
-          newMessage.messageType = 'attachment';
-        }
-        setMessages(prev => GiftedChat.append(prev, [newMessage]));
-        setMessage('');
-        setPendingAttachment(null);
-
-        // Build Firestore message
-        const firestoreMessage: any = {
-          text: displayText,
-          timestamp,
-          senderId,
-          senderName,
-          unread: true,
-          chatId,
-          receiver,
-          type: isAttachment ? 'attachment' : 'text',
-        };
-        if (isAttachment) {
-          firestoreMessage.attachment = attachmentData;
-        }
-
-        const chatRef = firestore().collection('Chats').doc(chatId);
-        await chatRef.collection('Messages').add(firestoreMessage);
-        await chatRef.set(
-          {
-            lastMessage: firestoreMessage,
-            lastMessageTimestamp: timestamp,
-            participants: [senderId, receiver],
-          },
-          {merge: true},
-        );
-
-        const pushBody = isAttachment
-          ? textContent
-            ? `📎 ${attachmentData!.name}: ${textContent}`
-            : attachmentData!.mimeType.startsWith('image/') 
-              ? `📷 Sent a photo`
-              : `📎 Sent a document: ${attachmentData!.name}`
-          : textContent;
-        await sendPushNotification(pushBody);
-      } catch {
-        Alert.alert('Error', 'Failed to send message. Please try again.');
-      } finally {
-        setIsSending(false);
+        optimisticMessage.messageType = 'attachment';
       }
+      setMessages(prev => GiftedChat.append(prev, [optimisticMessage]));
+      setMessage('');
+      setPendingAttachment(null);
+
+      // Upload & persist in background
+      (async () => {
+        try {
+          let attachmentData: ChatAttachment | undefined;
+          if (attachmentSnapshot) {
+            try {
+              attachmentData = await uploadAttachment(attachmentSnapshot);
+            } catch {
+              Alert.alert('Upload Failed', 'Failed to upload attachment. Please check your connection and try again.');
+              return;
+            }
+          }
+
+          const isAttachment = !!attachmentData;
+          const displayText = textContent || (isAttachment ? attachmentData!.name : '');
+
+          // Update optimistic message with real URL if attachment
+          if (isAttachment) {
+            setMessages(prev =>
+              prev.map(m =>
+                m._id === optimisticId
+                  ? {...m, attachment: attachmentData, text: displayText}
+                  : m,
+              ),
+            );
+          }
+
+          const firestoreMessage: any = {
+            text: displayText,
+            timestamp,
+            senderId,
+            senderName,
+            unread: true,
+            chatId,
+            receiver,
+            type: isAttachment ? 'attachment' : 'text',
+          };
+          if (isAttachment) {
+            firestoreMessage.attachment = attachmentData;
+          }
+
+          const chatRef = firestore().collection('Chats').doc(chatId);
+          await chatRef.collection('Messages').add(firestoreMessage);
+          await chatRef.set(
+            {
+              lastMessage: firestoreMessage,
+              lastMessageTimestamp: timestamp,
+              participants: [senderId, receiver],
+            },
+            {merge: true},
+          );
+
+          const pushBody = isAttachment
+            ? textContent
+              ? `📎 ${attachmentData!.name}: ${textContent}`
+              : attachmentData!.mimeType.startsWith('image/')
+                ? ` Sent a photo`
+                : ` Sent a document: ${attachmentData!.name}`
+            : textContent;
+          await sendPushNotification(pushBody);
+        } catch {
+          // silently fail background sync
+        }
+      })();
     },
     [chatId, senderId, senderName, receiver, senderProfile, pendingAttachment],
   );
@@ -480,52 +490,12 @@ const Chat = ({navigation, route}: any) => {
 
                   if (isImage) {
                     return (
-                      <View>
-                        <ChatImageBubble
-                          attachment={att}
-                          isRight={isRight}
-                          isDownloaded={isDownloaded}
-                          time={time}
-                          onPress={() =>
-                            handleOpenAttachment(
-                              att.url,
-                              att.name,
-                              att.mimeType,
-                              currentMsg._id,
-                            )
-                          }
-                          onDownload={() =>
-                            handleDownloadAttachment(
-                              att.url,
-                              att.name,
-                              att.mimeType,
-                              currentMsg._id,
-                            )
-                          }
-                        />
-                        {hasText && (
-                          <ChatTextBubble
-                            bubbleProps={{
-                              ...props,
-                              currentMessage: {
-                                ...currentMsg,
-                                text: msgText.trim(),
-                              },
-                            }}
-                            showTime={false}
-                          />
-                        )}
-                      </View>
-                    );
-                  }
-
-                  return (
-                    <View>
-                      <ChatDocumentBubble
+                      <ChatImageBubble
                         attachment={att}
                         isRight={isRight}
+                        isDownloaded={isDownloaded}
                         time={time}
-                        fileSize={formatFileSize(att.size)}
+                        text={hasText ? msgText.trim() : undefined}
                         onPress={() =>
                           handleOpenAttachment(
                             att.url,
@@ -543,19 +513,33 @@ const Chat = ({navigation, route}: any) => {
                           )
                         }
                       />
-                      {hasText && (
-                        <ChatTextBubble
-                          bubbleProps={{
-                            ...props,
-                            currentMessage: {
-                              ...currentMsg,
-                              text: msgText.trim(),
-                            },
-                          }}
-                          showTime={false}
-                        />
-                      )}
-                    </View>
+                    );
+                  }
+
+                  return (
+                    <ChatDocumentBubble
+                      attachment={att}
+                      isRight={isRight}
+                      time={time}
+                      fileSize={formatFileSize(att.size)}
+                      text={hasText ? msgText.trim() : undefined}
+                      onPress={() =>
+                        handleOpenAttachment(
+                          att.url,
+                          att.name,
+                          att.mimeType,
+                          currentMsg._id,
+                        )
+                      }
+                      onDownload={() =>
+                        handleDownloadAttachment(
+                          att.url,
+                          att.name,
+                          att.mimeType,
+                          currentMsg._id,
+                        )
+                      }
+                    />
                   );
                 }
 
@@ -612,7 +596,6 @@ const Chat = ({navigation, route}: any) => {
                         <TouchableOpacity
                           activeOpacity={0.7}
                           onPress={handleAttachPress}
-                          disabled={isSending}
                           hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
                           style={styles.attachButton}>
                           <MaterialCommunityIcons
@@ -634,7 +617,7 @@ const Chat = ({navigation, route}: any) => {
                           multiline={true}
                           scrollEnabled={true}
                           textAlignVertical="top"
-                          editable={!isSending}
+                          editable={true}
                         />
                       </View>
                     )}
@@ -643,9 +626,7 @@ const Chat = ({navigation, route}: any) => {
                         activeOpacity={0.8}
                         style={styles.sendButton}
                         hitSlop={{top: 15, bottom: 15, left: 15, right: 15}}
-                        disabled={isSending}
                         onPress={() => {
-                          if (isSending) return;
                           onSend([
                             {
                               _id: `${Date.now()}`,
@@ -658,12 +639,7 @@ const Chat = ({navigation, route}: any) => {
                             },
                           ]);
                         }}>
-                        {isSending ? (
-                          <ActivityIndicator
-                            size="small"
-                            color={Colors.gradient1}
-                          />
-                        ) : (
+                        {(
                           <Feather
                             name="send"
                             size={RFPercentage(2.5)}
