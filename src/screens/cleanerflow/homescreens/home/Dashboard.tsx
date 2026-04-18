@@ -1177,6 +1177,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     height: RFPercentage(34),
     backgroundColor: '#447DFE08',
+    justifyContent: 'flex-start',
   },
   packageHeader: {
     flexDirection: 'row',
@@ -1214,7 +1215,8 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.5),
     color: '#6B7380B2',
     lineHeight: 18,
-    marginBottom: 24,
+    marginBottom: 12,
+    flexShrink: 1,
   },
   selectButton: {
     flexDirection: 'row',
@@ -1223,8 +1225,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#4554670D',
     paddingVertical: 8,
     borderRadius: 8,
-    position: 'absolute',
-    bottom: 20,
+    marginTop: 'auto',
     alignSelf: 'center',
     paddingHorizontal: 16,
   },

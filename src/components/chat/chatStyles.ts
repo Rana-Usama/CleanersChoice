@@ -3,19 +3,24 @@ import {Colors, Fonts} from '../../constants/Themes';
 
 // Shared spacing tokens
 export const BUBBLE_SPACING = {
-  messagePadding: RFPercentage(0.6),
+  messagePadding: RFPercentage(0.8),
   messageBottomMargin: RFPercentage(0.8),
-  borderRadius: RFPercentage(1.8),
+  borderRadius: RFPercentage(2),
 };
+
+// Sent bubble: steelBlue; Received bubble: coolGray200
+export const SENT_BG = Colors.steelBlue;
+export const RECEIVED_BG = Colors.coolGray200;
+export const RECEIVED_BORDER = Colors.coolGray200;
 
 // Shared bubble wrapper styles (left/right)
 export const BUBBLE_WRAPPER = {
   left: {
-    backgroundColor: Colors.coolGray200,
+    backgroundColor: RECEIVED_BG,
     padding: BUBBLE_SPACING.messagePadding,
   },
   right: {
-    backgroundColor: Colors.steelBlue,
+    backgroundColor: SENT_BG,
     padding: BUBBLE_SPACING.messagePadding,
   },
 };
@@ -36,10 +41,10 @@ export const BUBBLE_TEXT = {
 
 // Shared time style tokens
 export const TIME_STYLE = {
-  fontSize: RFPercentage(1.3),
+  fontSize: RFPercentage(1.25),
   fontFamily: Fonts.fontRegular,
-  leftColor: '#aaa',
-  rightColor: 'rgba(255,255,255,0.7)',
+  leftColor: Colors.warmGray400,
+  rightColor: 'rgba(255,255,255,0.75)',
   externalColor: Colors.warmGray400,
 };
 
@@ -47,7 +52,7 @@ export const TIME_STYLE = {
 export const formatTime = (date: any): string => {
   try {
     const d = date instanceof Date ? date : new Date(date);
-    return d.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+    return d.toLocaleTimeString([], {hour: 'numeric', minute: '2-digit'});
   } catch {
     return '';
   }

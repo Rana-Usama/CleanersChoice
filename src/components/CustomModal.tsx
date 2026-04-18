@@ -1,7 +1,6 @@
 import {StyleSheet, Text, View, Dimensions, TouchableOpacity} from 'react-native';
 import React from 'react';
 import GradientButton from './GradientButton';
-import NextButton from './NextButton';
 import {Colors, Fonts} from '../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -104,12 +103,14 @@ const CustomModal = (props: props) => {
         </View>
       ) : (
         <View style={styles.buttonContainer}>
-          <NextButton
-            title={props.cancelButtonTitle ?? 'Cancel'}
+          <TouchableOpacity
+            activeOpacity={0.8}
             onPress={props.onPress ?? (() => {})}
-            style={styles.cancelButton}
-            textStyle={styles.cancelButtonText}
-          />
+            style={styles.cancelButton}>
+            <Text style={styles.cancelButtonText}>
+              {props.cancelButtonTitle ?? 'Cancel'}
+            </Text>
+          </TouchableOpacity>
           <GradientButton
             title={props.buttonTitle ? props.buttonTitle : 'Yes'}
             onPress={props.onPress2 ?? (() => {})}
@@ -135,7 +136,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     alignItems: 'center',
     justifyContent: 'center',
-    position: 'absolute',
     paddingHorizontal: RFPercentage(2),
     paddingVertical: RFPercentage(3),
     shadowColor: Colors.black,
@@ -198,12 +198,14 @@ const styles = StyleSheet.create({
     gap: RFPercentage(1.5),
   },
   cancelButton: {
+    flex: 1,
     height: RFPercentage(5),
     borderRadius: RFPercentage(100),
     backgroundColor: Colors.white,
     borderWidth: 1,
     borderColor: Colors.gradient1,
-    width: RFPercentage(16),
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   splitButton: {
     flex: 1,
@@ -236,7 +238,7 @@ const styles = StyleSheet.create({
     color: Colors.gradient1,
   },
   yesButton: {
-    width: RFPercentage(16),
+    flex: 1,
     height: RFPercentage(5),
     borderRadius: RFPercentage(100),
   },

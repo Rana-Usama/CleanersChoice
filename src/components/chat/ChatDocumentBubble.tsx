@@ -5,14 +5,20 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import {Colors, Fonts} from '../../constants/Themes';
 import {ChatAttachment} from '../../types/chat';
 import PdfIcon from '../../assets/svg/pdfIcon';
-import ChatMessageTime from './ChatMessageTime';
-import {BUBBLE_SPACING} from './chatStyles';
+import {
+  BUBBLE_SPACING,
+  SENT_BG,
+  RECEIVED_BG,
+  RECEIVED_BORDER,
+  TIME_STYLE,
+} from './chatStyles';
 
 interface ChatDocumentBubbleProps {
   attachment: ChatAttachment;
   isRight: boolean;
   time: string;
   fileSize: string;
+  text?: string;
   onPress: () => void;
   onDownload?: () => void;
 }
@@ -22,89 +28,131 @@ const ChatDocumentBubble: React.FC<ChatDocumentBubbleProps> = ({
   isRight,
   time,
   fileSize,
+  text,
   onPress,
   onDownload,
-}) => (
-  <TouchableOpacity
-    activeOpacity={0.7}
-    onPress={onPress}
-    style={[
-      styles.card,
-      isRight ? styles.cardRight : styles.cardLeft,
-    ]}>
-    <View style={styles.row}>
-      <View style={styles.iconWrap}>
-        <PdfIcon width={RFPercentage(3.5)} height={RFPercentage(3.5)} />
+}) => {
+  const hasCaption = !!text?.trim();
+
+  return (
+    <TouchableOpacity
+      activeOpacity={0.7}
+      onPress={onPress}
+      style={[
+        styles.card,
+        isRight ? styles.cardRight : styles.cardLeft,
+        {marginBottom: BUBBLE_SPACING.messageBottomMargin},
+      ]}>
+      {/* Doc row */}
+      <View style={styles.docRow}>
+        {/* Icon */}
+        <View style={styles.iconWrap}>
+          <PdfIcon width={RFPercentage(3.5)} height={RFPercentage(3.5)} />
+        </View>
+        {/* File info */}
+        <View style={styles.info}>
+          <Text
+            style={[
+              styles.fileName,
+              {color: isRight ? Colors.background : Colors.primaryText},
+            ]}
+            numberOfLines={2}>
+            {attachment.name}
+          </Text>
+          <Text
+            style={[
+              styles.fileSize,
+              {
+                color: isRight
+                  ? 'rgba(255,255,255,0.65)'
+                  : Colors.secondaryText,
+              },
+            ]}>
+            {fileSize} • {attachment.mimeType.split('/').pop()?.toUpperCase()}
+          </Text>
+        </View>
+        {/* Download button (received only) */}
+        {!isRight && (
+          <TouchableOpacity
+            activeOpacity={0.6}
+            onPress={e => {
+              e.stopPropagation();
+              onDownload?.();
+            }}
+            hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
+            style={styles.downloadBtn}>
+            <MaterialCommunityIcons
+              name="download"
+              size={RFPercentage(2.2)}
+              color={Colors.gradient1}
+            />
+          </TouchableOpacity>
+        )}
       </View>
-      <View style={styles.info}>
+
+      {/* Divider */}
+      <View
+        style={[
+          styles.divider,
+          {
+            backgroundColor: isRight
+              ? 'rgba(255,255,255,0.2)'
+              : Colors.coolGray200,
+          },
+        ]}
+      />
+
+      {/* Caption text (if any) */}
+      {hasCaption && (
         <Text
           style={[
-            styles.fileName,
-            {color: isRight ? Colors.background : Colors.primaryText},
-          ]}
-          numberOfLines={2}>
-          {attachment.name}
-        </Text>
-        <Text
-          style={[
-            styles.fileSize,
-            {color: isRight ? 'rgba(255,255,255,0.7)' : Colors.secondaryText},
+            styles.caption,
+            {color: isRight ? Colors.background : Colors.inputTextColor},
           ]}>
-          {fileSize} • {attachment.mimeType.split('/').pop()?.toUpperCase()}
+          {text}
         </Text>
-      </View>
-      {!isRight && (
-        <TouchableOpacity
-          activeOpacity={0.6}
-          onPress={e => {
-            e.stopPropagation();
-            onDownload?.();
-          }}
-          hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
-          style={styles.downloadBtn}>
-          <MaterialCommunityIcons
-            name="download"
-            size={RFPercentage(2.2)}
-            color={Colors.gradient1}
-          />
-        </TouchableOpacity>
       )}
-    </View>
-    <ChatMessageTime
-      time={time}
-      isRight={isRight}
-      variant="internal"
-      style={styles.time}
-    />
-  </TouchableOpacity>
-);
+
+      {/* Time */}
+      <Text
+        style={[
+          styles.time,
+          {
+            color: isRight ? TIME_STYLE.rightColor : TIME_STYLE.leftColor,
+          },
+        ]}>
+        {time}
+      </Text>
+    </TouchableOpacity>
+  );
+};
 
 const styles = StyleSheet.create({
   card: {
     paddingHorizontal: RFPercentage(1.3),
-    paddingTop: RFPercentage(0.5),
-    paddingBottom: RFPercentage(0.15),
+    paddingTop: RFPercentage(0.8),
+    paddingBottom: RFPercentage(0.4),
     borderRadius: BUBBLE_SPACING.borderRadius,
-    width: RFPercentage(35),
-    marginBottom: BUBBLE_SPACING.messageBottomMargin,
+    minWidth: RFPercentage(28),
+    maxWidth: RFPercentage(36),
   },
   cardLeft: {
-    backgroundColor: Colors.coolGray200,
+    backgroundColor: RECEIVED_BG,
   },
   cardRight: {
-    backgroundColor: Colors.steelBlue,
+    backgroundColor: SENT_BG,
   },
-  row: {
+  docRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     width: '100%',
-    minHeight: RFPercentage(3.5),
   },
   iconWrap: {
-    paddingTop: 2,
+    paddingTop: 3,
   },
   downloadBtn: {
     alignSelf: 'center',
+    marginLeft: RFPercentage(0.5),
   },
   info: {
     flex: 1,
@@ -112,18 +160,31 @@ const styles = StyleSheet.create({
   },
   fileName: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.55),
     lineHeight: RFPercentage(2.2),
   },
   fileSize: {
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.1),
-    marginTop: 1,
+    fontSize: RFPercentage(1.15),
+    marginTop: 2,
+  },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    marginVertical: RFPercentage(0.5),
+    marginHorizontal: -RFPercentage(0.2),
+  },
+  caption: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.9),
+    lineHeight: RFPercentage(2.7),
+    marginBottom: RFPercentage(0.3),
   },
   time: {
-    alignSelf: 'flex-end',
-    marginTop: RFPercentage(0.1),
+    fontSize: TIME_STYLE.fontSize,
+    fontFamily: TIME_STYLE.fontFamily,
+    textAlign: 'right',
   },
 });
 
 export default ChatDocumentBubble;
+
