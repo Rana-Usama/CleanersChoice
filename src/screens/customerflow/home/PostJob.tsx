@@ -119,6 +119,17 @@ const serviceTypesWithIcons = [
   },
 ];
 
+const getRoundedMinDate = () => {
+  const now = new Date();
+  const remainder = now.getMinutes() % 5;
+  if (remainder !== 0) {
+    now.setMinutes(now.getMinutes() + (5 - remainder));
+  }
+  now.setSeconds(0);
+  now.setMilliseconds(0);
+  return now;
+};
+
 const PostJob = ({route}: any) => {
   const {jobId, repost} = route.params || {};
 
@@ -698,7 +709,7 @@ const PostJob = ({route}: any) => {
                           styles.budgetTabText,
                           budgetType === 'sqft' && styles.budgetTabTextActive,
                         ]}>
-                        Square Footage
+                        Sq Footage
                       </Text>
                     </TouchableOpacity>
                   </View>
@@ -913,9 +924,10 @@ const PostJob = ({route}: any) => {
             <DatePicker
               modal
               open={open}
-              date={date || new Date()}
-              minimumDate={new Date()}
+              date={date || getRoundedMinDate()}
+              minimumDate={getRoundedMinDate()}
               mode="datetime"
+              minuteInterval={5}
               onConfirm={date => {
                 setOpen(false);
                 setDate(date);

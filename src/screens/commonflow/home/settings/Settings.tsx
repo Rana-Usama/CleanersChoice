@@ -14,8 +14,8 @@ import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, Icons} from '../../../../constants/Themes';
 import ProfileField from '../../../../components/ProfileField';
-import {BlurView} from '@react-native-community/blur';
 import CustomModal from '../../../../components/CustomModal';
+import ModalWrapper from '../../../../components/ModalWrapper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import auth from '@react-native-firebase/auth';
 import {showToast} from '../../../../utils/ToastMessage';
@@ -346,71 +346,44 @@ const Settings = ({navigation}: any) => {
       </ScrollView>
 
       {/* Logout Modal */}
-      {modalVisible && (
-        <TouchableWithoutFeedback>
-          <View style={styles.modalContainer}>
-            <BlurView
-              style={styles.blurView}
-              blurType="light"
-              blurAmount={10}
-            />
-            <CustomModal
-              title="Logout"
-              subTitle="Are you sure you want to log out from your account?"
-              onPress={() => setModalVisible(false)}
-              onPress2={logOut}
-              loader={loading}
-              buttonTitle="Logout"
-            />
-          </View>
-        </TouchableWithoutFeedback>
-      )}
+      <ModalWrapper visible={modalVisible} blurAmount={10}>
+        <CustomModal
+          title="Logout"
+          subTitle="Are you sure you want to log out from your account?"
+          onPress={() => setModalVisible(false)}
+          onPress2={logOut}
+          loader={loading}
+          buttonTitle="Logout"
+        />
+      </ModalWrapper>
 
       {/* Active Subscription Modal (iOS) */}
-      {modalVisible3 && (
-        <TouchableWithoutFeedback>
-          <View style={styles.modalContainer}>
-            <BlurView
-              style={styles.blurView}
-              blurType="light"
-              blurAmount={10}
-            />
-            <CustomModal
-              title="Subscription Active"
-              subTitle="You currently have an active subscription. Please cancel your subscription first before deleting your account."
-              iconName="alert-circle-outline"
-              iconColor={Colors.red500}
-              onPress={() => setModalVisible3(false)}
-              onPress2={() => {
-                setModalVisible3(false);
-                Linking.openURL('https://apps.apple.com/account/subscriptions');
-              }}
-              buttonTitle="Manage Plan"
-            />
-          </View>
-        </TouchableWithoutFeedback>
-      )}
+      <ModalWrapper visible={modalVisible3} blurAmount={10}>
+        <CustomModal
+          title="Subscription Active"
+          subTitle="You currently have an active subscription. Please cancel your subscription first before deleting your account."
+          iconName="alert-circle-outline"
+          iconColor={Colors.red500}
+          onPress={() => setModalVisible3(false)}
+          onPress2={() => {
+            setModalVisible3(false);
+            Linking.openURL('https://apps.apple.com/account/subscriptions');
+          }}
+          buttonTitle="Manage Plan"
+        />
+      </ModalWrapper>
 
       {/* Delete Account Modal */}
-      {modalVisible2 && (
-        <TouchableWithoutFeedback>
-          <View style={styles.modalContainer}>
-            <BlurView
-              style={styles.blurView}
-              blurType="light"
-              blurAmount={10}
-            />
-            <CustomModal
-              title="Delete Account"
-              subTitle="Are you sure you want to permanently delete your account?"
-              onPress={() => setModalVisible2(false)}
-              onPress2={deleteAccount}
-              loader={loading}
-              buttonTitle="Delete"
-            />
-          </View>
-        </TouchableWithoutFeedback>
-      )}
+      <ModalWrapper visible={modalVisible2} blurAmount={10}>
+        <CustomModal
+          title="Delete Account"
+          subTitle="Are you sure you want to permanently delete your account?"
+          onPress={() => setModalVisible2(false)}
+          onPress2={deleteAccount}
+          loader={loading}
+          buttonTitle="Delete"
+        />
+      </ModalWrapper>
     </View>
   );
 };
@@ -511,17 +484,5 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
     textAlign: 'center',
-  },
-  modalContainer: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  blurView: {
-    width: '100%',
-    height: '100%',
-    position: 'absolute',
   },
 });

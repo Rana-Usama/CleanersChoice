@@ -16,8 +16,8 @@ import React, {useState, useCallback, useRef, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts} from '../../../constants/Themes';
 import JobCard from '../../../components/JobCard';
-import {BlurView} from '@react-native-community/blur';
 import CustomModal from '../../../components/CustomModal';
+import ModalWrapper from '../../../components/ModalWrapper';
 import {useFocusEffect} from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
@@ -454,7 +454,7 @@ const Jobs = ({navigation}: any) => {
                   active
                     ? 'No active jobs posted\nPost a job to get started'
                     : expired
-                    ? 'No expired jobs'
+                    ? 'No Expired Jobs yet'
                     : 'No completed jobs yet'
                 }
               />
@@ -576,20 +576,17 @@ const Jobs = ({navigation}: any) => {
       )}
 
       {/* Delete Confirmation Modal */}
-      {modalVisible && (
-        <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-          <View style={styles.modalContainer}>
-            <BlurView style={styles.blurView} blurType="light" blurAmount={5} />
-            <CustomModal
-              title="Delete Job!"
-              subTitle={'Are you sure you want to delete this job?'}
-              onPress={() => setModalVisible(false)}
-              onPress2={handleDeleteJob}
-              loader={loading2}
-            />
-          </View>
-        </TouchableWithoutFeedback>
-      )}
+      <ModalWrapper
+        visible={modalVisible}
+        onBackdropPress={() => setModalVisible(false)}>
+        <CustomModal
+          title="Delete Job!"
+          subTitle={'Are you sure you want to delete this job?'}
+          onPress={() => setModalVisible(false)}
+          onPress2={handleDeleteJob}
+          loader={loading2}
+        />
+      </ModalWrapper>
     </View>
   );
 };
@@ -891,18 +888,6 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.7),
     fontFamily: Fonts.semiBold,
     color: Colors.white,
-  },
-  modalContainer: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  blurView: {
-    width: '100%',
-    height: '100%',
-    position: 'absolute',
   },
   manageButton: {
     flexDirection: 'row',

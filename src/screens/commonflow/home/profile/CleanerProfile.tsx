@@ -24,8 +24,8 @@ import Feather from 'react-native-vector-icons/Feather';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {showToast} from '../../../../utils/ToastMessage';
-import {BlurView} from '@react-native-community/blur';
 import CustomModal from '../../../../components/CustomModal';
+import ModalWrapper from '../../../../components/ModalWrapper';
 
 const SERVER_URL = 'https://cleaners-choice-server.vercel.app';
 
@@ -402,28 +402,21 @@ const CleanerProfile = ({route, navigation}: any) => {
       )}
 
       {/* Confirm Cleaner Modal */}
-      {showConfirmModal && (
-        <TouchableWithoutFeedback onPress={() => setShowConfirmModal(false)}>
-          <View style={styles.modalOverlay}>
-            <BlurView
-              style={styles.blurView}
-              blurType="light"
-              blurAmount={5}
-            />
-            <CustomModal
-              title="Confirm Cleaner"
-              subTitle={`Are you sure you want to hire ${profile?.name} for this job?`}
-              iconName="account-check"
-              iconColor={Colors.success}
-              buttonTitle="Confirm"
-              onPress3={() => setShowConfirmModal(false)}
-              onPress={() => setShowConfirmModal(false)}
-              onPress2={doConfirm}
-              loader={confirmLoading}
-            />
-          </View>
-        </TouchableWithoutFeedback>
-      )}
+      <ModalWrapper
+        visible={showConfirmModal}
+        onBackdropPress={() => setShowConfirmModal(false)}>
+        <CustomModal
+          title="Confirm Cleaner"
+          subTitle={`Are you sure you want to hire ${profile?.name} for this job?`}
+          iconName="account-check"
+          iconColor={Colors.success}
+          buttonTitle="Confirm"
+          onPress3={() => setShowConfirmModal(false)}
+          onPress={() => setShowConfirmModal(false)}
+          onPress2={doConfirm}
+          loader={confirmLoading}
+        />
+      </ModalWrapper>
     </View>
   );
 };
@@ -662,17 +655,5 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  modalOverlay: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  blurView: {
-    width: '100%',
-    height: '100%',
-    position: 'absolute',
   },
 });

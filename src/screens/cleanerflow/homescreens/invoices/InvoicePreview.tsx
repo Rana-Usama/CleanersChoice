@@ -247,7 +247,7 @@ const InvoicePreview = ({route, navigation}: any) => {
                     Rate/sqft
                   </Text>
                   <Text style={[styles.tableHeaderText, {flex: 1, textAlign: 'right'}]}>
-                    Area/sqft
+                    Total/sqft
                   </Text>
                 </View>
                 <View style={styles.tableRow}>

@@ -26,8 +26,8 @@ import Feather from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {showToast} from '../../../utils/ToastMessage';
-import {BlurView} from '@react-native-community/blur';
 import CustomModal from '../../../components/CustomModal';
+import ModalWrapper from '../../../components/ModalWrapper';
 
 const SERVER_URL = 'https://cleaners-choice-server.vercel.app';
 
@@ -600,37 +600,29 @@ const JobManagement = ({route, navigation}: any) => {
       )}
 
       {/* Confirm / Cancel Modal */}
-      {confirmModal.visible && (
-        <TouchableWithoutFeedback
-          onPress={() =>
-            setConfirmModal(prev => ({...prev, visible: false}))
-          }>
-          <View style={styles.modalOverlay}>
-            <BlurView
-              style={styles.blurView}
-              blurType="light"
-              blurAmount={5}
-            />
-            <CustomModal
-              title={confirmModal.title}
-              subTitle={confirmModal.subTitle}
-              iconName={confirmModal.iconName}
-              iconColor={confirmModal.iconColor}
-              svgIconType={confirmModal.svgIconType}
-              buttonTitle={confirmModal.buttonTitle}
-              cancelButtonTitle={
-                confirmModal.title === 'Confirm Cleaner'
-                  ? 'Not Now'
-                  : confirmModal.title === 'Cancel Cleaner?'
-                    ? 'Keep Cleaner'
-                    : 'No'
-              }
-              onPress={() => setConfirmModal(prev => ({...prev, visible: false}))}
-              onPress2={confirmModal.onConfirm}
-            />
-          </View>
-        </TouchableWithoutFeedback>
-      )}
+      <ModalWrapper
+        visible={confirmModal.visible}
+        onBackdropPress={() =>
+          setConfirmModal(prev => ({...prev, visible: false}))
+        }>
+        <CustomModal
+          title={confirmModal.title}
+          subTitle={confirmModal.subTitle}
+          iconName={confirmModal.iconName}
+          iconColor={confirmModal.iconColor}
+          svgIconType={confirmModal.svgIconType}
+          buttonTitle={confirmModal.buttonTitle}
+          cancelButtonTitle={
+            confirmModal.title === 'Confirm Cleaner'
+              ? 'Not Now'
+              : confirmModal.title === 'Cancel Cleaner?'
+                ? 'Keep Cleaner'
+                : 'No'
+          }
+          onPress={() => setConfirmModal(prev => ({...prev, visible: false}))}
+          onPress2={confirmModal.onConfirm}
+        />
+      </ModalWrapper>
     </View>
   );
 };
@@ -641,18 +633,6 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: Colors.background,
-  },
-  modalOverlay: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  blurView: {
-    width: '100%',
-    height: '100%',
-    position: 'absolute',
   },
   gradientHeader: {
     paddingTop: Platform.OS === 'ios' ? RFPercentage(8) : RFPercentage(6),
