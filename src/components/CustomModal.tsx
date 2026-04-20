@@ -170,12 +170,12 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.fontRegular,
     color: Colors.secondaryText,
     marginTop: 0,
-    marginBottom: RFPercentage(3),
+    marginBottom: RFPercentage(2.5),
     lineHeight: RFPercentage(2.7),
     paddingHorizontal: 0,
   },
   okButtonContainer: {
-    marginTop: RFPercentage(1),
+    marginTop: 0,
     width: '100%',
   },
   okButton: {
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.fontMedium,
   },
   buttonContainer: {
-    marginTop: RFPercentage(1),
+    marginTop: 0,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
