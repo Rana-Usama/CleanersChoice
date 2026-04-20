@@ -15,8 +15,8 @@ import {RFPercentage} from 'react-native-responsive-fontsize';
 import HeaderBack from '../../../../components/HeaderBack';
 import GradientButton from '../../../../components/GradientButton';
 import PasswordField from '../../../../components/PasswordField';
-import {BlurView} from '@react-native-community/blur';
 import CustomModal from '../../../../components/CustomModal';
+import ModalWrapper from '../../../../components/ModalWrapper';
 import auth from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as yup from 'yup';
@@ -247,26 +247,19 @@ const ChangePasswordV2 = ({navigation}: any) => {
       </ScrollView>
 
       {/* Confirmation Modal */}
-      {modalVisible && (
-        <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-          <View style={{position: 'absolute', width: '100%', height: '100%'}}>
-            <BlurView
-              style={{width: '100%', height: '100%', position: 'absolute'}}
-              blurType="light"
-              blurAmount={5}
-            />
-            <CustomModal
-              passwordModal={true}
-              title="Chnage Password"
-              subTitle={'Your password hase been successfuly changed!'}
-              onPress3={() => {
-                navigation.navigate('SignIn');
-                setModalVisible(false);
-              }}
-            />
-          </View>
-        </TouchableWithoutFeedback>
-      )}
+      <ModalWrapper
+        visible={modalVisible}
+        onBackdropPress={() => setModalVisible(false)}>
+        <CustomModal
+          passwordModal={true}
+          title="Chnage Password"
+          subTitle={'Your password hase been successfuly changed!'}
+          onPress3={() => {
+            navigation.navigate('SignIn');
+            setModalVisible(false);
+          }}
+        />
+      </ModalWrapper>
     </View>
   );
 };

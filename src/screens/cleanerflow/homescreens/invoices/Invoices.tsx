@@ -422,12 +422,14 @@ const Invoices = ({navigation}: any) => {
       />
 
       {/* FAB: Create Invoice */}
-      <TouchableOpacity
-        activeOpacity={0.7}
-        style={styles.fab}
-        onPress={() => navigation.navigate('InvoiceForm', {item: null})}>
-        <Feather name="plus" size={RFPercentage(3)} color={Colors.white} />
-      </TouchableOpacity>
+      <View style={styles.fabWrapper}>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={styles.fab}
+          onPress={() => navigation.navigate('InvoiceForm', {item: null})}>
+          <Feather name="plus" size={RFPercentage(3)} color={Colors.white} />
+        </TouchableOpacity>
+      </View>
 
       {/* Date pickers */}
       <DatePicker
@@ -576,22 +578,26 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(2),
     marginBottom: RFPercentage(0.5),
   },
-  fab: {
+  fabWrapper: {
     position: 'absolute',
-    bottom: Platform.OS === 'ios' ? RFPercentage(3) : RFPercentage(3),
+    bottom: RFPercentage(3),
     right: RFPercentage(2.5),
-    width: RFPercentage(6.5),
-    height: RFPercentage(6.5),
     borderRadius: RFPercentage(3.25),
-    backgroundColor: Colors.gradient1,
-    alignItems: 'center',
-    justifyContent: 'center',
     shadowColor: Colors.black,
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 8,
     zIndex: 100,
+  },
+  fab: {
+    width: RFPercentage(6.5),
+    height: RFPercentage(6.5),
+    borderRadius: RFPercentage(3.25),
+    backgroundColor: Colors.gradient1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
   },
   resultTitle: {
     fontFamily: Fonts.semiBold,

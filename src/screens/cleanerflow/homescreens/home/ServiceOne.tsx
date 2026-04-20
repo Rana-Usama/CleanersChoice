@@ -16,7 +16,6 @@ import {
 import React, {useState, useCallback, useRef, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Icons, Fonts} from '../../../../constants/Themes';
-import HeaderBack from '../../../../components/HeaderBack';
 import DescriptionField from '../../../../components/DescriptionField';
 import {useFocusEffect} from '@react-navigation/native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -254,14 +253,24 @@ const ServiceOne: React.FC = ({navigation}: any) => {
       <LinearGradient
         colors={[Colors.gradient1, Colors.gradient2]}
         style={styles.gradientHeader}>
-        <HeaderBack
-          title="Setup Your Services"
-          textStyle={styles.headerText}
-          left={true}
-          right={false}
-          style={{backgroundColor: 'transparent'}}
-          arrowColor={Colors.white}
-        />
+        <View style={styles.headerContent}>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}>
+            <MaterialIcons
+              name="keyboard-backspace"
+              size={RFPercentage(2.8)}
+              color={Colors.white}
+            />
+          </TouchableOpacity>
+
+          <Text style={styles.headerText}>Setup Your Services</Text>
+
+          <View style={styles.headerRightSpacer} />
+        </View>
+
+        <View style={styles.headerDivider} />
 
         {/* Progress Section */}
         <View style={styles.progressSection}>
@@ -595,7 +604,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   gradientHeader: {
-    paddingTop: Platform.OS === 'ios' ? 40 : 0,
+    paddingTop:
+      Platform.OS === 'ios' ? 50 : StatusBar.currentHeight || 0,
     paddingBottom: 20,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
@@ -605,10 +615,40 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     // elevation: 8,
   },
+  headerContent: {
+    width: '90%',
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    height: Platform.OS === 'ios' ? RFPercentage(8) : RFPercentage(13),
+    marginTop: RFPercentage(0.6),
+    paddingBottom: RFPercentage(1.8),
+  },
+  backButton: {
+    width: RFPercentage(4.8),
+    height: RFPercentage(4.8),
+    borderRadius: RFPercentage(2.4),
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
   headerText: {
     fontSize: RFPercentage(2.3),
     fontFamily: Fonts.semiBold,
     color: Colors.white,
+    textAlign: 'center',
+    flex: 1,
+  },
+  headerRightSpacer: {
+    width: RFPercentage(4.8),
+    height: RFPercentage(4.8),
+  },
+  headerDivider: {
+    width: '90%',
+    alignSelf: 'center',
+    height: RFPercentage(0.12),
+    backgroundColor: 'rgba(255,255,255,0.25)',
   },
   progressSection: {
     marginTop: 15,

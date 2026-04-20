@@ -248,7 +248,7 @@ const InvoiceForm = ({route, navigation}: any) => {
             <View style={styles.sectionHeader}>
               <MaterialCommunityIcons
                 name="identifier"
-                size={RFPercentage(2.2)}
+                size={RFPercentage(3)}
                 color={Colors.gradient1}
               />
               <Text style={styles.sectionTitle}>Invoice ID</Text>
@@ -778,9 +778,9 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   previewButton: {
-    width: '100%',
+    width: '90%',
     height: RFPercentage(6),
-    borderRadius: RFPercentage(1.5),
+    borderRadius: RFPercentage(2.3),
   },
   previewButtonText: {
     fontSize: RFPercentage(1.9),
