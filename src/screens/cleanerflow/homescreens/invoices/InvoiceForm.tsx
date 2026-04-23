@@ -473,7 +473,14 @@ const InvoiceForm = ({route, navigation}: any) => {
             {/* Hourly Rate Fields */}
             {form.budgetType === 'hourly' && (
               <View>
-                <Text style={styles.budgetFieldLabel}>Rate per Hour</Text>
+                <View style={styles.budgetFieldLabelsRow}>
+                  <Text style={[styles.budgetFieldLabel, styles.budgetFieldLabelHalf]}>
+                    Price per Hour
+                  </Text>
+                  <Text style={[styles.budgetFieldLabel, styles.budgetFieldLabelHalf]}>
+                    Total Hours
+                  </Text>
+                </View>
                 <View style={styles.budgetRow}>
                   <InputField
                     placeholder="$"
@@ -508,7 +515,14 @@ const InvoiceForm = ({route, navigation}: any) => {
             {/* Square Footage Fields */}
             {form.budgetType === 'sqft' && (
               <View>
-                <Text style={styles.budgetFieldLabel}>Price per Sq Ft</Text>
+                <View style={styles.budgetFieldLabelsRow}>
+                  <Text style={[styles.budgetFieldLabel, styles.budgetFieldLabelHalf]}>
+                    Price per Sq Ft
+                  </Text>
+                  <Text style={[styles.budgetFieldLabel, styles.budgetFieldLabelHalf]}>
+                    Total Area in Sq Ft
+                  </Text>
+                </View>
                 <View style={styles.budgetRow}>
                   <InputField
                     placeholder="$"
@@ -848,6 +862,14 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.fontMedium,
     color: Colors.primaryText,
     marginBottom: RFPercentage(0.8),
+  },
+  budgetFieldLabelsRow: {
+    flexDirection: 'row',
+    gap: RFPercentage(1),
+  },
+  budgetFieldLabelHalf: {
+    flex: 1,
+    marginBottom: RFPercentage(0),
   },
   budgetInput: {
     width: '100%',

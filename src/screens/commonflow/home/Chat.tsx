@@ -42,6 +42,7 @@ import ChatDocumentBubble from '../../../components/chat/ChatDocumentBubble';
 import ChatImageBubble from '../../../components/chat/ChatImageBubble';
 import ChatDaySeparator from '../../../components/chat/ChatDaySeparator';
 import {formatTime, formatFileSize} from '../../../components/chat/chatStyles';
+import {getAvatarInitials} from '../../../utils/avatarInitials';
 
 const Chat = ({navigation, route}: any) => {
   const [messages, setMessages] = useState<IMessage[]>([]);
@@ -65,6 +66,11 @@ const Chat = ({navigation, route}: any) => {
   const [downloadedAttachments, setDownloadedAttachments] = useState<Set<string>>(new Set());
   const [viewingImage, setViewingImage] = useState<string | null>(null);
   const [showAttachPicker, setShowAttachPicker] = useState(false);
+  const [resolvedReceiverId, setResolvedReceiverId] = useState(
+    receiver || '',
+  );
+  const [resolvedReceiverRole, setResolvedReceiverRole] = useState('');
+  const receiverInitials = getAvatarInitials(receiverName);
 
   const {handlePickDocument, handlePickImage} =
     useAttachmentPicker({onAttachmentSelected: setPendingAttachment});
@@ -85,6 +91,52 @@ const Chat = ({navigation, route}: any) => {
       }
     } catch {}
   }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const resolveReceiverFromParticipants = async () => {
+      if (receiver) {
+        setResolvedReceiverId(receiver);
+      }
+
+      try {
+        const chatDoc = await firestore().collection('Chats').doc(chatId).get();
+        const participants = (chatDoc.data()?.participants || []) as string[];
+        const otherParticipant = participants.find(
+          participantId => participantId && participantId !== senderId,
+        );
+
+        if (otherParticipant && isMounted) {
+          setResolvedReceiverId(otherParticipant);
+        }
+      } catch {}
+    };
+
+    resolveReceiverFromParticipants();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [chatId, senderId, receiver]);
+
+  useEffect(() => {
+    const targetReceiverId = resolvedReceiverId || receiver;
+    if (!targetReceiverId) {
+      setResolvedReceiverRole('');
+      return;
+    }
+
+    const unsubscribe = firestore()
+      .collection('Users')
+      .doc(targetReceiverId)
+      .onSnapshot(userDoc => {
+        const role = (userDoc.data()?.role || '').toLowerCase();
+        setResolvedReceiverRole(role);
+      });
+
+    return () => unsubscribe();
+  }, [resolvedReceiverId, receiver]);
 
   // Fetch chats
   useEffect(() => {
@@ -237,6 +289,11 @@ const Chat = ({navigation, route}: any) => {
   // Send Message (text or attachment)
   const onSend = useCallback(
     (messagesToSend: IMessage[] = []) => {
+      const resolvedRecipientId = resolvedReceiverId || receiver;
+      if (!resolvedRecipientId) {
+        return;
+      }
+
       const msg = messagesToSend[0];
       const textContent = msg?.text?.trim() || '';
       const attachmentSnapshot = pendingAttachment;
@@ -302,7 +359,7 @@ const Chat = ({navigation, route}: any) => {
             senderName,
             unread: true,
             chatId,
-            receiver,
+            receiver: resolvedRecipientId,
             type: isAttachment ? 'attachment' : 'text',
           };
           if (isAttachment) {
@@ -315,7 +372,7 @@ const Chat = ({navigation, route}: any) => {
             {
               lastMessage: firestoreMessage,
               lastMessageTimestamp: timestamp,
-              participants: [senderId, receiver],
+              participants: [senderId, resolvedRecipientId],
             },
             {merge: true},
           );
@@ -333,7 +390,7 @@ const Chat = ({navigation, route}: any) => {
         }
       })();
     },
-    [chatId, senderId, senderName, receiver, senderProfile, pendingAttachment],
+    [chatId, senderId, senderName, receiver, resolvedReceiverId, senderProfile, pendingAttachment],
   );
 
   // Mark message as read
@@ -385,6 +442,24 @@ const Chat = ({navigation, route}: any) => {
     } catch (err) {}
   };
 
+  const handleOpenReceiverProfile = () => {
+    const targetUserId = resolvedReceiverId || receiver;
+    if (!targetUserId) {
+      return;
+    }
+
+    if (resolvedReceiverRole === 'customer') {
+      navigation.navigate('CustomerProfile', {
+        customerId: targetUserId,
+      });
+      return;
+    }
+
+    navigation.navigate('CleanerProfile', {
+      cleanerId: targetUserId,
+    });
+  };
+
   return (
     <>
       <View style={styles.screen}>
@@ -404,30 +479,35 @@ const Chat = ({navigation, route}: any) => {
                 color={Colors.placeholderColor}
               />
             </TouchableOpacity>
-            <View>
-              {receiverProfile ? (
-                <>
-                  <Image
-                    source={{uri: receiverProfile}}
-                    resizeMode="contain"
-                    style={styles.profile}
-                    borderRadius={RFPercentage(100)}
-                  />
-                </>
-              ) : (
-                <>
-                  <View style={styles.noProfileContainer}>
-                    <Text style={styles.noProfile}>{receiverName?.[0]}</Text>
-                  </View>
-                </>
-              )}
-            </View>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={handleOpenReceiverProfile}
+              style={styles.receiverTapArea}>
+              <View>
+                {receiverProfile ? (
+                  <>
+                    <Image
+                      source={{uri: receiverProfile}}
+                      resizeMode="contain"
+                      style={styles.profile}
+                      borderRadius={RFPercentage(100)}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <View style={styles.noProfileContainer}>
+                      <Text style={styles.noProfile}>{receiverInitials || '?'}</Text>
+                    </View>
+                  </>
+                )}
+              </View>
 
-            <Text style={styles.receiverName}>
-              {receiverName?.length > 20
-                ? `${receiverName.slice(0, 20)}...`
-                : receiverName}
-            </Text>
+              <Text style={styles.receiverName}>
+                {receiverName?.length > 20
+                  ? `${receiverName.slice(0, 20)}...`
+                  : receiverName}
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
         <View style={styles.messageContainer}>
@@ -683,7 +763,7 @@ const Chat = ({navigation, route}: any) => {
                         fontSize: RFPercentage(1.9),
                         fontFamily: 'Poppins_600SemiBold',
                       }}>
-                      {receiverName?.[0] || '?'}
+                      {receiverInitials || '?'}
                     </Text>
                   </View>
                 );
@@ -780,6 +860,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: RFPercentage(2),
+  },
+  receiverTapArea: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
   },
   profile: {
     width: RFPercentage(6),

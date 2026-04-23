@@ -37,6 +37,7 @@ import Location from '../screens/commonflow/location/Location';
 import ProfileCompletionCongratulations from '../screens/cleanerflow/homescreens/home/SuccessScreen';
 import NotificationsScreen from '../screens/commonflow/home/NotificationsScreen';
 import CleanerProfile from '../screens/commonflow/home/profile/CleanerProfile';
+import CustomerProfile from '../screens/commonflow/home/profile/CustomerProfile';
 import JobManagement from '../screens/customerflow/home/JobManagement';
 import MyJobs from '../screens/cleanerflow/homescreens/jobs/MyJobs';
 import Settings from '../screens/commonflow/home/settings/Settings';
@@ -86,6 +87,7 @@ export type RootStackParamList = {
   CongratulationsScreen: undefined;
   NotificationsScreen: undefined;
   CleanerProfile: {cleanerId: string; jobId?: string};
+  CustomerProfile: {customerId: string};
   JobManagement: {jobId: string; jobTitle: string};
   MyJobs: undefined;
   InvoiceForm: {item: any | null};
@@ -219,6 +221,7 @@ const StackNavigator: React.FC = () => {
               component={NotificationsScreen}
             />
             <Stack.Screen name="CleanerProfile" component={CleanerProfile} />
+            <Stack.Screen name="CustomerProfile" component={CustomerProfile} />
             <Stack.Screen
               name="CongratulationsScreen"
               component={ProfileCompletionCongratulations}

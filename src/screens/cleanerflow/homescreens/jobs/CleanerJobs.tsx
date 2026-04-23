@@ -543,31 +543,31 @@ const CleanerJobs = () => {
         {/* Admin Toggle - Only visible to admins */}
         {isAdmin && (
           <View style={styles.adminToggleSection}>
-            <View style={styles.adminToggleHeader}>
-              <View style={styles.adminBadge}>
-                <MaterialIcons
-                  name="admin-panel-settings"
-                  size={16}
-                  color={Colors.white}
-                />
-                <Text style={styles.adminBadgeText}>Admin Mode</Text>
-              </View>
-              <TouchableOpacity
-                onPress={() => setAdminViewAllJobs(prev => !prev)}
-                style={[
-                  styles.toggleSwitch,
-                  adminViewAllJobs && styles.toggleSwitchActive,
-                ]}>
-                <View
-                  style={[
-                    styles.toggleCircle,
-                    adminViewAllJobs && styles.toggleCircleActive,
-                  ]}
-                />
-              </TouchableOpacity>
-            </View>
-
             <View style={styles.adminToggleCard}>
+              <View style={styles.adminToggleHeader}>
+                <View style={styles.adminBadge}>
+                  <MaterialIcons
+                    name="admin-panel-settings"
+                    size={16}
+                    color={Colors.white}
+                  />
+                  <Text style={styles.adminBadgeText}>Admin Mode</Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() => setAdminViewAllJobs(prev => !prev)}
+                  style={[
+                    styles.toggleSwitch,
+                    adminViewAllJobs && styles.toggleSwitchActive,
+                  ]}>
+                  <View
+                    style={[
+                      styles.toggleCircle,
+                      adminViewAllJobs && styles.toggleCircleActive,
+                    ]}
+                  />
+                </TouchableOpacity>
+              </View>
+
               <View style={styles.adminToggleRow}>
                 <View style={styles.adminToggleInfo}>
                   <MaterialIcons name="public" size={20} color={Colors.gray600} />
@@ -597,7 +597,7 @@ const CleanerJobs = () => {
         )}
 
         {/* Jobs Section */}
-        <View style={styles.jobsSection}>
+        <View style={[styles.jobsSection, isAdmin && styles.jobsSectionWithAdmin]}>
           <View style={styles.jobsHeader}>
             <View style={styles.jobsTitleContainer}>
               <Text
@@ -1154,6 +1154,9 @@ const styles = StyleSheet.create({
     marginTop: 24,
     paddingHorizontal: 20,
   },
+  jobsSectionWithAdmin: {
+    marginTop: 0,
+  },
   jobsHeader: {
     flexDirection: 'column',
     alignItems: 'flex-start',
@@ -1500,6 +1503,7 @@ const styles = StyleSheet.create({
   adminToggleSection: {
     marginHorizontal: 20,
     marginTop: 16,
+    marginBottom: 16,
   },
   adminToggleHeader: {
     flexDirection: 'row',
@@ -1524,11 +1528,10 @@ const styles = StyleSheet.create({
   adminToggleCard: {
     backgroundColor: Colors.adminCardBg, // Light purple background
     borderRadius: 16,
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderWidth: 1,
     borderColor: Colors.purple100,
-    paddingVertical: 12,
-    justifyContent: 'center',
   },
   adminToggleRow: {
     flexDirection: 'row',

@@ -160,6 +160,7 @@ const SignIn: React.FC = () => {
                       onChangeText={handleChange('email')}
                       handleBlur={handleBlur('email')}
                       value={values.email}
+                      autoCapitalize="none"
                       customStyle={{
                         borderColor:
                           touched.email && errors.email

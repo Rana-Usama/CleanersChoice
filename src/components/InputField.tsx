@@ -15,7 +15,8 @@ interface Props {
   handleBlur?: (event: any) => void;
   customStyle?: object;
   type? : any;
-  length? : any
+  length? : any;
+  autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
 }
 
 const InputField: React.FC<Props> = (props: Props) => {
@@ -31,7 +32,7 @@ const InputField: React.FC<Props> = (props: Props) => {
           onBlur={props.handleBlur}
           keyboardType={props.type}
           maxLength={props.length}
-          
+          autoCapitalize={props.autoCapitalize}
         />
       </View>
     </View>

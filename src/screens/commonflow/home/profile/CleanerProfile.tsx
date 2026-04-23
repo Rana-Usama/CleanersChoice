@@ -167,6 +167,24 @@ const CleanerProfile = ({route, navigation}: any) => {
     '88': 'Others',
   };
 
+  const viewedRole = (profile?.role || '').toLowerCase();
+  const isCleanerProfile = viewedRole === 'cleaner';
+  const profileTitle =
+    viewedRole === 'customer'
+      ? 'Customer Profile'
+      : viewedRole === 'cleaner'
+      ? 'Cleaner Profile'
+      : 'Profile';
+
+  const roleBadgeStyle =
+    viewedRole === 'admin'
+      ? {backgroundColor: Colors.amberOverlay10, color: Colors.amber500, icon: 'shield-checkmark', text: 'Admin'}
+      : viewedRole === 'customer'
+      ? {backgroundColor: Colors.lightBlueOverlay90, color: Colors.gradient1, icon: 'person', text: 'Customer'}
+      : viewedRole === 'cleaner'
+      ? {backgroundColor: Colors.lightBlueOverlay90, color: Colors.gradient1, icon: 'sparkles', text: 'Professional Cleaner'}
+      : {backgroundColor: Colors.grayOverlay10, color: Colors.placeholderColor, icon: 'person-circle', text: 'User'};
+
   if (loading) {
     return (
       <View style={styles.safeArea}>
@@ -184,7 +202,7 @@ const CleanerProfile = ({route, navigation}: any) => {
               style={styles.backButton}>
               <Feather name="arrow-left" size={24} color={Colors.white} />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Cleaner Profile</Text>
+            <Text style={styles.headerTitle}>{profileTitle}</Text>
             <View style={{width: 40}} />
           </View>
         </LinearGradient>
@@ -211,7 +229,7 @@ const CleanerProfile = ({route, navigation}: any) => {
             style={styles.backButton}>
             <Feather name="arrow-left" size={24} color={Colors.white} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Cleaner Profile</Text>
+          <Text style={styles.headerTitle}>{profileTitle}</Text>
           <View style={{width: 40}} />
         </View>
       </LinearGradient>
@@ -232,25 +250,33 @@ const CleanerProfile = ({route, navigation}: any) => {
                 resizeMode="cover"
                 style={styles.avatar}
               />
-              <Image
-                source={Icons.owner}
-                resizeMode="contain"
-                style={styles.ownerBadge}
-              />
+              {isCleanerProfile && (
+                <Image
+                  source={Icons.owner}
+                  resizeMode="contain"
+                  style={styles.ownerBadge}
+                />
+              )}
             </View>
           </View>
 
           <View style={styles.userInfo}>
             <Text style={styles.nameText} numberOfLines={1}>
-              {profile?.name || 'Cleaner'}
+              {profile?.name || 'User'}
             </Text>
-            <View style={styles.roleBadge}>
+            <View
+              style={[
+                styles.roleBadge,
+                {backgroundColor: roleBadgeStyle.backgroundColor},
+              ]}>
               <Ionicons
-                name="sparkles"
+                name={roleBadgeStyle.icon as any}
                 size={RFPercentage(1.8)}
-                color={Colors.gradient1}
+                color={roleBadgeStyle.color}
               />
-              <Text style={styles.roleText}>Professional Cleaner</Text>
+              <Text style={[styles.roleText, {color: roleBadgeStyle.color}]}> 
+                {roleBadgeStyle.text}
+              </Text>
             </View>
           </View>
         </View>
@@ -285,7 +311,7 @@ const CleanerProfile = ({route, navigation}: any) => {
         </View>
 
         {/* Description */}
-        {serviceData?.description && (
+        {isCleanerProfile && serviceData?.description && (
           <View style={styles.infoCard}>
             <Text style={styles.cardTitle}>About</Text>
             <Text style={styles.descriptionText}>
@@ -295,7 +321,7 @@ const CleanerProfile = ({route, navigation}: any) => {
         )}
 
         {/* Services */}
-        {serviceData?.type && serviceData.type.length > 0 && (
+        {isCleanerProfile && serviceData?.type && serviceData.type.length > 0 && (
           <View style={styles.infoCard}>
             <Text style={styles.cardTitle}>Services Offered</Text>
             <View style={styles.servicesGrid}>
@@ -316,7 +342,7 @@ const CleanerProfile = ({route, navigation}: any) => {
         )}
 
         {/* Location */}
-        {serviceData?.location?.name && (
+        {isCleanerProfile && serviceData?.location?.name && (
           <View style={styles.infoCard}>
             <Text style={styles.cardTitle}>Location</Text>
             <View style={styles.infoRow}>
@@ -331,7 +357,7 @@ const CleanerProfile = ({route, navigation}: any) => {
         )}
 
         {/* Packages */}
-        {serviceData?.packages && serviceData.packages.length > 0 && (
+        {isCleanerProfile && serviceData?.packages && serviceData.packages.length > 0 && (
           <View style={styles.infoCard}>
             <Text style={styles.cardTitle}>Packages</Text>
             {serviceData.packages.map((pkg: any, index: number) => (
@@ -349,7 +375,7 @@ const CleanerProfile = ({route, navigation}: any) => {
         )}
 
         {/* Gallery */}
-        {serviceData?.serviceImages && serviceData.serviceImages.length > 0 && (
+        {isCleanerProfile && serviceData?.serviceImages && serviceData.serviceImages.length > 0 && (
           <View style={styles.infoCard}>
             <Text style={styles.cardTitle}>Gallery</Text>
             <ScrollView
@@ -375,7 +401,7 @@ const CleanerProfile = ({route, navigation}: any) => {
       </ScrollView>
 
       {/* Confirm Button - only show when viewing from job context */}
-      {jobId && !isAlreadyConfirmed && isApplicant && (
+      {isCleanerProfile && jobId && !isAlreadyConfirmed && isApplicant && (
         <View style={styles.confirmBar}>
           <GradientButton
             title="Confirm Cleaner"
@@ -388,7 +414,7 @@ const CleanerProfile = ({route, navigation}: any) => {
         </View>
       )}
 
-      {jobId && isAlreadyConfirmed && (
+      {isCleanerProfile && jobId && isAlreadyConfirmed && (
         <View style={styles.confirmBar}>
           <View style={styles.confirmedState}>
             <MaterialCommunityIcons
@@ -402,21 +428,23 @@ const CleanerProfile = ({route, navigation}: any) => {
       )}
 
       {/* Confirm Cleaner Modal */}
-      <ModalWrapper
-        visible={showConfirmModal}
-        onBackdropPress={() => setShowConfirmModal(false)}>
-        <CustomModal
-          title="Confirm Cleaner"
-          subTitle={`Are you sure you want to hire ${profile?.name} for this job?`}
-          iconName="account-check"
-          iconColor={Colors.success}
-          buttonTitle="Confirm"
-          onPress3={() => setShowConfirmModal(false)}
-          onPress={() => setShowConfirmModal(false)}
-          onPress2={doConfirm}
-          loader={confirmLoading}
-        />
-      </ModalWrapper>
+      {isCleanerProfile && (
+        <ModalWrapper
+          visible={showConfirmModal}
+          onBackdropPress={() => setShowConfirmModal(false)}>
+          <CustomModal
+            title="Confirm Cleaner"
+            subTitle={`Are you sure you want to hire ${profile?.name} for this job?`}
+            iconName="account-check"
+            iconColor={Colors.success}
+            buttonTitle="Confirm"
+            onPress3={() => setShowConfirmModal(false)}
+            onPress={() => setShowConfirmModal(false)}
+            onPress2={doConfirm}
+            loader={confirmLoading}
+          />
+        </ModalWrapper>
+      )}
     </View>
   );
 };

@@ -14,6 +14,7 @@ import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, Icons, IMAGES} from '../../../../constants/Themes';
 import HeaderBack from '../../../../components/HeaderBack';
+import WelcomeCoachMark from '../../../../components/WelcomeCoachMark';
 import {useFocusEffect} from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
@@ -117,6 +118,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
   });
   const [isAdmin, setIsAdmin] = useState(false);
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
+  const [showWelcomeCoachMark, setShowWelcomeCoachMark] = useState(true);
 
   useExitAppOnBack();
 
@@ -341,6 +343,14 @@ const Dashboard: React.FC = ({navigation}: any) => {
 
   const cleanDescription =
     service?.description?.replace(/\s+/g, ' ').trim() || '';
+
+  const handleSkipCoachMark = () => {
+    setShowWelcomeCoachMark(false);
+  };
+
+  const handleNextCoachMark = () => {
+    setShowWelcomeCoachMark(false);
+  };
 
   return (
     <View style={styles.safeArea}>
@@ -746,6 +756,12 @@ const Dashboard: React.FC = ({navigation}: any) => {
           </>
         )}
       </ScrollView>
+
+      <WelcomeCoachMark
+        visible={showWelcomeCoachMark}
+        onSkip={handleSkipCoachMark}
+        onNext={handleNextCoachMark}
+      />
     </View>
   );
 };
@@ -1082,7 +1098,7 @@ const styles = StyleSheet.create({
   readMore: {
     fontFamily: Fonts.semiBold,
     color: '#407BFF',
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.3),
   },
   seeAll: {
     fontFamily: Fonts.semiBold,

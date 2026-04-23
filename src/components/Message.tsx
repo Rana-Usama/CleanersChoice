@@ -2,6 +2,7 @@ import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React from 'react';
 import {IMAGES, Fonts, Colors} from '../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
+import {getAvatarInitials} from '../utils/avatarInitials';
 
 interface props {
   message: string;
@@ -15,6 +16,8 @@ interface props {
 }
 
 const Message = (props: props) => {
+  const avatarInitials = getAvatarInitials(props.name);
+
   return (
     <TouchableOpacity
       activeOpacity={0.8}
@@ -32,7 +35,7 @@ const Message = (props: props) => {
       ) : (
         <>
           <View style={styles.noProfileContainer}>
-            <Text style={styles.name}>{props.name[0]}</Text>
+            <Text style={styles.name}>{avatarInitials}</Text>
           </View>
         </>
       )}
