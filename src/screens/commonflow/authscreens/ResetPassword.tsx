@@ -162,6 +162,7 @@ const ResetPassword: React.FC = ({navigation}: any) => {
                       onChangeText={handleChange('email')}
                       handleBlur={handleBlur('email')}
                       value={values.email}
+                      autoCapitalize="none"
                       customStyle={[
                         styles.inputField,
                         touched.email &&

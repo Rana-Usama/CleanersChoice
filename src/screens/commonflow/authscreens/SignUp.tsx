@@ -282,6 +282,7 @@ const SignUp: React.FC = ({navigation}: any) => {
                     onChangeText={handleChange('email')}
                     handleBlur={handleBlur('email')}
                     value={values.email}
+                    autoCapitalize="none"
                     customStyle={{
                       borderColor:
                         touched.email && errors.email

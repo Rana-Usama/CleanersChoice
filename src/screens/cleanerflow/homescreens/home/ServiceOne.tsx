@@ -329,7 +329,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                       </View>
                       <View style={styles.locationTextContainer}>
                         <Text style={styles.locationLabel}>
-                          Service Location
+                          Service Area (City/State)
                         </Text>
                         <Text
                           style={[

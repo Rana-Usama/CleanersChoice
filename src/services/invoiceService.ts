@@ -114,9 +114,9 @@ export const generateInvoiceHtml = (invoice: InvoiceFormData): string => {
     .info-block p { font-size: 14px; color: #475569; line-height: 1.6; }
     .info-block .name { font-size: 16px; font-weight: 600; color: #1E293B; }
     .details-table { width: 100%; border-collapse: collapse; margin-bottom: 32px; }
-    .details-table th { background: #F1F5F9; padding: 12px 16px; text-align: left; font-size: 12px; letter-spacing: 0.5px; color: #4C5469; font-weight: 600; border-bottom: 2px solid #E2E8F0; }
+    .details-table th { background: #F1F5F9; padding: 12px 16px; text-align: left; font-size: 12px; letter-spacing: 0.5px; color: #334155; font-weight: 600; border-bottom: 2px solid #E2E8F0; }
     .details-table td { padding: 16px; border-bottom: 1px solid #F1F5F9; font-size: 14px; color: #4C5469; font-weight: 500; }
-    .details-table .description { color: #9CA3AF; font-size: 13px; margin-top: 4px; font-weight: 400; }
+    .details-table .description { color: #475569; font-size: 13px; margin-top: 4px; font-weight: 400; }
     .total-section { display: flex; justify-content: flex-end; margin-top: 16px; }
     .total-box { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px 32px; min-width: 250px; }
     .total-row { display: flex; justify-content: space-between; align-items: center; }
@@ -187,7 +187,7 @@ export const generateInvoiceHtml = (invoice: InvoiceFormData): string => {
         <td style="text-align:left;font-weight:600;">${escapeHtml(invoice.pricePerSqFt)}</td>
         <td style="text-align:right;font-weight:600;">${escapeHtml(invoice.sqFt || '0')}</td>
         ` : `
-        <td style="text-align:right;font-weight:500;color:#4C5469;">${invoice.price.startsWith('$') ? invoice.price : `$${invoice.price}`}<br><span style="font-weight:400;font-size:12px;color:#9CA3AF;">Flat Rate</span></td>
+        <td style="text-align:right;font-weight:500;color:#4C5469;">${invoice.price.startsWith('$') ? invoice.price : `$${invoice.price}`}<br><span style="font-weight:400;font-size:12px;color:#475569;">Flat Rate</span></td>
         `}
       </tr>
     </tbody>
