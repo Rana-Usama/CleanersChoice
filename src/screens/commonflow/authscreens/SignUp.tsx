@@ -32,6 +32,7 @@ import Backarrow from '../../../assets/svg/Backarrow';
 import BlueStars from '../../../assets/svg/BlueStars';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import {useSoftInputAdjustNothing} from '../../../hooks/useSoftInputMode';
 
 const {width: screenWidth} = Dimensions.get('window');
 
@@ -63,6 +64,7 @@ const resolveSvgComponent = (moduleRef: any) => {
 const GroupComponent = resolveSvgComponent(Group);
 const BackarrowComponent = resolveSvgComponent(Backarrow);
 const BlueStarsComponent = resolveSvgComponent(BlueStars);
+const starsImage = require('../../../assets/images/Starsss.webp');
 
 const SignUp: React.FC = ({navigation}: any) => {
   const [selected, setSelected] = useState<boolean>(false);
@@ -72,6 +74,7 @@ const SignUp: React.FC = ({navigation}: any) => {
   const [showConfirmPassword, setShowConfirmPassword] =
     useState<boolean>(false);
   const userFlow = useSelector((state: any) => state.userFlow);
+  useSoftInputAdjustNothing();
 
   const validationSchema = yup.object({
     name: yup.string().required('Username is required'),
@@ -239,6 +242,14 @@ const SignUp: React.FC = ({navigation}: any) => {
                 width={screenWidth + RFPercentage(10)}
                 height={RFPercentage(26)}
                 style={styles.groupSvg}
+              />
+            </View>
+
+            <View style={styles.topStarContainer} pointerEvents="none">
+              <Image
+                source={starsImage}
+                resizeMode="contain"
+                style={styles.topStar}
               />
             </View>
 
@@ -665,6 +676,16 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontMedium,
     marginLeft: RFPercentage(0.55),
+  },
+  topStarContainer: {
+    position: 'absolute',
+    left: RFPercentage(1.4),
+    top: RFPercentage(0),
+    zIndex: 1,
+  },
+  topStar: {
+    width: RFPercentage(7.5),
+    height: RFPercentage(7.5),
   },
   starContainer: {
     position: 'absolute',

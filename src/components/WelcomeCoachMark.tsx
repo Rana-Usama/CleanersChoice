@@ -40,23 +40,13 @@ const WelcomeCoachMark: React.FC<WelcomeCoachMarkProps> = ({
         <View style={styles.card}>
           <Stars
             style={styles.sparkleTopRight}
-            width={RFPercentage(4)}
-            height={RFPercentage(4.5)}
-          />
-          <Stars
-            style={styles.sparkleTopRightSmall}
-            width={RFPercentage(2.2)}
-            height={RFPercentage(2.5)}
+            width={RFPercentage(6.5)}
+            height={RFPercentage(7.5)}
           />
           <Stars
             style={styles.sparkleBottomLeftBig}
-            width={RFPercentage(3.8)}
-            height={RFPercentage(4.2)}
-          />
-          <Stars
-            style={styles.sparkleBottomLeftSmall}
-            width={RFPercentage(2.2)}
-            height={RFPercentage(2.5)}
+            width={RFPercentage(5.5)}
+            height={RFPercentage(7.5)}
           />
 
           <View style={styles.logoWrapper}>
@@ -102,11 +92,11 @@ const styles = StyleSheet.create({
   },
   card: {
     width: '100%',
-    maxWidth: RFPercentage(42),
+    maxWidth: RFPercentage(38),
     backgroundColor: Colors.white,
     borderRadius: RFPercentage(2.8),
-    paddingTop: RFPercentage(3.2),
-    paddingBottom: RFPercentage(2.7),
+    paddingTop: RFPercentage(2.2),
+    paddingBottom: RFPercentage(1.8),
     paddingHorizontal: RFPercentage(2.2),
     position: 'relative',
     shadowColor: '#000',
@@ -114,15 +104,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.14,
     shadowRadius: RFPercentage(3),
     elevation: 10,
-    overflow: 'hidden',
   },
   logoWrapper: {
     alignItems: 'center',
-    marginBottom: RFPercentage(2.2),
+    marginBottom: RFPercentage(1.4),
   },
   title: {
     textAlign: 'center',
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.75),
     fontFamily: Fonts.fontMedium,
     color: '#242B37',
     marginBottom: RFPercentage(0.5),
@@ -134,7 +123,7 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
     fontFamily: Fonts.fontMedium,
     paddingHorizontal: RFPercentage(1),
-    marginBottom: RFPercentage(2.7),
+    marginBottom: RFPercentage(1.8),
   },
   buttonRow: {
     flexDirection: 'row',
@@ -143,54 +132,42 @@ const styles = StyleSheet.create({
   },
   skipButton: {
     flex: 1,
-    minHeight: RFPercentage(6.3),
+    minHeight: RFPercentage(5),
     borderRadius: RFPercentage(4),
     borderWidth: 1.5,
-    borderColor: '#B8BEC9',
+    borderColor: '#A5A9B0',
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: Colors.white,
   },
   skipButtonText: {
-    fontSize: RFPercentage(1.7),
-    fontFamily: Fonts.semiBold,
-    color: '#A1A8B3',
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontMedium,
+    color: '#A5A9B0',
   },
   nextButton: {
     flex: 1,
-    minHeight: RFPercentage(6.3),
+    minHeight: RFPercentage(5),
     borderRadius: RFPercentage(4),
     backgroundColor: '#4E7EFF',
     justifyContent: 'center',
     alignItems: 'center',
   },
   nextButtonText: {
-    fontSize: RFPercentage(1.8),
-    fontFamily: Fonts.fontBold,
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontMedium,
     color: Colors.white,
   },
   sparkleTopRight: {
     position: 'absolute',
-    top: RFPercentage(0.9),
-    right: RFPercentage(0.7),
+    top: RFPercentage(0.3),
+    right: RFPercentage(0.1),
     opacity: 0.9,
-  },
-  sparkleTopRightSmall: {
-    position: 'absolute',
-    top: RFPercentage(3.6),
-    right: RFPercentage(3.8),
-    opacity: 0.6,
   },
   sparkleBottomLeftBig: {
     position: 'absolute',
-    left: RFPercentage(0.1),
-    bottom: RFPercentage(7),
-    opacity: 0.8,
-  },
-  sparkleBottomLeftSmall: {
-    position: 'absolute',
-    left: RFPercentage(3),
-    bottom: RFPercentage(10.5),
-    opacity: 0.55,
+    left: RFPercentage(-1),
+    bottom: RFPercentage(5),
+    opacity: 0.9,
   },
 });

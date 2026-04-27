@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import React, {useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
+import {useSoftInputAdjustNothing} from '../../../hooks/useSoftInputMode';
 import {Fonts, IMAGES, Colors} from '../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -63,6 +64,7 @@ const resolveSvgComponent = (moduleRef: any) => {
 const GroupComponent = resolveSvgComponent(Group);
 const BackarrowComponent = resolveSvgComponent(Backarrow);
 const BlueStarsComponent = resolveSvgComponent(BlueStars);
+const starsImage = require('../../../assets/images/Starsss.webp');
 
 const SignIn: React.FC = () => {
   const navigation =
@@ -70,6 +72,7 @@ const SignIn: React.FC = () => {
   const [selected, setSelected] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  useSoftInputAdjustNothing();
 
   // Validation Schema
   let validationSchema = yup.object({
@@ -173,6 +176,15 @@ const SignIn: React.FC = () => {
                 style={styles.groupSvg}
               />
             </View>
+
+            <View style={styles.starContainer} pointerEvents="none">
+              <Image
+                source={starsImage}
+                resizeMode="contain"
+                style={styles.star}
+              />
+            </View>
+
             <Image source={IMAGES.logo} resizeMode="contain" style={styles.logo} />
           </View>
 
@@ -321,11 +333,11 @@ const SignIn: React.FC = () => {
                 )}
               </Formik>
             </ScrollView>
-
-            <View style={styles.starContainer} pointerEvents="none">
-              <BlueStarsComponent style={styles.star} />
-            </View>
           </KeyboardAvoidingView>
+
+          <View style={styles.blueStarContainer} pointerEvents="none">
+            <BlueStarsComponent style={styles.blueStar} />
+          </View>
         </View>
       </SafeAreaView>
     </TouchableWithoutFeedback>
@@ -520,11 +532,21 @@ const styles = StyleSheet.create({
   },
   starContainer: {
     position: 'absolute',
+    left: RFPercentage(1.4),
+    top: RFPercentage(0),
+    zIndex: 1,
+  },
+  star: {
+    width: RFPercentage(7.5),
+    height: RFPercentage(7.5),
+  },
+  blueStarContainer: {
+    position: 'absolute',
     right: RFPercentage(0.9),
     bottom: RFPercentage(2),
     opacity: 0.18,
   },
-  star: {
+  blueStar: {
     width: RFPercentage(9),
     height: RFPercentage(9),
   },

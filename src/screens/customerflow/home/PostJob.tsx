@@ -731,7 +731,10 @@ const PostJob = ({route}: any) => {
                   {/* Hourly Rate Fields */}
                   {budgetType === 'hourly' && (
                     <View>
-                      <Text style={styles.budgetFieldLabel}>Rate per Hour</Text>
+                      <View style={styles.budgetFieldLabelsRow}>
+                        <Text style={[styles.budgetFieldLabel, styles.budgetFieldLabelHalf]}>Price per Hour</Text>
+                        <Text style={[styles.budgetFieldLabel, styles.budgetFieldLabelHalf]}>Total Hours</Text>
+                      </View>
                       <View style={styles.budgetRow}>
                         <InputField
                           placeholder="$"
@@ -764,7 +767,10 @@ const PostJob = ({route}: any) => {
                   {/* Square Footage Fields */}
                   {budgetType === 'sqft' && (
                     <View>
-                      <Text style={styles.budgetFieldLabel}>Price per Sq Ft</Text>
+                      <View style={styles.budgetFieldLabelsRow}>
+                        <Text style={[styles.budgetFieldLabel, styles.budgetFieldLabelHalf]}>Price per Sq Ft</Text>
+                        <Text style={[styles.budgetFieldLabel, styles.budgetFieldLabelHalf]}>Total Area in Sq Ft</Text>
+                      </View>
                       <View style={styles.budgetRow}>
                         <InputField
                           placeholder="$"
@@ -1279,7 +1285,13 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.5),
     fontFamily: Fonts.fontMedium,
     color: Colors.primaryText,
-    marginBottom: RFPercentage(0.8),
+    marginBottom: RFPercentage(0),
+  },
+  budgetFieldLabelsRow: {
+    flexDirection: 'row',
+  },
+  budgetFieldLabelHalf: {
+    flex: 1,
   },
   budgetRow: {
     flexDirection: 'row',
