@@ -1,19 +1,20 @@
 import {
 	Image,
+	Modal,
 	StatusBar,
 	StyleSheet,
 	Text,
 	View,
-	Platform,
 	TouchableOpacity,
 	TouchableWithoutFeedback,
 	Keyboard,
 	TextInput,
 	Dimensions,
+	ScrollView,
 } from 'react-native';
 import React, {useState} from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import {useSoftInputAdjustNothing} from '../../../hooks/useSoftInputMode';
 import {Fonts, IMAGES, Colors} from '../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import GradientButton from '../../../components/GradientButton';
@@ -27,6 +28,7 @@ import Group from '../../../assets/svg/Group';
 import Backarrow from '../../../assets/svg/Backarrow';
 import BlueStars from '../../../assets/svg/BlueStars';
 import MessageIcon from '../../../assets/svg/messageicon';
+import SmsIcon from '../../../assets/svg/smsIcon';
 
 const {width: screenWidth} = Dimensions.get('window');
 
@@ -59,10 +61,13 @@ const GroupComponent = resolveSvgComponent(Group);
 const BackarrowComponent = resolveSvgComponent(Backarrow);
 const BlueStarsComponent = resolveSvgComponent(BlueStars);
 const MessageIconComponent = resolveSvgComponent(MessageIcon);
+const SmsIconComponent = resolveSvgComponent(SmsIcon);
+const starsImage = require('../../../assets/images/Starsss.webp');
 
 const ResetPassword: React.FC = ({navigation}: any) => {
 	const [loading, setLoading] = useState(false);
 	const [resetSent, setResetSent] = useState(false);
+	useSoftInputAdjustNothing();
 
 	const validationSchema = yup.object({
 		email: yup.string().email('Invalid email').required('Email is required'),
@@ -79,11 +84,6 @@ const ResetPassword: React.FC = ({navigation}: any) => {
 
 				if (!userQuery.empty) {
 					await auth().sendPasswordResetEmail(values.email);
-					showToast({
-						type: 'success',
-						title: 'Success',
-						message: 'Reset password link sent to your email.',
-					});
 					setResetSent(true);
 				} else {
 					showToast({
@@ -124,18 +124,23 @@ const ResetPassword: React.FC = ({navigation}: any) => {
 							/>
 						</View>
 
+						<View style={styles.topStarContainer} pointerEvents="none">
+							<Image
+								source={starsImage}
+								resizeMode="contain"
+								style={styles.topStar}
+							/>
+						</View>
+
 						<Image source={IMAGES.logo} resizeMode="contain" style={styles.logo} />
 					</View>
 
 					<View style={styles.formSheet}>
-						<KeyboardAwareScrollView
+						<ScrollView
 							keyboardShouldPersistTaps="handled"
+							keyboardDismissMode="on-drag"
 							showsVerticalScrollIndicator={false}
-							contentContainerStyle={styles.formScrollContent}
-							enableOnAndroid
-							extraHeight={Platform.OS === 'ios' ? 80 : 120}
-							extraScrollHeight={Platform.OS === 'ios' ? 24 : 40}
-							keyboardOpeningTime={0}>
+							contentContainerStyle={styles.formScrollContent}>
 							<View style={styles.formHeaderRow}>
 								<TouchableOpacity
 									activeOpacity={0.8}
@@ -151,7 +156,7 @@ const ResetPassword: React.FC = ({navigation}: any) => {
 									/>
 								</TouchableOpacity>
 
-								<Text style={styles.heading}>Reset Password</Text>
+								<Text style={styles.heading}>Forget Password</Text>
 							</View>
 
 							<View style={styles.copyBlock}>
@@ -234,31 +239,6 @@ const ResetPassword: React.FC = ({navigation}: any) => {
 											</TouchableOpacity>
 										</View>
 
-										{resetSent ? (
-											<View style={styles.successCard}>
-												<View style={styles.successHeader}>
-													<MaterialCommunityIcons
-														name="check-circle"
-														size={RFPercentage(2.6)}
-														color={Colors.success}
-													/>
-													<Text style={styles.successTitle}>Reset Link Sent</Text>
-												</View>
-												<Text style={styles.successText}>
-													We've sent you a password reset link. If it doesn't
-													appear in your inbox within a few minutes, please also
-													check your Spam or Junk folder.
-												</Text>
-												<TouchableOpacity
-													activeOpacity={0.8}
-													onPress={() => navigation.navigate('SignIn')}
-													style={styles.backToLoginButton}>
-													<Text style={styles.backToLoginText}>
-														Back to Login
-													</Text>
-												</TouchableOpacity>
-											</View>
-										) : null}
 									</>
 								)}
 							</Formik>
@@ -275,13 +255,56 @@ const ResetPassword: React.FC = ({navigation}: any) => {
 									only to verified accounts.
 								</Text>
 							</View>
-						</KeyboardAwareScrollView>
+						</ScrollView>
 					</View>
 
 					<View style={styles.starContainer} pointerEvents="none">
 						<BlueStarsComponent style={styles.star} />
 					</View>
 				</View>
+
+				<Modal
+					visible={resetSent}
+					transparent
+					animationType="fade"
+					statusBarTranslucent
+					onRequestClose={() => setResetSent(false)}>
+					<View style={styles.successModalOverlay}>
+						<View style={styles.successModalCard}>
+							<View style={styles.successModalIconWrap}>
+								<SmsIconComponent
+									width={RFPercentage(4)}
+									height={RFPercentage(4)}
+								/>
+							</View>
+
+							<Text style={styles.successModalTitle}>Check Your Email</Text>
+
+							<Text style={styles.successModalText}>
+								Password reset instructions sent to your email. Check your inbox to continue.
+							</Text>
+
+							<View style={styles.successModalActions}>
+								<TouchableOpacity
+									activeOpacity={0.85}
+									onPress={() => setResetSent(false)}
+									style={styles.successModalCloseButton}>
+									<Text style={styles.successModalCloseText}>Close</Text>
+								</TouchableOpacity>
+
+								<TouchableOpacity
+									activeOpacity={0.9}
+									onPress={() => {
+										setResetSent(false);
+										navigation.navigate('SignIn');
+									}}
+									style={styles.successModalLoginButton}>
+									<Text style={styles.successModalLoginText}>Back to Login</Text>
+								</TouchableOpacity>
+							</View>
+						</View>
+					</View>
+				</Modal>
 			</SafeAreaView>
 		</TouchableWithoutFeedback>
 	);
@@ -356,8 +379,9 @@ const styles = StyleSheet.create({
 		marginLeft: RFPercentage(-0.25),
 	},
 	copyBlock: {
-		// marginTop: RFPercentage(1.4),
-		marginBottom: RFPercentage(1.9),
+		marginTop: RFPercentage(-2.4),
+		marginBottom: RFPercentage(3),
+		paddingLeft: RFPercentage(5.75),
 	},
 	copyTitle: {
 		color: '#1E1E1E',
@@ -381,12 +405,10 @@ const styles = StyleSheet.create({
 		marginBottom: RFPercentage(1.6),
 	},
 	labelIconWrap: {
-		width: RFPercentage(4.1),
-		height: RFPercentage(4.1),
-		borderRadius: RFPercentage(1.2),
-		backgroundColor: 'rgba(64, 123, 255, 0.12)',
-		borderWidth: RFPercentage(0.12),
-		borderColor: 'rgba(64, 123, 255, 0.24)',
+		width: RFPercentage(3),
+		height: RFPercentage(3),
+		borderRadius: RFPercentage(0.7),
+		backgroundColor: 'rgba(77, 133, 254, 0.15)',
 		alignItems: 'center',
 		justifyContent: 'center',
 		marginRight: RFPercentage(1.1),
@@ -456,42 +478,6 @@ const styles = StyleSheet.create({
 		fontFamily: Fonts.fontMedium,
 		marginLeft: RFPercentage(0.55),
 	},
-	successCard: {
-		marginTop: RFPercentage(1.7),
-		backgroundColor: Colors.successBg,
-		borderRadius: RFPercentage(2),
-		paddingHorizontal: RFPercentage(1.8),
-		paddingVertical: RFPercentage(2),
-		borderWidth: RFPercentage(0.12),
-		borderColor: Colors.successBorder,
-	},
-	successHeader: {
-		flexDirection: 'row',
-		alignItems: 'center',
-	},
-	successTitle: {
-		marginLeft: RFPercentage(0.8),
-		color: Colors.successText,
-		fontSize: RFPercentage(1.9),
-		fontFamily: Fonts.fontMedium,
-	},
-	successText: {
-		marginTop: RFPercentage(1.1),
-		color: Colors.successText,
-		fontSize: RFPercentage(1.55),
-		fontFamily: Fonts.fontRegular,
-		lineHeight: RFPercentage(2.15),
-	},
-	backToLoginButton: {
-		alignSelf: 'flex-start',
-		marginTop: RFPercentage(1.6),
-		paddingVertical: RFPercentage(0.5),
-	},
-	backToLoginText: {
-		color: Colors.gradient1,
-		fontSize: RFPercentage(1.65),
-		fontFamily: Fonts.fontMedium,
-	},
 	securityNote: {
 		flexDirection: 'row',
 		alignItems: 'flex-start',
@@ -512,6 +498,87 @@ const styles = StyleSheet.create({
 		fontSize: RFPercentage(1.4),
 		fontFamily: Fonts.fontRegular,
 		lineHeight: RFPercentage(2.1),
+	},
+	successModalOverlay: {
+		flex: 1,
+		backgroundColor: 'rgba(20, 28, 45, 0.38)',
+		alignItems: 'center',
+		justifyContent: 'center',
+		paddingHorizontal: RFPercentage(2.3),
+	},
+	successModalCard: {
+		width: '100%',
+		maxWidth: RFPercentage(38),
+		backgroundColor: Colors.white,
+		borderRadius: RFPercentage(2.4),
+		paddingHorizontal: RFPercentage(2.3),
+		paddingTop: RFPercentage(2.5),
+		paddingBottom: RFPercentage(2.3),
+		alignItems: 'center',
+	},
+	successModalIconWrap: {
+		marginBottom: RFPercentage(1.1),
+	},
+	successModalTitle: {
+		color: '#475569',
+		fontSize: RFPercentage(2),
+		fontFamily: Fonts.fontMedium,
+		textAlign: 'center',
+	},
+	successModalText: {
+		marginTop: RFPercentage(1.7),
+		color: '#64748B',
+		fontSize: RFPercentage(1.5),
+		lineHeight: RFPercentage(2.35),
+		fontFamily: Fonts.fontRegular,
+		textAlign: 'center',
+		paddingHorizontal: RFPercentage(0.8),
+	},
+	successModalActions: {
+		width: '100%',
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		marginTop: RFPercentage(2.6),
+	},
+	successModalCloseButton: {
+		flex: 1,
+		height: RFPercentage(4.7),
+		borderRadius: RFPercentage(4),
+		borderWidth: RFPercentage(0.14),
+		borderColor: '#A5A9B0',
+		alignItems: 'center',
+		justifyContent: 'center',
+		marginRight: RFPercentage(1),
+		backgroundColor: Colors.white,
+	},
+	successModalCloseText: {
+		color: '#A5A9B0',
+		fontSize: RFPercentage(1.43),
+		fontFamily: Fonts.fontMedium,
+	},
+	successModalLoginButton: {
+		flex: 1,
+		height: RFPercentage(4.7),
+		borderRadius: RFPercentage(4),
+		alignItems: 'center',
+		justifyContent: 'center',
+		marginLeft: RFPercentage(1),
+		backgroundColor: Colors.gradient1,
+	},
+	successModalLoginText: {
+		color: Colors.white,
+		fontSize: RFPercentage(1.43),
+		fontFamily: Fonts.fontMedium,
+	},
+	topStarContainer: {
+		position: 'absolute',
+		left: RFPercentage(1.4),
+		top: RFPercentage(0),
+		zIndex: 1,
+	},
+	topStar: {
+		width: RFPercentage(7.5),
+		height: RFPercentage(7.5),
 	},
 	starContainer: {
 		position: 'absolute',
