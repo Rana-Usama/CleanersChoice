@@ -11,7 +11,7 @@ import {
   TextInput,
   Dimensions,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Fonts, IMAGES, Colors} from '../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import GradientButton from '../../../components/GradientButton';
@@ -73,8 +73,28 @@ const SignUp: React.FC = ({navigation}: any) => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] =
     useState<boolean>(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const userFlow = useSelector((state: any) => state.userFlow);
   useSoftInputAdjustNothing();
+
+  useEffect(() => {
+    const showEvent =
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent =
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const showSub = Keyboard.addListener(showEvent, event => {
+      setKeyboardHeight(event.endCoordinates.height);
+    });
+    const hideSub = Keyboard.addListener(hideEvent, () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   const validationSchema = yup.object({
     name: yup.string().required('Username is required'),
@@ -259,11 +279,18 @@ const SignUp: React.FC = ({navigation}: any) => {
           <View style={styles.formSheet}>
             <KeyboardAwareScrollView
               keyboardShouldPersistTaps="handled"
+              keyboardDismissMode="none"
+              overScrollMode="never"
               showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.formScrollContent}
+              contentContainerStyle={[
+                styles.formScrollContent,
+                keyboardHeight > 0 && {
+                  paddingBottom: keyboardHeight + RFPercentage(6),
+                },
+              ]}
               enableOnAndroid
-              extraHeight={Platform.OS === 'ios' ? 80 : 120}
-              extraScrollHeight={Platform.OS === 'ios' ? 24 : 40}
+              extraHeight={Platform.OS === 'ios' ? 60 : 24}
+              extraScrollHeight={Platform.OS === 'ios' ? 18 : 8}
               keyboardOpeningTime={0}>
               <View style={styles.formHeaderRow}>
                 <TouchableOpacity
@@ -549,7 +576,7 @@ const styles = StyleSheet.create({
   },
   formScrollContent: {
     flexGrow: 1,
-    paddingBottom: RFPercentage(8),
+    paddingBottom: RFPercentage(5),
   },
   formHeaderRow: {
     flexDirection: 'row',

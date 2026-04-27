@@ -5,6 +5,8 @@ import {
 	StyleSheet,
 	Text,
 	View,
+	KeyboardAvoidingView,
+	Platform,
 	TouchableOpacity,
 	TouchableWithoutFeedback,
 	Keyboard,
@@ -23,7 +25,6 @@ import {Formik} from 'formik';
 import auth from '@react-native-firebase/auth';
 import {showToast} from '../../../utils/ToastMessage';
 import firestore from '@react-native-firebase/firestore';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Group from '../../../assets/svg/Group';
 import Backarrow from '../../../assets/svg/Backarrow';
 import BlueStars from '../../../assets/svg/BlueStars';
@@ -135,10 +136,13 @@ const ResetPassword: React.FC = ({navigation}: any) => {
 						<Image source={IMAGES.logo} resizeMode="contain" style={styles.logo} />
 					</View>
 
-					<View style={styles.formSheet}>
+					<KeyboardAvoidingView
+						style={styles.formSheet}
+						behavior={Platform.OS === 'android' ? 'height' : undefined}>
 						<ScrollView
 							keyboardShouldPersistTaps="handled"
 							keyboardDismissMode="on-drag"
+							overScrollMode="never"
 							showsVerticalScrollIndicator={false}
 							contentContainerStyle={styles.formScrollContent}>
 							<View style={styles.formHeaderRow}>
@@ -242,21 +246,8 @@ const ResetPassword: React.FC = ({navigation}: any) => {
 									</>
 								)}
 							</Formik>
-
-							<View style={styles.securityNote}>
-								<MaterialCommunityIcons
-									name="shield-check"
-									size={RFPercentage(2)}
-									color={Colors.secondaryText}
-									style={styles.securityIcon}
-								/>
-								<Text style={styles.securityText}>
-									Your email is secure. Password reset instructions are sent
-									only to verified accounts.
-								</Text>
-							</View>
 						</ScrollView>
-					</View>
+					</KeyboardAvoidingView>
 
 					<View style={styles.starContainer} pointerEvents="none">
 						<BlueStarsComponent style={styles.star} />
@@ -355,8 +346,7 @@ const styles = StyleSheet.create({
 		paddingHorizontal: RFPercentage(2.4),
 	},
 	formScrollContent: {
-		flexGrow: 1,
-		paddingBottom: RFPercentage(5),
+		paddingBottom: RFPercentage(2.5),
 	},
 	formHeaderRow: {
 		flexDirection: 'row',
@@ -447,7 +437,7 @@ const styles = StyleSheet.create({
 		marginLeft: RFPercentage(0.45),
 	},
 	buttonContainer: {
-		marginTop: RFPercentage(2),
+		marginTop: RFPercentage(3.5),
 		width: '100%',
 		justifyContent: 'center',
 		alignItems: 'center',
@@ -478,27 +468,6 @@ const styles = StyleSheet.create({
 		fontFamily: Fonts.fontMedium,
 		marginLeft: RFPercentage(0.55),
 	},
-	securityNote: {
-		flexDirection: 'row',
-		alignItems: 'flex-start',
-		backgroundColor: '#F3F4F6',
-		borderRadius: RFPercentage(2),
-		paddingHorizontal: RFPercentage(1.8),
-		paddingVertical: RFPercentage(2),
-		marginTop: RFPercentage(1.8),
-		marginBottom: RFPercentage(1.5),
-	},
-	securityIcon: {
-		marginTop: RFPercentage(0.15),
-		marginRight: RFPercentage(1.1),
-	},
-	securityText: {
-		flex: 1,
-		color: Colors.secondaryText,
-		fontSize: RFPercentage(1.4),
-		fontFamily: Fonts.fontRegular,
-		lineHeight: RFPercentage(2.1),
-	},
 	successModalOverlay: {
 		flex: 1,
 		backgroundColor: 'rgba(20, 28, 45, 0.38)',
@@ -528,8 +497,8 @@ const styles = StyleSheet.create({
 	successModalText: {
 		marginTop: RFPercentage(1.7),
 		color: '#64748B',
-		fontSize: RFPercentage(1.5),
-		lineHeight: RFPercentage(2.35),
+		fontSize: RFPercentage(1.7),
+		lineHeight: RFPercentage(2.5),
 		fontFamily: Fonts.fontRegular,
 		textAlign: 'center',
 		paddingHorizontal: RFPercentage(0.8),
@@ -553,7 +522,7 @@ const styles = StyleSheet.create({
 	},
 	successModalCloseText: {
 		color: '#A5A9B0',
-		fontSize: RFPercentage(1.43),
+		fontSize: RFPercentage(1.6),
 		fontFamily: Fonts.fontMedium,
 	},
 	successModalLoginButton: {
@@ -567,7 +536,7 @@ const styles = StyleSheet.create({
 	},
 	successModalLoginText: {
 		color: Colors.white,
-		fontSize: RFPercentage(1.43),
+		fontSize: RFPercentage(1.6),
 		fontFamily: Fonts.fontMedium,
 	},
 	topStarContainer: {

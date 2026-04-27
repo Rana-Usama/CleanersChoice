@@ -3,6 +3,7 @@ import {NativeModules, Platform} from 'react-native';
 import {useFocusEffect} from '@react-navigation/native';
 
 const {SoftInputModule} = NativeModules;
+let activeSoftInputOwner = 0;
 
 /**
  * Sets Android windowSoftInputMode to ADJUST_NOTHING while the screen is focused,
@@ -13,8 +14,15 @@ export const useSoftInputAdjustNothing = () => {
   useFocusEffect(
     useCallback(() => {
       if (Platform.OS !== 'android') return;
+      activeSoftInputOwner += 1;
+      const ownerId = activeSoftInputOwner;
       SoftInputModule?.setAdjustNothing();
+
       return () => {
+        if (activeSoftInputOwner !== ownerId) {
+          return;
+        }
+
         SoftInputModule?.setAdjustResize();
       };
     }, []),
