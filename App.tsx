@@ -1,131 +1,166 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import React from 'react';
-import type {PropsWithChildren} from 'react';
 import {
-  ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
+  StatusBar,
+  Platform,
+  PermissionsAndroid,
 } from 'react-native';
+import React, {useEffect} from 'react';
+import StackNavigator from './src/routers/StackNavigator';
+import {Provider} from 'react-redux';
+import store from './src/redux/Store';
+import Toast from 'react-native-toast-message';
+import {StripeProvider} from '@stripe/stripe-react-native';
+import {PUBLISHABLE_KEY} from '@env';
+import {ThemeProvider} from '@rneui/themed';
+import messaging from '@react-native-firebase/messaging';
+import notifee, {EventType} from '@notifee/react-native';
+import {UnreadMessagesProvider} from './src/utils/UnreadMessagesContext';
+import {toastConfig} from './src/utils/toastConfig';
+import ReactNativeBlobUtil from 'react-native-blob-util';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+const App: React.FC = () => {
+  console.log('Running in', __DEV__ ? 'DEBUG' : 'RELEASE');
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+  useEffect(() => {
+    const requestNotificationPermission = async () => {
+      try {
+        console.log('Requesting notification permission...');
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+        if (Platform.OS === 'android' && Platform.Version >= 33) {
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+          );
+          console.log('Android POST_NOTIFICATIONS result:', granted);
+        }
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+        const authStatus = await messaging().requestPermission();
+        console.log('messaging().requestPermission result:', authStatus);
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+        const enabled =
+          authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+          authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+        if (enabled) {
+          console.log('Notification permission granted');
+          await messaging().registerDeviceForRemoteMessages();
+          console.log('📲 registerDeviceForRemoteMessages done');
+
+          // Wait a bit for APNs token → FCM mapping
+          const fcmToken = await messaging().getToken();
+          console.log('FCM token from getToken():', fcmToken);
+        } else {
+          console.log('Notification permission denied');
+        }
+      } catch (error) {
+        console.log('Error requesting permission:', error);
+      }
+    };
+
+    requestNotificationPermission();
+
+    // Foreground messages
+    const unsubscribeOnMessage = messaging().onMessage(async remoteMessage => {
+      console.log('onMessage received:', remoteMessage); 
+      try {
+        onDisplayNotification(remoteMessage);
+      } catch (error) {
+        console.log('Error handling notification:', error);
+      }
+    });
+
+    // Token refresh listener
+    const unsubscribeToken = messaging().onTokenRefresh(token => {
+      console.log('FCM token refreshed (after APNs token linked):', token);
+    });
+
+    return () => {
+      unsubscribeOnMessage();
+      unsubscribeToken();
+    };
+  }, []);
+
+  // Handle notifee notification tap in foreground (e.g. invoice download)
+  useEffect(() => {
+    return notifee.onForegroundEvent(({type, detail}) => {
+      if (
+        type === EventType.PRESS &&
+        detail.notification?.data?.type === 'invoice_download'
+      ) {
+        const {contentUri, mimeType} = detail.notification.data;
+        if (contentUri && Platform.OS === 'android') {
+          ReactNativeBlobUtil.android
+            .actionViewIntent(
+              String(contentUri),
+              String(mimeType || 'application/pdf'),
+            )
+            .catch(() => {});
+        }
+      }
+    });
+  }, []);
+
+  // Display foreground notifications
+  const displayedMessageIds = new Set();
+  const onDisplayNotification = async (remoteMessage: any) => {
+    const messageId =
+      remoteMessage.messageId || remoteMessage.data?.messageId || null;
+    if (messageId && displayedMessageIds.has(messageId)) {
+      return;
+    }
+    if (messageId) displayedMessageIds.add(messageId);
+    try {
+      if (!remoteMessage || !remoteMessage.notification) {
+        return;
+      }
+      await notifee.requestPermission({sound: true});
+      const channelId = await notifee.createChannel({
+        id: 'default',
+        sound: 'default',
+        name: 'Default Channel',
+      });
+      if (!channelId) return;
+      await notifee.cancelAllNotifications();
+
+      const {title, body} = remoteMessage.notification;
+      await notifee.displayNotification({
+        id: 'single-notification',
+        title: title || 'No Title',
+        body: body || 'No Body',
+        ios: {
+          sound: 'default', 
+        },
+        android: {
+          channelId,
+          smallIcon: 'ic_notification',
+          pressAction: {id: 'default'},
+        },
+      });
+    } catch (error) {
+      console.log('Error displaying notification:', error);
+    }
   };
 
-  /*
-   * To keep the template simple and small we're adding padding to prevent view
-   * from rendering under the System UI.
-   * For bigger apps the reccomendation is to use `react-native-safe-area-context`:
-   * https://github.com/AppAndFlow/react-native-safe-area-context
-   *
-   * You can read more about it here:
-   * https://github.com/react-native-community/discussions-and-proposals/discussions/827
-   */
-  const safePadding = '5%';
-
   return (
-    <View style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        style={backgroundStyle}>
-        <View style={{paddingRight: safePadding}}>
-          <Header/>
-        </View>
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-            paddingHorizontal: safePadding,
-            paddingBottom: safePadding,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:------------------------
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </View>
+    <StripeProvider publishableKey={PUBLISHABLE_KEY}>
+      <ThemeProvider>
+        <Provider store={store}>
+          <StatusBar
+            barStyle={'dark-content'}
+            translucent
+            backgroundColor="transparent"
+          />
+          <UnreadMessagesProvider>
+            <StackNavigator />
+          </UnreadMessagesProvider>
+          <Toast config={toastConfig} />
+        </Provider>
+      </ThemeProvider>
+    </StripeProvider>
   );
-}
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
+};
 
 export default App;
+
+const styles = StyleSheet.create({});

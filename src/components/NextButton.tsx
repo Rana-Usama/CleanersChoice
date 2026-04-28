@@ -1,0 +1,53 @@
+import {
+    StyleSheet,
+    Text,
+    View,
+    ImageBackground,
+    TouchableOpacity,
+    Dimensions,
+    ActivityIndicator
+} from 'react-native';
+import React from 'react';
+import { Fonts, Colors } from '../constants/Themes';
+import { RFPercentage } from "react-native-responsive-fontsize";
+
+
+interface Props {
+    onPress: () => void,
+    disabled?: boolean,
+    color?: string,
+    title: string,
+    style?: object,
+    loading? : boolean,
+    textStyle? : object
+}
+
+const NextButton: React.FC<Props> = (props: Props) => {
+    return (
+        <TouchableOpacity activeOpacity={0.8} onPress={props.onPress} disabled={props.disabled} >
+            <View style={[styles.nextButton, { ...props.style }]}>
+                <Text style={[styles.nextButtonText,{...props.textStyle}]}>{props.loading ? <ActivityIndicator size={'small'} color={Colors.placeholderColor} /> : props.title}</Text>
+            </View>
+        </TouchableOpacity>
+    )
+}
+
+export default NextButton
+
+const styles = StyleSheet.create({
+    nextButton: {
+        height: RFPercentage(5.6),
+        borderRadius: RFPercentage(5),
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: RFPercentage(18),
+        borderWidth:1.4,
+        borderColor:Colors.gradient2,
+        backgroundColor : Colors.buttonColor
+    },
+    nextButtonText: {
+        fontSize: RFPercentage(2.1),
+        fontFamily: Fonts.fontMedium,
+        color: Colors.primaryText
+    },
+})
