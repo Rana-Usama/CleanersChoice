@@ -33,6 +33,7 @@ import auth from '@react-native-firebase/auth';
 import {useDispatch} from 'react-redux';
 import {setProfileData} from '../../../redux/ProfileData/Actions';
 import NotFound from '../../../components/NotFound';
+import CustomerCoachMarks from '../../../components/CustomerCoachMarks';
 import {useExitAppOnBack} from '../../../utils/ExitApp';
 import {useSelector} from 'react-redux';
 import CustomModal from '../../../components/CustomModal';
@@ -98,6 +99,7 @@ const Home = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminViewAllServices, setAdminViewAllServices] = useState(false);
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
+  const [showCustomerCoachMarks, setShowCustomerCoachMarks] = useState(false);
 
   const selectedLocation = useSelector(
     (state: any) =>
@@ -119,6 +121,15 @@ const Home = () => {
     }
     return () => clearTimeout(timer);
   }, [location]);
+
+  useEffect(() => {
+    if (userFlow === 'Guest') {
+      setShowCustomerCoachMarks(false);
+      return;
+    }
+
+    setShowCustomerCoachMarks(true);
+  }, [userFlow]);
 
   // Unread notifications count
   useEffect(() => {
@@ -342,6 +353,14 @@ const Home = () => {
   const truncateText = (text: string, length = 20) => {
     if (!text) return '';
     return text.length > length ? text.substring(0, length) + '...' : text;
+  };
+
+  const handleSkipCustomerCoachMarks = () => {
+    setShowCustomerCoachMarks(false);
+  };
+
+  const handleNextCustomerCoachMarks = () => {
+    setShowCustomerCoachMarks(false);
   };
 
   return (
@@ -705,8 +724,8 @@ const Home = () => {
                           renderItem={({item}) => (
                             <View style={styles.serviceItem}>
                               <ServicesCard
-                                covers={item?.serviceImages}
-                                name={item?.name}
+                                covers={item?.serviceImages ?? []}
+                                name={item?.name ?? ''}
                                 icon={item?.image}
                                 price={item?.packages?.[0]?.price ?? 0}
                                 star={IMAGES?.star}
@@ -905,6 +924,12 @@ const Home = () => {
             setShowAuthModal(false);
             navigation.navigate('UserSelection');
           }}
+        />
+
+        <CustomerCoachMarks
+          visible={showCustomerCoachMarks && userFlow !== 'Guest'}
+          onSkip={handleSkipCustomerCoachMarks}
+          onNext={handleNextCustomerCoachMarks}
         />
       </>
     </TouchableWithoutFeedback>

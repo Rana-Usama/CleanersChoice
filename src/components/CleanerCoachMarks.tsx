@@ -11,12 +11,17 @@ import {
 import {BlurView} from '@react-native-community/blur';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Colors, Fonts, Icons} from '../constants/Themes';
 import LogoIcon from '../assets/svg/LogoIcon';
 import Stars from '../assets/svg/Stars';
+import HomeIcon from '../assets/svg/homeicon';
+import MessageIcon from '../assets/svg/iconmessage';
+import LocationIcon from '../assets/svg/iconlocation';
+import DocumentIcon from '../assets/svg/icondocunment';
 
-interface WelcomeCoachMarkProps {
+interface CleanerCoachMarksProps {
   visible: boolean;
   onSkip: () => void;
   onNext: () => void;
@@ -24,18 +29,34 @@ interface WelcomeCoachMarkProps {
   subtitle?: string;
 }
 
-type TabCoachStep = {
+type CoachStepTab =
+  | 'messages'
+  | 'job-list'
+  | 'home'
+  | 'invoices'
+  | 'my-jobs';
+
+type CoachStep = {
   stepLabel: string;
   title: string;
   subtitle: string;
   iconName: string;
-  activeTab: 'messages' | 'job-list' | 'home' | 'invoices' | 'my-jobs';
-  cardBottomOffset: number;
+  iconAsset?: 'home' | 'message' | 'location' | 'document';
+  iconFamily?: 'ionicons' | 'material-community';
+  variant?: 'tab' | 'header-action';
+  activeTab?: CoachStepTab;
+  cardBottomOffset?: number;
+  cardTopOffset?: number;
   cardTranslateX: number;
   pointerAlignment: 'center' | 'left';
+  pointerLeftOffset?: number;
+  titleFontSize?: number;
+  headerPreviewTopOffset?: number;
+  headerPreviewRightOffset?: number;
+  skipPillBottomOffset?: number;
 };
 
-const WelcomeCoachMark: React.FC<WelcomeCoachMarkProps> = ({
+const CleanerCoachMarks: React.FC<CleanerCoachMarksProps> = ({
   visible,
   onSkip,
   onNext,
@@ -51,12 +72,13 @@ const WelcomeCoachMark: React.FC<WelcomeCoachMarkProps> = ({
     }
   }, [visible]);
 
-  const tabCoachSteps: TabCoachStep[] = [
+  const coachSteps: CoachStep[] = [
     {
       stepLabel: 'Step 01 of 7',
       title: 'Welcome to Your Dashboard!',
       subtitle: 'Edit profile, manage services, and control what clients see.',
       iconName: 'home-outline',
+      iconAsset: 'home',
       activeTab: 'home',
       cardBottomOffset: RFPercentage(15.5),
       cardTranslateX: 0,
@@ -68,14 +90,82 @@ const WelcomeCoachMark: React.FC<WelcomeCoachMarkProps> = ({
       subtitle:
         'All client chats in one place. Reply fast and never miss a booking.',
       iconName: 'chatbubble-ellipses-outline',
+      iconAsset: 'message',
       activeTab: 'messages',
       cardBottomOffset: RFPercentage(15.5),
       cardTranslateX: -RFPercentage(2),
       pointerAlignment: 'left',
+      titleFontSize: RFPercentage(1.58),
+    },
+    {
+      stepLabel: 'Step 03 of 7',
+      title: 'Find New Jobs Near You',
+      subtitle:
+        'Browse nearby cleaning jobs. Filter by service, location, and budget.',
+      iconName: 'location-outline',
+      iconAsset: 'location',
+      activeTab: 'job-list',
+      cardBottomOffset: RFPercentage(15.5),
+      cardTranslateX: -RFPercentage(1),
+      pointerAlignment: 'left',
+      pointerLeftOffset: RFPercentage(10.2),
+    },
+    {
+      stepLabel: 'Step 04 of 7',
+      title: 'Create & Manage Invoices',
+      subtitle: 'Create, send, and track payments in one place.',
+      iconName: 'document-text-outline',
+      iconAsset: 'document',
+      activeTab: 'invoices',
+      cardBottomOffset: RFPercentage(15.5),
+      cardTranslateX: RFPercentage(1),
+      pointerAlignment: 'left',
+      pointerLeftOffset: RFPercentage(24.7),
+    },
+    {
+      stepLabel: 'Step 05 of 7',
+      title: 'Manage Your Jobs',
+      subtitle: 'Track active, pending, and completed tasks in one place.',
+      iconName: 'briefcase-outline',
+      activeTab: 'my-jobs',
+      cardBottomOffset: RFPercentage(15.5),
+      cardTranslateX: RFPercentage(3),
+      pointerAlignment: 'left',
+      pointerLeftOffset: RFPercentage(31.9),
+    },
+    {
+      stepLabel: 'Step 06 of 7',
+      title: 'Real-Time Updates',
+      subtitle: 'Never miss job requests, messages, or changes.',
+      iconName: 'bell-outline',
+      iconFamily: 'material-community',
+      variant: 'header-action',
+      cardTopOffset: RFPercentage(10.8),
+      cardTranslateX: RFPercentage(0.6),
+      pointerAlignment: 'left',
+      pointerLeftOffset: RFPercentage(30),
+      headerPreviewTopOffset: RFPercentage(1.8),
+      headerPreviewRightOffset: RFPercentage(8.2),
+      skipPillBottomOffset: RFPercentage(20),
+    },
+    {
+      stepLabel: 'Step 07 of 7',
+      title: 'Quick Access to Settings',
+      subtitle: 'Adjust preferences, profile options, and account settings anytime.',
+      iconName: 'cog-outline',
+      iconFamily: 'material-community',
+      variant: 'header-action',
+      cardTopOffset: RFPercentage(10.8),
+      cardTranslateX: RFPercentage(0.6),
+      pointerAlignment: 'left',
+      pointerLeftOffset: RFPercentage(33.1),
+      headerPreviewTopOffset: RFPercentage(1.8),
+      headerPreviewRightOffset: RFPercentage(4.8),
+      skipPillBottomOffset: RFPercentage(20),
     },
   ];
 
-  const currentTabCoachStep = stepIndex > 0 ? tabCoachSteps[stepIndex - 1] : null;
+  const currentCoachStep = stepIndex > 0 ? coachSteps[stepIndex - 1] : null;
 
   const handleSkip = () => {
     setStepIndex(0);
@@ -88,7 +178,7 @@ const WelcomeCoachMark: React.FC<WelcomeCoachMarkProps> = ({
       return;
     }
 
-    if (stepIndex < tabCoachSteps.length) {
+    if (stepIndex < coachSteps.length) {
       setStepIndex(prev => prev + 1);
       return;
     }
@@ -106,9 +196,7 @@ const WelcomeCoachMark: React.FC<WelcomeCoachMarkProps> = ({
     setStepIndex(0);
   };
 
-  const renderCleanerTabBarPreview = (
-    activeTab: TabCoachStep['activeTab'],
-  ) => {
+  const renderCleanerTabBarPreview = (activeTab: CoachStepTab) => {
     const cleanerTabs = [
       {key: 'messages', label: 'Messages'},
       {key: 'job-list', label: 'Job List'},
@@ -193,6 +281,124 @@ const WelcomeCoachMark: React.FC<WelcomeCoachMarkProps> = ({
     );
   };
 
+  const renderCoachStepIcon = (step: CoachStep) => {
+    if (step.iconAsset === 'home') {
+      return (
+        <HomeIcon
+          width={RFPercentage(1.9)}
+          height={RFPercentage(1.9)}
+        />
+      );
+    }
+
+    if (step.iconAsset === 'message') {
+      return (
+        <MessageIcon
+          width={RFPercentage(2.05)}
+          height={RFPercentage(2.05)}
+        />
+      );
+    }
+
+    if (step.iconAsset === 'location') {
+      return (
+        <LocationIcon
+          width={RFPercentage(2.05)}
+          height={RFPercentage(2.05)}
+        />
+      );
+    }
+
+    if (step.iconAsset === 'document') {
+      return (
+        <DocumentIcon
+          width={RFPercentage(1.9)}
+          height={RFPercentage(1.9)}
+        />
+      );
+    }
+
+    if (step.iconFamily === 'material-community') {
+      return (
+        <MaterialCommunityIcons
+          name={step.iconName}
+          size={RFPercentage(2.3)}
+          color={Colors.gradient1}
+        />
+      );
+    }
+
+    return (
+      <Ionicons
+        name={step.iconName}
+        size={RFPercentage(2.3)}
+        color={Colors.gradient1}
+      />
+    );
+  };
+
+  const renderCoachCard = (
+    step: CoachStep,
+    positionStyle: object,
+    pointerBaseStyle: object,
+  ) => (
+    <View style={[styles.dashboardCard, positionStyle]}>
+      <Stars
+        style={styles.dashboardSparkle}
+        width={RFPercentage(6.1)}
+        height={RFPercentage(6.8)}
+      />
+
+      <View style={styles.stepPill}>
+        <Text style={styles.stepPillText}>{step.stepLabel}</Text>
+      </View>
+
+      <View style={styles.dashboardCopyRow}>
+        <View style={styles.dashboardIconCircle}>{renderCoachStepIcon(step)}</View>
+
+        <View style={styles.dashboardCopyBlock}>
+          <Text
+            style={[
+              styles.dashboardTitle,
+              step.titleFontSize !== undefined
+                ? {fontSize: step.titleFontSize}
+                : null,
+            ]}>
+            {step.title}
+          </Text>
+          <Text style={styles.dashboardSubtitle}>{step.subtitle}</Text>
+        </View>
+      </View>
+
+      <View style={styles.dashboardButtonRow}>
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={handlePreviousStep}
+          style={styles.previousButton}>
+          <Text style={styles.previousButtonText}>Previous</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={handleNextStep}
+          style={styles.dashboardNextButton}>
+          <Text style={styles.dashboardNextButtonText}>Next</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View
+        style={[
+          pointerBaseStyle,
+          step.pointerAlignment === 'left'
+            ? step.pointerLeftOffset !== undefined
+              ? {left: step.pointerLeftOffset}
+              : styles.dashboardCardPointerLeft
+            : styles.dashboardCardPointerCenter,
+        ]}
+      />
+    </View>
+  );
+
   const renderIntroStep = () => (
     <View style={styles.centeredContent}>
       <View style={styles.card}>
@@ -233,7 +439,7 @@ const WelcomeCoachMark: React.FC<WelcomeCoachMarkProps> = ({
     </View>
   );
 
-  const renderTabCoachStep = (step: TabCoachStep) => (
+  const renderTabCoachStep = (step: CoachStep) => (
     <>
       <TouchableOpacity
         activeOpacity={0.85}
@@ -247,65 +453,77 @@ const WelcomeCoachMark: React.FC<WelcomeCoachMarkProps> = ({
         <Text style={styles.skipPillText}>Skip</Text>
       </TouchableOpacity>
 
-      {renderCleanerTabBarPreview(step.activeTab)}
+      {step.activeTab ? renderCleanerTabBarPreview(step.activeTab) : null}
+
+      {renderCoachCard(
+        step,
+        {
+          bottom: insets.bottom + (step.cardBottomOffset ?? RFPercentage(15.5)),
+          transform: [{translateX: step.cardTranslateX}],
+        },
+        styles.dashboardCardPointer,
+      )}
+    </>
+  );
+
+  const renderHeaderPreviewIcon = (step: CoachStep) => {
+    if (step.iconFamily === 'material-community') {
+      return (
+        <MaterialCommunityIcons
+          name={step.iconName}
+          size={RFPercentage(2.4)}
+          color={Colors.white}
+        />
+      );
+    }
+
+    return (
+      <Ionicons
+        name={step.iconName}
+        size={RFPercentage(2.4)}
+        color={Colors.white}
+      />
+    );
+  };
+
+  const renderHeaderActionCoachStep = (step: CoachStep) => (
+    <>
+      <View
+        pointerEvents="none"
+        style={[
+          styles.headerActionPreview,
+          {
+            top:
+              insets.top +
+              (step.headerPreviewTopOffset ?? RFPercentage(1.8)),
+            right: step.headerPreviewRightOffset ?? RFPercentage(6.2),
+          },
+        ]}>
+        {renderHeaderPreviewIcon(step)}
+      </View>
+
+      {renderCoachCard(
+        step,
+        {
+          top: insets.top + (step.cardTopOffset ?? RFPercentage(10.8)),
+          transform: [{translateX: step.cardTranslateX}],
+        },
+        styles.dashboardCardPointerTop,
+      )}
 
       <View
         style={[
-          styles.dashboardCard,
+          styles.skipPillCenterContainer,
           {
-            bottom: insets.bottom + step.cardBottomOffset,
-            transform: [{translateX: step.cardTranslateX}],
+            bottom: insets.bottom + (step.skipPillBottomOffset ?? RFPercentage(20)),
           },
         ]}>
-        <Stars
-          style={styles.dashboardSparkle}
-          width={RFPercentage(6.1)}
-          height={RFPercentage(6.8)}
-        />
-
-        <View style={styles.stepPill}>
-          <Text style={styles.stepPillText}>{step.stepLabel}</Text>
-        </View>
-
-        <View style={styles.dashboardCopyRow}>
-          <View style={styles.dashboardIconCircle}>
-            <Ionicons
-              name={step.iconName}
-              size={RFPercentage(2.3)}
-              color={Colors.gradient1}
-            />
-          </View>
-
-          <View style={styles.dashboardCopyBlock}>
-            <Text style={styles.dashboardTitle}>{step.title}</Text>
-            <Text style={styles.dashboardSubtitle}>{step.subtitle}</Text>
-          </View>
-        </View>
-
-        <View style={styles.dashboardButtonRow}>
-          <TouchableOpacity
-            activeOpacity={0.85}
-            onPress={handlePreviousStep}
-            style={styles.previousButton}>
-            <Text style={styles.previousButtonText}>Previous</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            activeOpacity={0.85}
-            onPress={handleNextStep}
-            style={styles.dashboardNextButton}>
-            <Text style={styles.dashboardNextButtonText}>Next</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View
-          style={[
-            styles.dashboardCardPointer,
-            step.pointerAlignment === 'left'
-              ? styles.dashboardCardPointerLeft
-              : styles.dashboardCardPointerCenter,
-          ]}
-        />
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={handleSkip}
+          style={styles.skipPillCentered}>
+          <Text style={styles.skipPillText}>Skip</Text>
+        </TouchableOpacity>
       </View>
     </>
   );
@@ -320,22 +538,24 @@ const WelcomeCoachMark: React.FC<WelcomeCoachMarkProps> = ({
       <View style={styles.overlay}>
         <BlurView
           style={StyleSheet.absoluteFillObject}
-          blurType="dark"
+          blurType="light"
           blurAmount={8}
-          reducedTransparencyFallbackColor="rgba(35, 38, 47, 0.7)"
+          reducedTransparencyFallbackColor="rgba(35, 38, 47, 0.5)"
         />
         <View style={styles.overlayTint} />
         {stepIndex === 0
           ? renderIntroStep()
-          : currentTabCoachStep
-            ? renderTabCoachStep(currentTabCoachStep)
+          : currentCoachStep
+            ? currentCoachStep.variant === 'header-action'
+              ? renderHeaderActionCoachStep(currentCoachStep)
+              : renderTabCoachStep(currentCoachStep)
             : null}
       </View>
     </Modal>
   );
 };
 
-export default WelcomeCoachMark;
+export default CleanerCoachMarks;
 
 const styles = StyleSheet.create({
   overlay: {
@@ -448,10 +668,36 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.fontMedium,
     textDecorationLine: 'underline',
   },
+  skipPillCentered: {
+    minWidth: RFPercentage(12),
+    minHeight: RFPercentage(4),
+    borderRadius: RFPercentage(4),
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.10)',
+  },
+  skipPillCenterContainer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    zIndex: 3,
+  },
+  headerActionPreview: {
+    position: 'absolute',
+    width: RFPercentage(4.5),
+    height: RFPercentage(4.5),
+    borderRadius: RFPercentage(10),
+    backgroundColor: Colors.whiteOverlay20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 5,
+  },
   dashboardCard: {
     position: 'absolute',
     left: RFPercentage(3.5),
     right: RFPercentage(3.5),
+    height: RFPercentage(23.5),
     backgroundColor: Colors.white,
     borderRadius: RFPercentage(2.8),
     paddingHorizontal: RFPercentage(2.2),
@@ -488,6 +734,7 @@ const styles = StyleSheet.create({
   dashboardCopyRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
+    flexGrow: 1,
     minHeight: RFPercentage(8.3),
   },
   dashboardIconCircle: {
@@ -561,6 +808,18 @@ const styles = StyleSheet.create({
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
     borderTopColor: Colors.white,
+  },
+  dashboardCardPointerTop: {
+    position: 'absolute',
+    top: RFPercentage(-1.55),
+    width: 0,
+    height: 0,
+    borderLeftWidth: RFPercentage(1.5),
+    borderRightWidth: RFPercentage(1.5),
+    borderBottomWidth: RFPercentage(1.9),
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderBottomColor: Colors.white,
   },
   dashboardCardPointerCenter: {
     alignSelf: 'center',
