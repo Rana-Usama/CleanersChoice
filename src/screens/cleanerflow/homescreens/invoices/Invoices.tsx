@@ -582,12 +582,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: RFPercentage(3),
     right: RFPercentage(2.5),
-    borderRadius: RFPercentage(3.25),
-    shadowColor: Colors.black,
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 8,
     zIndex: 100,
   },
   fab: {
@@ -597,7 +591,18 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.gradient1,
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden',
+    ...Platform.select({
+      ios: {
+        shadowColor: Colors.black,
+        shadowOffset: {width: 0, height: 4},
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 0,
+        shadowColor: 'transparent',
+      },
+    }),
   },
   resultTitle: {
     fontFamily: Fonts.semiBold,
