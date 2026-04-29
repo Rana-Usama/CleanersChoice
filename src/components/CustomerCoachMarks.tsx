@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Image,
   Platform,
+  useWindowDimensions,
 } from 'react-native';
 import {BlurView} from '@react-native-community/blur';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -16,6 +17,8 @@ import {Colors, Fonts, Icons} from '../constants/Themes';
 import LogoIcon from '../assets/svg/LogoIcon';
 import Stars from '../assets/svg/Stars';
 import HomeIcon from '../assets/svg/homeicon';
+import MessageIcon from '../assets/svg/iconmessage';
+import LocationIcon from '../assets/svg/iconlocation';
 
 interface CustomerCoachMarksProps {
   visible: boolean;
@@ -36,14 +39,17 @@ type CoachStep = {
   stepLabel: string;
   title: string;
   subtitle: string;
-  iconType: 'home' | 'plus';
-  variant?: 'tab' | 'cta';
+  iconType: 'home' | 'plus' | 'message' | 'job-board' | 'settings' | 'profile' | 'bell';
+  variant?: 'tab' | 'cta' | 'header-action';
   activeTab?: CoachStepTab;
   cardBottomOffset?: number;
   cardTopOffset?: number;
   cardTranslateX: number;
   pointerAlignment: 'center' | 'left';
   pointerLeftOffset?: number;
+  headerPreviewTopOffset?: number;
+  headerPreviewRightOffset?: number;
+  skipPillBottomOffset?: number;
   ctaLabel?: string;
   ctaTopOffset?: number;
   ctaLeftOffset?: number;
@@ -57,7 +63,20 @@ const CustomerCoachMarks: React.FC<CustomerCoachMarksProps> = ({
   subtitle = 'Find trusted cleaners near you, compare offers, and book in minutes.',
 }) => {
   const insets = useSafeAreaInsets();
+  const {width: screenWidth} = useWindowDimensions();
   const [stepIndex, setStepIndex] = useState(0);
+
+  // Pointer left = center of tab n (0-indexed) minus card anchor, accounting for card translateX.
+  // Tab bar container is full-screen-width (absolute ignores parent padding);
+  // 95%-wide content is centered → slot n center = screenWidth × (0.025 + (n+0.5)×0.19)
+  // Card left from screen = RFPercentage(3.5); triangle half-width = RFPercentage(1.5)
+  const tabPointerLeft = (tabIndex: number, cardTranslateX: number = 0): number =>
+    screenWidth * (0.025 + (tabIndex + 0.5) * 0.19) - RFPercentage(5) - cardTranslateX;
+
+  // Pointer for header-action: preview bubble is positioned with `right: previewRightOffset`
+  // (absolute, so from screen right edge). Preview button width = RFPercentage(4.5).
+  const headerPointerLeft = (previewRightOffset: number, cardTranslateX: number = 0): number =>
+    screenWidth - previewRightOffset - RFPercentage(7.25) - cardTranslateX;
 
   useEffect(() => {
     if (visible) {
@@ -91,6 +110,73 @@ const CustomerCoachMarks: React.FC<CustomerCoachMarksProps> = ({
       ctaLabel: 'Post a Job',
       ctaTopOffset: RFPercentage(58),
       ctaLeftOffset: RFPercentage(3.8),
+    },
+    {
+      stepLabel: 'Step 03 of 7',
+      title: 'Stay Connected With Cleaners',
+      subtitle:
+        'Respond quickly and keep all your bookings organized in one place.',
+      iconType: 'message',
+      variant: 'tab',
+      activeTab: 'messages',
+      cardBottomOffset: RFPercentage(15.5),
+      cardTranslateX: -RFPercentage(2.5),
+      pointerAlignment: 'left',
+      pointerLeftOffset: tabPointerLeft(0, -RFPercentage(2.5)),
+    },
+    {
+      stepLabel: 'Step 04 of 7',
+      title: 'Manage Your Jobs',
+      subtitle:
+        'Track applications, review cleaners, and easily confirm your choice.',
+      iconType: 'job-board',
+      variant: 'tab',
+      activeTab: 'job-board',
+      cardBottomOffset: RFPercentage(15.5),
+      cardTranslateX: 0,
+      pointerAlignment: 'left',
+      pointerLeftOffset: tabPointerLeft(1),
+    },
+    {
+      stepLabel: 'Step 05 of 7',
+      title: 'Manage Your Account',
+      subtitle:
+        'Manage your account, password, settings, and FAQs in one place.',
+      iconType: 'settings',
+      variant: 'tab',
+      activeTab: 'settings',
+      cardBottomOffset: RFPercentage(15.5),
+      cardTranslateX: 0,
+      pointerAlignment: 'left',
+      pointerLeftOffset: tabPointerLeft(3),
+    },
+    {
+      stepLabel: 'Step 06 of 7',
+      title: 'Manage Your Profile',
+      subtitle:
+        'Keep your information updated so cleaners can easily contact with you.',
+      iconType: 'profile',
+      variant: 'tab',
+      activeTab: 'profile',
+      cardBottomOffset: RFPercentage(15.5),
+      cardTranslateX: RFPercentage(2.5),
+      pointerAlignment: 'left',
+      pointerLeftOffset: tabPointerLeft(4, RFPercentage(2.5)),
+    },
+    {
+      stepLabel: 'Step 07 of 7',
+      title: 'Stay Notified',
+      subtitle:
+        'Get real-time updates on job offers, bookings, and messages from cleaners.',
+      iconType: 'bell',
+      variant: 'header-action',
+      cardTopOffset: RFPercentage(10.8),
+      cardTranslateX: RFPercentage(0.6),
+      pointerAlignment: 'left',
+      pointerLeftOffset: headerPointerLeft(RFPercentage(8.2), RFPercentage(0.6)),
+      headerPreviewTopOffset: RFPercentage(1.8),
+      headerPreviewRightOffset: RFPercentage(8.2),
+      skipPillBottomOffset: RFPercentage(20),
     },
   ];
 
@@ -221,6 +307,54 @@ const CustomerCoachMarks: React.FC<CustomerCoachMarksProps> = ({
       );
     }
 
+    if (step.iconType === 'message') {
+      return (
+        <MessageIcon
+          width={RFPercentage(2.1)}
+          height={RFPercentage(2.1)}
+        />
+      );
+    }
+
+    if (step.iconType === 'bell') {
+      return (
+        <MaterialCommunityIcons
+          name="bell-outline"
+          size={RFPercentage(2.1)}
+          color="#407BFF"
+        />
+      );
+    }
+
+    if (step.iconType === 'profile') {
+      return (
+        <Image
+          source={Icons.profileActive}
+          style={{width: RFPercentage(2.1), height: RFPercentage(2.1)}}
+          resizeMode="contain"
+        />
+      );
+    }
+
+    if (step.iconType === 'settings') {
+      return (
+        <MaterialCommunityIcons
+          name="cog-outline"
+          size={RFPercentage(2.1)}
+          color="#407BFF"
+        />
+      );
+    }
+
+    if (step.iconType === 'job-board') {
+      return (
+        <LocationIcon
+          width={RFPercentage(2.1)}
+          height={RFPercentage(2.1)}
+        />
+      );
+    }
+
     return (
       <HomeIcon
         width={RFPercentage(1.9)}
@@ -229,7 +363,7 @@ const CustomerCoachMarks: React.FC<CustomerCoachMarksProps> = ({
     );
   };
 
-  const renderCoachCard = (step: CoachStep, positionStyle: object) => (
+  const renderCoachCard = (step: CoachStep, positionStyle: object, pointerBaseStyle: object) => (
     <View style={[styles.dashboardCard, positionStyle]}>
       <Stars
         style={styles.dashboardSparkle}
@@ -262,13 +396,15 @@ const CustomerCoachMarks: React.FC<CustomerCoachMarksProps> = ({
           activeOpacity={0.85}
           onPress={handleNextStep}
           style={styles.dashboardNextButton}>
-          <Text style={styles.dashboardNextButtonText}>Next</Text>
+          <Text style={styles.dashboardNextButtonText}>
+            {step.stepLabel === 'Step 07 of 7' ? 'Done' : 'Next'}
+          </Text>
         </TouchableOpacity>
       </View>
 
       <View
         style={[
-          styles.dashboardCardPointer,
+          pointerBaseStyle,
           step.pointerAlignment === 'left'
             ? step.pointerLeftOffset !== undefined
               ? {left: step.pointerLeftOffset}
@@ -333,14 +469,66 @@ const CustomerCoachMarks: React.FC<CustomerCoachMarksProps> = ({
     </View>
   );
 
+  const renderHeaderActionCoachStep = (step: CoachStep) => (
+    <>
+      <View
+        pointerEvents="none"
+        style={[
+          styles.headerActionPreview,
+          {
+            top:
+              insets.top +
+              (step.headerPreviewTopOffset ?? RFPercentage(1.8)),
+            right: step.headerPreviewRightOffset ?? RFPercentage(8.2),
+          },
+        ]}>
+        <MaterialCommunityIcons
+          name="bell-outline"
+          size={RFPercentage(2.4)}
+          color={Colors.white}
+        />
+      </View>
+
+      {renderCoachCard(
+        step,
+        {
+          top: insets.top + (step.cardTopOffset ?? RFPercentage(10.8)),
+          transform: [{translateX: step.cardTranslateX}],
+        },
+        styles.dashboardCardPointerTop,
+      )}
+
+      <View
+        style={[
+          styles.skipPillCenterContainer,
+          {
+            bottom: insets.bottom + (step.skipPillBottomOffset ?? RFPercentage(20)),
+          },
+        ]}>
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={handleSkip}
+          style={styles.skipPillCentered}>
+          <Text style={styles.skipPillText}>Skip</Text>
+        </TouchableOpacity>
+      </View>
+    </>
+  );
+
+  const renderHeaderCoachStep = (step: CoachStep) => renderHeaderActionCoachStep(step);
+
   const renderTabCoachStep = (step: CoachStep) => (
     <>
       {renderStepSkipPill()}
       {step.activeTab ? renderCustomerTabBarPreview(step.activeTab) : null}
-      {renderCoachCard(step, {
-        bottom: insets.bottom + (step.cardBottomOffset ?? RFPercentage(15.5)),
-        transform: [{translateX: step.cardTranslateX}],
-      })}
+      {renderCoachCard(
+        step,
+        {
+          bottom: insets.bottom + (step.cardBottomOffset ?? RFPercentage(15.5)),
+          transform: [{translateX: step.cardTranslateX}],
+        },
+        styles.dashboardCardPointer,
+      )}
     </>
   );
 
@@ -362,15 +550,19 @@ const CustomerCoachMarks: React.FC<CustomerCoachMarksProps> = ({
         </Text>
         <MaterialCommunityIcons
           name="arrow-right"
-          size={RFPercentage(3.1)}
+          size={RFPercentage(2.4)}
           color="#407BFF"
         />
       </View>
 
-      {renderCoachCard(step, {
-        top: insets.top + (step.cardTopOffset ?? RFPercentage(33)),
-        transform: [{translateX: step.cardTranslateX}],
-      })}
+      {renderCoachCard(
+        step,
+        {
+          top: insets.top + (step.cardTopOffset ?? RFPercentage(33)),
+          transform: [{translateX: step.cardTranslateX}],
+        },
+        styles.dashboardCardPointer,
+      )}
     </>
   );
 
@@ -394,6 +586,8 @@ const CustomerCoachMarks: React.FC<CustomerCoachMarksProps> = ({
           : currentCoachStep
             ? currentCoachStep.variant === 'cta'
               ? renderPostJobCoachStep(currentCoachStep)
+              : currentCoachStep.variant === 'header-action'
+              ? renderHeaderActionCoachStep(currentCoachStep)
               : renderTabCoachStep(currentCoachStep)
             : null}
       </View>
@@ -518,7 +712,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     minHeight: RFPercentage(5.6),
     width: RFPercentage(15.4),
     borderRadius: RFPercentage(100),
@@ -541,7 +735,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: RFPercentage(3.5),
     right: RFPercentage(3.5),
-    height: RFPercentage(23.5),
+    minHeight: RFPercentage(23.5),
     backgroundColor: Colors.white,
     borderRadius: RFPercentage(2.8),
     paddingHorizontal: RFPercentage(2.2),
@@ -641,6 +835,31 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
   },
+  headerActionPreview: {
+    position: 'absolute',
+    width: RFPercentage(4.5),
+    height: RFPercentage(4.5),
+    borderRadius: RFPercentage(10),
+    backgroundColor: Colors.whiteOverlay20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 5,
+  },
+  skipPillCenterContainer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    zIndex: 3,
+  },
+  skipPillCentered: {
+    minWidth: RFPercentage(12),
+    minHeight: RFPercentage(4),
+    borderRadius: RFPercentage(4),
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.10)',
+  },
   dashboardCardPointer: {
     position: 'absolute',
     bottom: RFPercentage(-1.55),
@@ -652,6 +871,18 @@ const styles = StyleSheet.create({
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
     borderTopColor: Colors.white,
+  },
+  dashboardCardPointerTop: {
+    position: 'absolute',
+    top: RFPercentage(-1.55),
+    width: 0,
+    height: 0,
+    borderLeftWidth: RFPercentage(1.5),
+    borderRightWidth: RFPercentage(1.5),
+    borderBottomWidth: RFPercentage(1.9),
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderBottomColor: Colors.white,
   },
   dashboardCardPointerCenter: {
     alignSelf: 'center',

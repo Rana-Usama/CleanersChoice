@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Image,
   Platform,
+  useWindowDimensions,
 } from 'react-native';
 import {BlurView} from '@react-native-community/blur';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -64,7 +65,20 @@ const CleanerCoachMarks: React.FC<CleanerCoachMarksProps> = ({
   subtitle = 'Set up your profile and showcase services to get local bookings.',
 }) => {
   const insets = useSafeAreaInsets();
+  const {width: screenWidth} = useWindowDimensions();
   const [stepIndex, setStepIndex] = useState(0);
+
+  // Pointer left = center of tab n (0-indexed) minus card anchor, accounting for card translateX.
+  // Tab bar container is full-screen-width (absolute ignores parent padding);
+  // 95%-wide content is centered → slot n center = screenWidth × (0.025 + (n+0.5)×0.19)
+  // Card left from screen = RFPercentage(3.5); triangle half-width = RFPercentage(1.5)
+  const tabPointerLeft = (tabIndex: number, cardTranslateX: number = 0): number =>
+    screenWidth * (0.025 + (tabIndex + 0.5) * 0.19) - RFPercentage(5) - cardTranslateX;
+
+  // Pointer for header-action: preview bubble is positioned with `right: previewRightOffset`
+  // (absolute, so from screen right edge). Preview button width = RFPercentage(4.5).
+  const headerPointerLeft = (previewRightOffset: number, cardTranslateX: number = 0): number =>
+    screenWidth - previewRightOffset - RFPercentage(7.25) - cardTranslateX;
 
   useEffect(() => {
     if (visible) {
@@ -95,6 +109,7 @@ const CleanerCoachMarks: React.FC<CleanerCoachMarksProps> = ({
       cardBottomOffset: RFPercentage(15.5),
       cardTranslateX: -RFPercentage(2),
       pointerAlignment: 'left',
+      pointerLeftOffset: tabPointerLeft(0, -RFPercentage(2)),
       titleFontSize: RFPercentage(1.58),
     },
     {
@@ -108,7 +123,7 @@ const CleanerCoachMarks: React.FC<CleanerCoachMarksProps> = ({
       cardBottomOffset: RFPercentage(15.5),
       cardTranslateX: -RFPercentage(1),
       pointerAlignment: 'left',
-      pointerLeftOffset: RFPercentage(10.2),
+      pointerLeftOffset: tabPointerLeft(1, -RFPercentage(1)),
     },
     {
       stepLabel: 'Step 04 of 7',
@@ -120,7 +135,7 @@ const CleanerCoachMarks: React.FC<CleanerCoachMarksProps> = ({
       cardBottomOffset: RFPercentage(15.5),
       cardTranslateX: RFPercentage(1),
       pointerAlignment: 'left',
-      pointerLeftOffset: RFPercentage(24.7),
+      pointerLeftOffset: tabPointerLeft(3, RFPercentage(1)),
     },
     {
       stepLabel: 'Step 05 of 7',
@@ -131,7 +146,7 @@ const CleanerCoachMarks: React.FC<CleanerCoachMarksProps> = ({
       cardBottomOffset: RFPercentage(15.5),
       cardTranslateX: RFPercentage(3),
       pointerAlignment: 'left',
-      pointerLeftOffset: RFPercentage(31.9),
+      pointerLeftOffset: tabPointerLeft(4, RFPercentage(3)),
     },
     {
       stepLabel: 'Step 06 of 7',
@@ -143,7 +158,7 @@ const CleanerCoachMarks: React.FC<CleanerCoachMarksProps> = ({
       cardTopOffset: RFPercentage(10.8),
       cardTranslateX: RFPercentage(0.6),
       pointerAlignment: 'left',
-      pointerLeftOffset: RFPercentage(30),
+      pointerLeftOffset: headerPointerLeft(RFPercentage(8.2), RFPercentage(0.6)),
       headerPreviewTopOffset: RFPercentage(1.8),
       headerPreviewRightOffset: RFPercentage(8.2),
       skipPillBottomOffset: RFPercentage(20),
@@ -158,7 +173,7 @@ const CleanerCoachMarks: React.FC<CleanerCoachMarksProps> = ({
       cardTopOffset: RFPercentage(10.8),
       cardTranslateX: RFPercentage(0.6),
       pointerAlignment: 'left',
-      pointerLeftOffset: RFPercentage(33.1),
+      pointerLeftOffset: headerPointerLeft(RFPercentage(4.8), RFPercentage(0.6)),
       headerPreviewTopOffset: RFPercentage(1.8),
       headerPreviewRightOffset: RFPercentage(4.8),
       skipPillBottomOffset: RFPercentage(20),
