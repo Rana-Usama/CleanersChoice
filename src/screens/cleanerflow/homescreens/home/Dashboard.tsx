@@ -23,6 +23,10 @@ import {
   setProfileData,
   setProfileCompletion,
 } from '../../../../redux/ProfileData/Actions';
+import {
+  markCoachMarksSeenForRole,
+  shouldShowCoachMarksForRole,
+} from '../../../../utils/coachMarks';
 import {useExitAppOnBack} from '../../../../utils/ExitApp';
 import LinearGradient from 'react-native-linear-gradient';
 import * as Progress from 'react-native-progress';
@@ -118,9 +122,28 @@ const Dashboard: React.FC = ({navigation}: any) => {
   });
   const [isAdmin, setIsAdmin] = useState(false);
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
-  const [showCleanerCoachMarks, setShowCleanerCoachMarks] = useState(true);
+  const [showCleanerCoachMarks, setShowCleanerCoachMarks] = useState(false);
 
   useExitAppOnBack();
+
+  useFocusEffect(
+    React.useCallback(() => {
+      let isActive = true;
+
+      const syncCoachMarksVisibility = async () => {
+        const shouldShow = await shouldShowCoachMarksForRole('cleaner');
+        if (isActive) {
+          setShowCleanerCoachMarks(shouldShow);
+        }
+      };
+
+      void syncCoachMarksVisibility();
+
+      return () => {
+        isActive = false;
+      };
+    }, []),
+  );
 
   // Unread notifications count
   useEffect(() => {
@@ -344,12 +367,17 @@ const Dashboard: React.FC = ({navigation}: any) => {
   const cleanDescription =
     service?.description?.replace(/\s+/g, ' ').trim() || '';
 
-  const handleSkipCleanerCoachMarks = () => {
+  const completeCleanerCoachMarks = async () => {
     setShowCleanerCoachMarks(false);
+    await markCoachMarksSeenForRole('cleaner');
+  };
+
+  const handleSkipCleanerCoachMarks = () => {
+    void completeCleanerCoachMarks();
   };
 
   const handleNextCleanerCoachMarks = () => {
-    setShowCleanerCoachMarks(false);
+    void completeCleanerCoachMarks();
   };
 
   return (

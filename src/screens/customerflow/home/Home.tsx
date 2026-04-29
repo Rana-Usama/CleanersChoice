@@ -22,7 +22,7 @@ import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import SearchField from '../../../components/SearchField';
 import ServicesCard from '../../../components/ServicesCard';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import HeaderBack from '../../../components/HeaderBack';
 import Slider from '@react-native-community/slider';
 import firestore from '@react-native-firebase/firestore';
@@ -39,6 +39,10 @@ import {useSelector} from 'react-redux';
 import CustomModal from '../../../components/CustomModal';
 import GuestAuthModal from '../../../components/GuestAuthModal';
 import {useCurrentLocation} from '../../../utils/userLocation';
+import {
+  markCoachMarksSeenForRole,
+  shouldShowCoachMarksForRole,
+} from '../../../utils/coachMarks';
 import haversine from 'haversine';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import HomeCard from '../../../components/CardHome';
@@ -122,14 +126,31 @@ const Home = () => {
     return () => clearTimeout(timer);
   }, [location]);
 
-  useEffect(() => {
-    if (userFlow === 'Guest') {
-      setShowCustomerCoachMarks(false);
-      return;
-    }
+  useFocusEffect(
+    React.useCallback(() => {
+      let isActive = true;
 
-    setShowCustomerCoachMarks(true);
-  }, [userFlow]);
+      const syncCoachMarksVisibility = async () => {
+        if (userFlow === 'Guest') {
+          if (isActive) {
+            setShowCustomerCoachMarks(false);
+          }
+          return;
+        }
+
+        const shouldShow = await shouldShowCoachMarksForRole('customer');
+        if (isActive) {
+          setShowCustomerCoachMarks(shouldShow);
+        }
+      };
+
+      void syncCoachMarksVisibility();
+
+      return () => {
+        isActive = false;
+      };
+    }, [userFlow]),
+  );
 
   // Unread notifications count
   useEffect(() => {
@@ -355,12 +376,17 @@ const Home = () => {
     return text.length > length ? text.substring(0, length) + '...' : text;
   };
 
-  const handleSkipCustomerCoachMarks = () => {
+  const completeCustomerCoachMarks = async () => {
     setShowCustomerCoachMarks(false);
+    await markCoachMarksSeenForRole('customer');
+  };
+
+  const handleSkipCustomerCoachMarks = () => {
+    void completeCustomerCoachMarks();
   };
 
   const handleNextCustomerCoachMarks = () => {
-    setShowCustomerCoachMarks(false);
+    void completeCustomerCoachMarks();
   };
 
   return (
