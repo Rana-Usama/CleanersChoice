@@ -1,5 +1,7 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
+  Animated,
+  Easing,
   Modal,
   View,
   Text,
@@ -15,7 +17,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Colors, Fonts, Icons} from '../constants/Themes';
-import LogoIcon from '../assets/svg/LogoIcon';
+
 import Stars from '../assets/svg/Stars';
 import HomeIcon from '../assets/svg/homeicon';
 import MessageIcon from '../assets/svg/iconmessage';
@@ -68,15 +70,70 @@ const CleanerCoachMarks: React.FC<CleanerCoachMarksProps> = ({
   const {width: screenWidth} = useWindowDimensions();
   const [stepIndex, setStepIndex] = useState(0);
 
-  // Pointer left = center of tab n (0-indexed) minus card anchor, accounting for card translateX.
-  // Tab bar container is full-screen-width (absolute ignores parent padding);
-  // 95%-wide content is centered → slot n center = screenWidth × (0.025 + (n+0.5)×0.19)
-  // Card left from screen = RFPercentage(3.5); triangle half-width = RFPercentage(1.5)
+  const cardOpacity = useRef(new Animated.Value(0)).current;
+  const cardSlide = useRef(new Animated.Value(22)).current;
+
+  // Initial fade-in when the modal opens
+  useEffect(() => {
+    if (!visible) return;
+    cardOpacity.setValue(0);
+    cardSlide.setValue(22);
+    Animated.parallel([
+      Animated.timing(cardOpacity, {
+        toValue: 1,
+        duration: 420,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+      Animated.timing(cardSlide, {
+        toValue: 0,
+        duration: 480,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [visible]);
+
+  // Animate old card out → swap step → animate new card in
+  const animateToStep = (newIndex: number, afterSwap?: () => void) => {
+    Animated.parallel([
+      Animated.timing(cardOpacity, {
+        toValue: 0,
+        duration: 180,
+        easing: Easing.in(Easing.quad),
+        useNativeDriver: true,
+      }),
+      Animated.timing(cardSlide, {
+        toValue: -10,
+        duration: 180,
+        easing: Easing.in(Easing.quad),
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setStepIndex(newIndex);
+      afterSwap?.();
+      cardSlide.setValue(22);
+      Animated.parallel([
+        Animated.timing(cardOpacity, {
+          toValue: 1,
+          duration: 420,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(cardSlide, {
+          toValue: 0,
+          duration: 480,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+      ]).start();
+    });
+  };
+
+
   const tabPointerLeft = (tabIndex: number, cardTranslateX: number = 0): number =>
     screenWidth * (0.025 + (tabIndex + 0.5) * 0.19) - RFPercentage(5) - cardTranslateX;
 
-  // Pointer for header-action: preview bubble is positioned with `right: previewRightOffset`
-  // (absolute, so from screen right edge). Preview button width = RFPercentage(4.5).
   const headerPointerLeft = (previewRightOffset: number, cardTranslateX: number = 0): number =>
     screenWidth - previewRightOffset - RFPercentage(7.25) - cardTranslateX;
 
@@ -110,7 +167,6 @@ const CleanerCoachMarks: React.FC<CleanerCoachMarksProps> = ({
       cardTranslateX: -RFPercentage(2),
       pointerAlignment: 'left',
       pointerLeftOffset: tabPointerLeft(0, -RFPercentage(2)),
-      titleFontSize: RFPercentage(1.58),
     },
     {
       stepLabel: 'Step 03 of 7',
@@ -144,9 +200,9 @@ const CleanerCoachMarks: React.FC<CleanerCoachMarksProps> = ({
       iconName: 'briefcase-outline',
       activeTab: 'my-jobs',
       cardBottomOffset: RFPercentage(15.5),
-      cardTranslateX: RFPercentage(3),
+      cardTranslateX: RFPercentage(2),
       pointerAlignment: 'left',
-      pointerLeftOffset: tabPointerLeft(4, RFPercentage(3)),
+      pointerLeftOffset: tabPointerLeft(4, RFPercentage(2)),
     },
     {
       stepLabel: 'Step 06 of 7',
@@ -189,26 +245,43 @@ const CleanerCoachMarks: React.FC<CleanerCoachMarksProps> = ({
 
   const handleNextStep = () => {
     if (stepIndex === 0) {
-      setStepIndex(1);
+      animateToStep(1);
       return;
     }
 
     if (stepIndex < coachSteps.length) {
-      setStepIndex(prev => prev + 1);
+      animateToStep(stepIndex + 1);
       return;
     }
 
-    setStepIndex(0);
-    onNext();
+    // Last step: exit-only animation then complete.
+    // Do NOT call animateToStep(0, onNext) — that would start a new enter
+    // animation on views that are about to unmount, causing a blank screen on Android.
+    Animated.parallel([
+      Animated.timing(cardOpacity, {
+        toValue: 0,
+        duration: 180,
+        easing: Easing.in(Easing.quad),
+        useNativeDriver: true,
+      }),
+      Animated.timing(cardSlide, {
+        toValue: -10,
+        duration: 180,
+        easing: Easing.in(Easing.quad),
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      onNext();
+    });
   };
 
   const handlePreviousStep = () => {
     if (stepIndex > 1) {
-      setStepIndex(prev => prev - 1);
+      animateToStep(stepIndex - 1);
       return;
     }
 
-    setStepIndex(0);
+    animateToStep(0);
   };
 
   const renderCleanerTabBarPreview = (activeTab: CoachStepTab) => {
@@ -357,7 +430,15 @@ const CleanerCoachMarks: React.FC<CleanerCoachMarksProps> = ({
     positionStyle: object,
     pointerBaseStyle: object,
   ) => (
-    <View style={[styles.dashboardCard, positionStyle]}>
+    <Animated.View
+      style={[
+        styles.dashboardCard,
+        positionStyle,
+        {
+          opacity: cardOpacity,
+          transform: [{translateX: step.cardTranslateX}, {translateY: cardSlide}],
+        },
+      ]}>
       <Stars
         style={styles.dashboardSparkle}
         width={RFPercentage(6.1)}
@@ -372,15 +453,7 @@ const CleanerCoachMarks: React.FC<CleanerCoachMarksProps> = ({
         <View style={styles.dashboardIconCircle}>{renderCoachStepIcon(step)}</View>
 
         <View style={styles.dashboardCopyBlock}>
-          <Text
-            style={[
-              styles.dashboardTitle,
-              step.titleFontSize !== undefined
-                ? {fontSize: step.titleFontSize}
-                : null,
-            ]}>
-            {step.title}
-          </Text>
+          <Text style={styles.dashboardTitle}>{step.title}</Text>
           <Text style={styles.dashboardSubtitle}>{step.subtitle}</Text>
         </View>
       </View>
@@ -411,12 +484,16 @@ const CleanerCoachMarks: React.FC<CleanerCoachMarksProps> = ({
             : styles.dashboardCardPointerCenter,
         ]}
       />
-    </View>
+    </Animated.View>
   );
 
   const renderIntroStep = () => (
     <View style={styles.centeredContent}>
-      <View style={styles.card}>
+      <Animated.View
+        style={[
+          styles.card,
+          {opacity: cardOpacity, transform: [{translateY: cardSlide}]},
+        ]}>
         <Stars
           style={styles.sparkleTopRight}
           width={RFPercentage(6.5)}
@@ -429,7 +506,10 @@ const CleanerCoachMarks: React.FC<CleanerCoachMarksProps> = ({
         />
 
         <View style={styles.logoWrapper}>
-          <LogoIcon width={RFPercentage(10)} height={RFPercentage(7.2)} />
+          <Image
+            source={require('../assets/images/logo.png')}
+            style={{width: RFPercentage(10), height: RFPercentage(7.2), resizeMode: 'contain'}}
+          />
         </View>
 
         <Text style={styles.title}>{title}</Text>
@@ -450,7 +530,7 @@ const CleanerCoachMarks: React.FC<CleanerCoachMarksProps> = ({
             <Text style={styles.nextButtonText}>Next</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </Animated.View>
     </View>
   );
 
@@ -474,7 +554,6 @@ const CleanerCoachMarks: React.FC<CleanerCoachMarksProps> = ({
         step,
         {
           bottom: insets.bottom + (step.cardBottomOffset ?? RFPercentage(15.5)),
-          transform: [{translateX: step.cardTranslateX}],
         },
         styles.dashboardCardPointer,
       )}
@@ -521,7 +600,6 @@ const CleanerCoachMarks: React.FC<CleanerCoachMarksProps> = ({
         step,
         {
           top: insets.top + (step.cardTopOffset ?? RFPercentage(10.8)),
-          transform: [{translateX: step.cardTranslateX}],
         },
         styles.dashboardCardPointerTop,
       )}
@@ -551,12 +629,14 @@ const CleanerCoachMarks: React.FC<CleanerCoachMarksProps> = ({
       statusBarTranslucent
       onRequestClose={handleSkip}>
       <View style={styles.overlay}>
-        <BlurView
-          style={StyleSheet.absoluteFillObject}
-          blurType="light"
-          blurAmount={8}
-          reducedTransparencyFallbackColor="rgba(35, 38, 47, 0.5)"
-        />
+        {Platform.OS === 'ios' && (
+          <BlurView
+            style={StyleSheet.absoluteFillObject}
+            blurType="light"
+            blurAmount={8}
+            reducedTransparencyFallbackColor="rgba(35, 38, 47, 0.5)"
+          />
+        )}
         <View style={styles.overlayTint} />
         {stepIndex === 0
           ? renderIntroStep()
@@ -579,7 +659,7 @@ const styles = StyleSheet.create({
   },
   overlayTint: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(35, 38, 47, 0.34)',
+    backgroundColor: Platform.OS === 'android' ? 'rgba(35, 38, 47, 0.82)' : 'rgba(35, 38, 47, 0.34)',
   },
   centeredContent: {
     flex: 1,
@@ -587,8 +667,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   card: {
-    width: '100%',
-    maxWidth: RFPercentage(38),
+    width: '90%',
     backgroundColor: Colors.white,
     borderRadius: RFPercentage(2.8),
     paddingTop: RFPercentage(2.2),
@@ -607,17 +686,17 @@ const styles = StyleSheet.create({
   },
   title: {
     textAlign: 'center',
-    fontSize: RFPercentage(1.75),
+    fontSize: RFPercentage(2.0),
     fontFamily: Fonts.fontMedium,
     color: '#242B37',
     marginBottom: RFPercentage(0.5),
   },
   subtitle: {
     textAlign: 'center',
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.75),
     lineHeight: RFPercentage(2.6),
     color: '#9CA3AF',
-    fontFamily: Fonts.fontMedium,
+    fontFamily: Fonts.fontRegular,
     paddingHorizontal: RFPercentage(1),
     marginBottom: RFPercentage(1.8),
   },
@@ -674,7 +753,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(4),
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.10)',
+    backgroundColor: 'rgba(255, 255, 255, 0.30)',
     zIndex: 3,
   },
   skipPillText: {
@@ -689,7 +768,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(4),
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.10)',
+    backgroundColor: 'rgba(255, 255, 255, 0.30)',
   },
   skipPillCenterContainer: {
     position: 'absolute',
@@ -712,7 +791,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: RFPercentage(3.5),
     right: RFPercentage(3.5),
-    height: RFPercentage(23.5),
+    minHeight: RFPercentage(23.5),
     backgroundColor: Colors.white,
     borderRadius: RFPercentage(2.8),
     paddingHorizontal: RFPercentage(2.2),
@@ -744,6 +823,9 @@ const styles = StyleSheet.create({
   stepPillText: {
     color: Colors.white,
     fontSize: RFPercentage(1.40),
+    lineHeight: RFPercentage(1.9),
+    includeFontPadding: false,
+    textAlignVertical: 'center',
     fontFamily: Fonts.fontMedium,
   },
   dashboardCopyRow: {
@@ -763,18 +845,18 @@ const styles = StyleSheet.create({
   },
   dashboardCopyBlock: {
     flex: 1,
-    paddingRight: RFPercentage(2.5),
+    paddingRight: RFPercentage(1.0),
   },
   dashboardTitle: {
     color: '#242B37',
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(2.0),
     fontFamily: Fonts.fontMedium,
     marginTop: RFPercentage(0.2),
   },
   dashboardSubtitle: {
     marginTop: RFPercentage(0.7),
     color: '#A5A9B0',
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.75),
     lineHeight: RFPercentage(2.6),
     fontFamily: Fonts.fontRegular,
   },

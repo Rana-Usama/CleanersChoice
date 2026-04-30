@@ -1,5 +1,7 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
+  Animated,
+  Easing,
   Modal,
   View,
   Text,
@@ -7,6 +9,7 @@ import {
   StyleSheet,
   Image,
   Platform,
+  StatusBar,
   useWindowDimensions,
 } from 'react-native';
 import {BlurView} from '@react-native-community/blur';
@@ -14,7 +17,7 @@ import {RFPercentage} from 'react-native-responsive-fontsize';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Colors, Fonts, Icons} from '../constants/Themes';
-import LogoIcon from '../assets/svg/LogoIcon';
+
 import Stars from '../assets/svg/Stars';
 import HomeIcon from '../assets/svg/homeicon';
 import MessageIcon from '../assets/svg/iconmessage';
@@ -66,6 +69,37 @@ const CustomerCoachMarks: React.FC<CustomerCoachMarksProps> = ({
   const {width: screenWidth} = useWindowDimensions();
   const [stepIndex, setStepIndex] = useState(0);
 
+  const cardOpacity = useRef(new Animated.Value(0)).current;
+  const cardSlide = useRef(new Animated.Value(22)).current;
+
+  // Initial fade-in when the modal opens
+  useEffect(() => {
+    if (!visible) return;
+    cardOpacity.setValue(0);
+    cardSlide.setValue(22);
+    Animated.parallel([
+      Animated.timing(cardOpacity, {
+        toValue: 1,
+        duration: 420,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+      Animated.timing(cardSlide, {
+        toValue: 0,
+        duration: 480,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [visible]);
+
+  // On Android, insets.top can be 0 inside a statusBarTranslucent Modal.
+  // Use StatusBar.currentHeight as a reliable fallback.
+  const topInset =
+    Platform.OS === 'android'
+      ? (StatusBar.currentHeight ?? insets.top)
+      : insets.top;
+
   // Pointer left = center of tab n (0-indexed) minus card anchor, accounting for card translateX.
   // Tab bar container is full-screen-width (absolute ignores parent padding);
   // 95%-wide content is centered → slot n center = screenWidth × (0.025 + (n+0.5)×0.19)
@@ -83,6 +117,42 @@ const CustomerCoachMarks: React.FC<CustomerCoachMarksProps> = ({
       setStepIndex(0);
     }
   }, [visible]);
+
+  // Animate old card out → swap step → animate new card in
+  const animateToStep = (newIndex: number, afterSwap?: () => void) => {
+    Animated.parallel([
+      Animated.timing(cardOpacity, {
+        toValue: 0,
+        duration: 180,
+        easing: Easing.in(Easing.quad),
+        useNativeDriver: true,
+      }),
+      Animated.timing(cardSlide, {
+        toValue: -10,
+        duration: 180,
+        easing: Easing.in(Easing.quad),
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setStepIndex(newIndex);
+      afterSwap?.();
+      cardSlide.setValue(22);
+      Animated.parallel([
+        Animated.timing(cardOpacity, {
+          toValue: 1,
+          duration: 420,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(cardSlide, {
+          toValue: 0,
+          duration: 480,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+      ]).start();
+    });
+  };
 
   const coachSteps: CoachStep[] = [
     {
@@ -103,7 +173,7 @@ const CustomerCoachMarks: React.FC<CustomerCoachMarksProps> = ({
       subtitle: 'Describe your needs and get price offers from nearby providers.',
       iconType: 'plus',
       variant: 'cta',
-      cardTopOffset: RFPercentage(30.5),
+      cardTopOffset: RFPercentage(27),
       cardTranslateX: 0,
       pointerAlignment: 'left',
       pointerLeftOffset: RFPercentage(5.1),
@@ -189,26 +259,43 @@ const CustomerCoachMarks: React.FC<CustomerCoachMarksProps> = ({
 
   const handleNextStep = () => {
     if (stepIndex === 0) {
-      setStepIndex(1);
+      animateToStep(1);
       return;
     }
 
     if (stepIndex < coachSteps.length) {
-      setStepIndex(prev => prev + 1);
+      animateToStep(stepIndex + 1);
       return;
     }
 
-    setStepIndex(0);
-    onNext();
+    // Last step: exit-only animation then complete.
+    // Do NOT call animateToStep(0, onNext) — that would start a new enter
+    // animation on views that are about to unmount, causing a blank screen on Android.
+    Animated.parallel([
+      Animated.timing(cardOpacity, {
+        toValue: 0,
+        duration: 180,
+        easing: Easing.in(Easing.quad),
+        useNativeDriver: true,
+      }),
+      Animated.timing(cardSlide, {
+        toValue: -10,
+        duration: 180,
+        easing: Easing.in(Easing.quad),
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      onNext();
+    });
   };
 
   const handlePreviousStep = () => {
     if (stepIndex > 1) {
-      setStepIndex(prev => prev - 1);
+      animateToStep(stepIndex - 1);
       return;
     }
 
-    setStepIndex(0);
+    animateToStep(0);
   };
 
   const renderCustomerTabBarPreview = (activeTab: CoachStepTab) => {
@@ -364,7 +451,12 @@ const CustomerCoachMarks: React.FC<CustomerCoachMarksProps> = ({
   };
 
   const renderCoachCard = (step: CoachStep, positionStyle: object, pointerBaseStyle: object) => (
-    <View style={[styles.dashboardCard, positionStyle]}>
+    <Animated.View
+      style={[
+        styles.dashboardCard,
+        positionStyle,
+        {opacity: cardOpacity, transform: [{translateX: step.cardTranslateX}, {translateY: cardSlide}]},
+      ]}>
       <Stars
         style={styles.dashboardSparkle}
         width={RFPercentage(6.1)}
@@ -412,7 +504,7 @@ const CustomerCoachMarks: React.FC<CustomerCoachMarksProps> = ({
             : styles.dashboardCardPointerCenter,
         ]}
       />
-    </View>
+    </Animated.View>
   );
 
   const renderStepSkipPill = () => (
@@ -422,7 +514,7 @@ const CustomerCoachMarks: React.FC<CustomerCoachMarksProps> = ({
       style={[
         styles.skipPill,
         {
-          top: insets.top + RFPercentage(2),
+          top: topInset + RFPercentage(2),
         },
       ]}>
       <Text style={styles.skipPillText}>Skip</Text>
@@ -431,7 +523,8 @@ const CustomerCoachMarks: React.FC<CustomerCoachMarksProps> = ({
 
   const renderIntroStep = () => (
     <View style={styles.centeredContent}>
-      <View style={styles.card}>
+      <Animated.View
+        style={[styles.card, {opacity: cardOpacity, transform: [{translateY: cardSlide}]}]}>
         <Stars
           style={styles.sparkleTopRight}
           width={RFPercentage(6.5)}
@@ -444,7 +537,10 @@ const CustomerCoachMarks: React.FC<CustomerCoachMarksProps> = ({
         />
 
         <View style={styles.logoWrapper}>
-          <LogoIcon width={RFPercentage(10)} height={RFPercentage(7.2)} />
+          <Image
+            source={require('../assets/images/logo.png')}
+            style={{width: RFPercentage(10), height: RFPercentage(7.2), resizeMode: 'contain'}}
+          />
         </View>
 
         <Text style={styles.title}>{title}</Text>
@@ -465,7 +561,7 @@ const CustomerCoachMarks: React.FC<CustomerCoachMarksProps> = ({
             <Text style={styles.nextButtonText}>Next</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </Animated.View>
     </View>
   );
 
@@ -477,7 +573,7 @@ const CustomerCoachMarks: React.FC<CustomerCoachMarksProps> = ({
           styles.headerActionPreview,
           {
             top:
-              insets.top +
+              topInset +
               (step.headerPreviewTopOffset ?? RFPercentage(1.8)),
             right: step.headerPreviewRightOffset ?? RFPercentage(8.2),
           },
@@ -492,8 +588,7 @@ const CustomerCoachMarks: React.FC<CustomerCoachMarksProps> = ({
       {renderCoachCard(
         step,
         {
-          top: insets.top + (step.cardTopOffset ?? RFPercentage(10.8)),
-          transform: [{translateX: step.cardTranslateX}],
+          top: topInset + (step.cardTopOffset ?? RFPercentage(10.8)),
         },
         styles.dashboardCardPointerTop,
       )}
@@ -525,7 +620,6 @@ const CustomerCoachMarks: React.FC<CustomerCoachMarksProps> = ({
         step,
         {
           bottom: insets.bottom + (step.cardBottomOffset ?? RFPercentage(15.5)),
-          transform: [{translateX: step.cardTranslateX}],
         },
         styles.dashboardCardPointer,
       )}
@@ -541,7 +635,7 @@ const CustomerCoachMarks: React.FC<CustomerCoachMarksProps> = ({
         style={[
           styles.postJobPreviewButton,
           {
-            top: insets.top + (step.ctaTopOffset ?? RFPercentage(63)),
+            top: topInset + (step.ctaTopOffset ?? RFPercentage(63)),
             left: step.ctaLeftOffset ?? RFPercentage(0.9),
           },
         ]}>
@@ -558,8 +652,7 @@ const CustomerCoachMarks: React.FC<CustomerCoachMarksProps> = ({
       {renderCoachCard(
         step,
         {
-          top: insets.top + (step.cardTopOffset ?? RFPercentage(33)),
-          transform: [{translateX: step.cardTranslateX}],
+          top: topInset + (step.cardTopOffset ?? RFPercentage(33)),
         },
         styles.dashboardCardPointer,
       )}
@@ -574,12 +667,14 @@ const CustomerCoachMarks: React.FC<CustomerCoachMarksProps> = ({
       statusBarTranslucent
       onRequestClose={handleSkip}>
       <View style={styles.overlay}>
-        <BlurView
-          style={StyleSheet.absoluteFillObject}
-          blurType="light"
-          blurAmount={8}
-          reducedTransparencyFallbackColor="rgba(35, 38, 47, 0.5)"
-        />
+        {Platform.OS === 'ios' && (
+          <BlurView
+            style={StyleSheet.absoluteFillObject}
+            blurType="light"
+            blurAmount={8}
+            reducedTransparencyFallbackColor="rgba(35, 38, 47, 0.5)"
+          />
+        )}
         <View style={styles.overlayTint} />
         {stepIndex === 0
           ? renderIntroStep()
@@ -604,7 +699,7 @@ const styles = StyleSheet.create({
   },
   overlayTint: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(35, 38, 47, 0.34)',
+    backgroundColor: Platform.OS === 'android' ? 'rgba(35, 38, 47, 0.82)' : 'rgba(35, 38, 47, 0.34)',
   },
   centeredContent: {
     flex: 1,
@@ -612,8 +707,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   card: {
-    width: '100%',
-    maxWidth: RFPercentage(38),
+    width: '90%',
     backgroundColor: Colors.white,
     borderRadius: RFPercentage(2.8),
     paddingTop: RFPercentage(2.2),
@@ -632,17 +726,17 @@ const styles = StyleSheet.create({
   },
   title: {
     textAlign: 'center',
-    fontSize: RFPercentage(1.75),
+    fontSize: RFPercentage(2.0),
     fontFamily: Fonts.fontMedium,
     color: '#242B37',
     marginBottom: RFPercentage(0.5),
   },
   subtitle: {
     textAlign: 'center',
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.75),
     lineHeight: RFPercentage(2.6),
     color: '#9CA3AF',
-    fontFamily: Fonts.fontMedium,
+    fontFamily: Fonts.fontRegular,
     paddingHorizontal: RFPercentage(1),
     marginBottom: RFPercentage(1.8),
   },
@@ -699,7 +793,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(4),
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.10)',
+    backgroundColor: 'rgba(255, 255, 255, 0.30)',
     zIndex: 3,
   },
   skipPillText: {
@@ -712,7 +806,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
+    gap: RFPercentage(1),
     minHeight: RFPercentage(5.6),
     width: RFPercentage(15.4),
     borderRadius: RFPercentage(100),
@@ -728,8 +823,9 @@ const styles = StyleSheet.create({
   postJobPreviewText: {
     color: '#407BFF',
     fontSize: RFPercentage(1.7),
+    lineHeight: RFPercentage(2.2),
+    includeFontPadding: false,
     fontFamily: Fonts.semiBold,
-    marginRight: RFPercentage(0.5),
   },
   dashboardCard: {
     position: 'absolute',
@@ -767,6 +863,9 @@ const styles = StyleSheet.create({
   stepPillText: {
     color: Colors.white,
     fontSize: RFPercentage(1.40),
+    lineHeight: RFPercentage(1.9),
+    includeFontPadding: false,
+    textAlignVertical: 'center',
     fontFamily: Fonts.fontMedium,
   },
   dashboardCopyRow: {
@@ -786,18 +885,18 @@ const styles = StyleSheet.create({
   },
   dashboardCopyBlock: {
     flex: 1,
-    paddingRight: RFPercentage(2.5),
+    paddingRight: RFPercentage(1.0),
   },
   dashboardTitle: {
     color: '#242B37',
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(2.0),
     fontFamily: Fonts.fontMedium,
     marginTop: RFPercentage(0.2),
   },
   dashboardSubtitle: {
     marginTop: RFPercentage(0.7),
     color: '#A5A9B0',
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.75),
     lineHeight: RFPercentage(2.6),
     fontFamily: Fonts.fontRegular,
   },
@@ -858,7 +957,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(4),
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.10)',
+    backgroundColor: 'rgba(255, 255, 255, 0.30)',
   },
   dashboardCardPointer: {
     position: 'absolute',
