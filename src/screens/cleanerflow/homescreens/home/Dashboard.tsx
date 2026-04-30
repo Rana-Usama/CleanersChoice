@@ -131,6 +131,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
       let isActive = true;
 
       const syncCoachMarksVisibility = async () => {
+        if (!isActive) return;
         const shouldShow = await shouldShowCoachMarksForRole('cleaner');
         if (isActive) {
           setShowCleanerCoachMarks(shouldShow);
