@@ -14,7 +14,7 @@ import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, Icons, IMAGES} from '../../../../constants/Themes';
 import HeaderBack from '../../../../components/HeaderBack';
-import WelcomeCoachMark from '../../../../components/WelcomeCoachMark';
+import CleanerCoachMarks from '../../../../components/CleanerCoachMarks';
 import {useFocusEffect} from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
@@ -23,6 +23,10 @@ import {
   setProfileData,
   setProfileCompletion,
 } from '../../../../redux/ProfileData/Actions';
+import {
+  markCoachMarksSeenForRole,
+  shouldShowCoachMarksForRole,
+} from '../../../../utils/coachMarks';
 import {useExitAppOnBack} from '../../../../utils/ExitApp';
 import LinearGradient from 'react-native-linear-gradient';
 import * as Progress from 'react-native-progress';
@@ -118,9 +122,29 @@ const Dashboard: React.FC = ({navigation}: any) => {
   });
   const [isAdmin, setIsAdmin] = useState(false);
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
-  const [showWelcomeCoachMark, setShowWelcomeCoachMark] = useState(true);
+  const [showCleanerCoachMarks, setShowCleanerCoachMarks] = useState(false);
 
   useExitAppOnBack();
+
+  useFocusEffect(
+    React.useCallback(() => {
+      let isActive = true;
+
+      const syncCoachMarksVisibility = async () => {
+        if (!isActive) return;
+        const shouldShow = await shouldShowCoachMarksForRole('cleaner');
+        if (isActive) {
+          setShowCleanerCoachMarks(shouldShow);
+        }
+      };
+
+      void syncCoachMarksVisibility();
+
+      return () => {
+        isActive = false;
+      };
+    }, []),
+  );
 
   // Unread notifications count
   useEffect(() => {
@@ -344,12 +368,17 @@ const Dashboard: React.FC = ({navigation}: any) => {
   const cleanDescription =
     service?.description?.replace(/\s+/g, ' ').trim() || '';
 
-  const handleSkipCoachMark = () => {
-    setShowWelcomeCoachMark(false);
+  const completeCleanerCoachMarks = async () => {
+    setShowCleanerCoachMarks(false);
+    await markCoachMarksSeenForRole('cleaner');
   };
 
-  const handleNextCoachMark = () => {
-    setShowWelcomeCoachMark(false);
+  const handleSkipCleanerCoachMarks = () => {
+    void completeCleanerCoachMarks();
+  };
+
+  const handleNextCleanerCoachMarks = () => {
+    void completeCleanerCoachMarks();
   };
 
   return (
@@ -757,10 +786,10 @@ const Dashboard: React.FC = ({navigation}: any) => {
         )}
       </ScrollView>
 
-      <WelcomeCoachMark
-        visible={showWelcomeCoachMark}
-        onSkip={handleSkipCoachMark}
-        onNext={handleNextCoachMark}
+      <CleanerCoachMarks
+        visible={showCleanerCoachMarks}
+        onSkip={handleSkipCleanerCoachMarks}
+        onNext={handleNextCleanerCoachMarks}
       />
     </View>
   );

@@ -84,6 +84,16 @@ const InvoiceForm = ({route, navigation}: any) => {
     }
   }, []);
 
+  const capitalizeFirstInputCharacter = (value: string) => {
+    if (!value) {
+      return value;
+    }
+
+    return value.replace(/^(\s*)(\S)/, (_, leadingWhitespace, firstChar) => {
+      return `${leadingWhitespace}${firstChar.toUpperCase()}`;
+    });
+  };
+
   const loadDraft = async () => {
     try {
       const user = auth().currentUser;
@@ -120,7 +130,11 @@ const InvoiceForm = ({route, navigation}: any) => {
         cleanerData,
         customerData,
       );
-      setForm(draft);
+      setForm({
+        ...draft,
+        jobPostName: capitalizeFirstInputCharacter(draft.jobPostName || ''),
+        description: capitalizeFirstInputCharacter(draft.description || ''),
+      });
     } catch (error) {
       console.error('Error loading invoice draft:', error);
       showToast({
@@ -138,6 +152,13 @@ const InvoiceForm = ({route, navigation}: any) => {
     if (errors[field as keyof InvoiceValidationErrors]) {
       setErrors(prev => ({...prev, [field]: undefined}));
     }
+  };
+
+  const updateCapitalizedField = (
+    field: 'jobPostName' | 'description',
+    value: string,
+  ) => {
+    updateField(field, capitalizeFirstInputCharacter(value));
   };
 
   const handleBudgetChange = (text: string) => {
@@ -349,14 +370,14 @@ const InvoiceForm = ({route, navigation}: any) => {
             <FormField
               label="Job Post Name"
               value={form.jobPostName}
-              onChangeText={v => updateField('jobPostName', v)}
+              onChangeText={v => updateCapitalizedField('jobPostName', v)}
               error={errors.jobPostName}
               placeholder="Job title"
             />
             <FormField
               label="Description (Optional)"
               value={form.description}
-              onChangeText={v => updateField('description', v)}
+              onChangeText={v => updateCapitalizedField('description', v)}
               placeholder="Add any notes..."
               multiline
             />
@@ -477,7 +498,12 @@ const InvoiceForm = ({route, navigation}: any) => {
                   <Text style={[styles.budgetFieldLabel, styles.budgetFieldLabelHalf]}>
                     Price per Hour
                   </Text>
-                  <Text style={[styles.budgetFieldLabel, styles.budgetFieldLabelHalf]}>
+                  <Text
+                    style={[
+                      styles.budgetFieldLabel,
+                      styles.budgetFieldLabelHalf,
+                      styles.budgetFieldLabelShiftLeft,
+                    ]}>
                     Total Hours
                   </Text>
                 </View>
@@ -519,7 +545,12 @@ const InvoiceForm = ({route, navigation}: any) => {
                   <Text style={[styles.budgetFieldLabel, styles.budgetFieldLabelHalf]}>
                     Price per Sq Ft
                   </Text>
-                  <Text style={[styles.budgetFieldLabel, styles.budgetFieldLabelHalf]}>
+                  <Text
+                    style={[
+                      styles.budgetFieldLabel,
+                      styles.budgetFieldLabelHalf,
+                      styles.budgetFieldLabelShiftLeft,
+                    ]}>
                     Total Area in Sq Ft
                   </Text>
                 </View>
@@ -870,6 +901,9 @@ const styles = StyleSheet.create({
   budgetFieldLabelHalf: {
     flex: 1,
     marginBottom: RFPercentage(0),
+  },
+  budgetFieldLabelShiftLeft: {
+    marginLeft: -RFPercentage(0.5),
   },
   budgetInput: {
     width: '100%',
