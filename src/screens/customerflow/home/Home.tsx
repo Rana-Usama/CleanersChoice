@@ -22,7 +22,7 @@ import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import SearchField from '../../../components/SearchField';
 import ServicesCard from '../../../components/ServicesCard';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import HeaderBack from '../../../components/HeaderBack';
 import Slider from '@react-native-community/slider';
 import firestore from '@react-native-firebase/firestore';
@@ -33,11 +33,16 @@ import auth from '@react-native-firebase/auth';
 import {useDispatch} from 'react-redux';
 import {setProfileData} from '../../../redux/ProfileData/Actions';
 import NotFound from '../../../components/NotFound';
+import CustomerCoachMarks from '../../../components/CustomerCoachMarks';
 import {useExitAppOnBack} from '../../../utils/ExitApp';
 import {useSelector} from 'react-redux';
 import CustomModal from '../../../components/CustomModal';
 import GuestAuthModal from '../../../components/GuestAuthModal';
 import {useCurrentLocation} from '../../../utils/userLocation';
+import {
+  markCoachMarksSeenForRole,
+  shouldShowCoachMarksForRole,
+} from '../../../utils/coachMarks';
 import haversine from 'haversine';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import HomeCard from '../../../components/CardHome';
@@ -98,6 +103,7 @@ const Home = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminViewAllServices, setAdminViewAllServices] = useState(false);
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
+  const [showCustomerCoachMarks, setShowCustomerCoachMarks] = useState(false);
 
   const selectedLocation = useSelector(
     (state: any) =>
@@ -119,6 +125,32 @@ const Home = () => {
     }
     return () => clearTimeout(timer);
   }, [location]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      let isActive = true;
+
+      const syncCoachMarksVisibility = async () => {
+        if (userFlow === 'Guest') {
+          if (isActive) {
+            setShowCustomerCoachMarks(false);
+          }
+          return;
+        }
+
+        const shouldShow = await shouldShowCoachMarksForRole('customer');
+        if (isActive) {
+          setShowCustomerCoachMarks(shouldShow);
+        }
+      };
+
+      void syncCoachMarksVisibility();
+
+      return () => {
+        isActive = false;
+      };
+    }, [userFlow]),
+  );
 
   // Unread notifications count
   useEffect(() => {
@@ -342,6 +374,19 @@ const Home = () => {
   const truncateText = (text: string, length = 20) => {
     if (!text) return '';
     return text.length > length ? text.substring(0, length) + '...' : text;
+  };
+
+  const completeCustomerCoachMarks = async () => {
+    setShowCustomerCoachMarks(false);
+    await markCoachMarksSeenForRole('customer');
+  };
+
+  const handleSkipCustomerCoachMarks = () => {
+    void completeCustomerCoachMarks();
+  };
+
+  const handleNextCustomerCoachMarks = () => {
+    void completeCustomerCoachMarks();
   };
 
   return (
@@ -705,8 +750,8 @@ const Home = () => {
                           renderItem={({item}) => (
                             <View style={styles.serviceItem}>
                               <ServicesCard
-                                covers={item?.serviceImages}
-                                name={item?.name}
+                                covers={item?.serviceImages ?? []}
+                                name={item?.name ?? ''}
                                 icon={item?.image}
                                 price={item?.packages?.[0]?.price ?? 0}
                                 star={IMAGES?.star}
@@ -905,6 +950,12 @@ const Home = () => {
             setShowAuthModal(false);
             navigation.navigate('UserSelection');
           }}
+        />
+
+        <CustomerCoachMarks
+          visible={showCustomerCoachMarks && userFlow !== 'Guest'}
+          onSkip={handleSkipCustomerCoachMarks}
+          onNext={handleNextCustomerCoachMarks}
         />
       </>
     </TouchableWithoutFeedback>
