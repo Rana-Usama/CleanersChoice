@@ -689,21 +689,21 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(2.0),
     fontFamily: Fonts.fontMedium,
     color: '#242B37',
-    marginBottom: RFPercentage(0.5),
   },
   subtitle: {
     textAlign: 'center',
     fontSize: RFPercentage(1.75),
-    lineHeight: RFPercentage(2.6),
+    lineHeight: RFPercentage(2.2),
     color: '#9CA3AF',
     fontFamily: Fonts.fontRegular,
     paddingHorizontal: RFPercentage(1),
-    marginBottom: RFPercentage(1.8),
+    marginVertical:RFPercentage(1)
   },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     gap: RFPercentage(1.5),
+    marginTop:RFPercentage(1)
   },
   skipButton: {
     flex: 1,
@@ -853,11 +853,12 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.fontMedium,
     marginTop: RFPercentage(0.2),
   },
+  
   dashboardSubtitle: {
     marginTop: RFPercentage(0.7),
     color: '#A5A9B0',
     fontSize: RFPercentage(1.75),
-    lineHeight: RFPercentage(2.6),
+    lineHeight: RFPercentage(2.2),
     fontFamily: Fonts.fontRegular,
   },
   dashboardButtonRow: {

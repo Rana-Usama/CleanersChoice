@@ -334,7 +334,11 @@ const Availability = ({navigation}: any) => {
             {selectedDaysCount === 0 && (
               <View style={styles.tipsCard}>
                 <View style={styles.tipsHeader}>
-                  <FontAwesome name="lightbulb-o" size={18} color={Colors.amber500} />
+                  <FontAwesome
+                    name="lightbulb-o"
+                    size={18}
+                    color={Colors.amber500}
+                  />
                   <Text style={styles.tipsTitle}>Pro Tip</Text>
                 </View>
                 <Text style={styles.tipsText}>
@@ -423,7 +427,7 @@ const Availability = ({navigation}: any) => {
                     <ActivityIndicator color={Colors.white} />
                   ) : (
                     <>
-                      <Text style={styles.buttonText}>
+                      <Text style={styles.buttonText} numberOfLines={1}>
                         {profileCompletion === '100'
                           ? 'Update Availability'
                           : 'Save Availability'}
@@ -454,8 +458,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   gradientHeader: {
-    paddingTop:
-      Platform.OS === 'ios' ? 50 : StatusBar.currentHeight || 0,
+    paddingTop: Platform.OS === 'ios' ? RFPercentage(8) : RFPercentage(6),
     paddingBottom: 20,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
@@ -471,7 +474,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    height: Platform.OS === 'ios' ? RFPercentage(8) : RFPercentage(13),
+    height: Platform.OS === 'ios' ? RFPercentage(8) : RFPercentage(10),
     marginTop: RFPercentage(0.6),
     paddingBottom: RFPercentage(1.8),
   },

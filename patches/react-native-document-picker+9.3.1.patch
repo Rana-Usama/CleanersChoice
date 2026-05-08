@@ -84,19 +84,19 @@ new file mode 100644
 index 0000000..e69de29
 diff --git a/node_modules/react-native-document-picker/android/build/intermediates/incremental/release/packageReleaseResources/compile-file-map.properties b/node_modules/react-native-document-picker/android/build/intermediates/incremental/release/packageReleaseResources/compile-file-map.properties
 new file mode 100644
-index 0000000..e0eeba6
+index 0000000..87bb5ea
 --- /dev/null
 +++ b/node_modules/react-native-document-picker/android/build/intermediates/incremental/release/packageReleaseResources/compile-file-map.properties
 @@ -0,0 +1 @@
-+#Thu Apr 09 01:26:21 PKT 2026
++#Fri May 08 13:40:49 PKT 2026
 diff --git a/node_modules/react-native-document-picker/android/build/intermediates/incremental/release/packageReleaseResources/merger.xml b/node_modules/react-native-document-picker/android/build/intermediates/incremental/release/packageReleaseResources/merger.xml
 new file mode 100644
-index 0000000..6e8a684
+index 0000000..089d589
 --- /dev/null
 +++ b/node_modules/react-native-document-picker/android/build/intermediates/incremental/release/packageReleaseResources/merger.xml
 @@ -0,0 +1,2 @@
 +<?xml version="1.0" encoding="utf-8"?>
-+<merger version="3"><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="main$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/macbookpro/Documents/GitHub/CleanersChoice/node_modules/react-native-document-picker/android/src/main/res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="main" generated-set="main$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/macbookpro/Documents/GitHub/CleanersChoice/node_modules/react-native-document-picker/android/src/main/res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="release$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/macbookpro/Documents/GitHub/CleanersChoice/node_modules/react-native-document-picker/android/src/release/res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="release" generated-set="release$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/macbookpro/Documents/GitHub/CleanersChoice/node_modules/react-native-document-picker/android/src/release/res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="generated$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/macbookpro/Documents/GitHub/CleanersChoice/node_modules/react-native-document-picker/android/build/generated/res/resValues/release"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="generated" generated-set="generated$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/macbookpro/Documents/GitHub/CleanersChoice/node_modules/react-native-document-picker/android/build/generated/res/resValues/release"/></dataSet><mergedItems/></merger>
++<merger version="3"><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="main$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/ReactNativeProjects/CleanersChoice/node_modules/react-native-document-picker/android/src/main/res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="main" generated-set="main$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/ReactNativeProjects/CleanersChoice/node_modules/react-native-document-picker/android/src/main/res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="release$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/ReactNativeProjects/CleanersChoice/node_modules/react-native-document-picker/android/src/release/res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="release" generated-set="release$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/ReactNativeProjects/CleanersChoice/node_modules/react-native-document-picker/android/src/release/res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="generated$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/ReactNativeProjects/CleanersChoice/node_modules/react-native-document-picker/android/build/generated/res/resValues/release"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="generated" generated-set="generated$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/ReactNativeProjects/CleanersChoice/node_modules/react-native-document-picker/android/build/generated/res/resValues/release"/></dataSet><mergedItems/></merger>
 \ No newline at end of file
 diff --git a/node_modules/react-native-document-picker/android/build/intermediates/local_only_symbol_list/release/parseReleaseLocalResources/R-def.txt b/node_modules/react-native-document-picker/android/build/intermediates/local_only_symbol_list/release/parseReleaseLocalResources/R-def.txt
 new file mode 100644
@@ -158,29 +158,29 @@ index 0000000..df6e602
 +com.reactnativedocumentpicker
 diff --git a/node_modules/react-native-document-picker/android/build/outputs/logs/manifest-merger-release-report.txt b/node_modules/react-native-document-picker/android/build/outputs/logs/manifest-merger-release-report.txt
 new file mode 100644
-index 0000000..b3271ac
+index 0000000..eb9e2ba
 --- /dev/null
 +++ b/node_modules/react-native-document-picker/android/build/outputs/logs/manifest-merger-release-report.txt
 @@ -0,0 +1,17 @@
 +-- Merging decision tree log ---
 +manifest
-+ADDED from /Users/macbookpro/Documents/GitHub/CleanersChoice/node_modules/react-native-document-picker/android/src/main/AndroidManifest.xml:1:1-4:12
-+INJECTED from /Users/macbookpro/Documents/GitHub/CleanersChoice/node_modules/react-native-document-picker/android/src/main/AndroidManifest.xml:1:1-4:12
++ADDED from /Users/ReactNativeProjects/CleanersChoice/node_modules/react-native-document-picker/android/src/main/AndroidManifest.xml:1:1-4:12
++INJECTED from /Users/ReactNativeProjects/CleanersChoice/node_modules/react-native-document-picker/android/src/main/AndroidManifest.xml:1:1-4:12
 +	package
-+		ADDED from /Users/macbookpro/Documents/GitHub/CleanersChoice/node_modules/react-native-document-picker/android/src/main/AndroidManifest.xml:2:11-50
-+		INJECTED from /Users/macbookpro/Documents/GitHub/CleanersChoice/node_modules/react-native-document-picker/android/src/main/AndroidManifest.xml
++		ADDED from /Users/ReactNativeProjects/CleanersChoice/node_modules/react-native-document-picker/android/src/main/AndroidManifest.xml:2:11-50
++		INJECTED from /Users/ReactNativeProjects/CleanersChoice/node_modules/react-native-document-picker/android/src/main/AndroidManifest.xml
 +	xmlns:android
-+		ADDED from /Users/macbookpro/Documents/GitHub/CleanersChoice/node_modules/react-native-document-picker/android/src/main/AndroidManifest.xml:1:11-69
++		ADDED from /Users/ReactNativeProjects/CleanersChoice/node_modules/react-native-document-picker/android/src/main/AndroidManifest.xml:1:11-69
 +uses-sdk
-+INJECTED from /Users/macbookpro/Documents/GitHub/CleanersChoice/node_modules/react-native-document-picker/android/src/main/AndroidManifest.xml reason: use-sdk injection requested
-+INJECTED from /Users/macbookpro/Documents/GitHub/CleanersChoice/node_modules/react-native-document-picker/android/src/main/AndroidManifest.xml
-+INJECTED from /Users/macbookpro/Documents/GitHub/CleanersChoice/node_modules/react-native-document-picker/android/src/main/AndroidManifest.xml
++INJECTED from /Users/ReactNativeProjects/CleanersChoice/node_modules/react-native-document-picker/android/src/main/AndroidManifest.xml reason: use-sdk injection requested
++INJECTED from /Users/ReactNativeProjects/CleanersChoice/node_modules/react-native-document-picker/android/src/main/AndroidManifest.xml
++INJECTED from /Users/ReactNativeProjects/CleanersChoice/node_modules/react-native-document-picker/android/src/main/AndroidManifest.xml
 +	android:targetSdkVersion
-+		INJECTED from /Users/macbookpro/Documents/GitHub/CleanersChoice/node_modules/react-native-document-picker/android/src/main/AndroidManifest.xml
++		INJECTED from /Users/ReactNativeProjects/CleanersChoice/node_modules/react-native-document-picker/android/src/main/AndroidManifest.xml
 +	android:minSdkVersion
-+		INJECTED from /Users/macbookpro/Documents/GitHub/CleanersChoice/node_modules/react-native-document-picker/android/src/main/AndroidManifest.xml
++		INJECTED from /Users/ReactNativeProjects/CleanersChoice/node_modules/react-native-document-picker/android/src/main/AndroidManifest.xml
 diff --git a/node_modules/react-native-document-picker/android/src/main/java/com/reactnativedocumentpicker/RNDocumentPickerModule.java b/node_modules/react-native-document-picker/android/src/main/java/com/reactnativedocumentpicker/RNDocumentPickerModule.java
-index 5001525..d0dffe9 100644
+index 5001525..6428b8f 100644
 --- a/node_modules/react-native-document-picker/android/src/main/java/com/reactnativedocumentpicker/RNDocumentPickerModule.java
 +++ b/node_modules/react-native-document-picker/android/src/main/java/com/reactnativedocumentpicker/RNDocumentPickerModule.java
 @@ -18,7 +18,6 @@ import androidx.annotation.NonNull;
@@ -191,11 +191,12 @@ index 5001525..d0dffe9 100644
  import com.facebook.react.bridge.Promise;
  import com.facebook.react.bridge.ReactApplicationContext;
  import com.facebook.react.bridge.ReactContext;
-@@ -229,14 +228,13 @@ public class RNDocumentPickerModule extends NativeDocumentPickerSpec {
+@@ -229,14 +228,14 @@ public class RNDocumentPickerModule extends NativeDocumentPickerSpec {
      }
    }
  
 -  private static class ProcessDataTask extends GuardedResultAsyncTask<ReadableArray> {
++  // ✅ FIXED: Replaced GuardedResultAsyncTask (removed in RN 0.73+) with standard AsyncTask
 +  private static class ProcessDataTask extends android.os.AsyncTask<Void, Void, ReadableArray> {
      private final WeakReference<Context> weakContext;
      private final List<Uri> uris;
@@ -207,16 +208,16 @@ index 5001525..d0dffe9 100644
        this.weakContext = new WeakReference<>(reactContext.getApplicationContext());
        this.uris = uris;
        this.copyTo = copyTo;
-@@ -244,7 +242,7 @@ public class RNDocumentPickerModule extends NativeDocumentPickerSpec {
+@@ -244,7 +243,7 @@ public class RNDocumentPickerModule extends NativeDocumentPickerSpec {
      }
  
      @Override
 -    protected ReadableArray doInBackgroundGuarded() {
-+    protected ReadableArray doInBackground(Void... voids) {
++    protected ReadableArray doInBackground(Void... params) {
        WritableArray results = Arguments.createArray();
        for (Uri uri : uris) {
          results.pushMap(getMetadata(uri));
-@@ -253,7 +251,7 @@ public class RNDocumentPickerModule extends NativeDocumentPickerSpec {
+@@ -253,7 +252,7 @@ public class RNDocumentPickerModule extends NativeDocumentPickerSpec {
      }
  
      @Override

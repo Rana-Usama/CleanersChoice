@@ -644,8 +644,9 @@ const CustomerCoachMarks: React.FC<CustomerCoachMarksProps> = ({
         </Text>
         <MaterialCommunityIcons
           name="arrow-right"
-          size={RFPercentage(2.4)}
+          size={RFPercentage(2.3)}
           color="#407BFF"
+          style={{marginLeft:-1}}
         />
       </View>
 
@@ -808,10 +809,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: RFPercentage(1),
-    minHeight: RFPercentage(5.6),
-    width: RFPercentage(15.4),
+    minHeight: RFPercentage(5.4),
+    // width: RFPercentage(15.4),
     borderRadius: RFPercentage(100),
-    paddingHorizontal: RFPercentage(1.8),
+    paddingHorizontal: RFPercentage(2),
     backgroundColor: Colors.white,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: RFPercentage(0.8)},
@@ -823,7 +824,7 @@ const styles = StyleSheet.create({
   postJobPreviewText: {
     color: '#407BFF',
     fontSize: RFPercentage(1.7),
-    lineHeight: RFPercentage(2.2),
+    lineHeight: RFPercentage(2.5),
     includeFontPadding: false,
     fontFamily: Fonts.semiBold,
   },

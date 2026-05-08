@@ -75,7 +75,7 @@ const CancelSubscription = () => {
 
   // Cancel subscription — branches on provider
   const cancelSubscription = async () => {
-    if (isApple && Platform.OS === 'ios') {
+    if (isApple) {
       // Apple: open App Store subscription management
       Linking.openURL('https://apps.apple.com/account/subscriptions');
       showToast({

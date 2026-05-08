@@ -505,7 +505,7 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
                 <ActivityIndicator color={Colors.white} />
               ) : (
                 <>
-                  <Text style={styles.buttonText}>
+                  <Text style={styles.buttonText} numberOfLines={1}>
                     {profileCompletion === '100'
                       ? 'Update Gallery'
                       : 'Continue to Packages'}
@@ -542,8 +542,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   gradientHeader: {
-    paddingTop:
-      Platform.OS === 'ios' ? 50 : StatusBar.currentHeight || 0,
+    paddingTop: Platform.OS === 'ios' ? RFPercentage(8) : RFPercentage(6),
     paddingBottom: 20,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
@@ -559,7 +558,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    height: Platform.OS === 'ios' ? RFPercentage(8) : RFPercentage(13),
+    height: Platform.OS === 'ios' ? RFPercentage(8) : RFPercentage(10),
     marginTop: RFPercentage(0.6),
     paddingBottom: RFPercentage(1.8),
   },

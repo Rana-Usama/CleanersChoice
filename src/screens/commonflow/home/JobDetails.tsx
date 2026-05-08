@@ -1773,7 +1773,7 @@ const styles = StyleSheet.create({
   },
   applyButton: {
     flex: 1,
-    borderRadius: 20,
+    borderRadius: 100,
   },
   appliedState: {
     flex: 1,
