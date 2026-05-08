@@ -823,9 +823,9 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   previewButton: {
-    width: '90%',
+    width: '100%',
     height: RFPercentage(6),
-    borderRadius: RFPercentage(2.3),
+    borderRadius: RFPercentage(100),
   },
   previewButtonText: {
     fontSize: RFPercentage(1.9),

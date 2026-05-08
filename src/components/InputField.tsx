@@ -17,6 +17,7 @@ interface Props {
   type? : any;
   length? : any;
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
+  textStyle? : object
 }
 
 const InputField: React.FC<Props> = (props: Props) => {
@@ -26,7 +27,7 @@ const InputField: React.FC<Props> = (props: Props) => {
         <TextInput
           placeholder={props.placeholder}
           placeholderTextColor={Colors.placeholderColor}
-          style={styles.textInput}
+          style={[styles.textInput, props.textStyle]}
           value={props.value}
           onChangeText={props.onChangeText}
           onBlur={props.handleBlur}

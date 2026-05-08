@@ -23,7 +23,7 @@ const HomeCard = ({onPostJob}: any) => {
             style={styles.button}
             onPress={onPostJob}>
             <Text style={styles.buttonText}>Post a Job</Text>
-            <Icon name="arrow-right" size={18} color={Colors.gradient1} />
+            <Icon name="arrow-right" size={18} color={Colors.gradient1}  style={{left:RFPercentage(0.2)}} />
           </TouchableOpacity>
         </View>
         <Image
@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   title: {
-    fontSize: RFPercentage(2.3),
+    fontSize: RFPercentage(2.2),
     color: Colors.background,
     fontFamily: Fonts.semiBold,
   },
@@ -81,17 +81,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 10,
-    borderRadius: 100,
-    width: 130,
-    marginTop: 15,
+    borderRadius: RFPercentage(100),
+    paddingHorizontal: RFPercentage(2),
+    width: RFPercentage(15),
+    height: RFPercentage(4.8),
+    marginTop: RFPercentage(1.6),
+
+    // paddingVertical: 10,
+    // borderRadius: 100,
+    // width: 130,
+    // marginTop: 15,
   },
   buttonText: {
     color: Colors.gradient1,
     fontSize: RFPercentage(1.7),
-    marginRight: 4,
     fontFamily: Fonts.semiBold,
-    lineHeight: RFPercentage(2),
+    lineHeight: RFPercentage(2.5),
     textAlign: 'center',
   },
 });

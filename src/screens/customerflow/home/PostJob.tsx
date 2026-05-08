@@ -497,6 +497,7 @@ const PostJob = ({route}: any) => {
                     customStyle={styles.inputField}
                     value={jobTitle}
                     onChangeText={setJobTitle}
+                    textStyle={{fontSize:RFPercentage(1.6)}}
                   />
                   <Text style={styles.cardHint}>
                     Be specific to attract the right professionals
@@ -1435,9 +1436,9 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   bottomBarButton: {
-    width: '75%',
+    width: '100%',
     alignSelf: 'center',
-    borderRadius: 20,
+    borderRadius: RFPercentage(100),
   },
   backButtonSecondary: {
     flexDirection: 'row',
@@ -1445,7 +1446,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: Colors.white,
     height: RFPercentage(5.6),
-    borderRadius: 20,
+    borderRadius: RFPercentage(1.9),
     borderWidth: 1,
     borderColor: Colors.gradient1,
     flex: 0.7,

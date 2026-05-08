@@ -506,8 +506,8 @@ const styles = StyleSheet.create({
   },
   signInButton: {
     width: '100%',
-    height: RFPercentage(6.8),
-    borderRadius: RFPercentage(5),
+    height: RFPercentage(5.8),
+    borderRadius: RFPercentage(100),
   },
   signInButtonText: {
     fontSize: RFPercentage(2),

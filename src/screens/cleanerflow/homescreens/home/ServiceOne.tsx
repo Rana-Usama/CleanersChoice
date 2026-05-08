@@ -33,6 +33,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Octicons from 'react-native-vector-icons/Octicons';
 import {setUserLocation} from '../../../../redux/location/Actions';
 import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
+import {fonts} from '@rneui/base';
 
 const {width} = Dimensions.get('window');
 
@@ -384,6 +385,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                     onChangeText={text => dispatch(cleanerDescription(text))}
                     maxLength={200}
                     style={styles.descriptionInput}
+                    textInput={{fontSize: RFPercentage(1.6)}}
                   />
                 </View>
               </Animated.View>
@@ -437,7 +439,11 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                           <Ionicons
                             name="time-outline"
                             size={24}
-                            color={availableDays > 0 ? Colors.green500 : Colors.gray400}
+                            color={
+                              availableDays > 0
+                                ? Colors.green500
+                                : Colors.gray400
+                            }
                           />
                         )}
                       </View>
@@ -525,7 +531,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                                 <AntDesign
                                   name="close"
                                   size={12}
-                                color={Colors.placeholderColor}
+                                  color={Colors.placeholderColor}
                                 />
                               </TouchableOpacity>
                             </View>
@@ -564,7 +570,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                       </RNAnimated.View>
                     ) : (
                       <>
-                        <Text style={styles.buttonText}>
+                        <Text style={styles.buttonText} numberOfLines={1}>
                           {profileCompletion === '100'
                             ? 'Update Service'
                             : 'Continue to Gallery'}
@@ -604,8 +610,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   gradientHeader: {
-    paddingTop:
-      Platform.OS === 'ios' ? 50 : StatusBar.currentHeight || 0,
+    paddingTop: Platform.OS === 'ios' ? RFPercentage(8) : RFPercentage(6),
     paddingBottom: 20,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
@@ -621,7 +626,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    height: Platform.OS === 'ios' ? RFPercentage(8) : RFPercentage(13),
+    height: Platform.OS === 'ios' ? RFPercentage(8) : RFPercentage(10),
     marginTop: RFPercentage(0.6),
     paddingBottom: RFPercentage(1.8),
   },
@@ -801,11 +806,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.gray50,
     borderWidth: 1,
     borderColor: Colors.gray200,
-    borderRadius: 12,
-    padding: 16,
-    minHeight: 120,
+    borderRadius: RFPercentage(1),
+    padding: RFPercentage(1.5),
+    minHeight: RFPercentage(12),
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.6),
     color: Colors.gray700,
   },
   availabilityCard: {
