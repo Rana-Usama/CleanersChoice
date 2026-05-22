@@ -33,6 +33,8 @@ import {
   generateInvoiceId,
 } from '../../../../services/invoiceService';
 import {useSoftInputAdjustNothing} from '../../../../hooks/useSoftInputMode';
+import CustomerPickerSheet from '../../../../components/CustomerPickerSheet';
+import {Customer} from '../../../../types/customer';
 
 const InvoiceForm = ({route, navigation}: any) => {
   const item = route.params?.item || null;
@@ -60,6 +62,7 @@ const InvoiceForm = ({route, navigation}: any) => {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
 
   useSoftInputAdjustNothing();
 
@@ -159,6 +162,25 @@ const InvoiceForm = ({route, navigation}: any) => {
     value: string,
   ) => {
     updateField(field, capitalizeFirstInputCharacter(value));
+  };
+
+  // Auto-fill Bill To fields from a saved Phone Book contact
+  const handleSelectCustomer = (customer: Customer) => {
+    setForm(prev => ({
+      ...prev,
+      toName: customer.name || '',
+      toEmail: customer.email || '',
+      customerPhone: customer.phone || '',
+      customerAddress: customer.address || '',
+    }));
+    setErrors(prev => ({...prev, toName: undefined, toEmail: undefined}));
+    showToast({
+      type: 'success',
+      title: 'Contact loaded',
+      message: customer.name
+        ? `Billed to ${customer.name}`
+        : 'Customer details filled in',
+    });
   };
 
   const handleBudgetChange = (text: string) => {
@@ -332,13 +354,26 @@ const InvoiceForm = ({route, navigation}: any) => {
 
           {/* To Section */}
           <View style={styles.sectionCard}>
-            <View style={styles.sectionHeader}>
-              <MaterialCommunityIcons
-                name="account-arrow-left"
-                size={RFPercentage(2.2)}
-                color={Colors.gradient1}
-              />
-              <Text style={styles.sectionTitle}>Bill To</Text>
+            <View style={styles.sectionHeaderRow}>
+              <View style={styles.sectionHeader}>
+                <MaterialCommunityIcons
+                  name="account-arrow-left"
+                  size={RFPercentage(2.2)}
+                  color={Colors.gradient1}
+                />
+                <Text style={styles.sectionTitle}>Bill To</Text>
+              </View>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => setShowPicker(true)}
+                style={styles.pickerTrigger}>
+                <MaterialCommunityIcons
+                  name="account-search-outline"
+                  size={RFPercentage(1.8)}
+                  color={Colors.gradient1}
+                />
+                <Text style={styles.pickerTriggerText}>Phone Book</Text>
+              </TouchableOpacity>
             </View>
             <FormField
               label="Customer Name"
@@ -355,6 +390,34 @@ const InvoiceForm = ({route, navigation}: any) => {
               placeholder="customer@email.com"
               keyboardType="email-address"
             />
+            {(form.customerPhone || form.customerAddress) ? (
+              <View style={styles.pickerSummary}>
+                {form.customerPhone ? (
+                  <View style={styles.pickerSummaryRow}>
+                    <Feather
+                      name="phone"
+                      size={RFPercentage(1.5)}
+                      color={Colors.gradient1}
+                    />
+                    <Text style={styles.pickerSummaryText} numberOfLines={1}>
+                      {form.customerPhone}
+                    </Text>
+                  </View>
+                ) : null}
+                {form.customerAddress ? (
+                  <View style={styles.pickerSummaryRow}>
+                    <Feather
+                      name="map-pin"
+                      size={RFPercentage(1.5)}
+                      color={Colors.gradient1}
+                    />
+                    <Text style={styles.pickerSummaryText} numberOfLines={2}>
+                      {form.customerAddress}
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+            ) : null}
           </View>
 
           {/* Job Details */}
@@ -615,6 +678,14 @@ const InvoiceForm = ({route, navigation}: any) => {
           }}
           onCancel={() => setShowDatePicker(false)}
         />
+
+        {/* Phone Book picker */}
+        <CustomerPickerSheet
+          visible={showPicker}
+          onClose={() => setShowPicker(false)}
+          onSelect={handleSelectCustomer}
+          onAddNew={() => navigation.navigate('CustomerForm', {customer: null})}
+        />
         {/* Bottom Action */}
         <View style={styles.actionBar}>
             <GradientButton
@@ -731,6 +802,48 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: RFPercentage(0.8),
     marginBottom: RFPercentage(1.5),
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: RFPercentage(1.5),
+  },
+  pickerTrigger: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: RFPercentage(0.5),
+    paddingHorizontal: RFPercentage(1.2),
+    paddingVertical: RFPercentage(0.7),
+    borderRadius: RFPercentage(100),
+    borderWidth: 1,
+    borderColor: Colors.gradient1,
+    backgroundColor: Colors.primaryBlueOverlay05,
+  },
+  pickerTriggerText: {
+    fontFamily: Fonts.semiBold,
+    fontSize: RFPercentage(1.35),
+    color: Colors.gradient1,
+  },
+  pickerSummary: {
+    marginTop: RFPercentage(0.5),
+    padding: RFPercentage(1.2),
+    borderRadius: RFPercentage(1),
+    backgroundColor: Colors.primaryBlueOverlay05,
+    borderWidth: 1,
+    borderColor: Colors.blueBorderOverlay50,
+    gap: RFPercentage(0.4),
+  },
+  pickerSummaryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: RFPercentage(0.6),
+  },
+  pickerSummaryText: {
+    flex: 1,
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.4),
+    color: Colors.primaryText,
   },
   sectionTitle: {
     fontFamily: Fonts.fontMedium,

@@ -43,6 +43,10 @@ import MyJobs from '../screens/cleanerflow/homescreens/jobs/MyJobs';
 import Settings from '../screens/commonflow/home/settings/Settings';
 import InvoiceForm from '../screens/cleanerflow/homescreens/invoices/InvoiceForm';
 import InvoicePreview from '../screens/cleanerflow/homescreens/invoices/InvoicePreview';
+import PhoneBook from '../screens/cleanerflow/homescreens/invoices/PhoneBook';
+import CustomerForm from '../screens/cleanerflow/homescreens/invoices/CustomerForm';
+import Earnings from '../screens/cleanerflow/homescreens/invoices/Earnings';
+import {Customer} from '../types/customer';
 
 export type RootStackParamList = {
   SplashOne: undefined;
@@ -90,8 +94,17 @@ export type RootStackParamList = {
   CustomerProfile: {customerId: string};
   JobManagement: {jobId: string; jobTitle: string};
   MyJobs: undefined;
-  InvoiceForm: {item: any | null};
-  InvoicePreview: {formData: any; jobItem: any | null};
+  InvoiceForm: {item: any | null; prefill?: any};
+  InvoicePreview: {
+    formData: any;
+    jobItem: any | null;
+    viewOnly?: boolean;
+    invoice?: any;
+    paymentActionsDisabled?: boolean;
+  };
+  PhoneBook: undefined;
+  CustomerForm: {customer: Customer | null};
+  Earnings: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -256,6 +269,9 @@ const StackNavigator: React.FC = () => {
             <Stack.Screen name="Settings" component={Settings} />
             <Stack.Screen name="InvoiceForm" component={InvoiceForm} />
             <Stack.Screen name="InvoicePreview" component={InvoicePreview} />
+            <Stack.Screen name="PhoneBook" component={PhoneBook} />
+            <Stack.Screen name="CustomerForm" component={CustomerForm} />
+            <Stack.Screen name="Earnings" component={Earnings} />
           </Stack.Navigator>
         )}
       </NavigationContainer>

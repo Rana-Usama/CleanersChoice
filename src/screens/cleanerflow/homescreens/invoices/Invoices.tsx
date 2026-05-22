@@ -1,4 +1,4 @@
-import React, {useState, useCallback} from 'react';
+import React, {useState, useCallback, useEffect, useMemo} from 'react';
 import {
   StyleSheet,
   View,
@@ -10,6 +10,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  LayoutAnimation,
+  UIManager,
 } from 'react-native';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts} from '../../../../constants/Themes';
@@ -26,25 +28,41 @@ import {useFocusEffect} from '@react-navigation/native';
 import {useExitAppOnBack} from '../../../../utils/ExitApp';
 import {showToast} from '../../../../utils/ToastMessage';
 import moment from 'moment';
-import {Invoice} from '../../../../types/invoice';
+import {Invoice, PaymentStatus} from '../../../../types/invoice';
 import {
+  countByStatus,
+  filterByStatus,
   filterInvoices,
+  getPaymentStatus,
   paginateInvoices,
   generateInvoicePdf,
   shareInvoicePdf,
   downloadInvoicePdf,
   invoiceToFormData,
+  deleteInvoice,
 } from '../../../../services/invoiceService';
+import StatusTabs from '../../../../components/StatusTabs';
+import MarkAsPaidSheet from '../../../../components/MarkAsPaidSheet';
+import UndoSnackbar from '../../../../components/UndoSnackbar';
+import DeleteInvoiceDialog from '../../../../components/DeleteInvoiceDialog';
+import {markAsPaid, revertToUnpaid} from '../../../../services/paymentService';
 
 const PER_PAGE = 10;
 
 const Invoices = ({navigation}: any) => {
   const [allInvoices, setAllInvoices] = useState<Invoice[]>([]);
+  const [activeStatus, setActiveStatus] = useState<PaymentStatus>('unpaid');
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [paidSheetVisible, setPaidSheetVisible] = useState(false);
+  const [undoInvoice, setUndoInvoice] = useState<Invoice | null>(null);
+  const [undoVisible, setUndoVisible] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Invoice | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Date range filter
   const [showFilterPanel, setShowFilterPanel] = useState(false);
@@ -54,6 +72,19 @@ const Invoices = ({navigation}: any) => {
   const [showToPicker, setShowToPicker] = useState(false);
 
   useExitAppOnBack();
+
+  useEffect(() => {
+    if (
+      Platform.OS === 'android' &&
+      UIManager.setLayoutAnimationEnabledExperimental
+    ) {
+      UIManager.setLayoutAnimationEnabledExperimental(true);
+    }
+  }, []);
+
+  const animateListChange = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+  };
 
   const fetchInvoices = useCallback(async () => {
     const user = auth().currentUser;
@@ -94,31 +125,193 @@ const Invoices = ({navigation}: any) => {
     fetchInvoices().finally(() => setRefreshing(false));
   };
 
-  // Apply search filter
-  let filtered = filterInvoices(allInvoices, searchQuery);
+  const filteredBase = useMemo(() => {
+    let next = filterInvoices(allInvoices, searchQuery);
 
-  // Apply date range filter
-  if (dateFrom || dateTo) {
-    filtered = filtered.filter(inv => {
-      const invDate = inv.createdAt?.toDate
-        ? moment(inv.createdAt.toDate())
-        : moment(inv.createdAt);
-      if (!invDate.isValid()) return false;
-      if (dateFrom && invDate.isBefore(moment(dateFrom).startOf('day'))) return false;
-      if (dateTo && invDate.isAfter(moment(dateTo).endOf('day'))) return false;
-      return true;
-    });
-  }
+    if (dateFrom || dateTo) {
+      next = next.filter(inv => {
+        const invDate = inv.createdAt?.toDate
+          ? moment(inv.createdAt.toDate())
+          : moment(inv.createdAt);
+        if (!invDate.isValid()) return false;
+        if (dateFrom && invDate.isBefore(moment(dateFrom).startOf('day'))) {
+          return false;
+        }
+        if (dateTo && invDate.isAfter(moment(dateTo).endOf('day'))) {
+          return false;
+        }
+        return true;
+      });
+    }
 
+    return next;
+  }, [allInvoices, dateFrom, dateTo, searchQuery]);
+
+  const statusCounts = useMemo(() => countByStatus(filteredBase), [filteredBase]);
+  const filtered = useMemo(
+    () => filterByStatus(filteredBase, activeStatus),
+    [activeStatus, filteredBase],
+  );
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
-  const paginated = paginateInvoices(filtered, currentPage, PER_PAGE);
+  const paginated = useMemo(
+    () => paginateInvoices(filtered, currentPage, PER_PAGE),
+    [currentPage, filtered],
+  );
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   const handleView = (invoice: Invoice) => {
     navigation.navigate('InvoicePreview', {
       formData: invoiceToFormData(invoice),
       jobItem: {id: invoice.jobId, jobId: invoice.customerId},
+      invoice,
       viewOnly: true,
     });
+  };
+
+  const openMarkPaidSheet = (invoice: Invoice) => {
+    if (!invoice.id || actionLoading === invoice.id) return;
+    setSelectedInvoice(invoice);
+    setPaidSheetVisible(true);
+  };
+
+  const closeMarkPaidSheet = () => {
+    if (actionLoading) return;
+    setPaidSheetVisible(false);
+    setSelectedInvoice(null);
+  };
+
+  const updateInvoiceLocal = (invoiceId: string, patch: Partial<Invoice>) => {
+    animateListChange();
+    setAllInvoices(prev =>
+      prev.map(inv => (inv.id === invoiceId ? {...inv, ...patch} : inv)),
+    );
+  };
+
+  const removeInvoiceLocal = (invoiceId: string) => {
+    animateListChange();
+    setAllInvoices(prev => {
+      return prev.filter(inv => inv.id !== invoiceId);
+    });
+  };
+
+  const restoreInvoiceLocal = (invoice: Invoice, index: number) => {
+    animateListChange();
+    setAllInvoices(prev => {
+      const exists = prev.some(inv => inv.id === invoice.id);
+      if (exists) return prev;
+      const next = [...prev];
+      const safeIndex = index >= 0 ? Math.min(index, next.length) : next.length;
+      next.splice(safeIndex, 0, invoice);
+      return next;
+    });
+  };
+
+  const handleConfirmPaid = async (opts: {paidAt: Date; method: string}) => {
+    const invoice = selectedInvoice;
+    if (!invoice?.id || actionLoading === invoice.id) return;
+
+    const previous = invoice;
+    setActionLoading(invoice.id);
+    setPaidSheetVisible(false);
+    updateInvoiceLocal(invoice.id, {
+      paymentStatus: 'paid',
+      paidAt: opts.paidAt,
+      paymentMethod: opts.method,
+    });
+
+    try {
+      await markAsPaid(invoice.id, {
+        paidAt: opts.paidAt,
+        method: opts.method,
+      });
+      setUndoInvoice(previous);
+      setUndoVisible(true);
+      showToast({
+        type: 'success',
+        title: 'Marked as paid',
+        message: 'Invoice moved to Paid',
+      });
+    } catch (error: any) {
+      updateInvoiceLocal(invoice.id, {
+        paymentStatus: getPaymentStatus(previous),
+        paidAt: previous.paidAt ?? null,
+        paymentMethod: previous.paymentMethod || '',
+      });
+      showToast({
+        type: 'error',
+        title: 'Error',
+        message: error?.message || 'Failed to mark invoice as paid',
+      });
+    } finally {
+      setActionLoading(null);
+      setSelectedInvoice(null);
+    }
+  };
+
+  const handleUndoPaid = async () => {
+    const invoice = undoInvoice;
+    if (!invoice?.id || actionLoading === invoice.id) return;
+
+    setUndoVisible(false);
+    setUndoInvoice(null);
+    setActionLoading(invoice.id);
+    updateInvoiceLocal(invoice.id, {
+      paymentStatus: 'unpaid',
+      paidAt: null,
+      paymentMethod: '',
+    });
+
+    try {
+      await revertToUnpaid(invoice.id);
+      showToast({
+        type: 'success',
+        title: 'Reverted',
+        message: 'Invoice is unpaid again',
+      });
+    } catch (error: any) {
+      await fetchInvoices();
+      showToast({
+        type: 'error',
+        title: 'Error',
+        message: error?.message || 'Failed to undo payment status',
+      });
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleRevert = async (invoice: Invoice) => {
+    if (!invoice.id || actionLoading === invoice.id) return;
+
+    setActionLoading(invoice.id);
+    updateInvoiceLocal(invoice.id, {
+      paymentStatus: 'unpaid',
+      paidAt: null,
+      paymentMethod: '',
+    });
+
+    try {
+      await revertToUnpaid(invoice.id);
+      showToast({
+        type: 'success',
+        title: 'Reverted',
+        message: 'Invoice moved to Unpaid',
+      });
+    } catch (error: any) {
+      await fetchInvoices();
+      showToast({
+        type: 'error',
+        title: 'Error',
+        message: error?.message || 'Failed to revert invoice',
+      });
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   const handleDownloadOrShare = async (invoice: Invoice, action: 'download' | 'share') => {
@@ -151,6 +344,44 @@ const Invoices = ({navigation}: any) => {
       }
     } finally {
       setActionLoading(null);
+    }
+  };
+
+  const openDeleteDialog = (invoice: Invoice) => {
+    if (!invoice.id || deleteLoading) return;
+    setDeleteTarget(invoice);
+  };
+
+  const closeDeleteDialog = () => {
+    if (deleteLoading) return;
+    setDeleteTarget(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    const invoice = deleteTarget;
+    if (!invoice?.id || deleteLoading) return;
+
+    const previousIndex = allInvoices.findIndex(inv => inv.id === invoice.id);
+    setDeleteLoading(true);
+    setDeleteTarget(null);
+    removeInvoiceLocal(invoice.id);
+
+    try {
+      await deleteInvoice(invoice);
+      showToast({
+        type: 'success',
+        title: 'Invoice deleted',
+        message: '',
+      });
+    } catch (error) {
+      restoreInvoiceLocal(invoice, previousIndex);
+      showToast({
+        type: 'error',
+        title: 'Failed to delete invoice. Try again.',
+        message: '',
+      });
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -250,6 +481,16 @@ const Invoices = ({navigation}: any) => {
               </View>
               <TouchableOpacity
                 activeOpacity={0.7}
+                onPress={() => navigation.navigate('PhoneBook')}
+                style={styles.filterButton}>
+                <MaterialCommunityIcons
+                  name="contacts-outline"
+                  size={RFPercentage(2.2)}
+                  color={Colors.gradient1}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                activeOpacity={0.7}
                 onPress={() => {
                   if (hasActiveFilters) {
                     clearDateFilter();
@@ -318,10 +559,21 @@ const Invoices = ({navigation}: any) => {
               </View>
             )}
 
+            <StatusTabs
+              active={activeStatus}
+              unpaidCount={statusCounts.unpaid}
+              paidCount={statusCounts.paid}
+              onChange={next => {
+                setActiveStatus(next);
+                setCurrentPage(1);
+              }}
+            />
+
             {/* Results count */}
             <View style={styles.resultHeader}>
               <Text style={styles.resultTitle}>
-                {filtered.length} invoice{filtered.length !== 1 ? 's' : ''}
+                {filtered.length} {activeStatus} invoice
+                {filtered.length !== 1 ? 's' : ''}
               </Text>
             </View>
           </>
@@ -333,8 +585,12 @@ const Invoices = ({navigation}: any) => {
               onView={() => handleView(item)}
               onShare={() => handleDownloadOrShare(item, 'share')}
               onDownload={() => handleDownloadOrShare(item, 'download')}
+              onMarkPaid={() => openMarkPaidSheet(item)}
+              onRevert={() => handleRevert(item)}
+              onDelete={() => openDeleteDialog(item)}
             />
-            {actionLoading === item.id && (
+            {(actionLoading === item.id ||
+              (deleteLoading && deleteTarget?.id === item.id)) && (
               <View style={styles.cardLoadingOverlay}>
                 <ActivityIndicator size="small" color={Colors.gradient1} />
               </View>
@@ -352,7 +608,9 @@ const Invoices = ({navigation}: any) => {
               text={
                 searchQuery || hasActiveFilters
                   ? 'No invoices match your filters'
-                  : 'No invoices yet\nGenerate your first invoice from a completed job'
+                  : activeStatus === 'paid'
+                  ? 'No paid invoices yet\nMark unpaid invoices as paid once payment is received'
+                  : 'No unpaid invoices yet\nGenerate an invoice or switch to Paid'
               }
             />
           )
@@ -430,6 +688,34 @@ const Invoices = ({navigation}: any) => {
           <Feather name="plus" size={RFPercentage(3)} color={Colors.white} />
         </TouchableOpacity>
       </View>
+
+      <MarkAsPaidSheet
+        visible={paidSheetVisible}
+        invoiceId={selectedInvoice?.invoiceId}
+        amount={selectedInvoice?.price}
+        toName={selectedInvoice?.toName}
+        loading={!!selectedInvoice?.id && actionLoading === selectedInvoice.id}
+        onClose={closeMarkPaidSheet}
+        onConfirm={handleConfirmPaid}
+      />
+
+      <UndoSnackbar
+        visible={undoVisible}
+        message="Marked as paid"
+        onUndo={handleUndoPaid}
+        onTimeout={() => {
+          setUndoVisible(false);
+          setUndoInvoice(null);
+        }}
+      />
+
+      <DeleteInvoiceDialog
+        visible={!!deleteTarget}
+        invoiceId={deleteTarget?.invoiceId}
+        loading={deleteLoading}
+        onCancel={closeDeleteDialog}
+        onConfirm={handleConfirmDelete}
+      />
 
       {/* Date pickers */}
       <DatePicker
