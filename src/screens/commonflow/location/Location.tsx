@@ -52,7 +52,7 @@ export default function Location({navigation, route}: any) {
         },
       );
       if (res.data.status === 'OK') setSuggestions(res.data.predictions);
-      else console.log('Places API Error:', res.data.status);
+      else console.log('Places API Error:', res.data);
     } catch (err: any) {
       console.log('Autocomplete Error:', err.message);
     }

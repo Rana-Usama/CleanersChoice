@@ -44,6 +44,16 @@ import CarIcon from '../../../../assets/svg/carIcon';
 import LawnIcon from '../../../../assets/svg/lawnIcon';
 import OtherIcon from '../../../../assets/svg/otherIcon';
 import EditIcon from '../../../../assets/svg/editIcon';
+import {Invoice} from '../../../../types/invoice';
+import {buildAnnualEarningsSummary} from '../../../../services/earningsService';
+
+const CURRENT_YEAR = new Date().getFullYear();
+
+const formatCurrency = (amount: number): string =>
+  `$${amount.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
 
 const AdminIcon = ({width = 12, height = 12}: {width?: number; height?: number}) => (
   <Svg width={width} height={height} viewBox="0 0 14 14" fill="none">
@@ -123,6 +133,10 @@ const Dashboard: React.FC = ({navigation}: any) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
   const [showCleanerCoachMarks, setShowCleanerCoachMarks] = useState(false);
+  const [earningsLoading, setEarningsLoading] = useState(false);
+  const [earningsSummary, setEarningsSummary] = useState(() =>
+    buildAnnualEarningsSummary([], CURRENT_YEAR),
+  );
 
   useExitAppOnBack();
 
@@ -165,6 +179,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
     setLoading(true);
     serviceDetails();
     fetchUserData();
+    fetchEarningsSummary();
     setTimeout(() => {
       setRefreshing(false);
       setLoading(false);
@@ -200,6 +215,34 @@ const Dashboard: React.FC = ({navigation}: any) => {
       }
     } catch (error) {}
   };
+
+  const fetchEarningsSummary = async () => {
+    const user = auth().currentUser;
+    if (!user) return;
+    setEarningsLoading(true);
+    try {
+      const snapshot = await firestore()
+        .collection('Invoices')
+        .where('cleanerId', '==', user.uid)
+        .where('paymentStatus', '==', 'paid')
+        .get();
+      const invoices = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Invoice[];
+      setEarningsSummary(buildAnnualEarningsSummary(invoices, CURRENT_YEAR));
+    } catch (error) {
+      console.error('Error fetching earnings summary:', error);
+    } finally {
+      setEarningsLoading(false);
+    }
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchEarningsSummary();
+    }, []),
+  );
 
   useFocusEffect(
     React.useCallback(() => {
@@ -367,6 +410,14 @@ const Dashboard: React.FC = ({navigation}: any) => {
 
   const cleanDescription =
     service?.description?.replace(/\s+/g, ' ').trim() || '';
+  const earningsYoyText =
+    earningsSummary.yoyPercent === null
+      ? earningsSummary.total > 0
+        ? `New vs ${CURRENT_YEAR - 1}`
+        : `No paid invoices in ${CURRENT_YEAR - 1}`
+      : `${earningsSummary.yoyPercent >= 0 ? '+' : ''}${earningsSummary.yoyPercent.toFixed(
+          0,
+        )}% vs ${CURRENT_YEAR - 1}`;
 
   const completeCleanerCoachMarks = async () => {
     setShowCleanerCoachMarks(false);
@@ -514,6 +565,51 @@ const Dashboard: React.FC = ({navigation}: any) => {
               />
             </View>
           </LinearGradient>
+        </Animated.View>
+
+        <Animated.View
+          entering={FadeInUp.duration(600)}
+          style={styles.earningsCard}>
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={() => navigation.navigate('Earnings')}
+            style={styles.earningsCardInner}>
+            <View style={styles.earningsIconWrap}>
+              <Icon
+                name="chart-bar"
+                size={RFPercentage(2.7)}
+                color={Colors.gradient1}
+              />
+            </View>
+            <View style={styles.earningsContent}>
+              <Text style={styles.earningsLabel}>Earnings</Text>
+              {earningsLoading ? (
+                <ActivityIndicator
+                  size="small"
+                  color={Colors.gradient1}
+                  style={styles.earningsLoader}
+                />
+              ) : (
+                <>
+                  <Text style={styles.earningsTotal}>
+                    {formatCurrency(earningsSummary.total)}
+                  </Text>
+                  <Text style={styles.earningsSubtext}>
+                    {earningsYoyText} · {earningsSummary.paidInvoices.length}{' '}
+                    paid invoice
+                    {earningsSummary.paidInvoices.length !== 1 ? 's' : ''}
+                  </Text>
+                </>
+              )}
+            </View>
+            <View style={styles.earningsArrowWrap}>
+              <Icon
+                name="chevron-right"
+                size={RFPercentage(2.4)}
+                color={Colors.secondaryText}
+              />
+            </View>
+          </TouchableOpacity>
         </Animated.View>
 
         {loading3 ? (
@@ -990,6 +1086,65 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     marginTop: 4,
+  },
+  earningsCard: {
+    marginHorizontal: 20,
+    marginTop: 16,
+    borderRadius: 20,
+    backgroundColor: Colors.white,
+    borderWidth: 1,
+    borderColor: Colors.blueBorderOverlay50,
+    shadowColor: Colors.shadowBlueGrayLight,
+    shadowOffset: {width: 0, height: 8},
+    shadowOpacity: 0.2,
+    shadowRadius: 14,
+    elevation: 8,
+  },
+  earningsCardInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    gap: 12,
+  },
+  earningsIconWrap: {
+    width: RFPercentage(5.4),
+    height: RFPercentage(5.4),
+    borderRadius: RFPercentage(1.4),
+    backgroundColor: Colors.primaryBlueOverlay10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  earningsContent: {
+    flex: 1,
+  },
+  earningsLabel: {
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.5),
+    color: Colors.secondaryText,
+  },
+  earningsTotal: {
+    fontFamily: Fonts.fontBold,
+    fontSize: RFPercentage(2.5),
+    color: Colors.primaryText,
+    marginTop: 2,
+  },
+  earningsSubtext: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.3),
+    color: Colors.secondaryText,
+    marginTop: 2,
+  },
+  earningsLoader: {
+    alignSelf: 'flex-start',
+    marginTop: RFPercentage(0.8),
+  },
+  earningsArrowWrap: {
+    width: RFPercentage(3.8),
+    height: RFPercentage(3.8),
+    borderRadius: RFPercentage(100),
+    backgroundColor: Colors.gray50,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   loadingContainer: {
     flex: 1,

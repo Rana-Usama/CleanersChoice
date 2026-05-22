@@ -1,12 +1,10 @@
 import {
   StyleSheet,
-  Text,
-  View,
   StatusBar,
   Platform,
   PermissionsAndroid,
 } from 'react-native';
-import React, {useEffect} from 'react';
+import React, {useCallback, useEffect, useRef} from 'react';
 import StackNavigator from './src/routers/StackNavigator';
 import {Provider} from 'react-redux';
 import store from './src/redux/Store';
@@ -19,9 +17,58 @@ import notifee, {EventType} from '@notifee/react-native';
 import {UnreadMessagesProvider} from './src/utils/UnreadMessagesContext';
 import {toastConfig} from './src/utils/toastConfig';
 import ReactNativeBlobUtil from 'react-native-blob-util';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
 
 const App: React.FC = () => {
   console.log('Running in', __DEV__ ? 'DEBUG' : 'RELEASE');
+  const displayedMessageIds = useRef(new Set<string>()).current;
+
+  // Display foreground notifications
+  const onDisplayNotification = useCallback(
+    async (remoteMessage: any) => {
+      const messageId =
+        remoteMessage.messageId || remoteMessage.data?.messageId || null;
+      if (messageId && displayedMessageIds.has(messageId)) {
+        return;
+      }
+      if (messageId) {
+        displayedMessageIds.add(messageId);
+      }
+      try {
+        if (!remoteMessage || !remoteMessage.notification) {
+          return;
+        }
+        await notifee.requestPermission({sound: true});
+        const channelId = await notifee.createChannel({
+          id: 'default',
+          sound: 'default',
+          name: 'Default Channel',
+        });
+        if (!channelId) {
+          return;
+        }
+        await notifee.cancelAllNotifications();
+
+        const {title, body} = remoteMessage.notification;
+        await notifee.displayNotification({
+          id: 'single-notification',
+          title: title || 'No Title',
+          body: body || 'No Body',
+          ios: {
+            sound: 'default',
+          },
+          android: {
+            channelId,
+            smallIcon: 'ic_notification',
+            pressAction: {id: 'default'},
+          },
+        });
+      } catch (error) {
+        console.log('Error displaying notification:', error);
+      }
+    },
+    [displayedMessageIds],
+  );
 
   useEffect(() => {
     const requestNotificationPermission = async () => {
@@ -62,7 +109,7 @@ const App: React.FC = () => {
 
     // Foreground messages
     const unsubscribeOnMessage = messaging().onMessage(async remoteMessage => {
-      console.log('onMessage received:', remoteMessage); 
+      console.log('onMessage received:', remoteMessage);
       try {
         onDisplayNotification(remoteMessage);
       } catch (error) {
@@ -79,7 +126,7 @@ const App: React.FC = () => {
       unsubscribeOnMessage();
       unsubscribeToken();
     };
-  }, []);
+  }, [onDisplayNotification]);
 
   // Handle notifee notification tap in foreground (e.g. invoice download)
   useEffect(() => {
@@ -101,66 +148,31 @@ const App: React.FC = () => {
     });
   }, []);
 
-  // Display foreground notifications
-  const displayedMessageIds = new Set();
-  const onDisplayNotification = async (remoteMessage: any) => {
-    const messageId =
-      remoteMessage.messageId || remoteMessage.data?.messageId || null;
-    if (messageId && displayedMessageIds.has(messageId)) {
-      return;
-    }
-    if (messageId) displayedMessageIds.add(messageId);
-    try {
-      if (!remoteMessage || !remoteMessage.notification) {
-        return;
-      }
-      await notifee.requestPermission({sound: true});
-      const channelId = await notifee.createChannel({
-        id: 'default',
-        sound: 'default',
-        name: 'Default Channel',
-      });
-      if (!channelId) return;
-      await notifee.cancelAllNotifications();
-
-      const {title, body} = remoteMessage.notification;
-      await notifee.displayNotification({
-        id: 'single-notification',
-        title: title || 'No Title',
-        body: body || 'No Body',
-        ios: {
-          sound: 'default', 
-        },
-        android: {
-          channelId,
-          smallIcon: 'ic_notification',
-          pressAction: {id: 'default'},
-        },
-      });
-    } catch (error) {
-      console.log('Error displaying notification:', error);
-    }
-  };
-
   return (
-    <StripeProvider publishableKey={PUBLISHABLE_KEY}>
-      <ThemeProvider>
-        <Provider store={store}>
-          <StatusBar
-            barStyle={'dark-content'}
-            translucent
-            backgroundColor="transparent"
-          />
-          <UnreadMessagesProvider>
-            <StackNavigator />
-          </UnreadMessagesProvider>
-          <Toast config={toastConfig} />
-        </Provider>
-      </ThemeProvider>
-    </StripeProvider>
+    <GestureHandlerRootView style={styles.gestureRoot}>
+      <StripeProvider publishableKey={PUBLISHABLE_KEY}>
+        <ThemeProvider>
+          <Provider store={store}>
+            <StatusBar
+              barStyle={'dark-content'}
+              translucent
+              backgroundColor="transparent"
+            />
+            <UnreadMessagesProvider>
+              <StackNavigator />
+            </UnreadMessagesProvider>
+            <Toast config={toastConfig} />
+          </Provider>
+        </ThemeProvider>
+      </StripeProvider>
+    </GestureHandlerRootView>
   );
 };
 
 export default App;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  gestureRoot: {
+    flex: 1,
+  },
+});

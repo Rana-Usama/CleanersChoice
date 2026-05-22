@@ -1,3 +1,7 @@
+// Payment status — independent of the legacy `status: 'sent'` field which
+// is preserved to keep the PDF/email flow untouched.
+export type PaymentStatus = 'unpaid' | 'paid';
+
 export interface Invoice {
   id?: string;
   invoiceId: string;
@@ -22,6 +26,12 @@ export interface Invoice {
   createdAt: any;
   updatedAt: any;
   pdfPath?: string;
+  // Payment tracking — optional on the type to remain backward compatible
+  // with already-saved invoices that pre-date this feature. Reads must
+  // default missing values to 'unpaid' / null.
+  paymentStatus?: PaymentStatus;
+  paidAt?: any | null;
+  paymentMethod?: string;
 }
 
 export interface InvoiceFormData {
@@ -40,6 +50,10 @@ export interface InvoiceFormData {
   cleanerCompanyName: string;
   toName: string;
   toEmail: string;
+  // Phone Book extras — not part of the printable invoice. Carried on the
+  // form so they can be used to upsert the contact after save.
+  customerPhone?: string;
+  customerAddress?: string;
 }
 
 export interface InvoiceValidationErrors {
