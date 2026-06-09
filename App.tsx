@@ -15,6 +15,7 @@ import {ThemeProvider} from '@rneui/themed';
 import messaging from '@react-native-firebase/messaging';
 import notifee, {EventType} from '@notifee/react-native';
 import {UnreadMessagesProvider} from './src/utils/UnreadMessagesContext';
+import {AlertProvider} from './src/components/AlertProvider';
 import {toastConfig} from './src/utils/toastConfig';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
@@ -158,9 +159,11 @@ const App: React.FC = () => {
               translucent
               backgroundColor="transparent"
             />
-            <UnreadMessagesProvider>
-              <StackNavigator />
-            </UnreadMessagesProvider>
+            <AlertProvider>
+              <UnreadMessagesProvider>
+                <StackNavigator />
+              </UnreadMessagesProvider>
+            </AlertProvider>
             <Toast config={toastConfig} />
           </Provider>
         </ThemeProvider>

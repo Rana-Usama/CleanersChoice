@@ -1,5 +1,6 @@
 import {useCallback, useRef} from 'react';
-import {Platform, Alert, PermissionsAndroid, Linking} from 'react-native';
+import {Platform, PermissionsAndroid, Linking} from 'react-native';
+import {useAppAlert} from '../components/AlertProvider';
 import DocumentPicker, {
   types as docPickerTypes,
 } from 'react-native-document-picker';
@@ -45,6 +46,7 @@ export const useAttachmentPicker = ({
   onAttachmentSelected,
 }: UseAttachmentPickerOptions) => {
   const isPickerActive = useRef(false);
+  const {showAlert} = useAppAlert();
 
   const handlePickDocument = useCallback(async () => {
     if (isPickerActive.current) return;
@@ -63,23 +65,29 @@ export const useAttachmentPicker = ({
           mimeType as (typeof ALLOWED_MIME_TYPES)[number],
         )
       ) {
-        Alert.alert(
-          'Unsupported File',
-          `Only ${ALLOWED_EXTENSIONS_LABEL} files are supported.`,
-        );
+        showAlert({
+          title: 'Unsupported File',
+          message: `Only ${ALLOWED_EXTENSIONS_LABEL} files are supported.`,
+          variant: 'info',
+        });
         return;
       }
 
       const fileSize = file.size || 0;
       if (fileSize === 0) {
-        Alert.alert('Invalid File', 'The selected file appears to be empty.');
+        showAlert({
+          title: 'Invalid File',
+          message: 'The selected file appears to be empty.',
+          variant: 'info',
+        });
         return;
       }
       if (fileSize > MAX_FILE_SIZE_BYTES) {
-        Alert.alert(
-          'File Too Large',
-          `Maximum file size is ${MAX_FILE_SIZE_LABEL}. Selected: ${formatFileSize(fileSize)}.`,
-        );
+        showAlert({
+          title: 'File Too Large',
+          message: `Maximum file size is ${MAX_FILE_SIZE_LABEL}. Selected: ${formatFileSize(fileSize)}.`,
+          variant: 'info',
+        });
         return;
       }
 
@@ -92,12 +100,16 @@ export const useAttachmentPicker = ({
     } catch (err: any) {
       if (!DocumentPicker.isCancel(err)) {
         console.warn('[AttachmentPicker] Document pick failed:', err);
-        Alert.alert('Error', 'Failed to pick document. Please try again.');
+        showAlert({
+          title: 'Error',
+          message: 'Failed to pick document. Please try again.',
+          variant: 'error',
+        });
       }
     } finally {
       isPickerActive.current = false;
     }
-  }, [onAttachmentSelected]);
+  }, [onAttachmentSelected, showAlert]);
 
   const handlePickImage = useCallback(async () => {
     if (isPickerActive.current) return;
@@ -111,10 +123,11 @@ export const useAttachmentPicker = ({
 
       const fileSize = image.size || 0;
       if (fileSize > MAX_FILE_SIZE_BYTES) {
-        Alert.alert(
-          'File Too Large',
-          `Maximum file size is ${MAX_FILE_SIZE_LABEL}. Selected: ${formatFileSize(fileSize)}.`,
-        );
+        showAlert({
+          title: 'File Too Large',
+          message: `Maximum file size is ${MAX_FILE_SIZE_LABEL}. Selected: ${formatFileSize(fileSize)}.`,
+          variant: 'info',
+        });
         return;
       }
 
@@ -131,12 +144,16 @@ export const useAttachmentPicker = ({
     } catch (err: any) {
       if (err?.code !== 'E_PICKER_CANCELLED') {
         console.warn('[AttachmentPicker] Image pick failed:', err);
-        Alert.alert('Error', 'Failed to pick image. Please try again.');
+        showAlert({
+          title: 'Error',
+          message: 'Failed to pick image. Please try again.',
+          variant: 'error',
+        });
       }
     } finally {
       isPickerActive.current = false;
     }
-  }, [onAttachmentSelected]);
+  }, [onAttachmentSelected, showAlert]);
 
   const handleTakePhoto = useCallback(async () => {
     if (isPickerActive.current) return;
@@ -145,14 +162,16 @@ export const useAttachmentPicker = ({
       if (Platform.OS === 'android') {
         const hasPermission = await requestCameraPermission();
         if (!hasPermission) {
-          Alert.alert(
-            'Permission Required',
-            'Camera permission is needed to take photos. Please enable it in Settings.',
-            [
+          showAlert({
+            title: 'Permission Required',
+            message:
+              'Camera permission is needed to take photos. Please enable it in Settings.',
+            variant: 'confirm',
+            buttons: [
               {text: 'Cancel', style: 'cancel'},
               {text: 'Open Settings', onPress: () => Linking.openSettings()},
             ],
-          );
+          });
           return;
         }
       }
@@ -165,10 +184,11 @@ export const useAttachmentPicker = ({
 
       const fileSize = image.size || 0;
       if (fileSize > MAX_FILE_SIZE_BYTES) {
-        Alert.alert(
-          'File Too Large',
-          `Maximum file size is ${MAX_FILE_SIZE_LABEL}. Selected: ${formatFileSize(fileSize)}.`,
-        );
+        showAlert({
+          title: 'File Too Large',
+          message: `Maximum file size is ${MAX_FILE_SIZE_LABEL}. Selected: ${formatFileSize(fileSize)}.`,
+          variant: 'info',
+        });
         return;
       }
 
@@ -185,12 +205,16 @@ export const useAttachmentPicker = ({
     } catch (err: any) {
       if (err?.code !== 'E_PICKER_CANCELLED') {
         console.warn('[AttachmentPicker] Camera failed:', err);
-        Alert.alert('Error', 'Failed to take photo. Please try again.');
+        showAlert({
+          title: 'Error',
+          message: 'Failed to take photo. Please try again.',
+          variant: 'error',
+        });
       }
     } finally {
       isPickerActive.current = false;
     }
-  }, [onAttachmentSelected]);
+  }, [onAttachmentSelected, showAlert]);
 
   return {
     handlePickDocument,

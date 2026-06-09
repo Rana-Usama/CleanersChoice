@@ -163,7 +163,7 @@ const Earnings = ({navigation}: any) => {
   const yoyText =
     summary.yoyPercent === null
       ? summary.total > 0
-        ? `New vs ${selectedYear - 1}`
+        ? `${CURRENT_YEAR} vs ${selectedYear - 1}`
         : `No paid invoices in ${selectedYear - 1}`
       : `${summary.yoyPercent >= 0 ? '+' : ''}${summary.yoyPercent.toFixed(
           0,

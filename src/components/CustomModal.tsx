@@ -23,6 +23,8 @@ interface props {
   iconName?: string;
   iconColor?: string;
   hidePrimaryButton?: boolean;
+  /** Renders a single full-width primary button (e.g. info/error dialogs). */
+  singleButton?: boolean;
   svgIconType?: 'confirm' | 'cancel';
 }
 
@@ -80,6 +82,17 @@ const CustomModal = (props: props) => {
           <GradientButton
             title="Ok"
             onPress={props.onPress3 ?? (() => {})}
+            style={styles.okButton}
+            textStyle={styles.okButtonText}
+          />
+        </View>
+      ) : props.singleButton ? (
+        <View style={styles.okButtonContainer}>
+          <GradientButton
+            title={props.buttonTitle ?? 'OK'}
+            onPress={props.onPress2 ?? (() => {})}
+            loading={props.loader}
+            disabled={props.loader}
             style={styles.okButton}
             textStyle={styles.okButtonText}
           />

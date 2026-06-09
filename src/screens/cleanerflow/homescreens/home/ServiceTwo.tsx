@@ -11,7 +11,6 @@ import {
   Dimensions,
   StatusBar,
   Platform,
-  Alert,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -32,12 +31,14 @@ import Animated, {
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import * as Progress from 'react-native-progress';
+import {useAppAlert} from '../../../../components/AlertProvider';
 
 const {width} = Dimensions.get('window');
 
 const MAX_IMAGES = 6; // Increased from 3 to 6 for better showcase
 
 const ServiceTwo: React.FC = ({navigation}: any) => {
+  const {showAlert} = useAppAlert();
   const [selectedImages, setSelectedImages] = useState(
     Array(MAX_IMAGES).fill(null),
   );
@@ -112,18 +113,24 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
   };
 
   const removeImage = (index: number) => {
-    Alert.alert('Remove Image', 'Are you sure you want to remove this image?', [
-      {text: 'Cancel', style: 'cancel'},
-      {
-        text: 'Remove',
-        style: 'destructive',
-        onPress: () => {
-          const newImages = [...selectedImages];
-          newImages[index] = null;
-          setSelectedImages(newImages);
+    showAlert({
+      title: 'Remove Image',
+      message: 'Are you sure you want to remove this image?',
+      variant: 'destructive',
+      iconName: 'image-remove',
+      buttons: [
+        {text: 'Cancel', style: 'cancel'},
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: () => {
+            const newImages = [...selectedImages];
+            newImages[index] = null;
+            setSelectedImages(newImages);
+          },
         },
-      },
-    ]);
+      ],
+    });
   };
 
   const saveImagesToFirestore = async () => {
@@ -141,17 +148,19 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
     }
 
     if (uploadedCount < 2) {
-      Alert.alert(
-        'Add More Photos',
-        'We recommend uploading at least 2-3 photos to showcase your work better. Continue anyway?',
-        [
+      showAlert({
+        title: 'Add More Photos',
+        message:
+          'We recommend uploading at least 2-3 photos to showcase your work better. Continue anyway?',
+        variant: 'confirm',
+        buttons: [
           {text: 'Add More', style: 'cancel'},
           {
             text: 'Continue',
             onPress: async () => await proceedWithSave(),
           },
         ],
-      );
+      });
     } else {
       await proceedWithSave();
     }

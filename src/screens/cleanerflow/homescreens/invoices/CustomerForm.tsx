@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Keyboard,
   Platform,
   ScrollView,
@@ -18,6 +17,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {Colors, Fonts} from '../../../../constants/Themes';
 import GradientButton from '../../../../components/GradientButton';
+import {useAppAlert} from '../../../../components/AlertProvider';
 import {showToast} from '../../../../utils/ToastMessage';
 import {
   buildMatchKey,
@@ -45,6 +45,7 @@ const EMPTY_FORM: CustomerFormData = {
 const CustomerForm = ({route, navigation}: any) => {
   const existing: Customer | null = route.params?.customer || null;
   const isEdit = !!existing?.id;
+  const {showAlert} = useAppAlert();
 
   const [form, setForm] = useState<CustomerFormData>(
     existing ? customerToFormData(existing) : EMPTY_FORM,
@@ -102,10 +103,11 @@ const CustomerForm = ({route, navigation}: any) => {
         const duplicate = await findCustomerByMatchKey(key);
         if (duplicate) {
           setSaving(false);
-          Alert.alert(
-            'Contact already exists',
-            `${duplicate.name} is already in your Phone Book. Open the existing contact instead?`,
-            [
+          showAlert({
+            title: 'Contact already exists',
+            message: `${duplicate.name} is already in your Phone Book. Open the existing contact instead?`,
+            variant: 'confirm',
+            buttons: [
               {text: 'Cancel', style: 'cancel'},
               {
                 text: 'Open existing',
@@ -113,7 +115,7 @@ const CustomerForm = ({route, navigation}: any) => {
                   navigation.replace('CustomerForm', {customer: duplicate}),
               },
             ],
-          );
+          });
           return;
         }
 
@@ -139,10 +141,12 @@ const CustomerForm = ({route, navigation}: any) => {
 
   const handleDelete = () => {
     if (!existing?.id) return;
-    Alert.alert(
-      'Delete contact?',
-      `${existing.name || 'This contact'} will be removed from your Phone Book. Existing invoices for this customer will not be affected.`,
-      [
+    showAlert({
+      title: 'Delete contact?',
+      message: `${existing.name || 'This contact'} will be removed from your Phone Book. Existing invoices for this customer will not be affected.`,
+      variant: 'destructive',
+      iconName: 'trash-can-outline',
+      buttons: [
         {text: 'Cancel', style: 'cancel'},
         {
           text: 'Delete',
@@ -171,7 +175,7 @@ const CustomerForm = ({route, navigation}: any) => {
           },
         },
       ],
-    );
+    });
   };
 
   return (

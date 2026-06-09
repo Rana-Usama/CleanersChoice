@@ -11,7 +11,6 @@ import {
   Platform,
   ActivityIndicator,
   Linking,
-  Alert,
 } from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import {
@@ -33,6 +32,7 @@ import PdfIcon from '../../../assets/svg/pdfIcon';
 import CancelIcon from '../../../assets/svg/CrossIcon';
 import AttachmentPickerCard from '../../../components/chat/AttachmentPickerCard';
 import {useAttachmentPicker} from '../../../hooks/useAttachmentPicker';
+import {useAppAlert} from '../../../components/AlertProvider';
 import {
   PendingAttachment,
   ChatAttachment,
@@ -46,6 +46,7 @@ import {getAvatarInitials} from '../../../utils/avatarInitials';
 
 const Chat = ({navigation, route}: any) => {
   const [messages, setMessages] = useState<IMessage[]>([]);
+  const {showAlert} = useAppAlert();
 
   const {
     chatId,
@@ -245,7 +246,11 @@ const Chat = ({navigation, route}: any) => {
     } catch {
       // Fallback: open in browser
       Linking.openURL(url).catch(() =>
-        Alert.alert('Error', 'Unable to open this file.'),
+        showAlert({
+          title: 'Error',
+          message: 'Unable to open this file.',
+          variant: 'error',
+        }),
       );
     }
   };
@@ -282,7 +287,11 @@ const Chat = ({navigation, route}: any) => {
         ReactNativeBlobUtil.ios.openDocument(res.path());
       }
     } catch {
-      Alert.alert('Download Failed', 'Unable to download this file. Please try again.');
+      showAlert({
+        title: 'Download Failed',
+        message: 'Unable to download this file. Please try again.',
+        variant: 'error',
+      });
     }
   };
 
@@ -333,7 +342,12 @@ const Chat = ({navigation, route}: any) => {
             try {
               attachmentData = await uploadAttachment(attachmentSnapshot);
             } catch {
-              Alert.alert('Upload Failed', 'Failed to upload attachment. Please check your connection and try again.');
+              showAlert({
+                title: 'Upload Failed',
+                message:
+                  'Failed to upload attachment. Please check your connection and try again.',
+                variant: 'error',
+              });
               return;
             }
           }
@@ -390,7 +404,7 @@ const Chat = ({navigation, route}: any) => {
         }
       })();
     },
-    [chatId, senderId, senderName, receiver, resolvedReceiverId, senderProfile, pendingAttachment],
+    [chatId, senderId, senderName, receiver, resolvedReceiverId, senderProfile, pendingAttachment, showAlert],
   );
 
   // Mark message as read

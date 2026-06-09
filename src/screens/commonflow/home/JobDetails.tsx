@@ -1,5 +1,4 @@
 import {
-  Alert,
   Image,
   SafeAreaView,
   ScrollView,
@@ -34,6 +33,7 @@ import moment from 'moment';
 import {showToast} from '../../../utils/ToastMessage';
 import CustomModal from '../../../components/CustomModal';
 import ModalWrapper from '../../../components/ModalWrapper';
+import {useAppAlert} from '../../../components/AlertProvider';
 
 const {width} = Dimensions.get('window');
 
@@ -41,6 +41,7 @@ const SERVER_URL = 'https://cleaners-choice-server.vercel.app';
 
 const JobDetails = ({route, navigation}: any) => {
   const {item} = route.params;
+  const {showAlert} = useAppAlert();
   const userData = useSelector((state: any) => state?.profile?.profileData);
   const [loading, setLoading] = useState(false);
   const [loading2, setLoading2] = useState(false);
@@ -389,10 +390,12 @@ const JobDetails = ({route, navigation}: any) => {
 
   // Delete expired/unconfirmed job
   const handleDeleteJob = () => {
-    Alert.alert(
-      'Delete Job',
-      'Are you sure you want to delete this job?',
-      [
+    showAlert({
+      title: 'Delete Job',
+      message: 'Are you sure you want to delete this job?',
+      variant: 'destructive',
+      iconName: 'trash-can-outline',
+      buttons: [
         {text: 'Cancel', style: 'cancel'},
         {
           text: 'Delete',
@@ -420,7 +423,7 @@ const JobDetails = ({route, navigation}: any) => {
           },
         },
       ],
-    );
+    });
   };
 
   // Navigate to PostJob in repost mode

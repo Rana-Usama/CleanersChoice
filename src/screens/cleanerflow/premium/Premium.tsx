@@ -9,7 +9,6 @@ import {
   StatusBar,
   Dimensions,
   ScrollView,
-  Alert,
   Platform,
   Linking,
 } from 'react-native';
@@ -29,6 +28,7 @@ import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as RNIap from 'react-native-iap';
 import {useAppleIAP} from '../../../hooks/useAppleIAP';
+import {useAppAlert} from '../../../components/AlertProvider';
 
 const {width} = Dimensions.get('window');
 
@@ -47,6 +47,7 @@ const EULA_URL =
 
 const Premium = ({navigation}: any) => {
   const insets = useSafeAreaInsets();
+  const {showAlert} = useAppAlert();
   const {initPaymentSheet, presentPaymentSheet} = useStripe();
   const [loading, setLoading] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
@@ -125,7 +126,11 @@ const Premium = ({navigation}: any) => {
       }
       return {setupIntentClientSecret, customerId};
     } catch (error) {
-      Alert.alert('Error', 'Could not create customer. Please try again.');
+      showAlert({
+        title: 'Error',
+        message: 'Could not create customer. Please try again.',
+        variant: 'error',
+      });
       return null;
     }
   };

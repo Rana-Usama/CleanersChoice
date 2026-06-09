@@ -413,7 +413,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
   const earningsYoyText =
     earningsSummary.yoyPercent === null
       ? earningsSummary.total > 0
-        ? `New vs ${CURRENT_YEAR - 1}`
+        ? `${CURRENT_YEAR} vs ${CURRENT_YEAR - 1}`
         : `No paid invoices in ${CURRENT_YEAR - 1}`
       : `${earningsSummary.yoyPercent >= 0 ? '+' : ''}${earningsSummary.yoyPercent.toFixed(
           0,
