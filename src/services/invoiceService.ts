@@ -116,7 +116,6 @@ export const generateInvoiceHtml = (invoice: InvoiceFormData): string => {
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Helvetica Neue', Arial, sans-serif; color: #334155; background: #fff; padding: 40px; }
     .invoice-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; border-bottom: 3px solid #407BFF; padding-bottom: 20px; }
-    .company-name { font-size: 24px; font-weight: 700; color: #407BFF; margin-bottom: 4px; }
     .invoice-title { font-size: 32px; font-weight: 700; color: #1E293B; text-align: right; }
     .invoice-id { font-size: 14px; color: #64748B; text-align: right; margin-top: 4px; }
     .info-section { display: flex; justify-content: space-between; margin-bottom: 32px; }
@@ -136,16 +135,11 @@ export const generateInvoiceHtml = (invoice: InvoiceFormData): string => {
     .due-date-section { margin-bottom: 32px; padding: 12px 16px; background: #F8FAFC; border-left: 4px solid #94A3B8; border-radius: 0 4px 4px 0; }
     .due-date-section span { font-size: 13px; color: #475569; }
     .due-date-section strong { color: #1E293B; }
-    .footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid #E2E8F0; text-align: center; font-size: 12px; color: #475569; }
   </style>
 </head>
 <body>
   <div class="invoice-header">
-    <div>
-      <div class="company-name">Cleaners Choice</div>
-      <p style="font-size:13px;color:#475569;">Professional cleaning service</p>
-    </div>
-    <div>
+    <div style="width:100%;">
       <div class="invoice-title">INVOICE</div>
       <div class="invoice-id">${escapeHtml(invoice.invoiceId)}</div>
     </div>
@@ -213,9 +207,6 @@ export const generateInvoiceHtml = (invoice: InvoiceFormData): string => {
     </div>
   </div>
 
-  <div class="footer">
-    <p style="margin-top:4px;">Powered by Cleaners Choice App</p>
-  </div>
 </body>
 </html>`;
 };

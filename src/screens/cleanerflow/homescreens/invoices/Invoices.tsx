@@ -464,6 +464,7 @@ const Invoices = ({navigation}: any) => {
                     setSearchQuery(text);
                     setCurrentPage(1);
                   }}
+                  numberOfLines={1}
                 />
                 {searchQuery.length > 0 && (
                   <TouchableOpacity

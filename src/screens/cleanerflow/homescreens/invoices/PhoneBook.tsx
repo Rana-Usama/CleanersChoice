@@ -1,7 +1,6 @@
 import React, {useCallback, useState} from 'react';
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Platform,
   RefreshControl,
@@ -19,6 +18,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import HeaderBack from '../../../../components/HeaderBack';
 import CustomerCard from '../../../../components/CustomerCard';
+import {useAppAlert} from '../../../../components/AlertProvider';
 import {Colors, Fonts} from '../../../../constants/Themes';
 import {Customer} from '../../../../types/customer';
 import {
@@ -30,6 +30,7 @@ import {
 import {showToast} from '../../../../utils/ToastMessage';
 
 const PhoneBook = ({navigation}: any) => {
+  const {showAlert} = useAppAlert();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -104,12 +105,14 @@ const PhoneBook = ({navigation}: any) => {
 
   const handleDelete = (customer: Customer) => {
     if (!customer.id) return;
-    Alert.alert(
-      'Delete contact?',
-      `${
+    showAlert({
+      title: 'Delete contact?',
+      message: `${
         customer.name || 'This contact'
       } will be removed from your Phone Book. Existing invoices for this customer will not be affected.`,
-      [
+      variant: 'destructive',
+      iconName: 'trash-can-outline',
+      buttons: [
         {text: 'Cancel', style: 'cancel'},
         {
           text: 'Delete',
@@ -141,7 +144,7 @@ const PhoneBook = ({navigation}: any) => {
           },
         },
       ],
-    );
+    });
   };
 
   return (
