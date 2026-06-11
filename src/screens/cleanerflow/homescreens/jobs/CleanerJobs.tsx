@@ -33,6 +33,7 @@ import Slider from '@react-native-community/slider';
 import NotFound from '../../../../components/NotFound';
 import {useExitAppOnBack} from '../../../../utils/ExitApp';
 import {useCurrentLocation} from '../../../../utils/userLocation';
+import LocationDisclosureModal from '../../../../components/LocationDisclosureModal';
 import {useSelector, useDispatch} from 'react-redux';
 import haversine from 'haversine';
 import {clearFilterLocation} from '../../../../redux/location/Actions';
@@ -72,7 +73,14 @@ type Job = {
 const CleanerJobs = () => {
   const profileData = useSelector((state: any) => state?.profile.profileData);
 
-  const {location, loading, error} = useCurrentLocation();
+  const {
+    location,
+    loading,
+    error,
+    disclosureVisible,
+    acceptDisclosure,
+    declineDisclosure,
+  } = useCurrentLocation();
   const navigation = useNavigation<any>();
   const [jobsData, setJobsData] = useState<Job[]>([]);
   const [loading2, setLoading] = useState(false);
@@ -278,7 +286,7 @@ const CleanerJobs = () => {
         {latitude: jobLoc.latitude, longitude: jobLoc.longitude},
         {unit: 'km'},
       );
-      return distance <= 20;
+      return distance <= 25;
     } catch (e) {
       return false;
     }
@@ -994,6 +1002,12 @@ const CleanerJobs = () => {
           </Modal>
         </View>
       )}
+
+      <LocationDisclosureModal
+        visible={disclosureVisible}
+        onAccept={acceptDisclosure}
+        onDecline={declineDisclosure}
+      />
     </View>
   );
 };
