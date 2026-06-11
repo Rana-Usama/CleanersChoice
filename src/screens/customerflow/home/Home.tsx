@@ -39,6 +39,7 @@ import {useSelector} from 'react-redux';
 import CustomModal from '../../../components/CustomModal';
 import GuestAuthModal from '../../../components/GuestAuthModal';
 import {useCurrentLocation} from '../../../utils/userLocation';
+import LocationDisclosureModal from '../../../components/LocationDisclosureModal';
 import {
   markCoachMarksSeenForRole,
   shouldShowCoachMarksForRole,
@@ -99,7 +100,8 @@ const Home = () => {
   );
   const userFlow = useSelector((state: any) => state.userFlow.userFlow);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const {location} = useCurrentLocation();
+  const {location, disclosureVisible, acceptDisclosure, declineDisclosure} =
+    useCurrentLocation();
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminViewAllServices, setAdminViewAllServices] = useState(false);
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
@@ -339,7 +341,7 @@ const Home = () => {
     };
 
     const distance = haversine(start, end, {unit: 'km'});
-    return distance <= 20;
+    return distance <= 25;
   });
 
   const adminViewingAllServices = isAdmin && adminViewAllServices;
@@ -391,7 +393,9 @@ const Home = () => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <>
+      {/* TouchableWithoutFeedback injects responder props into its child,
+          so the direct child must be a View, not a Fragment */}
+      <View style={{flex: 1}}>
         <StatusBar
           backgroundColor={Colors.gradient1}
           barStyle="light-content"
@@ -650,7 +654,7 @@ const Home = () => {
                         <Text style={styles.adminToggleDescription}>
                           {adminViewAllServices
                             ? 'Showing all services'
-                            : 'Showing services within 20km radius'}
+                            : 'Showing services within 25km radius'}
                         </Text>
                       </View>
                     </View>
@@ -957,7 +961,13 @@ const Home = () => {
           onSkip={handleSkipCustomerCoachMarks}
           onNext={handleNextCustomerCoachMarks}
         />
-      </>
+
+        <LocationDisclosureModal
+          visible={disclosureVisible}
+          onAccept={acceptDisclosure}
+          onDecline={declineDisclosure}
+        />
+      </View>
     </TouchableWithoutFeedback>
   );
 };

@@ -58,14 +58,15 @@ const ChangePasswordV2 = ({navigation}: any) => {
     }
     const credential = EmailAuthProvider.credential(
       user?.email,
-      values.oldPassword,
+      values?.oldPassword,
     );
     try {
       await user.reauthenticateWithCredential(credential);
-      await user.updatePassword(values.password);
+      await user.updatePassword(values?.password);
       await AsyncStorage.multiRemove(['email', 'password', 'role']);
       setModalVisible(true);
     } catch (error) {
+      console.log("error.......", error)
       showToast({
         type: 'error',
         title: 'Password Change',
@@ -252,8 +253,8 @@ const ChangePasswordV2 = ({navigation}: any) => {
         onBackdropPress={() => setModalVisible(false)}>
         <CustomModal
           passwordModal={true}
-          title="Chnage Password"
-          subTitle={'Your password hase been successfuly changed!'}
+          title="Change Password"
+          subTitle={'Your password has been successfuly changed!'}
           onPress3={() => {
             navigation.navigate('SignIn');
             setModalVisible(false);
