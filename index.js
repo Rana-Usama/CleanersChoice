@@ -10,6 +10,10 @@ import {FirebaseApp, initializeApp} from '@react-native-firebase/app';
 import messaging from '@react-native-firebase/messaging';
 import notifee, {EventType} from '@notifee/react-native';
 import ReactNativeBlobUtil from 'react-native-blob-util';
+import {applyGlobalFontScaleCap} from './src/utils/fontScaling';
+
+// Cap OS accessibility font scaling app-wide before anything renders.
+applyGlobalFontScaleCap();
 
 const handleNotificationNavigation = screen => {
   if (!screen) return;
