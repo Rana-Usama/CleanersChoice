@@ -1275,14 +1275,13 @@ const styles = StyleSheet.create({
   },
   description: {
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     color: '#A5A9B0',
-    lineHeight: 23,
   },
   readMore: {
     fontFamily: Fonts.semiBold,
     color: '#407BFF',
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
   },
   seeAll: {
     fontFamily: Fonts.semiBold,

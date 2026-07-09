@@ -286,7 +286,7 @@ const CleanerJobs = () => {
         {latitude: jobLoc.latitude, longitude: jobLoc.longitude},
         {unit: 'km'},
       );
-      return distance <= 25;
+      return distance <= 50;
     } catch (e) {
       return false;
     }
