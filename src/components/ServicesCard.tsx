@@ -22,7 +22,9 @@ interface ServicesCardProps {
   covers: string[]; // URLs of service images
   icon?: string | null; // service icon URL
   name: string;
-  price: number;
+  // Undefined/null when the cleaner hasn't added any packages yet - shown
+  // as "Custom Pricing" instead of a $0 price.
+  price?: number | null;
   rating?: number;
   star?: ImageSourcePropType;
   location?: Location;
@@ -43,6 +45,8 @@ const ServicesCard: React.FC<ServicesCardProps> = ({
 }) => {
   const [step, setStep] = useState<number>(0);
 
+  const hasPrice = price !== undefined && price !== null && !isNaN(price);
+
   const createdAtDate = new Date(createdAt._seconds * 1000);
   const formattedDate = moment(createdAtDate).format('DD MMMM, YYYY');
 
@@ -62,7 +66,9 @@ const ServicesCard: React.FC<ServicesCardProps> = ({
               colors={[Colors.gradient1, Colors.gradient2]}
               style={styles.priceGradient}
             >
-              <Text style={styles.priceBadgeText}>${price}</Text>
+              <Text style={styles.priceBadgeText}>
+                {hasPrice ? `$${price}` : 'Custom Pricing'}
+              </Text>
             </LinearGradient>
           </View>
 
@@ -110,14 +116,22 @@ const ServicesCard: React.FC<ServicesCardProps> = ({
 
           {/* Footer */}
           <View style={styles.footer}>
-            <Text style={styles.startingText}>
-              Starting price{' '}
-              <Text
-                style={{ color: Colors.gradient1, fontFamily: Fonts.semiBold }}
-              >
-                {price}$
+            {hasPrice ? (
+              <Text style={styles.startingText}>
+                Starting price{' '}
+                <Text
+                  style={{ color: Colors.gradient1, fontFamily: Fonts.semiBold }}
+                >
+                  ${price}
+                </Text>
               </Text>
-            </Text>
+            ) : (
+              <Text
+                style={[styles.startingText, { color: Colors.gradient1, fontFamily: Fonts.semiBold }]}
+              >
+                Custom Pricing
+              </Text>
+            )}
             <View style={styles.availabilityDot} />
           </View>
         </View>

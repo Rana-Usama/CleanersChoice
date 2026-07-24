@@ -361,16 +361,13 @@ const Dashboard: React.FC = ({navigation}: any) => {
   const [profileCompletion, setProfileCompletionValue] = useState('50');
   useEffect(() => {
     if (service) {
+      // Packages are optional - a service with 0 packages still counts as
+      // a fully completed profile as long as the core fields are set.
       const completion =
         service?.availability?.length > 0 &&
         service?.description?.length > 0 &&
-        service?.location?.name?.length > 0 &&
-        service?.packages?.length > 0
+        service?.location?.name?.length > 0
           ? '100'
-          : service?.availability?.length > 0 &&
-            service?.description?.length > 0 &&
-            service?.location?.name?.length > 0
-          ? '80'
           : '50';
 
       setProfileCompletionValue(completion);
@@ -734,6 +731,14 @@ const Dashboard: React.FC = ({navigation}: any) => {
                       <Text style={styles.editButtonLabel}>Edit</Text>
                     </TouchableOpacity>
                   </View>
+                  {!service?.packages?.length ? (
+                    <View style={{paddingHorizontal: 20}}>
+                      <Text style={styles.packageDescription}>
+                        No packages added yet. Packages are optional — add
+                        one anytime.
+                      </Text>
+                    </View>
+                  ) : (
                   <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
@@ -778,6 +783,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
                       </Animated.View>
                     ))}
                   </ScrollView>
+                  )}
                 </View>
 
                 {/* Detailed Availability */}

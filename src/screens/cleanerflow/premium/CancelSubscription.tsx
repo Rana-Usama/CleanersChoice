@@ -47,6 +47,9 @@ const CancelSubscription = () => {
     string | null
   >(null);
   const user = auth().currentUser;
+  const [subscriptionEndDate, setSubscriptionEndDate] = useState<number | null>(
+    null,
+  );
 
   const isApple = subscriptionProvider === 'apple';
 
@@ -67,11 +70,21 @@ const CancelSubscription = () => {
         setSubscriptionId(userData?.subscriptionId);
         setCancel(userData?.cancelSubscription);
         setSubscriptionProvider(userData?.subscriptionProvider || null);
+        setSubscriptionEndDate(userData?.subscriptionEndDate || null);
       }
     };
 
     fetchSubscriptionId();
   }, [user?.uid]);
+
+  const formatDate = (timestamp: number | null) => {
+    if (!timestamp) return '';
+    return new Date(timestamp).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
 
   // Cancel subscription — branches on provider
   const cancelSubscription = async () => {
@@ -193,6 +206,13 @@ const CancelSubscription = () => {
                   </Text>
                 )}
                 <Text style={styles.pricePeriod}>per month</Text>
+
+                {subscriptionEndDate && (
+                  <Text style={styles.renewalDateText}>
+                    {cancel ? 'Access until ' : 'Renews on '}
+                    {formatDate(subscriptionEndDate)}
+                  </Text>
+                )}
               </View>
             </View>
           </View>
@@ -229,8 +249,11 @@ const CancelSubscription = () => {
             <View style={styles.warningContent}>
               <Text style={styles.warningTitle}>Important Notice</Text>
               <Text style={styles.warningText}>
-                You will lose access to all premium features after your current
-                billing cycle ends.
+                You will lose access to all premium features{' '}
+                {subscriptionEndDate
+                  ? `on ${formatDate(subscriptionEndDate)}`
+                  : 'after your current billing cycle ends'}
+                .
               </Text>
             </View>
           </View>
@@ -333,7 +356,9 @@ const CancelSubscription = () => {
               <Text style={styles.modalNote}>
                 {isApple
                   ? 'You will be redirected to the App Store to manage your subscription.'
-                  : 'Your subscription will remain active until the end of the current billing period.'}
+                  : `Your subscription will remain active until ${formatDate(
+                      subscriptionEndDate,
+                    )}.`}
               </Text>
 
               {/* Modal Buttons */}
@@ -684,5 +709,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.darkOverlay80,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  renewalDateText: {
+    color: Colors.secondaryText,
+    fontSize: RFPercentage(1.4),
+    fontFamily: Fonts.fontRegular,
+    marginTop: RFPercentage(0.5),
   },
 });

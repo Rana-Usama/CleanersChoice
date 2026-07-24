@@ -69,8 +69,14 @@ const JobCard = (props: props) => {
         {/* Footer with Price and CTA */}
         <View style={styles.footer}>
           <View style={styles.priceSection}>
-            <Text style={styles.budgetText}>Budget</Text>
-            <Text style={styles.priceText}>{props.price}$</Text>
+            {props.price ? (
+              <>
+                <Text style={styles.budgetText}>Budget</Text>
+                <Text style={styles.priceText}>${props.price}</Text>
+              </>
+            ) : (
+              <Text style={styles.priceText}>Custom Budget</Text>
+            )}
           </View>
 
           <TouchableOpacity

@@ -545,7 +545,7 @@ const InvoiceForm = ({route, navigation}: any) => {
               <View>
                 <Text style={styles.budgetFieldLabel}>Total Price</Text>
                 <InputField
-                  placeholder="$"
+                  placeholder="Add Budget or Amount"
                   customStyle={[styles.budgetInput, budgetErrors.price && styles.budgetInputError]}
                   value={form.price}
                   onChangeText={handleBudgetChange}
@@ -572,7 +572,7 @@ const InvoiceForm = ({route, navigation}: any) => {
                 </View>
                 <View style={styles.budgetRow}>
                   <InputField
-                    placeholder="$"
+                    placeholder="Add Rate"
                     customStyle={[styles.budgetInputHalf, budgetErrors.hourlyRate && styles.budgetInputError]}
                     value={form.hourlyRate}
                     onChangeText={(text: string) => {
@@ -619,7 +619,7 @@ const InvoiceForm = ({route, navigation}: any) => {
                 </View>
                 <View style={styles.budgetRow}>
                   <InputField
-                    placeholder="$"
+                    placeholder="Add Price"
                     customStyle={[styles.budgetInputHalf, budgetErrors.pricePerSqFt && styles.budgetInputError]}
                     value={form.pricePerSqFt}
                     onChangeText={(text: string) => {
