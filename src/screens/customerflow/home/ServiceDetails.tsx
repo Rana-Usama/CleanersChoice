@@ -530,42 +530,51 @@ const ServiceDetails: React.FC = ({route}: any) => {
               <Text style={styles.cardTitle}>Available Packages</Text>
             </View>
 
-            <View style={styles.packagesHeader}>
-              <View>
-                <Text style={styles.startingFromText}>Starting from</Text>
-                <Text style={styles.startingPrice}>
-                  ${item.packages?.[0]?.price || 0}
-                </Text>
-              </View>
-              <View style={styles.bestValueBadge}>
-                <MaterialCommunityIcons
-                  name="crown"
-                  size={14}
-                  color={Colors.white}
-                />
-                <Text style={styles.bestValueText}>Best Value</Text>
-              </View>
-            </View>
+            {Array.isArray(item.packages) && item.packages.length > 0 ? (
+              <>
+                <View style={styles.packagesHeader}>
+                  <View>
+                    <Text style={styles.startingFromText}>Starting from</Text>
+                    <Text style={styles.startingPrice}>
+                      ${item.packages?.[0]?.price || 0}
+                    </Text>
+                  </View>
+                  <View style={styles.bestValueBadge}>
+                    <MaterialCommunityIcons
+                      name="crown"
+                      size={14}
+                      color={Colors.white}
+                    />
+                    <Text style={styles.bestValueText}>Best Value</Text>
+                  </View>
+                </View>
 
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.packagesScroll}>
-              {item.packages.map((pkg: any, index: any) => (
-                <ServicePackage
-                  key={index}
-                  name={`${pkg.name || `Package ${index + 1}`}`}
-                  price={pkg.price}
-                  detail={pkg.details}
-                  onPress={() => {
-                    setSelectedPackage(pkg);
-                    setPackageModalVisible(true);
-                  }}
-                  // isSelected
-                  // isFeatured
-                />
-              ))}
-            </ScrollView>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={styles.packagesScroll}>
+                  {item.packages.map((pkg: any, index: any) => (
+                    <ServicePackage
+                      key={index}
+                      name={`${pkg.name || `Package ${index + 1}`}`}
+                      price={pkg.price}
+                      detail={pkg.details}
+                      onPress={() => {
+                        setSelectedPackage(pkg);
+                        setPackageModalVisible(true);
+                      }}
+                      // isSelected
+                      // isFeatured
+                    />
+                  ))}
+                </ScrollView>
+              </>
+            ) : (
+              <Text style={styles.startingFromText}>
+                This cleaner hasn't listed any packages yet. Request a custom
+                offer to get pricing.
+              </Text>
+            )}
           </View>
 
           {/* Service Provider Info */}
@@ -622,10 +631,16 @@ const ServiceDetails: React.FC = ({route}: any) => {
       {/* Fixed Bottom Action Bar */}
       <View style={styles.bottomActionBar}>
         <View style={styles.priceContainer}>
-          <Text style={styles.startingFrom}>Starting from</Text>
-          <Text style={styles.bottomPrice}>
-            ${item.packages?.[0]?.price || 0}
-          </Text>
+          {Array.isArray(item.packages) && item.packages.length > 0 ? (
+            <>
+              <Text style={styles.startingFrom}>Starting from</Text>
+              <Text style={styles.bottomPrice}>
+                ${item.packages?.[0]?.price || 0}
+              </Text>
+            </>
+          ) : (
+            <Text style={styles.startingFrom}>Custom pricing</Text>
+          )}
         </View>
 
         <GradientButton

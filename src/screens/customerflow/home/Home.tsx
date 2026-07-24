@@ -106,6 +106,18 @@ const Home = () => {
   const [adminViewAllServices, setAdminViewAllServices] = useState(false);
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
   const [showCustomerCoachMarks, setShowCustomerCoachMarks] = useState(false);
+  // Guards against the location permission modal being presented while the
+  // coach marks modal is still open/closing. Both are native RN <Modal>
+  // instances, and mounting one while the other is still tearing down can
+  // deadlock the UI thread, so we only flip this to true once the coach
+  // marks flow is fully out of the way.
+  const [locationModalAllowed, setLocationModalAllowed] = useState(false);
+  const isMountedRef = useRef(true);
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   const selectedLocation = useSelector(
     (state: any) =>
@@ -136,6 +148,9 @@ const Home = () => {
         if (userFlow === 'Guest') {
           if (isActive) {
             setShowCustomerCoachMarks(false);
+            // No coach marks for guests, so the location modal is free to
+            // show as soon as it needs to.
+            setLocationModalAllowed(true);
           }
           return;
         }
@@ -143,6 +158,10 @@ const Home = () => {
         const shouldShow = await shouldShowCoachMarksForRole('customer');
         if (isActive) {
           setShowCustomerCoachMarks(shouldShow);
+          // Only allow the location modal to show immediately if the coach
+          // marks aren't going to be displayed this session. Otherwise it
+          // stays gated until the coach marks flow explicitly completes.
+          setLocationModalAllowed(!shouldShow);
         }
       };
 
@@ -201,6 +220,8 @@ const Home = () => {
             };
           })
           .filter(
+            // Packages are optional - a service is still listed to
+            // customers even if the cleaner published it without any.
             (service): service is Service =>
               !!service.createdAt &&
               !!service.name &&
@@ -209,9 +230,7 @@ const Home = () => {
               !!service.type &&
               !!service.location &&
               Array.isArray(service.serviceImages) &&
-              service.serviceImages.length > 0 &&
-              Array.isArray(service.packages) &&
-              service.packages.length > 0,
+              service.serviceImages.length > 0,
           );
 
         setServicesData(servicesArray);
@@ -381,6 +400,17 @@ const Home = () => {
   const completeCustomerCoachMarks = async () => {
     setShowCustomerCoachMarks(false);
     await markCoachMarksSeenForRole('customer');
+
+    // Give the coach marks' native Modal time to finish dismissing before
+    // presenting the location disclosure Modal. Flipping both modals'
+    // visibility in the same tick can cause two native Modal windows to be
+    // open/closing at once, which freezes the screen until the app is
+    // force-closed and reopened.
+    setTimeout(() => {
+      if (isMountedRef.current) {
+        setLocationModalAllowed(true);
+      }
+    }, 400);
   };
 
   const handleSkipCustomerCoachMarks = () => {
@@ -756,7 +786,7 @@ const Home = () => {
                               covers={item?.serviceImages ?? []}
                               name={item?.name ?? ''}
                               icon={item?.image}
-                              price={item?.packages?.[0]?.price ?? 0}
+                              price={item?.packages?.[0]?.price}
                               star={IMAGES?.star}
                               rating={5}
                               location={item?.location}
@@ -962,7 +992,7 @@ const Home = () => {
       />
 
       <LocationDisclosureModal
-        visible={disclosureVisible}
+        visible={disclosureVisible && locationModalAllowed}
         onAccept={acceptDisclosure}
         onDecline={declineDisclosure}
       />

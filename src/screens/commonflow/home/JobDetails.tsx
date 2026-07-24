@@ -158,7 +158,7 @@ const JobDetails = ({route, navigation}: any) => {
 
   const getBudgetDisplayText = () => {
     const total = parseNumericValue(item?.priceRange);
-    const totalText = total > 0 ? `$${total}` : 'Not set';
+    const totalText = total > 0 ? `$${total}` : 'Custom Budget';
 
     if (item?.budgetType === 'hourly') {
       const rate = parseNumericValue(item?.hourlyRate);

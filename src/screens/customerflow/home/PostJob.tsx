@@ -195,7 +195,8 @@ const PostJob = ({route}: any) => {
       return;
     }
 
-    // Validate budget based on type
+    // Budget is optional - compute it if the customer entered one, but never
+    // block job submission when it's missing.
     let computedBudget = 0;
     if (budgetType === 'flat') {
       computedBudget = parseInt(budget.replace(/[^0-9]/g, ''), 10) || 0;
@@ -209,15 +210,6 @@ const PostJob = ({route}: any) => {
       computedBudget = ppsf * sf;
     }
 
-    if (!computedBudget || computedBudget < 1) {
-      showToast({
-        type: 'info',
-        title: 'Invalid Amount',
-        message: 'Budget must be greater than 0',
-      });
-      return;
-    }
-
     setLoading(true);
     try {
       const jobData: any = {
@@ -225,7 +217,9 @@ const PostJob = ({route}: any) => {
         description: Description.trim(),
         type: selectedType,
         location: userLocation,
-        priceRange: String(computedBudget),
+        // Empty string (not "0") when no budget was entered, so downstream
+        // screens/invoices can tell "no budget" apart from an actual $0.
+        priceRange: computedBudget > 0 ? String(computedBudget) : '',
         budgetType: budgetType,
         remarks: remarks ? remarks.trim() : '',
         jobId: user.uid,
@@ -626,7 +620,11 @@ const PostJob = ({route}: any) => {
                       <DollarIcon width={20} height={20} color={Colors.gradient1} />
                     </View>
                     <Text style={styles.cardTitle}>Budget</Text>
+                    <Text style={styles.optionalBadge}>Optional</Text>
                   </View>
+                  <Text style={[styles.cardHint, {marginTop: 0, marginBottom: RFPercentage(1.5)}]}>
+                    Leave this blank to let cleaners send you custom offers
+                  </Text>
 
                   {/* Budget Type Tabs */}
                   <View style={styles.budgetTabs}>
@@ -805,11 +803,21 @@ const PostJob = ({route}: any) => {
                     <Text style={styles.budgetHint}>
                       Total cost for the service{' '}
                       <Text style={styles.budgetHintAmount}>
-                        {budgetType === 'flat'
-                          ? (budget || '$0')
-                          : budgetType === 'hourly'
-                          ? `$${(parseInt(hourlyRate.replace(/[^0-9]/g, ''), 10) || 0) * (parseInt(hours, 10) || 0)}`
-                          : `$${(parseInt(pricePerSqFt.replace(/[^0-9]/g, ''), 10) || 0) * (parseInt(sqFt, 10) || 0)}`}
+                        {(() => {
+                          let total = 0;
+                          if (budgetType === 'flat') {
+                            total = parseInt(budget.replace(/[^0-9]/g, ''), 10) || 0;
+                          } else if (budgetType === 'hourly') {
+                            total =
+                              (parseInt(hourlyRate.replace(/[^0-9]/g, ''), 10) || 0) *
+                              (parseInt(hours, 10) || 0);
+                          } else {
+                            total =
+                              (parseInt(pricePerSqFt.replace(/[^0-9]/g, ''), 10) || 0) *
+                              (parseInt(sqFt, 10) || 0);
+                          }
+                          return total > 0 ? `$${total}` : 'Custom Budget';
+                        })()}
                       </Text>
                     </Text>
                   </View>
@@ -905,14 +913,14 @@ const PostJob = ({route}: any) => {
                       <Text style={styles.summaryLabel}>Budget:</Text>
                       <Text style={styles.summaryValue}>
                         {budgetType === 'flat'
-                          ? budget || 'Not set'
+                          ? budget || 'Custom Budget'
                           : budgetType === 'hourly'
                           ? hourlyRate && hours
                             ? `${hourlyRate}/hr × ${hours}hrs`
-                            : 'Not set'
+                            : 'Custom Budget'
                           : pricePerSqFt && sqFt
                           ? `${pricePerSqFt}/sqft × ${sqFt}sqft`
-                          : 'Not set'}
+                          : 'Custom Budget'}
                       </Text>
                     </View>
                     <View style={styles.summaryRow}>
@@ -1122,6 +1130,16 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.fontRegular,
     color: Colors.secondaryText,
     marginTop: RFPercentage(1),
+  },
+  optionalBadge: {
+    fontSize: RFPercentage(1.2),
+    fontFamily: Fonts.fontMedium,
+    color: Colors.secondaryText,
+    backgroundColor: Colors.lightGrayBg,
+    paddingHorizontal: RFPercentage(0.8),
+    paddingVertical: RFPercentage(0.2),
+    borderRadius: RFPercentage(1),
+    overflow: 'hidden',
   },
   descriptionContainer: {
     backgroundColor: Colors.inputBg,
