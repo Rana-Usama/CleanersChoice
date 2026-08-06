@@ -1,0 +1,12 @@
+{
+  "extends": "./node_modules/@react-native/typescript-config/tsconfig.json",
+  "compilerOptions": {"noEmit": true, "types": ["react-native"]},
+  "files": [
+    "src/utils/imageCache.ts",
+    "src/components/CachedImage.tsx",
+    "src/components/ServicesCard.tsx",
+    "src/screens/customerflow/home/ServiceDetails.tsx",
+    "src/screens/customerflow/home/Home.tsx",
+    "src/screens/cleanerflow/homescreens/home/ServiceTwo.tsx"
+  ]
+}

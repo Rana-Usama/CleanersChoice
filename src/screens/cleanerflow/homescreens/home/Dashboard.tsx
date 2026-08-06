@@ -609,6 +609,75 @@ const Dashboard: React.FC = ({navigation}: any) => {
           </TouchableOpacity>
         </Animated.View>
 
+        {/*
+          Admin Controls — only rendered for users with Users.admin === true.
+          `isAdmin` is the same flag already used for the Admin badge above, so
+          no extra fetch is introduced. Regular cleaners render nothing here and
+          the layout is byte-identical to before.
+        */}
+        {isAdmin && (
+          <Animated.View
+            entering={FadeInUp.duration(600)}
+            style={styles.adminEntryCard}>
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={() => navigation.navigate('AdminDashboard')}
+              style={styles.adminEntryInner}>
+              <View style={styles.earningsIconWrap}>
+                <Icon
+                  name="shield-account-outline"
+                  size={RFPercentage(2.7)}
+                  color={Colors.gradient1}
+                />
+              </View>
+              <View style={styles.adminEntryContent}>
+                <Text style={styles.adminEntryTitle}>Admin Controls</Text>
+                <Text style={styles.adminEntrySubtext}>
+                  Monitor all jobs and cleaner services
+                </Text>
+              </View>
+              <View style={styles.adminEntryArrowWrap}>
+                <Icon
+                  name="chevron-right"
+                  size={RFPercentage(2.4)}
+                  color={Colors.secondaryText}
+                />
+              </View>
+            </TouchableOpacity>
+          </Animated.View>
+        )}
+
+        {/* Intro video replay — same screen used by Settings -> Watch Intro Video */}
+        <Animated.View
+          entering={FadeInUp.duration(600)}
+          style={styles.introCard}>
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={() => navigation.navigate('CleanerIntroVideo')}
+            style={styles.introCardInner}>
+            <View style={styles.introIconWrap}>
+              <Icon
+                name="play-circle-outline"
+                size={RFPercentage(2.7)}
+                color={Colors.gradient1}
+              />
+            </View>
+            <View style={styles.introContent}>
+              <Text style={styles.introTitle}>Watch Intro Video</Text>
+              <Text style={styles.introSubtext}>
+                See how Cleaners Choice works
+              </Text>
+            </View>
+            <View style={styles.introArrowWrap}>
+              <Icon
+                name="chevron-right"
+                size={RFPercentage(2.4)}
+                color={Colors.secondaryText}
+              />
+            </View>
+          </TouchableOpacity>
+        </Animated.View>
+
         {loading3 ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={Colors.blueMedium} />
@@ -983,7 +1052,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 10},
     shadowOpacity: 0.2,
     shadowRadius: 20,
-    elevation: 10,
+    // elevation: 10,
   },
   profileGradient: {
     borderRadius: 24,
@@ -1104,7 +1173,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 8},
     shadowOpacity: 0.2,
     shadowRadius: 14,
-    elevation: 8,
+    // elevation: 8,
   },
   earningsCardInner: {
     flexDirection: 'row',
@@ -1143,6 +1212,57 @@ const styles = StyleSheet.create({
   earningsLoader: {
     alignSelf: 'flex-start',
     marginTop: RFPercentage(0.8),
+  },
+
+  // Intro video card — mirrors the earnings card so the two read as one system.
+  introCard: {
+    marginHorizontal: 20,
+    marginTop: 16,
+    borderRadius: 20,
+    backgroundColor: Colors.white,
+    borderWidth: 1,
+    borderColor: Colors.blueBorderOverlay50,
+    shadowColor: Colors.shadowBlueGrayLight,
+    shadowOffset: {width: 0, height: 8},
+    shadowOpacity: 0.2,
+    shadowRadius: 14,
+    // elevation: 8,
+  },
+  introCardInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    gap: 12,
+  },
+  introIconWrap: {
+    width: RFPercentage(5.4),
+    height: RFPercentage(5.4),
+    borderRadius: RFPercentage(1.4),
+    backgroundColor: Colors.primaryBlueOverlay10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  introContent: {
+    flex: 1,
+  },
+  introTitle: {
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.9),
+    color: Colors.primaryText,
+  },
+  introSubtext: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.3),
+    color: Colors.secondaryText,
+    marginTop: 2,
+  },
+  introArrowWrap: {
+    width: RFPercentage(3.8),
+    height: RFPercentage(3.8),
+    borderRadius: RFPercentage(100),
+    backgroundColor: Colors.gray50,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   earningsArrowWrap: {
     width: RFPercentage(3.8),
@@ -1622,6 +1742,55 @@ const styles = StyleSheet.create({
     width: '100%',
   },
 
+  // ---- Admin Controls entry card (admin only) ----
+  adminEntryCard: {
+    marginHorizontal: RFPercentage(2),
+    marginTop: RFPercentage(1.5),
+    backgroundColor: Colors.white,
+    borderRadius: RFPercentage(2),
+    borderWidth: 1,
+    borderColor: Colors.blueBorderOverlay50,
+    shadowColor: Colors.shadowBlueLight,
+    shadowOffset: {width: 0, height: 3},
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    // elevation: 3,
+    overflow: 'hidden',
+  },
+  adminEntryInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: RFPercentage(1.8),
+    paddingHorizontal: RFPercentage(2),
+  },
+  adminEntryIconWrap: {
+    width: RFPercentage(5.2),
+    height: RFPercentage(5.2),
+    borderRadius: RFPercentage(2),
+    backgroundColor: Colors.blueBg50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: RFPercentage(1.5),
+  },
+  adminEntryContent: {
+    flex: 1,
+    minWidth: 0,
+    marginLeft: RFPercentage(1),
+  },
+  adminEntryTitle: {
+    color: Colors.primaryText,
+    fontFamily: Fonts.semiBold,
+    fontSize: RFPercentage(1.9),
+  },
+  adminEntrySubtext: {
+    color: Colors.secondaryText,
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.45),
+    marginTop: RFPercentage(0.3),
+  },
+  adminEntryArrowWrap: {
+    marginLeft: RFPercentage(0.5),
+  },
   adminBadge: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -21,6 +21,7 @@ import {
   setFilterLocation,
 } from '../../../redux/location/Actions';
 import {GOOGLE_PLACES_API_KEY} from '@env';
+import {parseAddressComponents} from '../../../utils/addressComponents';
 
 export default function Location({navigation, route}: any) {
   const mapRef = useRef<MapView>(null);
@@ -68,10 +69,19 @@ export default function Location({navigation, route}: any) {
         {params: {place_id: item.place_id, key: GOOGLE_PLACES_API_KEY}},
       );
       const loc = detailRes.data.result.geometry.location;
+      // The Place Details response already contains address_components (no
+      // `fields` param is sent, so the full result is requested and billed
+      // either way) — keep the structured city/state instead of discarding it.
+      const {city, state, postalCode} = parseAddressComponents(
+        detailRes.data.result.address_components,
+      );
       const coordinate = {
         latitude: loc.lat,
         longitude: loc.lng,
         name: item.description,
+        city,
+        state,
+        postalCode,
       };
       setMarker(coordinate);
       setSelectedLocation(coordinate);
@@ -128,7 +138,10 @@ export default function Location({navigation, route}: any) {
       );
       const address =
         response.data.results[0]?.formatted_address || 'Selected Location';
-      setSelectedLocation({...coordinate, name: address});
+      const {city, state, postalCode} = parseAddressComponents(
+        response.data.results[0]?.address_components,
+      );
+      setSelectedLocation({...coordinate, name: address, city, state, postalCode});
       setQuery(address);
     } catch (error: any) {
       console.log('Reverse Geocode Error:', error.message);

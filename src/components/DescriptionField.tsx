@@ -14,7 +14,7 @@ interface Props {
 }
 
 const DescriptionField = (props: Props) => {
-  const MAX_CHARACTERS = props.maxLength ?? 200;
+  const MAX_CHARACTERS = props.maxLength ?? 500;
 
   const handleTextChange = (text: string) => {
     if (text.length <= MAX_CHARACTERS) {
@@ -28,7 +28,7 @@ const DescriptionField = (props: Props) => {
         placeholder={props.placeholder}
         placeholderTextColor={Colors.placeholderColor}
         style={[styles.textInput, {...props.textInput}]}
-        numberOfLines={20}
+        numberOfLines={5}
         multiline
         onChangeText={handleTextChange}
         value={props.value}
@@ -56,7 +56,7 @@ export default DescriptionField;
 const styles = StyleSheet.create({
   textArea: {
     width: '100%',
-    height: RFPercentage(13),
+    // height: RFPercentage(13),
     borderWidth: 1,
     borderColor: Colors.inputFieldColor,
     borderRadius: RFPercentage(1.5),
@@ -76,10 +76,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   charCount: {
-    position: 'absolute',
-    bottom: RFPercentage(0.5),
     right: RFPercentage(1),
     fontSize: RFPercentage(1.4),
     fontFamily: Fonts.fontRegular,
+    textAlign: 'right',
   },
 });

@@ -260,6 +260,7 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 0,
     gap: 12,
+    paddingBottom:24
   },
   cancelButton: {
     flex: 1,
@@ -267,14 +268,17 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: Colors.gray200,
+        height:48
+
   },
   cancelButtonGradient: {
-    paddingVertical: 14,
     alignItems: 'center',
+    flex:1,
+    justifyContent: 'center',
   },
   cancelButtonText: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.9),
+    fontSize: RFPercentage(1.6),
     color: Colors.gray700,
   },
   removeButton: {
@@ -289,19 +293,20 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 4,
+    height:48
   },
   removeButtonGradient: {
-    paddingVertical: 14,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    flex:1
   },
   removeIcon: {
     marginRight: 8,
   },
   removeButtonText: {
     fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.6),
     color: Colors.white,
   },
 });
