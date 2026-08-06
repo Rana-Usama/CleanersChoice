@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
 } from 'react-native';
-import React, {useState, useCallback} from 'react';
+import React, {useState, useCallback, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, IMAGES, Icons} from '../../../../constants/Themes';
 import HeaderBack from '../../../../components/HeaderBack';
@@ -26,6 +26,8 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import {showToast} from '../../../../utils/ToastMessage';
 import CustomModal from '../../../../components/CustomModal';
 import ModalWrapper from '../../../../components/ModalWrapper';
+import useIsAdmin from '../../../../hooks/useIsAdmin';
+import {buildChatParams, ChatNavParams} from '../../../../services/chatService';
 
 const SERVER_URL = 'https://cleaners-choice-server.vercel.app';
 
@@ -39,6 +41,16 @@ const CleanerProfile = ({route, navigation}: any) => {
   const [isAlreadyConfirmed, setIsAlreadyConfirmed] = useState(false);
   const [isApplicant, setIsApplicant] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  // --- Admin chat CTA ---------------------------------------------------
+  // Admins monitoring the platform need a way to reach a cleaner directly
+  // (e.g. about an overdue subscription or an incomplete profile). Gated on the
+  // admin flag, so nothing changes for customers or cleaners viewing a profile.
+  const isAdmin = useIsAdmin();
+  const currentUserId = auth().currentUser?.uid;
+  const canAdminChat = isAdmin && !!cleanerId && cleanerId !== currentUserId;
+  const [chatParams, setChatParams] = useState<ChatNavParams | null>(null);
+  const [chatLoading, setChatLoading] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -85,6 +97,63 @@ const CleanerProfile = ({route, navigation}: any) => {
       fetchData();
     }, [fetchData]),
   );
+
+  /**
+   * Resolve the Chat params up front so tapping the CTA navigates instantly.
+   * Runs only for admins, and only once the viewed profile has loaded (so the
+   * recipient's name/photo are available). Falls back to resolving on tap if
+   * this hasn't finished yet.
+   */
+  useEffect(() => {
+    let cancelled = false;
+    if (!canAdminChat || !profile) {
+      setChatParams(null);
+      return;
+    }
+    (async () => {
+      const params = await buildChatParams({
+        receiverId: cleanerId,
+        receiverName: profile?.name,
+        receiverProfile: profile?.profile,
+      });
+      if (!cancelled) setChatParams(params);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [canAdminChat, cleanerId, profile]);
+
+  const openChat = async () => {
+    if (chatLoading) return;
+
+    // Prefetched in the effect above — the common path.
+    if (chatParams) {
+      navigation.navigate('Chat', chatParams);
+      return;
+    }
+
+    // Prefetch hasn't landed yet (slow network, or tapped immediately).
+    setChatLoading(true);
+    try {
+      const params = await buildChatParams({
+        receiverId: cleanerId,
+        receiverName: profile?.name,
+        receiverProfile: profile?.profile,
+      });
+      if (!params) {
+        showToast({
+          type: 'error',
+          title: 'Chat Unavailable',
+          message: 'This conversation could not be started right now.',
+        });
+        return;
+      }
+      setChatParams(params);
+      navigation.navigate('Chat', params);
+    } finally {
+      setChatLoading(false);
+    }
+  };
 
   const handleConfirm = () => {
     setShowConfirmModal(true);
@@ -185,6 +254,10 @@ const CleanerProfile = ({route, navigation}: any) => {
       ? {backgroundColor: Colors.lightBlueOverlay90, color: Colors.gradient1, icon: 'sparkles', text: 'Professional Cleaner'}
       : {backgroundColor: Colors.grayOverlay10, color: Colors.placeholderColor, icon: 'person-circle', text: 'User'};
 
+  /** True when either of the existing job-context bottom bars is rendering. */
+  const showsJobBar =
+    isCleanerProfile && !!jobId && (isAlreadyConfirmed || isApplicant);
+
   if (loading) {
     return (
       <View style={styles.safeArea}>
@@ -230,7 +303,27 @@ const CleanerProfile = ({route, navigation}: any) => {
             <Feather name="arrow-left" size={24} color={Colors.white} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>{profileTitle}</Text>
-          <View style={{width: 40}} />
+          {/* Admin-only quick chat. Sits where the layout spacer was, so the
+              header geometry is unchanged for everyone else. */}
+          {canAdminChat ? (
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={openChat}
+              disabled={chatLoading}
+              style={styles.headerChatButton}>
+              {chatLoading ? (
+                <ActivityIndicator size="small" color={Colors.white} />
+              ) : (
+                <MaterialCommunityIcons
+                  name="message-text-outline"
+                  size={RFPercentage(2.4)}
+                  color={Colors.white}
+                />
+              )}
+            </TouchableOpacity>
+          ) : (
+            <View style={{width: 40}} />
+          )}
         </View>
       </LinearGradient>
 
@@ -427,6 +520,25 @@ const CleanerProfile = ({route, navigation}: any) => {
         </View>
       )}
 
+      {/*
+        Admin message CTA. Rendered only when neither confirm bar above is
+        showing, so the two can never stack — an admin who arrives from a job
+        context still has the header icon. `showsJobBar` mirrors the exact
+        conditions of those two blocks.
+      */}
+      {canAdminChat && !showsJobBar && (
+        <View style={styles.confirmBar}>
+          <GradientButton
+            title={`Message ${isCleanerProfile ? 'Cleaner' : 'User'}`}
+            onPress={openChat}
+            loading={chatLoading}
+            disabled={chatLoading}
+            style={styles.confirmButton}
+            textStyle={styles.confirmButtonText}
+          />
+        </View>
+      )}
+
       {/* Confirm Cleaner Modal */}
       {isCleanerProfile && (
         <ModalWrapper
@@ -478,6 +590,14 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontSize: RFPercentage(2.1),
     fontFamily: Fonts.semiBold,
+  },
+  headerChatButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.whiteOverlay20,
   },
   scrollContent: {
     paddingHorizontal: RFPercentage(2),

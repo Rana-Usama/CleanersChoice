@@ -29,6 +29,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import * as RNIap from 'react-native-iap';
 import {useAppleIAP} from '../../../hooks/useAppleIAP';
 import {useAppAlert} from '../../../components/AlertProvider';
+import CleanerIntroVideoModal from '../../../components/CleanerIntroVideoModal';
 
 const {width} = Dimensions.get('window');
 
@@ -399,6 +400,10 @@ const Premium = ({navigation}: any) => {
           />
         </View>
       )}
+
+      {/* First-run intro video for Cleaners. Self-gating: renders nothing when
+          already seen, disabled remotely, or unreachable. */}
+      <CleanerIntroVideoModal enabled />
     </SafeAreaView>
   );
 };

@@ -383,7 +383,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                     count={true}
                     value={description}
                     onChangeText={text => dispatch(cleanerDescription(text))}
-                    maxLength={200}
+                    maxLength={500}
                     style={styles.descriptionInput}
                     textInput={{fontSize: RFPercentage(1.6)}}
                   />
@@ -983,7 +983,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 16,
     // elevation: 8,
-    width: '60%',
+    width: '100%',
     alignSelf: 'center',
     height: RFPercentage(5.6),
   },

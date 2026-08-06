@@ -967,7 +967,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 16,
     // elevation: 8,
-    width: '60%',
+    width: '100%',
     alignSelf: 'center',
     height: RFPercentage(5.6),
   },

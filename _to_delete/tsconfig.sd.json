@@ -1,0 +1,5 @@
+{
+  "extends": "@react-native/typescript-config/tsconfig.json",
+  "compilerOptions": { "noEmit": true, "skipLibCheck": true, "baseUrl": ".." },
+  "include": ["../src/screens/customerflow/home/ServiceDetails.tsx", "../env.d.ts"]
+}

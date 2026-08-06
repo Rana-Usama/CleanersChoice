@@ -517,13 +517,13 @@ const PostJob = ({route}: any) => {
                       placeholderTextColor={Colors.placeholderColor}
                       multiline
                       numberOfLines={4}
-                      maxLength={200}
+                      maxLength={500}
                       value={Description}
                       onChangeText={setDescription}
                     />
                     <View style={styles.charCounter}>
                       <Text style={styles.charText}>
-                        {Description.length}/200 characters
+                        {Description.length}/500 characters
                       </Text>
                     </View>
                   </View>

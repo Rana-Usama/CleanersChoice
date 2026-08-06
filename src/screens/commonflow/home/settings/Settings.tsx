@@ -33,6 +33,7 @@ const Settings = ({navigation}: any) => {
   const [modalVisible2, setModalVisible2] = useState(false);
   const [modalVisible3, setModalVisible3] = useState(false);
   const [role, setuserRole] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(false);
   useExitAppOnBack();
   const [subscriptionId, setSubscriptionId] = useState(null);
@@ -88,6 +89,7 @@ const Settings = ({navigation}: any) => {
         console.log('User data fetched for role and subscription:', userData);
         setSubscriptionId(userData?.subscriptionId);
         setuserRole(userData?.role);
+        setIsAdmin(!!userData?.admin);
         setSubscription(userData?.subscription ?? false);
         setCancelSubscription(userData?.cancelSubscription ?? false);
       }
@@ -253,6 +255,31 @@ const Settings = ({navigation}: any) => {
             </View>
           )}
 
+          {/*
+            Admin Controls — rendered only for users with Users.admin === true.
+            Mirrors the CTA on the cleaner Dashboard so the section is reachable
+            from either place. Regular users see nothing.
+          */}
+          {isAdmin && (
+            <View style={styles.sectionCard}>
+              <View style={styles.sectionHeader}>
+                <MaterialCommunityIcons
+                  name="shield-account"
+                  size={RFPercentage(2.5)}
+                  color={Colors.gradient1}
+                />
+                <Text style={styles.sectionTitle}>Admin</Text>
+              </View>
+              <View style={styles.fieldsContainer}>
+                <ProfileField
+                  text="Admin Controls"
+                  icon="view-dashboard-outline"
+                  onPress={() => navigation.navigate('AdminDashboard')}
+                />
+              </View>
+            </View>
+          )}
+
           {/* Help & Security Section */}
           <View style={styles.sectionCard}>
             <View style={styles.sectionHeader}>
@@ -265,6 +292,13 @@ const Settings = ({navigation}: any) => {
             </View>
 
             <View style={styles.fieldsContainer}>
+              {role === 'Cleaner' && (
+                <ProfileField
+                  text="Watch Intro Video"
+                  icon="play-circle-outline"
+                  onPress={() => navigation.navigate('CleanerIntroVideo')}
+                />
+              )}
               {role === 'Cleaner' && (
                 <ProfileField
                   text="Cancel Subscription"

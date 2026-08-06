@@ -1,0 +1,9 @@
+{
+  "extends": "@react-native/typescript-config/tsconfig.json",
+  "compilerOptions": { "noEmit": true, "skipLibCheck": true, "baseUrl": ".." },
+  "include": [
+    "../src/screens/commonflow/home/profile/CleanerProfile.tsx",
+    "../src/services/chatService.ts",
+    "../env.d.ts"
+  ]
+}

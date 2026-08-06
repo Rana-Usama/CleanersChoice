@@ -1,0 +1,10 @@
+{
+  "extends": "@react-native/typescript-config/tsconfig.json",
+  "compilerOptions": { "noEmit": true, "skipLibCheck": true, "baseUrl": ".." },
+  "include": [
+    "../src/screens/commonflow/home/settings/Settings.tsx",
+    "../src/screens/commonflow/location/Location.tsx",
+    "../src/screens/cleanerflow/homescreens/home/Dashboard.tsx",
+    "../env.d.ts"
+  ]
+}

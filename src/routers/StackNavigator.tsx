@@ -46,6 +46,10 @@ import InvoicePreview from '../screens/cleanerflow/homescreens/invoices/InvoiceP
 import PhoneBook from '../screens/cleanerflow/homescreens/invoices/PhoneBook';
 import CustomerForm from '../screens/cleanerflow/homescreens/invoices/CustomerForm';
 import Earnings from '../screens/cleanerflow/homescreens/invoices/Earnings';
+import CleanerIntroVideo from '../screens/cleanerflow/intro/CleanerIntroVideo';
+import AdminDashboard from '../screens/adminflow/AdminDashboard';
+import AdminActiveJobs from '../screens/adminflow/AdminActiveJobs';
+import AdminCleanerServices from '../screens/adminflow/AdminCleanerServices';
 import {Customer} from '../types/customer';
 
 export type RootStackParamList = {
@@ -105,6 +109,13 @@ export type RootStackParamList = {
   PhoneBook: undefined;
   CustomerForm: {customer: Customer | null};
   Earnings: undefined;
+  CleanerIntroVideo: undefined;
+  // ---- Admin Flow (visible only to users with Users.admin === true) ----
+  AdminDashboard: undefined;
+  AdminActiveJobs: undefined;
+  AdminCleanerServices:
+    | {initialFilter?: 'all' | 'active' | 'overdue' | 'expired'}
+    | undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -272,6 +283,25 @@ const StackNavigator: React.FC = () => {
             <Stack.Screen name="PhoneBook" component={PhoneBook} />
             <Stack.Screen name="CustomerForm" component={CustomerForm} />
             <Stack.Screen name="Earnings" component={Earnings} />
+            <Stack.Screen
+              name="CleanerIntroVideo"
+              component={CleanerIntroVideo}
+              options={{animation: 'fade'}}
+            />
+
+            {/* ----------------- Admin Flow ---------------- */}
+            {/*
+              Registered unconditionally so app-launch routing stays simple.
+              Access is gated by the admin-only entry points (Dashboard CTA and
+              Settings row), and each screen re-checks `Users.admin` via
+              useIsAdmin() before rendering anything.
+            */}
+            <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
+            <Stack.Screen name="AdminActiveJobs" component={AdminActiveJobs} />
+            <Stack.Screen
+              name="AdminCleanerServices"
+              component={AdminCleanerServices}
+            />
           </Stack.Navigator>
         )}
       </NavigationContainer>

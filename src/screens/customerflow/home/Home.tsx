@@ -22,6 +22,7 @@ import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import SearchField from '../../../components/SearchField';
 import ServicesCard from '../../../components/ServicesCard';
+import {prefetchImages} from '../../../utils/imageCache';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import HeaderBack from '../../../components/HeaderBack';
 import Slider from '@react-native-community/slider';
@@ -780,6 +781,13 @@ const Home = () => {
                         contentContainerStyle={{
                           paddingBottom: RFPercentage(1),
                         }}
+                        // This list is nested in a vertical ScrollView, so it
+                        // renders eagerly. Capping the batches keeps a long
+                        // result set from firing every cover download at once
+                        // and starving the screen the user opens next.
+                        initialNumToRender={4}
+                        maxToRenderPerBatch={4}
+                        windowSize={5}
                         renderItem={({item}) => (
                           <View style={styles.serviceItem}>
                             <ServicesCard
@@ -790,11 +798,18 @@ const Home = () => {
                               star={IMAGES?.star}
                               rating={5}
                               location={item?.location}
-                              onPress={() =>
+                              onPress={() => {
+                                // Warm the gallery while the navigation
+                                // transition animates, so Service Details has
+                                // the photos locally by the time it appears.
+                                prefetchImages(
+                                  [item?.image, ...(item?.serviceImages ?? [])],
+                                  {highPriority: true},
+                                );
                                 navigation.navigate('ServiceDetails', {
                                   item: item,
-                                })
-                              }
+                                });
+                              }}
                               createdAt={item.createdAt}
                             />
                           </View>
