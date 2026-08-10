@@ -401,9 +401,8 @@ const Premium = ({navigation}: any) => {
         </View>
       )}
 
-      {/* First-run intro video for Cleaners. Self-gating: renders nothing when
-          already seen, disabled remotely, or unreachable. */}
-      <CleanerIntroVideoModal enabled />
+     
+      {/* <CleanerIntroVideoModal enabled /> */}
     </SafeAreaView>
   );
 };

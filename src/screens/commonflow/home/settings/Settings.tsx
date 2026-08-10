@@ -292,13 +292,13 @@ const Settings = ({navigation}: any) => {
             </View>
 
             <View style={styles.fieldsContainer}>
-              {role === 'Cleaner' && (
+              {/* {role === 'Cleaner' && (
                 <ProfileField
                   text="Watch Intro Video"
                   icon="play-circle-outline"
                   onPress={() => navigation.navigate('CleanerIntroVideo')}
                 />
-              )}
+              )} */}
               {role === 'Cleaner' && (
                 <ProfileField
                   text="Cancel Subscription"

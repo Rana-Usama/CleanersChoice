@@ -548,8 +548,7 @@ const CleanerJobs = () => {
           </View>
         )}
 
-        {/* Admin Toggle - Only visible to admins */}
-        {isAdmin && (
+        {/* {isAdmin && (
           <View style={styles.adminToggleSection}>
             <View style={styles.adminToggleCard}>
               <View style={styles.adminToggleHeader}>
@@ -602,7 +601,7 @@ const CleanerJobs = () => {
               )}
             </View>
           </View>
-        )}
+        )} */}
 
         {/* Jobs Section */}
         <View style={[styles.jobsSection, isAdmin && styles.jobsSectionWithAdmin]}>
@@ -1169,7 +1168,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   jobsSectionWithAdmin: {
-    marginTop: 0,
+    marginTop: 24,
   },
   jobsHeader: {
     flexDirection: 'column',

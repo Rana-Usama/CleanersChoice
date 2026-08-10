@@ -76,7 +76,7 @@ const items = [
   {
     id: '88',
     name: 'Others',
-    icon: Icons.more,
+    icon: Icons.others,
   },
 ];
 
@@ -468,40 +468,66 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                         Services You Provide
                       </Text>
                     </View>
+
+                    {selectedItems?.length > 0 && (
+                      <View style={styles.selectedCount}>
+                        <Text style={styles.countText}>
+                          {selectedItems.length} selected
+                        </Text>
+                      </View>
+                    )}
                   </View>
 
                   <MultiSelect
                     hideTags={true}
                     items={items}
-                    styleDropdownMenuSubsection={styles.dropdownMenu}
                     uniqueKey="id"
                     ref={multiSelectRef}
                     onSelectedItemsChange={onSelectedItemsChange}
                     selectedItems={selectedItems}
-                    searchInputPlaceholderText="Search services..."
-                    altFontFamily={Fonts.fontRegular}
-                    // tagRemoveIconColor={Colors.gradient1}
-                    tagBorderColor={Colors.gray200}
-                    tagTextColor={Colors.gradient1}
-                    selectedItemTextColor={Colors.gradient1}
-                    selectedItemIconColor={Colors.gradient1}
-                    itemTextColor={Colors.placeholderColor}
                     displayKey="name"
-                    searchInputStyle={styles.searchInput}
-                    styleRowList={styles.rowList}
-                    // submitButtonColor={Colors.gradient2}
+                    selectText="Select services"
+                    searchInputPlaceholderText="Search services..."
                     submitButtonText="Save"
-                    fontFamily={Fonts.fontRegular}
-                    selectedItemFontFamily={Fonts.fontMedium}
-                    itemFontFamily={Fonts.fontRegular}
-                    itemFontSize={RFPercentage(1.7)}
                     hideSubmitButton
-                    styleItemsContainer={styles.itemsContainer}
-                    styleTextDropdownSelected={styles.dropdownTextSelected}
-                    styleTextDropdown={styles.dropdownText}
                     hideDropdown
                     textInputProps={{autoFocus: false}}
+                    /* ---- Typography ---- */
+                    fontFamily={Fonts.fontRegular}
+                    altFontFamily={Fonts.fontRegular}
+                    itemFontFamily={Fonts.fontRegular}
+                    selectedItemFontFamily={Fonts.fontMedium}
+                    itemFontSize={RFPercentage(1.75)}
+                    /* ---- Item colors ---- */
+                    itemTextColor={Colors.gray700}
+                    selectedItemTextColor={Colors.gradient1}
+                    selectedItemIconColor={Colors.gradient1}
+                    tagBorderColor={Colors.gray200}
+                    tagTextColor={Colors.gradient1}
+                    /* ---- Search icon (expanded state) ---- */
+                    searchIcon={
+                      <Ionicons
+                        name="search-outline"
+                        size={RFPercentage(2.1)}
+                        color={Colors.gradient1}
+                        style={styles.searchIcon}
+                      />
+                    }
+                    /* ---- Collapsed trigger ---- */
+                    styleMainWrapper={styles.multiSelectWrapper}
                     styleDropdownMenu={styles.dropdownStyle}
+                    styleDropdownMenuSubsection={styles.dropdownMenu}
+                    styleTextDropdown={styles.dropdownText}
+                    styleTextDropdownSelected={styles.dropdownTextSelected}
+                    // Indicator is rendered as a vector Icon (Text based), so it
+                    // takes text styles even though the prop is typed ViewStyle.
+                    styleIndicator={styles.dropdownIndicator as any}
+                    /* ---- Expanded panel ---- */
+                    styleSelectorContainer={styles.selectorContainer}
+                    styleInputGroup={styles.searchInputGroup}
+                    searchInputStyle={styles.searchInput}
+                    styleItemsContainer={styles.itemsContainer}
+                    styleRowList={styles.rowList}
                   />
 
                   {/* Selected Services Tags */}
@@ -514,13 +540,24 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                           const item = items.find(i => i.id === itemId);
                           return (
                             <View key={itemId} style={styles.serviceTag}>
-                              <Image
-                                source={item?.icon}
-                                style={styles.tagIcon}
-                                resizeMode="contain"
-                              />
-                              <Text style={styles.tagText}>{item?.name}</Text>
+                              <View style={styles.tagIconWrapper}>
+                                <Image
+                                  source={item?.icon}
+                                  style={styles.tagIcon}
+                                  resizeMode="contain"
+                                />
+                              </View>
+                              <Text style={styles.tagText} numberOfLines={1}>
+                                {item?.name}
+                              </Text>
                               <TouchableOpacity
+                                activeOpacity={0.7}
+                                hitSlop={{
+                                  top: 8,
+                                  bottom: 8,
+                                  left: 8,
+                                  right: 8,
+                                }}
                                 onPress={() => {
                                   const newSelected = selectedItems.filter(
                                     id => id !== itemId,
@@ -530,8 +567,8 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                                 style={styles.tagClose}>
                                 <AntDesign
                                   name="close"
-                                  size={12}
-                                  color={Colors.placeholderColor}
+                                  size={11}
+                                  color={Colors.gradient1}
                                 />
                               </TouchableOpacity>
                             </View>
@@ -885,90 +922,152 @@ const styles = StyleSheet.create({
   },
 
   selectedCount: {
-    backgroundColor: Colors.indigoBg50,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+    backgroundColor: Colors.blueBg200,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: Colors.blueBg300,
   },
   countText: {
     fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.4),
     color: Colors.gradient1,
   },
+
+  /* ---------- Services dropdown : collapsed trigger ---------- */
+  multiSelectWrapper: {
+    flexDirection: 'column',
+  },
+  dropdownStyle: {
+    height: RFPercentage(6.2),
+    alignItems: 'stretch',
+    marginBottom: 0,
+  },
   dropdownMenu: {
+    // paddingLeft/Right & borderBottomWidth are set explicitly because the
+    // library applies its own longhand values that would otherwise win.
+    paddingLeft: 16,
+    paddingRight: 8,
+    paddingTop: 0,
+    paddingBottom: 0,
     borderWidth: 1,
-    borderRadius: 10,
+    borderBottomWidth: 2.5,
     borderColor: Colors.gray200,
+    borderRadius: 14,
     backgroundColor: Colors.gray50,
+    shadowColor: Colors.black,
+    shadowOffset: {width: 0, height: 1},
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+  },
+  dropdownText: {
+    color: Colors.gray400,
+    fontSize: RFPercentage(1.65),
+    fontFamily: Fonts.fontRegular,
+    marginLeft: 0,
+  },
+  dropdownTextSelected: {
+    color: Colors.gray800,
+    fontSize: RFPercentage(1.65),
+    fontFamily: Fonts.fontMedium,
+    marginLeft: 0,
+  },
+  dropdownIndicator: {
+    fontSize: RFPercentage(3.4),
+    color: Colors.gradient1,
+  },
+
+  /* ---------- Services dropdown : expanded panel ---------- */
+  selectorContainer: {
+    marginBottom: 0,
+    elevation: 0,
+    borderWidth: 1,
+    borderColor: Colors.gray200,
+    borderRadius: 14,
+    backgroundColor: Colors.white,
+    overflow: 'hidden',
+  },
+  searchInputGroup: {
+    height: RFPercentage(6.2),
+    paddingLeft: 14,
+    paddingRight: 4,
+    backgroundColor: Colors.white,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderLight,
+  },
+  searchIcon: {
+    marginRight: 10,
   },
   searchInput: {
-    color: Colors.gray700,
+    color: Colors.gray800,
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.7),
-  },
-  rowList: {
-    paddingVertical: RFPercentage(1.1),
-    borderBottomWidth: 1,
-    borderColor: Colors.lightGrayBg,
+    paddingVertical: 0,
   },
   itemsContainer: {
     backgroundColor: Colors.white,
-    borderRadius: 12,
-    padding: 8,
-    maxHeight: 250,
+    paddingVertical: 4,
+    maxHeight: RFPercentage(34),
   },
-  dropdownTextSelected: {
-    color: Colors.placeholderColor,
-    fontSize: RFPercentage(1.6),
-    fontFamily: Fonts.fontMedium,
-    marginLeft: 12,
+  rowList: {
+    paddingVertical: RFPercentage(1.35),
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderLight,
   },
-  dropdownText: {
-    color: Colors.placeholderColor,
-    fontSize: RFPercentage(1.4),
-    fontFamily: Fonts.fontRegular,
-    marginLeft: 12,
-  },
-  tagText: {
-    fontSize: RFPercentage(1.6),
-    fontFamily: Fonts.fontMedium,
-    color: Colors.secondaryText,
-  },
-  dropdownStyle: {
-    height: RFPercentage(5.5),
-  },
-  tagsContainer: {
-    marginTop: 12,
-    paddingBottom: 8,
 
+  /* ---------- Selected service chips ---------- */
+  tagsContainer: {
+    marginTop: 14,
+    paddingBottom: 4,
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
+    gap: 8,
   },
   serviceTag: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.lightGrayBg,
-    borderRadius: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginBottom: 6,
+    backgroundColor: Colors.blueBg200,
+    borderWidth: 1,
+    borderColor: Colors.blueBg300,
+    borderRadius: 100,
+    paddingLeft: 5,
+    paddingRight: 8,
+    paddingVertical: 5,
+  },
+  tagIconWrapper: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: Colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
   },
   tagIcon: {
-    width: 14,
-    height: 14,
-    marginRight: 6,
+    width: 13,
+    height: 13,
     // tintColor: Colors.gradient1,
+  },
+  tagText: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontMedium,
+    color: Colors.gray800,
   },
   tagClose: {
     marginLeft: 8,
-    padding: 2,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: Colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   hintText: {
     fontFamily: Fonts.fontRegular,
     fontSize: RFPercentage(1.5),
     color: Colors.gray400,
-    marginTop: 12,
+    marginTop: 14,
     textAlign: 'center',
   },
   buttonContainer: {

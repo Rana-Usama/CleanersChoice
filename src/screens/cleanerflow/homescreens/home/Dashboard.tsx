@@ -648,7 +648,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
         )}
 
         {/* Intro video replay — same screen used by Settings -> Watch Intro Video */}
-        <Animated.View
+        {/* <Animated.View
           entering={FadeInUp.duration(600)}
           style={styles.introCard}>
           <TouchableOpacity
@@ -676,7 +676,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
               />
             </View>
           </TouchableOpacity>
-        </Animated.View>
+        </Animated.View> */}
 
         {loading3 ? (
           <View style={styles.loadingContainer}>
