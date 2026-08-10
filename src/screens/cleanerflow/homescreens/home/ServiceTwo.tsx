@@ -57,7 +57,7 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
       const compressedImage = await CompressorImage.compress(imageUri, {
         compressionMethod: 'manual',
         maxWidth: 1200,
-        quality: 0.85,
+        quality: 0.7,
       });
 
       const user = auth().currentUser;

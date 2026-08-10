@@ -155,7 +155,7 @@ const AdminDashboard = ({navigation}: any) => {
             />
             <View style={styles.tileGap} />
             <AdminStatTile
-              label="Cleaner Services"
+              label="Cleaning Services"
               value={stats.cleanerServices}
               icon="shield-check"
               loading={loading}
