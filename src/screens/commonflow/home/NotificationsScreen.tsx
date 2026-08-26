@@ -10,7 +10,7 @@ import {
   StatusBar,
   Image,
 } from 'react-native';
-import React, {useState, useCallback} from 'react';
+import React, {useState, useCallback, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, IMAGES} from '../../../constants/Themes';
 import HeaderBack from '../../../components/HeaderBack';
@@ -24,9 +24,23 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import moment from 'moment';
 
+/** How long a nearby-job notification keeps its "New Job" badge. */
+const NEW_JOB_TAG_TTL_MS = 24 * 60 * 60 * 1000;
+
+/** Re-evaluate badge expiry while the screen stays open. */
+const TAG_TICK_MS = 60 * 1000;
+
+/** Firestore Timestamp | Date | ms | ISO string -> Date. */
+const toDate = (timestamp: any): Date | null => {
+  if (!timestamp) return null;
+  if (typeof timestamp?.toDate === 'function') return timestamp.toDate();
+  const date = new Date(timestamp);
+  return isNaN(date.getTime()) ? null : date;
+};
+
 interface NotificationItem {
   id: string;
-  type: 'application' | 'confirmation' | 'cancellation' | 'completion' | 'completion_request' | 'auto_complete' | 'expired' | 'expiry_warning' | 'unconfirmed' | 'message';
+  type: 'application' | 'confirmation' | 'cancellation' | 'completion' | 'completion_request' | 'auto_complete' | 'expired' | 'expiry_warning' | 'unconfirmed' | 'message' | 'new_nearby_job';
   fromUserId: string;
   toUserId: string;
   jobId: string;
@@ -44,6 +58,9 @@ const NotificationsScreen = ({navigation}: any) => {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  // Drives "New Job" badge expiry without re-fetching. Ticks only while the
+  // screen is mounted, so it costs nothing in the background.
+  const [now, setNow] = useState(() => Date.now());
 
   const fetchExistingChatId = async (userId1: string, userId2: string) => {
     try {
@@ -90,9 +107,15 @@ const NotificationsScreen = ({navigation}: any) => {
 
   useFocusEffect(
     useCallback(() => {
+      setNow(Date.now());
       fetchNotifications();
     }, [fetchNotifications]),
   );
+
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), TAG_TICK_MS);
+    return () => clearInterval(interval);
+  }, []);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -244,6 +267,24 @@ const NotificationsScreen = ({navigation}: any) => {
           jobTitle: item.jobTitle || '',
         });
         break;
+      case 'new_nearby_job':
+        // Cleaner taps → job details so they can review and apply. The job may
+        // already have been filled, expired or deleted by the time they get
+        // here, so a missing doc has to fail quietly.
+        try {
+          const nearbyJobDoc = await firestore()
+            .collection('Jobs')
+            .doc(item.jobId)
+            .get();
+          if (nearbyJobDoc.exists) {
+            navigation.navigate('JobDetails', {
+              item: {id: nearbyJobDoc.id, ...nearbyJobDoc.data()},
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching job:', error);
+        }
+        break;
       case 'message':
         // Navigate to chat
         const user = auth().currentUser;
@@ -308,16 +349,17 @@ const NotificationsScreen = ({navigation}: any) => {
         return {name: 'account-alert-outline', color: Colors.orange600};
       case 'message':
         return {name: 'message-text-outline', color: Colors.primaryBlue};
+      case 'new_nearby_job':
+        return {name: 'map-marker-radius-outline', color: Colors.green500};
       default:
         return {name: 'bell-outline', color: Colors.gradient1};
     }
   };
 
   const formatTime = (timestamp: any) => {
-    if (!timestamp) return '';
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
+    const date = toDate(timestamp);
+    if (!date) return '';
+    const diffMs = Date.now() - date.getTime();
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
@@ -329,8 +371,21 @@ const NotificationsScreen = ({navigation}: any) => {
     return moment(date).format('MMM DD');
   };
 
+  /**
+   * "New Job" badge is purely derived from the notification's own timestamp —
+   * nothing to write, nothing to clean up, and it drops off on its own once
+   * the job is a day old.
+   */
+  const isNewJobBadgeVisible = (item: NotificationItem) => {
+    if (item.type !== 'new_nearby_job') return false;
+    const date = toDate(item.timestamp);
+    if (!date) return false;
+    return now - date.getTime() < NEW_JOB_TAG_TTL_MS;
+  };
+
   const renderNotification = ({item}: {item: NotificationItem}) => {
     const icon = getNotificationIcon(item.type);
+    const showNewJobBadge = isNewJobBadgeVisible(item);
     return (
       <TouchableOpacity
         activeOpacity={0.7}
@@ -365,16 +420,30 @@ const NotificationsScreen = ({navigation}: any) => {
           <Text style={styles.notificationBody} numberOfLines={2}>
             {item.body}
           </Text>
-          {item.jobTitle && (
-            <View style={styles.jobTag}>
-              <MaterialCommunityIcons
-                name="briefcase-outline"
-                size={RFPercentage(1.4)}
-                color={Colors.gradient1}
-              />
-              <Text style={styles.jobTagText} numberOfLines={1}>
-                {item.jobTitle}
-              </Text>
+          {(showNewJobBadge || !!item.jobTitle) && (
+            <View style={styles.tagRow}>
+              {showNewJobBadge && (
+                <View style={styles.newJobTag}>
+                  <MaterialCommunityIcons
+                    name="new-box"
+                    size={RFPercentage(1.4)}
+                    color={Colors.green800}
+                  />
+                  <Text style={styles.newJobTagText}>New Job</Text>
+                </View>
+              )}
+              {!!item.jobTitle && (
+                <View style={styles.jobTag}>
+                  <MaterialCommunityIcons
+                    name="briefcase-outline"
+                    size={RFPercentage(1.4)}
+                    color={Colors.gradient1}
+                  />
+                  <Text style={styles.jobTagText} numberOfLines={1}>
+                    {item.jobTitle}
+                  </Text>
+                </View>
+              )}
             </View>
           )}
         </View>
@@ -546,6 +615,12 @@ const styles = StyleSheet.create({
     color: Colors.secondaryText,
     lineHeight: RFPercentage(2),
   },
+  tagRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: RFPercentage(0.5),
+  },
   jobTag: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -556,11 +631,32 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(0.5),
     gap: RFPercentage(0.3),
     alignSelf: 'flex-start',
+    // Keeps a long job title from pushing the New Job badge off the row.
+    flexShrink: 1,
   },
   jobTagText: {
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.2),
     color: Colors.gradient1,
+    flexShrink: 1,
+  },
+  newJobTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.greenBg100,
+    borderWidth: 1,
+    borderColor: Colors.greenBorder,
+    paddingHorizontal: RFPercentage(0.8),
+    paddingVertical: RFPercentage(0.2),
+    borderRadius: RFPercentage(0.5),
+    marginTop: RFPercentage(0.5),
+    gap: RFPercentage(0.3),
+    alignSelf: 'flex-start',
+  },
+  newJobTagText: {
+    fontFamily: Fonts.semiBold,
+    fontSize: RFPercentage(1.2),
+    color: Colors.green800,
   },
   unreadDot: {
     width: RFPercentage(1),

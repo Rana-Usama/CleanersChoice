@@ -221,17 +221,18 @@ const Home = () => {
             };
           })
           .filter(
-            // Packages are optional - a service is still listed to
-            // customers even if the cleaner published it without any.
+            // Packages and service images are both optional - a service is
+            // still listed to customers even if the cleaner published it
+            // without either. ServicesCard falls back to a placeholder cover
+            // via ServiceCoverImage, and ServiceDetails renders its own
+            // empty-gallery state, so a missing gallery costs nothing here.
             (service): service is Service =>
               !!service.createdAt &&
               !!service.name &&
               !!service.description &&
               !!service.availability &&
               !!service.type &&
-              !!service.location &&
-              Array.isArray(service.serviceImages) &&
-              service.serviceImages.length > 0,
+              !!service.location,
           );
 
         setServicesData(servicesArray);

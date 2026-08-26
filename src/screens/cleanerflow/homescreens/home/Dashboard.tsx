@@ -10,11 +10,13 @@ import {
   Platform,
   StatusBar,
 } from 'react-native';
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, Icons, IMAGES} from '../../../../constants/Themes';
 import HeaderBack from '../../../../components/HeaderBack';
 import CleanerCoachMarks from '../../../../components/CleanerCoachMarks';
+import LocationDisclosureModal from '../../../../components/LocationDisclosureModal';
+import {useCurrentLocation} from '../../../../utils/userLocation';
 import {useFocusEffect} from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
@@ -133,6 +135,31 @@ const Dashboard: React.FC = ({navigation}: any) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
   const [showCleanerCoachMarks, setShowCleanerCoachMarks] = useState(false);
+
+  /**
+   * Location is resolved here, on the cleaner's landing screen, rather than
+   * only when they open the Job List tab. Mirrors the customer flow (Home.tsx)
+   * and means `Users/{uid}.lastKnownLocation` — which the nearby-job Cloud
+   * Function matches on — is refreshed as soon as the cleaner opens the app.
+   *
+   * Only the disclosure controls are destructured: this screen never renders
+   * the coordinate, it just needs the fetch to happen.
+   */
+  const {disclosureVisible, acceptDisclosure, declineDisclosure} =
+    useCurrentLocation();
+
+  // Guards against the location permission modal being presented while the
+  // coach marks modal is still open/closing. Both are native RN <Modal>
+  // instances, and mounting one while the other is still tearing down can
+  // deadlock the UI thread, so we only flip this to true once the coach
+  // marks flow is fully out of the way.
+  const [locationModalAllowed, setLocationModalAllowed] = useState(false);
+  const isMountedRef = useRef(true);
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
   const [earningsLoading, setEarningsLoading] = useState(false);
   const [earningsSummary, setEarningsSummary] = useState(() =>
     buildAnnualEarningsSummary([], CURRENT_YEAR),
@@ -149,6 +176,10 @@ const Dashboard: React.FC = ({navigation}: any) => {
         const shouldShow = await shouldShowCoachMarksForRole('cleaner');
         if (isActive) {
           setShowCleanerCoachMarks(shouldShow);
+          // Only let the location modal show immediately if the coach marks
+          // aren't being displayed this session. Otherwise it stays gated
+          // until the coach marks flow explicitly completes.
+          setLocationModalAllowed(!shouldShow);
         }
       };
 
@@ -419,6 +450,16 @@ const Dashboard: React.FC = ({navigation}: any) => {
   const completeCleanerCoachMarks = async () => {
     setShowCleanerCoachMarks(false);
     await markCoachMarksSeenForRole('cleaner');
+
+    // Let the coach marks Modal finish dismissing before presenting the
+    // location disclosure Modal. Flipping both modals' visibility in the same
+    // tick can leave two native Modal windows open/closing at once, which
+    // freezes the screen until the app is force-closed and reopened.
+    setTimeout(() => {
+      if (isMountedRef.current) {
+        setLocationModalAllowed(true);
+      }
+    }, 400);
   };
 
   const handleSkipCleanerCoachMarks = () => {
@@ -961,6 +1002,12 @@ const Dashboard: React.FC = ({navigation}: any) => {
         visible={showCleanerCoachMarks}
         onSkip={handleSkipCleanerCoachMarks}
         onNext={handleNextCleanerCoachMarks}
+      />
+
+      <LocationDisclosureModal
+        visible={disclosureVisible && locationModalAllowed}
+        onAccept={acceptDisclosure}
+        onDecline={declineDisclosure}
       />
     </View>
   );

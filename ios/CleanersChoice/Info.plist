@@ -65,9 +65,9 @@
 	<string>Cleaners Choice uses your camera to let you take photos for uploading service images, receipts, or profile pictures.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Cleaners Choice uses your location to show nearby cleaning services and provide accurate pickup and delivery options.</string>
-
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Cleaners Choice uses your location to suggest nearby cleaning requests and ensure accurate service availability, even when you're actively using the app.</string>
+	<string>Cleaners Choice uses your location only while you are using the app, to show nearby cleaning jobs and services and to display your position on the map. It never tracks your location in the background.</string>
+
 <key>NSMicrophoneUsageDescription</key>
 	<string>Cleaners Choice uses your microphone when you record voice notes or provide voice instructions for service requests.</string>
 	

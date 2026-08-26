@@ -3,6 +3,7 @@ import {
   Modal,
   View,
   StyleSheet,
+  Platform,
   TouchableWithoutFeedback,
 } from 'react-native';
 import {BlurView} from '@react-native-community/blur';
@@ -15,9 +16,50 @@ interface Props {
   onDecline: () => void;
 }
 
+const isIOS = Platform.OS === 'ios';
+
+const DISCLOSURE_TEXT =
+  'Cleaner Choice uses your location to show nearby cleaning jobs and services, and to display your position on the map while you are using the app. Your location is sent to our servers to match you with jobs and cleaners in your area. We never collect location in the background.';
+
+type ActionProps = Pick<
+  React.ComponentProps<typeof CustomModal>,
+  'singleButton' | 'buttonTitle' | 'cancelButtonTitle' | 'onPress' | 'onPress2'
+>;
+
 /**
- * Prominent disclosure required by the Google Play User Data policy.
- * Must be shown BEFORE the runtime location permission dialog.
+ * iOS renders a single centred "Continue" button and nothing else, so the
+ * cancel-button props are not passed at all. Android keeps the two-button
+ * Allow / No Thanks layout.
+ */
+const buildActionProps = (
+  onAccept: () => void,
+  onDecline: () => void,
+): ActionProps =>
+  isIOS
+    ? {
+        singleButton: true,
+        buttonTitle: 'Continue',
+        onPress2: onAccept,
+      }
+    : {
+        buttonTitle: 'Allow',
+        cancelButtonTitle: 'No Thanks',
+        onPress: onDecline,
+        onPress2: onAccept,
+      };
+
+/**
+ * Pre-permission disclosure shown before the runtime location prompt.
+ *
+ * iOS - App Store guideline 5.1.1(iv): the screen may only *explain* the
+ * upcoming request. It must not encourage a choice ("Allow") and must not let
+ * the user skip or delay the request ("No Thanks"). So on iOS we render a
+ * single neutral "Continue" button and every dismissal path leads straight to
+ * the system permission dialog.
+ *
+ * Android - Google Play Prominent Disclosure & Consent: the user must be able
+ * to decline the disclosure before the runtime dialog is triggered, so both
+ * buttons are kept.
  */
 const LocationDisclosureModal: React.FC<Props> = ({
   visible,
@@ -29,7 +71,8 @@ const LocationDisclosureModal: React.FC<Props> = ({
       transparent
       visible={visible}
       animationType="fade"
-      onRequestClose={onDecline}>
+      // iOS has no opt-out path, so any dismissal still proceeds to the prompt.
+      onRequestClose={isIOS ? onAccept : onDecline}>
       <View style={styles.overlay}>
         <BlurView
           style={StyleSheet.absoluteFillObject}
@@ -41,13 +84,10 @@ const LocationDisclosureModal: React.FC<Props> = ({
           <View>
             <CustomModal
               title="Location Access"
-              subTitle="Cleaner Choice collects location data to show nearby cleaning jobs and services, and to display your position on the map while you are using the app. Your location is sent to our servers to match you with jobs and cleaners in your area. We never collect location in the background."
+              subTitle={DISCLOSURE_TEXT}
               iconName="map-marker-outline"
               iconColor={Colors.gradient1}
-              onPress={onDecline}
-              onPress2={onAccept}
-              buttonTitle="Allow"
-              cancelButtonTitle="No Thanks"
+              {...buildActionProps(onAccept, onDecline)}
             />
           </View>
         </TouchableWithoutFeedback>

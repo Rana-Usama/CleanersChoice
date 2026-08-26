@@ -148,23 +148,19 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
     if (!user) return;
 
     const uploadedCount = selectedImages.filter(img => img !== null).length;
-    if (uploadedCount === 0) {
-      Toast.show({
-        type: 'info',
-        text1: 'Gallery Required',
-        text2: 'Please upload at least one picture',
-      });
-      return;
-    }
 
+    // Service images are optional - a cleaner can publish without any and add
+    // them later. The prompt below is a recommendation, never a gate.
     if (uploadedCount < 2) {
       showAlert({
-        title: 'Add More Photos',
+        title: uploadedCount === 0 ? 'Continue Without Photos?' : 'Add More Photos',
         message:
-          'We recommend uploading at least 2-3 photos to showcase your work better. Continue anyway?',
+          uploadedCount === 0
+            ? 'Photos help customers choose you, but they are optional. You can add them any time from your profile. Continue without photos?'
+            : 'We recommend uploading at least 2-3 photos to showcase your work better. Continue anyway?',
         variant: 'confirm',
         buttons: [
-          {text: 'Add More', style: 'cancel'},
+          {text: uploadedCount === 0 ? 'Add Photos' : 'Add More', style: 'cancel'},
           {
             text: 'Continue',
             onPress: async () => await proceedWithSave(),
@@ -506,19 +502,12 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
           entering={FadeInUp.delay(500)}
           style={styles.buttonContainer}>
           <TouchableOpacity
-            style={[
-              styles.continueButton,
-              uploadedCount === 0 && styles.buttonDisabled,
-            ]}
+            style={styles.continueButton}
             onPress={saveImagesToFirestore}
-            disabled={loading || uploadedCount === 0}
+            disabled={loading}
             activeOpacity={0.8}>
             <LinearGradient
-              colors={
-                uploadedCount === 0
-                  ? [Colors.gray200, Colors.gray300]
-                  : [Colors.gradient1, Colors.gradient2]
-              }
+              colors={[Colors.gradient1, Colors.gradient2]}
               style={styles.buttonGradient}>
               {loading ? (
                 <ActivityIndicator color={Colors.white} />
@@ -542,7 +531,7 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
 
           <Text style={styles.requirementsText}>
             {uploadedCount === 0
-              ? 'At least 1 photo is required to continue'
+              ? 'Photos are optional - you can add them later'
               : uploadedCount === 1
               ? '✓ Ready to continue (add more photos for better results)'
               : `✓ ${uploadedCount} photos uploaded - Great!`}
@@ -908,10 +897,6 @@ const styles = StyleSheet.create({
     width: '100%',
     alignSelf: 'center',
     height: RFPercentage(5.6),
-  },
-  buttonDisabled: {
-    shadowOpacity: 0,
-    elevation: 0,
   },
   buttonGradient: {
     borderRadius: 100,

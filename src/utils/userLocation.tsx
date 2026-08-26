@@ -5,6 +5,9 @@ import {
 } from "react-native";
 import Geolocation from "@react-native-community/geolocation";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import auth from "@react-native-firebase/auth";
+import firestore from "@react-native-firebase/firestore";
+import haversine from "haversine";
 import axios from "axios";
 
 const LOCATION_DISCLOSURE_KEY = "@location_disclosure_accepted";
@@ -15,6 +18,83 @@ interface Location {
   address: string | null;
 }
 import {GOOGLE_PLACES_API_KEY} from '@env';
+
+/**
+ * Cleaner location sync.
+ *
+ * The nearby-job Cloud Function needs a coordinate for each cleaner, and the
+ * only one previously stored was their service address — which disagreed with
+ * the jobs list, since that filters on live device GPS. Persisting the device
+ * position here keeps push radius and list radius on the same coordinate.
+ *
+ * Only cleaners are written: a customer's position is never needed server-side.
+ * The write is fire-and-forget — a failure must never affect the location the
+ * calling screen receives.
+ */
+const LOCATION_SYNC_MIN_INTERVAL_MS = 15 * 60 * 1000;
+const LOCATION_SYNC_MIN_DISTANCE_KM = 1;
+
+let lastSyncedLocation: {
+  latitude: number;
+  longitude: number;
+  at: number;
+} | null = null;
+
+/**
+ * This hook re-runs on every screen mount, so without a guard a cleaner
+ * browsing between tabs would issue a Firestore write each time. Skip when the
+ * position is both recent and essentially unchanged.
+ */
+const shouldSyncLocation = (latitude: number, longitude: number) => {
+  if (!lastSyncedLocation) return true;
+
+  const elapsed = Date.now() - lastSyncedLocation.at;
+  if (elapsed >= LOCATION_SYNC_MIN_INTERVAL_MS) return true;
+
+  try {
+    const movedKm = haversine(
+      {
+        latitude: lastSyncedLocation.latitude,
+        longitude: lastSyncedLocation.longitude,
+      },
+      {latitude, longitude},
+      {unit: "km"},
+    );
+    return movedKm >= LOCATION_SYNC_MIN_DISTANCE_KM;
+  } catch (err) {
+    return true;
+  }
+};
+
+const syncCleanerLocation = async (latitude: number, longitude: number) => {
+  try {
+    const user = auth().currentUser;
+    if (!user) return;
+
+    const role = await AsyncStorage.getItem("role");
+    if (role !== "Cleaner") return;
+
+    if (!shouldSyncLocation(latitude, longitude)) return;
+
+    await firestore()
+      .collection("Users")
+      .doc(user.uid)
+      .update({
+        lastKnownLocation: {
+          latitude,
+          longitude,
+          // Epoch ms to match the project's other time fields
+          // (subscriptionEndDate). Lets a staleness cutoff be added later
+          // without a migration.
+          updatedAt: Date.now(),
+        },
+      });
+
+    lastSyncedLocation = {latitude, longitude, at: Date.now()};
+  } catch (err) {
+    console.log("Error syncing cleaner location:", err);
+  }
+};
 
 
 export const useCurrentLocation = () => {
@@ -94,6 +174,8 @@ export const useCurrentLocation = () => {
 
             setLocation(newLocation);
             setLoading(false);
+            // Fire-and-forget: never block the caller on the sync.
+            syncCleanerLocation(latitude, longitude);
             resolve(newLocation);
           },
           (err) => {
