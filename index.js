@@ -3,7 +3,7 @@
  */
 import 'react-native-get-random-values';
 
-import {AppRegistry, Linking, Platform} from 'react-native';
+import {AppRegistry, Platform} from 'react-native';
 import App from './App';
 import {name as appName} from './app.json';
 import {FirebaseApp, initializeApp} from '@react-native-firebase/app';
@@ -11,30 +11,23 @@ import messaging from '@react-native-firebase/messaging';
 import notifee, {EventType} from '@notifee/react-native';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import {applyGlobalFontScaleCap} from './src/utils/fontScaling';
+import {handleNotificationTap} from './src/utils/notificationNavigation';
 
 // Cap OS accessibility font scaling app-wide before anything renders.
 applyGlobalFontScaleCap();
 
-const handleNotificationNavigation = screen => {
-  if (!screen) return;
-
-  const supportedScreens = ['messages', 'notifications'];
-  if (supportedScreens.includes(screen.toLowerCase())) {
-    Linking.openURL(`cleanerChoiceApp://${screen.toLowerCase()}`);
-  }
-};
-
-// Foreground/background notification tap handler
+// Tap on an OS-rendered notification while the app is backgrounded.
 messaging().onNotificationOpenedApp(remoteMessage => {
-  handleNotificationNavigation(remoteMessage?.data?.screen);
+  handleNotificationTap(remoteMessage?.data);
 });
 
-// App opened from quit state
+// App opened from quit state. The navigator does not exist yet, so the payload
+// is queued and replayed by StackNavigator once the stack is mounted.
 messaging()
   .getInitialNotification()
   .then(remoteMessage => {
     if (remoteMessage) {
-      handleNotificationNavigation(remoteMessage?.data?.screen);
+      handleNotificationTap(remoteMessage.data);
     }
   });
 

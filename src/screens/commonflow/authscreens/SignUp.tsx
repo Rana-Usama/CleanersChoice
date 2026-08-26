@@ -33,6 +33,7 @@ import BlueStars from '../../../assets/svg/BlueStars';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {useSoftInputAdjustNothing} from '../../../hooks/useSoftInputMode';
+import CleanerTermsSheet from '../../../components/CleanerTermsSheet';
 
 const {width: screenWidth} = Dimensions.get('window');
 
@@ -75,6 +76,12 @@ const SignUp: React.FC = ({navigation}: any) => {
     useState<boolean>(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const userFlow = useSelector((state: any) => state.userFlow);
+
+  // The membership terms describe the Premium subscription, the job list and
+  // the invoicing tools — all cleaner-only, so customers never see them.
+  const isCleaner = userFlow?.userFlow === 'Cleaner';
+  const [termsSheetVisible, setTermsSheetVisible] = useState(false);
+
   useSoftInputAdjustNothing();
 
   useEffect(() => {
@@ -219,8 +226,10 @@ const SignUp: React.FC = ({navigation}: any) => {
         message: 'Signed Up successfully',
       });
 
+      // A brand-new cleaner has not accepted the instructions yet, so they
+      // always start there — the paywall comes after.
       navigation.navigate(
-        userFlow?.userFlow === 'Customer' ? 'Home' : 'Premium',
+        userFlow?.userFlow === 'Customer' ? 'Home' : 'CleanerInstructions',
       );
     } catch (error: any) {
       showToast({
@@ -477,21 +486,53 @@ const SignUp: React.FC = ({navigation}: any) => {
                     </View>
 
                     <View style={styles.termsRow}>
-                      <TouchableOpacity
-                        activeOpacity={0.8}
-                        onPress={() => setSelected(!selected)}
-                        style={styles.termsTouchable}>
-                        <View
-                          style={[
-                            styles.checkboxCircle,
-                            selected && styles.checkboxCircleActive,
-                          ]}>
-                          {selected ? <View style={styles.checkboxInner} /> : null}
+                      
+                      {isCleaner ? (
+                        <View style={styles.termsTouchable}>
+                          <TouchableOpacity
+                            activeOpacity={0.8}
+                            onPress={() => setSelected(!selected)}
+                            hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}
+                            style={styles.termsToggle}>
+                            <View
+                              style={[
+                                styles.checkboxCircle,
+                                selected && styles.checkboxCircleActive,
+                              ]}>
+                              {selected ? (
+                                <View style={styles.checkboxInner} />
+                              ) : null}
+                            </View>
+                            <Text style={styles.termsText}>I agree to</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            activeOpacity={0.7}
+                            onPress={() => setTermsSheetVisible(true)}
+                            hitSlop={{top: 8, bottom: 8, left: 4, right: 8}}>
+                            <Text style={[styles.termsText, styles.termsLink]}>
+                              Terms And Conditions
+                            </Text>
+                          </TouchableOpacity>
                         </View>
-                        <Text style={styles.termsText}>
-                          I agree to terms and conditions
-                        </Text>
-                      </TouchableOpacity>
+                      ) : (
+                        <TouchableOpacity
+                          activeOpacity={0.8}
+                          onPress={() => setSelected(!selected)}
+                          style={styles.termsTouchable}>
+                          <View
+                            style={[
+                              styles.checkboxCircle,
+                              selected && styles.checkboxCircleActive,
+                            ]}>
+                            {selected ? (
+                              <View style={styles.checkboxInner} />
+                            ) : null}
+                          </View>
+                          <Text style={styles.termsText}>
+                            I agree to terms and conditions
+                          </Text>
+                        </TouchableOpacity>
+                      )}
                     </View>
 
                     <View style={styles.buttonContainer}>
@@ -524,6 +565,13 @@ const SignUp: React.FC = ({navigation}: any) => {
           <View style={styles.starContainer} pointerEvents="none">
             <BlueStarsComponent style={styles.star} />
           </View>
+
+          {isCleaner && (
+            <CleanerTermsSheet
+              visible={termsSheetVisible}
+              onClose={() => setTermsSheetVisible(false)}
+            />
+          )}
         </View>
       </SafeAreaView>
     </TouchableWithoutFeedback>
@@ -647,6 +695,16 @@ const styles = StyleSheet.create({
   termsTouchable: {
     flexDirection: 'row',
     alignItems: 'center',
+    flexWrap: 'wrap',
+  },
+  termsToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  termsLink: {
+    color: Colors.gradient1,
+    textDecorationLine: 'underline',
+    fontFamily: Fonts.fontMedium,
   },
   checkboxCircle: {
     width: RFPercentage(2),

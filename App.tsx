@@ -14,11 +14,33 @@ import {PUBLISHABLE_KEY} from '@env';
 import {ThemeProvider} from '@rneui/themed';
 import messaging from '@react-native-firebase/messaging';
 import notifee, {EventType} from '@notifee/react-native';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
+import {handleNotificationTap} from './src/utils/notificationNavigation';
 import {UnreadMessagesProvider} from './src/utils/UnreadMessagesContext';
 import {AlertProvider} from './src/components/AlertProvider';
 import {toastConfig} from './src/utils/toastConfig';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
+
+/**
+ * Persist the current FCM token against the signed-in user.
+ *
+ * Tokens rotate (reinstall, OS restore, long inactivity) and previously the
+ * refreshed value was only logged, so those users silently stopped receiving
+ * pushes. No-ops when signed out, which keeps logout's deleteField() intact.
+ */
+const persistFcmToken = async (token?: string | null) => {
+  const user = auth().currentUser;
+  if (!user || !token) return;
+  try {
+    await firestore().collection('Users').doc(user.uid).update({
+      fcmToken: token,
+    });
+  } catch (error) {
+    console.log('Error persisting FCM token:', error);
+  }
+};
 
 const App: React.FC = () => {
   console.log('Running in', __DEV__ ? 'DEBUG' : 'RELEASE');
@@ -48,13 +70,20 @@ const App: React.FC = () => {
         if (!channelId) {
           return;
         }
-        await notifee.cancelAllNotifications();
 
         const {title, body} = remoteMessage.notification;
         await notifee.displayNotification({
-          id: 'single-notification',
+          // Was a fixed id preceded by cancelAllNotifications(), which meant
+          // only one foreground notification could ever be visible — two
+          // nearby-job alerts in a row and the cleaner only saw the second.
+          // A per-message id lets them stack while still de-duplicating
+          // redelivery of the same message.
+          id: messageId || 'single-notification',
           title: title || 'No Title',
           body: body || 'No Body',
+          // Carried through so the tap handler below can route it the same way
+          // an OS-rendered (background) notification is routed.
+          data: remoteMessage.data || {},
           ios: {
             sound: 'default',
           },
@@ -98,6 +127,7 @@ const App: React.FC = () => {
           // Wait a bit for APNs token → FCM mapping
           const fcmToken = await messaging().getToken();
           console.log('FCM token from getToken():', fcmToken);
+          await persistFcmToken(fcmToken);
         } else {
           console.log('Notification permission denied');
         }
@@ -121,6 +151,7 @@ const App: React.FC = () => {
     // Token refresh listener
     const unsubscribeToken = messaging().onTokenRefresh(token => {
       console.log('FCM token refreshed (after APNs token linked):', token);
+      persistFcmToken(token).catch(() => {});
     });
 
     return () => {
@@ -129,14 +160,32 @@ const App: React.FC = () => {
     };
   }, [onDisplayNotification]);
 
+  /**
+   * At cold start `auth().currentUser` is usually still null when the token is
+   * first read, so re-persist once auth restores. Fires with null on logout,
+   * where it correctly does nothing and leaves the deleted token deleted.
+   */
+  useEffect(() => {
+    return auth().onAuthStateChanged(async user => {
+      if (!user) return;
+      try {
+        const token = await messaging().getToken();
+        await persistFcmToken(token);
+      } catch (error) {
+        console.log('Error syncing FCM token on auth change:', error);
+      }
+    });
+  }, []);
+
   // Handle notifee notification tap in foreground (e.g. invoice download)
   useEffect(() => {
     return notifee.onForegroundEvent(({type, detail}) => {
-      if (
-        type === EventType.PRESS &&
-        detail.notification?.data?.type === 'invoice_download'
-      ) {
-        const {contentUri, mimeType} = detail.notification.data;
+      if (type !== EventType.PRESS) return;
+
+      const data = detail.notification?.data;
+
+      if (data?.type === 'invoice_download') {
+        const {contentUri, mimeType} = data;
         if (contentUri && Platform.OS === 'android') {
           ReactNativeBlobUtil.android
             .actionViewIntent(
@@ -145,7 +194,13 @@ const App: React.FC = () => {
             )
             .catch(() => {});
         }
+        return;
       }
+
+      // Foreground pushes are re-displayed locally by Notifee, so their taps
+      // arrive here rather than through messaging().onNotificationOpenedApp.
+      // Without this, tapping a foreground notification did nothing at all.
+      handleNotificationTap(data);
     });
   }, []);
 

@@ -33,6 +33,7 @@ import Group from '../../../assets/svg/Group';
 import Backarrow from '../../../assets/svg/Backarrow';
 import BlueStars from '../../../assets/svg/BlueStars';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import {resolveCleanerRoute} from '../../../utils/cleanerRoute';
 
 const {width: screenWidth} = Dimensions.get('window');
 
@@ -129,12 +130,15 @@ const SignIn: React.FC = () => {
         await AsyncStorage.setItem('password', values.password);
       }
 
-      let nextRoute: 'CleanerNavigator' | 'Premium' | 'Home' = 'Home';
+      let nextRoute:
+        | 'CleanerNavigator'
+        | 'CleanerInstructions'
+        | 'Premium'
+        | 'Home' = 'Home';
       if (userRole === 'Cleaner') {
-        const now = Date.now();
-        const expiry = userData?.subscriptionEndDate;
-        const hasActiveSub = expiry && expiry > now;
-        nextRoute = hasActiveSub ? 'CleanerNavigator' : 'Premium';
+        // Instructions → paywall → dashboard. `userData` is already in hand
+        // here, so resolving costs no extra read.
+        nextRoute = resolveCleanerRoute(userData);
       }
 
       showToast({

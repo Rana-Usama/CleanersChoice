@@ -47,10 +47,14 @@ import PhoneBook from '../screens/cleanerflow/homescreens/invoices/PhoneBook';
 import CustomerForm from '../screens/cleanerflow/homescreens/invoices/CustomerForm';
 import Earnings from '../screens/cleanerflow/homescreens/invoices/Earnings';
 import CleanerIntroVideo from '../screens/cleanerflow/intro/CleanerIntroVideo';
+import CleanerInstructions from '../screens/cleanerflow/intro/CleanerInstructions';
 import AdminDashboard from '../screens/adminflow/AdminDashboard';
 import AdminActiveJobs from '../screens/adminflow/AdminActiveJobs';
 import AdminCleanerServices from '../screens/adminflow/AdminCleanerServices';
 import {Customer} from '../types/customer';
+import {navigationRef} from '../utils/navigationRef';
+import {flushPendingNotification} from '../utils/notificationNavigation';
+import {resolveCleanerRoute} from '../utils/cleanerRoute';
 
 export type RootStackParamList = {
   SplashOne: undefined;
@@ -110,6 +114,7 @@ export type RootStackParamList = {
   CustomerForm: {customer: Customer | null};
   Earnings: undefined;
   CleanerIntroVideo: undefined;
+  CleanerInstructions: undefined;
   // ---- Admin Flow (visible only to users with Users.admin === true) ----
   AdminDashboard: undefined;
   AdminActiveJobs: undefined;
@@ -127,6 +132,7 @@ const StackNavigator: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [userData, setUserData] = useState<any>(null);
   const [loggedOut, setLoggedOut] = useState<string | null>(null);
+  const [navReady, setNavReady] = useState(false);
 
   useEffect(() => {
     const fetchCredentialsAndUserData = async () => {
@@ -166,24 +172,18 @@ const StackNavigator: React.FC = () => {
     fetchCredentialsAndUserData();
   }, []);
 
-  const linking = {
-    prefixes: ['cleanerChoiceApp://'],
-    config: {
-      screens: {
-        NotificationsScreen: 'notifications',
-        Home: {
-          screens: {
-            Messages: 'messages',
-          },
-        },
-        CleanerNavigator: {
-          screens: {
-            Messages: 'messages',
-          },
-        },
-      },
-    },
-  };
+  /**
+   * A notification tapped from the quit state fires before this component has
+   * rendered its stack, so the payload is queued in notificationNavigation and
+   * replayed here. Waiting on `!isLoading` matters: until then the container
+   * only holds <Decider />, and navigating to a screen that isn't registered
+   * yet is a silent no-op.
+   */
+  useEffect(() => {
+    if (navReady && !isLoading) {
+      flushPendingNotification();
+    }
+  }, [navReady, isLoading]);
 
   console.log(email, password, userData);
 
@@ -202,16 +202,22 @@ const StackNavigator: React.FC = () => {
     userData?.role === 'Cleaner' &&
     hasActiveSub
   ) {
-    initialRoute = 'CleanerNavigator';
+    // Resolves to CleanerInstructions when the mandatory step is still
+    // pending, otherwise the dashboard. Without this gate, force-quitting on
+    // the instructions screen would skip it permanently.
+    initialRoute = resolveCleanerRoute(userData);
   } else if (userData?.role === 'Cleaner' && !hasActiveSub) {
-    initialRoute = 'Premium';
+    // Unpaid cleaner: instructions first, paywall second.
+    initialRoute = resolveCleanerRoute(userData);
   } else if (loggedOut === 'yes') {
     initialRoute = 'SignIn';
   }
 
   return (
     <SafeAreaProvider>
-      <NavigationContainer>
+      <NavigationContainer
+        ref={navigationRef}
+        onReady={() => setNavReady(true)}>
         {isLoading ? (
           <Decider />
         ) : (
@@ -287,6 +293,11 @@ const StackNavigator: React.FC = () => {
               name="CleanerIntroVideo"
               component={CleanerIntroVideo}
               options={{animation: 'fade'}}
+            />
+            <Stack.Screen
+              name="CleanerInstructions"
+              component={CleanerInstructions}
+              options={{animation: 'fade', gestureEnabled: false}}
             />
 
             {/* ----------------- Admin Flow ---------------- */}
