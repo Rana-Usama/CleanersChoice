@@ -1,4 +1,4 @@
-import {useCallback, useRef} from 'react';
+import {useCallback, useRef, useState} from 'react';
 import {Platform, PermissionsAndroid, Linking} from 'react-native';
 import {useAppAlert} from '../components/AlertProvider';
 import DocumentPicker, {
@@ -12,6 +12,7 @@ import {
   MAX_FILE_SIZE_LABEL,
   ALLOWED_EXTENSIONS_LABEL,
 } from '../types/chat';
+import {isGalleryPermissionError} from '../utils/imagePickerErrors';
 
 interface UseAttachmentPickerOptions {
   onAttachmentSelected: (attachment: PendingAttachment) => void;
@@ -47,6 +48,8 @@ export const useAttachmentPicker = ({
 }: UseAttachmentPickerOptions) => {
   const isPickerActive = useRef(false);
   const {showAlert} = useAppAlert();
+  const [isGalleryPermissionSheetVisible, setIsGalleryPermissionSheetVisible] =
+    useState(false);
 
   const handlePickDocument = useCallback(async () => {
     if (isPickerActive.current) return;
@@ -142,7 +145,9 @@ export const useAttachmentPicker = ({
         size: fileSize,
       });
     } catch (err: any) {
-      if (err?.code !== 'E_PICKER_CANCELLED') {
+      if (isGalleryPermissionError(err)) {
+        setIsGalleryPermissionSheetVisible(true);
+      } else if (err?.code !== 'E_PICKER_CANCELLED') {
         console.warn('[AttachmentPicker] Image pick failed:', err);
         showAlert({
           title: 'Error',
@@ -220,5 +225,7 @@ export const useAttachmentPicker = ({
     handlePickDocument,
     handlePickImage,
     handleTakePhoto,
+    isGalleryPermissionSheetVisible,
+    closeGalleryPermissionSheet: () => setIsGalleryPermissionSheetVisible(false),
   };
 };

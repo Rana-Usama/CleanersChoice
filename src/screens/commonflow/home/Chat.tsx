@@ -32,6 +32,7 @@ import PdfIcon from '../../../assets/svg/pdfIcon';
 import CancelIcon from '../../../assets/svg/CrossIcon';
 import AttachmentPickerCard from '../../../components/chat/AttachmentPickerCard';
 import {useAttachmentPicker} from '../../../hooks/useAttachmentPicker';
+import GalleryPermissionSheet from '../../../components/GalleryPermissionSheet';
 import {useAppAlert} from '../../../components/AlertProvider';
 import {
   PendingAttachment,
@@ -73,8 +74,12 @@ const Chat = ({navigation, route}: any) => {
   const [resolvedReceiverRole, setResolvedReceiverRole] = useState('');
   const receiverInitials = getAvatarInitials(receiverName);
 
-  const {handlePickDocument, handlePickImage} =
-    useAttachmentPicker({onAttachmentSelected: setPendingAttachment});
+  const {
+    handlePickDocument,
+    handlePickImage,
+    isGalleryPermissionSheetVisible,
+    closeGalleryPermissionSheet,
+  } = useAttachmentPicker({onAttachmentSelected: setPendingAttachment});
 
   // Check if attachment files already exist in cache
   const checkIfDownloaded = useCallback(async (fileName: string, messageId: string) => {
@@ -797,6 +802,10 @@ const Chat = ({navigation, route}: any) => {
       onClose={() => setShowAttachPicker(false)}
       onPickImage={handlePickImage}
       onPickDocument={handlePickDocument}
+    />
+    <GalleryPermissionSheet
+      visible={isGalleryPermissionSheetVisible}
+      onClose={closeGalleryPermissionSheet}
     />
   </>
   );

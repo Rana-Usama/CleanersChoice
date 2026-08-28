@@ -298,6 +298,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: RFPercentage(5),
     alignSelf: 'center',
+    alignItems:"center"
   },
   applyButton: {
     paddingHorizontal: RFPercentage(3),
@@ -306,6 +307,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 5,
+    width:"80%",
+    alignSelf:"center"
   },
   applyButtonText: {
     color: 'white',

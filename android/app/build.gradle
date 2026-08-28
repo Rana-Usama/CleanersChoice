@@ -18,8 +18,8 @@ android {
         applicationId "com.cleanerschoice"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 33
-        versionName "2.7.6"
+        versionCode 34
+        versionName "2.7.7"
         multiDexEnabled true
         missingDimensionStrategy 'store', 'play'
 
@@ -78,6 +78,12 @@ android {
         pickFirst 'lib/x86_64/libc++_shared.so'
         pickFirst 'lib/armeabi-v7a/libc++_shared.so'
         pickFirst 'lib/arm64-v8a/libc++_shared.so'
+        // react-native-compressor bundles AndroidLame (com.github.banketree:AndroidLame-kotlin)
+        // for its Audio.compress() API, which this app never calls (Image compression only,
+        // see ServiceTwo.tsx / SignUp.tsx / EditProfile.tsx). That prebuilt .so is what Play
+        // Console flags under "Your app could crash on 16 KB devices" -> strip it from the
+        // packaged app instead of shipping dead native code.
+        exclude 'lib/*/libandroidlame.so'
     }
 
     buildFeatures {

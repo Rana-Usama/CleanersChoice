@@ -34,6 +34,8 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {useSoftInputAdjustNothing} from '../../../hooks/useSoftInputMode';
 import CleanerTermsSheet from '../../../components/CleanerTermsSheet';
+import GalleryPermissionSheet from '../../../components/GalleryPermissionSheet';
+import {isGalleryPermissionError} from '../../../utils/imagePickerErrors';
 
 const {width: screenWidth} = Dimensions.get('window');
 
@@ -81,6 +83,8 @@ const SignUp: React.FC = ({navigation}: any) => {
   // the invoicing tools — all cleaner-only, so customers never see them.
   const isCleaner = userFlow?.userFlow === 'Cleaner';
   const [termsSheetVisible, setTermsSheetVisible] = useState(false);
+  const [showGalleryPermissionSheet, setShowGalleryPermissionSheet] =
+    useState(false);
 
   useSoftInputAdjustNothing();
 
@@ -138,7 +142,11 @@ const SignUp: React.FC = ({navigation}: any) => {
       .then(image => {
         setImg(image);
       })
-      .catch(() => {});
+      .catch((error: any) => {
+        if (isGalleryPermissionError(error)) {
+          setShowGalleryPermissionSheet(true);
+        }
+      });
   };
 
   const getSignupErrorMessage = (errorCode: any) => {
@@ -572,6 +580,11 @@ const SignUp: React.FC = ({navigation}: any) => {
               onClose={() => setTermsSheetVisible(false)}
             />
           )}
+
+          <GalleryPermissionSheet
+            visible={showGalleryPermissionSheet}
+            onClose={() => setShowGalleryPermissionSheet(false)}
+          />
         </View>
       </SafeAreaView>
     </TouchableWithoutFeedback>
