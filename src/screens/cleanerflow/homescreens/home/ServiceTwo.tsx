@@ -32,6 +32,8 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import * as Progress from 'react-native-progress';
 import {useAppAlert} from '../../../../components/AlertProvider';
+import GalleryPermissionSheet from '../../../../components/GalleryPermissionSheet';
+import {isGalleryPermissionError} from '../../../../utils/imagePickerErrors';
 
 const {width} = Dimensions.get('window');
 
@@ -48,6 +50,8 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
   const [loading, setLoading] = useState(false);
   const [loading2, setLoading2] = useState(false);
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
+  const [showGalleryPermissionSheet, setShowGalleryPermissionSheet] =
+    useState(false);
   const profileCompletion = useSelector(
     (state: any) => state.profile.profileCompletion,
   );
@@ -110,7 +114,9 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
         setSelectedImages(newImages);
       }
     } catch (error: any) {
-      if (error.code !== 'E_PICKER_CANCELLED') {
+      if (isGalleryPermissionError(error)) {
+        setShowGalleryPermissionSheet(true);
+      } else if (error.code !== 'E_PICKER_CANCELLED') {
         Toast.show({
           type: 'error',
           text1: 'Upload Failed',
@@ -538,6 +544,11 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
           </Text>
         </Animated.View>
       </ScrollView>
+
+      <GalleryPermissionSheet
+        visible={showGalleryPermissionSheet}
+        onClose={() => setShowGalleryPermissionSheet(false)}
+      />
     </View>
   );
 };

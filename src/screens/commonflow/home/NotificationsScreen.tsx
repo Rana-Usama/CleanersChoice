@@ -432,7 +432,7 @@ const NotificationsScreen = ({navigation}: any) => {
                   <Text style={styles.newJobTagText}>New Job</Text>
                 </View>
               )}
-              {!!item.jobTitle && (
+              {/* {!!item.jobTitle && (
                 <View style={styles.jobTag}>
                   <MaterialCommunityIcons
                     name="briefcase-outline"
@@ -443,7 +443,7 @@ const NotificationsScreen = ({navigation}: any) => {
                     {item.jobTitle}
                   </Text>
                 </View>
-              )}
+              )} */}
             </View>
           )}
         </View>
@@ -620,6 +620,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexWrap: 'wrap',
     gap: RFPercentage(0.5),
+    marginTop:RFPercentage(1)
   },
   jobTag: {
     flexDirection: 'row',

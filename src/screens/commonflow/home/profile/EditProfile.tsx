@@ -21,6 +21,8 @@ import HeaderBack from '../../../../components/HeaderBack';
 import GradientButton from '../../../../components/GradientButton';
 import InputField from '../../../../components/InputField';
 import ImagePicker from 'react-native-image-crop-picker';
+import GalleryPermissionSheet from '../../../../components/GalleryPermissionSheet';
+import {isGalleryPermissionError} from '../../../../utils/imagePickerErrors';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
@@ -41,6 +43,8 @@ const EditProfile = ({navigation}: any) => {
   const [userData, setUserData] =
     useState<FirebaseFirestoreTypes.DocumentData | null>(null);
   const [loading2, setLoading2] = useState(false);
+  const [showGalleryPermissionSheet, setShowGalleryPermissionSheet] =
+    useState(false);
 
   // Image Picker
   const uploadImg = () => {
@@ -52,7 +56,11 @@ const EditProfile = ({navigation}: any) => {
       .then(image => {
         setImg(image);
       })
-      .catch(error => {});
+      .catch((error: any) => {
+        if (isGalleryPermissionError(error)) {
+          setShowGalleryPermissionSheet(true);
+        }
+      });
   };
 
   // Fetching User Data
@@ -373,6 +381,11 @@ const EditProfile = ({navigation}: any) => {
           </ScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
+
+      <GalleryPermissionSheet
+        visible={showGalleryPermissionSheet}
+        onClose={() => setShowGalleryPermissionSheet(false)}
+      />
     </View>
   );
 };
