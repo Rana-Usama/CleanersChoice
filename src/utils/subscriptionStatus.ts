@@ -91,7 +91,7 @@ export const resolveSubscriptionStatus = (
  * subscription has ended, and refunds are rare enough that a separate colour
  * would add noise without adding information. It stays distinct in Firestore.
  *
- * `incomplete` gets its OWN badge, "Never Subscribed" — it does NOT fold into
+ * `incomplete` gets its OWN badge, "Incomplete" — it does NOT fold into
  * "Expired". `incomplete` covers both Stripe's live `incomplete` (first
  * payment still pending/retrying) and `incomplete_expired` (the first payment
  * never went through and Stripe gave up) — see STRIPE_STATUS_MAP in
@@ -182,7 +182,7 @@ export const SUBSCRIPTION_BADGES: Record<SubscriptionBadgeKey, BadgeStyle> = {
   // or grey so it reads as neither "was paying, now isn't" (Expired) nor
   // "never tried" (No Subscription) — it's its own, third fact.
   neverSubscribed: {
-    label: 'Never Subscribed',
+    label: 'Incomplete',
     bg: Colors.indigoBg50,
     border: Colors.indigoBg100,
     text: Colors.indigo500,
@@ -258,7 +258,7 @@ export const SUBSCRIPTION_FILTERS: Array<{
   {key: 'expired', label: 'Expired', matches: ['expired']},
   {
     key: 'neverSubscribed',
-    label: 'Never Subscribed',
+    label: 'Incomplete',
     matches: ['neverSubscribed'],
   },
 ];
