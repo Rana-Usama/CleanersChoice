@@ -363,3 +363,30 @@ export const Fonts: {[key: string]: string} = {
   fontMedium: 'Poppins-Medium',
   semiBold: 'Poppins-SemiBold',
 };
+
+/**
+ * Caps OS accessibility font scaling (iOS Dynamic Type / Android Font Size)
+ * app-wide. 1.3 respects larger text settings without breaking fixed layouts.
+ * Applied globally in src/utils/fontScaling.ts and by AppText/AppTextInput.
+ */
+export const FontScaling = {
+  maxMultiplier: 1.1,
+};
+
+/**
+ * Typography presets: fontSize paired with a proportional lineHeight (~1.4x)
+ * so text doesn't clip when fonts scale. Consumed via <AppText variant="...">.
+ * Font family/weight is intentionally left to the caller's style.
+ */
+export const Typography = {
+  xs: {fontSize: 10, lineHeight: 14},
+  sm: {fontSize: 12, lineHeight: 17},
+  base: {fontSize: 14, lineHeight: 20},
+  md: {fontSize: 16, lineHeight: 22},
+  lg: {fontSize: 18, lineHeight: 25},
+  xl: {fontSize: 20, lineHeight: 28},
+  xxl: {fontSize: 24, lineHeight: 34},
+  title: {fontSize: 28, lineHeight: 38},
+} as const;
+
+export type TypographyVariant = keyof typeof Typography;

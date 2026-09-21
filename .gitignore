@@ -40,10 +40,25 @@ local.properties
 node_modules/
 npm-debug.log
 yarn-error.log
+# Secrets and local config. Values live in .env; .env.example documents the
+# keys without them. NOTE: these rules only apply to files git is not already
+# tracking -- a file added to the index before it was listed here keeps being
+# committed until `git rm --cached` removes it.
 .env
-
+.env.*
+!.env.example
 android/app/google-services.json
+# The plist moved to ios/ at some point but this list was never updated, so it
+# was tracked unignored for its whole life. Both paths listed deliberately.
+ios/GoogleService-Info.plist
 ios/CleanersChoice/GoogleService-Info.plist
+**/.xcode.env.local.*
+
+# Decompiled app bundles. Build output, and index.android.bundle inside one
+# embeds every @env value at build time -- it is how the Places key ended up
+# in public history a second time, independently of .env.
+aab_extracted/
+*.aab
 # fastlane
 #
 # It is recommended to not store the screenshots in the git repo. Instead, use fastlane to re-generate the
@@ -55,6 +70,10 @@ ios/CleanersChoice/GoogleService-Info.plist
 **/fastlane/Preview.html
 **/fastlane/screenshots
 **/fastlane/test_output
+
+# Tool-generated backups (Xcode, sed -i, version-bump scripts)
+*.bak
+*.orig
 
 # Bundle artifact
 *.jsbundle

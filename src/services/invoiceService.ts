@@ -6,7 +6,18 @@ import RNHTMLtoPDF from 'react-native-html-to-pdf';
 import Share from 'react-native-share';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import notifee, {AndroidImportance} from '@notifee/react-native';
-import {Invoice, InvoiceFormData, InvoiceValidationErrors} from '../types/invoice';
+import {
+  isCashBasisPaidInvoice,
+  paidAtToDate,
+  parseInvoiceAmount,
+} from './earningsService';
+
+import {
+  Invoice,
+  InvoiceFormData,
+  InvoiceValidationErrors,
+  PaymentStatus,
+} from '../types/invoice';
 
 // Check if an invoice already exists for a specific job by the current cleaner
 export const checkExistingInvoiceForJob = async (
@@ -105,7 +116,6 @@ export const generateInvoiceHtml = (invoice: InvoiceFormData): string => {
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Helvetica Neue', Arial, sans-serif; color: #334155; background: #fff; padding: 40px; }
     .invoice-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; border-bottom: 3px solid #407BFF; padding-bottom: 20px; }
-    .company-name { font-size: 24px; font-weight: 700; color: #407BFF; margin-bottom: 4px; }
     .invoice-title { font-size: 32px; font-weight: 700; color: #1E293B; text-align: right; }
     .invoice-id { font-size: 14px; color: #64748B; text-align: right; margin-top: 4px; }
     .info-section { display: flex; justify-content: space-between; margin-bottom: 32px; }
@@ -125,16 +135,11 @@ export const generateInvoiceHtml = (invoice: InvoiceFormData): string => {
     .due-date-section { margin-bottom: 32px; padding: 12px 16px; background: #F8FAFC; border-left: 4px solid #94A3B8; border-radius: 0 4px 4px 0; }
     .due-date-section span { font-size: 13px; color: #475569; }
     .due-date-section strong { color: #1E293B; }
-    .footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid #E2E8F0; text-align: center; font-size: 12px; color: #475569; }
   </style>
 </head>
 <body>
   <div class="invoice-header">
-    <div>
-      <div class="company-name">Cleaners Choice</div>
-      <p style="font-size:13px;color:#475569;">Professional cleaning service</p>
-    </div>
-    <div>
+    <div style="width:100%;">
       <div class="invoice-title">INVOICE</div>
       <div class="invoice-id">${escapeHtml(invoice.invoiceId)}</div>
     </div>
@@ -202,9 +207,6 @@ export const generateInvoiceHtml = (invoice: InvoiceFormData): string => {
     </div>
   </div>
 
-  <div class="footer">
-    <p style="margin-top:4px;">Powered by Cleaners Choice App</p>
-  </div>
 </body>
 </html>`;
 };
@@ -373,10 +375,51 @@ export const saveInvoiceToFirestore = async (
     createdAt: firestore.FieldValue.serverTimestamp(),
     updatedAt: firestore.FieldValue.serverTimestamp(),
     pdfPath: pdfPath || '',
+    // Payment defaults — every new invoice starts unpaid.
+    paymentStatus: 'unpaid',
+    paidAt: null,
+    paymentMethod: '',
   };
 
   const docRef = await firestore().collection('Invoices').add(invoiceData);
   return docRef.id;
+};
+
+const normalizeLocalFilePath = (path?: string): string => {
+  if (!path) return '';
+  return path.startsWith('file://') ? path.replace('file://', '') : path;
+};
+
+const unlinkLocalPdf = async (pdfPath?: string): Promise<void> => {
+  const localPath = normalizeLocalFilePath(pdfPath);
+  if (!localPath) return;
+
+  try {
+    const exists = await ReactNativeBlobUtil.fs.exists(localPath);
+    if (exists) {
+      await ReactNativeBlobUtil.fs.unlink(localPath);
+    }
+  } catch (error) {
+    console.warn('Failed to remove local invoice PDF cache:', error);
+  }
+};
+
+export const deleteInvoice = async (invoice: Invoice): Promise<void> => {
+  const user = auth().currentUser;
+  if (!user) throw new Error('Not authenticated');
+  if (!invoice.id) throw new Error('Invoice document is missing');
+
+  const ref = firestore().collection('Invoices').doc(invoice.id);
+
+  await firestore().runTransaction(async tx => {
+    const snap = await tx.get(ref);
+    if (!snap.exists) throw new Error('Invoice not found');
+    const data = snap.data() as Invoice;
+    if (data.cleanerId !== user.uid) throw new Error('Not authorized');
+    tx.delete(ref);
+  });
+
+  await unlinkLocalPdf(invoice.pdfPath);
 };
 
 // Convert Invoice to InvoiceFormData for PDF regeneration
@@ -421,3 +464,48 @@ export const paginateInvoices = (
   const start = (page - 1) * perPage;
   return invoices.slice(start, start + perPage);
 };
+
+// ---------------------------------------------------------------------------
+// Payment-status helpers
+//
+// Every read defaults missing paymentStatus to 'unpaid' so pre-existing
+// invoices written before this feature continue to work without a backfill.
+// ---------------------------------------------------------------------------
+
+export const getPaymentStatus = (invoice: Invoice): PaymentStatus =>
+  invoice.paymentStatus === 'paid' ? 'paid' : 'unpaid';
+
+export const filterByStatus = (
+  invoices: Invoice[],
+  status: PaymentStatus,
+): Invoice[] => invoices.filter(inv => getPaymentStatus(inv) === status);
+
+export const countByStatus = (
+  invoices: Invoice[],
+): {unpaid: number; paid: number} => {
+  let unpaid = 0;
+  let paid = 0;
+  for (const inv of invoices) {
+    if (getPaymentStatus(inv) === 'paid') paid += 1;
+    else unpaid += 1;
+  }
+  return {unpaid, paid};
+};
+
+export const isPaidInvoiceForEarnings = (
+  invoice: Invoice,
+  year: number,
+): boolean => {
+  if (!isCashBasisPaidInvoice(invoice)) return false;
+  const paidAt = paidAtToDate(invoice.paidAt);
+  return !!paidAt && paidAt.getFullYear() === year;
+};
+
+export const calculateAnnualPaidEarnings = (
+  invoices: Invoice[],
+  year: number = new Date().getFullYear(),
+): number =>
+  invoices.reduce((total, invoice) => {
+    if (!isPaidInvoiceForEarnings(invoice, year)) return total;
+    return total + parseInvoiceAmount(invoice.price);
+  }, 0);

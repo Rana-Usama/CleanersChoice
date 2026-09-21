@@ -11,7 +11,6 @@ import {
   Dimensions,
   StatusBar,
   Platform,
-  Alert,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -32,12 +31,16 @@ import Animated, {
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import * as Progress from 'react-native-progress';
+import {useAppAlert} from '../../../../components/AlertProvider';
+import GalleryPermissionSheet from '../../../../components/GalleryPermissionSheet';
+import {isGalleryPermissionError} from '../../../../utils/imagePickerErrors';
 
 const {width} = Dimensions.get('window');
 
 const MAX_IMAGES = 6; // Increased from 3 to 6 for better showcase
 
 const ServiceTwo: React.FC = ({navigation}: any) => {
+  const {showAlert} = useAppAlert();
   const [selectedImages, setSelectedImages] = useState(
     Array(MAX_IMAGES).fill(null),
   );
@@ -47,6 +50,8 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
   const [loading, setLoading] = useState(false);
   const [loading2, setLoading2] = useState(false);
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
+  const [showGalleryPermissionSheet, setShowGalleryPermissionSheet] =
+    useState(false);
   const profileCompletion = useSelector(
     (state: any) => state.profile.profileCompletion,
   );
@@ -56,7 +61,7 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
       const compressedImage = await CompressorImage.compress(imageUri, {
         compressionMethod: 'manual',
         maxWidth: 1200,
-        quality: 0.85,
+        quality: 0.7,
       });
 
       const user = auth().currentUser;
@@ -65,7 +70,17 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
       const reference = storage().ref(
         `serviceImages/${user.uid}/service_${Date.now()}_${index}.jpg`,
       );
-      await reference.putFile(compressedImage);
+
+      /**
+       * `cacheControl` matters here. Without it, Firebase serves the download
+       * URL as non-cacheable, so iOS re-fetches the full JPEG on every render
+       * and the Service Details gallery loads slowly each time it is opened.
+       * The object name is unique per upload, so it can safely be immutable.
+       */
+      await reference.putFile(compressedImage, {
+        contentType: 'image/jpeg',
+        cacheControl: 'public, max-age=31536000, immutable',
+      });
       const downloadURL = await reference.getDownloadURL();
       return downloadURL;
     } catch (error) {
@@ -99,7 +114,9 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
         setSelectedImages(newImages);
       }
     } catch (error: any) {
-      if (error.code !== 'E_PICKER_CANCELLED') {
+      if (isGalleryPermissionError(error)) {
+        setShowGalleryPermissionSheet(true);
+      } else if (error.code !== 'E_PICKER_CANCELLED') {
         Toast.show({
           type: 'error',
           text1: 'Upload Failed',
@@ -112,18 +129,24 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
   };
 
   const removeImage = (index: number) => {
-    Alert.alert('Remove Image', 'Are you sure you want to remove this image?', [
-      {text: 'Cancel', style: 'cancel'},
-      {
-        text: 'Remove',
-        style: 'destructive',
-        onPress: () => {
-          const newImages = [...selectedImages];
-          newImages[index] = null;
-          setSelectedImages(newImages);
+    showAlert({
+      title: 'Remove Image',
+      message: 'Are you sure you want to remove this image?',
+      variant: 'destructive',
+      iconName: 'image-remove',
+      buttons: [
+        {text: 'Cancel', style: 'cancel'},
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: () => {
+            const newImages = [...selectedImages];
+            newImages[index] = null;
+            setSelectedImages(newImages);
+          },
         },
-      },
-    ]);
+      ],
+    });
   };
 
   const saveImagesToFirestore = async () => {
@@ -131,27 +154,25 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
     if (!user) return;
 
     const uploadedCount = selectedImages.filter(img => img !== null).length;
-    if (uploadedCount === 0) {
-      Toast.show({
-        type: 'info',
-        text1: 'Gallery Required',
-        text2: 'Please upload at least one picture',
-      });
-      return;
-    }
 
+    // Service images are optional - a cleaner can publish without any and add
+    // them later. The prompt below is a recommendation, never a gate.
     if (uploadedCount < 2) {
-      Alert.alert(
-        'Add More Photos',
-        'We recommend uploading at least 2-3 photos to showcase your work better. Continue anyway?',
-        [
-          {text: 'Add More', style: 'cancel'},
+      showAlert({
+        title: uploadedCount === 0 ? 'Continue Without Photos?' : 'Add More Photos',
+        message:
+          uploadedCount === 0
+            ? 'Photos help customers choose you, but they are optional. You can add them any time from your profile. Continue without photos?'
+            : 'We recommend uploading at least 2-3 photos to showcase your work better. Continue anyway?',
+        variant: 'confirm',
+        buttons: [
+          {text: uploadedCount === 0 ? 'Add Photos' : 'Add More', style: 'cancel'},
           {
             text: 'Continue',
             onPress: async () => await proceedWithSave(),
           },
         ],
-      );
+      });
     } else {
       await proceedWithSave();
     }
@@ -487,25 +508,18 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
           entering={FadeInUp.delay(500)}
           style={styles.buttonContainer}>
           <TouchableOpacity
-            style={[
-              styles.continueButton,
-              uploadedCount === 0 && styles.buttonDisabled,
-            ]}
+            style={styles.continueButton}
             onPress={saveImagesToFirestore}
-            disabled={loading || uploadedCount === 0}
+            disabled={loading}
             activeOpacity={0.8}>
             <LinearGradient
-              colors={
-                uploadedCount === 0
-                  ? [Colors.gray200, Colors.gray300]
-                  : [Colors.gradient1, Colors.gradient2]
-              }
+              colors={[Colors.gradient1, Colors.gradient2]}
               style={styles.buttonGradient}>
               {loading ? (
                 <ActivityIndicator color={Colors.white} />
               ) : (
                 <>
-                  <Text style={styles.buttonText}>
+                  <Text style={styles.buttonText} numberOfLines={1}>
                     {profileCompletion === '100'
                       ? 'Update Gallery'
                       : 'Continue to Packages'}
@@ -523,13 +537,18 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
 
           <Text style={styles.requirementsText}>
             {uploadedCount === 0
-              ? 'At least 1 photo is required to continue'
+              ? 'Photos are optional - you can add them later'
               : uploadedCount === 1
               ? '✓ Ready to continue (add more photos for better results)'
               : `✓ ${uploadedCount} photos uploaded - Great!`}
           </Text>
         </Animated.View>
       </ScrollView>
+
+      <GalleryPermissionSheet
+        visible={showGalleryPermissionSheet}
+        onClose={() => setShowGalleryPermissionSheet(false)}
+      />
     </View>
   );
 };
@@ -542,8 +561,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   gradientHeader: {
-    paddingTop:
-      Platform.OS === 'ios' ? 50 : StatusBar.currentHeight || 0,
+    paddingTop: Platform.OS === 'ios' ? RFPercentage(8) : RFPercentage(6),
     paddingBottom: 20,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
@@ -559,7 +577,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    height: Platform.OS === 'ios' ? RFPercentage(8) : RFPercentage(13),
+    height: Platform.OS === 'ios' ? RFPercentage(8) : RFPercentage(10),
     marginTop: RFPercentage(0.6),
     paddingBottom: RFPercentage(1.8),
   },
@@ -887,13 +905,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 16,
     // elevation: 8,
-    width: '60%',
+    width: '100%',
     alignSelf: 'center',
     height: RFPercentage(5.6),
-  },
-  buttonDisabled: {
-    shadowOpacity: 0,
-    elevation: 0,
   },
   buttonGradient: {
     borderRadius: 100,

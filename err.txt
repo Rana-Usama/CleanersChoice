@@ -1,0 +1,7 @@
+npm error npx canceled due to missing packages and no YES option: ["esbuild@0.28.0"]
+npm notice
+npm notice New major version of npm available! 10.9.4 -> 11.16.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.16.0
+npm notice To update run: npm install -g npm@11.16.0
+npm notice
+npm error A complete log of this run can be found in: /sessions/practical-beautiful-cray/.npm/_logs/2026-06-09T08_56_11_575Z-debug-0.log

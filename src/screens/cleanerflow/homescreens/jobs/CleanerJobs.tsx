@@ -1,5 +1,4 @@
 import {
-  SafeAreaView,
   StyleSheet,
   Text,
   View,
@@ -18,9 +17,10 @@ import {
   StatusBar,
   Keyboard,
 } from 'react-native';
-import React, {useCallback, useState, useRef, useEffect} from 'react';
+import React, {useCallback, useState, useRef, useEffect, useMemo} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts} from '../../../../constants/Themes';
+import {NEARBY_RADIUS_MILES} from '../../../../constants/nearbyRadius';
 import HeaderBack from '../../../../components/HeaderBack';
 import JobCard from '../../../../components/JobCard';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
@@ -33,6 +33,7 @@ import Slider from '@react-native-community/slider';
 import NotFound from '../../../../components/NotFound';
 import {useExitAppOnBack} from '../../../../utils/ExitApp';
 import {useCurrentLocation} from '../../../../utils/userLocation';
+import LocationDisclosureModal from '../../../../components/LocationDisclosureModal';
 import {useSelector, useDispatch} from 'react-redux';
 import haversine from 'haversine';
 import {clearFilterLocation} from '../../../../redux/location/Actions';
@@ -72,7 +73,19 @@ type Job = {
 const CleanerJobs = () => {
   const profileData = useSelector((state: any) => state?.profile.profileData);
 
-  const {location, loading, error} = useCurrentLocation();
+  const {
+    location,
+    locationSource,
+    resolving: resolvingLocation,
+    error: locationError,
+    failure: locationFailure,
+    permissionBlocked,
+    refresh: refreshLocation,
+    openAppSettings,
+    disclosureVisible,
+    acceptDisclosure,
+    declineDisclosure,
+  } = useCurrentLocation({savedLocationFallback: true});
   const navigation = useNavigation<any>();
   const [jobsData, setJobsData] = useState<Job[]>([]);
   const [loading2, setLoading] = useState(false);
@@ -89,7 +102,6 @@ const CleanerJobs = () => {
   const [selectedType, setSelectedType] = useState('');
   const [query2, setQuery2] = useState('');
   const [refreshing, setRefreshing] = useState(false);
-  const [initializingLocation, setInitializingLocation] = useState(true);
   const [isAdmin, setIsAdmin] = useState(profileData?.admin);
   const [adminViewAllJobs, setAdminViewAllJobs] = useState(false);
 
@@ -104,34 +116,11 @@ const CleanerJobs = () => {
   const dispatch = useDispatch();
   useExitAppOnBack();
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setInitializingLocation(false);
-    }, 2000);
-
-    if (location && location.latitude && location.longitude) {
-      clearTimeout(timer);
-      setInitializingLocation(false);
-    }
-
-    return () => clearTimeout(timer);
-  }, [location]);
-
-  // On Refresh
-  const onRefresh = () => {
-    setRefreshing(true);
-    setLoading(true);
-    fetchJobs();
-    setTimeout(() => {
-      setRefreshing(false);
-      setLoading(false);
-    }, 1500);
-  };
-
   // Fetching jobs
-  const fetchJobs = async () => {
+  const fetchJobs = useCallback(async () => {
     const user = auth().currentUser;
     if (!user) return;
+    setLoading(true);
     try {
       const snapshot = await firestore()
         .collection('Jobs')
@@ -145,13 +134,29 @@ const CleanerJobs = () => {
       setJobsData(jobs);
     } catch (error) {
       console.log('Error fetching jobs:', error);
+    } finally {
+      setLoading(false);
     }
-  };
+  }, []);
+
+  /**
+   * Pull-to-refresh previously refetched jobs only, so a failed location
+   * lookup had no in-app retry at all — the user had to kill the app. Both are
+   * retried together now.
+   */
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([fetchJobs(), refreshLocation()]);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [fetchJobs, refreshLocation]);
 
   useFocusEffect(
     useCallback(() => {
       fetchJobs();
-    }, []),
+    }, [fetchJobs]),
   );
 
   const getTruncatedText = (text: any) => {
@@ -226,12 +231,20 @@ const CleanerJobs = () => {
     }, 1500);
   };
 
-  useEffect(() => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-    }, 3000);
-  }, []);
+  /**
+   * One resolved position for the whole screen. A manually chosen filter still
+   * wins over the device position (unchanged), and `location` may itself be a
+   * saved fallback rather than a GPS fix — see useCurrentLocation.
+   */
+  const hasSelectedLocation = !!(
+    selectedLocation?.latitude && selectedLocation?.longitude
+  );
+  const hasCurrentLocation = !!(location?.latitude && location?.longitude);
+  const activePosition = hasSelectedLocation
+    ? selectedLocation
+    : hasCurrentLocation
+    ? location
+    : null;
 
   const finalFilteredJobs = jobsData.filter(job => {
     if (job.status !== 'active') return false;
@@ -250,11 +263,7 @@ const CleanerJobs = () => {
       return true; // 👈 Admin sees everything else
     }
 
-    const hasSelectedLocation =
-      selectedLocation?.latitude && selectedLocation?.longitude;
-    const hasCurrentLocation = location?.latitude && location?.longitude;
-
-    if (!hasSelectedLocation && !hasCurrentLocation) return false;
+    if (!activePosition) return false;
 
     if (rangeSelector) {
       const price = job?.priceRange || 0;
@@ -271,14 +280,16 @@ const CleanerJobs = () => {
     const jobLoc = job?.location;
     if (!jobLoc?.latitude || !jobLoc?.longitude) return false;
 
-    const position = hasSelectedLocation ? selectedLocation : location;
     try {
       const distance = haversine(
-        {latitude: position.latitude, longitude: position.longitude},
+        {
+          latitude: activePosition.latitude,
+          longitude: activePosition.longitude,
+        },
         {latitude: jobLoc.latitude, longitude: jobLoc.longitude},
-        {unit: 'km'},
+        {unit: 'mile'},
       );
-      return distance <= 20;
+      return distance <= NEARBY_RADIUS_MILES;
     } catch (e) {
       return false;
     }
@@ -292,22 +303,155 @@ const CleanerJobs = () => {
 
   const displayedJobs = showAllJobs ? sortedJobs : sortedJobs?.slice(0, 10);
 
-  // Determine if no location exists
-  const noLocation =
-    (!location?.latitude || !location?.longitude) &&
-    (!selectedLocation?.latitude || !selectedLocation?.longitude);
+  const noLocation = !activePosition;
 
-  if (initializingLocation) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <StatusBar backgroundColor={Colors.white} barStyle="dark-content" />
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={Colors.gradient1} />
-          <Text style={styles.loadingText}>Fetching your location...</Text>
-        </View>
-      </SafeAreaView>
+  /**
+   * All five failure paths used to collapse into the same "Location Required /
+   * please apply a location filter" message, which blamed the user for what
+   * was usually a blocked permission or a timed-out fix and offered no way
+   * out. Each case now names itself and carries the action that resolves it.
+   */
+  const locationEmptyState = permissionBlocked
+    ? {
+        icon: 'location-disabled',
+        title: 'Location Access Is Off',
+        message:
+          'CleanersChoice needs your location to show jobs near you.\nTurn it back on in Settings, or pick a location manually.',
+        actionLabel: 'Open Settings',
+        onAction: openAppSettings,
+      }
+    : locationError
+    ? {
+        icon: 'location-searching',
+        title: "Couldn't Get Your Location",
+        message: locationError,
+        actionLabel: 'Try Again',
+        onAction: refreshLocation,
+      }
+    : {
+        icon: 'location-off',
+        title: 'Location Required',
+        message:
+          'Allow location access or pick a location to see\ncleaning jobs near you.',
+        actionLabel: 'Try Again',
+        onAction: refreshLocation,
+      };
+
+  /**
+   * Permission CTA, deliberately NOT gated on `noLocation`.
+   *
+   * With savedLocationFallback on, a denied permission still resolves to the
+   * cleaner's last known position or service address, so `activePosition` is
+   * set and `noLocation` is false -- which meant the empty state below (the
+   * only thing carrying "Open Settings") never rendered. The cleaner got jobs
+   * around a stale address and no way to turn location back on. This banner
+   * shows whenever the permission itself is the problem, with or without a
+   * usable fallback.
+   *
+   * "blocked" is the Settings case: neither OS will prompt again (iOS after
+   * any denial, Android after "Don't ask again"). "denied" on Android can
+   * still be re-prompted in-app, so it gets a different action.
+   */
+  const permissionPrompt = useMemo(() => {
+    if (permissionBlocked) {
+      return {
+        title: 'Location Access Is Off',
+        message: hasSelectedLocation
+          ? 'Turn it on to see jobs around you instead of your chosen filter.'
+          : activePosition
+          ? "Jobs below aren't centred on where you are right now."
+          : 'CleanersChoice needs your location to show jobs near you.',
+        actionLabel: 'Open Settings',
+        onAction: openAppSettings,
+      };
+    }
+    if (locationFailure === 'denied') {
+      return {
+        title: 'Location Permission Needed',
+        message: 'Allow location access to see cleaning jobs near you.',
+        actionLabel: 'Allow Location',
+        onAction: refreshLocation,
+      };
+    }
+    return null;
+  }, [
+    permissionBlocked,
+    locationFailure,
+    hasSelectedLocation,
+    activePosition,
+    openAppSettings,
+    refreshLocation,
+  ]);
+
+  // A saved fallback keeps the list populated, but the cleaner needs to know
+  // the results are not centred on where they actually are right now.
+  const fallbackNotice =
+    !hasSelectedLocation && locationSource === 'serviceAddress'
+      ? 'Showing jobs near your saved service address. Turn on location for jobs around you right now.'
+      : !hasSelectedLocation && locationSource === 'lastKnown'
+      ? 'Showing jobs near your last known location.'
+      : null;
+
+  /**
+   * Location is no longer allowed to take the whole screen hostage.
+   *
+   * The old early return replaced the header, filters and jobs list with a
+   * bare spinner for as long as `resolving` was true, so a stalled native
+   * authorization callback read as a permanently broken screen — and the
+   * "Choose a Location" button it rendered sat outside `locationActions`,
+   * which is where that button gets its width and padding, so it came out
+   * unstyled. The screen now always renders; location state is expressed
+   * inside the jobs section, where the properly laid out empty state and the
+   * location filter in the header are both reachable the whole time.
+   */
+  const locationPending = resolvingLocation && noLocation;
+
+  /**
+   * The ONLY case where location state should be hidden: an admin who has
+   * switched the list to every job platform-wide, so no coordinate is used.
+   *
+   * These branches previously tested `!isAdmin`, which was wrong -- and
+   * silently so. `adminViewAllJobs` defaults to false and `setAdminViewAllJobs`
+   * is never called (the toggle UI at the top of this file is commented out),
+   * so an admin is filtered by distance exactly like any cleaner while every
+   * location affordance -- the resolving spinner, the empty state, and the
+   * permission CTA -- was suppressed for them. The result was an admin with a
+   * blocked permission landing on "No cleaning jobs found matching your
+   * filters" with no hint that location was the actual problem and no way to
+   * fix it.
+   */
+  const adminBypassesLocation = isAdmin && adminViewAllJobs;
+
+  // Why the screen is showing what it is showing. Release-stripped by
+  // configureConsole(), so this costs nothing in production.
+  useEffect(() => {
+    console.log(
+      '[CleanerJobs] location state ->',
+      JSON.stringify({
+        failure: locationFailure,
+        permissionBlocked,
+        source: locationSource,
+        hasPosition: !noLocation,
+        manualFilter: hasSelectedLocation,
+        resolving: resolvingLocation,
+        isAdmin: !!isAdmin,
+        adminViewAllJobs,
+        adminBypassesLocation,
+        showingPermissionCta: !!permissionPrompt && !adminBypassesLocation,
+      }),
     );
-  }
+  }, [
+    locationFailure,
+    permissionBlocked,
+    locationSource,
+    noLocation,
+    hasSelectedLocation,
+    resolvingLocation,
+    isAdmin,
+    adminViewAllJobs,
+    adminBypassesLocation,
+    permissionPrompt,
+  ]);
 
   return (
     <View style={styles.safeArea}>
@@ -540,8 +684,7 @@ const CleanerJobs = () => {
           </View>
         )}
 
-        {/* Admin Toggle - Only visible to admins */}
-        {isAdmin && (
+        {/* {isAdmin && (
           <View style={styles.adminToggleSection}>
             <View style={styles.adminToggleCard}>
               <View style={styles.adminToggleHeader}>
@@ -594,7 +737,7 @@ const CleanerJobs = () => {
               )}
             </View>
           </View>
-        )}
+        )} */}
 
         {/* Jobs Section */}
         <View style={[styles.jobsSection, isAdmin && styles.jobsSectionWithAdmin]}>
@@ -611,7 +754,7 @@ const CleanerJobs = () => {
                   : 'Nearby Cleaning Jobs'}
               </Text>
             </View>
-            {!noLocation && (
+            {!noLocation && !locationPending && (
               <View style={styles.jobsCount}>
                 <Text style={styles.jobsCountText}>
                   {sortedJobs?.length} Job
@@ -621,28 +764,101 @@ const CleanerJobs = () => {
             )}
           </View>
 
-          {loading2 ? (
+          {permissionPrompt && !adminBypassesLocation && (
+            <View style={styles.permissionCard}>
+              <View style={styles.permissionIconWrap}>
+                <MaterialIcons
+                  name="location-disabled"
+                  size={RFPercentage(2.6)}
+                  color={Colors.gradient1}
+                />
+              </View>
+              <View style={styles.permissionTextWrap}>
+                <Text style={styles.permissionTitle}>
+                  {permissionPrompt.title}
+                </Text>
+                <Text style={styles.permissionMessage}>
+                  {permissionPrompt.message}
+                </Text>
+              </View>
+              <TouchableOpacity
+                accessibilityRole="button"
+                accessibilityLabel={permissionPrompt.actionLabel}
+                activeOpacity={0.8}
+                style={styles.permissionButton}
+                onPress={permissionPrompt.onAction}>
+                <Text style={styles.permissionButtonText}>
+                  {permissionPrompt.actionLabel}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* Softer notice only when permission is not already being asked about. */}
+          {fallbackNotice && !noLocation && !permissionPrompt && (
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={permissionBlocked ? openAppSettings : refreshLocation}
+              style={styles.fallbackBanner}>
+              <MaterialIcons
+                name="info-outline"
+                size={RFPercentage(2)}
+                color={Colors.gradient1}
+              />
+              <Text style={styles.fallbackBannerText}>{fallbackNotice}</Text>
+            </TouchableOpacity>
+          )}
+
+          {locationPending && !adminBypassesLocation ? (
+            <View style={styles.loadingJobsContainer}>
+              <ActivityIndicator size="large" color={Colors.gradient1} />
+              <Text style={styles.loadingJobsText}>
+                Finding jobs near you...
+              </Text>
+              <Text style={styles.loadingJobsHint}>
+                Using the location filter above works too.
+              </Text>
+            </View>
+          ) : loading2 ? (
             <View style={styles.loadingJobsContainer}>
               <ActivityIndicator size="large" color={Colors.gradient1} />
               <Text style={styles.loadingJobsText}>Loading jobs...</Text>
             </View>
-          ) : noLocation && !isAdmin ? (
+          ) : noLocation && !adminBypassesLocation ? (
             <View style={styles.noLocationContainer}>
               <MaterialIcons
-                name="location-off"
+                name={locationEmptyState.icon}
                 size={RFPercentage(8)}
                 color={Colors.slate300}
               />
               <Text style={styles.noLocationTitle}>
-                {isAdmin && adminViewAllJobs
-                  ? 'Viewing All Jobs'
-                  : 'Location Required'}
+                {locationEmptyState.title}
               </Text>
               <Text style={styles.noLocationText}>
-                {isAdmin && adminViewAllJobs
-                  ? 'You are viewing all active jobs'
-                  : 'Please apply a location filter to see nearby\ncleaning jobs'}
+                {locationEmptyState.message}
               </Text>
+
+              <View style={styles.locationActions}>
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  style={styles.locationPrimaryButton}
+                  onPress={locationEmptyState.onAction}>
+                  <Text style={styles.locationPrimaryText}>
+                    {locationEmptyState.actionLabel}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  style={styles.locationSecondaryButton}
+                  onPress={() =>
+                    navigation.navigate('Location', {location: false})
+                  }>
+                  <Text style={styles.locationSecondaryText}>
+                    Choose a Location
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           ) : displayedJobs?.length === 0 ? (
             <View style={styles.noJobsContainer}>
@@ -994,6 +1210,19 @@ const CleanerJobs = () => {
           </Modal>
         </View>
       )}
+
+      {/*
+        Sole mount point now that the blocking early return is gone. That
+        branch had to carry its own copy, because a first-run cleaner is
+        "resolving" precisely because this modal is waiting on them — leaving
+        it only down here stranded them on the spinner with nothing to answer.
+        The main tree always renders now, so one copy is enough.
+      */}
+      <LocationDisclosureModal
+        visible={disclosureVisible}
+        onAccept={acceptDisclosure}
+        onDecline={declineDisclosure}
+      />
     </View>
   );
 };
@@ -1026,18 +1255,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingBottom: 100,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: Colors.white,
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: RFPercentage(1.7),
-    fontFamily: Fonts.fontMedium,
-    color: Colors.placeholderColor,
   },
   filtersSection: {
     paddingHorizontal: 20,
@@ -1155,7 +1372,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   jobsSectionWithAdmin: {
-    marginTop: 0,
+    marginTop: 24,
   },
   jobsHeader: {
     flexDirection: 'column',
@@ -1193,6 +1410,13 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.fontMedium,
     color: Colors.placeholderColor,
   },
+  loadingJobsHint: {
+    marginTop: 4,
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontRegular,
+    color: Colors.slate300,
+    textAlign: 'center',
+  },
   noLocationContainer: {
     alignItems: 'center',
     paddingVertical: 40,
@@ -1210,6 +1434,103 @@ const styles = StyleSheet.create({
     color: Colors.placeholderColor,
     textAlign: 'center',
     lineHeight: 22,
+  },
+  locationActions: {
+    marginTop: 20,
+    width: '100%',
+    gap: 10,
+    paddingHorizontal: 24,
+  },
+  locationPrimaryButton: {
+    backgroundColor: Colors.gradient1,
+    paddingVertical: 13,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  locationPrimaryText: {
+    fontSize: RFPercentage(1.7),
+    fontFamily: Fonts.semiBold,
+    color: Colors.white,
+  },
+  locationSecondaryButton: {
+    backgroundColor: Colors.blueBg200,
+    borderWidth: 1,
+    borderColor: Colors.lightBlueBorder,
+    paddingVertical: 13,
+    // Horizontal padding lives here rather than only on the `locationActions`
+    // wrapper, so the button stays legible if it is ever rendered on its own.
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    alignItems: 'center',
+    alignSelf: 'stretch',
+  },
+  locationSecondaryText: {
+    fontSize: RFPercentage(1.7),
+    fontFamily: Fonts.fontMedium,
+    color: Colors.gradient1,
+  },
+  permissionCard: {
+    backgroundColor: Colors.blueBg150,
+    borderWidth: 1,
+    borderColor: Colors.lightBlueBorder,
+    borderRadius: 14,
+    padding: RFPercentage(1.8),
+    marginBottom: RFPercentage(1.5),
+    gap: RFPercentage(1.2),
+  },
+  permissionIconWrap: {
+    width: RFPercentage(4.6),
+    height: RFPercentage(4.6),
+    borderRadius: RFPercentage(2.3),
+    backgroundColor: Colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  permissionTextWrap: {
+    gap: 4,
+  },
+  permissionTitle: {
+    fontSize: RFPercentage(1.8),
+    fontFamily: Fonts.semiBold,
+    color: Colors.gray700,
+  },
+  permissionMessage: {
+    fontSize: RFPercentage(1.55),
+    fontFamily: Fonts.fontRegular,
+    color: Colors.secondaryText,
+    lineHeight: RFPercentage(2.2),
+  },
+  permissionButton: {
+    backgroundColor: Colors.gradient1,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    alignItems: 'center',
+    alignSelf: 'stretch',
+  },
+  permissionButtonText: {
+    fontSize: RFPercentage(1.7),
+    fontFamily: Fonts.semiBold,
+    color: Colors.white,
+  },
+  fallbackBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: Colors.blueBg150,
+    borderWidth: 1,
+    borderColor: Colors.lightBlueBorder,
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    marginBottom: 12,
+  },
+  fallbackBannerText: {
+    flex: 1,
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontRegular,
+    color: Colors.grayBlueText,
+    lineHeight: 19,
   },
   noJobsContainer: {
     // paddingVertical: 40,

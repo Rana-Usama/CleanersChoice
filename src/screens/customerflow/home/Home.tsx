@@ -19,10 +19,12 @@ import {
 } from 'react-native';
 import React, {useState, useRef, useEffect} from 'react';
 import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
+import {NEARBY_RADIUS_MILES} from '../../../constants/nearbyRadius';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import SearchField from '../../../components/SearchField';
 import ServicesCard from '../../../components/ServicesCard';
-import {useNavigation} from '@react-navigation/native';
+import {prefetchImages} from '../../../utils/imageCache';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import HeaderBack from '../../../components/HeaderBack';
 import Slider from '@react-native-community/slider';
 import firestore from '@react-native-firebase/firestore';
@@ -33,11 +35,21 @@ import auth from '@react-native-firebase/auth';
 import {useDispatch} from 'react-redux';
 import {setProfileData} from '../../../redux/ProfileData/Actions';
 import NotFound from '../../../components/NotFound';
+import CustomerCoachMarks from '../../../components/CustomerCoachMarks';
 import {useExitAppOnBack} from '../../../utils/ExitApp';
 import {useSelector} from 'react-redux';
 import CustomModal from '../../../components/CustomModal';
 import GuestAuthModal from '../../../components/GuestAuthModal';
 import {useCurrentLocation} from '../../../utils/userLocation';
+import {
+  filterVisibleByCleanerId,
+  isServiceVisible,
+} from '../../../utils/cleanerVisibility';
+import LocationDisclosureModal from '../../../components/LocationDisclosureModal';
+import {
+  markCoachMarksSeenForRole,
+  shouldShowCoachMarksForRole,
+} from '../../../utils/coachMarks';
 import haversine from 'haversine';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import HomeCard from '../../../components/CardHome';
@@ -71,6 +83,8 @@ interface Service {
   packages?: any[];
   rating?: number | null;
   reviews?: any[];
+  /** Denormalized subscription deadline — see utils/cleanerVisibility.ts. */
+  visibleUntil?: number | null;
 }
 
 const Home = () => {
@@ -94,10 +108,19 @@ const Home = () => {
   );
   const userFlow = useSelector((state: any) => state.userFlow.userFlow);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const {location} = useCurrentLocation();
+  const {location, disclosureVisible, acceptDisclosure, declineDisclosure} =
+    useCurrentLocation();
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminViewAllServices, setAdminViewAllServices] = useState(false);
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
+  const [showCustomerCoachMarks, setShowCustomerCoachMarks] = useState(false);
+  const [locationModalAllowed, setLocationModalAllowed] = useState(false);
+  const isMountedRef = useRef(true);
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   const selectedLocation = useSelector(
     (state: any) =>
@@ -119,6 +142,37 @@ const Home = () => {
     }
     return () => clearTimeout(timer);
   }, [location]);
+
+
+  // console.log("servicesData.........", servicesData)
+
+  useFocusEffect(
+    React.useCallback(() => {
+      let isActive = true;
+
+      const syncCoachMarksVisibility = async () => {
+        if (userFlow === 'Guest') {
+          if (isActive) {
+            setShowCustomerCoachMarks(false);
+            setLocationModalAllowed(true);
+          }
+          return;
+        }
+
+        const shouldShow = await shouldShowCoachMarksForRole('customer');
+        if (isActive) {
+          setShowCustomerCoachMarks(shouldShow);
+          setLocationModalAllowed(!shouldShow);
+        }
+      };
+
+      void syncCoachMarksVisibility();
+
+      return () => {
+        isActive = false;
+      };
+    }, [userFlow]),
+  );
 
   // Unread notifications count
   useEffect(() => {
@@ -149,14 +203,43 @@ const Home = () => {
     serviceDetails();
   }, []);
 
+ 
+  const createdAtMs = (value: any): number => {
+    if (!value) return 0;
+    if (typeof value?.toDate === 'function') return value.toDate().getTime();
+    if (value instanceof Date) return value.getTime();
+    const parsed = new Date(value).getTime();
+    return Number.isNaN(parsed) ? 0 : parsed;
+  };
+
   // Fetching Service Details
   const serviceDetails = async () => {
     setLoading(true);
     try {
-      const querySnapshot = await firestore()
-        .collection('CleanerServices')
-        .orderBy('createdAt', 'desc')
-        .get();
+      const now = Date.now();
+      let querySnapshot: FirebaseFirestoreTypes.QuerySnapshot =
+        await firestore()
+          .collection('CleanerServices')
+          .where('visibleUntil', '>', now)
+          .get();
+      let usedFallback = false;
+      if (querySnapshot.empty) {
+        try {
+          const probe = await firestore()
+            .collection('CleanerServices')
+            .limit(1)
+            .get();
+          if (!probe.empty) {
+            usedFallback = true;
+            querySnapshot = await firestore()
+              .collection('CleanerServices')
+              .get();
+          }
+        } catch (fallbackError) {
+          console.log('Visibility fallback unavailable:', fallbackError);
+        }
+      }
+
       if (!querySnapshot.empty) {
         const servicesArray: Service[] = querySnapshot.docs
           .map(doc => {
@@ -173,14 +256,20 @@ const Home = () => {
               !!service.description &&
               !!service.availability &&
               !!service.type &&
-              !!service.location &&
-              Array.isArray(service.serviceImages) &&
-              service.serviceImages.length > 0 &&
-              Array.isArray(service.packages) &&
-              service.packages.length > 0,
+              !!service.location,
           );
 
-        setServicesData(servicesArray);
+        const visibleServices = usedFallback
+          ? await filterVisibleByCleanerId(servicesArray, service => service.id)
+          : servicesArray.filter(service => isServiceVisible(service, now));
+
+        setServicesData(
+          visibleServices
+            .slice()
+            .sort(
+              (a, b) => createdAtMs(b.createdAt) - createdAtMs(a.createdAt),
+            ),
+        );
       } else {
         setServicesData([]);
       }
@@ -306,8 +395,8 @@ const Home = () => {
       longitude: service.location.longitude,
     };
 
-    const distance = haversine(start, end, {unit: 'km'});
-    return distance <= 20;
+    const distance = haversine(start, end, {unit: 'mile'});
+    return distance <= NEARBY_RADIUS_MILES;
   });
 
   const adminViewingAllServices = isAdmin && adminViewAllServices;
@@ -344,570 +433,613 @@ const Home = () => {
     return text.length > length ? text.substring(0, length) + '...' : text;
   };
 
+  const completeCustomerCoachMarks = async () => {
+    setShowCustomerCoachMarks(false);
+    await markCoachMarksSeenForRole('customer');
+    setTimeout(() => {
+      if (isMountedRef.current) {
+        setLocationModalAllowed(true);
+      }
+    }, 400);
+  };
+
+  const handleSkipCustomerCoachMarks = () => {
+    void completeCustomerCoachMarks();
+  };
+
+  const handleNextCustomerCoachMarks = () => {
+    void completeCustomerCoachMarks();
+  };
+
+
+  // console.log("finalFilteredJobs......",finalFilteredJobs)
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <>
-        <StatusBar
-          backgroundColor={Colors.gradient1}
-          barStyle="light-content"
-          translucent={true}
+    <View style={{flex: 1}}>
+      <StatusBar
+        backgroundColor={Colors.gradient1}
+        barStyle="light-content"
+        translucent={true}
+      />
+
+      <LinearGradient
+        colors={[Colors.gradient1, Colors.gradient2]}
+        style={styles.gradientHeader}>
+        <HeaderBack
+          title="Home"
+          textStyle={styles.headerText}
+          left={true}
+          arrowColor={Colors.white}
+          style={{backgroundColor: 'transparent'}}
+          logo
+          tintColor={Colors.white}
         />
+        {userFlow !== 'Guest' && (
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate('NotificationsScreen')}
+            style={styles.bellButton}>
+            <Icon
+              name="bell-outline"
+              size={RFPercentage(2.4)}
+              color={Colors.white}
+            />
+            {unreadNotifCount > 0 && (
+              <View style={styles.bellBadge}>
+                <Text style={styles.bellBadgeText}>
+                  {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        )}
+      </LinearGradient>
 
-        <LinearGradient
-          colors={[Colors.gradient1, Colors.gradient2]}
-          style={styles.gradientHeader}>
-          <HeaderBack
-            title="Home"
-            textStyle={styles.headerText}
-            left={true}
-            arrowColor={Colors.white}
-            style={{backgroundColor: 'transparent'}}
-            logo
-            tintColor={Colors.white}
-          />
-          {userFlow !== 'Guest' && (
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={() => navigation.navigate('NotificationsScreen')}
-              style={styles.bellButton}>
-              <Icon name="bell-outline" size={RFPercentage(2.4)} color={Colors.white} />
-              {unreadNotifCount > 0 && (
-                <View style={styles.bellBadge}>
-                  <Text style={styles.bellBadgeText}>
-                    {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
-                  </Text>
-                </View>
-              )}
-            </TouchableOpacity>
-          )}
-        </LinearGradient>
-
-        <ScrollView
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
-          contentContainerStyle={styles.scrollView}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="always">
-          <View style={styles.safeArea}>
-            <View style={styles.container}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  width: '90%',
-                  alignSelf: 'center',
-                  marginTop: RFPercentage(1.5),
-                }}>
-                <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                  <Image
-                    source={Icons.location}
-                    resizeMode="contain"
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        contentContainerStyle={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="always">
+        <View style={styles.safeArea}>
+          <View style={styles.container}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                width: '90%',
+                alignSelf: 'center',
+                marginTop: RFPercentage(1.5),
+              }}>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <Image
+                  source={Icons.location}
+                  resizeMode="contain"
+                  style={{
+                    width: RFPercentage(2.3),
+                    height: RFPercentage(2.3),
+                  }}
+                />
+                <View style={{marginLeft: RFPercentage(1)}}>
+                  <Text
                     style={{
-                      width: RFPercentage(2.3),
-                      height: RFPercentage(2.3),
+                      fontFamily: Fonts.fontMedium,
+                      fontSize: RFPercentage(1.6),
+                      color: Colors.secondaryText,
+                    }}>
+                    Location
+                  </Text>
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={() => {
+                      navigation.navigate('Location', {location: false});
                     }}
-                  />
-                  <View style={{marginLeft: RFPercentage(1)}}>
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginTop: RFPercentage(0.5),
+                    }}>
                     <Text
                       style={{
-                        fontFamily: Fonts.fontMedium,
-                        fontSize: RFPercentage(1.6),
+                        fontFamily: Fonts.semiBold,
+                        fontSize: RFPercentage(1.7),
                         color: Colors.secondaryText,
                       }}>
-                      Location
+                      {selectedLocation?.name
+                        ? truncateText(selectedLocation.name)
+                        : truncateText(location?.address || 'Not Specified')}
                     </Text>
+                    <Entypo
+                      name="chevron-down"
+                      size={RFPercentage(2)}
+                      style={{marginLeft: RFPercentage(0.5)}}
+                      color={Colors.secondaryText}
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <TouchableOpacity
+                activeOpacity={1}
+                style={{
+                  width: RFPercentage(7),
+                  height: RFPercentage(7),
+                  borderRadius: RFPercentage(100),
+                  borderWidth: 1,
+                  borderColor: Colors.gradient2,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                <Image
+                  source={
+                    user?.profile ? {uri: user?.profile} : IMAGES.defaultPic
+                  }
+                  resizeMode="cover"
+                  style={{
+                    width: RFPercentage(6.5),
+                    height: RFPercentage(6.5),
+                    borderRadius: RFPercentage(100),
+                  }}
+                />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.searchContainer}>
+              <SearchField
+                placeholder="Search by name..."
+                value={nameQuery}
+                onChangeText={setNameQuery}
+              />
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => setModalVisible2(true)}
+                style={{
+                  width: RFPercentage(5.5),
+                  height: RFPercentage(5.5),
+                  borderRadius: RFPercentage(1.2),
+                  borderWidth: RFPercentage(0.1),
+                  borderColor: Colors.inputFieldColor,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: rangeSelector
+                    ? Colors.gradient1
+                    : Colors.white,
+                }}>
+                <MaterialIcons
+                  name="filter-list-alt"
+                  size={RFPercentage(2.8)}
+                  color={rangeSelector ? Colors.white : Colors.coolGrayIcon}
+                />
+              </TouchableOpacity>
+            </View>
+
+            <Text style={[styles.sectionTitle, {marginTop: RFPercentage(1.5)}]}>
+              Categories
+            </Text>
+            <FlatList
+              data={categories}
+              keyExtractor={item => item.id}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              renderItem={({item}) => (
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={() => setCategorySelection(item?.id)}
+                  style={{marginTop: RFPercentage(0.5)}}>
+                  <View
+                    style={[
+                      styles.categoryBox,
+                      {
+                        backgroundColor:
+                          categorySelection === item.id
+                            ? Colors.gradient1
+                            : Colors.white,
+                      },
+                    ]}>
+                    <Icon
+                      name={item.icon}
+                      size={25}
+                      color={
+                        categorySelection === item.id
+                          ? Colors.white
+                          : Colors.coolGrayIcon
+                      }
+                    />
+                  </View>
+                  <Text
+                    style={[
+                      styles.categoryText,
+                      {
+                        fontFamily:
+                          categorySelection === item.id
+                            ? Fonts.semiBold
+                            : Fonts.fontMedium,
+                      },
+                    ]}>
+                    {item.name.length > 8
+                      ? `${item.name.slice(0, 8)}..`
+                      : item.name}
+                  </Text>
+                </TouchableOpacity>
+              )}
+              contentContainerStyle={styles.flatListPadding}
+            />
+            <HomeCard
+              onPostJob={() => {
+                if (userFlow === 'Guest') {
+                  setShowAuthModal(true);
+                } else {
+                  navigation.navigate('PostJob', {jobId: null});
+                }
+              }}
+            />
+
+            {/* Admin Toggle - Only visible to admins */}
+            {isAdmin && (
+              <View style={styles.adminToggleSection}>
+                <View style={styles.adminToggleCard}>
+                  <View style={styles.adminToggleHeader}>
+                    <View style={styles.adminBadge}>
+                      <MaterialIcons
+                        name="admin-panel-settings"
+                        size={16}
+                        color={Colors.white}
+                      />
+                      <Text style={styles.adminBadgeText}>Admin View</Text>
+                    </View>
                     <TouchableOpacity
-                      activeOpacity={0.8}
-                      onPress={() => {
-                        navigation.navigate('Location', {location: false});
-                      }}
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        marginTop: RFPercentage(0.5),
-                      }}>
-                      <Text
-                        style={{
-                          fontFamily: Fonts.semiBold,
-                          fontSize: RFPercentage(1.7),
-                          color: Colors.secondaryText,
-                        }}>
-                        {selectedLocation?.name
-                          ? truncateText(selectedLocation.name)
-                          : truncateText(location?.address || 'Not Specified')}
-                      </Text>
-                      <Entypo
-                        name="chevron-down"
-                        size={RFPercentage(2)}
-                        style={{marginLeft: RFPercentage(0.5)}}
-                        color={Colors.secondaryText}
+                      onPress={() => setAdminViewAllServices(prev => !prev)}
+                      style={[
+                        styles.adminToggleSwitch,
+                        adminViewAllServices && styles.adminToggleSwitchActive,
+                      ]}>
+                      <View
+                        style={[
+                          styles.adminToggleThumb,
+                          adminViewAllServices && styles.adminToggleThumbActive,
+                        ]}
                       />
                     </TouchableOpacity>
                   </View>
-                </View>
-                <TouchableOpacity
-                  activeOpacity={1}
-                  style={{
-                    width: RFPercentage(7),
-                    height: RFPercentage(7),
-                    borderRadius: RFPercentage(100),
-                    borderWidth: 1,
-                    borderColor: Colors.gradient2,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}>
-                  <Image
-                    source={
-                      user?.profile ? {uri: user?.profile} : IMAGES.defaultPic
-                    }
-                    resizeMode="cover"
-                    style={{
-                      width: RFPercentage(6.5),
-                      height: RFPercentage(6.5),
-                      borderRadius: RFPercentage(100),
-                    }}
-                  />
-                </TouchableOpacity>
-              </View>
-              <View style={styles.searchContainer}>
-                <SearchField
-                  placeholder="Search by name..."
-                  value={nameQuery}
-                  onChangeText={setNameQuery}
-                />
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  onPress={() => setModalVisible2(true)}
-                  style={{
-                    width: RFPercentage(5.5),
-                    height: RFPercentage(5.5),
-                    borderRadius: RFPercentage(1.2),
-                    borderWidth: RFPercentage(0.1),
-                    borderColor: Colors.inputFieldColor,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: rangeSelector ? Colors.gradient1 : Colors.white,
-                  }}>
-                  <MaterialIcons
-                    name="filter-list-alt"
-                    size={RFPercentage(2.8)}
-                    color={rangeSelector ? Colors.white : Colors.coolGrayIcon}
-                  />
-                </TouchableOpacity>
-              </View>
 
-              <Text
-                style={[styles.sectionTitle, {marginTop: RFPercentage(1.5)}]}>
-                Categories
-              </Text>
-              <FlatList
-                data={categories}
-                keyExtractor={item => item.id}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                renderItem={({item}) => (
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    onPress={() => setCategorySelection(item?.id)}
-                    style={{marginTop: RFPercentage(0.5)}}>
-                    <View
-                      style={[
-                        styles.categoryBox,
-                        {
-                          backgroundColor:
-                            categorySelection === item.id
-                              ? Colors.gradient1
-                              : Colors.white,
-                        },
-                      ]}>
-                      <Icon
-                        name={item.icon}
-                        size={25}
-                        color={
-                          categorySelection === item.id
-                            ? Colors.white
-                            : Colors.coolGrayIcon
-                        }
-                      />
+                  <View style={styles.adminToggleInfo}>
+                    <MaterialIcons
+                      name={adminViewAllServices ? 'public' : 'location-on'}
+                      size={20}
+                      color={Colors.gray600}
+                    />
+                    <View style={styles.adminToggleTextContainer}>
+                      <Text style={styles.adminToggleTitle}>
+                        {adminViewAllServices
+                          ? 'Viewing All Services'
+                          : 'Location-Based View'}
+                      </Text>
+                      <Text style={styles.adminToggleDescription}>
+                        {adminViewAllServices
+                          ? 'Showing all services'
+                          : `Showing services within ${NEARBY_RADIUS_MILES} mile radius`}
+                      </Text>
                     </View>
-                    <Text
-                      style={[
-                        styles.categoryText,
-                        {
-                          fontFamily:
-                            categorySelection === item.id
-                              ? Fonts.semiBold
-                              : Fonts.fontMedium,
-                        },
-                      ]}>
-                      {item.name.length > 8
-                        ? `${item.name.slice(0, 8)}..`
-                        : item.name}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-                contentContainerStyle={styles.flatListPadding}
-              />
-              <HomeCard
-                onPostJob={() => {
-                  if (userFlow === 'Guest') {
-                    setShowAuthModal(true);
-                  } else {
-                    navigation.navigate('PostJob', {jobId: null});
-                  }
-                }}
-              />
-
-              {/* Admin Toggle - Only visible to admins */}
-              {isAdmin && (
-                <View style={styles.adminToggleSection}>
-                  <View style={styles.adminToggleCard}>
-                    <View style={styles.adminToggleHeader}>
-                      <View style={styles.adminBadge}>
-                        <MaterialIcons
-                          name="admin-panel-settings"
-                          size={16}
-                          color={Colors.white}
-                        />
-                        <Text style={styles.adminBadgeText}>Admin View</Text>
-                      </View>
-                      <TouchableOpacity
-                        onPress={() => setAdminViewAllServices(prev => !prev)}
-                        style={[
-                          styles.adminToggleSwitch,
-                          adminViewAllServices &&
-                            styles.adminToggleSwitchActive,
-                        ]}>
-                        <View
-                          style={[
-                            styles.adminToggleThumb,
-                            adminViewAllServices &&
-                              styles.adminToggleThumbActive,
-                          ]}
-                        />
-                      </TouchableOpacity>
-                    </View>
-
-                    <View style={styles.adminToggleInfo}>
-                      <MaterialIcons
-                        name={adminViewAllServices ? 'public' : 'location-on'}
-                        size={20}
-                        color={Colors.gray600}
-                      />
-                      <View style={styles.adminToggleTextContainer}>
-                        <Text style={styles.adminToggleTitle}>
-                          {adminViewAllServices
-                            ? 'Viewing All Services'
-                            : 'Location-Based View'}
-                        </Text>
-                        <Text style={styles.adminToggleDescription}>
-                          {adminViewAllServices
-                            ? 'Showing all services'
-                            : 'Showing services within 20km radius'}
-                        </Text>
-                      </View>
-                    </View>
-
-                    {adminViewAllServices && (
-                      <View style={styles.adminStats}>
-                        <Text style={styles.adminStatText}>
-                          Total Services: {servicesData.length}
-                        </Text>
-                        <Text style={styles.adminStatSubText}>
-                          Displaying: {finalFilteredJobs.length} services
-                        </Text>
-                      </View>
-                    )}
                   </View>
-                </View>
-              )}
 
-              <View
+                  {adminViewAllServices && (
+                    <View style={styles.adminStats}>
+                      <Text style={styles.adminStatText}>
+                        Total Services: {servicesData.length}
+                      </Text>
+                      <Text style={styles.adminStatSubText}>
+                        Displaying: {finalFilteredJobs.length} services
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+            )}
+
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                width: '90%',
+                alignSelf: 'center',
+                marginTop: RFPercentage(4),
+              }}>
+              <Text
                 style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  width: '90%',
-                  alignSelf: 'center',
-                  marginTop: RFPercentage(4),
+                  color: Colors.primaryText,
+                  fontFamily: Fonts.fontMedium,
+                  fontSize: RFPercentage(1.9),
                 }}>
+                {adminViewingAllServices
+                  ? 'All Services'
+                  : noLocationForRegularUser
+                  ? 'Services'
+                  : 'Nearby Services'}
+                {!adminViewingAllServices && selectedLocation?.name ? ':' : ''}
+              </Text>
+              {!adminViewingAllServices && selectedLocation?.name && (
                 <Text
                   style={{
-                    color: Colors.primaryText,
-                    fontFamily: Fonts.fontMedium,
-                    fontSize: RFPercentage(1.9),
+                    color: Colors.secondaryText,
+                    fontFamily: Fonts.fontRegular,
+                    fontSize: RFPercentage(1.6),
+                    marginLeft: RFPercentage(1),
                   }}>
-                  {adminViewingAllServices
-                    ? 'All Services'
-                    : noLocationForRegularUser
-                    ? 'Services'
-                    : 'Nearby Services'}
-                  {!adminViewingAllServices && selectedLocation?.name
-                    ? ':'
-                    : ''}
+                  {selectedLocation.name.length > 30
+                    ? selectedLocation.name.substring(0, 30) + '...'
+                    : selectedLocation.name}
                 </Text>
-                {!adminViewingAllServices && selectedLocation?.name && (
-                  <Text
-                    style={{
-                      color: Colors.secondaryText,
-                      fontFamily: Fonts.fontRegular,
-                      fontSize: RFPercentage(1.6),
-                      marginLeft: RFPercentage(1),
-                    }}>
-                    {selectedLocation.name.length > 30
-                      ? selectedLocation.name.substring(0, 30) + '...'
-                      : selectedLocation.name}
-                  </Text>
-                )}
-                {noLocationForRegularUser && !adminViewingAllServices && (
-                  <Text
-                    style={{
-                      color: Colors.red500,
-                      fontFamily: Fonts.fontMedium,
-                      fontSize: RFPercentage(1.4),
-                      marginLeft: RFPercentage(1),
-                      backgroundColor: Colors.redBg50,
-                      paddingHorizontal: 8,
-                      paddingVertical: 2,
-                      borderRadius: 10,
-                    }}>
-                    Location Required
-                  </Text>
-                )}
-              </View>
-
-              {loading ? (
-                <>
-                  <ActivityIndicator
-                    size={'large'}
-                    color={Colors.placeholderColor}
-                    style={{top: RFPercentage(14)}}
-                  />
-                </>
-              ) : (
-                <>
-                  <View style={styles.servicesContainer}>
-                    {finalFilteredJobs?.length === 0 ? (
-                      <>
-                        <View style={{bottom: RFPercentage(4)}}>
-                          <NotFound text="No services found" />
-                        </View>
-                      </>
-                    ) : (
-                      <>
-                        <FlatList
-                          data={finalFilteredJobs}
-                          keyExtractor={item => item.id.toString()}
-                          contentContainerStyle={{
-                            paddingBottom: RFPercentage(1),
-                          }}
-                          renderItem={({item}) => (
-                            <View style={styles.serviceItem}>
-                              <ServicesCard
-                                covers={item?.serviceImages}
-                                name={item?.name}
-                                icon={item?.image}
-                                price={item?.packages?.[0]?.price ?? 0}
-                                star={IMAGES?.star}
-                                rating={5}
-                                location={item?.location}
-                                onPress={() =>
-                                  navigation.navigate('ServiceDetails', {
-                                    item: item,
-                                  })
-                                }
-                                createdAt={item.createdAt}
-                              />
-                            </View>
-                          )}
-                        />
-                      </>
-                    )}
-                  </View>
-                </>
+              )}
+              {noLocationForRegularUser && !adminViewingAllServices && (
+                <Text
+                  style={{
+                    color: Colors.red500,
+                    fontFamily: Fonts.fontMedium,
+                    fontSize: RFPercentage(1.4),
+                    marginLeft: RFPercentage(1),
+                    backgroundColor: Colors.redBg50,
+                    paddingHorizontal: 8,
+                    paddingVertical: 2,
+                    borderRadius: 10,
+                  }}>
+                  Location Required
+                </Text>
               )}
             </View>
-          </View>
-        </ScrollView>
 
-        {modalVisible2 && (
-          <>
-            <TouchableWithoutFeedback onPress={() => setModalVisible2(false)}>
-              <View style={styles.modalContainer}>
-                <BlurView
-                  style={styles.blurView}
-                  blurType="light"
-                  blurAmount={10}
-                  reducedTransparencyFallbackColor="white"
+            {loading ? (
+              <>
+                <ActivityIndicator
+                  size={'large'}
+                  color={Colors.placeholderColor}
+                  style={{top: RFPercentage(14)}}
                 />
-                <Modal
-                  visible={modalVisible2}
-                  transparent={true}
-                  animationType="fade"
-                  onRequestClose={() => setModalVisible2(false)}>
-                  <KeyboardAvoidingView
-                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                    style={{flex: 1}}>
-                    <TouchableWithoutFeedback
-                      onPress={() => setModalVisible2(false)}>
-                      <View style={styles.modalOverlay}>
-                        <TouchableWithoutFeedback onPress={() => {}}>
-                          <Animated.View
-                            style={[
-                              {
-                                opacity: opacityAnim,
-                                transform: [{scale: scaleAnim}],
-                              },
-                              styles.rangeModal,
-                            ]}>
-                            {/* Header with gradient */}
-                            <LinearGradient
-                              colors={[Colors.gradient1, Colors.gradient2]}
-                              start={{x: 0, y: 0}}
-                              end={{x: 1, y: 0}}
-                              style={styles.modalHeader}>
-                              <View style={styles.headerContent}>
-                                <View style={styles.titleContainer}>
-                                  <MaterialIcons
-                                    name="price-change"
-                                    size={RFPercentage(2.5)}
-                                    color={Colors.white}
-                                  />
-                                  <Text style={styles.modalTitle}>
-                                    Price Range
-                                  </Text>
-                                </View>
-                                <TouchableOpacity
-                                  activeOpacity={0.7}
-                                  style={styles.closeButton}
-                                  onPress={() => setModalVisible2(false)}>
-                                  <AntDesign
-                                    name="close"
-                                    size={RFPercentage(2.2)}
-                                    color={Colors.white}
-                                  />
-                                </TouchableOpacity>
-                              </View>
-                            </LinearGradient>
+              </>
+            ) : (
+              <>
+                <View style={styles.servicesContainer}>
+                  {finalFilteredJobs?.length === 0 ? (
+                    <>
+                      <View style={{bottom: RFPercentage(4)}}>
+                        <NotFound text="No services found" />
+                      </View>
+                    </>
+                  ) : (
+                    <>
+                      <FlatList
+                        data={finalFilteredJobs}
+                        keyExtractor={item => item.id.toString()}
+                        contentContainerStyle={{
+                          paddingBottom: RFPercentage(1),
+                        }}
+                        
+                        initialNumToRender={4}
+                        maxToRenderPerBatch={4}
+                        windowSize={5}
+                        renderItem={({item}) => (
+                          <View style={styles.serviceItem}>
+                            <ServicesCard
+                              covers={item?.serviceImages ?? []}
+                              name={item?.name ?? ''}
+                              icon={item?.image}
+                              price={item?.packages?.[0]?.price}
+                              star={IMAGES?.star}
+                              rating={5}
+                              location={item?.location}
+                              onPress={() => {
+                                // Warm the gallery while the navigation
+                                // transition animates, so Service Details has
+                                // the photos locally by the time it appears.
+                                prefetchImages(
+                                  [item?.image, ...(item?.serviceImages ?? [])],
+                                  {highPriority: true},
+                                );
+                                navigation.navigate('ServiceDetails', {
+                                  item: item,
+                                });
+                              }}
+                              createdAt={item.createdAt}
+                            />
+                          </View>
+                        )}
+                      />
+                    </>
+                  )}
+                </View>
+              </>
+            )}
+          </View>
+        </View>
+      </ScrollView>
 
-                            {/* Body */}
-                            <View style={styles.modalBody}>
-                              {/* Current Price Display */}
-                              <View style={styles.priceDisplayCard}>
-                                <View style={styles.priceDisplayHeader}>
-                                  <Text style={styles.priceDisplayTitle}>
-                                    Selected Price
-                                  </Text>
-                                  <View style={styles.pricePill}>
-                                    <Text style={styles.pricePillText}>
-                                      ${tempValue.current}
-                                    </Text>
-                                  </View>
-                                </View>
-
-                                {/* Range Display */}
-                                <View style={styles.rangeDisplay}>
-                                  <View style={styles.rangeItem}>
-                                    <Text style={styles.rangeLabel}>Min</Text>
-                                    <Text style={styles.rangeValue}>$10</Text>
-                                  </View>
-                                  <View style={styles.rangeSeparator}>
-                                    <View style={styles.dashLine} />
-                                  </View>
-                                  <View style={styles.rangeItem}>
-                                    <Text style={styles.rangeLabel}>Max</Text>
-                                    <Text style={styles.rangeValue}>
-                                      ${tempValue.current}
-                                    </Text>
-                                  </View>
-                                </View>
-                              </View>
-
-                              {/* Slider Container */}
-                              <View style={styles.sliderCard}>
-                                <Text style={styles.sliderTitle}>
-                                  Adjust Maximum Price
-                                </Text>
-
-                                {/* Slider Component */}
-                                <Slider
-                                  style={styles.sliderStyle}
-                                  minimumValue={10}
-                                  maximumValue={2000}
-                                  step={10}
-                                  value={priceRange[0]}
-                                  onValueChange={value => {
-                                    tempValue.current = value;
-                                  }}
-                                  onSlidingComplete={value => {
-                                    setPriceRange([value, priceRange[1]]);
-                                  }}
-                                  minimumTrackTintColor={Colors.gradient1}
-                                  thumbTintColor={Colors.gradient1}
-                                  maximumTrackTintColor={Colors.sliderTrackGray}
+      {modalVisible2 && (
+        <>
+          <TouchableWithoutFeedback onPress={() => setModalVisible2(false)}>
+            <View style={styles.modalContainer}>
+              <BlurView
+                style={styles.blurView}
+                blurType="light"
+                blurAmount={10}
+                reducedTransparencyFallbackColor="white"
+              />
+              <Modal
+                visible={modalVisible2}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setModalVisible2(false)}>
+                <KeyboardAvoidingView
+                  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                  style={{flex: 1}}>
+                  <TouchableWithoutFeedback
+                    onPress={() => setModalVisible2(false)}>
+                    <View style={styles.modalOverlay}>
+                      <TouchableWithoutFeedback onPress={() => {}}>
+                        <Animated.View
+                          style={[
+                            {
+                              opacity: opacityAnim,
+                              transform: [{scale: scaleAnim}],
+                            },
+                            styles.rangeModal,
+                          ]}>
+                          {/* Header with gradient */}
+                          <LinearGradient
+                            colors={[Colors.gradient1, Colors.gradient2]}
+                            start={{x: 0, y: 0}}
+                            end={{x: 1, y: 0}}
+                            style={styles.modalHeader}>
+                            <View style={styles.headerContent}>
+                              <View style={styles.titleContainer}>
+                                <MaterialIcons
+                                  name="price-change"
+                                  size={RFPercentage(2.5)}
+                                  color={Colors.white}
                                 />
+                                <Text style={styles.modalTitle}>
+                                  Price Range
+                                </Text>
+                              </View>
+                              <TouchableOpacity
+                                activeOpacity={0.7}
+                                style={styles.closeButton}
+                                onPress={() => setModalVisible2(false)}>
+                                <AntDesign
+                                  name="close"
+                                  size={RFPercentage(2.2)}
+                                  color={Colors.white}
+                                />
+                              </TouchableOpacity>
+                            </View>
+                          </LinearGradient>
 
-                                {/* Price Markers */}
-                                <View style={styles.priceMarkers}>
-                                  <Text style={styles.markerText}>$10</Text>
-                                  <Text style={styles.markerText}>$1000</Text>
-                                  <Text style={styles.markerText}>$2000+</Text>
+                          {/* Body */}
+                          <View style={styles.modalBody}>
+                            {/* Current Price Display */}
+                            <View style={styles.priceDisplayCard}>
+                              <View style={styles.priceDisplayHeader}>
+                                <Text style={styles.priceDisplayTitle}>
+                                  Selected Price
+                                </Text>
+                                <View style={styles.pricePill}>
+                                  <Text style={styles.pricePillText}>
+                                    ${tempValue.current}
+                                  </Text>
                                 </View>
                               </View>
 
-                              {/* Action Buttons */}
-                              <View style={styles.actionButtonsContainer}>
-                                <TouchableOpacity
-                                  style={styles.removeButton}
-                                  onPress={() => {
-                                    setPriceRange([10, 2000]);
-                                    tempValue.current = 2000;
-                                    setModalVisible2(false);
-                                    setRangeSelector(false);
-                                  }}
-                                  activeOpacity={0.8}>
-                                  <MaterialIcons
-                                    name="filter-alt-off"
-                                    size={RFPercentage(2)}
-                                    color={Colors.error}
-                                  />
-                                  <Text style={styles.removeButtonText}>
-                                    Remove Filter
+                              {/* Range Display */}
+                              <View style={styles.rangeDisplay}>
+                                <View style={styles.rangeItem}>
+                                  <Text style={styles.rangeLabel}>Min</Text>
+                                  <Text style={styles.rangeValue}>$10</Text>
+                                </View>
+                                <View style={styles.rangeSeparator}>
+                                  <View style={styles.dashLine} />
+                                </View>
+                                <View style={styles.rangeItem}>
+                                  <Text style={styles.rangeLabel}>Max</Text>
+                                  <Text style={styles.rangeValue}>
+                                    ${tempValue.current}
                                   </Text>
-                                </TouchableOpacity>
-
-                                <View style={styles.applyButtonWrapper}>
-                                  <GradientButton
-                                    title="Apply Range"
-                                    onPress={handlePriceRangeApply}
-                                    loading={priceLoading}
-                                    style={styles.applyButton}
-                                  />
                                 </View>
                               </View>
                             </View>
-                          </Animated.View>
-                        </TouchableWithoutFeedback>
-                      </View>
-                    </TouchableWithoutFeedback>
-                  </KeyboardAvoidingView>
-                </Modal>
-              </View>
-            </TouchableWithoutFeedback>
-          </>
-        )}
 
-        <GuestAuthModal
-          visible={showAuthModal}
-          onClose={() => setShowAuthModal(false)}
-          onContinue={() => {
-            setShowAuthModal(false);
-            navigation.navigate('UserSelection');
-          }}
-        />
-      </>
-    </TouchableWithoutFeedback>
+                            {/* Slider Container */}
+                            <View style={styles.sliderCard}>
+                              <Text style={styles.sliderTitle}>
+                                Adjust Maximum Price
+                              </Text>
+
+                              {/* Slider Component */}
+                              <Slider
+                                style={styles.sliderStyle}
+                                minimumValue={10}
+                                maximumValue={2000}
+                                step={10}
+                                value={priceRange[0]}
+                                onValueChange={value => {
+                                  tempValue.current = value;
+                                }}
+                                onSlidingComplete={value => {
+                                  setPriceRange([value, priceRange[1]]);
+                                }}
+                                minimumTrackTintColor={Colors.gradient1}
+                                thumbTintColor={Colors.gradient1}
+                                maximumTrackTintColor={Colors.sliderTrackGray}
+                              />
+
+                              {/* Price Markers */}
+                              <View style={styles.priceMarkers}>
+                                <Text style={styles.markerText}>$10</Text>
+                                <Text style={styles.markerText}>$1000</Text>
+                                <Text style={styles.markerText}>$2000+</Text>
+                              </View>
+                            </View>
+
+                            {/* Action Buttons */}
+                            <View style={styles.actionButtonsContainer}>
+                              <TouchableOpacity
+                                style={styles.removeButton}
+                                onPress={() => {
+                                  setPriceRange([10, 2000]);
+                                  tempValue.current = 2000;
+                                  setModalVisible2(false);
+                                  setRangeSelector(false);
+                                }}
+                                activeOpacity={0.8}>
+                                <MaterialIcons
+                                  name="filter-alt-off"
+                                  size={RFPercentage(2)}
+                                  color={Colors.error}
+                                />
+                                <Text style={styles.removeButtonText}>
+                                  Remove Filter
+                                </Text>
+                              </TouchableOpacity>
+
+                              <View style={styles.applyButtonWrapper}>
+                                <GradientButton
+                                  title="Apply Range"
+                                  onPress={handlePriceRangeApply}
+                                  loading={priceLoading}
+                                  style={styles.applyButton}
+                                />
+                              </View>
+                            </View>
+                          </View>
+                        </Animated.View>
+                      </TouchableWithoutFeedback>
+                    </View>
+                  </TouchableWithoutFeedback>
+                </KeyboardAvoidingView>
+              </Modal>
+            </View>
+          </TouchableWithoutFeedback>
+        </>
+      )}
+
+      <GuestAuthModal
+        visible={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onContinue={() => {
+          setShowAuthModal(false);
+          navigation.navigate('UserSelection');
+        }}
+      />
+
+      <CustomerCoachMarks
+        visible={showCustomerCoachMarks && userFlow !== 'Guest'}
+        onSkip={handleSkipCustomerCoachMarks}
+        onNext={handleNextCustomerCoachMarks}
+      />
+
+      <LocationDisclosureModal
+        visible={disclosureVisible && locationModalAllowed}
+        onAccept={acceptDisclosure}
+        onDecline={declineDisclosure}
+      />
+    </View>
   );
 };
 

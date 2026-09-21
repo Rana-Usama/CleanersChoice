@@ -43,6 +43,19 @@ import MyJobs from '../screens/cleanerflow/homescreens/jobs/MyJobs';
 import Settings from '../screens/commonflow/home/settings/Settings';
 import InvoiceForm from '../screens/cleanerflow/homescreens/invoices/InvoiceForm';
 import InvoicePreview from '../screens/cleanerflow/homescreens/invoices/InvoicePreview';
+import PhoneBook from '../screens/cleanerflow/homescreens/invoices/PhoneBook';
+import CustomerForm from '../screens/cleanerflow/homescreens/invoices/CustomerForm';
+import Earnings from '../screens/cleanerflow/homescreens/invoices/Earnings';
+import CleanerIntroVideo from '../screens/cleanerflow/intro/CleanerIntroVideo';
+import CleanerInstructions from '../screens/cleanerflow/intro/CleanerInstructions';
+import AdminDashboard from '../screens/adminflow/AdminDashboard';
+import AdminActiveJobs from '../screens/adminflow/AdminActiveJobs';
+import AdminCleanerServices from '../screens/adminflow/AdminCleanerServices';
+import {Customer} from '../types/customer';
+import {navigationRef} from '../utils/navigationRef';
+import {flushPendingNotification} from '../utils/notificationNavigation';
+import {resolveCleanerRoute} from '../utils/cleanerRoute';
+import {hasActiveSubscriptionAccess} from '../utils/cleanerVisibility';
 
 export type RootStackParamList = {
   SplashOne: undefined;
@@ -53,8 +66,8 @@ export type RootStackParamList = {
   ResetPassword: undefined;
   Home: undefined;
   ServiceDetails: {item: any};
-  PostJob: {jobId: string | null};
-  JobPosted: undefined;
+  PostJob: {jobId: string | null; repost?: boolean; adminPost?: boolean};
+  JobPosted: {adminPost?: boolean} | undefined;
   JobDetails: {item: any};
   EditProfile: undefined;
   ChangePasswordV2: undefined;
@@ -90,8 +103,25 @@ export type RootStackParamList = {
   CustomerProfile: {customerId: string};
   JobManagement: {jobId: string; jobTitle: string};
   MyJobs: undefined;
-  InvoiceForm: {item: any | null};
-  InvoicePreview: {formData: any; jobItem: any | null};
+  InvoiceForm: {item: any | null; prefill?: any};
+  InvoicePreview: {
+    formData: any;
+    jobItem: any | null;
+    viewOnly?: boolean;
+    invoice?: any;
+    paymentActionsDisabled?: boolean;
+  };
+  PhoneBook: undefined;
+  CustomerForm: {customer: Customer | null};
+  Earnings: undefined;
+  CleanerIntroVideo: undefined;
+  CleanerInstructions: undefined;
+  // ---- Admin Flow (visible only to users with Users.admin === true) ----
+  AdminDashboard: undefined;
+  AdminActiveJobs: undefined;
+  AdminCleanerServices:
+    | {initialFilter?: 'all' | 'active' | 'overdue' | 'expired'}
+    | undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -103,6 +133,7 @@ const StackNavigator: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [userData, setUserData] = useState<any>(null);
   const [loggedOut, setLoggedOut] = useState<string | null>(null);
+  const [navReady, setNavReady] = useState(false);
 
   useEffect(() => {
     const fetchCredentialsAndUserData = async () => {
@@ -142,31 +173,26 @@ const StackNavigator: React.FC = () => {
     fetchCredentialsAndUserData();
   }, []);
 
-  const linking = {
-    prefixes: ['cleanerChoiceApp://'],
-    config: {
-      screens: {
-        NotificationsScreen: 'notifications',
-        Home: {
-          screens: {
-            Messages: 'messages',
-          },
-        },
-        CleanerNavigator: {
-          screens: {
-            Messages: 'messages',
-          },
-        },
-      },
-    },
-  };
+  /**
+   * A notification tapped from the quit state fires before this component has
+   * rendered its stack, so the payload is queued in notificationNavigation and
+   * replayed here. Waiting on `!isLoading` matters: until then the container
+   * only holds <Decider />, and navigating to a screen that isn't registered
+   * yet is a silent no-op.
+   */
+  useEffect(() => {
+    if (navReady && !isLoading) {
+      flushPendingNotification();
+    }
+  }, [navReady, isLoading]);
 
   console.log(email, password, userData);
 
-  const now = Date.now();
-  const expiry = userData?.subscriptionEndDate;
-
-  const hasActiveSub = expiry && expiry > now;
+  // Single definition of "valid subscription access right now", shared with
+  // resolveCleanerRoute and with the customer-facing visibility rule
+  // (utils/cleanerVisibility.ts). Still `subscriptionEndDate > now` at heart —
+  // centralised so the paywall and the customer side cannot drift apart.
+  const hasActiveSub = hasActiveSubscriptionAccess(userData);
 
   let initialRoute: keyof RootStackParamList = 'SplashOne';
 
@@ -178,16 +204,22 @@ const StackNavigator: React.FC = () => {
     userData?.role === 'Cleaner' &&
     hasActiveSub
   ) {
-    initialRoute = 'CleanerNavigator';
+    // Resolves to CleanerInstructions when the mandatory step is still
+    // pending, otherwise the dashboard. Without this gate, force-quitting on
+    // the instructions screen would skip it permanently.
+    initialRoute = resolveCleanerRoute(userData);
   } else if (userData?.role === 'Cleaner' && !hasActiveSub) {
-    initialRoute = 'Premium';
+    // Unpaid cleaner: instructions first, paywall second.
+    initialRoute = resolveCleanerRoute(userData);
   } else if (loggedOut === 'yes') {
     initialRoute = 'SignIn';
   }
 
   return (
     <SafeAreaProvider>
-      <NavigationContainer>
+      <NavigationContainer
+        ref={navigationRef}
+        onReady={() => setNavReady(true)}>
         {isLoading ? (
           <Decider />
         ) : (
@@ -256,6 +288,33 @@ const StackNavigator: React.FC = () => {
             <Stack.Screen name="Settings" component={Settings} />
             <Stack.Screen name="InvoiceForm" component={InvoiceForm} />
             <Stack.Screen name="InvoicePreview" component={InvoicePreview} />
+            <Stack.Screen name="PhoneBook" component={PhoneBook} />
+            <Stack.Screen name="CustomerForm" component={CustomerForm} />
+            <Stack.Screen name="Earnings" component={Earnings} />
+            <Stack.Screen
+              name="CleanerIntroVideo"
+              component={CleanerIntroVideo}
+              options={{animation: 'fade'}}
+            />
+            <Stack.Screen
+              name="CleanerInstructions"
+              component={CleanerInstructions}
+              options={{animation: 'fade', gestureEnabled: false}}
+            />
+
+            {/* ----------------- Admin Flow ---------------- */}
+            {/*
+              Registered unconditionally so app-launch routing stays simple.
+              Access is gated by the admin-only entry points (Dashboard CTA and
+              Settings row), and each screen re-checks `Users.admin` via
+              useIsAdmin() before rendering anything.
+            */}
+            <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
+            <Stack.Screen name="AdminActiveJobs" component={AdminActiveJobs} />
+            <Stack.Screen
+              name="AdminCleanerServices"
+              component={AdminCleanerServices}
+            />
           </Stack.Navigator>
         )}
       </NavigationContainer>

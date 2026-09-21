@@ -7,9 +7,11 @@ import {
   Platform,
   ImageSourcePropType,
 } from 'react-native';
-import React, { useState } from 'react';
-import { Colors, Fonts, IMAGES, Icons } from '../constants/Themes';
-import { RFPercentage } from 'react-native-responsive-fontsize';
+import React, {useState} from 'react';
+import {Colors, Fonts, IMAGES, Icons} from '../constants/Themes';
+import CachedImage from './CachedImage';
+import ServiceCoverImage from './ServiceCoverImage';
+import {RFPercentage} from 'react-native-responsive-fontsize';
 import LinearGradient from 'react-native-linear-gradient';
 import moment from 'moment';
 
@@ -22,13 +24,34 @@ interface ServicesCardProps {
   covers: string[]; // URLs of service images
   icon?: string | null; // service icon URL
   name: string;
-  price: number;
+  price?: number | null;
   rating?: number;
   star?: ImageSourcePropType;
   location?: Location;
   onPress: () => void;
-  createdAt: { _seconds: number; _nanoseconds?: number };
+  createdAt: {_seconds: number; _nanoseconds?: number};
+  subtitle?: string;
+  locationText?: string;
+  footer?: React.ReactNode;
 }
+
+
+const toDateSafe = (value: any): Date | null => {
+  if (!value) return null;
+  if (typeof value?._seconds === 'number')
+    return new Date(value._seconds * 1000);
+  if (typeof value?.seconds === 'number') return new Date(value.seconds * 1000);
+  if (typeof value?.toDate === 'function') {
+    try {
+      return value.toDate();
+    } catch {
+      return null;
+    }
+  }
+  if (typeof value === 'number') return new Date(value);
+  if (value instanceof Date) return value;
+  return null;
+};
 
 const ServicesCard: React.FC<ServicesCardProps> = ({
   covers,
@@ -40,19 +63,27 @@ const ServicesCard: React.FC<ServicesCardProps> = ({
   location,
   onPress,
   createdAt,
+  subtitle,
+  locationText,
+  footer,
 }) => {
   const [step, setStep] = useState<number>(0);
 
-  const createdAtDate = new Date(createdAt._seconds * 1000);
-  const formattedDate = moment(createdAtDate).format('DD MMMM, YYYY');
+  const hasPrice = price !== undefined && price !== null && !isNaN(price);
+
+  const createdAtDate = toDateSafe(createdAt);
+  const formattedDate = createdAtDate
+    ? moment(createdAtDate).format('DD MMMM, YYYY')
+    : null;
 
   return (
     <TouchableOpacity activeOpacity={0.8} onPress={onPress}>
       <View style={styles.container}>
         {/* Image Section */}
         <View style={styles.imageContainer}>
-          <Image
-            source={{ uri: covers[step] }}
+          
+          <ServiceCoverImage
+            uri={covers[step]}
             resizeMode="cover"
             style={styles.image}
           />
@@ -60,9 +91,10 @@ const ServicesCard: React.FC<ServicesCardProps> = ({
           <View style={styles.priceBadge}>
             <LinearGradient
               colors={[Colors.gradient1, Colors.gradient2]}
-              style={styles.priceGradient}
-            >
-              <Text style={styles.priceBadgeText}>${price}</Text>
+              style={styles.priceGradient}>
+              <Text style={styles.priceBadgeText}>
+                {hasPrice ? `$${price}` : 'Custom Pricing'}
+              </Text>
             </LinearGradient>
           </View>
 
@@ -77,8 +109,9 @@ const ServicesCard: React.FC<ServicesCardProps> = ({
         <View style={styles.contentContainer}>
           {/* Header Row */}
           <View style={styles.headerRow}>
+            
             <Image
-              source={icon ? { uri: icon } : IMAGES.defaultPic}
+              source={icon ? {uri: icon} : IMAGES.defaultPic}
               resizeMode="cover"
               style={styles.serviceIcon}
             />
@@ -86,6 +119,11 @@ const ServicesCard: React.FC<ServicesCardProps> = ({
               <Text style={styles.serviceName} numberOfLines={1}>
                 {name}
               </Text>
+              {!!subtitle && (
+                <Text style={styles.serviceSubtitle} numberOfLines={1}>
+                  {subtitle}
+                </Text>
+              )}
               {/* Rating row can be added here */}
             </View>
           </View>
@@ -99,27 +137,41 @@ const ServicesCard: React.FC<ServicesCardProps> = ({
                 style={styles.locationIcon}
               />
               <Text style={styles.locationText} numberOfLines={1}>
-                {location?.name || 'Location not specified'}
+                {locationText || location?.name || 'Location not specified'}
               </Text>
             </View>
 
-            <Text style={styles.postedText} numberOfLines={1}>
-              Posted on: {formattedDate}
-            </Text>
+            {!!formattedDate && (
+              <Text style={styles.postedText} numberOfLines={1}>
+                Posted on: {formattedDate}
+              </Text>
+            )}
           </View>
 
           {/* Footer */}
           <View style={styles.footer}>
-            <Text style={styles.startingText}>
-              Starting price{' '}
-              <Text
-                style={{ color: Colors.gradient1, fontFamily: Fonts.semiBold }}
-              >
-                {price}$
+            {hasPrice ? (
+              <Text style={styles.startingText}>
+                Starting price{' '}
+                <Text
+                  style={{color: Colors.gradient1, fontFamily: Fonts.semiBold}}>
+                  ${price}
+                </Text>
               </Text>
-            </Text>
+            ) : (
+              <Text
+                style={[
+                  styles.startingText,
+                  {color: Colors.gradient1, fontFamily: Fonts.semiBold},
+                ]}>
+                Custom Pricing
+              </Text>
+            )}
             <View style={styles.availabilityDot} />
           </View>
+
+          {/* Optional admin/extra content, inside the card so the design holds */}
+          {!!footer && <View style={styles.footerSlot}>{footer}</View>}
         </View>
       </View>
     </TouchableOpacity>
@@ -134,7 +186,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     borderRadius: RFPercentage(2.5),
     shadowColor: Colors.shadowBlueLight,
-    shadowOffset: { width: 0, height: 6 },
+    shadowOffset: {width: 0, height: 6},
     shadowOpacity: 0.1,
     shadowRadius: 20,
     elevation: 8,
@@ -167,7 +219,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: Colors.gradient1,
-    shadowOffset: { width: 0, height: 3 },
+    shadowOffset: {width: 0, height: 3},
     shadowOpacity: 0.3,
     shadowRadius: 6,
     elevation: 6,
@@ -188,10 +240,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     textAlignVertical: 'center',
     includeFontPadding: false,
-    lineHeight:
-      Platform.OS === 'android'
-        ? RFPercentage(2)
-        : RFPercentage(1.8),
+    lineHeight: Platform.OS === 'android' ? RFPercentage(2) : RFPercentage(1.8),
   },
   contentContainer: {
     padding: RFPercentage(2),
@@ -220,7 +269,19 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(2.0),
     marginBottom: RFPercentage(0.4),
-    lineHeight: RFPercentage(2.2),
+    lineHeight: RFPercentage(2.4),
+  },
+  serviceSubtitle: {
+    color: Colors.secondaryText,
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.4),
+    lineHeight: RFPercentage(1.8),
+  },
+  footerSlot: {
+    marginTop: RFPercentage(1.2),
+    paddingTop: RFPercentage(1.2),
+    borderTopWidth: 1,
+    borderTopColor: Colors.slateBorderOverlay80,
   },
   locationContainer: {
     flexDirection: 'row',
@@ -273,7 +334,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(0.5),
     backgroundColor: Colors.success,
     shadowColor: Colors.success,
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.3,
     shadowRadius: 2,
     elevation: 2,

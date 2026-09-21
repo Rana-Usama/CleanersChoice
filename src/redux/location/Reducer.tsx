@@ -1,4 +1,9 @@
-import { LOCATION, FILTER_LOCATION,CLEAR_FILTER_LOCATION } from './Actions';
+import {
+  LOCATION,
+  FILTER_LOCATION,
+  CLEAR_FILTER_LOCATION,
+  HYDRATE_FILTER_LOCATION,
+} from './Actions';
 
 const initialState = {
   location: {
@@ -34,8 +39,28 @@ export const userLocationReducer = (state = initialState, action: any) => {
     case CLEAR_FILTER_LOCATION:
       return {
         ...state,
-        filterLocation: { latitude: null, longitude: null, name: '' },
+        filterLocation: {latitude: null, longitude: null, name: ''},
       };
+
+    /**
+     * Rehydration is async, so it can land after the user has already picked
+     * or cleared a filter in this session. Applying it then would resurrect a
+     * stale filter, so it only fills an untouched slot.
+     */
+    case HYDRATE_FILTER_LOCATION: {
+      const {latitude, longitude} = state.filterLocation;
+      if (latitude || longitude) return state;
+      if (!action.payload?.latitude || !action.payload?.longitude) return state;
+
+      return {
+        ...state,
+        filterLocation: {
+          latitude: action.payload.latitude,
+          longitude: action.payload.longitude,
+          name: action.payload.name ?? '',
+        },
+      };
+    }
 
     default:
       return state;

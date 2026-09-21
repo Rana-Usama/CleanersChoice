@@ -17,7 +17,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import moment from 'moment';
 import {showToast} from '../../../../utils/ToastMessage';
 import GradientButton from '../../../../components/GradientButton';
-import {InvoiceFormData} from '../../../../types/invoice';
+import {Invoice, InvoiceFormData} from '../../../../types/invoice';
 import {
   generateInvoicePdf,
   shareInvoicePdf,
@@ -25,13 +25,52 @@ import {
   saveInvoiceToFirestore,
   checkExistingInvoiceForJob,
   generateInvoiceId,
+  getPaymentStatus,
+  deleteInvoice,
 } from '../../../../services/invoiceService';
+import {upsertCustomerFromInvoice} from '../../../../services/customerService';
+import MarkAsPaidSheet from '../../../../components/MarkAsPaidSheet';
+import StatusPill from '../../../../components/StatusPill';
+import {
+  canRevertToUnpaid,
+  markAsPaid,
+  REVERT_WINDOW_LABEL,
+  revertToUnpaid,
+} from '../../../../services/paymentService';
+import DeleteInvoiceDialog from '../../../../components/DeleteInvoiceDialog';
 
 const InvoicePreview = ({route, navigation}: any) => {
-  const {formData, jobItem, viewOnly}: {formData: InvoiceFormData; jobItem: any | null; viewOnly?: boolean} =
+  const {
+    formData,
+    jobItem,
+    viewOnly,
+    invoice,
+    paymentActionsDisabled,
+  }: {
+    formData: InvoiceFormData;
+    jobItem: any | null;
+    viewOnly?: boolean;
+    invoice?: Invoice;
+    paymentActionsDisabled?: boolean;
+  } =
     route.params;
   const [generating, setGenerating] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [paymentInvoice, setPaymentInvoice] = useState<Invoice | null>(
+    invoice || null,
+  );
+  const [paymentSheetVisible, setPaymentSheetVisible] = useState(false);
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const paymentStatus = paymentInvoice
+    ? getPaymentStatus(paymentInvoice)
+    : 'unpaid';
+  const isPaid = paymentStatus === 'paid';
+  const canRevert = paymentInvoice ? canRevertToUnpaid(paymentInvoice) : false;
+  const canManagePayment = !paymentActionsDisabled;
+  const canDeleteInvoice = !paymentActionsDisabled && !!paymentInvoice?.id;
 
   const handleDownload = async () => {
     setDownloading(true);
@@ -93,6 +132,13 @@ const InvoicePreview = ({route, navigation}: any) => {
         pdfPath,
       );
 
+      // Fire-and-forget Phone Book upsert. Failures are swallowed inside the
+      // service so they never block the invoice flow.
+      upsertCustomerFromInvoice(finalFormData, {
+        phone: finalFormData.customerPhone,
+        address: finalFormData.customerAddress,
+      });
+
       showToast({
         type: 'success',
         title: 'Invoice Created',
@@ -126,6 +172,104 @@ const InvoicePreview = ({route, navigation}: any) => {
     }
   };
 
+  const handleConfirmPaid = async (opts: {paidAt: Date; method: string}) => {
+    if (!paymentInvoice?.id || paymentLoading) return;
+
+    const previous = paymentInvoice;
+    setPaymentLoading(true);
+    setPaymentSheetVisible(false);
+    setPaymentInvoice(prev =>
+      prev
+        ? {
+            ...prev,
+            paymentStatus: 'paid',
+            paidAt: opts.paidAt,
+            paymentMethod: opts.method,
+          }
+        : prev,
+    );
+
+    try {
+      await markAsPaid(paymentInvoice.id, {
+        paidAt: opts.paidAt,
+        method: opts.method,
+      });
+      showToast({
+        type: 'success',
+        title: 'Marked as paid',
+        message: 'Invoice payment status updated',
+      });
+    } catch (error: any) {
+      setPaymentInvoice(previous);
+      showToast({
+        type: 'error',
+        title: 'Error',
+        message: error?.message || 'Failed to mark invoice as paid',
+      });
+    } finally {
+      setPaymentLoading(false);
+    }
+  };
+
+  const handleRevert = async () => {
+    if (!paymentInvoice?.id || !canRevert || paymentLoading) return;
+
+    const previous = paymentInvoice;
+    setPaymentLoading(true);
+    setPaymentInvoice(prev =>
+      prev
+        ? {
+            ...prev,
+            paymentStatus: 'unpaid',
+            paidAt: null,
+            paymentMethod: '',
+          }
+        : prev,
+    );
+
+    try {
+      await revertToUnpaid(paymentInvoice.id);
+      showToast({
+        type: 'success',
+        title: 'Reverted',
+        message: 'Invoice moved to Unpaid',
+      });
+    } catch (error: any) {
+      setPaymentInvoice(previous);
+      showToast({
+        type: 'error',
+        title: 'Error',
+        message: error?.message || 'Failed to revert invoice',
+      });
+    } finally {
+      setPaymentLoading(false);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!paymentInvoice?.id || deleteLoading) return;
+
+    setDeleteLoading(true);
+    try {
+      await deleteInvoice(paymentInvoice);
+      showToast({
+        type: 'success',
+        title: 'Invoice deleted',
+        message: '',
+      });
+      setDeleteDialogVisible(false);
+      navigation.goBack();
+    } catch (error) {
+      showToast({
+        type: 'error',
+        title: 'Failed to delete invoice. Try again.',
+        message: '',
+      });
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   return (
     <View style={styles.safeArea}>
       <StatusBar
@@ -144,7 +288,20 @@ const InvoicePreview = ({route, navigation}: any) => {
             <Feather name="arrow-left" size={24} color={Colors.white} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Invoice Preview</Text>
-          <View style={{width: 40}} />
+          {canDeleteInvoice ? (
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => setDeleteDialogVisible(true)}
+              style={styles.deleteHeaderButton}>
+              <MaterialCommunityIcons
+                name="trash-can-outline"
+                size={RFPercentage(2.4)}
+                color={Colors.white}
+              />
+            </TouchableOpacity>
+          ) : (
+            <View style={{width: 40}} />
+          )}
         </View>
       </LinearGradient>
 
@@ -153,24 +310,16 @@ const InvoicePreview = ({route, navigation}: any) => {
         showsVerticalScrollIndicator={false}>
         {/* Invoice Document */}
         <View style={styles.invoiceDocument}>
-          {/* Company Header */}
-          <View style={styles.companyHeader}>
-            <MaterialCommunityIcons
-              name="domain"
-              size={RFPercentage(3)}
-              color={Colors.gradient1}
-            />
-            <Text style={styles.companyName}>
-              Cleaners Choice
-            </Text>
-            <Text style={styles.companySubtitle}>
-              Professional Cleaning Services
-            </Text>
-          </View>
-
           {/* Invoice title + ID */}
           <View style={styles.invoiceTitleRow}>
-            <Text style={styles.invoiceTitle}>INVOICE</Text>
+            <View style={{flex: 1}}>
+              <Text style={styles.invoiceTitle}>INVOICE</Text>
+              {viewOnly && paymentInvoice ? (
+                <View style={styles.previewStatusWrap}>
+                  <StatusPill status={paymentStatus} size="md" />
+                </View>
+              ) : null}
+            </View>
             <Text style={styles.invoiceIdText}>{formData.invoiceId}</Text>
           </View>
 
@@ -303,12 +452,23 @@ const InvoicePreview = ({route, navigation}: any) => {
             </View>
           </View>
 
-          {/* Footer */}
-          <View style={styles.invoiceFooter}>
-            <Text style={styles.footerSubtext}>
-              Generated by Cleaners Choice
-            </Text>
-          </View>
+          {/* Footer — only rendered when there is payment-related info to show */}
+          {(viewOnly && isPaid && paymentInvoice?.paymentMethod) ||
+          (viewOnly && canManagePayment && isPaid && !canRevert) ? (
+            <View style={styles.invoiceFooter}>
+              {viewOnly && isPaid && paymentInvoice?.paymentMethod ? (
+                <Text style={styles.paymentMeta}>
+                  Paid via {paymentInvoice.paymentMethod}
+                </Text>
+              ) : null}
+              {viewOnly && canManagePayment && isPaid && !canRevert ? (
+                <Text style={styles.revertHelper}>
+                  Revert is locked because payments can only be reverted within{' '}
+                  {REVERT_WINDOW_LABEL}.
+                </Text>
+              ) : null}
+            </View>
+          ) : null}
         </View>
       </ScrollView>
 
@@ -334,15 +494,82 @@ const InvoicePreview = ({route, navigation}: any) => {
       {/* Download Action for viewOnly */}
       {viewOnly && (
         <View style={styles.actionBar}>
+          {canManagePayment && paymentInvoice && !isPaid ? (
+            <GradientButton
+              title={'Mark as Paid'}
+              onPress={() => setPaymentSheetVisible(true)}
+              loading={paymentLoading}
+              disabled={paymentLoading}
+              style={styles.markPaidButton}
+              textStyle={styles.generateButtonText}
+            />
+          ) : null}
+          {canManagePayment && paymentInvoice && isPaid ? (
+            <TouchableOpacity
+              style={[
+                styles.revertButton,
+                !canRevert && styles.revertButtonDisabled,
+              ]}
+              activeOpacity={canRevert ? 0.8 : 1}
+              onPress={handleRevert}
+              disabled={!canRevert || paymentLoading}>
+              {paymentLoading ? (
+                <ActivityIndicator
+                  size="small"
+                  color={canRevert ? Colors.amber500 : Colors.gray400}
+                />
+              ) : (
+                <>
+                  <MaterialCommunityIcons
+                    name="undo-variant"
+                    size={RFPercentage(2)}
+                    color={canRevert ? Colors.amber500 : Colors.gray400}
+                  />
+                  <Text
+                    style={[
+                      styles.revertButtonText,
+                      !canRevert && styles.revertButtonTextDisabled,
+                    ]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit>
+                    Revert
+                  </Text>
+                </>
+              )}
+            </TouchableOpacity>
+          ) : null}
           <GradientButton
             title={'Download Invoice'}
             onPress={handleDownload}
+            loading={downloading}
             disabled={downloading}
             style={styles.downloadButton}
             textStyle={styles.generateButtonText}
           />
         </View>
       )}
+
+      <MarkAsPaidSheet
+        visible={paymentSheetVisible}
+        invoiceId={paymentInvoice?.invoiceId}
+        amount={paymentInvoice?.price || formData.price}
+        toName={paymentInvoice?.toName || formData.toName}
+        loading={paymentLoading}
+        onClose={() => {
+          if (!paymentLoading) setPaymentSheetVisible(false);
+        }}
+        onConfirm={handleConfirmPaid}
+      />
+
+      <DeleteInvoiceDialog
+        visible={deleteDialogVisible}
+        invoiceId={paymentInvoice?.invoiceId || formData.invoiceId}
+        loading={deleteLoading}
+        onCancel={() => {
+          if (!deleteLoading) setDeleteDialogVisible(false);
+        }}
+        onConfirm={handleConfirmDelete}
+      />
     </View>
   );
 };
@@ -372,6 +599,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'rgba(255,255,255,0.2)',
   },
+  deleteHeaderButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.redOverlay20,
+    borderWidth: 1,
+    borderColor: Colors.whiteOverlay30,
+  },
   headerTitle: {
     color: Colors.white,
     fontSize: RFPercentage(2.1),
@@ -393,27 +630,12 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     elevation: 12,
   },
-  companyHeader: {
-    alignItems: 'center',
-    marginBottom: RFPercentage(2),
-  },
-  companyName: {
-    fontFamily: Fonts.fontBold,
-    fontSize: RFPercentage(2.4),
-    color: Colors.gradient1,
-    marginTop: RFPercentage(0.5),
-  },
-  companySubtitle: {
-    fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.4),
-    color: Colors.secondaryText,
-    marginTop: 2,
-  },
   invoiceTitleRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: RFPercentage(1),
+    gap: RFPercentage(1),
   },
   invoiceTitle: {
     fontFamily: Fonts.fontBold,
@@ -421,10 +643,15 @@ const styles = StyleSheet.create({
     color: Colors.primaryText,
     letterSpacing: 2,
   },
+  previewStatusWrap: {
+    marginTop: RFPercentage(0.8),
+  },
   invoiceIdText: {
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.5),
     color: Colors.secondaryText,
+    textAlign: 'right',
+    maxWidth: '48%',
   },
   divider: {
     height: 3,
@@ -565,11 +792,19 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.5),
     color: Colors.secondaryText,
   },
-  footerSubtext: {
+  paymentMeta: {
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.35),
+    color: Colors.green800,
+    marginTop: RFPercentage(0.8),
+  },
+  revertHelper: {
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.25),
     color: Colors.gray400,
-    marginTop: 2,
+    marginTop: RFPercentage(0.7),
+    textAlign: 'center',
+    lineHeight: RFPercentage(2),
   },
   actionBar: {
     position: 'absolute',
@@ -620,5 +855,36 @@ const styles = StyleSheet.create({
     width: undefined,
     borderRadius: RFPercentage(1.5),
     height: RFPercentage(6),
+  },
+  markPaidButton: {
+    flex: 1,
+    width: undefined,
+    borderRadius: RFPercentage(1.5),
+    height: RFPercentage(6),
+  },
+  revertButton: {
+    flex: 0.7,
+    height: RFPercentage(6),
+    borderRadius: RFPercentage(1.5),
+    borderWidth: 1,
+    borderColor: Colors.amberBorder,
+    backgroundColor: Colors.amberBg50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: RFPercentage(0.4),
+    paddingHorizontal: RFPercentage(1),
+  },
+  revertButtonDisabled: {
+    borderColor: Colors.gray200,
+    backgroundColor: Colors.gray50,
+  },
+  revertButtonText: {
+    fontFamily: Fonts.semiBold,
+    fontSize: RFPercentage(1.5),
+    color: Colors.amberDarkText,
+  },
+  revertButtonTextDisabled: {
+    color: Colors.gray400,
   },
 });

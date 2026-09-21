@@ -294,8 +294,14 @@ const CustomerProfile = ({route, navigation}: any) => {
           </Text>
 
           <Text style={styles.jobBudgetText}>
-            Budget{' '}
-            <Text style={styles.jobBudgetValue}>{job.priceRange || '0'}$</Text>
+            {job.priceRange ? (
+              <>
+                Budget{' '}
+                <Text style={styles.jobBudgetValue}>${job.priceRange}</Text>
+              </>
+            ) : (
+              <Text style={styles.jobBudgetValue}>Custom Budget</Text>
+            )}
           </Text>
         </View>
 

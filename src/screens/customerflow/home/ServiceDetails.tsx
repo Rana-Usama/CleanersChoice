@@ -1,5 +1,4 @@
 import {
-  Image,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -14,12 +13,17 @@ import {
   StatusBar,
   Animated,
 } from 'react-native';
-import React, {useState, useRef, useEffect} from 'react';
+import React, {useState, useRef, useEffect, useMemo} from 'react';
 import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
+import CachedImage from '../../../components/CachedImage';
+import ServiceCoverImage from '../../../components/ServiceCoverImage';
+import {getCachedImageUri, prefetchImages} from '../../../utils/imageCache';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import LinearGradient from 'react-native-linear-gradient';
 import GradientButton from '../../../components/GradientButton';
 import {useNavigation} from '@react-navigation/native';
+import {showToast} from '../../../utils/ToastMessage';
+import {isCleanerIdVisibleToCustomers} from '../../../utils/cleanerVisibility';
 import moment from 'moment';
 import {useSelector} from 'react-redux';
 import auth from '@react-native-firebase/auth';
@@ -133,8 +137,72 @@ const ServiceDetails: React.FC = ({route}: any) => {
   const formattedDate = moment(createdAtDate).format('DD MMMM, YYYY');
   const relativeDate = moment(createdAtDate).fromNow();
   const userFlow = useSelector((state: any) => state.userFlow.userFlow);
-  const imageObjects =
-    item?.serviceImages?.map((url: any) => ({uri: url})) || [];
+
+  const galleryImages: string[] = useMemo(
+    () =>
+      (item?.serviceImages ?? []).filter(
+        (url: any) => typeof url === 'string' && url.length > 0,
+      ),
+    [item?.serviceImages],
+  );
+
+  /**
+   * Locally cached copies of the gallery, used by the fullscreen viewer.
+   *
+   * `react-native-image-viewing` mounts every image at once and has no cache
+   * of its own, so handing it the remote URLs meant re-downloading the whole
+   * gallery the moment a user tapped a photo. Resolving to `file://` URIs up
+   * front makes the viewer open instantly and reuses the exact same bytes the
+   * inline carousel already fetched.
+   */
+  const [viewerUris, setViewerUris] = useState<string[]>(galleryImages);
+
+  useEffect(() => {
+    if (galleryImages.length === 0) {
+      setViewerUris([]);
+      return;
+    }
+
+    // The visible carousel is what the user is waiting on, so it goes first
+    // and the rest of the gallery streams in behind it.
+    prefetchImages(galleryImages, {highPriority: true});
+    prefetchImages([item?.image], {highPriority: true});
+
+    let cancelled = false;
+    Promise.all(
+      galleryImages.map(url =>
+        getCachedImageUri(url, {highPriority: true}).catch(() => url),
+      ),
+    ).then(uris => {
+      if (!cancelled) {
+        setViewerUris(uris);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [galleryImages, item?.image]);
+
+  const imageObjects = useMemo(
+    () => viewerUris.map(uri => ({uri})),
+    [viewerUris],
+  );
+
+  /**
+   * How far into the carousel we have mounted real images.
+   *
+   * Starts at the first two pages so the cover the user actually sees paints
+   * without competing with five other decodes, then stays two pages ahead of
+   * the swipe. It only ever grows, so scrolling back never triggers a second
+   * decode of an image that is already on screen.
+   */
+  const [mountedThrough, setMountedThrough] = useState(1);
+
+  useEffect(() => {
+    const lookahead = step === 0 ? 1 : step + 2;
+    setMountedThrough(previous => Math.max(previous, lookahead));
+  }, [step]);
 
   const getTruncatedText = (text: any) => {
     const maxChars = 120;
@@ -183,6 +251,38 @@ const ServiceDetails: React.FC = ({route}: any) => {
     tryToFindChat();
   }, [userId, item?.id]);
 
+  /**
+   * Subscription gate for this screen.
+   *
+   * The list this screen was opened from may be minutes old, and a service can
+   * also be reached from a notification or a chat, so the rule is re-checked on
+   * arrival rather than trusted from the caller. `item.id` is the cleaner's uid
+   * (a CleanerServices document id), which is what the visibility lookup takes.
+   *
+   * A cleaner whose subscription lapsed between the list load and the tap is
+   * bounced back with an explanation instead of being shown a listing they can
+   * no longer fulfil.
+   */
+  useEffect(() => {
+    let cancelled = false;
+    const enforceCleanerVisibility = async () => {
+      const stillVisible = await isCleanerIdVisibleToCustomers(item?.id);
+      if (cancelled || stillVisible) {
+        return;
+      }
+      showToast({
+        type: 'info',
+        title: 'No longer available',
+        message: 'This service is not available at the moment.',
+      });
+      navigation.goBack();
+    };
+    enforceCleanerVisibility();
+    return () => {
+      cancelled = true;
+    };
+  }, [item?.id, navigation]);
+
   const [token, setFcmToken] = useState<string>('');
   useEffect(() => {
     fetchToken(item.id);
@@ -228,19 +328,43 @@ const ServiceDetails: React.FC = ({route}: any) => {
             showsHorizontalScrollIndicator={false}
             scrollEventThrottle={16}
             style={styles.imageScrollView}>
-            {item.serviceImages.map((image: any, index: any) => (
+            {/*
+              A service with no photos would otherwise render an empty carousel —
+              a blank band above the content. One branded placeholder page keeps
+              the header the same height it always is.
+            */}
+            {galleryImages.length === 0 && (
+              <ServiceCoverImage
+                uri={null}
+                resizeMode="cover"
+                style={styles.coverImage}
+              />
+            )}
+            {galleryImages.map((image: string, index: number) => (
               <TouchableOpacity
-                key={index}
+                key={`${image}-${index}`}
                 activeOpacity={0.9}
                 onPress={() => {
                   setStep(index);
                   setIsVisible(true);
                 }}>
-                <Image
-                  source={typeof image === 'string' ? {uri: image} : image}
-                  resizeMode="cover"
-                  style={styles.coverImage}
-                />
+                {/*
+                  Pages are mounted lazily. Mounting all six covers at once
+                  meant six full-size decodes competing on the same frame, which
+                  is why the first photo took so long to appear. Off-screen pages
+                  keep an identically sized placeholder so the paging offsets and
+                  the dots indicator never shift.
+                */}
+                {index <= mountedThrough ? (
+                  <CachedImage
+                    source={{uri: image}}
+                    resizeMode="cover"
+                    style={styles.coverImage}
+                    highPriority
+                  />
+                ) : (
+                  <View style={[styles.coverImage, styles.coverPlaceholder]} />
+                )}
                 <LinearGradient
                   colors={['transparent', Colors.blackOverlay10, Colors.blackOverlay30]}
                   style={styles.imageGradient}
@@ -271,20 +395,20 @@ const ServiceDetails: React.FC = ({route}: any) => {
           </TouchableOpacity>
 
           {/* Image Counter */}
-          {item?.serviceImages?.length > 1 && (
+          {galleryImages.length > 1 && (
             <View style={styles.imageCounter}>
               <View style={styles.counterBadge}>
                 <Text style={styles.counterText}>
-                  {activeImageIndex + 1} / {item.serviceImages.length}
+                  {activeImageIndex + 1} / {galleryImages.length}
                 </Text>
               </View>
             </View>
           )}
 
           {/* Dots Indicator */}
-          {item?.serviceImages?.length > 1 && (
+          {galleryImages.length > 1 && (
             <View style={styles.dotsContainer}>
-              {item.serviceImages.map((_: any, index: any) => (
+              {galleryImages.map((_: string, index: number) => (
                 <TouchableOpacity
                   activeOpacity={0.8}
                   key={index}
@@ -325,10 +449,19 @@ const ServiceDetails: React.FC = ({route}: any) => {
                 activeOpacity={0.8}
                 onPress={() => setModalVisible(true)}
                 style={styles.profileImageContainer}>
-                <Image
-                  source={item.image ? {uri: item.image} : IMAGES.defaultPic}
+                {/*
+                  `item.image` is a snapshot of the cleaner's profile photo and
+                  is null when they published the service without one. The
+                  fallback sits underneath so this never renders as an empty
+                  circle inside the avatar ring.
+                */}
+                <CachedImage
+                  source={{uri: item.image}}
+                  fallbackSource={IMAGES.defaultPic}
                   resizeMode="cover"
                   style={styles.profileImage}
+                  showSkeleton={false}
+                  highPriority
                 />
                 <View style={styles.verifiedBadge}>
                   <MaterialCommunityIcons
@@ -530,42 +663,51 @@ const ServiceDetails: React.FC = ({route}: any) => {
               <Text style={styles.cardTitle}>Available Packages</Text>
             </View>
 
-            <View style={styles.packagesHeader}>
-              <View>
-                <Text style={styles.startingFromText}>Starting from</Text>
-                <Text style={styles.startingPrice}>
-                  ${item.packages?.[0]?.price || 0}
-                </Text>
-              </View>
-              <View style={styles.bestValueBadge}>
-                <MaterialCommunityIcons
-                  name="crown"
-                  size={14}
-                  color={Colors.white}
-                />
-                <Text style={styles.bestValueText}>Best Value</Text>
-              </View>
-            </View>
+            {Array.isArray(item.packages) && item.packages.length > 0 ? (
+              <>
+                <View style={styles.packagesHeader}>
+                  <View>
+                    <Text style={styles.startingFromText}>Starting from</Text>
+                    <Text style={styles.startingPrice}>
+                      ${item.packages?.[0]?.price || 0}
+                    </Text>
+                  </View>
+                  <View style={styles.bestValueBadge}>
+                    <MaterialCommunityIcons
+                      name="crown"
+                      size={14}
+                      color={Colors.white}
+                    />
+                    <Text style={styles.bestValueText}>Best Value</Text>
+                  </View>
+                </View>
 
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.packagesScroll}>
-              {item.packages.map((pkg: any, index: any) => (
-                <ServicePackage
-                  key={index}
-                  name={`${pkg.name || `Package ${index + 1}`}`}
-                  price={pkg.price}
-                  detail={pkg.details}
-                  onPress={() => {
-                    setSelectedPackage(pkg);
-                    setPackageModalVisible(true);
-                  }}
-                  // isSelected
-                  // isFeatured
-                />
-              ))}
-            </ScrollView>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={styles.packagesScroll}>
+                  {item.packages.map((pkg: any, index: any) => (
+                    <ServicePackage
+                      key={index}
+                      name={`${pkg.name || `Package ${index + 1}`}`}
+                      price={pkg.price}
+                      detail={pkg.details}
+                      onPress={() => {
+                        setSelectedPackage(pkg);
+                        setPackageModalVisible(true);
+                      }}
+                      // isSelected
+                      // isFeatured
+                    />
+                  ))}
+                </ScrollView>
+              </>
+            ) : (
+              <Text style={styles.startingFromText}>
+                This cleaner hasn't listed any packages yet. Request a custom
+                offer to get pricing.
+              </Text>
+            )}
           </View>
 
           {/* Service Provider Info */}
@@ -580,10 +722,12 @@ const ServiceDetails: React.FC = ({route}: any) => {
             </View>
 
             <View style={styles.providerInfo}>
-              <Image
-                source={item.image ? {uri: item.image} : IMAGES.defaultPic}
+              <CachedImage
+                source={{uri: item.image}}
+                fallbackSource={IMAGES.defaultPic}
                 resizeMode="cover"
                 style={styles.providerImage}
+                showSkeleton={false}
               />
               <View style={styles.providerDetails}>
                 <Text style={styles.providerName}>{item.name}</Text>
@@ -622,10 +766,16 @@ const ServiceDetails: React.FC = ({route}: any) => {
       {/* Fixed Bottom Action Bar */}
       <View style={styles.bottomActionBar}>
         <View style={styles.priceContainer}>
-          <Text style={styles.startingFrom}>Starting from</Text>
-          <Text style={styles.bottomPrice}>
-            ${item.packages?.[0]?.price || 0}
-          </Text>
+          {Array.isArray(item.packages) && item.packages.length > 0 ? (
+            <>
+              <Text style={styles.startingFrom}>Starting from</Text>
+              <Text style={styles.bottomPrice}>
+                ${item.packages?.[0]?.price || 0}
+              </Text>
+            </>
+          ) : (
+            <Text style={styles.startingFrom}>Custom pricing</Text>
+          )}
         </View>
 
         <GradientButton
@@ -670,10 +820,12 @@ const ServiceDetails: React.FC = ({route}: any) => {
               style={styles.closeModalButton}>
               <AntDesign name="close" size={24} color={Colors.white} />
             </TouchableOpacity>
-            <Image
-              source={item.image ? {uri: item.image} : IMAGES.defaultPic}
+            <CachedImage
+              source={{uri: item.image}}
+              fallbackSource={IMAGES.defaultPic}
               resizeMode="contain"
               style={styles.fullScreenImage}
+              highPriority
             />
           </View>
         </Modal>
@@ -838,6 +990,11 @@ const styles = StyleSheet.create({
     width: width,
     height: RFPercentage(35),
   },
+  // Keeps an un-mounted carousel page the exact size of a real cover so
+  // `pagingEnabled` offsets and the dots indicator stay in sync.
+  coverPlaceholder: {
+    backgroundColor: Colors.skeletonLight,
+  },
   imageGradient: {
     position: 'absolute',
     bottom: 0,
@@ -949,7 +1106,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   serviceName: {
-    fontSize: RFPercentage(2.3),
+    fontSize: RFPercentage(2),
     fontFamily: Fonts.semiBold,
     color: Colors.primaryText,
     marginBottom: RFPercentage(0.3),

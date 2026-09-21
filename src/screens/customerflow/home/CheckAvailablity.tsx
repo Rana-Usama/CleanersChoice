@@ -27,6 +27,8 @@ import {useSelector} from 'react-redux';
 import GuestAuthModal from '../../../components/GuestAuthModal';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import {showToast} from '../../../utils/ToastMessage';
+import {isCleanerIdVisibleToCustomers} from '../../../utils/cleanerVisibility';
 
 const CheckAvailability = ({route, navigation}: any) => {
   const {item} = route.params;
@@ -288,6 +290,38 @@ const CheckAvailability = ({route, navigation}: any) => {
     };
     tryToFindChat();
   }, [userId, item?.id]);
+
+  /**
+   * Subscription gate for this screen.
+   *
+   * The list this screen was opened from may be minutes old, and a service can
+   * also be reached from a notification or a chat, so the rule is re-checked on
+   * arrival rather than trusted from the caller. `item.id` is the cleaner's uid
+   * (a CleanerServices document id), which is what the visibility lookup takes.
+   *
+   * A cleaner whose subscription lapsed between the list load and the tap is
+   * bounced back with an explanation instead of being shown a listing they can
+   * no longer fulfil.
+   */
+  useEffect(() => {
+    let cancelled = false;
+    const enforceCleanerVisibility = async () => {
+      const stillVisible = await isCleanerIdVisibleToCustomers(item?.id);
+      if (cancelled || stillVisible) {
+        return;
+      }
+      showToast({
+        type: 'info',
+        title: 'No longer available',
+        message: 'This service is not available at the moment.',
+      });
+      navigation.goBack();
+    };
+    enforceCleanerVisibility();
+    return () => {
+      cancelled = true;
+    };
+  }, [item?.id, navigation]);
 
   const [token, setFcmToken] = useState<string>('');
   useEffect(() => {

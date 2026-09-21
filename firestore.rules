@@ -1,0 +1,306 @@
+rules_version = '2';
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  CleanersChoice — Firestore security rules
+//
+//  ⚠️  READ THIS BEFORE DEPLOYING  ⚠️
+//
+//  This repository had NO rules file: `firebase.json` managed only functions
+//  and storage, so the live rules were edited directly in the Firebase console
+//  and are NOT represented here. `firebase deploy --only firestore:rules`
+//  REPLACES the live rules wholesale with this file.
+//
+//  So: open Firebase console → Firestore → Rules, copy what is live, and diff
+//  it against this file before deploying. The `Users` and `CleanerServices`
+//  blocks below are the ones this change needs and are written deliberately.
+//  Everything after them reproduces the access patterns actually observed in
+//  the app source (every `collection('…')` call site was enumerated), but it
+//  was written without sight of the live rules and needs your review.
+//
+//  Deploy order matters — see the deployment notes in the summary:
+//    1. run scripts/backfill-visibility.js --commit   (server repo)
+//    2. deploy the server
+//    3. ship the app build
+//    4. deploy these rules LAST
+//  Deploying rules before the backfill hides every cleaner at once, because a
+//  document with no `visibleUntil` fails the read condition below.
+//
+//  NOTE ON GUESTS: the app has an unauthenticated browse mode
+//  (`setUserFlow('Guest')` in UserSelection.tsx, with no anonymous sign-in), so
+//  `Users` and `CleanerServices` reads must NOT require `request.auth`.
+// ═══════════════════════════════════════════════════════════════════════════
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    // Admin comes from a CUSTOM CLAIM, not from `Users.admin`.
+    //
+    // Reading the flag out of Firestore would mean a `get()` per document
+    // evaluation, and a multi-document read is capped at 20 access calls — so
+    // an admin listing more than ~20 hidden cleaners on the admin screen would
+    // be denied outright. A claim costs nothing and has no limit.
+    // Mint it from the existing boolean with:
+    //   node -r dotenv/config scripts/set-admin-claim.js <uid> --commit
+    // in the CleanersChoice-Server repo.
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    // ───────────────────────────────────────────────────────────────────────
+    //  Users
+    //
+    //  Reads stay open, unchanged: the guest browse flow reads cleaner
+    //  documents while unauthenticated, and customers read a cleaner's profile
+    //  and applicant details. Tightening this is a separate piece of work with
+    //  its own regression surface — flagged, not attempted here.
+    //
+    //  Writes are where this block earns its place. Every subscription and
+    //  visibility field becomes SERVER-ONLY. Without this, a cleaner could set
+    //  their own `subscriptionEndDate` far in the future and both bypass the
+    //  paywall and make themselves permanently visible to customers — the
+    //  entitlement cap on CleanerServices below would be checking a number the
+    //  cleaner controls.
+    // ───────────────────────────────────────────────────────────────────────
+    match /Users/{userId} {
+
+      // ── Locked now ────────────────────────────────────────────────────
+      // Nothing in the app writes any of these. Every writer is the Admin SDK
+      // (payment webhooks, the reconciliation sweep, the backfill scripts),
+      // which bypasses rules entirely — so denying client writes costs nothing
+      // and closes the self-grant path on the fields that matter most:
+      // `visibleUntil` (customer-facing visibility), `admin` (the rules
+      // exemption below), `role` and `accountStatus`.
+      function lockedFields() {
+        return [
+          'subscriptionStatus',
+          'subscriptionUpdatedAt',
+          'gracePeriodEndsAt',
+          'lastPaymentFailedAt',
+          'lastPaymentFailure',
+          'lastPayment',
+          'totalPaid',
+          'webhook',
+          'lastWebhookType',
+          'lastWebhookSubtype',
+          'lastWebhookAt',
+          'visibleUntil',
+          'visibilityReason',
+          'visibilityUpdatedAt',
+          // Granted by scripts/grant-visibility-grace.js (Admin SDK) only. If a
+          // client could write this, a cleaner could grant themselves an
+          // unlimited visibility grace AND app access — the grace is a floor on
+          // the deadline, and `hasActiveSubscriptionAccess` reads that deadline.
+          'visibilityGraceUntil',
+          'visibilityGraceGrantedAt',
+          'visibilityGraceReason',
+          'admin',
+          'accountStatus',
+          'role'
+        ];
+      }
+
+      // ── NOT locked, deliberately ──────────────────────────────────────
+      // `subscription`, `subscriptionEndDate`, `subscriptionId`,
+      // `subscriptionProvider`, `cancelSubscription` and
+      // `originalTransactionId` are still client-written by three call sites:
+      //
+      //   src/hooks/useAppleIAP.ts            (~line 149, after purchase)
+      //   src/screens/cleanerflow/premium/Premium.tsx      (~line 192)
+      //   src/screens/cleanerflow/premium/CancelSubscription.tsx (~line 129)
+      //
+      // All three are OPTIMISTIC duplicates: the server already writes the
+      // authoritative values (apple-validate.js and the Stripe
+      // invoice.payment_succeeded / customer.subscription.updated handlers).
+      // They exist so the paywall clears immediately instead of waiting on a
+      // webhook. Locking these fields today would break Apple purchases,
+      // Stripe purchases and cancellation, so they stay open.
+      //
+      // CONSEQUENCE, STATED PLAINLY: while `subscriptionEndDate` is
+      // client-writable, a determined cleaner can raise their own entitlement,
+      // which makes the entitlement cap in the CleanerServices block below
+      // advisory rather than airtight. Moving those three writes server-side
+      // (have each endpoint return the authoritative state, and let the client
+      // re-read rather than write) is the follow-up that lets these fields join
+      // lockedFields() and closes it for good.
+      function touchesLockedFields() {
+        return request.resource.data.diff(resource.data)
+          .affectedKeys()
+          .hasAny(lockedFields());
+      }
+
+      allow get, list: if true;
+
+      // `role` and `admin` are locked against updates, but must be settable ON
+      // sign-up (SignUp.tsx writes the whole document with `.set()`), when
+      // there is no prior document to diff against.
+      allow create: if isSelf(userId);
+
+      allow update: if isSelf(userId) && !touchesLockedFields();
+
+      // Account deletion is self-service today (Settings.tsx).
+      allow delete: if isSelf(userId);
+    }
+
+    // ───────────────────────────────────────────────────────────────────────
+    //  CleanerServices  — the collection customers actually browse
+    //
+    //  This is the enforcement point for the visibility rule. `visibleUntil` is
+    //  a DEADLINE (epoch ms) denormalized onto each document by the payment
+    //  webhooks, so a lapsing subscription stops being readable the instant the
+    //  server clock passes it. No scheduled job is involved in that: the cron
+    //  in the server repo only repairs drift.
+    // ───────────────────────────────────────────────────────────────────────
+    match /CleanerServices/{cleanerId} {
+
+      // Five minutes of slack against device/server clock skew.
+      //
+      // The customer query filters on the DEVICE clock while this rule compares
+      // the SERVER clock. A device running a little behind would otherwise
+      // request a document this rule rejects — and in Firestore a single
+      // rejected document fails the ENTIRE list query, blanking the home
+      // screen instead of hiding one cleaner. The app applies the exact cut
+      // locally (`isServiceVisible`), so nothing inside this window is ever
+      // actually shown; the slack only prevents that failure mode.
+      // Keep in sync with VISIBILITY_CLOCK_SKEW_MS in
+      // src/utils/cleanerVisibility.ts.
+      function withinVisibilityWindow() {
+        return resource.data.get('visibleUntil', 0)
+          > request.time.toMillis() - 300000;
+      }
+
+      // A cleaner may not write a visibility deadline beyond their own
+      // entitlement. 0 is always allowed: that is "hide me".
+      //
+      // Strength caveat: the ceiling is `Users.subscriptionEndDate`, which is
+      // still client-writable (see the NOT-locked note in the Users block), so
+      // today this stops accidents and casual tampering rather than a
+      // determined cleaner. It becomes airtight the moment those three
+      // client-side subscription writes move server-side.
+      //
+      // One `get()`, on a single-document write, well inside the 10-call budget.
+      function visibilityWithinEntitlement() {
+        let requested = request.resource.data.get('visibleUntil', 0);
+        let owner = get(/databases/$(database)/documents/Users/$(cleanerId)).data;
+        // The ceiling is whichever deadline the OWNER document already carries —
+        // their paid period or a granted grace, whichever is later. Both are
+        // server-written (see lockedFields above), so the cleaner cannot raise
+        // it. Reading the grace here is not a loophole, it is what stops a
+        // graced cleaner's own service save from being rejected for "exceeding"
+        // a subscriptionEndDate that the grace has legitimately superseded.
+        // A ternary rather than math.max(): the rules `math` namespace covers
+        // abs/ceil/floor/round/pow/sqrt and friends, and max is not something to
+        // gamble a deploy on.
+        let end = owner.get('subscriptionEndDate', 0);
+        let grace = owner.get('visibilityGraceUntil', 0);
+        let entitled = end > grace ? end : grace;
+        return requested is int && (requested == 0 || requested <= entitled);
+      }
+
+      allow get, list: if withinVisibilityWindow()
+        || isSelf(cleanerId)
+        || isAdmin();
+
+      allow create, update: if isSelf(cleanerId) && visibilityWithinEntitlement();
+
+      allow delete: if isSelf(cleanerId) || isAdmin();
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    //  Everything below reproduces observed app access patterns and was
+    //  written WITHOUT sight of the live console rules. Review before deploy.
+    // ═══════════════════════════════════════════════════════════════════════
+
+    // Cleaners browse `status == 'active'` postings; customers manage their own.
+    // `Jobs.jobId` is the POSTING CUSTOMER'S uid, not the document id.
+    match /Jobs/{jobId} {
+      allow get, list: if signedIn();
+      allow create: if signedIn();
+      // Left broad on purpose: a cleaner applies by arrayUnion-ing themselves
+      // onto `applicants`, the customer confirms one, and the Cloud Functions
+      // (Admin SDK, rules-exempt) drive the rest. Narrowing this needs the job
+      // lifecycle pinned down first.
+      allow update: if signedIn();
+      allow delete: if signedIn() && (
+        resource.data.get('jobId', '') == request.auth.uid
+        || (resource.data.get('status', '') == 'active'
+          && get(/databases/$(database)/documents/Users/$(request.auth.uid)).data.get('admin', false) == true)
+      );
+    }
+
+    // A user may only read notifications addressed to them. Writes stay open to
+    // signed-in users because the app sends notifications client-side.
+    match /Notifications/{notificationId} {
+      allow get, list: if signedIn()
+        && resource.data.get('toUserId', '') == request.auth.uid;
+      allow create: if signedIn();
+      allow update: if signedIn()
+        && resource.data.get('toUserId', '') == request.auth.uid;
+      allow delete: if signedIn()
+        && resource.data.get('toUserId', '') == request.auth.uid;
+    }
+
+    // Chat ids are `${senderId}_${receiverId}` with a `participants` array.
+    match /Chats/{chatId} {
+      function isParticipant() {
+        return signedIn()
+          && request.auth.uid in resource.data.get('participants', []);
+      }
+      allow get, list: if isParticipant();
+      allow create: if signedIn()
+        && request.auth.uid in request.resource.data.get('participants', []);
+      allow update: if isParticipant();
+
+      match /Messages/{messageId} {
+        function inParentChat() {
+          return signedIn() && request.auth.uid in
+            get(/databases/$(database)/documents/Chats/$(chatId))
+              .data.get('participants', []);
+        }
+        allow read, create: if inParentChat();
+        allow update: if inParentChat();
+      }
+    }
+
+    // Invoices belong to the cleaner who issued them and the customer billed.
+    match /Invoices/{invoiceId} {
+      function isParty() {
+        return signedIn() && (
+          resource.data.get('cleanerId', '') == request.auth.uid
+          || resource.data.get('customerId', '') == request.auth.uid
+        );
+      }
+      allow get, list: if isParty();
+      allow create: if signedIn()
+        && request.resource.data.get('cleanerId', '') == request.auth.uid;
+      allow update, delete: if signedIn()
+        && resource.data.get('cleanerId', '') == request.auth.uid;
+    }
+
+    // Cleaner's private phone book (services/customerService.ts).
+    match /Customers/{customerId} {
+      allow read, write: if signedIn()
+        && request.auth.uid == resource.data.get('cleanerId', request.auth.uid);
+    }
+
+    // Written only by the server's recordPayment(). Readable by the payer.
+    match /Payments/{paymentId} {
+      allow get, list: if signedIn()
+        && resource.data.get('userId', '') == request.auth.uid;
+      allow write: if false;
+    }
+
+    // Anything not matched above is denied. If the app breaks on a collection
+    // not listed here, it existed in the console rules and needs adding.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

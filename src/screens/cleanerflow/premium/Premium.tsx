@@ -9,7 +9,6 @@ import {
   StatusBar,
   Dimensions,
   ScrollView,
-  Alert,
   Platform,
   Linking,
 } from 'react-native';
@@ -27,8 +26,11 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import {showToast} from '../../../utils/ToastMessage';
 import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import * as RNIap from 'react-native-iap';
 import {useAppleIAP} from '../../../hooks/useAppleIAP';
+import {useAppleReceiptRefresh} from '../../../hooks/useAppleReceiptRefresh';
+import {resolveCleanerRouteAsync} from '../../../utils/cleanerRoute';
+import {useAppAlert} from '../../../components/AlertProvider';
+import CleanerIntroVideoModal from '../../../components/CleanerIntroVideoModal';
 
 const {width} = Dimensions.get('window');
 
@@ -47,6 +49,7 @@ const EULA_URL =
 
 const Premium = ({navigation}: any) => {
   const insets = useSafeAreaInsets();
+  const {showAlert} = useAppAlert();
   const {initPaymentSheet, presentPaymentSheet} = useStripe();
   const [loading, setLoading] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
@@ -76,6 +79,41 @@ const Premium = ({navigation}: any) => {
 
     fetchUserData();
   }, [user?.email]);
+
+  /**
+   * Self-repair before charging anyone twice.
+   *
+   * This screen is exactly where a cleaner with a stranded `subscriptionEndDate`
+   * ends up: an Apple subscriber whose date was never advanced because the
+   * DID_RENEW notification did not arrive looks lapsed to every gate in the app,
+   * so they get routed here and asked to pay again for a subscription they still
+   * hold. Re-validating the device receipt on arrival asks Apple directly, and
+   * the server writes back the real expiry (and re-syncs customer visibility).
+   *
+   * If it turns out they are still subscribed, they are sent on rather than left
+   * staring at a paywall — `resolveCleanerRouteAsync` is reused so the
+   * instructions-then-paywall precedence stays defined in one place.
+   *
+   * Silent and throttled; a cleaner who never bought through Apple sees nothing.
+   */
+  useAppleReceiptRefresh({
+    onRefreshed: async () => {
+      // `resolveCleanerRouteAsync` is the only check needed — it re-reads the
+      // user document and runs the same access predicate every other gate uses,
+      // so if it still says Premium there is nothing to restore. An earlier
+      // version pre-checked `subscriptionEndDate` here as well, which was a
+      // second definition of "has access" that ignored the grace and could
+      // disagree with the router.
+      const route = await resolveCleanerRouteAsync();
+      if (route === 'Premium') return;
+      showToast({
+        type: 'success',
+        title: 'Subscription restored',
+        message: 'Your Apple subscription is still active.',
+      });
+      navigation.replace(route);
+    },
+  });
 
   const {productPrice, iapLoading, purchaseWithApple} = useAppleIAP(
     // onSuccess callback
@@ -125,7 +163,11 @@ const Premium = ({navigation}: any) => {
       }
       return {setupIntentClientSecret, customerId};
     } catch (error) {
-      Alert.alert('Error', 'Could not create customer. Please try again.');
+      showAlert({
+        title: 'Error',
+        message: 'Could not create customer. Please try again.',
+        variant: 'error',
+      });
       return null;
     }
   };
@@ -394,6 +436,9 @@ const Premium = ({navigation}: any) => {
           />
         </View>
       )}
+
+     
+      {/* <CleanerIntroVideoModal enabled /> */}
     </SafeAreaView>
   );
 };

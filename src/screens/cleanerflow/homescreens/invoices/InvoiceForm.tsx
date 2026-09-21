@@ -33,6 +33,8 @@ import {
   generateInvoiceId,
 } from '../../../../services/invoiceService';
 import {useSoftInputAdjustNothing} from '../../../../hooks/useSoftInputMode';
+import CustomerPickerSheet from '../../../../components/CustomerPickerSheet';
+import {Customer} from '../../../../types/customer';
 
 const InvoiceForm = ({route, navigation}: any) => {
   const item = route.params?.item || null;
@@ -60,6 +62,7 @@ const InvoiceForm = ({route, navigation}: any) => {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
 
   useSoftInputAdjustNothing();
 
@@ -83,6 +86,16 @@ const InvoiceForm = ({route, navigation}: any) => {
       loadDraft();
     }
   }, []);
+
+  const capitalizeFirstInputCharacter = (value: string) => {
+    if (!value) {
+      return value;
+    }
+
+    return value.replace(/^(\s*)(\S)/, (_, leadingWhitespace, firstChar) => {
+      return `${leadingWhitespace}${firstChar.toUpperCase()}`;
+    });
+  };
 
   const loadDraft = async () => {
     try {
@@ -120,7 +133,11 @@ const InvoiceForm = ({route, navigation}: any) => {
         cleanerData,
         customerData,
       );
-      setForm(draft);
+      setForm({
+        ...draft,
+        jobPostName: capitalizeFirstInputCharacter(draft.jobPostName || ''),
+        description: capitalizeFirstInputCharacter(draft.description || ''),
+      });
     } catch (error) {
       console.error('Error loading invoice draft:', error);
       showToast({
@@ -138,6 +155,32 @@ const InvoiceForm = ({route, navigation}: any) => {
     if (errors[field as keyof InvoiceValidationErrors]) {
       setErrors(prev => ({...prev, [field]: undefined}));
     }
+  };
+
+  const updateCapitalizedField = (
+    field: 'jobPostName' | 'description',
+    value: string,
+  ) => {
+    updateField(field, capitalizeFirstInputCharacter(value));
+  };
+
+  // Auto-fill Bill To fields from a saved Phone Book contact
+  const handleSelectCustomer = (customer: Customer) => {
+    setForm(prev => ({
+      ...prev,
+      toName: customer.name || '',
+      toEmail: customer.email || '',
+      customerPhone: customer.phone || '',
+      customerAddress: customer.address || '',
+    }));
+    setErrors(prev => ({...prev, toName: undefined, toEmail: undefined}));
+    showToast({
+      type: 'success',
+      title: 'Contact loaded',
+      message: customer.name
+        ? `Billed to ${customer.name}`
+        : 'Customer details filled in',
+    });
   };
 
   const handleBudgetChange = (text: string) => {
@@ -311,13 +354,26 @@ const InvoiceForm = ({route, navigation}: any) => {
 
           {/* To Section */}
           <View style={styles.sectionCard}>
-            <View style={styles.sectionHeader}>
-              <MaterialCommunityIcons
-                name="account-arrow-left"
-                size={RFPercentage(2.2)}
-                color={Colors.gradient1}
-              />
-              <Text style={styles.sectionTitle}>Bill To</Text>
+            <View style={styles.sectionHeaderRow}>
+              <View style={styles.sectionHeader}>
+                <MaterialCommunityIcons
+                  name="account-arrow-left"
+                  size={RFPercentage(2.2)}
+                  color={Colors.gradient1}
+                />
+                <Text style={styles.sectionTitle}>Bill To</Text>
+              </View>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => setShowPicker(true)}
+                style={styles.pickerTrigger}>
+                <MaterialCommunityIcons
+                  name="account-search-outline"
+                  size={RFPercentage(1.8)}
+                  color={Colors.gradient1}
+                />
+                <Text style={styles.pickerTriggerText}>Phone Book</Text>
+              </TouchableOpacity>
             </View>
             <FormField
               label="Customer Name"
@@ -334,6 +390,34 @@ const InvoiceForm = ({route, navigation}: any) => {
               placeholder="customer@email.com"
               keyboardType="email-address"
             />
+            {(form.customerPhone || form.customerAddress) ? (
+              <View style={styles.pickerSummary}>
+                {form.customerPhone ? (
+                  <View style={styles.pickerSummaryRow}>
+                    <Feather
+                      name="phone"
+                      size={RFPercentage(1.5)}
+                      color={Colors.gradient1}
+                    />
+                    <Text style={styles.pickerSummaryText} numberOfLines={1}>
+                      {form.customerPhone}
+                    </Text>
+                  </View>
+                ) : null}
+                {form.customerAddress ? (
+                  <View style={styles.pickerSummaryRow}>
+                    <Feather
+                      name="map-pin"
+                      size={RFPercentage(1.5)}
+                      color={Colors.gradient1}
+                    />
+                    <Text style={styles.pickerSummaryText} numberOfLines={2}>
+                      {form.customerAddress}
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+            ) : null}
           </View>
 
           {/* Job Details */}
@@ -349,14 +433,14 @@ const InvoiceForm = ({route, navigation}: any) => {
             <FormField
               label="Job Post Name"
               value={form.jobPostName}
-              onChangeText={v => updateField('jobPostName', v)}
+              onChangeText={v => updateCapitalizedField('jobPostName', v)}
               error={errors.jobPostName}
               placeholder="Job title"
             />
             <FormField
               label="Description (Optional)"
               value={form.description}
-              onChangeText={v => updateField('description', v)}
+              onChangeText={v => updateCapitalizedField('description', v)}
               placeholder="Add any notes..."
               multiline
             />
@@ -461,7 +545,7 @@ const InvoiceForm = ({route, navigation}: any) => {
               <View>
                 <Text style={styles.budgetFieldLabel}>Total Price</Text>
                 <InputField
-                  placeholder="$"
+                  placeholder="Add Budget or Amount"
                   customStyle={[styles.budgetInput, budgetErrors.price && styles.budgetInputError]}
                   value={form.price}
                   onChangeText={handleBudgetChange}
@@ -477,13 +561,18 @@ const InvoiceForm = ({route, navigation}: any) => {
                   <Text style={[styles.budgetFieldLabel, styles.budgetFieldLabelHalf]}>
                     Price per Hour
                   </Text>
-                  <Text style={[styles.budgetFieldLabel, styles.budgetFieldLabelHalf]}>
+                  <Text
+                    style={[
+                      styles.budgetFieldLabel,
+                      styles.budgetFieldLabelHalf,
+                      styles.budgetFieldLabelShiftLeft,
+                    ]}>
                     Total Hours
                   </Text>
                 </View>
                 <View style={styles.budgetRow}>
                   <InputField
-                    placeholder="$"
+                    placeholder="Add Rate"
                     customStyle={[styles.budgetInputHalf, budgetErrors.hourlyRate && styles.budgetInputError]}
                     value={form.hourlyRate}
                     onChangeText={(text: string) => {
@@ -519,13 +608,18 @@ const InvoiceForm = ({route, navigation}: any) => {
                   <Text style={[styles.budgetFieldLabel, styles.budgetFieldLabelHalf]}>
                     Price per Sq Ft
                   </Text>
-                  <Text style={[styles.budgetFieldLabel, styles.budgetFieldLabelHalf]}>
+                  <Text
+                    style={[
+                      styles.budgetFieldLabel,
+                      styles.budgetFieldLabelHalf,
+                      styles.budgetFieldLabelShiftLeft,
+                    ]}>
                     Total Area in Sq Ft
                   </Text>
                 </View>
                 <View style={styles.budgetRow}>
                   <InputField
-                    placeholder="$"
+                    placeholder="Add Price"
                     customStyle={[styles.budgetInputHalf, budgetErrors.pricePerSqFt && styles.budgetInputError]}
                     value={form.pricePerSqFt}
                     onChangeText={(text: string) => {
@@ -583,6 +677,14 @@ const InvoiceForm = ({route, navigation}: any) => {
             updateField('dueDate', date);
           }}
           onCancel={() => setShowDatePicker(false)}
+        />
+
+        {/* Phone Book picker */}
+        <CustomerPickerSheet
+          visible={showPicker}
+          onClose={() => setShowPicker(false)}
+          onSelect={handleSelectCustomer}
+          onAddNew={() => navigation.navigate('CustomerForm', {customer: null})}
         />
         {/* Bottom Action */}
         <View style={styles.actionBar}>
@@ -701,6 +803,48 @@ const styles = StyleSheet.create({
     gap: RFPercentage(0.8),
     marginBottom: RFPercentage(1.5),
   },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: RFPercentage(1.5),
+  },
+  pickerTrigger: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: RFPercentage(0.5),
+    paddingHorizontal: RFPercentage(1.2),
+    paddingVertical: RFPercentage(0.7),
+    borderRadius: RFPercentage(100),
+    borderWidth: 1,
+    borderColor: Colors.gradient1,
+    backgroundColor: Colors.primaryBlueOverlay05,
+  },
+  pickerTriggerText: {
+    fontFamily: Fonts.semiBold,
+    fontSize: RFPercentage(1.35),
+    color: Colors.gradient1,
+  },
+  pickerSummary: {
+    marginTop: RFPercentage(0.5),
+    padding: RFPercentage(1.2),
+    borderRadius: RFPercentage(1),
+    backgroundColor: Colors.primaryBlueOverlay05,
+    borderWidth: 1,
+    borderColor: Colors.blueBorderOverlay50,
+    gap: RFPercentage(0.4),
+  },
+  pickerSummaryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: RFPercentage(0.6),
+  },
+  pickerSummaryText: {
+    flex: 1,
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.4),
+    color: Colors.primaryText,
+  },
   sectionTitle: {
     fontFamily: Fonts.fontMedium,
     fontSize: RFPercentage(1.8),
@@ -792,9 +936,9 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   previewButton: {
-    width: '90%',
+    width: '100%',
     height: RFPercentage(6),
-    borderRadius: RFPercentage(2.3),
+    borderRadius: RFPercentage(100),
   },
   previewButtonText: {
     fontSize: RFPercentage(1.9),
@@ -870,6 +1014,9 @@ const styles = StyleSheet.create({
   budgetFieldLabelHalf: {
     flex: 1,
     marginBottom: RFPercentage(0),
+  },
+  budgetFieldLabelShiftLeft: {
+    marginLeft: -RFPercentage(0.5),
   },
   budgetInput: {
     width: '100%',

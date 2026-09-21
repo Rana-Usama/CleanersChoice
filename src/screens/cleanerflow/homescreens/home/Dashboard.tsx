@@ -10,11 +10,13 @@ import {
   Platform,
   StatusBar,
 } from 'react-native';
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, Icons, IMAGES} from '../../../../constants/Themes';
 import HeaderBack from '../../../../components/HeaderBack';
-import WelcomeCoachMark from '../../../../components/WelcomeCoachMark';
+import CleanerCoachMarks from '../../../../components/CleanerCoachMarks';
+import LocationDisclosureModal from '../../../../components/LocationDisclosureModal';
+import {useCurrentLocation} from '../../../../utils/userLocation';
 import {useFocusEffect} from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
@@ -23,6 +25,10 @@ import {
   setProfileData,
   setProfileCompletion,
 } from '../../../../redux/ProfileData/Actions';
+import {
+  markCoachMarksSeenForRole,
+  shouldShowCoachMarksForRole,
+} from '../../../../utils/coachMarks';
 import {useExitAppOnBack} from '../../../../utils/ExitApp';
 import LinearGradient from 'react-native-linear-gradient';
 import * as Progress from 'react-native-progress';
@@ -40,6 +46,17 @@ import CarIcon from '../../../../assets/svg/carIcon';
 import LawnIcon from '../../../../assets/svg/lawnIcon';
 import OtherIcon from '../../../../assets/svg/otherIcon';
 import EditIcon from '../../../../assets/svg/editIcon';
+import {Invoice} from '../../../../types/invoice';
+import {buildAnnualEarningsSummary} from '../../../../services/earningsService';
+import {useAppleReceiptRefresh} from '../../../../hooks/useAppleReceiptRefresh';
+
+const CURRENT_YEAR = new Date().getFullYear();
+
+const formatCurrency = (amount: number): string =>
+  `$${amount.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
 
 const AdminIcon = ({width = 12, height = 12}: {width?: number; height?: number}) => (
   <Svg width={width} height={height} viewBox="0 0 14 14" fill="none">
@@ -118,9 +135,47 @@ const Dashboard: React.FC = ({navigation}: any) => {
   });
   const [isAdmin, setIsAdmin] = useState(false);
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
-  const [showWelcomeCoachMark, setShowWelcomeCoachMark] = useState(true);
+  const [showCleanerCoachMarks, setShowCleanerCoachMarks] = useState(false);
+  const {disclosureVisible, acceptDisclosure, declineDisclosure} =
+    useCurrentLocation();
+
+  const [locationModalAllowed, setLocationModalAllowed] = useState(false);
+  const isMountedRef = useRef(true);
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+  
+  useAppleReceiptRefresh();
+
+  const [earningsLoading, setEarningsLoading] = useState(false);
+  const [earningsSummary, setEarningsSummary] = useState(() =>
+    buildAnnualEarningsSummary([], CURRENT_YEAR),
+  );
 
   useExitAppOnBack();
+
+  useFocusEffect(
+    React.useCallback(() => {
+      let isActive = true;
+
+      const syncCoachMarksVisibility = async () => {
+        if (!isActive) return;
+        const shouldShow = await shouldShowCoachMarksForRole('cleaner');
+        if (isActive) {
+          setShowCleanerCoachMarks(shouldShow);
+          setLocationModalAllowed(!shouldShow);
+        }
+      };
+
+      void syncCoachMarksVisibility();
+
+      return () => {
+        isActive = false;
+      };
+    }, []),
+  );
 
   // Unread notifications count
   useEffect(() => {
@@ -141,6 +196,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
     setLoading(true);
     serviceDetails();
     fetchUserData();
+    fetchEarningsSummary();
     setTimeout(() => {
       setRefreshing(false);
       setLoading(false);
@@ -176,6 +232,34 @@ const Dashboard: React.FC = ({navigation}: any) => {
       }
     } catch (error) {}
   };
+
+  const fetchEarningsSummary = async () => {
+    const user = auth().currentUser;
+    if (!user) return;
+    setEarningsLoading(true);
+    try {
+      const snapshot = await firestore()
+        .collection('Invoices')
+        .where('cleanerId', '==', user.uid)
+        .where('paymentStatus', '==', 'paid')
+        .get();
+      const invoices = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Invoice[];
+      setEarningsSummary(buildAnnualEarningsSummary(invoices, CURRENT_YEAR));
+    } catch (error) {
+      console.error('Error fetching earnings summary:', error);
+    } finally {
+      setEarningsLoading(false);
+    }
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchEarningsSummary();
+    }, []),
+  );
 
   useFocusEffect(
     React.useCallback(() => {
@@ -294,16 +378,13 @@ const Dashboard: React.FC = ({navigation}: any) => {
   const [profileCompletion, setProfileCompletionValue] = useState('50');
   useEffect(() => {
     if (service) {
+      // Packages are optional - a service with 0 packages still counts as
+      // a fully completed profile as long as the core fields are set.
       const completion =
         service?.availability?.length > 0 &&
         service?.description?.length > 0 &&
-        service?.location?.name?.length > 0 &&
-        service?.packages?.length > 0
+        service?.location?.name?.length > 0
           ? '100'
-          : service?.availability?.length > 0 &&
-            service?.description?.length > 0 &&
-            service?.location?.name?.length > 0
-          ? '80'
           : '50';
 
       setProfileCompletionValue(completion);
@@ -343,13 +424,31 @@ const Dashboard: React.FC = ({navigation}: any) => {
 
   const cleanDescription =
     service?.description?.replace(/\s+/g, ' ').trim() || '';
+  const earningsYoyText =
+    earningsSummary.yoyPercent === null
+      ? earningsSummary.total > 0
+        ? `${CURRENT_YEAR} vs ${CURRENT_YEAR - 1}`
+        : `No paid invoices in ${CURRENT_YEAR - 1}`
+      : `${earningsSummary.yoyPercent >= 0 ? '+' : ''}${earningsSummary.yoyPercent.toFixed(
+          0,
+        )}% vs ${CURRENT_YEAR - 1}`;
 
-  const handleSkipCoachMark = () => {
-    setShowWelcomeCoachMark(false);
+  const completeCleanerCoachMarks = async () => {
+    setShowCleanerCoachMarks(false);
+    await markCoachMarksSeenForRole('cleaner');
+    setTimeout(() => {
+      if (isMountedRef.current) {
+        setLocationModalAllowed(true);
+      }
+    }, 400);
   };
 
-  const handleNextCoachMark = () => {
-    setShowWelcomeCoachMark(false);
+  const handleSkipCleanerCoachMarks = () => {
+    void completeCleanerCoachMarks();
+  };
+
+  const handleNextCleanerCoachMarks = () => {
+    void completeCleanerCoachMarks();
   };
 
   return (
@@ -487,6 +586,120 @@ const Dashboard: React.FC = ({navigation}: any) => {
           </LinearGradient>
         </Animated.View>
 
+        <Animated.View
+          entering={FadeInUp.duration(600)}
+          style={styles.earningsCard}>
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={() => navigation.navigate('Earnings')}
+            style={styles.earningsCardInner}>
+            <View style={styles.earningsIconWrap}>
+              <Icon
+                name="chart-bar"
+                size={RFPercentage(2.7)}
+                color={Colors.gradient1}
+              />
+            </View>
+            <View style={styles.earningsContent}>
+              <Text style={styles.earningsLabel}>Earnings</Text>
+              {earningsLoading ? (
+                <ActivityIndicator
+                  size="small"
+                  color={Colors.gradient1}
+                  style={styles.earningsLoader}
+                />
+              ) : (
+                <>
+                  <Text style={styles.earningsTotal}>
+                    {formatCurrency(earningsSummary.total)}
+                  </Text>
+                  <Text style={styles.earningsSubtext}>
+                    {earningsYoyText} · {earningsSummary.paidInvoices.length}{' '}
+                    paid invoice
+                    {earningsSummary.paidInvoices.length !== 1 ? 's' : ''}
+                  </Text>
+                </>
+              )}
+            </View>
+            <View style={styles.earningsArrowWrap}>
+              <Icon
+                name="chevron-right"
+                size={RFPercentage(2.4)}
+                color={Colors.secondaryText}
+              />
+            </View>
+          </TouchableOpacity>
+        </Animated.View>
+
+        {/*
+          Admin Controls — only rendered for users with Users.admin === true.
+          `isAdmin` is the same flag already used for the Admin badge above, so
+          no extra fetch is introduced. Regular cleaners render nothing here and
+          the layout is byte-identical to before.
+        */}
+        {isAdmin && (
+          <Animated.View
+            entering={FadeInUp.duration(600)}
+            style={styles.adminEntryCard}>
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={() => navigation.navigate('AdminDashboard')}
+              style={styles.adminEntryInner}>
+              <View style={styles.earningsIconWrap}>
+                <Icon
+                  name="shield-account-outline"
+                  size={RFPercentage(2.7)}
+                  color={Colors.gradient1}
+                />
+              </View>
+              <View style={styles.adminEntryContent}>
+                <Text style={styles.adminEntryTitle}>Admin Controls</Text>
+                <Text style={styles.adminEntrySubtext}>
+                  Monitor all jobs and cleaner services
+                </Text>
+              </View>
+              <View style={styles.adminEntryArrowWrap}>
+                <Icon
+                  name="chevron-right"
+                  size={RFPercentage(2.4)}
+                  color={Colors.secondaryText}
+                />
+              </View>
+            </TouchableOpacity>
+          </Animated.View>
+        )}
+
+        {/* Intro video replay — same screen used by Settings -> Watch Intro Video */}
+        {/* <Animated.View
+          entering={FadeInUp.duration(600)}
+          style={styles.introCard}>
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={() => navigation.navigate('CleanerIntroVideo')}
+            style={styles.introCardInner}>
+            <View style={styles.introIconWrap}>
+              <Icon
+                name="play-circle-outline"
+                size={RFPercentage(2.7)}
+                color={Colors.gradient1}
+              />
+            </View>
+            <View style={styles.introContent}>
+              <Text style={styles.introTitle}>Watch Intro Video</Text>
+              <Text style={styles.introSubtext}>
+                See how Cleaners Choice works
+              </Text>
+            </View>
+            <View style={styles.introArrowWrap}>
+              <Icon
+                name="chevron-right"
+                size={RFPercentage(2.4)}
+                color={Colors.secondaryText}
+              />
+            </View>
+          </TouchableOpacity>
+        </Animated.View> */}
+
         {loading3 ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={Colors.blueMedium} />
@@ -609,6 +822,14 @@ const Dashboard: React.FC = ({navigation}: any) => {
                       <Text style={styles.editButtonLabel}>Edit</Text>
                     </TouchableOpacity>
                   </View>
+                  {!service?.packages?.length ? (
+                    <View style={{paddingHorizontal: 20}}>
+                      <Text style={styles.packageDescription}>
+                        No packages added yet. Packages are optional — add
+                        one anytime.
+                      </Text>
+                    </View>
+                  ) : (
                   <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
@@ -653,6 +874,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
                       </Animated.View>
                     ))}
                   </ScrollView>
+                  )}
                 </View>
 
                 {/* Detailed Availability */}
@@ -757,10 +979,16 @@ const Dashboard: React.FC = ({navigation}: any) => {
         )}
       </ScrollView>
 
-      <WelcomeCoachMark
-        visible={showWelcomeCoachMark}
-        onSkip={handleSkipCoachMark}
-        onNext={handleNextCoachMark}
+      <CleanerCoachMarks
+        visible={showCleanerCoachMarks}
+        onSkip={handleSkipCleanerCoachMarks}
+        onNext={handleNextCleanerCoachMarks}
+      />
+
+      <LocationDisclosureModal
+        visible={disclosureVisible && locationModalAllowed}
+        onAccept={acceptDisclosure}
+        onDecline={declineDisclosure}
       />
     </View>
   );
@@ -852,7 +1080,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 10},
     shadowOpacity: 0.2,
     shadowRadius: 20,
-    elevation: 10,
+    // elevation: 10,
   },
   profileGradient: {
     borderRadius: 24,
@@ -961,6 +1189,116 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     marginTop: 4,
+  },
+  earningsCard: {
+    marginHorizontal: 20,
+    marginTop: 16,
+    borderRadius: 20,
+    backgroundColor: Colors.white,
+    borderWidth: 1,
+    borderColor: Colors.blueBorderOverlay50,
+    shadowColor: Colors.shadowBlueGrayLight,
+    shadowOffset: {width: 0, height: 8},
+    shadowOpacity: 0.2,
+    shadowRadius: 14,
+    // elevation: 8,
+  },
+  earningsCardInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    gap: 12,
+  },
+  earningsIconWrap: {
+    width: RFPercentage(5.4),
+    height: RFPercentage(5.4),
+    borderRadius: RFPercentage(1.4),
+    backgroundColor: Colors.primaryBlueOverlay10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  earningsContent: {
+    flex: 1,
+  },
+  earningsLabel: {
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.5),
+    color: Colors.secondaryText,
+  },
+  earningsTotal: {
+    fontFamily: Fonts.fontBold,
+    fontSize: RFPercentage(2.5),
+    color: Colors.primaryText,
+    marginTop: 2,
+  },
+  earningsSubtext: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.3),
+    color: Colors.secondaryText,
+    marginTop: 2,
+  },
+  earningsLoader: {
+    alignSelf: 'flex-start',
+    marginTop: RFPercentage(0.8),
+  },
+
+  // Intro video card — mirrors the earnings card so the two read as one system.
+  introCard: {
+    marginHorizontal: 20,
+    marginTop: 16,
+    borderRadius: 20,
+    backgroundColor: Colors.white,
+    borderWidth: 1,
+    borderColor: Colors.blueBorderOverlay50,
+    shadowColor: Colors.shadowBlueGrayLight,
+    shadowOffset: {width: 0, height: 8},
+    shadowOpacity: 0.2,
+    shadowRadius: 14,
+    // elevation: 8,
+  },
+  introCardInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    gap: 12,
+  },
+  introIconWrap: {
+    width: RFPercentage(5.4),
+    height: RFPercentage(5.4),
+    borderRadius: RFPercentage(1.4),
+    backgroundColor: Colors.primaryBlueOverlay10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  introContent: {
+    flex: 1,
+  },
+  introTitle: {
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.9),
+    color: Colors.primaryText,
+  },
+  introSubtext: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.3),
+    color: Colors.secondaryText,
+    marginTop: 2,
+  },
+  introArrowWrap: {
+    width: RFPercentage(3.8),
+    height: RFPercentage(3.8),
+    borderRadius: RFPercentage(100),
+    backgroundColor: Colors.gray50,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  earningsArrowWrap: {
+    width: RFPercentage(3.8),
+    height: RFPercentage(3.8),
+    borderRadius: RFPercentage(100),
+    backgroundColor: Colors.gray50,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   loadingContainer: {
     flex: 1,
@@ -1091,14 +1429,13 @@ const styles = StyleSheet.create({
   },
   description: {
     fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     color: '#A5A9B0',
-    lineHeight: 23,
   },
   readMore: {
     fontFamily: Fonts.semiBold,
     color: '#407BFF',
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
   },
   seeAll: {
     fontFamily: Fonts.semiBold,
@@ -1433,6 +1770,55 @@ const styles = StyleSheet.create({
     width: '100%',
   },
 
+  // ---- Admin Controls entry card (admin only) ----
+  adminEntryCard: {
+    marginHorizontal: RFPercentage(2),
+    marginTop: RFPercentage(1.5),
+    backgroundColor: Colors.white,
+    borderRadius: RFPercentage(2),
+    borderWidth: 1,
+    borderColor: Colors.blueBorderOverlay50,
+    shadowColor: Colors.shadowBlueLight,
+    shadowOffset: {width: 0, height: 3},
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    // elevation: 3,
+    overflow: 'hidden',
+  },
+  adminEntryInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: RFPercentage(1.8),
+    paddingHorizontal: RFPercentage(2),
+  },
+  adminEntryIconWrap: {
+    width: RFPercentage(5.2),
+    height: RFPercentage(5.2),
+    borderRadius: RFPercentage(2),
+    backgroundColor: Colors.blueBg50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: RFPercentage(1.5),
+  },
+  adminEntryContent: {
+    flex: 1,
+    minWidth: 0,
+    marginLeft: RFPercentage(1),
+  },
+  adminEntryTitle: {
+    color: Colors.primaryText,
+    fontFamily: Fonts.semiBold,
+    fontSize: RFPercentage(1.9),
+  },
+  adminEntrySubtext: {
+    color: Colors.secondaryText,
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.45),
+    marginTop: RFPercentage(0.3),
+  },
+  adminEntryArrowWrap: {
+    marginLeft: RFPercentage(0.5),
+  },
   adminBadge: {
     flexDirection: 'row',
     alignItems: 'center',
