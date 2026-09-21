@@ -40,8 +40,21 @@ const AdminServiceCard: React.FC<Props> = ({service, onPress}) => {
     : [];
   const covers = Array.isArray(service.serviceImages) ? service.serviceImages : [];
 
+  // Package prices are saved as strings (ServiceThree.tsx builds each
+  // package straight from a TextInput's .trim()'d value, never Number()'d),
+  // so a `typeof === 'number'` check here always failed and every cleaner
+  // with a real first-package price still showed "Custom Pricing". Parse
+  // whatever shape is stored; only fall back to null (-> Custom Pricing)
+  // when there is genuinely no usable price.
+  const rawFirstPackagePrice = packages[0]?.price;
   const startingPrice =
-    typeof packages[0]?.price === 'number' ? packages[0].price : null;
+    typeof rawFirstPackagePrice === 'number' && !isNaN(rawFirstPackagePrice)
+      ? rawFirstPackagePrice
+      : typeof rawFirstPackagePrice === 'string' &&
+          rawFirstPackagePrice.trim() !== '' &&
+          !isNaN(Number(rawFirstPackagePrice))
+        ? Number(rawFirstPackagePrice)
+        : null;
 
   const availableDays = availability.filter((slot: any) => slot?.checked).length;
 

@@ -56,7 +56,13 @@ export interface ServiceLocation {
 export interface ServicePackage {
   id?: string | number;
   name?: string;
-  price?: number;
+  /**
+   * Stored as a STRING in practice — ServiceThree.tsx builds it from a
+   * TextInput's .trim()'d value and never Number()'s it before saving.
+   * Typed as `number | string` to reflect the real shape; AdminServiceCard.tsx
+   * parses whichever one shows up.
+   */
+  price?: number | string;
   details?: string;
   services?: any[];
 }
