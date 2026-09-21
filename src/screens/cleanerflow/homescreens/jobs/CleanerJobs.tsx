@@ -17,7 +17,7 @@ import {
   StatusBar,
   Keyboard,
 } from 'react-native';
-import React, {useCallback, useState, useRef, useEffect} from 'react';
+import React, {useCallback, useState, useRef, useEffect, useMemo} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts} from '../../../../constants/Themes';
 import {NEARBY_RADIUS_MILES} from '../../../../constants/nearbyRadius';
@@ -78,6 +78,7 @@ const CleanerJobs = () => {
     locationSource,
     resolving: resolvingLocation,
     error: locationError,
+    failure: locationFailure,
     permissionBlocked,
     refresh: refreshLocation,
     openAppSettings,
@@ -336,6 +337,52 @@ const CleanerJobs = () => {
         onAction: refreshLocation,
       };
 
+  /**
+   * Permission CTA, deliberately NOT gated on `noLocation`.
+   *
+   * With savedLocationFallback on, a denied permission still resolves to the
+   * cleaner's last known position or service address, so `activePosition` is
+   * set and `noLocation` is false -- which meant the empty state below (the
+   * only thing carrying "Open Settings") never rendered. The cleaner got jobs
+   * around a stale address and no way to turn location back on. This banner
+   * shows whenever the permission itself is the problem, with or without a
+   * usable fallback.
+   *
+   * "blocked" is the Settings case: neither OS will prompt again (iOS after
+   * any denial, Android after "Don't ask again"). "denied" on Android can
+   * still be re-prompted in-app, so it gets a different action.
+   */
+  const permissionPrompt = useMemo(() => {
+    if (permissionBlocked) {
+      return {
+        title: 'Location Access Is Off',
+        message: hasSelectedLocation
+          ? 'Turn it on to see jobs around you instead of your chosen filter.'
+          : activePosition
+          ? "Jobs below aren't centred on where you are right now."
+          : 'CleanersChoice needs your location to show jobs near you.',
+        actionLabel: 'Open Settings',
+        onAction: openAppSettings,
+      };
+    }
+    if (locationFailure === 'denied') {
+      return {
+        title: 'Location Permission Needed',
+        message: 'Allow location access to see cleaning jobs near you.',
+        actionLabel: 'Allow Location',
+        onAction: refreshLocation,
+      };
+    }
+    return null;
+  }, [
+    permissionBlocked,
+    locationFailure,
+    hasSelectedLocation,
+    activePosition,
+    openAppSettings,
+    refreshLocation,
+  ]);
+
   // A saved fallback keeps the list populated, but the cleaner needs to know
   // the results are not centred on where they actually are right now.
   const fallbackNotice =
@@ -358,6 +405,53 @@ const CleanerJobs = () => {
    * location filter in the header are both reachable the whole time.
    */
   const locationPending = resolvingLocation && noLocation;
+
+  /**
+   * The ONLY case where location state should be hidden: an admin who has
+   * switched the list to every job platform-wide, so no coordinate is used.
+   *
+   * These branches previously tested `!isAdmin`, which was wrong -- and
+   * silently so. `adminViewAllJobs` defaults to false and `setAdminViewAllJobs`
+   * is never called (the toggle UI at the top of this file is commented out),
+   * so an admin is filtered by distance exactly like any cleaner while every
+   * location affordance -- the resolving spinner, the empty state, and the
+   * permission CTA -- was suppressed for them. The result was an admin with a
+   * blocked permission landing on "No cleaning jobs found matching your
+   * filters" with no hint that location was the actual problem and no way to
+   * fix it.
+   */
+  const adminBypassesLocation = isAdmin && adminViewAllJobs;
+
+  // Why the screen is showing what it is showing. Release-stripped by
+  // configureConsole(), so this costs nothing in production.
+  useEffect(() => {
+    console.log(
+      '[CleanerJobs] location state ->',
+      JSON.stringify({
+        failure: locationFailure,
+        permissionBlocked,
+        source: locationSource,
+        hasPosition: !noLocation,
+        manualFilter: hasSelectedLocation,
+        resolving: resolvingLocation,
+        isAdmin: !!isAdmin,
+        adminViewAllJobs,
+        adminBypassesLocation,
+        showingPermissionCta: !!permissionPrompt && !adminBypassesLocation,
+      }),
+    );
+  }, [
+    locationFailure,
+    permissionBlocked,
+    locationSource,
+    noLocation,
+    hasSelectedLocation,
+    resolvingLocation,
+    isAdmin,
+    adminViewAllJobs,
+    adminBypassesLocation,
+    permissionPrompt,
+  ]);
 
   return (
     <View style={styles.safeArea}>
@@ -670,7 +764,38 @@ const CleanerJobs = () => {
             )}
           </View>
 
-          {fallbackNotice && !noLocation && (
+          {permissionPrompt && !adminBypassesLocation && (
+            <View style={styles.permissionCard}>
+              <View style={styles.permissionIconWrap}>
+                <MaterialIcons
+                  name="location-disabled"
+                  size={RFPercentage(2.6)}
+                  color={Colors.gradient1}
+                />
+              </View>
+              <View style={styles.permissionTextWrap}>
+                <Text style={styles.permissionTitle}>
+                  {permissionPrompt.title}
+                </Text>
+                <Text style={styles.permissionMessage}>
+                  {permissionPrompt.message}
+                </Text>
+              </View>
+              <TouchableOpacity
+                accessibilityRole="button"
+                accessibilityLabel={permissionPrompt.actionLabel}
+                activeOpacity={0.8}
+                style={styles.permissionButton}
+                onPress={permissionPrompt.onAction}>
+                <Text style={styles.permissionButtonText}>
+                  {permissionPrompt.actionLabel}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* Softer notice only when permission is not already being asked about. */}
+          {fallbackNotice && !noLocation && !permissionPrompt && (
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={permissionBlocked ? openAppSettings : refreshLocation}
@@ -684,7 +809,7 @@ const CleanerJobs = () => {
             </TouchableOpacity>
           )}
 
-          {locationPending && !isAdmin ? (
+          {locationPending && !adminBypassesLocation ? (
             <View style={styles.loadingJobsContainer}>
               <ActivityIndicator size="large" color={Colors.gradient1} />
               <Text style={styles.loadingJobsText}>
@@ -699,7 +824,7 @@ const CleanerJobs = () => {
               <ActivityIndicator size="large" color={Colors.gradient1} />
               <Text style={styles.loadingJobsText}>Loading jobs...</Text>
             </View>
-          ) : noLocation && !isAdmin ? (
+          ) : noLocation && !adminBypassesLocation ? (
             <View style={styles.noLocationContainer}>
               <MaterialIcons
                 name={locationEmptyState.icon}
@@ -1343,6 +1468,50 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.7),
     fontFamily: Fonts.fontMedium,
     color: Colors.gradient1,
+  },
+  permissionCard: {
+    backgroundColor: Colors.blueBg150,
+    borderWidth: 1,
+    borderColor: Colors.lightBlueBorder,
+    borderRadius: 14,
+    padding: RFPercentage(1.8),
+    marginBottom: RFPercentage(1.5),
+    gap: RFPercentage(1.2),
+  },
+  permissionIconWrap: {
+    width: RFPercentage(4.6),
+    height: RFPercentage(4.6),
+    borderRadius: RFPercentage(2.3),
+    backgroundColor: Colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  permissionTextWrap: {
+    gap: 4,
+  },
+  permissionTitle: {
+    fontSize: RFPercentage(1.8),
+    fontFamily: Fonts.semiBold,
+    color: Colors.gray700,
+  },
+  permissionMessage: {
+    fontSize: RFPercentage(1.55),
+    fontFamily: Fonts.fontRegular,
+    color: Colors.secondaryText,
+    lineHeight: RFPercentage(2.2),
+  },
+  permissionButton: {
+    backgroundColor: Colors.gradient1,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    alignItems: 'center',
+    alignSelf: 'stretch',
+  },
+  permissionButtonText: {
+    fontSize: RFPercentage(1.7),
+    fontFamily: Fonts.semiBold,
+    color: Colors.white,
   },
   fallbackBanner: {
     flexDirection: 'row',

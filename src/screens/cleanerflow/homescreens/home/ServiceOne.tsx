@@ -33,7 +33,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Octicons from 'react-native-vector-icons/Octicons';
 import {setUserLocation} from '../../../../redux/location/Actions';
 import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
-import {fonts} from '@rneui/base';
 import {visibilityFieldsForOwnService} from '../../../../utils/cleanerVisibility';
 
 const {width} = Dimensions.get('window');

@@ -114,11 +114,6 @@ const Home = () => {
   const [adminViewAllServices, setAdminViewAllServices] = useState(false);
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
   const [showCustomerCoachMarks, setShowCustomerCoachMarks] = useState(false);
-  // Guards against the location permission modal being presented while the
-  // coach marks modal is still open/closing. Both are native RN <Modal>
-  // instances, and mounting one while the other is still tearing down can
-  // deadlock the UI thread, so we only flip this to true once the coach
-  // marks flow is fully out of the way.
   const [locationModalAllowed, setLocationModalAllowed] = useState(false);
   const isMountedRef = useRef(true);
   useEffect(() => {
@@ -148,6 +143,9 @@ const Home = () => {
     return () => clearTimeout(timer);
   }, [location]);
 
+
+  // console.log("servicesData.........", servicesData)
+
   useFocusEffect(
     React.useCallback(() => {
       let isActive = true;
@@ -156,8 +154,6 @@ const Home = () => {
         if (userFlow === 'Guest') {
           if (isActive) {
             setShowCustomerCoachMarks(false);
-            // No coach marks for guests, so the location modal is free to
-            // show as soon as it needs to.
             setLocationModalAllowed(true);
           }
           return;
@@ -166,9 +162,6 @@ const Home = () => {
         const shouldShow = await shouldShowCoachMarksForRole('customer');
         if (isActive) {
           setShowCustomerCoachMarks(shouldShow);
-          // Only allow the location modal to show immediately if the coach
-          // marks aren't going to be displayed this session. Otherwise it
-          // stays gated until the coach marks flow explicitly completes.
           setLocationModalAllowed(!shouldShow);
         }
       };
@@ -210,14 +203,7 @@ const Home = () => {
     serviceDetails();
   }, []);
 
-  /**
-   * `createdAt` desc, tolerant of what is actually stored.
-   *
-   * The Firestore ordering had to move to the client: the subscription filter
-   * below is an inequality on `visibleUntil`, and Firestore requires the first
-   * orderBy to be that same field. Sorting the (already fully fetched) result in
-   * memory is free and keeps the newest-first order customers see today.
-   */
+ 
   const createdAtMs = (value: any): number => {
     if (!value) return 0;
     if (typeof value?.toDate === 'function') return value.toDate().getTime();
@@ -231,31 +217,11 @@ const Home = () => {
     setLoading(true);
     try {
       const now = Date.now();
-
-      // Subscription gate, enforced by the query rather than by N follow-up
-      // reads. `visibleUntil` is a deadline denormalized onto each services
-      // document by the payment webhooks, so an expiring subscription drops out
-      // of this result the moment the clock passes it — no cron, no flag flip.
-      // Firestore rules enforce the same comparison server-side, so a client
-      // that skips this filter still cannot read a lapsed cleaner.
-      let querySnapshot: FirebaseFirestoreTypes.QuerySnapshot = await firestore()
-        .collection('CleanerServices')
-        .where('visibleUntil', '>', now)
-        .get();
-
-      // Transition safety net. Firestore inequality filters silently skip
-      // documents that lack the field, so before the backfill has run the query
-      // above returns nothing at all. Rather than blanking the home screen
-      // (and making the app's deploy order load-bearing), fall back to the
-      // Users-based path — but only once we know the collection is not simply
-      // empty, so a genuinely quiet market costs one extra read, not a scan.
-      //
-      // Wrapped in its own try/catch: once firestore.rules is deployed an
-      // unfiltered read is correctly denied, and that must degrade to "no
-      // fallback available" rather than take the whole listing down with it.
-      // By that point the backfill has run and the primary query is answering,
-      // so this branch is dead weight — kept because the cost of it being
-      // wrong is a blank home screen.
+      let querySnapshot: FirebaseFirestoreTypes.QuerySnapshot =
+        await firestore()
+          .collection('CleanerServices')
+          .where('visibleUntil', '>', now)
+          .get();
       let usedFallback = false;
       if (querySnapshot.empty) {
         try {
@@ -284,11 +250,6 @@ const Home = () => {
             };
           })
           .filter(
-            // Packages and service images are both optional - a service is
-            // still listed to customers even if the cleaner published it
-            // without either. ServicesCard falls back to a placeholder cover
-            // via ServiceCoverImage, and ServiceDetails renders its own
-            // empty-gallery state, so a missing gallery costs nothing here.
             (service): service is Service =>
               !!service.createdAt &&
               !!service.name &&
@@ -298,23 +259,16 @@ const Home = () => {
               !!service.location,
           );
 
-        // Final exact cut. The rule allows a few minutes of clock skew (see
-        // VISIBILITY_CLOCK_SKEW_MS) so a device whose clock runs behind cannot
-        // fail the whole list query; this drops anything inside that window.
-        // Free — the field is already on the documents we fetched.
-        //
-        // On the fallback path the field is absent, so visibility is resolved
-        // from the owning Users documents in batched reads instead.
         const visibleServices = usedFallback
           ? await filterVisibleByCleanerId(servicesArray, service => service.id)
           : servicesArray.filter(service => isServiceVisible(service, now));
 
-        // Nothing is deleted anywhere: a lapsed cleaner's services stay in
-        // Firestore and reappear the moment their subscription is valid again.
         setServicesData(
           visibleServices
             .slice()
-            .sort((a, b) => createdAtMs(b.createdAt) - createdAtMs(a.createdAt)),
+            .sort(
+              (a, b) => createdAtMs(b.createdAt) - createdAtMs(a.createdAt),
+            ),
         );
       } else {
         setServicesData([]);
@@ -482,12 +436,6 @@ const Home = () => {
   const completeCustomerCoachMarks = async () => {
     setShowCustomerCoachMarks(false);
     await markCoachMarksSeenForRole('customer');
-
-    // Give the coach marks' native Modal time to finish dismissing before
-    // presenting the location disclosure Modal. Flipping both modals'
-    // visibility in the same tick can cause two native Modal windows to be
-    // open/closing at once, which freezes the screen until the app is
-    // force-closed and reopened.
     setTimeout(() => {
       if (isMountedRef.current) {
         setLocationModalAllowed(true);
@@ -503,6 +451,8 @@ const Home = () => {
     void completeCustomerCoachMarks();
   };
 
+
+  // console.log("finalFilteredJobs......",finalFilteredJobs)
   return (
     <View style={{flex: 1}}>
       <StatusBar
@@ -862,10 +812,7 @@ const Home = () => {
                         contentContainerStyle={{
                           paddingBottom: RFPercentage(1),
                         }}
-                        // This list is nested in a vertical ScrollView, so it
-                        // renders eagerly. Capping the batches keeps a long
-                        // result set from firing every cover download at once
-                        // and starving the screen the user opens next.
+                        
                         initialNumToRender={4}
                         maxToRenderPerBatch={4}
                         windowSize={5}

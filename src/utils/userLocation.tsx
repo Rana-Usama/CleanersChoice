@@ -1,5 +1,6 @@
 import {useState, useEffect, useCallback, useRef} from "react";
 import {
+  AppState,
   Linking,
   PermissionsAndroid,
   Platform,
@@ -151,8 +152,18 @@ const syncCleanerLocation = async (latitude: number, longitude: number) => {
       });
 
     lastSyncedLocation = {latitude, longitude, at: Date.now()};
-  } catch (err) {
-    console.log("Error syncing cleaner location:", err);
+    log("lastKnownLocation synced to profile");
+  } catch (err: any) {
+    // Same reasoning as persistFcmToken in App.tsx: `.update()` on purpose.
+    // A merge-write would create Users/{uid} ahead of SignUp.tsx and make its
+    // `.set(userData)` an update touching role/admin/accountStatus, which
+    // firestore.rules rejects. `not-found` just means the profile does not
+    // exist yet; the next sync after sign-up writes it.
+    if (err?.code === "firestore/not-found") {
+      log("profile not created yet - skipping lastKnownLocation sync");
+      return;
+    }
+    log("Error syncing cleaner location:", err);
   }
 };
 
@@ -266,6 +277,16 @@ const IOS_AUTH_CALLBACK_GRACE_MS = 2500;
  */
 const RESOLVE_HARD_CAP_MS = 30000;
 
+/**
+ * Single tagged logger for the whole permission/resolve cycle, so the flow can
+ * be followed end to end by filtering Metro (or Xcode / logcat) on
+ * "[Location]" instead of hunting scattered console.log calls.
+ *
+ * No __DEV__ guard needed: configureConsole() in src/utils/consoleConfig.ts
+ * turns console.log into a no-op for release builds, so none of this ships.
+ */
+const log = (...args: any[]) => console.log("[Location]", ...args);
+
 type UseCurrentLocationOptions = {
   /**
    * Opt in to the saved-coordinate fallback above. Cleaner screens want it so
@@ -300,6 +321,10 @@ export const useCurrentLocation = (
 
   const isMountedRef = useRef(true);
   const requestIdRef = useRef(0);
+  // Mirrors `failure` for the AppState listener below, which must read the
+  // latest value without being torn down and resubscribed on every change.
+  const failureRef = useRef<LocationFailure | null>(null);
+  failureRef.current = failure;
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -338,15 +363,20 @@ export const useCurrentLocation = (
 
         // Neither callback is guaranteed to fire — see
         // IOS_AUTH_CALLBACK_GRACE_MS. Silence is inconclusive, not a denial.
-        const grace = setTimeout(
-          () => settle("undetermined"),
-          IOS_AUTH_CALLBACK_GRACE_MS,
-        );
+        const grace = setTimeout(() => {
+          log(
+            "iOS authorization callback never fired within",
+            IOS_AUTH_CALLBACK_GRACE_MS + "ms -> undetermined;",
+            "letting getCurrentPosition decide",
+          );
+          settle("undetermined");
+        }, IOS_AUTH_CALLBACK_GRACE_MS);
 
         try {
           Geolocation.requestAuthorization(
             () => {
               clearTimeout(grace);
+              log("iOS permission: GRANTED");
               settle("granted");
             },
             // iOS shows the system prompt at most once. After any denial the
@@ -354,6 +384,7 @@ export const useCurrentLocation = (
             // possible, so this is always the Settings case.
             () => {
               clearTimeout(grace);
+              log("iOS permission: BLOCKED (denied previously; Settings only)");
               settle("blocked");
             },
           );
@@ -370,12 +401,18 @@ export const useCurrentLocation = (
         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
       );
 
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) return "granted";
+      log("Android permission result:", granted);
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        log("Android permission: GRANTED");
+        return "granted";
+      }
       // "Don't ask again" — request() returns instantly from here on, so
       // retrying in-app can never succeed.
       if (granted === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
+        log("Android permission: BLOCKED (never ask again; Settings only)");
         return "blocked";
       }
+      log("Android permission: DENIED (can still be re-prompted in-app)");
       return "denied";
     } catch (err) {
       return "denied";
@@ -393,8 +430,10 @@ export const useCurrentLocation = (
 
       setFailure(failureReason);
       setError(message);
+      log("resolve failed:", failureReason, "-", message);
 
       if (!savedLocationFallback) {
+        log("no saved-location fallback for this screen -> no position");
         setResolving(false);
         return null;
       }
@@ -403,8 +442,11 @@ export const useCurrentLocation = (
       if (!isMountedRef.current || requestId !== requestIdRef.current) return null;
 
       if (fallback) {
+        log("using fallback position, source:", fallback.source);
         setLocation(fallback.location);
         setLocationSource(fallback.source);
+      } else {
+        log("no fallback position available (no lastKnown, no service address)");
       }
 
       setResolving(false);
@@ -417,6 +459,7 @@ export const useCurrentLocation = (
     const requestId = ++requestIdRef.current;
     const isCurrent = () => isMountedRef.current && requestId === requestIdRef.current;
     setResolving(true);
+    log("requesting permission (platform:", Platform.OS + ")");
 
     try {
       const permission = await withDeadline(requestPermission(), 20000);
@@ -426,6 +469,7 @@ export const useCurrentLocation = (
       // request natively and reports code 1 if it really is denied, which is a
       // far more reliable permission signal than the queued callbacks.
       if (permission !== "granted" && permission !== "undetermined") {
+        log("LOCATION NOT ALLOWED ->", permission, "- falling back");
         setLoading(false);
         return settleWithFallback(
           permission === "blocked" ? "blocked" : "denied",
@@ -436,6 +480,7 @@ export const useCurrentLocation = (
         );
       }
 
+      log("permission OK (" + permission + ") - acquiring GPS fix...");
       setLoading(true);
       setError(null);
       setFailure(null);
@@ -451,6 +496,7 @@ export const useCurrentLocation = (
         };
 
         const timeout = setTimeout(() => {
+          log("GPS outer timeout (20s) - giving up on a live fix");
           gpsFinished = true;
           if (isCurrent()) setLoading(false);
           settleWithFallback("timeout", "Location request timed out", requestId).then(
@@ -473,6 +519,12 @@ export const useCurrentLocation = (
               longitude,
               address: null,
             };
+
+            log(
+              "LOCATION ALLOWED - GPS fix acquired:",
+              latitude.toFixed(5) + "," + longitude.toFixed(5),
+              "accuracy:", position.coords.accuracy,
+            );
 
             if (isCurrent()) {
               setLocation(newLocation);
@@ -506,6 +558,8 @@ export const useCurrentLocation = (
                 : err?.code === 3
                 ? "timeout"
                 : "unknown";
+
+            log("GPS error - code:", err?.code, "->", reason, "|", err?.message);
 
             const message =
               reason === "blocked"
@@ -543,6 +597,7 @@ export const useCurrentLocation = (
     try {
       const accepted = await withDeadline(AsyncStorage.getItem(LOCATION_DISCLOSURE_KEY), 3000);
       if (accepted !== "true") {
+        log("disclosure not yet accepted - showing consent modal, no OS prompt yet");
         // Waiting for consent is not a location request in flight.
         setDisclosureVisible(true);
         setResolving(false);
@@ -558,6 +613,7 @@ export const useCurrentLocation = (
   }, [fetchLocation]);
 
   const acceptDisclosure = useCallback(async () => {
+    log("disclosure accepted - proceeding to OS permission prompt");
     setDisclosureVisible(false);
     try {
       await withDeadline(AsyncStorage.setItem(LOCATION_DISCLOSURE_KEY, "true"), 3000);
@@ -568,6 +624,7 @@ export const useCurrentLocation = (
   }, [fetchLocation]);
 
   const declineDisclosure = useCallback(() => {
+    log("LOCATION NOT ALLOWED - disclosure declined, OS prompt never shown");
     setDisclosureVisible(false);
     // Android only (iOS has no decline path). The runtime prompt is never
     // shown, but a saved service address can still place them on the map.
@@ -579,6 +636,7 @@ export const useCurrentLocation = (
    * "blocked" outcome, since neither OS will prompt again.
    */
   const openAppSettings = useCallback(async () => {
+    log("opening app settings - will re-check permission on foreground");
     try {
       await Linking.openSettings();
     } catch (err) {
@@ -588,6 +646,30 @@ export const useCurrentLocation = (
 
   useEffect(() => {
     getLocation();
+  }, [getLocation]);
+
+  /**
+   * Close the Settings round-trip.
+   *
+   * "Open Settings" backgrounds the app, so when the user flips the permission
+   * on and comes back, no screen remounts and no navigation focus event fires
+   * -- the hook would keep reporting the stale blocked state until a manual
+   * pull-to-refresh, making the button look broken. Re-resolving on foreground
+   * is the only signal available.
+   *
+   * Gated on the last outcome being a permission failure: without that this
+   * would fire a GPS request every single time the app is foregrounded.
+   */
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", state => {
+      if (state !== "active") return;
+      const last = failureRef.current;
+      if (last === "blocked" || last === "denied") {
+        log("app foregrounded after a", last, "outcome - re-checking permission");
+        getLocation();
+      }
+    });
+    return () => subscription.remove();
   }, [getLocation]);
 
   /**
@@ -601,7 +683,7 @@ export const useCurrentLocation = (
     if (!resolving) return;
     const timer = setTimeout(() => {
       if (isMountedRef.current) {
-        console.log("Location resolve exceeded hard cap — releasing UI");
+        log("resolve exceeded hard cap (" + RESOLVE_HARD_CAP_MS + "ms) - releasing UI");
         setResolving(false);
       }
     }, RESOLVE_HARD_CAP_MS);
