@@ -10,8 +10,13 @@ import {FirebaseApp, initializeApp} from '@react-native-firebase/app';
 import messaging from '@react-native-firebase/messaging';
 import notifee, {EventType} from '@notifee/react-native';
 import ReactNativeBlobUtil from 'react-native-blob-util';
+import {configureConsole} from './src/utils/consoleConfig';
 import {applyGlobalFontScaleCap} from './src/utils/fontScaling';
 import {handleNotificationTap} from './src/utils/notificationNavigation';
+
+// Mute native (ADVICE) log spam in dev; strip all non-error logs in release.
+// Must run before anything can log.
+configureConsole();
 
 // Cap OS accessibility font scaling app-wide before anything renders.
 applyGlobalFontScaleCap();

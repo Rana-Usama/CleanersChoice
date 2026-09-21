@@ -28,6 +28,7 @@ import CustomModal from '../../../../components/CustomModal';
 import ModalWrapper from '../../../../components/ModalWrapper';
 import useIsAdmin from '../../../../hooks/useIsAdmin';
 import {buildChatParams, ChatNavParams} from '../../../../services/chatService';
+import {isCleanerVisibleToCustomers} from '../../../../utils/cleanerVisibility';
 
 const SERVER_URL = 'https://cleaners-choice-server.vercel.app';
 
@@ -60,6 +61,49 @@ const CleanerProfile = ({route, navigation}: any) => {
         .collection('Users')
         .doc(cleanerId)
         .get();
+
+      /**
+       * Subscription gate — customer-facing viewers only.
+       *
+       * This screen is shared: customers open it from a job's applicant list,
+       * and admins open it from AdminCleanerServices *specifically* to inspect
+       * overdue and expired cleaners. Applying the rule unconditionally would
+       * break that admin path, so the viewer decides.
+       *
+       * The viewer's role is read here rather than taken from `useIsAdmin()`,
+       * which returns false until its own lookup resolves — enforcing on that
+       * initial false would bounce an admin out of the screen they just opened.
+       * A signed-out (guest) viewer is treated as a customer, which is what the
+       * guest flow is.
+       */
+      let enforceVisibility = true;
+      if (currentUserId) {
+        try {
+          const viewerDoc = await firestore()
+            .collection('Users')
+            .doc(currentUserId)
+            .get();
+          const viewer = viewerDoc.data();
+          enforceVisibility = viewer?.role === 'Customer' && !viewer?.admin;
+        } catch (error) {
+          // Unknown viewer: fail closed, the strict side of the rule.
+          enforceVisibility = true;
+        }
+      }
+
+      if (
+        enforceVisibility &&
+        !isCleanerVisibleToCustomers(userDoc.exists ? userDoc.data() : null)
+      ) {
+        showToast({
+          type: 'info',
+          title: 'No longer available',
+          message: 'This professional is not available at the moment.',
+        });
+        navigation.goBack();
+        return;
+      }
+
       if (userDoc.exists) {
         setProfile(userDoc.data());
       }
@@ -90,7 +134,7 @@ const CleanerProfile = ({route, navigation}: any) => {
     } finally {
       setLoading(false);
     }
-  }, [cleanerId, jobId]);
+  }, [cleanerId, jobId, currentUserId, navigation]);
 
   useFocusEffect(
     useCallback(() => {

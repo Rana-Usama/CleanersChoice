@@ -1,6 +1,7 @@
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import {navigationRef} from './navigationRef';
+import {hasActiveSubscriptionAccess} from './cleanerVisibility';
 
 /**
  * Where a push notification tap lands.
@@ -44,10 +45,14 @@ const resolveTarget = (screen?: string): Target | null => {
  * StackNavigator's initial-route logic and cannot open jobs, so their tap goes
  * to Premium instead of the (unreachable) notifications list.
  *
- * Uses the same predicate as StackNavigator/SignIn — `subscriptionEndDate`
- * against now — so the tap destination always agrees with where the app would
- * have put them on launch. Any failure resolves to `false`: a lookup error must
- * never trap an active cleaner on the paywall.
+ * Delegates to `hasActiveSubscriptionAccess` — the same single predicate
+ * StackNavigator and resolveCleanerRoute use — so the tap destination always
+ * agrees with where the app would have put them on launch. This used to inline
+ * `subscriptionEndDate > now`, which was equivalent until a grace deadline was
+ * introduced; after that it was the one gate left that ignored the grace, and a
+ * graced cleaner tapping a push would have been dumped on the paywall the app
+ * was otherwise letting them past. Any failure resolves to `false`: a lookup
+ * error must never trap an active cleaner on the paywall.
  */
 const shouldRouteToPaywall = async (): Promise<boolean> => {
   const user = auth().currentUser;
@@ -58,12 +63,7 @@ const shouldRouteToPaywall = async (): Promise<boolean> => {
     const data = doc.data();
     if (data?.role !== 'Cleaner') return false;
 
-    const endDate =
-      typeof data?.subscriptionEndDate === 'number'
-        ? data.subscriptionEndDate
-        : null;
-
-    return !(endDate !== null && endDate > Date.now());
+    return !hasActiveSubscriptionAccess(data);
   } catch (error) {
     console.log('Error resolving notification route:', error);
     return false;

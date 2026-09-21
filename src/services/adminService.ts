@@ -1,4 +1,5 @@
 import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
 import {
   AdminCleanerService,
   AdminJob,
@@ -23,6 +24,42 @@ import {getBadgeKeyForUser, resolveSubscriptionStatus} from '../utils/subscripti
 
 /** Firestore caps `in` queries at 30 values. */
 const IN_QUERY_LIMIT = 30;
+
+/** Read and mutate against fresh data, including status changes since listing. */
+export const manageActiveAdminJob = async (
+  id: string,
+  action: 'read' | 'update' | 'delete',
+  changes: Record<string, any> = {},
+): Promise<AdminJob> => {
+  const user = auth().currentUser;
+  if (!user) throw new Error('Please sign in again.');
+  const db = firestore();
+  return db.runTransaction(async transaction => {
+    const admin = await transaction.get(db.collection('Users').doc(user.uid));
+    const ref = db.collection('Jobs').doc(id);
+    const snapshot = await transaction.get(ref);
+    const job = snapshot.data();
+    if (admin.data()?.admin !== true || auth().currentUser?.uid !== user.uid) {
+      throw new Error('Admin access is required.');
+    }
+    if (!snapshot.exists || job?.status !== 'active') {
+      throw new Error('You can only manage active jobs. Refresh the list.');
+    }
+    if (action === 'delete') transaction.delete(ref);
+    if (action === 'update') {
+      // Form fields only: preserve ownership, lifecycle and application data.
+      const fields = ['title', 'description', 'type', 'location', 'priceRange',
+        'budgetType', 'remarks', 'createdAt', 'hourlyRate', 'hours',
+        'pricePerSqFt', 'sqFt'];
+      const update: Record<string, any> = {};
+      fields.forEach(field => {
+        if (changes[field] !== undefined) update[field] = changes[field];
+      });
+      transaction.update(ref, update);
+    }
+    return {id: snapshot.id, ...job} as AdminJob;
+  });
+};
 
 const chunk = <T>(items: T[], size: number): T[][] => {
   const out: T[][] = [];
@@ -53,7 +90,7 @@ const byNewestFirst = (a: any, b: any) =>
  * Every ACTIVE customer-posted job, platform-wide.
  *
  * Same collection and same `status == 'active'` filter the cleaner Job List
- * already uses (CleanerJobs.tsx), minus the 50 km distance filter — the whole
+ * already uses (CleanerJobs.tsx), minus the 50 mile distance filter — the whole
  * point of the admin view. Completed / cancelled / expired / unconfirmed jobs
  * are excluded at the query level.
  */

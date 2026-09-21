@@ -1,4 +1,3 @@
-// functions/src/index.ts
 import * as admin from "firebase-admin";
 import {onSchedule} from "firebase-functions/v2/scheduler";
 import {onDocumentCreated} from "firebase-functions/v2/firestore";
@@ -416,27 +415,11 @@ async function sendExpiryNotification(
   }
 }
 
-/* -------------------------------------------------------------------------
- * Nearby-job notifications
- *
- * When a Customer posts a job, every Cleaner whose saved business location
- * (CleanerServices/{uid}.location) falls within NEARBY_RADIUS_KM of the job's
- * coordinates gets one Notifications record + one push.
- *
- * Cleaners are notified regardless of subscription state — the client decides
- * where the tap lands (NotificationsScreen for active subs, Premium for
- * lapsed ones), see src/utils/notificationNavigation.ts.
- * ---------------------------------------------------------------------- */
 
-const NEARBY_RADIUS_KM = 50;
-const EARTH_RADIUS_KM = 6371;
 
-/**
- * How long a synced device position counts as the cleaner's "current"
- * location. Past this it is treated as unavailable and the saved service
- * address is used instead — a cleaner who has not opened the app in a month is
- * likelier to be near their registered service area than their last GPS ping.
- */
+const NEARBY_RADIUS_MILES = 50;
+const EARTH_RADIUS_MILES = 3960;
+
 const CURRENT_LOCATION_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 
 /**
@@ -452,17 +435,17 @@ function toCoord(value: unknown): number | null {
 }
 
 /**
- * Great-circle distance in km. Mirrors the `haversine` package the app uses
- * client-side in CleanerJobs.tsx / Home.tsx so server and client agree on who
- * is "within 50 km".
+ * Great-circle distance in miles. Mirrors the `haversine` package the app
+ * uses client-side in CleanerJobs.tsx / Home.tsx so server and client agree
+ * on who is "within 50 miles".
  *
  * @param {number} lat1 Latitude of the first point.
  * @param {number} lon1 Longitude of the first point.
  * @param {number} lat2 Latitude of the second point.
  * @param {number} lon2 Longitude of the second point.
- * @return {number} Distance between the two points, in kilometres.
+ * @return {number} Distance between the two points, in miles.
  */
-function distanceInKm(
+function distanceInMiles(
   lat1: number,
   lon1: number,
   lat2: number,
@@ -477,7 +460,7 @@ function distanceInKm(
       Math.cos(toRad(lat2)) *
       Math.sin(dLon / 2) *
       Math.sin(dLon / 2);
-  return EARTH_RADIUS_KM * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return EARTH_RADIUS_MILES * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
 /**
@@ -531,11 +514,6 @@ export const notifyNearbyCleaners = onDocumentCreated(
     }
 
     const db = admin.firestore();
-
-    // ---- Idempotency claim -------------------------------------------------
-    // Firestore triggers are at-least-once, so claim the job BEFORE sending.
-    // A crash after the claim means nobody is notified, which is far better
-    // than notifying every nearby cleaner twice.
     let claimed = false;
     try {
       claimed = await db.runTransaction(async (tx) => {
@@ -558,8 +536,6 @@ export const notifyNearbyCleaners = onDocumentCreated(
     }
 
     try {
-      // NOTE: on the Jobs doc, `jobId` is the POSTING CUSTOMER'S uid, not a
-      // job id. Confusing field name, but it is the existing convention.
       const customerId =
         typeof job.jobId === "string" && job.jobId ? job.jobId : null;
 
@@ -584,9 +560,7 @@ export const notifyNearbyCleaners = onDocumentCreated(
         }
       }
 
-      // ---- Candidate cleaners ---------------------------------------------
-      // Deliberately NOT filtered by subscription: lapsed cleaners still get
-      // the alert, and the app routes their tap to the Premium paywall.
+  
       const cleanersSnap = await db
         .collection("Users")
         .where("role", "==", "Cleaner")
@@ -606,16 +580,10 @@ export const notifyNearbyCleaners = onDocumentCreated(
             rawToken.trim() :
             null;
 
-        // Primary source: the device position the app syncs on each location
-        // fetch. This is the same coordinate CleanerJobs.tsx filters the jobs
-        // list on, so a cleaner's pushes and their visible jobs agree.
         const lastKnown = user.lastKnownLocation;
         let lat = toCoord(lastKnown?.latitude);
         let lng = toCoord(lastKnown?.longitude);
 
-        // Only a reasonably recent position counts as "current". Records
-        // written before updatedAt existed have no age, so they are treated as
-        // stale rather than trusted indefinitely.
         if (lat !== null && lng !== null) {
           const updatedAt = lastKnown?.updatedAt;
           const age =
@@ -635,10 +603,7 @@ export const notifyNearbyCleaners = onDocumentCreated(
         }
       }
 
-      // Fallback: cleaners who denied location permission, have not opened the
-      // app since the sync shipped, or whose position has gone stale still
-      // match on their saved service address rather than being excluded.
-      // Cleaners with neither source are dropped by the radius filter below.
+
       if (needsFallbackLocation.length > 0) {
         const byUid = new Map(candidates.map((c) => [c.uid, c]));
 
@@ -671,13 +636,13 @@ export const notifyNearbyCleaners = onDocumentCreated(
         // No usable coordinate from either source — skip quietly.
         if (candidate.lat === null || candidate.lng === null) continue;
 
-        const distance = distanceInKm(
+        const distance = distanceInMiles(
           jobLat,
           jobLng,
           candidate.lat,
           candidate.lng
         );
-        if (distance <= NEARBY_RADIUS_KM) {
+        if (distance <= NEARBY_RADIUS_MILES) {
           recipients.set(candidate.uid, candidate.token);
         }
       }
@@ -691,9 +656,6 @@ export const notifyNearbyCleaners = onDocumentCreated(
       const title = "New job near you";
       const body = `${customerName} posted "${jobTitle}" in your area.`;
 
-      // ---- In-app records --------------------------------------------------
-      // Written for EVERY nearby cleaner, including those without a token, so
-      // a logged-out cleaner still sees the job on their next launch.
       const uids = [...recipients.keys()];
       for (const ids of chunk(uids, 450)) {
         const batch = db.batch();
@@ -724,9 +686,6 @@ export const notifyNearbyCleaners = onDocumentCreated(
         try {
           const response = await admin.messaging().sendEachForMulticast({
             tokens,
-            // A `notification` block is required: App.tsx's foreground handler
-            // drops data-only messages, and background/quit display relies on
-            // the OS rendering this payload.
             notification: {title, body},
             data: {
               screen: "notifications",

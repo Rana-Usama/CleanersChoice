@@ -10,6 +10,7 @@ import {
   SubscriptionPurchase,
   PurchaseError,
 } from 'react-native-iap';
+import {Platform} from 'react-native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 
@@ -57,6 +58,11 @@ export function useAppleIAP(
   }, [onError]);
 
   useEffect(() => {
+    // StoreKit only. Android cleaners subscribe through Stripe, and the
+    // react-native-iap Android module is excluded from the build
+    // (react-native.config.js), so there is no native module to talk to.
+    if (Platform.OS !== 'ios') return;
+
     let purchaseSub: any;
     let errorSub: any;
 
@@ -191,6 +197,8 @@ export function useAppleIAP(
   }, []); // Empty deps — only run once on mount
 
   const purchaseWithApple = useCallback(async () => {
+    if (Platform.OS !== 'ios') return;
+
     if (iapError) {
       onError(iapError);
       return;

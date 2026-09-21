@@ -7,7 +7,7 @@ import {
 import React, {useCallback, useEffect, useRef} from 'react';
 import StackNavigator from './src/routers/StackNavigator';
 import {Provider} from 'react-redux';
-import store from './src/redux/Store';
+import store, {hydrateStore} from './src/redux/Store';
 import Toast from 'react-native-toast-message';
 import {StripeProvider} from '@stripe/stripe-react-native';
 import {PUBLISHABLE_KEY} from '@env';
@@ -23,13 +23,7 @@ import {toastConfig} from './src/utils/toastConfig';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 
-/**
- * Persist the current FCM token against the signed-in user.
- *
- * Tokens rotate (reinstall, OS restore, long inactivity) and previously the
- * refreshed value was only logged, so those users silently stopped receiving
- * pushes. No-ops when signed out, which keeps logout's deleteField() intact.
- */
+
 const persistFcmToken = async (token?: string | null) => {
   const user = auth().currentUser;
   if (!user || !token) return;
@@ -45,6 +39,11 @@ const persistFcmToken = async (token?: string | null) => {
 const App: React.FC = () => {
   console.log('Running in', __DEV__ ? 'DEBUG' : 'RELEASE');
   const displayedMessageIds = useRef(new Set<string>()).current;
+
+  // Restore the persisted location filter before the first screen can read it.
+  useEffect(() => {
+    hydrateStore();
+  }, []);
 
   // Display foreground notifications
   const onDisplayNotification = useCallback(
@@ -73,16 +72,9 @@ const App: React.FC = () => {
 
         const {title, body} = remoteMessage.notification;
         await notifee.displayNotification({
-          // Was a fixed id preceded by cancelAllNotifications(), which meant
-          // only one foreground notification could ever be visible — two
-          // nearby-job alerts in a row and the cleaner only saw the second.
-          // A per-message id lets them stack while still de-duplicating
-          // redelivery of the same message.
           id: messageId || 'single-notification',
           title: title || 'No Title',
           body: body || 'No Body',
-          // Carried through so the tap handler below can route it the same way
-          // an OS-rendered (background) notification is routed.
           data: remoteMessage.data || {},
           ios: {
             sound: 'default',
@@ -160,11 +152,7 @@ const App: React.FC = () => {
     };
   }, [onDisplayNotification]);
 
-  /**
-   * At cold start `auth().currentUser` is usually still null when the token is
-   * first read, so re-persist once auth restores. Fires with null on logout,
-   * where it correctly does nothing and leaves the deleted token deleted.
-   */
+  
   useEffect(() => {
     return auth().onAuthStateChanged(async user => {
       if (!user) return;
@@ -196,10 +184,6 @@ const App: React.FC = () => {
         }
         return;
       }
-
-      // Foreground pushes are re-displayed locally by Notifee, so their taps
-      // arrive here rather than through messaging().onNotificationOpenedApp.
-      // Without this, tapping a foreground notification did nothing at all.
       handleNotificationTap(data);
     });
   }, []);

@@ -55,6 +55,7 @@ import {Customer} from '../types/customer';
 import {navigationRef} from '../utils/navigationRef';
 import {flushPendingNotification} from '../utils/notificationNavigation';
 import {resolveCleanerRoute} from '../utils/cleanerRoute';
+import {hasActiveSubscriptionAccess} from '../utils/cleanerVisibility';
 
 export type RootStackParamList = {
   SplashOne: undefined;
@@ -65,8 +66,8 @@ export type RootStackParamList = {
   ResetPassword: undefined;
   Home: undefined;
   ServiceDetails: {item: any};
-  PostJob: {jobId: string | null};
-  JobPosted: undefined;
+  PostJob: {jobId: string | null; repost?: boolean; adminPost?: boolean};
+  JobPosted: {adminPost?: boolean} | undefined;
   JobDetails: {item: any};
   EditProfile: undefined;
   ChangePasswordV2: undefined;
@@ -187,10 +188,11 @@ const StackNavigator: React.FC = () => {
 
   console.log(email, password, userData);
 
-  const now = Date.now();
-  const expiry = userData?.subscriptionEndDate;
-
-  const hasActiveSub = expiry && expiry > now;
+  // Single definition of "valid subscription access right now", shared with
+  // resolveCleanerRoute and with the customer-facing visibility rule
+  // (utils/cleanerVisibility.ts). Still `subscriptionEndDate > now` at heart —
+  // centralised so the paywall and the customer side cannot drift apart.
+  const hasActiveSub = hasActiveSubscriptionAccess(userData);
 
   let initialRoute: keyof RootStackParamList = 'SplashOne';
 

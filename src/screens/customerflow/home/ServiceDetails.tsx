@@ -22,6 +22,8 @@ import {RFPercentage} from 'react-native-responsive-fontsize';
 import LinearGradient from 'react-native-linear-gradient';
 import GradientButton from '../../../components/GradientButton';
 import {useNavigation} from '@react-navigation/native';
+import {showToast} from '../../../utils/ToastMessage';
+import {isCleanerIdVisibleToCustomers} from '../../../utils/cleanerVisibility';
 import moment from 'moment';
 import {useSelector} from 'react-redux';
 import auth from '@react-native-firebase/auth';
@@ -248,6 +250,38 @@ const ServiceDetails: React.FC = ({route}: any) => {
     };
     tryToFindChat();
   }, [userId, item?.id]);
+
+  /**
+   * Subscription gate for this screen.
+   *
+   * The list this screen was opened from may be minutes old, and a service can
+   * also be reached from a notification or a chat, so the rule is re-checked on
+   * arrival rather than trusted from the caller. `item.id` is the cleaner's uid
+   * (a CleanerServices document id), which is what the visibility lookup takes.
+   *
+   * A cleaner whose subscription lapsed between the list load and the tap is
+   * bounced back with an explanation instead of being shown a listing they can
+   * no longer fulfil.
+   */
+  useEffect(() => {
+    let cancelled = false;
+    const enforceCleanerVisibility = async () => {
+      const stillVisible = await isCleanerIdVisibleToCustomers(item?.id);
+      if (cancelled || stillVisible) {
+        return;
+      }
+      showToast({
+        type: 'info',
+        title: 'No longer available',
+        message: 'This service is not available at the moment.',
+      });
+      navigation.goBack();
+    };
+    enforceCleanerVisibility();
+    return () => {
+      cancelled = true;
+    };
+  }, [item?.id, navigation]);
 
   const [token, setFcmToken] = useState<string>('');
   useEffect(() => {

@@ -115,4 +115,6 @@ export interface AdminModule {
   enabled: boolean;
   /** Which stat from AdminStats to show as the row badge, if any. */
   countKey?: keyof AdminStats;
+  /** Optional params for an existing shared screen opened from Admin Controls. */
+  params?: object;
 }

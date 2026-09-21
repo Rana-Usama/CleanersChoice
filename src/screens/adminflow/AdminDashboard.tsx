@@ -201,7 +201,7 @@ const AdminDashboard = ({navigation}: any) => {
               subtitle={module.subtitle}
               icon={module.icon}
               count={module.countKey ? stats[module.countKey] : undefined}
-              onPress={() => navigation.navigate(module.route)}
+              onPress={() => navigation.navigate(module.route, module.params)}
             />
           ))}
         </View>

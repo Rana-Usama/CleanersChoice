@@ -298,7 +298,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: RFPercentage(5),
     alignSelf: 'center',
-    alignItems:"center"
+    alignItems:"center", 
+     width:"100%",
   },
   applyButton: {
     paddingHorizontal: RFPercentage(3),

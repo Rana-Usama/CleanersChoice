@@ -26,6 +26,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {showToast} from '../../../utils/ToastMessage';
+import {isCleanerVisibleToCustomers} from '../../../utils/cleanerVisibility';
 import CustomModal from '../../../components/CustomModal';
 import ModalWrapper from '../../../components/ModalWrapper';
 
@@ -110,7 +111,18 @@ const JobManagement = ({route, navigation}: any) => {
         );
         const applicantPromises = filteredIds.map(async uid => {
           const userDoc = await firestore().collection('Users').doc(uid).get();
-          if (userDoc.exists) {
+          // Subscription gate. An applicant is a candidate the customer is
+          // being asked to choose between, so a cleaner whose subscription has
+          // lapsed since applying must not be offered — confirming them would
+          // hand the job to someone who is locked out of the cleaner side.
+          //
+          // The `applicants` array on the Job is left untouched: this filters
+          // what is displayed, so the cleaner reappears as a candidate if they
+          // resubscribe while the job is still open.
+          if (
+            userDoc.exists &&
+            isCleanerVisibleToCustomers(userDoc.data())
+          ) {
             return {uid: userDoc.id, ...userDoc.data()} as CleanerData;
           }
           return null;

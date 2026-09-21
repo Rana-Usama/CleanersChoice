@@ -1,6 +1,7 @@
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import {hasAcceptedInstructions} from './cleanerInstructions';
+import {hasActiveSubscriptionAccess} from './cleanerVisibility';
 
 /**
  * Where a Cleaner belongs right now.
@@ -16,8 +17,12 @@ import {hasAcceptedInstructions} from './cleanerInstructions';
  * Instructions come BEFORE the paywall: a cleaner should understand what the
  * membership is before being asked to pay for it.
  *
- * Active-subscription test is `subscriptionEndDate > now`, matching the gate
- * the rest of the app already uses (StackNavigator, SignIn).
+ * Active-subscription test is delegated to `hasActiveSubscriptionAccess`
+ * (utils/cleanerVisibility.ts), which is the single definition of "valid
+ * subscription access right now" shared with StackNavigator's gate and with the
+ * customer-facing visibility rule. It is still `subscriptionEndDate > now` at
+ * heart; centralising it means the paywall and the customer side can never
+ * disagree about whether a cleaner is live.
  */
 
 export type CleanerRoute =
@@ -32,13 +37,7 @@ export const resolveCleanerRoute = (
     return 'CleanerInstructions';
   }
 
-  const endDate =
-    typeof userData?.subscriptionEndDate === 'number'
-      ? userData.subscriptionEndDate
-      : null;
-  const hasActiveSub = endDate !== null && endDate > Date.now();
-
-  return hasActiveSub ? 'CleanerNavigator' : 'Premium';
+  return hasActiveSubscriptionAccess(userData) ? 'CleanerNavigator' : 'Premium';
 };
 
 /**

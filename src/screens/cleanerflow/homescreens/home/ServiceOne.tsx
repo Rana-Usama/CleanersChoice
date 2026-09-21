@@ -34,6 +34,7 @@ import Octicons from 'react-native-vector-icons/Octicons';
 import {setUserLocation} from '../../../../redux/location/Actions';
 import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
 import {fonts} from '@rneui/base';
+import {visibilityFieldsForOwnService} from '../../../../utils/cleanerVisibility';
 
 const {width} = Dimensions.get('window');
 
@@ -204,6 +205,16 @@ const ServiceOne: React.FC = ({navigation}: any) => {
             packages: serviceData?.packages || [],
             rating: serviceData?.rating || null,
             reviews: serviceData?.reviews || [],
+            // Customer-facing visibility deadline. This `.set()` is a full
+            // overwrite, not a merge, so the field has to be restated here or a
+            // re-save would erase it and the cleaner's own listing would vanish
+            // until the next webhook or the nightly sweep repaired it.
+            //
+            // Derived from this cleaner's own subscription (utils/
+            // cleanerVisibility.ts) and capped by firestore.rules at their
+            // `Users.subscriptionEndDate`, so it cannot be used to self-grant
+            // visibility. The payment webhooks own the value from here on.
+            ...visibilityFieldsForOwnService(profileData),
           });
         navigation.navigate('ServiceTwo');
       } catch (error) {

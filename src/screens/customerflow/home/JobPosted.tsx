@@ -15,8 +15,9 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {useNavigation} from '@react-navigation/native';
 
-const JobPosted = () => {
+const JobPosted = ({route}: any) => {
   const navigation = useNavigation<any>();
+  const isAdminPost = route?.params?.adminPost === true;
   const [loading, setLoading] = useState(false);
 
   // Animation values
@@ -45,7 +46,11 @@ const JobPosted = () => {
   const handleNext = () => {
     setLoading(true);
     setTimeout(() => {
-      navigation.navigate('Home', {screen: 'Job Board'});
+      if (isAdminPost) {
+        navigation.navigate('AdminDashboard');
+      } else {
+        navigation.navigate('Home', {screen: 'Job Board'});
+      }
     }, 1000);
   };
 
@@ -144,7 +149,10 @@ const JobPosted = () => {
           style={styles.secondaryButton}
           activeOpacity={0.8}
           onPress={() => {
-            navigation.navigate('PostJob', {jobId: null});
+            navigation.navigate('PostJob', {
+              jobId: null,
+              ...(isAdminPost ? {adminPost: true} : {}),
+            });
           }}>
           <Text style={styles.secondaryButtonText}>Post Another Job</Text>
         </TouchableOpacity>

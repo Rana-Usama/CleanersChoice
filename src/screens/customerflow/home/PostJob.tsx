@@ -28,7 +28,10 @@ import moment from 'moment';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import {showToast} from '../../../utils/ToastMessage';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
+import {setUserLocation} from '../../../redux/location/Actions';
+import {manageActiveAdminJob} from '../../../services/adminService';
+import {jobEditSignature} from '../../../utils/jobEditSignature';
 import LinearGradient from 'react-native-linear-gradient';
 import Feather from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -36,6 +39,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useSoftInputAdjustNothing} from '../../../hooks/useSoftInputMode';
 import DollarIcon from '../../../assets/svg/DollarIcon';
 import SquareFeetIcon from '../../../assets/svg/SquareFeetIcon';
+import useIsAdmin from '../../../hooks/useIsAdmin';
 
 const {width} = Dimensions.get('window');
 
@@ -131,9 +135,12 @@ const getRoundedMinDate = () => {
 };
 
 const PostJob = ({route}: any) => {
-  const {jobId, repost} = route.params || {};
+  const {jobId, repost, adminPost} = route.params || {};
 
   const navigation = useNavigation<any>();
+  const isAdmin = useIsAdmin();
+  const dispatch = useDispatch();
+  const [adminEditReady, setAdminEditReady] = useState(false);
   const [date, setDate] = useState<Date | null>(null);
   const [open, setOpen] = useState<boolean>(false);
   const formattedDate = date
@@ -157,6 +164,14 @@ const PostJob = ({route}: any) => {
   const scrollViewRef = useRef<ScrollView>(null);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const userLocation = useSelector((state: any) => state?.location?.location);
+  const [savedEditSignature, setSavedEditSignature] = useState<string | null>(null);
+  const currentEditSignature = jobEditSignature({
+    title: jobTitle, description: Description, type: selectedType, remarks,
+    location: userLocation, dueDate: date ? moment(date).format('YYYY-MM-DD  HH:mm A') : null,
+    budgetType, budget, hourlyRate, hours, pricePerSqFt, sqFt,
+  });
+  const unchangedEdit = !!jobId && !repost &&
+    (savedEditSignature === null || savedEditSignature === currentEditSignature);
 
   useSoftInputAdjustNothing();
 
@@ -185,6 +200,22 @@ const PostJob = ({route}: any) => {
   const postJob = async () => {
     const user = auth().currentUser;
     if (!user) return;
+
+    if (unchangedEdit) {
+      showToast({type: 'info', title: 'No changes', message: 'Edit a job detail before updating.'});
+      return;
+    }
+
+    // The same screen is shared with customers. The admin-only entry point
+    // supplies this flag, which is rechecked here before any write can occur.
+    if (adminPost && (!isAdmin || (jobId && !adminEditReady))) {
+      showToast({
+        type: 'error',
+        title: 'Admin access required',
+        message: 'You do not have permission to post jobs from Admin Controls.',
+      });
+      return;
+    }
 
     if (!jobTitle.trim() || !userLocation || !selectedType || !date) {
       showToast({
@@ -254,7 +285,12 @@ const PostJob = ({route}: any) => {
       }
 
       if (jobId) {
-        await firestore().collection('Jobs').doc(jobId).update(jobData);
+        if (adminPost) {
+          await manageActiveAdminJob(jobId, 'update', jobData);
+        } else {
+          await firestore().collection('Jobs').doc(jobId).update(jobData);
+        }
+        setSavedEditSignature(currentEditSignature);
         showToast({
           type: 'success',
           title: repost ? 'Job Reposted!' : 'Success',
@@ -262,7 +298,7 @@ const PostJob = ({route}: any) => {
             ? 'Your job is now live again'
             : 'Job updated successfully',
         });
-        navigation.navigate('Home');
+        navigation.navigate(adminPost ? 'AdminActiveJobs' : 'Home');
       } else {
         await firestore().collection('Jobs').add(jobData);
         showToast({
@@ -270,14 +306,16 @@ const PostJob = ({route}: any) => {
           title: 'Congratulations!',
           message: 'Your job is now live',
         });
-        navigation.navigate('JobPosted');
+        navigation.navigate('JobPosted', adminPost ? {adminPost: true} : undefined);
       }
     } catch (error) {
       console.log('Post Job Error:', error);
       showToast({
         type: 'error',
         title: 'Error',
-        message: 'Failed to post job. Please try again.',
+        message: adminPost && jobId && error instanceof Error
+          ? error.message
+          : 'Failed to post job. Please try again.',
       });
     } finally {
       setLoading(false);
@@ -287,13 +325,40 @@ const PostJob = ({route}: any) => {
   // Fetch job
   const fetchJob = async () => {
     const user = auth().currentUser;
-    if (!user || !jobId) return;
+    if (!jobId) return;
+    if (!user) {
+      if (adminPost) navigation.goBack();
+      return;
+    }
     setLoading(true);
     try {
-      const docSnapshot = await firestore().collection('Jobs').doc(jobId).get();
+      const adminJob = adminPost
+        ? await manageActiveAdminJob(jobId, 'read')
+        : null;
+      const docSnapshot = adminJob
+        ? {exists: true, data: () => adminJob}
+        : await firestore().collection('Jobs').doc(jobId).get();
 
       if (docSnapshot.exists) {
         const jobData = docSnapshot.data();
+        if (!repost) {
+          // The saved address is the initial form value, not a location left
+          // in Redux by a previous job or screen.
+          dispatch(setUserLocation(jobData?.location));
+          setSavedEditSignature(jobEditSignature({
+            title: jobData?.title, description: jobData?.description,
+            type: jobData?.type, remarks: jobData?.remarks,
+            location: jobData?.location,
+            dueDate: moment(jobData?.createdAt, 'YYYY-MM-DD  HH:mm A').format('YYYY-MM-DD  HH:mm A'),
+            budgetType: jobData?.budgetType, budget: jobData?.priceRange,
+            hourlyRate: jobData?.hourlyRate, hours: jobData?.hours,
+            pricePerSqFt: jobData?.pricePerSqFt, sqFt: jobData?.sqFt,
+          }));
+        }
+        if (adminPost) {
+          dispatch(setUserLocation(jobData?.location));
+          setAdminEditReady(true);
+        }
         setJobTitle(jobData?.title || '');
         setDescription(jobData?.description || '');
         setLocation(jobData?.location?.name || '');
@@ -329,6 +394,11 @@ const PostJob = ({route}: any) => {
       }
     } catch (error) {
       console.log('Fetch Job Error:', error);
+      if (adminPost) {
+        showToast({type: 'error', title: 'Unable to edit job',
+          message: error instanceof Error ? error.message : 'Please try again.'});
+        navigation.goBack();
+      }
     } finally {
       setLoading(false);
     }
@@ -337,6 +407,31 @@ const PostJob = ({route}: any) => {
   useEffect(() => {
     fetchJob();
   }, []);
+
+  if (adminPost && jobId && !adminEditReady) {
+    return (
+      <SafeAreaView style={styles.accessDeniedContainer}>
+        <Text style={styles.accessDeniedText}>Loading job...</Text>
+      </SafeAreaView>
+    );
+  }
+
+  // Navigation routes are registered globally, so protect the shared screen
+  // too in case a non-admin cleaner reaches this admin-only entry directly.
+  if (adminPost && !isAdmin) {
+    return (
+      <SafeAreaView style={styles.accessDeniedContainer}>
+        <Text style={styles.accessDeniedText}>
+          You don't have access to post jobs from Admin Controls.
+        </Text>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.accessDeniedButton}>
+          <Text style={styles.accessDeniedButtonText}>Go Back</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
 
   const handleBudgetChange = (text: any) => {
     const numeric = text.replace(/[^0-9]/g, '').replace(/^0+/, '');
@@ -973,10 +1068,10 @@ const PostJob = ({route}: any) => {
               </TouchableOpacity>
               <GradientButton
                 title={jobId ? 'Update Job' : 'Post Job Now'}
-                style={styles.postButton}
+                style={[styles.postButton, unchangedEdit && {opacity: 0.5}]}
                 onPress={postJob}
                 loading={loading}
-                disabled={loading}
+                disabled={loading || unchangedEdit}
                 textStyle={{fontSize: RFPercentage(1.9)}}
               />
             </View>
@@ -989,6 +1084,31 @@ const PostJob = ({route}: any) => {
 export default PostJob;
 
 const styles = StyleSheet.create({
+  accessDeniedContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: RFPercentage(3),
+    backgroundColor: Colors.background,
+  },
+  accessDeniedText: {
+    color: Colors.primaryText,
+    fontFamily: Fonts.semiBold,
+    fontSize: RFPercentage(2),
+    textAlign: 'center',
+  },
+  accessDeniedButton: {
+    marginTop: RFPercentage(2),
+    paddingHorizontal: RFPercentage(2.5),
+    paddingVertical: RFPercentage(1.2),
+    borderRadius: RFPercentage(1),
+    backgroundColor: Colors.gradient1,
+  },
+  accessDeniedButtonText: {
+    color: Colors.white,
+    fontFamily: Fonts.semiBold,
+    fontSize: RFPercentage(1.7),
+  },
   safeArea: {
     flex: 1,
     backgroundColor: Colors.background,

@@ -25,13 +25,6 @@ interface Props {
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 const SHEET_HEIGHT = Math.min(SCREEN_HEIGHT * 0.42, RFPercentage(42));
 
-/**
- * Shown in place of a silent failure whenever react-native-image-crop-picker
- * rejects with E_NO_LIBRARY_PERMISSION — i.e. gallery/photo access was
- * previously denied and the user tapped the image picker again. Same UI on
- * iOS and Android since both platforms surface that denial as the identical
- * error code (see utils/imagePickerErrors.ts).
- */
 const GalleryPermissionSheet: React.FC<Props> = ({visible, onClose}) => {
   const translateY = useRef(new Animated.Value(SHEET_HEIGHT)).current;
 
@@ -198,6 +191,7 @@ const styles = StyleSheet.create({
     lineHeight: RFPercentage(2),
   },
   actionRow: {
+    flexDirection: 'row',
     gap: RFPercentage(1.2),
     marginTop: RFPercentage(2.4),
     width:"90%",

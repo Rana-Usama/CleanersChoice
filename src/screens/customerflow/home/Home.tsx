@@ -19,6 +19,7 @@ import {
 } from 'react-native';
 import React, {useState, useRef, useEffect} from 'react';
 import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
+import {NEARBY_RADIUS_MILES} from '../../../constants/nearbyRadius';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import SearchField from '../../../components/SearchField';
 import ServicesCard from '../../../components/ServicesCard';
@@ -40,6 +41,10 @@ import {useSelector} from 'react-redux';
 import CustomModal from '../../../components/CustomModal';
 import GuestAuthModal from '../../../components/GuestAuthModal';
 import {useCurrentLocation} from '../../../utils/userLocation';
+import {
+  filterVisibleByCleanerId,
+  isServiceVisible,
+} from '../../../utils/cleanerVisibility';
 import LocationDisclosureModal from '../../../components/LocationDisclosureModal';
 import {
   markCoachMarksSeenForRole,
@@ -78,6 +83,8 @@ interface Service {
   packages?: any[];
   rating?: number | null;
   reviews?: any[];
+  /** Denormalized subscription deadline — see utils/cleanerVisibility.ts. */
+  visibleUntil?: number | null;
 }
 
 const Home = () => {
@@ -203,14 +210,70 @@ const Home = () => {
     serviceDetails();
   }, []);
 
+  /**
+   * `createdAt` desc, tolerant of what is actually stored.
+   *
+   * The Firestore ordering had to move to the client: the subscription filter
+   * below is an inequality on `visibleUntil`, and Firestore requires the first
+   * orderBy to be that same field. Sorting the (already fully fetched) result in
+   * memory is free and keeps the newest-first order customers see today.
+   */
+  const createdAtMs = (value: any): number => {
+    if (!value) return 0;
+    if (typeof value?.toDate === 'function') return value.toDate().getTime();
+    if (value instanceof Date) return value.getTime();
+    const parsed = new Date(value).getTime();
+    return Number.isNaN(parsed) ? 0 : parsed;
+  };
+
   // Fetching Service Details
   const serviceDetails = async () => {
     setLoading(true);
     try {
-      const querySnapshot = await firestore()
+      const now = Date.now();
+
+      // Subscription gate, enforced by the query rather than by N follow-up
+      // reads. `visibleUntil` is a deadline denormalized onto each services
+      // document by the payment webhooks, so an expiring subscription drops out
+      // of this result the moment the clock passes it — no cron, no flag flip.
+      // Firestore rules enforce the same comparison server-side, so a client
+      // that skips this filter still cannot read a lapsed cleaner.
+      let querySnapshot: FirebaseFirestoreTypes.QuerySnapshot = await firestore()
         .collection('CleanerServices')
-        .orderBy('createdAt', 'desc')
+        .where('visibleUntil', '>', now)
         .get();
+
+      // Transition safety net. Firestore inequality filters silently skip
+      // documents that lack the field, so before the backfill has run the query
+      // above returns nothing at all. Rather than blanking the home screen
+      // (and making the app's deploy order load-bearing), fall back to the
+      // Users-based path — but only once we know the collection is not simply
+      // empty, so a genuinely quiet market costs one extra read, not a scan.
+      //
+      // Wrapped in its own try/catch: once firestore.rules is deployed an
+      // unfiltered read is correctly denied, and that must degrade to "no
+      // fallback available" rather than take the whole listing down with it.
+      // By that point the backfill has run and the primary query is answering,
+      // so this branch is dead weight — kept because the cost of it being
+      // wrong is a blank home screen.
+      let usedFallback = false;
+      if (querySnapshot.empty) {
+        try {
+          const probe = await firestore()
+            .collection('CleanerServices')
+            .limit(1)
+            .get();
+          if (!probe.empty) {
+            usedFallback = true;
+            querySnapshot = await firestore()
+              .collection('CleanerServices')
+              .get();
+          }
+        } catch (fallbackError) {
+          console.log('Visibility fallback unavailable:', fallbackError);
+        }
+      }
+
       if (!querySnapshot.empty) {
         const servicesArray: Service[] = querySnapshot.docs
           .map(doc => {
@@ -235,7 +298,24 @@ const Home = () => {
               !!service.location,
           );
 
-        setServicesData(servicesArray);
+        // Final exact cut. The rule allows a few minutes of clock skew (see
+        // VISIBILITY_CLOCK_SKEW_MS) so a device whose clock runs behind cannot
+        // fail the whole list query; this drops anything inside that window.
+        // Free — the field is already on the documents we fetched.
+        //
+        // On the fallback path the field is absent, so visibility is resolved
+        // from the owning Users documents in batched reads instead.
+        const visibleServices = usedFallback
+          ? await filterVisibleByCleanerId(servicesArray, service => service.id)
+          : servicesArray.filter(service => isServiceVisible(service, now));
+
+        // Nothing is deleted anywhere: a lapsed cleaner's services stay in
+        // Firestore and reappear the moment their subscription is valid again.
+        setServicesData(
+          visibleServices
+            .slice()
+            .sort((a, b) => createdAtMs(b.createdAt) - createdAtMs(a.createdAt)),
+        );
       } else {
         setServicesData([]);
       }
@@ -361,8 +441,8 @@ const Home = () => {
       longitude: service.location.longitude,
     };
 
-    const distance = haversine(start, end, {unit: 'km'});
-    return distance <= 50;
+    const distance = haversine(start, end, {unit: 'mile'});
+    return distance <= NEARBY_RADIUS_MILES;
   });
 
   const adminViewingAllServices = isAdmin && adminViewAllServices;
@@ -687,7 +767,7 @@ const Home = () => {
                       <Text style={styles.adminToggleDescription}>
                         {adminViewAllServices
                           ? 'Showing all services'
-                          : 'Showing services within 50km radius'}
+                          : `Showing services within ${NEARBY_RADIUS_MILES} mile radius`}
                       </Text>
                     </View>
                   </View>
