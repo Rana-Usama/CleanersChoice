@@ -30,6 +30,15 @@ export type SubscriptionBadgeKey =
   | 'overdue'
   | 'cancelled'
   | 'expired'
+  /**
+   * Started a Stripe checkout (or, in principle, an IAP purchase) but never
+   * completed the FIRST successful payment — Stripe `incomplete` /
+   * `incomplete_expired`. Distinct from `expired`: that badge means a real,
+   * once-successful subscription has lapsed; this one means no payment was
+   * ever collected. Both are hidden from customers, but they are different
+   * facts for reactivation/outreach purposes, hence the separate badge.
+   */
+  | 'neverSubscribed'
   | 'none'
   | 'unknown';
 

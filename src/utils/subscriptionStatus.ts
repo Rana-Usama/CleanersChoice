@@ -87,10 +87,19 @@ export const resolveSubscriptionStatus = (
  * signal from drifting off the end of a period, and it's the one the client can
  * act on.
  *
- * `refunded` and `incomplete` still fold into "Expired" — both mean no live
- * subscription, and both are rare enough that separate colours would add noise
- * without adding information. They stay distinct in Firestore, so splitting
- * them later is two lines here plus a palette entry.
+ * `refunded` still folds into "Expired" — both mean a real, once-successful
+ * subscription has ended, and refunds are rare enough that a separate colour
+ * would add noise without adding information. It stays distinct in Firestore.
+ *
+ * `incomplete` gets its OWN badge, "Never Subscribed" — it does NOT fold into
+ * "Expired". `incomplete` covers both Stripe's live `incomplete` (first
+ * payment still pending/retrying) and `incomplete_expired` (the first payment
+ * never went through and Stripe gave up) — see STRIPE_STATUS_MAP in
+ * CleanersChoice-Server/lib/subscriptions.js. Both mean no payment was EVER
+ * successfully collected, which is a different fact from `expired` (a
+ * subscription that was genuinely active at least once and has since lapsed).
+ * Folding them together is exactly what made a failed-first-charge signup
+ * indistinguishable from a lapsed paying customer in this admin view.
  */
 export const toBadgeKey = (
   status: SubscriptionStatus | null,
@@ -104,8 +113,9 @@ export const toBadgeKey = (
       return 'cancelled';
     case 'expired':
     case 'refunded':
-    case 'incomplete':
       return 'expired';
+    case 'incomplete':
+      return 'neverSubscribed';
     case 'none':
       return 'none';
     default:
@@ -167,6 +177,17 @@ export const SUBSCRIPTION_BADGES: Record<SubscriptionBadgeKey, BadgeStyle> = {
     text: Colors.red500,
     icon: Colors.red500,
     iconName: 'close-circle-outline',
+  },
+  // Payment attempted, first charge never succeeded. Indigo rather than red
+  // or grey so it reads as neither "was paying, now isn't" (Expired) nor
+  // "never tried" (No Subscription) — it's its own, third fact.
+  neverSubscribed: {
+    label: 'Never Subscribed',
+    bg: Colors.indigoBg50,
+    border: Colors.indigoBg100,
+    text: Colors.indigo500,
+    icon: Colors.indigo500,
+    iconName: 'credit-card-off-outline',
   },
   none: {
     label: 'No Subscription',
@@ -235,6 +256,11 @@ export const SUBSCRIPTION_FILTERS: Array<{
   {key: 'overdue', label: 'Overdue', matches: ['overdue']},
   {key: 'cancelled', label: 'Cancelled', matches: ['cancelling', 'cancelled']},
   {key: 'expired', label: 'Expired', matches: ['expired']},
+  {
+    key: 'neverSubscribed',
+    label: 'Never Subscribed',
+    matches: ['neverSubscribed'],
+  },
 ];
 
 /** Does a badge belong under a given filter chip? */
