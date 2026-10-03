@@ -133,6 +133,7 @@ const SignIn: React.FC = () => {
       let nextRoute:
         | 'CleanerNavigator'
         | 'CleanerInstructions'
+        | 'CompleteBusinessInfo'
         | 'Premium'
         | 'Home' = 'Home';
       if (userRole === 'Cleaner') {

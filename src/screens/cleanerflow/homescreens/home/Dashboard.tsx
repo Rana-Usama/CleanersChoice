@@ -14,6 +14,7 @@ import React, {useState, useEffect, useRef} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, Icons, IMAGES} from '../../../../constants/Themes';
 import HeaderBack from '../../../../components/HeaderBack';
+import NotificationBadge from '../../../../components/NotificationBadge';
 import CleanerCoachMarks from '../../../../components/CleanerCoachMarks';
 import LocationDisclosureModal from '../../../../components/LocationDisclosureModal';
 import {useCurrentLocation} from '../../../../utils/userLocation';
@@ -23,15 +24,20 @@ import firestore from '@react-native-firebase/firestore';
 import {useDispatch} from 'react-redux';
 import {
   setProfileData,
-  setProfileCompletion,
+  setHasServiceDetails,
 } from '../../../../redux/ProfileData/Actions';
+import {
+  describeListingStatus,
+  REQUIRED_FIELD_LABELS,
+  syncRequiredProfileMirror,
+} from '../../../../utils/cleanerProfile';
+import {formatCityState} from '../../../../utils/locationFormat';
 import {
   markCoachMarksSeenForRole,
   shouldShowCoachMarksForRole,
 } from '../../../../utils/coachMarks';
 import {useExitAppOnBack} from '../../../../utils/ExitApp';
 import LinearGradient from 'react-native-linear-gradient';
-import * as Progress from 'react-native-progress';
 import Animated, {FadeInDown, FadeInUp, ZoomIn} from 'react-native-reanimated';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -134,6 +140,8 @@ const Dashboard: React.FC = ({navigation}: any) => {
     nextAvailable: '',
   });
   const [isAdmin, setIsAdmin] = useState(false);
+  const [userDoc, setUserDoc] = useState<Record<string, any> | null>(null);
+  const [serviceLoaded, setServiceLoaded] = useState(false);
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
   const [showCleanerCoachMarks, setShowCleanerCoachMarks] = useState(false);
   const {disclosureVisible, acceptDisclosure, declineDisclosure} =
@@ -228,9 +236,23 @@ const Dashboard: React.FC = ({navigation}: any) => {
         setProfile(userData?.profile);
         setName(userData?.name);
         setIsAdmin(userData?.admin);
+        setUserDoc(userData ?? null);
         dispatch(setProfileData(userData));
+
+        // Self-heal the listing mirror (CleanerServices name/phone/location)
+        // in case its write failed at sign-up or on the business-info screen.
+        // Idempotent — writes only when something differs.
+        syncRequiredProfileMirror(user.uid, userData)
+          .then(wrote => {
+            if (wrote) serviceDetails();
+          })
+          .catch(error =>
+            console.log('[Dashboard] listing mirror sync failed:', error),
+          );
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log('[Dashboard] fetchUserData failed:', error);
+    }
   };
 
   const fetchEarningsSummary = async () => {
@@ -281,7 +303,11 @@ const Dashboard: React.FC = ({navigation}: any) => {
         setService(userData);
         calculateAvailabilitySummary(userData?.availability);
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log('[Dashboard] serviceDetails failed:', error);
+    } finally {
+      setServiceLoaded(true);
+    }
   };
 
   // Calculate availability summary
@@ -375,22 +401,28 @@ const Dashboard: React.FC = ({navigation}: any) => {
     }, 500);
   };
 
-  const [profileCompletion, setProfileCompletionValue] = useState('50');
+  // Optional listing details (description / service types). Decides whether
+  // the Dashboard shows the details cards or the "Set up services" prompt.
+  // It does NOT affect visibility — see listingStatus below.
+  const hasServiceDetails =
+    !!service?.description?.trim?.() || (service?.type?.length ?? 0) > 0;
   useEffect(() => {
-    if (service) {
-      // Packages are optional - a service with 0 packages still counts as
-      // a fully completed profile as long as the core fields are set.
-      const completion =
-        service?.availability?.length > 0 &&
-        service?.description?.length > 0 &&
-        service?.location?.name?.length > 0
-          ? '100'
-          : '50';
+    dispatch(setHasServiceDetails(hasServiceDetails));
+  }, [dispatch, hasServiceDetails]);
 
-      setProfileCompletionValue(completion);
-      dispatch(setProfileCompletion(completion));
-    }
-  }, [service]);
+  // Visibility = required business info + active subscription. Evaluated on
+  // the same CleanerServices document the customer Home screen reads, so what
+  // the cleaner sees here is exactly what customers get.
+  const listingStatus = describeListingStatus(service, userDoc ?? undefined);
+  const serviceAreaLabel = formatCityState(
+    service?.location ?? userDoc?.serviceLocation,
+    'Not set',
+  );
+  const missingLabels = listingStatus.missing
+    .map(field => REQUIRED_FIELD_LABELS[field].toLowerCase())
+    .join(', ');
+  const openBusinessInfo = () =>
+    navigation.navigate('CompleteBusinessInfo', {mode: 'edit'});
 
   const handleShowMore = () => {
     setVisibleItems(prev => Math.min(prev + 4, service?.type?.length));
@@ -482,13 +514,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
             onPress={() => navigation.navigate('NotificationsScreen')}
             style={styles.bellButton}>
             <Icon name="bell-outline" size={RFPercentage(2.4)} color={Colors.white} />
-            {unreadNotifCount > 0 && (
-              <View style={styles.bellBadge}>
-                <Text style={styles.bellBadgeText}>
-                  {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
-                </Text>
-              </View>
-            )}
+            <NotificationBadge count={unreadNotifCount} />
           </TouchableOpacity>
           <TouchableOpacity
             activeOpacity={0.8}
@@ -566,23 +592,69 @@ const Dashboard: React.FC = ({navigation}: any) => {
               </View>
             </View>
 
-            {/* Profile Completion */}
-            <View style={styles.progressSection}>
-              <View style={styles.progressHeader}>
-                <Text style={styles.progressTitle}>Profile Completion</Text>
-                <Text style={styles.progressPercent}>{profileCompletion}%</Text>
+            {/* Listing visibility — replaces the old "Profile Completion %" */}
+            {serviceLoaded && userDoc ? (
+            <View
+              style={[
+                styles.visibilityCard,
+                listingStatus.live
+                  ? styles.visibilityCardLive
+                  : styles.visibilityCardHidden,
+              ]}>
+              <View style={styles.visibilityHeader}>
+                <View
+                  style={[
+                    styles.visibilityDot,
+                    {
+                      backgroundColor: listingStatus.live
+                        ? Colors.green500
+                        : Colors.amber500,
+                    },
+                  ]}
+                />
+                <Text
+                  style={[
+                    styles.visibilityTitle,
+                    {
+                      color: listingStatus.live
+                        ? Colors.green800
+                        : Colors.amberDarkText,
+                    },
+                  ]}>
+                  {listingStatus.live
+                    ? 'Visible to customers'
+                    : 'Hidden from customers'}
+                </Text>
               </View>
-              <Progress.Bar
-                progress={parseInt(profileCompletion) / 100}
-                width={null}
-                height={8}
-                color={Colors.gradient1}
-                unfilledColor={Colors.gray200}
-                borderWidth={0}
-                borderRadius={20}
-                style={styles.progressBar}
-              />
+              <Text style={styles.visibilityText}>
+                {listingStatus.live
+                  ? 'Customers near your service area can find and contact you.'
+                  : listingStatus.reason === 'missing_profile'
+                  ? `Add your ${missingLabels} to appear in customer search.`
+                  : 'Your listing will appear once your membership is active.'}
+              </Text>
+
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={openBusinessInfo}
+                style={styles.businessInfoRow}
+                accessibilityLabel="Edit business info">
+                <Icon
+                  name="map-marker-outline"
+                  size={RFPercentage(2)}
+                  color={Colors.secondaryText}
+                />
+                <Text style={styles.businessInfoText} numberOfLines={1}>
+                  {serviceAreaLabel}
+                </Text>
+                <Text style={styles.businessInfoEdit}>
+                  {listingStatus.reason === 'missing_profile'
+                    ? 'Complete'
+                    : 'Edit'}
+                </Text>
+              </TouchableOpacity>
             </View>
+            ) : null}
           </LinearGradient>
         </Animated.View>
 
@@ -706,7 +778,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
           </View>
         ) : (
           <>
-            {profileCompletion === '100' ? (
+            {hasServiceDetails ? (
               <Animated.View entering={FadeInUp.duration(600)}>
                 {/* Description Card */}
                 <View style={styles.sectionCard}>
@@ -946,11 +1018,11 @@ const Dashboard: React.FC = ({navigation}: any) => {
                     />
                   </View>
                   <Text style={styles.emptyStateTitle}>
-                    Ready to Get Started? 🚀
+                    Stand Out to Customers ✨
                   </Text>
                   <Text style={styles.emptyStateText}>
-                    Complete your profile setup to start offering services and
-                    connect with customers looking for your expertise
+                    Optional: add a description, the services you offer, photos
+                    and your availability to help customers choose you
                   </Text>
 
                   <TouchableOpacity
@@ -963,7 +1035,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
                     ) : (
                       <>
                         <Text style={styles.ctaButtonText}>
-                          Complete Profile
+                          Set Up Services
                         </Text>
                         <Image
                           source={Icons.arrowRight}
@@ -1045,23 +1117,6 @@ const styles = StyleSheet.create({
     height: RFPercentage(4.5),
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  bellBadge: {
-    position: 'absolute',
-    top: -4,
-    right: -4,
-    backgroundColor: Colors.red500,
-    borderRadius: 10,
-    minWidth: 18,
-    height: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 4,
-  },
-  bellBadgeText: {
-    color: Colors.white,
-    fontSize: RFPercentage(1.3),
-    fontFamily: Fonts.fontMedium,
   },
   editButtonText: {
     color: Colors.white,
@@ -1168,27 +1223,62 @@ const styles = StyleSheet.create({
     height: 40,
     backgroundColor: Colors.gray200,
   },
-  progressSection: {
+  visibilityCard: {
     marginTop: 8,
+    borderRadius: 14,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
   },
-  progressHeader: {
+  visibilityCardLive: {
+    backgroundColor: Colors.greenBg50,
+    borderColor: Colors.greenBorder,
+  },
+  visibilityCardHidden: {
+    backgroundColor: Colors.amberBg50,
+    borderColor: Colors.amberBorder,
+  },
+  visibilityHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
   },
-  progressTitle: {
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.7),
-    color: Colors.gray600,
+  visibilityDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 8,
   },
-  progressPercent: {
+  visibilityTitle: {
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.7),
-    color: Colors.gradient1,
   },
-  progressBar: {
+  visibilityText: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.5),
+    lineHeight: RFPercentage(2.2),
+    color: Colors.gray600,
     marginTop: 4,
+  },
+  businessInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: Colors.blackOverlay05,
+  },
+  businessInfoText: {
+    flex: 1,
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.55),
+    color: Colors.gray700,
+    marginLeft: 6,
+  },
+  businessInfoEdit: {
+    fontFamily: Fonts.semiBold,
+    fontSize: RFPercentage(1.55),
+    color: Colors.gradient1,
+    marginLeft: 8,
   },
   earningsCard: {
     marginHorizontal: 20,

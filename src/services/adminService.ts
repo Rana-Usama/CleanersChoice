@@ -7,6 +7,7 @@ import {
   SubscriptionStatus,
 } from '../types/admin';
 import {getBadgeKeyForUser, resolveSubscriptionStatus} from '../utils/subscriptionStatus';
+import {describeListingStatus} from '../utils/cleanerProfile';
 
 /**
  * Data layer for the Admin Controls screens.
@@ -173,6 +174,11 @@ export const fetchCleanerServices = async (): Promise<AdminCleanerService[]> => 
         name: service.name || user?.name || '',
         image: service.image ?? user?.profile ?? null,
         badge: getBadgeKeyForUser(user, now),
+        // Evaluated on the service doc itself (its mirrored name/phone/location
+        // and `visibleUntil`), exactly as the customer Home screen does, so
+        // "Live" here means "a customer can see this cleaner right now".
+        // A missing Users doc (deleted account) reads as inactive.
+        listing: describeListingStatus(service, user ?? null, now),
       };
     })
     .sort(byNewestFirst);

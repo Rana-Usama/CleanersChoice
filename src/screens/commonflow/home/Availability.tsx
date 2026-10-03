@@ -79,8 +79,8 @@ const Availability = ({navigation}: any) => {
   const [loading, setLoading] = useState(false);
   const [service, setService] =
     useState<FirebaseFirestoreTypes.DocumentData | null>(null);
-  const profileCompletion = useSelector(
-    (state: any) => state?.profile?.profileCompletion,
+  const hasServiceDetails = useSelector(
+    (state: any) => !!state?.profile?.hasServiceDetails,
   );
   const [loading2, setLoading2] = useState(false);
   const [availabilityData, setAvailabilityData] = useState<AvailabilityItem[]>(
@@ -428,7 +428,7 @@ const Availability = ({navigation}: any) => {
                   ) : (
                     <>
                       <Text style={styles.buttonText} numberOfLines={1}>
-                        {profileCompletion === '100'
+                        {hasServiceDetails
                           ? 'Update Availability'
                           : 'Save Availability'}
                       </Text>

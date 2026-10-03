@@ -36,6 +36,13 @@ import {useSoftInputAdjustNothing} from '../../../hooks/useSoftInputMode';
 import CleanerTermsSheet from '../../../components/CleanerTermsSheet';
 import GalleryPermissionSheet from '../../../components/GalleryPermissionSheet';
 import {isGalleryPermissionError} from '../../../utils/imagePickerErrors';
+import CityStateField from '../../../components/CityStateField';
+import {
+  isValidServiceArea,
+  ServiceArea,
+  syncRequiredProfileMirror,
+  US_PHONE_PATTERN,
+} from '../../../utils/cleanerProfile';
 
 const {width: screenWidth} = Dimensions.get('window');
 
@@ -107,21 +114,45 @@ const SignUp: React.FC = ({navigation}: any) => {
     };
   }, []);
 
+  // Cleaners must provide business name, phone and service location up front:
+  // together with an active subscription that is the whole visibility rule
+  // (utils/cleanerProfile.ts). Customers keep the original optional phone.
   const validationSchema = yup.object({
-    name: yup.string().required('Username is required'),
-    email: yup.string().email('Invalid email').required('Email is required'),
-    phone: yup
+    name: yup
       .string()
+      .trim()
+      .required(
+        isCleaner ? 'Service / business name is required' : 'Username is required',
+      ),
+    email: yup.string().email('Invalid email').required('Email is required'),
+    phone: isCleaner
+      ? yup
+          .string()
+          .required('Phone number is required')
+          .matches(
+            US_PHONE_PATTERN,
+            'Enter a valid US phone number (e.g. +1-321-659-6898)',
+          )
+      : yup
+          .string()
+          .nullable()
+          .notRequired()
+          .matches(
+            US_PHONE_PATTERN,
+            'Enter a valid US phone number (e.g. +1-321-659-6898)',
+          )
+          .test(
+            'optional-phone',
+            'Enter a valid US phone number',
+            value => !value || US_PHONE_PATTERN.test(value),
+          ),
+    serviceArea: yup
+      .mixed<ServiceArea>()
       .nullable()
-      .notRequired()
-      .matches(
-        /^\+1-\d{3}-\d{3}-\d{4}$/,
-        'Enter a valid US phone number (e.g. +1-321-659-6898)',
-      )
       .test(
-        'optional-phone',
-        'Enter a valid US phone number',
-        value => !value || /^\+1-\d{3}-\d{3}-\d{4}$/.test(value),
+        'service-area',
+        'Select your service city from the list',
+        value => !isCleaner || isValidServiceArea(value as ServiceArea | null),
       ),
     password: yup
       .string()
@@ -207,7 +238,7 @@ const SignUp: React.FC = ({navigation}: any) => {
       await messaging().registerDeviceForRemoteMessages();
       const fcmToken = await messaging().getToken();
       const userData = {
-        name: values.name,
+        name: values.name.trim(),
         email: normalizedEmail,
         phone: values.phone || null,
         uid: user.uid,
@@ -220,10 +251,23 @@ const SignUp: React.FC = ({navigation}: any) => {
           subscription: false,
           subscriptionId: null,
           cancelSubscription: false,
+          serviceLocation: values.serviceArea,
+          requiredProfileUpdatedAt: Date.now(),
         }),
       };
 
       await firestore().collection('Users').doc(user.uid).set(userData);
+
+      // Create the cleaner's listing now (hidden until they subscribe) so the
+      // payment webhooks have a document to stamp `visibleUntil` on. A failure
+      // here is healed by syncRequiredProfileMirror on Dashboard focus.
+      if (userFlow?.userFlow === 'Cleaner') {
+        try {
+          await syncRequiredProfileMirror(user.uid, userData);
+        } catch (mirrorError) {
+          console.log('[SignUp] listing mirror write failed:', mirrorError);
+        }
+      }
       await AsyncStorage.setItem('email', normalizedEmail);
       await AsyncStorage.setItem('password', values.password);
       await AsyncStorage.setItem('role', userFlow?.userFlow);
@@ -334,6 +378,7 @@ const SignUp: React.FC = ({navigation}: any) => {
                   phone: '',
                   password: '',
                   confirmPassword: '',
+                  serviceArea: null as ServiceArea | null,
                 }}
                 validationSchema={validationSchema}
                 onSubmit={values => handleSignUp(values)}>
@@ -344,6 +389,8 @@ const SignUp: React.FC = ({navigation}: any) => {
                   values,
                   errors,
                   touched,
+                  setFieldValue,
+                  setFieldTouched,
                 }) => (
                   <>
                     <View style={styles.fieldContainer}>
@@ -353,7 +400,9 @@ const SignUp: React.FC = ({navigation}: any) => {
                           touched.name && errors.name && styles.inputError,
                         ]}>
                         <TextInput
-                          placeholder="Username"
+                          placeholder={
+                            isCleaner ? 'Service / Business Name' : 'Username'
+                          }
                           placeholderTextColor={Colors.placeholderColor}
                           onChangeText={handleChange('name')}
                           onBlur={handleBlur('name')}
@@ -473,7 +522,9 @@ const SignUp: React.FC = ({navigation}: any) => {
                           touched.phone && errors.phone && styles.inputError,
                         ]}>
                         <TextInput
-                          placeholder="Phone Number (optional)"
+                          placeholder={
+                            isCleaner ? 'Phone Number' : 'Phone Number (optional)'
+                          }
                           placeholderTextColor={Colors.placeholderColor}
                           onChangeText={text => {
                             const formatted = formatPhoneNumber(text);
@@ -488,8 +539,35 @@ const SignUp: React.FC = ({navigation}: any) => {
                           style={styles.inputText}
                         />
                       </View>
-                      {touched.phone && errors.phone && values.phone !== '' ? (
+                      {touched.phone &&
+                      errors.phone &&
+                      (isCleaner || values.phone !== '') ? (
                         <Text style={styles.errorText}>{errors.phone}</Text>
+                      ) : null}
+
+                      {isCleaner ? (
+                        <View style={styles.inputGap}>
+                          <Text style={styles.fieldLabel}>
+                            Where do you offer your services?
+                          </Text>
+                          <Text style={styles.fieldHint}>
+                            Customers near this city will find you.
+                          </Text>
+                          <CityStateField
+                            value={values.serviceArea}
+                            onChange={area => {
+                              setFieldValue('serviceArea', area, true);
+                              if (area) setFieldTouched('serviceArea', true, false);
+                            }}
+                            error={
+                              touched.serviceArea && errors.serviceArea
+                                ? String(errors.serviceArea)
+                                : null
+                            }
+                            inputContainerStyle={styles.inputContainer}
+                            inputTextStyle={styles.inputText}
+                          />
+                        </View>
                       ) : null}
                     </View>
 
@@ -694,6 +772,19 @@ const styles = StyleSheet.create({
   },
   inputError: {
     borderColor: Colors.error,
+  },
+  fieldLabel: {
+    fontSize: RFPercentage(1.75),
+    fontFamily: Fonts.fontMedium,
+    color: Colors.gray800,
+    marginLeft: RFPercentage(0.45),
+  },
+  fieldHint: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: Fonts.fontRegular,
+    color: Colors.secondaryText,
+    marginLeft: RFPercentage(0.45),
+    marginBottom: RFPercentage(0.9),
   },
   errorText: {
     color: Colors.error,

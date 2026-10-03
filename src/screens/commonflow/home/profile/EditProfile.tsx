@@ -28,6 +28,10 @@ import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 import {Image as CompressorImage} from 'react-native-compressor';
 import {showToast} from '../../../../utils/ToastMessage';
+import {
+  isValidPhone,
+  syncRequiredProfileMirror,
+} from '../../../../utils/cleanerProfile';
 import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
 import LinearGradient from 'react-native-linear-gradient';
 import Feather from 'react-native-vector-icons/Feather';
@@ -88,6 +92,17 @@ const EditProfile = ({navigation}: any) => {
   const handleEditProfile = async () => {
     const user = auth().currentUser;
     if (!user) return;
+    const isCleaner = userData?.role === 'Cleaner';
+    // A cleaner's phone is part of the required business info that controls
+    // visibility (utils/cleanerProfile.ts) — never save a partial number.
+    if (isCleaner && phone && phone !== userData?.phone && !isValidPhone(phone)) {
+      showToast({
+        type: 'error',
+        title: 'Invalid phone number',
+        message: 'Enter a valid US phone number (e.g. +1-321-659-6898)',
+      });
+      return;
+    }
     setLoading(true);
     try {
       let imageUrl = userData?.profile;
@@ -132,6 +147,26 @@ const EditProfile = ({navigation}: any) => {
           phone: phone || prev?.phone,
           profile: imageUrl,
         }));
+
+        // Keep the customer-facing listing in step with the Users doc.
+        if (isCleaner) {
+          try {
+            await syncRequiredProfileMirror(user.uid, {
+              ...userData,
+              name: name || userData?.name,
+              phone: phone || userData?.phone,
+              profile: imageUrl,
+            });
+            if (isImageChanged) {
+              await firestore()
+                .collection('CleanerServices')
+                .doc(user.uid)
+                .update({image: imageUrl});
+            }
+          } catch (mirrorError) {
+            console.log('[EditProfile] listing mirror sync failed:', mirrorError);
+          }
+        }
 
         showToast({
           type: 'success',

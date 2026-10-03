@@ -31,9 +31,9 @@ import * as Progress from 'react-native-progress';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Octicons from 'react-native-vector-icons/Octicons';
-import {setUserLocation} from '../../../../redux/location/Actions';
 import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
 import {visibilityFieldsForOwnService} from '../../../../utils/cleanerVisibility';
+import {formatCityState} from '../../../../utils/locationFormat';
 
 const {width} = Dimensions.get('window');
 
@@ -93,25 +93,17 @@ type ServiceData = FirebaseFirestoreTypes.DocumentData & {
   reviews?: any[];
 };
 
-type LocationData = {
-  name?: string;
-  address?: string;
-  coordinates?: any;
-};
-
 const ServiceOne: React.FC = ({navigation}: any) => {
   const available = useSelector(
     (state: any) => state?.availablity?.availability,
   );
-  const [location, setLocation] = useState<LocationData | null>(null);
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const description = useSelector((state: any) => state?.form?.description);
   const [serviceData, setServiceData] = useState<ServiceData | null>(null);
-  const profileCompletion = useSelector(
-    (state: any) => state?.profile?.profileCompletion,
+  const hasServiceDetails = useSelector(
+    (state: any) => !!state?.profile?.hasServiceDetails,
   );
-  const userLocation = useSelector((state: any) => state?.location?.location);
   const profileData = useSelector((state: any) => state?.profile?.profileData);
 
   const [selectedItems, setSelectedItems] = useState([]);
@@ -165,8 +157,6 @@ const ServiceOne: React.FC = ({navigation}: any) => {
           setServiceData(data as ServiceData);
           dispatch(cleanerDescription(data.description || ''));
           setSelectedItems(data.type || []);
-          setLocation(data.location || '');
-          dispatch(setUserLocation(data.location));
         }
       }
     } catch (error) {}
@@ -177,46 +167,54 @@ const ServiceOne: React.FC = ({navigation}: any) => {
     const user = auth().currentUser;
     if (!user) return;
 
-    const finalLocation = userLocation || serviceData?.location;
-    const hasValidLocation =
-      finalLocation &&
-      (finalLocation.name ||
-        finalLocation.address ||
-        finalLocation.coordinates);
-
-    console.log('serviceData............', serviceData);
-    if (description && hasValidLocation && available && selectedItems) {
+    // Service location is no longer edited here — it is part of the REQUIRED
+    // business info (Users.serviceLocation, mirrored onto this document by
+    // utils/cleanerProfile.ts) and is collected at sign-up. This screen only
+    // writes the optional listing details, so it merges rather than overwrites
+    // and never touches name/phone/location.
+    if (description && available && selectedItems?.length > 0) {
       try {
         setLoading(true);
-        const serviceRef = await firestore()
+        await firestore()
           .collection('CleanerServices')
           .doc(user.uid)
-          .set({
+          .set(
+            {
             createdAt: new Date(),
             name: profileData?.name,
             image: profileData?.profile,
             description: description,
             availability:
-              available.length > 0 ? available : serviceData?.availability,
+              available.length > 0 ? available : serviceData?.availability ?? [],
             type: selectedItems,
-            location: finalLocation,
             serviceImages: serviceData?.serviceImages || [],
             packages: serviceData?.packages || [],
             rating: serviceData?.rating || null,
             reviews: serviceData?.reviews || [],
-            // Customer-facing visibility deadline. This `.set()` is a full
-            // overwrite, not a merge, so the field has to be restated here or a
-            // re-save would erase it and the cleaner's own listing would vanish
-            // until the next webhook or the nightly sweep repaired it.
+            // Customer-facing visibility deadline — stamped only when the
+            // document has none yet. This is a merge write, so an existing
+            // value (owned by the payment webhooks / nightly sweep) is kept
+            // rather than replaced with one derived from a possibly-stale
+            // Redux snapshot of the Users doc.
             //
             // Derived from this cleaner's own subscription (utils/
             // cleanerVisibility.ts) and capped by firestore.rules at their
             // `Users.subscriptionEndDate`, so it cannot be used to self-grant
-            // visibility. The payment webhooks own the value from here on.
-            ...visibilityFieldsForOwnService(profileData),
-          });
+            // visibility.
+            ...(typeof serviceData?.visibleUntil === 'number'
+              ? {}
+              : visibilityFieldsForOwnService(profileData)),
+            },
+            {merge: true},
+          );
         navigation.navigate('ServiceTwo');
       } catch (error) {
+        console.log('[ServiceOne] save failed:', error);
+        showToast({
+          type: 'error',
+          title: 'Could not save',
+          message: 'Please check your connection and try again.',
+        });
       } finally {
         setLoading(false);
       }
@@ -231,16 +229,15 @@ const ServiceOne: React.FC = ({navigation}: any) => {
 
   // Calculate progress
   const calculateProgress = () => {
-    const fields = [
-      description,
-      userLocation?.name || location?.name,
-      selectedItems.length > 0,
-    ];
+    const fields = [description, selectedItems.length > 0];
     const filledFields = fields.filter(Boolean).length;
     return filledFields / fields.length;
   };
 
   const progress = calculateProgress();
+  // Read from Redux first: CompleteBusinessInfo (edit mode) updates it on save,
+  // while `serviceData` is only fetched once when this screen mounts.
+  const serviceArea = profileData?.serviceLocation ?? serviceData?.location ?? null;
   // Add these after your other variables at the top
   const reduxAvailableDays =
     available?.filter((item: any) => item.checked).length ?? 0;
@@ -286,10 +283,8 @@ const ServiceOne: React.FC = ({navigation}: any) => {
         {/* Progress Section */}
         <View style={styles.progressSection}>
           <View style={styles.progressHeader}>
-            <Text style={styles.progressTitle}>Setup Progress</Text>
-            <Text style={styles.progressPercent}>
-              {Math.round(progress * 100)}%
-            </Text>
+            <Text style={styles.progressTitle}>Step 1 of 3</Text>
+            <Text style={styles.progressPercent}>Service details</Text>
           </View>
           <Progress.Bar
             progress={progress}
@@ -319,13 +314,13 @@ const ServiceOne: React.FC = ({navigation}: any) => {
               <Animated.View>
                 <TouchableOpacity
                   onPress={() =>
-                    navigation.navigate('Location', {location: true})
+                    navigation.navigate('CompleteBusinessInfo', {mode: 'edit'})
                   }
                   activeOpacity={0.7}
                   style={styles.locationCard}>
                   <LinearGradient
                     colors={
-                      serviceData?.location?.name || userLocation?.name
+                      serviceArea
                         ? [Colors.blueBg200, Colors.blueBg200b]
                         : [Colors.white, Colors.gray50]
                     }
@@ -345,13 +340,11 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                         <Text
                           style={[
                             styles.locationValue,
-                            !userLocation?.name &&
-                              !serviceData?.location?.name &&
-                              styles.placeholderText,
+                            !serviceArea && styles.placeholderText,
                           ]}>
-                          {userLocation?.name ||
-                            serviceData?.location?.name ||
-                            'Tap to add your service location'}
+                          {serviceArea
+                            ? formatCityState(serviceArea)
+                            : 'Tap to add your service location'}
                         </Text>
                       </View>
                       <View style={styles.locationArrow}>
@@ -359,7 +352,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                           name="right"
                           size={RFPercentage(1.8)}
                           color={
-                            userLocation?.name || serviceData?.location?.name
+                            serviceArea
                               ? Colors.secondaryText
                               : Colors.gray400
                           }
@@ -618,7 +611,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
                     ) : (
                       <>
                         <Text style={styles.buttonText} numberOfLines={1}>
-                          {profileCompletion === '100'
+                          {hasServiceDetails
                             ? 'Update Service'
                             : 'Continue to Gallery'}
                         </Text>
@@ -635,9 +628,7 @@ const ServiceOne: React.FC = ({navigation}: any) => {
 
                 <Text style={styles.progressHint}>
                   {progress < 1
-                    ? `Complete all fields to continue (${Math.round(
-                        progress * 100,
-                      )}%)`
+                    ? 'Add a description and at least one service to continue'
                     : 'All set! Ready to continue'}
                 </Text>
               </Animated.View>

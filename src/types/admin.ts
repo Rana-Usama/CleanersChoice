@@ -1,3 +1,5 @@
+import type {ListingStatus} from '../utils/cleanerProfile';
+
 /**
  * Types for the Admin Controls feature.
  *
@@ -72,6 +74,8 @@ export interface AdminCleanerService {
   /** Document id — this IS the cleaner's uid. */
   id: string;
   name?: string;
+  /** Required business phone, mirrored from Users (utils/cleanerProfile.ts). */
+  phone?: string | null;
   image?: string | null;
   description?: string;
   type?: string[];
@@ -92,6 +96,11 @@ export interface AdminCleanerService {
   cleanerEmail?: string | null;
   /** Resolved badge, computed once at fetch time so list rows stay cheap. */
   badge: SubscriptionBadgeKey;
+  /**
+   * Customer visibility — the same rule the customer Home screen applies
+   * (required business info + active subscription), with the reason when hidden.
+   */
+  listing: ListingStatus;
 }
 
 export interface AdminJob {

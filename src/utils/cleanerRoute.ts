@@ -2,6 +2,10 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import {hasAcceptedInstructions} from './cleanerInstructions';
 import {hasActiveSubscriptionAccess} from './cleanerVisibility';
+import {
+  hasRequiredCleanerProfile,
+  requiredFieldsFromUser,
+} from './cleanerProfile';
 
 /**
  * Where a Cleaner belongs right now.
@@ -10,12 +14,19 @@ import {hasActiveSubscriptionAccess} from './cleanerVisibility';
  * previously drifted: SignUp, SignIn, StackNavigator's initialRoute, and the
  * instructions screen's accept handler.
  *
- *   1. Instructions not accepted  → CleanerInstructions
- *   2. No active subscription     → Premium
- *   3. Otherwise                  → CleanerNavigator
+ *   1. Instructions not accepted        → CleanerInstructions
+ *   2. Required business info missing   → CompleteBusinessInfo
+ *   3. No active subscription           → Premium
+ *   4. Otherwise                        → CleanerNavigator
  *
  * Instructions come BEFORE the paywall: a cleaner should understand what the
  * membership is before being asked to pay for it.
+ *
+ * Required business info (name, phone, service city/state — see
+ * utils/cleanerProfile.ts) is collected on SignUp, so step 2 only ever catches
+ * accounts created before those fields were required. It sits before the
+ * paywall to mirror the sign-up order (info → subscribe), and it also catches
+ * already-paying legacy cleaners, who would otherwise be paying while invisible.
  *
  * Active-subscription test is delegated to `hasActiveSubscriptionAccess`
  * (utils/cleanerVisibility.ts), which is the single definition of "valid
@@ -27,6 +38,7 @@ import {hasActiveSubscriptionAccess} from './cleanerVisibility';
 
 export type CleanerRoute =
   | 'CleanerInstructions'
+  | 'CompleteBusinessInfo'
   | 'Premium'
   | 'CleanerNavigator';
 
@@ -35,6 +47,10 @@ export const resolveCleanerRoute = (
 ): CleanerRoute => {
   if (!hasAcceptedInstructions(userData)) {
     return 'CleanerInstructions';
+  }
+
+  if (!hasRequiredCleanerProfile(requiredFieldsFromUser(userData))) {
+    return 'CompleteBusinessInfo';
   }
 
   return hasActiveSubscriptionAccess(userData) ? 'CleanerNavigator' : 'Premium';

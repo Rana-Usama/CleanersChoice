@@ -106,6 +106,7 @@ const AdminCleanerServices = ({navigation, route}: any) => {
         formatCityState(service.location, ''),
         service.location?.name,
         service.cleanerEmail,
+        service.phone,
       ]
         .filter(Boolean)
         .join(' ')

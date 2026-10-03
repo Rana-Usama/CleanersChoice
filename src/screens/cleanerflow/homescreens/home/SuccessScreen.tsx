@@ -178,11 +178,11 @@ const ProfileCompletionCongratulations = ({completionPercentage = 100}) => {
             </Animated.View>
 
             <Animated.Text style={[styles.title, {opacity: fadeValue}]}>
-              Profile Complete! 🎉
+              Listing Updated! 🎉
             </Animated.Text>
 
             <Animated.Text style={[styles.subtitle, {opacity: fadeValue}]}>
-              Your cleaning service is now ready
+              Your service details are now on your listing
             </Animated.Text>
 
             {completionPercentage === 100 && (

@@ -48,6 +48,7 @@ import CustomerForm from '../screens/cleanerflow/homescreens/invoices/CustomerFo
 import Earnings from '../screens/cleanerflow/homescreens/invoices/Earnings';
 import CleanerIntroVideo from '../screens/cleanerflow/intro/CleanerIntroVideo';
 import CleanerInstructions from '../screens/cleanerflow/intro/CleanerInstructions';
+import CompleteBusinessInfo from '../screens/cleanerflow/intro/CompleteBusinessInfo';
 import AdminDashboard from '../screens/adminflow/AdminDashboard';
 import AdminActiveJobs from '../screens/adminflow/AdminActiveJobs';
 import AdminCleanerServices from '../screens/adminflow/AdminCleanerServices';
@@ -116,6 +117,7 @@ export type RootStackParamList = {
   Earnings: undefined;
   CleanerIntroVideo: undefined;
   CleanerInstructions: undefined;
+  CompleteBusinessInfo: {mode?: 'gate' | 'edit'} | undefined;
   // ---- Admin Flow (visible only to users with Users.admin === true) ----
   AdminDashboard: undefined;
   AdminActiveJobs: undefined;
@@ -299,6 +301,11 @@ const StackNavigator: React.FC = () => {
             <Stack.Screen
               name="CleanerInstructions"
               component={CleanerInstructions}
+              options={{animation: 'fade', gestureEnabled: false}}
+            />
+            <Stack.Screen
+              name="CompleteBusinessInfo"
+              component={CompleteBusinessInfo}
               options={{animation: 'fade', gestureEnabled: false}}
             />
 

@@ -84,8 +84,19 @@ const items = [
   },
 ];
 
+/** Firestore Timestamp (live or serialized through nav params), Date or ms. */
+const toDateSafe = (value: any): Date => {
+  if (!value) return new Date();
+  if (typeof value?.toDate === 'function') return value.toDate();
+  const seconds = value?._seconds ?? value?.seconds;
+  if (typeof seconds === 'number') return new Date(seconds * 1000);
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? new Date() : parsed;
+};
+
 const ServiceDetails: React.FC = ({route}: any) => {
   const {item} = route.params;
+  const serviceTypes: any[] = Array.isArray(item?.type) ? item.type : [];
   const [visibleItems, setVisibleItems] = useState(5);
   const navigation = useNavigation<any>();
   const profileData = useSelector((state: any) => state.profile.profileData);
@@ -119,7 +130,7 @@ const ServiceDetails: React.FC = ({route}: any) => {
   };
 
   const handleShowMore = () => {
-    setVisibleItems(prev => Math.min(prev + 5, item.type.length));
+    setVisibleItems(prev => Math.min(prev + 5, serviceTypes.length));
   };
 
   const handleShowLess = () => {
@@ -130,10 +141,13 @@ const ServiceDetails: React.FC = ({route}: any) => {
     return items.find(service => service.id === serviceId);
   };
 
-  const serviceNames = item?.type
-    ?.slice(0, visibleItems)
+  // Only name, phone and service location are required for a listing to be
+  // visible (utils/cleanerProfile.ts) — description, service types,
+  // availability and packages are optional, so every one of them is guarded.
+  const serviceNames = serviceTypes
+    .slice(0, visibleItems)
     .map((id: any) => getServiceWithIcon(id));
-  const createdAtDate = new Date(item.createdAt._seconds * 1000);
+  const createdAtDate = toDateSafe(item?.createdAt);
   const formattedDate = moment(createdAtDate).format('DD MMMM, YYYY');
   const relativeDate = moment(createdAtDate).fromNow();
   const userFlow = useSelector((state: any) => state.userFlow.userFlow);
@@ -298,7 +312,9 @@ const ServiceDetails: React.FC = ({route}: any) => {
     } catch (error) {}
   };
 
-  const cleanDescription = item.description.replace(/\s+/g, ' ').trim();
+  const cleanDescription = (item?.description ?? '')
+    .replace(/\s+/g, ' ')
+    .trim();
 
 
 
@@ -530,16 +546,23 @@ const ServiceDetails: React.FC = ({route}: any) => {
               <AntDesign name="setting" size={20} color={Colors.gradient1} />
               <Text style={styles.cardTitle}>Description</Text>
             </View>
-            <Text style={styles.descriptionText}>
-              {isExpanded
-                ? cleanDescription
-                : getTruncatedText(cleanDescription)}
-              {cleanDescription?.length > 120 && (
-                <Text onPress={toggleDescription} style={styles.readMoreText}>
-                  {isExpanded ? ' Show less' : ' Read more'}
-                </Text>
-              )}
-            </Text>
+            {cleanDescription ? (
+              <Text style={styles.descriptionText}>
+                {isExpanded
+                  ? cleanDescription
+                  : getTruncatedText(cleanDescription)}
+                {cleanDescription.length > 120 && (
+                  <Text onPress={toggleDescription} style={styles.readMoreText}>
+                    {isExpanded ? ' Show less' : ' Read more'}
+                  </Text>
+                )}
+              </Text>
+            ) : (
+              <Text style={styles.descriptionText}>
+                This cleaner hasn’t added a description yet. Send them a
+                message to ask about their services.
+              </Text>
+            )}
           </View>
 
           {/* Location Card */}
@@ -605,6 +628,11 @@ const ServiceDetails: React.FC = ({route}: any) => {
               <Text style={styles.cardTitle}>Services Offered</Text>
             </View>
 
+            {serviceTypes.length === 0 && (
+              <Text style={styles.descriptionText}>
+                No specific services listed yet.
+              </Text>
+            )}
             <View style={styles.servicesGrid}>
               {serviceNames.map(
                 (service: any, index: any) =>
@@ -625,23 +653,23 @@ const ServiceDetails: React.FC = ({route}: any) => {
               )}
             </View>
 
-            {item.type.length > 5 && (
+            {serviceTypes.length > 5 && (
               <TouchableOpacity
                 activeOpacity={0.8}
                 style={styles.showMoreButton}
                 onPress={
-                  visibleItems < item.type.length
+                  visibleItems < serviceTypes.length
                     ? handleShowMore
                     : handleShowLess
                 }>
                 <Text style={styles.showMoreText}>
-                  {visibleItems < item.type.length
-                    ? `View ${item.type.length - visibleItems} more services`
+                  {visibleItems < serviceTypes.length
+                    ? `View ${serviceTypes.length - visibleItems} more services`
                     : `Show less`}
                 </Text>
                 <Feather
                   name={
-                    visibleItems < item.type.length
+                    visibleItems < serviceTypes.length
                       ? 'chevron-down'
                       : 'chevron-up'
                   }

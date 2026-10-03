@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: RFPercentage(3),
     borderTopRightRadius: RFPercentage(3),
     paddingHorizontal: RFPercentage(2.2),
-    paddingBottom: Platform.OS === 'ios' ? RFPercentage(3) : RFPercentage(1.8),
+    paddingBottom: Platform.OS === 'ios' ? RFPercentage(5) : RFPercentage(5),
     shadowColor: Colors.black,
     shadowOffset: {width: 0, height: -4},
     shadowOpacity: 0.1,
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: RFPercentage(6),
     borderRadius: RFPercentage(1.5),
-    marginTop:RFPercentage(1)
+    // marginTop:RFPercentage(1)
   },
   allowText: {
     fontSize: RFPercentage(1.7),

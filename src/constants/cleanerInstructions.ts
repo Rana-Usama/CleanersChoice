@@ -90,16 +90,22 @@ export const CLEANER_INSTRUCTIONS_SECTIONS: InstructionSection[] = [
   },
   {
     id: 'complete-profile',
-    heading: '2️⃣ Complete Your Profile to 100%',
+    heading: '2️⃣ Get Visible to Customers',
     blocks: [
-      {kind: 'text', text: 'Once you reach your dashboard:'},
       {
-        kind: 'steps',
-        text: 'Scroll down → Select “Complete Profile” → Complete your profile to 100%.',
+        kind: 'text',
+        text: 'Customers can find you as soon as two things are in place:',
       },
       {
-        kind: 'callout',
-        text: 'Your profile needs to be 100% complete before you’re fully set up and ready to receive cleaning opportunities.',
+        kind: 'checklist',
+        items: [
+          'Your business name, phone number and service location (city & state)',
+          'An active Cleaners Choice membership',
+        ],
+      },
+      {
+        kind: 'text',
+        text: 'Your dashboard shows whether you’re visible. Adding a description, your services, photos and availability is optional, but helps customers choose you.',
       },
     ],
   },
@@ -109,7 +115,7 @@ export const CLEANER_INSTRUCTIONS_SECTIONS: InstructionSection[] = [
     blocks: [
       {
         kind: 'text',
-        text: 'Once your profile is complete, go to the Job List by clicking the icon at the bottom left of the app.',
+        text: 'Go to the Job List by clicking the icon at the bottom left of the app.',
       },
       {
         kind: 'text',
@@ -173,7 +179,7 @@ export const CLEANER_INSTRUCTIONS_SECTIONS: InstructionSection[] = [
     blocks: [
       {
         kind: 'text',
-        text: 'Complete your profile, keep an eye on your Job List, and take advantage of everything included with your membership.',
+        text: 'Keep your business info up to date, keep an eye on your Job List, and take advantage of everything included with your membership.',
       },
       {
         kind: 'text',

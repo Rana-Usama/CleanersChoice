@@ -205,10 +205,10 @@ const AdminActiveJobs = ({navigation}: any) => {
                     style={[styles.actionButton, styles.editButton, deletingId !== null && styles.actionDisabled]}
                     disabled={deletingId !== null}
                     onPress={() => navigation.navigate('PostJob', {jobId: item.id, adminPost: true})}>
-                    <LinearGradient colors={[Colors.gradient1, Colors.gradient2]} style={styles.actionInner}>
+                    <View style={styles.actionInner}>
                       <Feather name="edit-2" size={16} color={Colors.white} />
                       <Text style={[styles.actionText, styles.editText]}>Edit Job</Text>
-                    </LinearGradient>
+                    </View>
                   </TouchableOpacity>
                   <TouchableOpacity
                     accessibilityRole="button"
@@ -245,11 +245,11 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     flex: 1,
-    borderRadius: RFPercentage(1.2),
+    borderRadius: RFPercentage(2),
     overflow: 'hidden',
   },
   actionInner: {
-    minHeight: 46,
+    minHeight: 40,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',

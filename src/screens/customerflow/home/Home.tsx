@@ -22,6 +22,7 @@ import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
 import {NEARBY_RADIUS_MILES} from '../../../constants/nearbyRadius';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import SearchField from '../../../components/SearchField';
+import NotificationBadge from '../../../components/NotificationBadge';
 import ServicesCard from '../../../components/ServicesCard';
 import {prefetchImages} from '../../../utils/imageCache';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
@@ -45,6 +46,10 @@ import {
   filterVisibleByCleanerId,
   isServiceVisible,
 } from '../../../utils/cleanerVisibility';
+import {
+  hasRequiredCleanerProfile,
+  requiredFieldsFromService,
+} from '../../../utils/cleanerProfile';
 import LocationDisclosureModal from '../../../components/LocationDisclosureModal';
 import {
   markCoachMarksSeenForRole,
@@ -74,6 +79,7 @@ interface Service {
   id: string;
   createdAt?: any;
   name?: string;
+  phone?: string;
   image?: string;
   description?: string;
   availability?: any[];
@@ -249,14 +255,12 @@ const Home = () => {
               ...data,
             };
           })
-          .filter(
-            (service): service is Service =>
-              !!service.createdAt &&
-              !!service.name &&
-              !!service.description &&
-              !!service.availability &&
-              !!service.type &&
-              !!service.location,
+          // Required business info only (name + phone + service city/state).
+          // Description, service types, availability and packages are
+          // optional and no longer gate visibility — see utils/cleanerProfile.ts.
+          // Subscription is the other half of the rule, applied just below.
+          .filter((service): service is Service =>
+            hasRequiredCleanerProfile(requiredFieldsFromService(service)),
           );
 
         const visibleServices = usedFallback
@@ -483,13 +487,7 @@ const Home = () => {
               size={RFPercentage(2.4)}
               color={Colors.white}
             />
-            {unreadNotifCount > 0 && (
-              <View style={styles.bellBadge}>
-                <Text style={styles.bellBadgeText}>
-                  {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
-                </Text>
-              </View>
-            )}
+            <NotificationBadge count={unreadNotifCount} />
           </TouchableOpacity>
         )}
       </LinearGradient>
@@ -1100,23 +1098,6 @@ const styles = StyleSheet.create({
     height: RFPercentage(4.5),
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  bellBadge: {
-    position: 'absolute',
-    top: -4,
-    right: -4,
-    backgroundColor: Colors.red500,
-    borderRadius: 10,
-    minWidth: 18,
-    height: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 4,
-  },
-  bellBadgeText: {
-    color: Colors.white,
-    fontSize: RFPercentage(1.3),
-    fontFamily: Fonts.fontMedium,
   },
 
   postJobText: {

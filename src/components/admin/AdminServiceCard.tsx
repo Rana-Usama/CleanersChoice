@@ -9,6 +9,7 @@ import {Colors, Fonts, IMAGES} from '../../constants/Themes';
 import {AdminCleanerService} from '../../types/admin';
 import {formatServiceTypes} from '../../constants/adminModules';
 import {formatCityState} from '../../utils/locationFormat';
+import {REQUIRED_FIELD_LABELS} from '../../utils/cleanerProfile';
 
 interface Props {
   service: AdminCleanerService;
@@ -33,7 +34,19 @@ const DetailRow: React.FC<{icon: string; label: string; value: string}> = ({
   </View>
 );
 
+/**
+ * Required business info still missing on this listing (name / phone / service
+ * location — utils/cleanerProfile.ts). Empty when complete. A listing with
+ * missing info is not shown to customers even with an active subscription.
+ */
+const missingInfoLabel = (service: AdminCleanerService): string | null => {
+  const missing = service.listing?.missing ?? [];
+  if (missing.length === 0) return null;
+  return missing.map(field => REQUIRED_FIELD_LABELS[field]).join(', ');
+};
+
 const AdminServiceCard: React.FC<Props> = ({service, onPress}) => {
+  const missingInfo = missingInfoLabel(service);
   const packages = Array.isArray(service.packages) ? service.packages : [];
   const availability = Array.isArray(service.availability)
     ? service.availability
@@ -90,8 +103,27 @@ const AdminServiceCard: React.FC<Props> = ({service, onPress}) => {
               />
             </View>
 
+            {missingInfo && (
+              <View style={styles.missingInfo}>
+                <MaterialCommunityIcons
+                  name="alert-circle-outline"
+                  size={RFPercentage(1.8)}
+                  color={Colors.amberDarkText}
+                />
+                <Text style={styles.missingInfoText}>
+                  <Text style={styles.missingInfoTitle}>Missing info: </Text>
+                  {missingInfo}
+                </Text>
+              </View>
+            )}
+
             {/* Service details */}
             <View style={styles.detailsBlock}>
+              <DetailRow
+                icon="phone-outline"
+                label="Phone"
+                value={service.phone || 'Not provided'}
+              />
               <DetailRow
                 icon="tag-outline"
                 label="Categories"
@@ -141,6 +173,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: RFPercentage(1),
+  },
+  missingInfo: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: RFPercentage(0.6),
+    backgroundColor: Colors.amberBg50,
+    borderColor: Colors.amberBorder,
+    borderWidth: 1,
+    borderRadius: RFPercentage(1.2),
+    paddingHorizontal: RFPercentage(1.2),
+    paddingVertical: RFPercentage(0.8),
+    marginBottom: RFPercentage(1),
+  },
+  missingInfoText: {
+    flex: 1,
+    color: Colors.amberDarkText,
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.45),
+  },
+  missingInfoTitle: {
+    fontFamily: Fonts.semiBold,
   },
   statusLabel: {
     color: Colors.secondaryText,

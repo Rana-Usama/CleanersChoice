@@ -54,8 +54,8 @@ const ServiceThree: React.FC = ({navigation}: any) => {
   const [draftPrice, setDraftPrice] = useState('');
   const [draftErrors, setDraftErrors] = useState<DraftErrors>({});
 
-  const profileCompletion = useSelector(
-    (state: any) => state?.profile?.profileCompletion,
+  const hasServiceDetails = useSelector(
+    (state: any) => !!state?.profile?.hasServiceDetails,
   );
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -481,7 +481,7 @@ const ServiceThree: React.FC = ({navigation}: any) => {
                 ) : (
                   <>
                     <Text style={styles.buttonText} numberOfLines={1}>
-                      {profileCompletion === '100'
+                      {hasServiceDetails
                         ? 'Update Packages'
                         : 'Complete Setup'}
                     </Text>

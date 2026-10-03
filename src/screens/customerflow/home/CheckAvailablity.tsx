@@ -37,9 +37,11 @@ const CheckAvailability = ({route, navigation}: any) => {
   const profileData = useSelector((state: any) => state.profile.profileData);
 
   // Filter only checked days
-  const availableDays = item.availability.filter(
-    (day: any) => day.checked === true,
-  );
+  // Availability is optional on a listing — guard for cleaners who haven't set it.
+  const availableDays = (Array.isArray(item?.availability)
+    ? item.availability
+    : []
+  ).filter((day: any) => day?.checked === true);
 
   const [selectedFilter, setSelectedFilter] = useState('all');
 

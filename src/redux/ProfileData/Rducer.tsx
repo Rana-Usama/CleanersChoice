@@ -1,8 +1,8 @@
-import {PROFILE_COMPLETION, PROFILE_DATA} from './Actions';
+import {HAS_SERVICE_DETAILS, PROFILE_DATA} from './Actions';
 
 const initialState = {
   profileData: [],
-  profileCompletion : ''
+  hasServiceDetails: false,
 };
 
 export const userDataReducer = (state = initialState, action:any) => {
@@ -12,10 +12,10 @@ export const userDataReducer = (state = initialState, action:any) => {
         ...state,
         profileData: action.payload,
       };
-      case PROFILE_COMPLETION:
+      case HAS_SERVICE_DETAILS:
       return {
         ...state,
-        profileCompletion: action.payload,
+        hasServiceDetails: !!action.payload,
       };
     default:
       return state;

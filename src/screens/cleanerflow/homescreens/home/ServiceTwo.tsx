@@ -52,8 +52,8 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
   const [showGalleryPermissionSheet, setShowGalleryPermissionSheet] =
     useState(false);
-  const profileCompletion = useSelector(
-    (state: any) => state.profile.profileCompletion,
+  const hasServiceDetails = useSelector(
+    (state: any) => !!state?.profile?.hasServiceDetails,
   );
 
   const uploadImageToStorage = async (imageUri: string, index: number) => {
@@ -372,13 +372,12 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
         <View style={styles.progressSection}>
           <View style={styles.progressHeader}>
             <Text style={styles.progressTitle}>Step 2 of 3</Text>
-            <Text style={styles.progressPercent}>{`${(
-              (uploadedCount / 6) *
-              100
-            ).toFixed(0)}%`}</Text>
+            <Text style={styles.progressPercent}>
+              {`${uploadedCount}/${MAX_IMAGES} photos`}
+            </Text>
           </View>
           <Progress.Bar
-            progress={(uploadedCount / 6) * 100}
+            progress={uploadedCount / MAX_IMAGES}
             width={width - 80}
             height={6}
             color={Colors.white}
@@ -520,7 +519,7 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
               ) : (
                 <>
                   <Text style={styles.buttonText} numberOfLines={1}>
-                    {profileCompletion === '100'
+                    {hasServiceDetails
                       ? 'Update Gallery'
                       : 'Continue to Packages'}
                   </Text>
