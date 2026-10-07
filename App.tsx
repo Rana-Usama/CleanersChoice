@@ -21,6 +21,7 @@ import {AlertProvider} from './src/components/AlertProvider';
 import {toastConfig} from './src/utils/toastConfig';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
+import {WorkSessionProvider} from './src/components/work/WorkSessionProvider';
 
 
 /**
@@ -192,6 +193,9 @@ const App: React.FC = () => {
 
   // Handle notifee notification tap in foreground (e.g. invoice download)
   useEffect(() => {
+    notifee.getInitialNotification().then(initial => {
+      if (initial) handleNotificationTap(initial.notification.data);
+    }).catch(() => {});
     return notifee.onForegroundEvent(({type, detail}) => {
       if (type !== EventType.PRESS) return;
 
@@ -240,7 +244,9 @@ const App: React.FC = () => {
           />
           <AlertProvider>
             <UnreadMessagesProvider>
-              <StackNavigator />
+              <WorkSessionProvider>
+                <StackNavigator />
+              </WorkSessionProvider>
             </UnreadMessagesProvider>
           </AlertProvider>
           <Toast config={toastConfig} />

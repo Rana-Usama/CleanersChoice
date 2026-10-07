@@ -19,6 +19,8 @@ export const jobEditSignature = (form: Record<string, any>): string => {
       postalCode: text(location.postalCode),
     },
     budgetType,
+    expectedHours: text(form.expectedHours) === ''
+      ? null : Number(form.expectedHours),
     budget: budgetType === 'flat' ? amount(form.budget) : null,
     hourlyRate: budgetType === 'hourly' ? amount(form.hourlyRate) : null,
     hours: budgetType === 'hourly' ? amount(form.hours) : null,

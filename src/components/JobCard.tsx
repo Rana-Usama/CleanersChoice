@@ -2,6 +2,7 @@ import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, Icons} from '../constants/Themes';
+import {WorkClockPanel} from './work/WorkClockPanel';
 
 interface props {
   delete?: boolean;
@@ -12,6 +13,7 @@ interface props {
   price: string;
   onPress: () => void;
   footer?: React.ReactNode;
+  workJob?: {id: string; eligible: boolean};
 }
 
 const JobCard = (props: props) => {
@@ -92,6 +94,7 @@ const JobCard = (props: props) => {
           </TouchableOpacity>
         </View>
         </TouchableOpacity>
+        {props.workJob && <WorkClockPanel jobId={props.workJob.id} jobEligible={props.workJob.eligible} compact />}
         {props.footer}
       </View>
     </View>

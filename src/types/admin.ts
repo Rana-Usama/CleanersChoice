@@ -1,4 +1,5 @@
 import type {ListingStatus} from '../utils/cleanerProfile';
+import type {JobWorkTiming} from './workSession';
 
 /**
  * Types for the Admin Controls feature.
@@ -103,7 +104,7 @@ export interface AdminCleanerService {
   listing: ListingStatus;
 }
 
-export interface AdminJob {
+export interface AdminJob extends JobWorkTiming {
   id: string;
   title?: string;
   status?: string;

@@ -32,6 +32,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {setUserLocation} from '../../../redux/location/Actions';
 import {manageActiveAdminJob} from '../../../services/adminService';
 import {jobEditSignature} from '../../../utils/jobEditSignature';
+import {parseExpectedHours, formatExpectedHours, getJobScheduledStart} from '../../../utils/workTiming';
 import LinearGradient from 'react-native-linear-gradient';
 import Feather from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -154,6 +155,7 @@ const PostJob = ({route}: any) => {
   const [budgetType, setBudgetType] = useState<'flat' | 'hourly' | 'sqft'>('flat');
   const [hourlyRate, setHourlyRate] = useState('');
   const [hours, setHours] = useState('');
+  const [expectedHours, setExpectedHours] = useState('');
   const [pricePerSqFt, setPricePerSqFt] = useState('');
   const [sqFt, setSqFt] = useState('');
   const [selectedType, setSelectedType] = useState<string | null>(null);
@@ -162,13 +164,14 @@ const PostJob = ({route}: any) => {
   const [selectedService, setSelectedService] = useState<any>(null);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const scrollViewRef = useRef<ScrollView>(null);
+  const savedSchedule = useRef<{startMs: number; timeZone?: string} | null>(null);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const userLocation = useSelector((state: any) => state?.location?.location);
   const [savedEditSignature, setSavedEditSignature] = useState<string | null>(null);
   const currentEditSignature = jobEditSignature({
     title: jobTitle, description: Description, type: selectedType, remarks,
     location: userLocation, dueDate: date ? moment(date).format('YYYY-MM-DD  HH:mm A') : null,
-    budgetType, budget, hourlyRate, hours, pricePerSqFt, sqFt,
+    budgetType, budget, hourlyRate, hours, pricePerSqFt, sqFt, expectedHours,
   });
   const unchangedEdit = !!jobId && !repost &&
     (savedEditSignature === null || savedEditSignature === currentEditSignature);
@@ -226,6 +229,20 @@ const PostJob = ({route}: any) => {
       return;
     }
 
+    const expectedDuration = parseExpectedHours(expectedHours);
+    if (expectedDuration === null) {
+      showToast({
+        type: 'info',
+        title: 'Expected duration required',
+        message: 'Enter expected work hours greater than 0 and up to 12 (e.g. 2.5).',
+      });
+      return;
+    }
+    if (!Number.isFinite(date.getTime())) {
+      showToast({type: 'info', title: 'Job schedule', message: 'Select a valid date and time.'});
+      return;
+    }
+
     // Budget is optional - compute it if the customer entered one, but never
     // block job submission when it's missing.
     let computedBudget = 0;
@@ -252,6 +269,11 @@ const PostJob = ({route}: any) => {
         // screens/invoices can tell "no budget" apart from an actual $0.
         priceRange: computedBudget > 0 ? String(computedBudget) : '',
         budgetType: budgetType,
+        expectedHours: expectedDuration,
+        scheduledStartAt: firestore.Timestamp.fromDate(date),
+        scheduleTimeZone: savedSchedule.current?.startMs === date.getTime()
+          ? savedSchedule.current.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone
+          : Intl.DateTimeFormat().resolvedOptions().timeZone,
         remarks: remarks ? remarks.trim() : '',
         jobId: user.uid,
         status: 'active',
@@ -341,6 +363,11 @@ const PostJob = ({route}: any) => {
 
       if (docSnapshot.exists) {
         const jobData = docSnapshot.data();
+        // Keep the saved instant when editing from a different device timezone.
+        const scheduledDate = getJobScheduledStart(jobData ?? {});
+        savedSchedule.current = scheduledDate ? {
+          startMs: scheduledDate.getTime(), timeZone: jobData?.scheduleTimeZone,
+        } : null;
         if (!repost) {
           // The saved address is the initial form value, not a location left
           // in Redux by a previous job or screen.
@@ -349,9 +376,10 @@ const PostJob = ({route}: any) => {
             title: jobData?.title, description: jobData?.description,
             type: jobData?.type, remarks: jobData?.remarks,
             location: jobData?.location,
-            dueDate: moment(jobData?.createdAt, 'YYYY-MM-DD  HH:mm A').format('YYYY-MM-DD  HH:mm A'),
+            dueDate: scheduledDate ? moment(scheduledDate).format('YYYY-MM-DD  HH:mm A') : null,
             budgetType: jobData?.budgetType, budget: jobData?.priceRange,
             hourlyRate: jobData?.hourlyRate, hours: jobData?.hours,
+            expectedHours: jobData?.expectedHours,
             pricePerSqFt: jobData?.pricePerSqFt, sqFt: jobData?.sqFt,
           }));
         }
@@ -365,6 +393,7 @@ const PostJob = ({route}: any) => {
         setSelectedType(jobData?.type || null);
         setBudget(jobData?.priceRange ? `$${jobData.priceRange}` : '');
         setRemarks(jobData?.remarks || '');
+        setExpectedHours(jobData?.expectedHours == null ? '' : String(jobData.expectedHours));
 
         // Load budget type fields
         if (jobData?.budgetType) {
@@ -384,7 +413,7 @@ const PostJob = ({route}: any) => {
         }
 
         if (!repost) {
-          setDate(moment(jobData?.createdAt, 'YYYY-MM-DD  HH:mm A').toDate());
+          setDate(scheduledDate);
         }
 
         const service = serviceTypesWithIcons.find(
@@ -959,8 +988,28 @@ const PostJob = ({route}: any) => {
                     />
                   </TouchableOpacity>
                   <Text style={styles.dateHint}>
-                    When do you need this service completed?
+                    When should the cleaner start?
                   </Text>
+                </View>
+
+                <View style={styles.card}>
+                  <View style={styles.cardHeader}>
+                    <View style={styles.serviceTypeIconBubble}>
+                      <MaterialCommunityIcons name="clock-outline" size={20} color={Colors.gradient1} />
+                    </View>
+                    <Text style={styles.cardTitle}>Expected work duration</Text>
+                  </View>
+                  <InputField
+                    placeholder="Hours, e.g. 2.5"
+                    value={expectedHours}
+                    onChangeText={setExpectedHours}
+                    type="decimal-pad"
+                    length={5}
+                    customStyle={{width: '100%'}}
+                  />
+                  {/* <Text style={styles.cardHint}>
+                    Required for every job. Enter up to 12 hours; 2.5 means 2 hours 30 minutes. This does not change your budget.
+                  </Text> */}
                 </View>
 
                 {/* Special Instructions Card */}
@@ -1017,6 +1066,10 @@ const PostJob = ({route}: any) => {
                           ? `${pricePerSqFt}/sqft × ${sqFt}sqft`
                           : 'Custom Budget'}
                       </Text>
+                    </View>
+                    <View style={styles.summaryRow}>
+                      <Text style={styles.summaryLabel}>Expected work:</Text>
+                      <Text style={styles.summaryValue}>{formatExpectedHours(expectedHours)}</Text>
                     </View>
                     <View style={styles.summaryRow}>
                       <Text style={styles.summaryLabel}>Due Date:</Text>

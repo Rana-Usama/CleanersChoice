@@ -31,6 +31,8 @@ import {useAppleReceiptRefresh} from '../../../hooks/useAppleReceiptRefresh';
 import {resolveCleanerRouteAsync} from '../../../utils/cleanerRoute';
 import {useAppAlert} from '../../../components/AlertProvider';
 import CleanerIntroVideoModal from '../../../components/CleanerIntroVideoModal';
+import {useWorkSessions} from '../../../components/work/WorkSessionProvider';
+import {canUseWorkRecords} from '../../../utils/workSessionFlow';
 
 const {width} = Dimensions.get('window');
 
@@ -48,6 +50,7 @@ const EULA_URL =
   'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
 
 const Premium = ({navigation}: any) => {
+  const work = useWorkSessions();
   const insets = useSafeAreaInsets();
   const {showAlert} = useAppAlert();
   const {initPaymentSheet, presentPaymentSheet} = useStripe();
@@ -274,6 +277,11 @@ const Premium = ({navigation}: any) => {
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}>
+        {canUseWorkRecords(work.user) && (work.hasHistory || work.manualAvailable) && (
+          <TouchableOpacity style={styles.headerContainer} onPress={() => navigation.navigate('WorkTracking')}>
+            <Text style={styles.premiumSubtitle}>Finish work, review times, or view your history</Text>
+          </TouchableOpacity>
+        )}
         {/* Header Section */}
         <View style={styles.headerContainer}>
           {showRenewUI ? (

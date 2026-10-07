@@ -1,5 +1,5 @@
 import {StyleSheet} from 'react-native';
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Splash from '../screens/commonflow/splashscreens/Splash';
@@ -57,6 +57,12 @@ import {navigationRef} from '../utils/navigationRef';
 import {flushPendingNotification} from '../utils/notificationNavigation';
 import {resolveCleanerRoute} from '../utils/cleanerRoute';
 import {hasActiveSubscriptionAccess} from '../utils/cleanerVisibility';
+import WorkTracking from '../screens/cleanerflow/work/WorkTracking';
+import WorkHours from '../screens/cleanerflow/work/WorkHours';
+import ManualWorkEntry from '../screens/cleanerflow/work/ManualWorkEntry';
+import WorkSessionDetails from '../screens/cleanerflow/work/WorkSessionDetails';
+import {useWorkSessions} from '../components/work/WorkSessionProvider';
+import {canUseWorkRecords} from '../utils/workSessionFlow';
 
 export type RootStackParamList = {
   SplashOne: undefined;
@@ -115,6 +121,10 @@ export type RootStackParamList = {
   PhoneBook: undefined;
   CustomerForm: {customer: Customer | null};
   Earnings: undefined;
+  WorkTracking: {sessionId?: string} | undefined;
+  WorkHours: {year: number; month: number} | undefined;
+  ManualWorkEntry: undefined;
+  WorkSessionDetails: {sessionId: string};
   CleanerIntroVideo: undefined;
   CleanerInstructions: undefined;
   CompleteBusinessInfo: {mode?: 'gate' | 'edit'} | undefined;
@@ -129,6 +139,8 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const StackNavigator: React.FC = () => {
+  const work = useWorkSessions();
+  const {user: workUser, hasHistory: hasWorkHistory, manualAvailable, now: workNow} = work;
   const [email, setEmail] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
   const [user, setUser] = useState<string | null>(null);
@@ -136,6 +148,19 @@ const StackNavigator: React.FC = () => {
   const [userData, setUserData] = useState<any>(null);
   const [loggedOut, setLoggedOut] = useState<string | null>(null);
   const [navReady, setNavReady] = useState(false);
+
+  // Ordinary expiry grants record access only; never leaves the full job tabs open.
+  const enforceWorkAccess = useCallback(() => {
+    if (!navReady || isLoading || workUser?.role !== 'Cleaner' || hasActiveSubscriptionAccess(workUser, workNow)) return;
+    const route = navigationRef.getCurrentRoute()?.name;
+    const recordsAllowed = canUseWorkRecords(workUser) && (hasWorkHistory || manualAvailable);
+    const allowed = ['Premium', 'CleanerInstructions', 'CompleteBusinessInfo', 'SignIn', 'SignUp', 'ResetPassword',
+      ...(recordsAllowed ? ['WorkTracking', 'WorkHours', 'WorkSessionDetails', 'Earnings', 'InvoicePreview', ...(manualAvailable ? ['ManualWorkEntry'] : [])] : [])];
+    if (route && !allowed.includes(route)) {
+      navigationRef.reset({index: 0, routes: [{name: recordsAllowed ? 'WorkTracking' : resolveCleanerRoute(workUser)}]});
+    }
+  }, [navReady, isLoading, workUser, hasWorkHistory, manualAvailable, workNow]);
+  useEffect(() => {enforceWorkAccess();}, [enforceWorkAccess]);
 
   useEffect(() => {
     const fetchCredentialsAndUserData = async () => {
@@ -209,10 +234,10 @@ const StackNavigator: React.FC = () => {
     // Resolves to CleanerInstructions when the mandatory step is still
     // pending, otherwise the dashboard. Without this gate, force-quitting on
     // the instructions screen would skip it permanently.
-    initialRoute = resolveCleanerRoute(userData);
+    initialRoute = resolveCleanerRoute(userData, work.hasHistory || work.manualAvailable);
   } else if (userData?.role === 'Cleaner' && !hasActiveSub) {
     // Unpaid cleaner: instructions first, paywall second.
-    initialRoute = resolveCleanerRoute(userData);
+    initialRoute = resolveCleanerRoute(userData, work.hasHistory || work.manualAvailable);
   } else if (loggedOut === 'yes') {
     initialRoute = 'SignIn';
   }
@@ -221,6 +246,7 @@ const StackNavigator: React.FC = () => {
     <SafeAreaProvider>
       <NavigationContainer
         ref={navigationRef}
+        onStateChange={enforceWorkAccess}
         onReady={() => setNavReady(true)}>
         {isLoading ? (
           <Decider />
@@ -293,6 +319,10 @@ const StackNavigator: React.FC = () => {
             <Stack.Screen name="PhoneBook" component={PhoneBook} />
             <Stack.Screen name="CustomerForm" component={CustomerForm} />
             <Stack.Screen name="Earnings" component={Earnings} />
+            <Stack.Screen name="WorkTracking" component={WorkTracking} />
+            <Stack.Screen name="WorkHours" component={WorkHours} />
+            <Stack.Screen name="ManualWorkEntry" component={ManualWorkEntry} />
+            <Stack.Screen name="WorkSessionDetails" component={WorkSessionDetails} />
             <Stack.Screen
               name="CleanerIntroVideo"
               component={CleanerIntroVideo}

@@ -6,6 +6,7 @@ import {
   hasRequiredCleanerProfile,
   requiredFieldsFromUser,
 } from './cleanerProfile';
+import {canUseWorkRecords} from './workSessionFlow';
 
 /**
  * Where a Cleaner belongs right now.
@@ -40,10 +41,12 @@ export type CleanerRoute =
   | 'CleanerInstructions'
   | 'CompleteBusinessInfo'
   | 'Premium'
+  | 'WorkTracking'
   | 'CleanerNavigator';
 
 export const resolveCleanerRoute = (
   userData?: Record<string, any> | null,
+  hasWorkHistory = false,
 ): CleanerRoute => {
   if (!hasAcceptedInstructions(userData)) {
     return 'CleanerInstructions';
@@ -53,7 +56,8 @@ export const resolveCleanerRoute = (
     return 'CompleteBusinessInfo';
   }
 
-  return hasActiveSubscriptionAccess(userData) ? 'CleanerNavigator' : 'Premium';
+  return hasActiveSubscriptionAccess(userData) ? 'CleanerNavigator' :
+    hasWorkHistory && canUseWorkRecords(userData) ? 'WorkTracking' : 'Premium';
 };
 
 /**

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -38,12 +38,16 @@ import {
   revertToUnpaid,
 } from '../../../../services/paymentService';
 import DeleteInvoiceDialog from '../../../../components/DeleteInvoiceDialog';
+import {useWorkSessions} from '../../../../components/work/WorkSessionProvider';
+import {canStartWork} from '../../../../utils/workSessionFlow';
 
 const InvoicePreview = ({route, navigation}: any) => {
+  const work = useWorkSessions();
+  const restricted = work.user?.role === 'Cleaner' && !canStartWork(work.user, work.now);
   const {
     formData,
     jobItem,
-    viewOnly,
+    viewOnly: requestedViewOnly,
     invoice,
     paymentActionsDisabled,
   }: {
@@ -54,6 +58,7 @@ const InvoicePreview = ({route, navigation}: any) => {
     paymentActionsDisabled?: boolean;
   } =
     route.params;
+  const viewOnly = requestedViewOnly || restricted;
   const [generating, setGenerating] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [paymentInvoice, setPaymentInvoice] = useState<Invoice | null>(
@@ -69,8 +74,15 @@ const InvoicePreview = ({route, navigation}: any) => {
     : 'unpaid';
   const isPaid = paymentStatus === 'paid';
   const canRevert = paymentInvoice ? canRevertToUnpaid(paymentInvoice) : false;
-  const canManagePayment = !paymentActionsDisabled;
-  const canDeleteInvoice = !paymentActionsDisabled && !!paymentInvoice?.id;
+  const canManagePayment = !paymentActionsDisabled && !restricted;
+  const canDeleteInvoice = !paymentActionsDisabled && !restricted && !!paymentInvoice?.id;
+
+  useEffect(() => {
+    if (restricted) {
+      setPaymentSheetVisible(false);
+      setDeleteDialogVisible(false);
+    }
+  }, [restricted]);
 
   const handleDownload = async () => {
     setDownloading(true);
@@ -101,6 +113,7 @@ const InvoicePreview = ({route, navigation}: any) => {
   };
 
   const handleGenerateAndShare = async () => {
+    if (restricted) return;
     setGenerating(true);
     try {
       // Check if invoice already exists for this job (only for job-based invoices)
@@ -173,7 +186,7 @@ const InvoicePreview = ({route, navigation}: any) => {
   };
 
   const handleConfirmPaid = async (opts: {paidAt: Date; method: string}) => {
-    if (!paymentInvoice?.id || paymentLoading) return;
+    if (!canManagePayment || !paymentInvoice?.id || paymentLoading) return;
 
     const previous = paymentInvoice;
     setPaymentLoading(true);
@@ -212,7 +225,7 @@ const InvoicePreview = ({route, navigation}: any) => {
   };
 
   const handleRevert = async () => {
-    if (!paymentInvoice?.id || !canRevert || paymentLoading) return;
+    if (!canManagePayment || !paymentInvoice?.id || !canRevert || paymentLoading) return;
 
     const previous = paymentInvoice;
     setPaymentLoading(true);
@@ -247,7 +260,7 @@ const InvoicePreview = ({route, navigation}: any) => {
   };
 
   const handleConfirmDelete = async () => {
-    if (!paymentInvoice?.id || deleteLoading) return;
+    if (!canDeleteInvoice || !paymentInvoice?.id || deleteLoading) return;
 
     setDeleteLoading(true);
     try {

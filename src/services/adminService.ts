@@ -51,7 +51,8 @@ export const manageActiveAdminJob = async (
       // Form fields only: preserve ownership, lifecycle and application data.
       const fields = ['title', 'description', 'type', 'location', 'priceRange',
         'budgetType', 'remarks', 'createdAt', 'hourlyRate', 'hours',
-        'pricePerSqFt', 'sqFt'];
+        'pricePerSqFt', 'sqFt', 'expectedHours', 'scheduledStartAt',
+        'scheduleTimeZone'];
       const update: Record<string, any> = {};
       fields.forEach(field => {
         if (changes[field] !== undefined) update[field] = changes[field];

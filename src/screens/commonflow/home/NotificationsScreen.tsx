@@ -40,7 +40,8 @@ const toDate = (timestamp: any): Date | null => {
 
 interface NotificationItem {
   id: string;
-  type: 'application' | 'confirmation' | 'cancellation' | 'completion' | 'completion_request' | 'auto_complete' | 'expired' | 'expiry_warning' | 'unconfirmed' | 'message' | 'new_nearby_job';
+  workSessionId?: string;
+  type: 'application' | 'confirmation' | 'cancellation' | 'completion' | 'completion_request' | 'auto_complete' | 'expired' | 'expiry_warning' | 'unconfirmed' | 'message' | 'new_nearby_job' | 'work_session_review';
   fromUserId: string;
   toUserId: string;
   jobId: string;
@@ -142,6 +143,9 @@ const NotificationsScreen = ({navigation}: any) => {
     );
 
     switch (item.type) {
+      case 'work_session_review':
+        navigation.navigate('WorkTracking', {sessionId: item.workSessionId});
+        break;
       case 'application':
         // Customer taps → go to job management to see all applicants
         navigation.navigate('JobManagement', {
@@ -345,6 +349,8 @@ const NotificationsScreen = ({navigation}: any) => {
         return {name: 'clock-alert-outline', color: Colors.orange600};
       case 'expiry_warning':
         return {name: 'alert-circle-outline', color: Colors.amber500};
+      case 'work_session_review':
+        return {name: 'clock-alert-outline', color: Colors.amber500};
       case 'unconfirmed':
         return {name: 'account-alert-outline', color: Colors.orange600};
       case 'message':

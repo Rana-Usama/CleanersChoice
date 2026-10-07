@@ -218,6 +218,40 @@ service cloud.firestore {
     //  written WITHOUT sight of the live console rules. Review before deploy.
     // ═══════════════════════════════════════════════════════════════════════
 
+    // Operational settings are published via Console/Admin SDK, never the app.
+    match /AppConfig/workSessions {
+      allow get: if signedIn();
+      allow list, write: if false;
+    }
+
+    function canReadOwnWork(cleanerId) {
+      let owner = get(/databases/$(database)/documents/Users/$(request.auth.uid)).data;
+      return isSelf(cleanerId) && owner.get('role', '') == 'Cleaner'
+        && !(owner.get('accountStatus', '') in ['disabled', 'deleted', 'suspended'])
+        && owner.get('subscriptionStatus', '') != 'refunded';
+    }
+
+    // Session writes and lock reservations are exclusively server validated.
+    // Ordinary subscription expiry does not remove access to work history.
+    match /WorkSessions/{sessionId} {
+      allow read: if signedIn() && canReadOwnWork(resource.data.cleanerId);
+      allow write: if false;
+      match /history/{eventId} {
+        allow read: if signedIn() && canReadOwnWork(
+          get(/databases/$(database)/documents/WorkSessions/$(sessionId)).data.cleanerId);
+        allow write: if false;
+      }
+    }
+
+    match /WorkSessionLocks/{cleanerId} {
+      allow get: if signedIn() && canReadOwnWork(cleanerId);
+      allow list, write: if false;
+    }
+
+    match /WorkSessionOperations/{cleanerId}/{document=**} {
+      allow read, write: if false;
+    }
+
     // Cleaners browse `status == 'active'` postings; customers manage their own.
     // `Jobs.jobId` is the POSTING CUSTOMER'S uid, not the document id.
     match /Jobs/{jobId} {
@@ -238,11 +272,21 @@ service cloud.firestore {
     // A user may only read notifications addressed to them. Writes stay open to
     // signed-in users because the app sends notifications client-side.
     match /Notifications/{notificationId} {
+      function reservedWorkNotice() {
+        return notificationId.matches('work-session-review-.*')
+          || resource.data.get('type', '') == 'work_session_review';
+      }
       allow get, list: if signedIn()
         && resource.data.get('toUserId', '') == request.auth.uid;
-      allow create: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.get('type', '') != 'work_session_review'
+        && !notificationId.matches('work-session-review-.*');
       allow update: if signedIn()
-        && resource.data.get('toUserId', '') == request.auth.uid;
+        && resource.data.get('toUserId', '') == request.auth.uid
+        && (reservedWorkNotice()
+          ? (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read'])
+            && request.resource.data.get('read', false) is bool)
+          : request.resource.data.get('type', '') != 'work_session_review');
       allow delete: if signedIn()
         && resource.data.get('toUserId', '') == request.auth.uid;
     }

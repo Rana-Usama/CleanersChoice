@@ -30,6 +30,9 @@ import {
   parseInvoiceAmount,
 } from '../../../../services/earningsService';
 
+import {useWorkSessions} from '../../../../components/work/WorkSessionProvider';
+import {canUseWorkRecords} from '../../../../utils/workSessionFlow';
+
 const PER_PAGE = 10;
 const BAR_MAX_HEIGHT = RFPercentage(12);
 const CURRENT_YEAR = new Date().getFullYear();
@@ -51,6 +54,7 @@ const formatPaidDate = (paidAt: any): string => {
 };
 
 const Earnings = ({navigation}: any) => {
+  const work = useWorkSessions();
   const [paidInvoices, setPaidInvoices] = useState<Invoice[]>([]);
   const [selectedYear, setSelectedYear] = useState(CURRENT_YEAR);
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
@@ -201,6 +205,11 @@ const Earnings = ({navigation}: any) => {
             tintColor={Colors.gradient1}
           />
         }>
+        {canUseWorkRecords(work.user) && (work.enabled || work.hasHistory) && (
+          <TouchableOpacity onPress={() => navigation.navigate('WorkHours', {year: selectedYear, month: selectedMonth ?? new Date(work.now).getMonth()})}>
+            <Text style={styles.drilldownText}>View monthly hours and collected earnings</Text>
+          </TouchableOpacity>
+        )}
         <View style={styles.summaryCard}>
           <Text style={styles.summaryEyebrow}>
             Total earned in {selectedYear}

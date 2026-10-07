@@ -55,6 +55,8 @@ import EditIcon from '../../../../assets/svg/editIcon';
 import {Invoice} from '../../../../types/invoice';
 import {buildAnnualEarningsSummary} from '../../../../services/earningsService';
 import {useAppleReceiptRefresh} from '../../../../hooks/useAppleReceiptRefresh';
+import {WorkMonthlyDashboard} from '../../../../components/work/WorkMonthlyDashboard';
+import {WorkClockPanel} from '../../../../components/work/WorkClockPanel';
 
 const CURRENT_YEAR = new Date().getFullYear();
 
@@ -531,6 +533,8 @@ const Dashboard: React.FC = ({navigation}: any) => {
         }
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
+        <WorkClockPanel />
+        <WorkMonthlyDashboard />
         {/* Profile Section */}
         <Animated.View
           entering={FadeInDown.duration(600)}
@@ -673,7 +677,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
               />
             </View>
             <View style={styles.earningsContent}>
-              <Text style={styles.earningsLabel}>Earnings</Text>
+              <Text style={styles.earningsLabel}>Earnings · {CURRENT_YEAR}</Text>
               {earningsLoading ? (
                 <ActivityIndicator
                   size="small"

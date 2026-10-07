@@ -52,6 +52,12 @@ it('deletes a selected active job posted by another user', async () => {
   expect(mockDelete).toHaveBeenCalledWith({collection: 'Jobs', id: 'job'});
 });
 
+it('preserves tracking duration and normalized schedule on admin edits', async () => {
+  const timing = {expectedHours: 2.5, scheduledStartAt: {seconds: 100}, scheduleTimeZone: 'America/New_York'};
+  await manageActiveAdminJob('job', 'update', {...timing, confirmedCleaner: 'other'});
+  expect(mockUpdate).toHaveBeenCalledWith({collection: 'Jobs', id: 'job'}, timing);
+});
+
 it.each(['read', 'update', 'delete'] as const)('rejects %s after admin access is revoked', async action => {
   mockAdmin = false;
   await expect(manageActiveAdminJob('job', action)).rejects.toThrow('Admin access');

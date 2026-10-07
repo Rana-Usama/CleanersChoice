@@ -20,8 +20,18 @@ it.each([
   {location: {...original.location, latitude: 32}},
   {location: {...original.location, name: 'House'}},
   {budgetType: 'hourly', hourlyRate: '10', hours: '10'},
+  {expectedHours: 2.5},
 ])('detects an edited field: %p', change => {
   expect(jobEditSignature({...original, ...change})).not.toBe(jobEditSignature(original));
+});
+
+it('tracks duration independently from price and normalizes decimal formatting', () => {
+  expect(jobEditSignature({...original, expectedHours: '2.50'}))
+    .toBe(jobEditSignature({...original, expectedHours: 2.5}));
+  expect(jobEditSignature({...original, expectedHours: 2.5}))
+    .not.toBe(jobEditSignature({...original, expectedHours: 3}));
+  expect(jobEditSignature({...original, expectedHours: ''}))
+    .toBe(jobEditSignature(original));
 });
 
 it('does not count an edit that was reverted', () => {

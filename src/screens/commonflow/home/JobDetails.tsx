@@ -34,6 +34,9 @@ import {showToast} from '../../../utils/ToastMessage';
 import CustomModal from '../../../components/CustomModal';
 import ModalWrapper from '../../../components/ModalWrapper';
 import {useAppAlert} from '../../../components/AlertProvider';
+import {formatExpectedHours, getJobScheduledStart} from '../../../utils/workTiming';
+import {WorkClockPanel} from '../../../components/work/WorkClockPanel';
+import {useWorkSessions} from '../../../components/work/WorkSessionProvider';
 
 const {width} = Dimensions.get('window');
 
@@ -42,6 +45,7 @@ const SERVER_URL = 'https://cleaners-choice-server.vercel.app';
 const JobDetails = ({route, navigation}: any) => {
   const {item} = route.params;
   const {showAlert} = useAppAlert();
+  const work = useWorkSessions();
   const userData = useSelector((state: any) => state?.profile?.profileData);
   const [loading, setLoading] = useState(false);
   const [loading2, setLoading2] = useState(false);
@@ -145,10 +149,11 @@ const JobDetails = ({route, navigation}: any) => {
   }, [item.createdAt]);
 
   // Format date
-  const formatDate = (dateString: string) => {
-    return moment(dateString, 'YYYY-MM-DD  HH:mm A').format(
-      'MMM DD, YYYY • hh:mm A',
-    );
+  const formatDate = () => {
+    const scheduledStart = getJobScheduledStart(item);
+    return scheduledStart
+      ? moment(scheduledStart).format('MMM DD, YYYY • hh:mm A')
+      : 'Not specified';
   };
 
   const parseNumericValue = (value: any) => {
@@ -183,19 +188,26 @@ const JobDetails = ({route, navigation}: any) => {
   const markComplete = async (jobId: string, newStatus: string) => {
     setLoading(true);
     try {
+      if (userData.role === 'Cleaner' && !(await work.beforeJobAction(jobId, 'complete'))) return;
       const jobDoc = await firestore().collection('Jobs').doc(jobId).get();
       const jobData = jobDoc.data();
+      const requesting = newStatus === 'pending_completion';
+      const recipientId = requesting ? jobData?.jobId : jobData?.confirmedCleaner;
+      const noticeTitle = requesting ? 'Completion Request' : 'Job Completed';
+      const noticeBody = requesting ? `Your cleaner has requested completion of "${item.title}". Please confirm.` :
+        `"${item.title}" has been marked as completed`;
 
       await firestore().collection('Jobs').doc(jobId).update({
         status: newStatus,
         updatedAt: new Date(),
+        ...(requesting ? {completionRequestedAt: firestore.FieldValue.serverTimestamp()} : {}),
       });
 
       // Send completion notification to confirmed cleaner
-      if (jobData?.confirmedCleaner) {
+      if (recipientId) {
         const cleanerDoc = await firestore()
           .collection('Users')
-          .doc(jobData.confirmedCleaner)
+          .doc(recipientId)
           .get();
         const cleanerData = cleanerDoc.data();
 
@@ -206,8 +218,8 @@ const JobDetails = ({route, navigation}: any) => {
               headers: {'Content-Type': 'application/json'},
               body: JSON.stringify({
                 fcmToken: cleanerData.fcmToken,
-                title: 'Job Completed',
-                body: `"${item.title}" has been marked as completed`,
+                title: noticeTitle,
+                body: noticeBody,
                 data: {screen: 'notifications'},
               }),
             });
@@ -218,12 +230,12 @@ const JobDetails = ({route, navigation}: any) => {
 
         try {
           await firestore().collection('Notifications').add({
-            type: 'completion',
+            type: requesting ? 'completion_request' : 'completion',
             fromUserId: userId,
-            toUserId: jobData.confirmedCleaner,
+            toUserId: recipientId,
             jobId: jobId,
-            title: 'Job Completed',
-            body: `"${item.title}" has been marked as completed`,
+            title: noticeTitle,
+            body: noticeBody,
             timestamp: firestore.FieldValue.serverTimestamp(),
             read: false,
             jobTitle: item.title,
@@ -233,13 +245,13 @@ const JobDetails = ({route, navigation}: any) => {
         }
       }
 
-      showSuccess('Job marked as completed!');
+      showSuccess(requesting ? 'Completion requested. The customer can confirm.' : 'Job marked as completed!');
       setTimeout(() => {
         navigation.goBack();
       }, 1500);
     } catch (error) {
       console.error('Error marking job as complete:', error);
-      showError('Failed to mark as complete');
+      showError('The job update failed. Any work hours saved earlier are retained; retry the job action.');
     } finally {
       setLoading(false);
     }
@@ -585,6 +597,7 @@ const JobDetails = ({route, navigation}: any) => {
         setConfirmModal(prev => ({...prev, visible: false}));
         setCancelLoading(true);
         try {
+          if (!(await work.beforeJobAction(item.id, 'cancel'))) return;
           await firestore().collection('Jobs').doc(item.id).update({
             confirmedCleaner: null,
             status: 'active',
@@ -919,6 +932,9 @@ const JobDetails = ({route, navigation}: any) => {
           {useNativeDriver: false},
         )}
         scrollEventThrottle={16}>
+        {userData?.role === 'Cleaner' && (
+          <WorkClockPanel jobId={item.id} jobEligible={isConfirmed && jobStatus === 'confirmed'} />
+        )}
         <View style={styles.headerSummary}>
           <Text style={styles.jobTitle} numberOfLines={2}>
             {item.title}
@@ -996,11 +1012,15 @@ const JobDetails = ({route, navigation}: any) => {
                 Due Date
               </Text>
               <Text style={styles.quickInfoValue} numberOfLines={2}>
-                {formatDate(item.createdAt)}
+                {formatDate()}
               </Text>
             </View>
           </View>
         </View>
+
+        <InfoCard title="Expected work duration" icon="clock-outline">
+          <Text style={styles.descriptionText}>{formatExpectedHours(item.expectedHours)}</Text>
+        </InfoCard>
 
         {/* Job Description Card */}
         <InfoCard title="Job Description" icon="text-box-outline">

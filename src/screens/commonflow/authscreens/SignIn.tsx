@@ -135,6 +135,7 @@ const SignIn: React.FC = () => {
         | 'CleanerInstructions'
         | 'CompleteBusinessInfo'
         | 'Premium'
+        | 'WorkTracking'
         | 'Home' = 'Home';
       if (userRole === 'Cleaner') {
         // Instructions → paywall → dashboard. `userData` is already in hand

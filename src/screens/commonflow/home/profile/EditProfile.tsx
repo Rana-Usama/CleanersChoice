@@ -28,6 +28,7 @@ import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 import {Image as CompressorImage} from 'react-native-compressor';
 import {showToast} from '../../../../utils/ToastMessage';
+import {parseDefaultHourlyRate} from '../../../../utils/workTiming';
 import {
   isValidPhone,
   syncRequiredProfileMirror,
@@ -42,6 +43,8 @@ const {width} = Dimensions.get('window');
 const EditProfile = ({navigation}: any) => {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [defaultHourlyRate, setDefaultHourlyRate] = useState('');
+  const [rateChanged, setRateChanged] = useState(false);
   const [img, setImg] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const [userData, setUserData] =
@@ -81,6 +84,8 @@ const EditProfile = ({navigation}: any) => {
           if (userDoc.exists) {
             const userData = userDoc.data() ?? null;
             setUserData(userData);
+            setDefaultHourlyRate(userData?.defaultHourlyRate == null
+              ? '' : String(userData.defaultHourlyRate));
           }
         } catch (error) {}
       }
@@ -93,6 +98,16 @@ const EditProfile = ({navigation}: any) => {
     const user = auth().currentUser;
     if (!user) return;
     const isCleaner = userData?.role === 'Cleaner';
+    const rate = defaultHourlyRate.trim() === ''
+      ? null : parseDefaultHourlyRate(defaultHourlyRate);
+    if (isCleaner && rateChanged && defaultHourlyRate.trim() !== '' && rate === null) {
+      showToast({
+        type: 'error', title: 'Invalid hourly rate',
+        message: 'Enter a positive hourly rate with up to two decimal places, or leave it blank.',
+      });
+      return;
+    }
+    const rateUpdate = isCleaner && rateChanged ? {defaultHourlyRate: rate} : {};
     // A cleaner's phone is part of the required business info that controls
     // visibility (utils/cleanerProfile.ts) — never save a partial number.
     if (isCleaner && phone && phone !== userData?.phone && !isValidPhone(phone)) {
@@ -127,29 +142,29 @@ const EditProfile = ({navigation}: any) => {
       }
 
       // Check if any field has changed
-      const isNameChanged = name !== userData?.name;
-      const isPhoneChanged = phone !== userData?.phone;
+      const isNameChanged = !!name && name !== userData?.name;
+      const isPhoneChanged = !!phone && phone !== userData?.phone;
       const isImageChanged = imageUrl !== userData?.profile;
 
-      if (isNameChanged || isPhoneChanged || isImageChanged) {
+      if (isNameChanged || isPhoneChanged || isImageChanged || (isCleaner && rateChanged)) {
+        const profileUpdate = {
+          ...(isNameChanged ? {name} : {}),
+          ...(isPhoneChanged ? {phone} : {}),
+          ...(isImageChanged && imageUrl !== undefined ? {profile: imageUrl} : {}),
+          ...rateUpdate,
+        };
         await firestore()
           .collection('Users')
           .doc(user.uid)
-          .update({
-            name: name || userData?.name,
-            phone: phone || userData?.phone,
-            profile: imageUrl,
-          });
+          .update(profileUpdate);
 
         setUserData(prev => ({
           ...prev,
-          name: name || prev?.name,
-          phone: phone || prev?.phone,
-          profile: imageUrl,
+          ...profileUpdate,
         }));
 
         // Keep the customer-facing listing in step with the Users doc.
-        if (isCleaner) {
+        if (isCleaner && (isNameChanged || isPhoneChanged || isImageChanged)) {
           try {
             await syncRequiredProfileMirror(user.uid, {
               ...userData,
@@ -345,6 +360,26 @@ const EditProfile = ({navigation}: any) => {
                 )}
               </View>
 
+              {userData?.role === 'Cleaner' && (
+                <View style={styles.inputSection}>
+                  <View style={styles.inputLabelRow}>
+                    <MaterialCommunityIcons name="cash" size={RFPercentage(2)} color={Colors.secondaryText} />
+                    <Text style={styles.inputLabel}>Default hourly rate (optional)</Text>
+                  </View>
+                  <InputField
+                    placeholder="Amount per hour, e.g. 25.00"
+                    value={defaultHourlyRate}
+                    onChangeText={text => {setDefaultHourlyRate(text); setRateChanged(true);}}
+                    type="decimal-pad"
+                    length={10}
+                    customStyle={styles.inputField}
+                  />
+                  <Text style={styles.fieldHint}>
+                    Used for work tracking when no job hourly rate is available. Leave blank to remove it. This does not change job prices or invoices.
+                  </Text>
+                </View>
+              )}
+
               {/* Email Field (Read-only) */}
               <View style={styles.inputSection}>
                 <View style={styles.readOnlyField}>
@@ -369,7 +404,7 @@ const EditProfile = ({navigation}: any) => {
                   title="Update Profile"
                   onPress={handleEditProfile}
                   loading={loading}
-                  disabled={loading}
+                  disabled={loading || loading2 || !userData}
                   style={styles.updateButton}
                   textStyle={styles.updateButtonText}
                 />

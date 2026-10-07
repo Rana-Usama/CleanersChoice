@@ -4,6 +4,10 @@ import {onDocumentCreated} from "firebase-functions/v2/firestore";
 
 admin.initializeApp();
 
+export {workSessionOperation} from "./workSessions/endpoint";
+export {recoverOverdueWorkSessions, reconcileJobWorkSessionChanges, notifyWorkSessionReview}
+  from "./workSessions/tasks";
+
 // Runs daily at midnight
 export const autoDeleteExpiredJobs = onSchedule(
   {
@@ -415,8 +419,6 @@ async function sendExpiryNotification(
   }
 }
 
-
-
 const NEARBY_RADIUS_MILES = 50;
 const EARTH_RADIUS_MILES = 3960;
 
@@ -560,7 +562,6 @@ export const notifyNearbyCleaners = onDocumentCreated(
         }
       }
 
-  
       const cleanersSnap = await db
         .collection("Users")
         .where("role", "==", "Cleaner")

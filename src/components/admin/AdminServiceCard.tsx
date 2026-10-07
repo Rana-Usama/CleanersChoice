@@ -34,11 +34,7 @@ const DetailRow: React.FC<{icon: string; label: string; value: string}> = ({
   </View>
 );
 
-/**
- * Required business info still missing on this listing (name / phone / service
- * location — utils/cleanerProfile.ts). Empty when complete. A listing with
- * missing info is not shown to customers even with an active subscription.
- */
+
 const missingInfoLabel = (service: AdminCleanerService): string | null => {
   const missing = service.listing?.missing ?? [];
   if (missing.length === 0) return null;
@@ -53,12 +49,6 @@ const AdminServiceCard: React.FC<Props> = ({service, onPress}) => {
     : [];
   const covers = Array.isArray(service.serviceImages) ? service.serviceImages : [];
 
-  // Package prices are saved as strings (ServiceThree.tsx builds each
-  // package straight from a TextInput's .trim()'d value, never Number()'d),
-  // so a `typeof === 'number'` check here always failed and every cleaner
-  // with a real first-package price still showed "Custom Pricing". Parse
-  // whatever shape is stored; only fall back to null (-> Custom Pricing)
-  // when there is genuinely no usable price.
   const rawFirstPackagePrice = packages[0]?.price;
   const startingPrice =
     typeof rawFirstPackagePrice === 'number' && !isNaN(rawFirstPackagePrice)
@@ -71,9 +61,6 @@ const AdminServiceCard: React.FC<Props> = ({service, onPress}) => {
 
   const availableDays = availability.filter((slot: any) => slot?.checked).length;
 
-  // A pending cancellation is only useful with the date attached — "Cancelling"
-  // alone doesn't tell the client whether they have a month to win them back or
-  // two days.
   const cancelsOn =
     service.badge === 'cancelling' &&
     typeof service.subscriptionEndDate === 'number'
@@ -103,7 +90,7 @@ const AdminServiceCard: React.FC<Props> = ({service, onPress}) => {
               />
             </View>
 
-            {missingInfo && (
+            {/* {missingInfo && (
               <View style={styles.missingInfo}>
                 <MaterialCommunityIcons
                   name="alert-circle-outline"
@@ -115,7 +102,7 @@ const AdminServiceCard: React.FC<Props> = ({service, onPress}) => {
                   {missingInfo}
                 </Text>
               </View>
-            )}
+            )} */}
 
             {/* Service details */}
             <View style={styles.detailsBlock}>

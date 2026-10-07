@@ -1,0 +1,6 @@
+{
+  "enabled": false,
+  "graceHours": 3,
+  "hardCapHours": 12,
+  "manualEntryMaxAgeDays": 7
+}

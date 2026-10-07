@@ -2,6 +2,7 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import {navigationRef} from './navigationRef';
 import {hasActiveSubscriptionAccess} from './cleanerVisibility';
+import {canUseWorkRecords} from './workSessionFlow';
 
 /**
  * Where a push notification tap lands.
@@ -20,7 +21,7 @@ export interface NotificationPayload {
   [key: string]: any;
 }
 
-type Target = 'NotificationsScreen' | 'Messages';
+type Target = 'NotificationsScreen' | 'Messages' | 'WorkTracking';
 
 /**
  * Taps that arrive from a cold start land here before NavigationContainer has
@@ -33,6 +34,7 @@ const resolveTarget = (screen?: string): Target | null => {
   const normalized = (screen || '').trim().toLowerCase();
   if (!normalized) return null;
   if (normalized === 'messages') return 'Messages';
+  if (normalized === 'worktracking') return 'WorkTracking';
   // 'jobdetails' is accepted so a future payload change doesn't strand taps.
   if (normalized === 'notifications' || normalized === 'jobdetails') {
     return 'NotificationsScreen';
@@ -75,6 +77,18 @@ const navigateForPayload = async (payload: NotificationPayload) => {
   if (!target || !navigationRef.isReady()) return;
 
   try {
+    if (target === 'WorkTracking' || payload.type === 'work_session_review' || payload.type === 'work_session_reminder') {
+      const uid = auth().currentUser?.uid;
+      if (!uid) return;
+      const doc = await firestore().collection('Users').doc(uid).get({source: 'server'});
+      if (!navigationRef.isReady()) return;
+      if (canUseWorkRecords(doc.data())) {
+        navigationRef.navigate('WorkTracking', {sessionId: payload.workSessionId});
+      } else {
+        navigationRef.navigate('Premium');
+      }
+      return;
+    }
     if (target === 'Messages') {
       navigationRef.navigate('Messages');
       return;

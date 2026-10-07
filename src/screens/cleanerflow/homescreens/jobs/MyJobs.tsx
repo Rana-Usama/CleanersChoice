@@ -26,6 +26,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import CustomModal from '../../../../components/CustomModal';
 import ModalWrapper from '../../../../components/ModalWrapper';
+import {useWorkSessions} from '../../../../components/work/WorkSessionProvider';
 
 const SERVER_URL = 'https://cleaners-choice-server.vercel.app';
 
@@ -42,6 +43,7 @@ interface Job {
 }
 
 const MyJobs = ({navigation}: any) => {
+  const work = useWorkSessions();
   const [activeTab, setActiveTab] = useState<
     'active' | 'completed' | 'cancelled'
   >('active');
@@ -205,6 +207,7 @@ const MyJobs = ({navigation}: any) => {
         setConfirmModal(prev => ({...prev, visible: false}));
         setCompleteLoading(job.id);
             try {
+              if (!(await work.beforeJobAction(job.id, 'complete'))) return;
               await firestore().collection('Jobs').doc(job.id).update({
                 status: 'pending_completion',
                 completionRequestedAt:
@@ -271,7 +274,7 @@ const MyJobs = ({navigation}: any) => {
               showToast({
                 type: 'error',
                 title: 'Error',
-                message: 'Failed to request completion',
+                message: 'Completion was not requested. Any work hours saved earlier are retained; retry the job action.',
               });
             } finally {
               setCompleteLoading(null);
@@ -295,6 +298,7 @@ const MyJobs = ({navigation}: any) => {
         setConfirmModal(prev => ({...prev, visible: false}));
         setCancelLoading(job.id);
             try {
+              if (!(await work.beforeJobAction(job.id, 'cancel'))) return;
               await firestore().collection('Jobs').doc(job.id).update({
                 confirmedCleaner: null,
                 status: 'active',
@@ -544,6 +548,7 @@ const MyJobs = ({navigation}: any) => {
               }
               onPress2={() => {}}
               delete={false}
+              workJob={activeTab === 'active' ? {id: item.id, eligible: item.status === 'confirmed'} : undefined}
               footer={
                 activeTab === 'completed' && !invoicedJobIds.has(item.id) ? (
                   <View style={styles.completedFooter}>

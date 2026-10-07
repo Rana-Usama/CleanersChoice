@@ -48,6 +48,8 @@ notifee.onBackgroundEvent(async ({type, detail}) => {
         );
       } catch (_) {}
     }
+  } else if (type === EventType.PRESS) {
+    handleNotificationTap(detail.notification?.data);
   }
 });
 
