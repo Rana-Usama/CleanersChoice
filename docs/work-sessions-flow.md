@@ -345,3 +345,203 @@ Month/account changes clear previous totals and ignore late callbacks. Partial/f
 Checks pass: 255 tests across 24 relevant suites; Firebase Functions build/lint; focused reporting/mobile lint. Full app TypeScript diagnostics match the pre-existing baseline. New coverage includes the reconciled 42h30m/9h/$945/$22.24 example and 44h44m/$21.13 running preview; overnight confirmed/pending/running splitting; DST, leap/year boundaries, UTC+14/UTC-11/fractional offsets; fixed invoice counting; paid-later recognition and legacy paidAt formats; money-only/unlinked jobs; conservative invoice follow-up; correction/discard/payment-reversal updates; zero-hour rates; overdue cutoff; screen drill-down; cache/read errors; focus cleanup; month and account isolation.
 
 No app release, cloud deployment, or remote configuration change was performed. Tracking remains disabled by default. This step introduces no new cloud function, collection, index, payment operation, or data migration; it uses the session indexes and invoice ownership rules already staged. Final rollout still requires the previous backend/rules/index deployment checks, real-device month selection/timezone changes, multi-device recovery/review, invoice updates, and iOS/Android acceptance testing before enabling AppConfig/workSessions.
+
+## Step 8 verification — 8 October 2026
+
+Status: local automated verification passed; staging and native-device acceptance remain outstanding. Step 8 is not release sign-off. Nothing was deployed, no production data was changed, and the disabled configuration template remains unchanged.
+
+### Changes and measured results
+
+- Added `npm run test:work` for the tracking/reporting and adjacent regression suites. **262 tests across 25 suites passed.** This includes reminders denied by the OS, persisted exact retries after a simulated restart, expiry routing, review/correction screens, invoice access, paid-month recognition, overnight/month/DST splitting, the reconciled $945 example, cleaner visibility and customer job behavior. These are automated component/logic checks, not native-device tests.
+- Added `firebase.work-tests.json` and `scripts/test-work-sessions-emulator.cjs` for **real Firestore transactions and compiled security rules**, using the existing Firebase SDK dependencies. **15 integration tests passed.** The runner requires the exact project `demo-cleaners-work` and host `127.0.0.1:8180` before clearing fixtures; it refuses other targets. Only Firestore runs, so no push, subscription, payment or job-trigger function is invoked.
+- Verified conflicting clock-ins, simultaneous identical retries, overlapping manual saves, competing revisions, concurrent repeated sweeps, expiry with the switch disabled, delayed cancellation, deleted jobs, explicit review protection, manual age/cap/eligibility limits, and unchanged invoice money. Verified owner-scoped reads, server-only session/lock/receipt/history/config writes, blocked/refunded account restrictions, reserved recovery notices, customer invoice access and guest browsing.
+- Found and fixed a rules mismatch: mixed-case or padded blocked account states such as `" Suspended "` were rejected by the server but allowed work-record reads. Work-record rules now normalize casing and match surrounding whitespace; emulator cases also cover disabled/deleted variants. This takes effect in the cloud only after the reviewed rules are deployed.
+- Corrected the existing iOS authorization test to account for the 2.5-second authorization grace followed by the 20-second GPS deadline. It now checks GPS fallback starts before timeout. No location behavior or screen was changed.
+- Functions build/lint and lint for the changed test tooling passed. App TypeScript diagnostics match the pre-step baseline: existing errors remain in `IntroVideoPlayer`, `ServiceThree` and customer `ServiceDetails`. The separate generic `App.test.tsx` cannot run with the current Jest setup because the React Navigation ESM import is not transformed; it is outside the 25 passing suites. A complete app build/render has not been certified.
+
+### Repeatable local verification
+
+Run `npm run test:work`. For integration checks, install the existing root/functions dependencies and use Node 24, Firebase CLI and Java 21 or newer, then run `npm run test:work:emulator`. Ports 8180, 9150 and the standard Firebase emulator hub/logging ports must be available. The emulator runner resets only the dedicated demo project's local database on each run. Permission-denied SDK logs during negative rules cases are expected; assertions determine pass/fail.
+
+On this Mac, Java 21 was supplied by Android Studio's bundled runtime:
+
+```sh
+env JAVA_HOME='/Applications/Android Studio.app/Contents/jbr/Contents/Home' PATH='/Applications/Android Studio.app/Contents/jbr/Contents/Home/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin' npm run test:work:emulator
+```
+
+The emulator checks compile the repository rules but do not compare them with live Console rules, enforce production composite-index availability, validate real ID tokens, deliver FCM/Notifee notifications, or render native controls. Those checks still require the staging setup below.
+
+### Outstanding acceptance checks
+
+No Android test device was connected. Access to inspect iOS simulators was declined. A staging Firebase project and test cleaner/customer accounts have not been supplied; production tracking stays disabled.
+
+Before sign-off, use a staging build configured to the staging project, review its existing rules against the repository rules, deploy the staged backend/rules/indexes there, wait for indexes to build, and enable tracking for the isolated test cohort. Record build/device/OS versions and results for each scenario on iOS and Android:
+
+| Scenario | Expected outcome | Status |
+| --- | --- | --- |
+| Job expected end / reminders | 9 AM + 6h reminds at 3 PM; recovery cutoff is 6 PM, with the 12h cap taking precedence. General work without a planned finish uses its cap. | Device/notification check pending |
+| App killed, backgrounded, or rebooted | Saved session survives; backend recovery leaves zero confirmed hours until review; foreground reconciliation shows the same record. | Device/cloud check pending |
+| Denied notifications and offline retry | Clock controls still work; retry sends the original request once after reconnect/relaunch; no duplicate hours or stale reminder after finish. | Device check pending |
+| Two signed-in devices | One start wins; both show the same session. Concurrent edits reject stale revisions, and repeated job events/sweeps do not duplicate audit or hours. | Staging multi-device check pending |
+| Expiry / switch disabled / account restriction | Ordinary expiry retains finish/review/history and existing invoices; new starts fail. Disabled/refunded/suspended accounts cannot use limited access to bypass restrictions. | Staging navigation check pending |
+| Completion, cancellation, deletion and reassignment | Actual hours save before a cleaner job action proceeds; external changes require review; explicit reviewed records survive delayed events. | Staging lifecycle check pending |
+| Manual entry and correction | Keyboard/date pickers, overnight dates, notes and errors are usable; Save is pending, confirm counts once, discard removes hours, full audit remains. | Native UI check pending |
+| Month and paid invoice updates | Dashboard and Work Hours reconcile; hours split in the saved timezone, money follows paidAt; live invoice/session changes refresh correctly. | Native/reporting check pending |
+| Customer and subscription regressions | Customer browsing/posting/completion/invoice navigation stays correct; real renewal/payment behavior and cleaner visibility remain correct. | Staging regression check pending |
+| Layout and accessibility | Small screens, keyboard, large text, back gestures and available themes are usable on both platforms. | Native UI check pending |
+
+Step 9 remains the gradual production release after these acceptance checks and the pre-existing build/test limitations are resolved or explicitly assessed. This local verification does not enable tracking or replace staging sign-off.
+
+### Admin access prerequisite after rules deployment
+
+The admin UI uses `Users/{uid}.admin == true`, while the `CleanerServices` rules require the signed-in token's `admin == true` custom claim for platform-wide queries. A Firestore admin flag alone does not satisfy those rules. Consequently `fetchCleanerServices()` fails without the claim; `AdminDashboard` awaits that call before loading any counts, leaving both subscription and active-job tiles at their initial values. The separate active-jobs query/count is permitted for signed-in users by the repository rules.
+
+An additional emulator regression reproduced the missing-claim failure and verified that the claim permits unfiltered service reads/counts with 32 hidden profiles. It also verifies that active job reads/counts work without the claim and that an admin claim does not bypass another cleaner's work-session ownership. **All 16 emulator integration tests passed.** This does not inspect or change any live account's claims.
+
+The existing server utility at `/Users/ReactNativeProjects/cleanerChoiceServer/CleanersChoice-Server/scripts/set-admin-claim.js` mirrors currently flagged admins into Firebase Auth claims and preserves their other claims. Run it from that server repository with its configured service-account environment: preview using `PROJECT_ID=cleaners-choice-3cc65 node scripts/set-admin-claim.js`, check that the listed admins are intended, then apply using the same command plus `--commit`. Affected admins must sign out and sign back in to obtain a token containing the claim before refreshing Admin Controls. Repeat this prerequisite when granting admin access to another account; rules deployment alone does not mint claims. A claim already present in Firebase Auth may still be absent from an older device token.
+
+If the standalone Active Jobs screen still fails after fresh sign-in, inspect its actual error: the repository's `Jobs` read rules allow that query, so missing admin claims alone do not explain that separate failure. Do not loosen public service visibility or work-record ownership to repair admin access.
+
+## PDF UI integration — 10 October 2026
+
+The monthly/work surfaces now follow the mockups on PDF pages 13–16, with the agreed pending-hours corrections and no paused/break state:
+
+- Dashboard: today's confirmed, assigned jobs with schedule, expected duration and clock-in controls; general-work entry; monthly Work Hours and Collected tiles with separate Earned and Unpaid figures from the current reporting service; full-report navigation. The jobs listener stops when the dashboard loses focus and clears on account changes. Today uses each job's saved schedule timezone.
+- Work Hours: gradient header, rounded headline card, month picker, separate pending estimate, earnings grid, amber review prompt, grouped by-job rates and session rows, manual-entry and invoice drill-down. Rows and figures can wrap instead of truncating long names or overlapping.
+- Recovery: centred Still Working prompt; bottom sheets for review/correction with quick duration picks, explicit dates, preview and discard confirmation. Record-detail actions and manual Save remain outside the scrolling form and account for the safe-area inset and keyboard.
+- Manual entry: a transparent-modal bottom sheet, job selection, explicit start/finish dates, notes, duration, validation checklist and pending-save notice. Overnight previews describe splitting between months.
+- Shared layout: cards share the header's scroll surface, so negative margins on individual cards no longer clip their content. Large-text monthly tiles stack, timer rows adapt to narrow widths, and job-card footers wrap. Job Details' action bar now takes its own space below the scroll view and grows instead of using an absolute fixed-height overlay; shared action buttons grow with their labels.
+
+Existing ownership, subscription gates, work-action retry/confirmation, audit history, earned calculations and invoice `paidAt` recognition are preserved. The new Discard entry point opens the existing confirmation flow and does not send an action until explicitly confirmed. This UI work makes no cloud deployment, rules/index change, or remote-config write.
+
+Verification: 292 work-flow tests across 29 suites passed, including account-isolated today's-job loading/retry, schedule-day boundaries and explicit discard confirmation. TypeScript diagnostics match the pre-existing baseline. React test-renderer captures were also generated at 390px, 320px and 320px with 1.6 text scale. These captures verify component rendering, not native geometry: browser security blocked opening the local preview file, and no native visual sign-off is claimed. Physical-device checks remain required for spacing, keyboard/date pickers, large text and iOS/Android gestures.
+
+### Safe-area crash correction
+
+Physical-device testing reported `No safe area value available` from `WorkSessionDialog`. The provider was inside `StackNavigator`, while `WorkSessionProvider` renders that navigator and its dialog as siblings. The dialog's new inset hook therefore had no ancestor provider, even when the dialog was closed. Move the existing safe-area provider to `App`, above both the work provider and navigator, and seed it with native `initialWindowMetrics`. No inset fallback or native dependency change is required.
+
+The app-level regression uses the real safe-area provider and throwing hook, stubbing only native measurement and unrelated services. It checks hidden/open dialogs and propagation of changed native insets; earlier screen-level inset mocks did not cover app-level provider placement. All 294 work-flow tests across 30 suites pass; focused fix lint passes and TypeScript diagnostics remain at the existing baseline. Reload the device app to load this JavaScript fix; no Firebase deployment is needed.
+
+### Named work and start-modal refinement
+
+The start dialog now uses a compact header, a work-name input, small matching start/end date-time controls and a fixed Clock in footer. The form scrolls when the keyboard is open; controls stack at widths below 360 or text scales above 1.2. The timezone editor, optional-finish toggle, Now label and Choose time placeholder have been removed.
+
+- New unlinked clock-ins require a work name in the app. The server accepts optional `workName` on creation, validates 1–120 characters, trims it and stores it on the session. Older clients and historical unnamed records remain supported. Linked work uses the saved job title; existing records cannot be renamed through a time update.
+- Start time is selectable for a new live timer. The client sends the selected `startedAt`, and the server validates a current/past timestamp with the original hard cap still in the future. Future scheduling is excluded by the user’s explicit choice to keep a live timer. The cap is anchored to the selected start, overlap is checked across the full interval, and clock-out counts from that start. Older/completed work belongs in the manual-record flow. Clients that omit `startedAt` retain server-now behavior.
+- End time shows a date/time value and is editable for unlinked work. Its initial visible value is one hour ahead, capped to the session limit; submitting Clock in saves that value as the expected finish. Moving the start earlier also clamps the end to the earlier cap. The end must remain future and within the cap, schedules the existing reminder/recovery ladder and never pre-confirms hours. Linked jobs show their scheduled end; overdue jobs still require a revised end before starting. The API continues to accept unnamed/unplanned starts from older clients.
+- The device's local times are used for the picker and its displayed values. The existing reporting timezone remains internal and continues to determine monthly allocation. Invalid stored preferences fall back to the device zone.
+- Adding a plan to an existing timer displays its saved name and original start and respects its original hard cap. An expired cap blocks the picker and saving; it does not extend the timer.
+- Names appear in the active banner, clock panel, monthly session list, tracking/review lists and record details. Unlinked work remains grouped together in the monthly by-job aggregate; naming a session does not create a new job or change earnings.
+- Pending requests preserve the exact name, timestamps and request ID for retry. The receipt hash omits an absent `workName`, preserving replay of requests created before this release.
+
+Deploy `workSessionOperation` from this repository before using named clock-ins with the updated app. No new Firestore rule or index is required for this change. Physical-device layout and picker checks remain necessary; renderer tests verify form behavior and responsive style selection, not native pixel geometry.
+
+Selected-start verification: 324 work-flow tests across 31 suites pass, covering chosen start persistence, retry identity, overlap with confirmed work, caps anchored to the chosen start, date-picker behavior and compact responsive controls. Functions build/lint pass; app TypeScript diagnostics remain at the existing nine-error baseline. Two real-Firestore emulator cases were added, but this machine’s Java 17 runtime cannot start the installed Firebase CLI, which requires Java 21 or newer. No native visual sign-off is claimed.
+
+### Work hours and earned only
+
+The current work-tracking UI displays work hours and earned amounts. Dashboard tiles and the monthly summary no longer show Collected, Unpaid / unbilled, awaiting-payment messages, effective cash rates or provisional cash rates. By-job rows show confirmed hours and earned amounts. Pending/review and running-hour indicators remain because they explain which hours count.
+
+The monthly paid-invoice disclosure, tracking-screen collected-earnings link and inline invoice list were removed. The monthly hook now listens only to work sessions and the fixed-price completion ledger, so invoice loading or payment errors cannot delay these totals. Cache indicators include both of those data sources, and account/month/focus isolation remains enforced. The existing report calculations and earned-recognition rules remain intact; this change does not change invoices or payments in their own modules.
+
+Verification: all 326 work-flow tests across 31 suites pass, including display of earned rather than collected amounts, absence of payment breakdowns, completion without invoice reads, cache updates, retry, month/account isolation and existing invoice-access tests. Focused app lint has no errors; TypeScript remains at the existing nine-error baseline. This UI/listener update needs an app reload, with no additional Firebase deployment.
+
+
+## General-work expected earnings — 10 October 2026
+
+The cleaner chose a total amount per work record, not an hourly rate. The general
+Start work modal and unlinked manual-entry form now offer Expected earnings.
+Record details displays that total and allows Edit earnings while running,
+pending or confirmed. Zero is valid; blank new entries retain hours-only behavior.
+
+Only confirmed general-work records contribute their explicit total to Earned.
+The amount is counted once in the finish month in the saved reporting timezone
+(`endedAt - 1`, so an exact midnight finish stays with the day just worked).
+Hours continue splitting across months. Pending/running/discarded records add
+no money, and the saved default hourly rate is never added on top of an explicit
+total. Old records can receive a total through Edit earnings without migration.
+
+The server's new `editEarnings` action checks ownership, general-work eligibility,
+amount precision/range and optimistic revision. It changes no times, status,
+duration, deadlines or lock ownership. Audits retain both amounts, and the
+existing persisted queue retries the original request ID and exact amount.
+Existing invoice payments and paidAt recognition are unaffected.
+
+Deploy from this repository before device testing:
+`firebase deploy --project cleaners-choice-3cc65 --only functions:workSessionOperation`.
+No rules, indexes or remote-config change is needed for this addition.
+
+Verification: all 348 work-flow tests across 32 suites pass, including total-money
+validation, amount-only edits, ownership/stale revision protection, receipt and
+queue replay, pending/manual records, default-rate double-count prevention,
+month/zone boundaries, details/history controls and real safe-area context for
+the earnings modal. Cloud build and lint pass; focused app lint has zero errors.
+App TypeScript diagnostics remain at the existing nine-error baseline.
+Device rendering and live Firebase deployment have not been performed here.
+
+
+## Timezone UI removed — 10 October 2026
+
+The work flow no longer displays timezone fields, identifiers, or explanatory
+labels in manual entry, review/correction previews, recent records, details,
+or monthly report help. New records continue choosing a valid reporting zone
+automatically from the saved preference or device, and existing records retain
+their saved zone for calculations. Invalid cached manual-entry preferences now
+fall back to the device zone rather than leaving an invisible field to correct.
+Dates, start/end selections, monthly splits and money recognition are preserved.
+This is an app-only update; no additional cloud deployment is required.
+
+
+## Manual-entry work name — 10 October 2026
+
+Add record manually now asks for a typed Work name instead of a work-type/job
+selector. New entries require a nonblank name (up to 120 characters), save it
+as `workName`, and are unlinked general-work records with the existing total
+Expected earnings field. Start/end times, notes, pending confirmation and retry
+behavior stay intact. A previously queued linked/manual action remains locked
+and retries its original payload; no saved job association is rewritten.
+The server already supports named manual records, so this form change requires
+an app reload and no additional Firebase deployment.
+
+
+## Job-application notification permission fix — 10 October 2026
+
+The cleaner's application succeeded, but JobDetails then queried Notifications
+addressed to the customer and tried to update that customer's grouped notice.
+Recipient-only notification rules correctly rejected those client operations.
+The application handler now writes only its Jobs applicant entry and preserves
+its existing success/error UI. It no longer reads or writes the customer's inbox
+or sends a second client-side application push.
+
+The new `notifyJobApplications` Jobs update trigger detects newly added applicants
+and uses Admin SDK transactions to create/update one grouped customer notice.
+It reuses a legacy application notice when present, reads the live unique
+applicant count rather than incrementing an old count, and records the live job
+commit version to handle duplicate and out-of-order events. New applications
+reset unread; replayed events preserve a customer's read state. Deleted jobs,
+withdrawn applicants and unrelated updates are skipped. Inbox failures retry;
+a missing/invalid push token cannot undo the stored notice. Push remains best
+effort after the durable inbox write.
+
+Before testing a new application, deploy from this repo:
+`firebase deploy --project cleaners-choice-3cc65 --only functions:notifyJobApplications`,
+then reload the updated app. Existing notification privacy rules remain in place;
+no rules/index deployment is needed. Historical missing notices are not backfilled
+by deploying a trigger; the next new application produces the actual grouped count.
+
+Verification: all 10 focused notification/trigger tests pass. Functions TypeScript
+build and lint pass. Live deployment and physical-device testing remain with the
+user. JobDetails' pre-existing app lint errors remain outside this focused fix.
+
+
+## Simple today's-job cards — 10 October 2026
+
+Dashboard cards now show the job name and scheduled time, followed by a short
+clock-action footer. Running work shows Working, its elapsed timer and Clock Out;
+pending work retains Review times. Repeated titles, location, budget, expected
+hours/finish, hourly-rate chips and explanatory paragraphs are removed from the
+dashboard card. Tapping its header opens full JobDetails for the remaining info.
+The simple footer is limited to today's cards; other work panels retain their
+existing detail. Ownership, subscription/review gates, errors and pending retries
+remain in place. Seven focused navigation and clock-action tests pass.
+This is an app-only UI change and requires no Firebase deployment.

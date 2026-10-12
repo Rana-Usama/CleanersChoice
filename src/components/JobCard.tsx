@@ -24,77 +24,83 @@ const JobCard = (props: props) => {
           activeOpacity={0.9}
           style={styles.cardContent}
           onPress={props.onPress}>
-        {/* Header with delete button */}
-        <View style={styles.header}>
-          <View style={styles.titleContainer}>
-            <Text style={styles.nameText} numberOfLines={2}>
-              {props.name}
-            </Text>
-            {props.delete && (
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={props.onPress2}
-                style={styles.deleteButton}>
-                <Image
-                  source={Icons.delete}
-                  resizeMode="contain"
-                  style={styles.deleteIcon}
-                />
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
-
-        {/* Date and Location */}
-        <View style={styles.detailsSection}>
-          <View style={styles.detailRow}>
-            <Image
-              source={Icons.calendar}
-              resizeMode="contain"
-              style={styles.detailIcon}
-            />
-            <Text style={styles.detailText}>{props.date}</Text>
+          {/* Header with delete button */}
+          <View style={styles.header}>
+            <View style={styles.titleContainer}>
+              <Text style={styles.nameText} numberOfLines={2}>
+                {props.name}
+              </Text>
+              {props.delete && (
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={props.onPress2}
+                  style={styles.deleteButton}>
+                  <Image
+                    source={Icons.delete}
+                    resizeMode="contain"
+                    style={styles.deleteIcon}
+                  />
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
 
-          <View style={styles.detailRow}>
-             <Image
-              source={Icons.location}
-              resizeMode="contain"
-              style={styles.detailIcon}
-            />
-            <Text style={styles.detailText} numberOfLines={1}>
-              {props.location || 'Not Added'}
-            </Text>
-          </View>
-        </View>
+          {/* Date and Location */}
+          <View style={styles.detailsSection}>
+            <View style={styles.detailRow}>
+              <Image
+                source={Icons.calendar}
+                resizeMode="contain"
+                style={styles.detailIcon}
+              />
+              <Text style={styles.detailText}>{props.date}</Text>
+            </View>
 
-        {/* Footer with Price and CTA */}
-        <View style={styles.footer}>
-          <View style={styles.priceSection}>
-            {props.price ? (
-              <>
-                <Text style={styles.budgetText}>Budget</Text>
-                <Text style={styles.priceText}>${props.price}</Text>
-              </>
-            ) : (
-              <Text style={styles.priceText}>Custom Budget</Text>
-            )}
+            <View style={styles.detailRow}>
+              <Image
+                source={Icons.location}
+                resizeMode="contain"
+                style={styles.detailIcon}
+              />
+              <Text style={styles.detailText} numberOfLines={1}>
+                {props.location || 'Not Added'}
+              </Text>
+            </View>
           </View>
 
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={props.onPress}
-            style={styles.ctaButton}>
-            <Text style={styles.ctaText}>View Details</Text>
-            <Image
-              source={Icons.arrowRight}
-              resizeMode="contain"
-              style={styles.arrowIcon}
-            />
-          </TouchableOpacity>
-        </View>
+          {/* Footer with Price and CTA */}
+          <View style={styles.footer}>
+            <View style={styles.priceSection}>
+              {props.price ? (
+                <>
+                  <Text style={styles.budgetText}>Budget</Text>
+                  <Text style={styles.priceText}>${props.price}</Text>
+                </>
+              ) : (
+                <Text style={styles.priceText}>Custom Budget</Text>
+              )}
+            </View>
+
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={props.onPress}
+              style={styles.ctaButton}>
+              <Text style={styles.ctaText}>View Details</Text>
+              <Image
+                source={Icons.arrowRight}
+                resizeMode="contain"
+                style={styles.arrowIcon}
+              />
+            </TouchableOpacity>
+          </View>
         </TouchableOpacity>
-        {props.workJob && <WorkClockPanel jobId={props.workJob.id} jobEligible={props.workJob.eligible} compact />}
+        {props.workJob && (
+          <WorkClockPanel
+            jobId={props.workJob.id}
+            jobEligible={props.workJob.eligible}
+            compact
+          />
+        )}
         {props.footer}
       </View>
     </View>
@@ -182,10 +188,14 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: Colors.grayBorderOverlay50,
     paddingTop: RFPercentage(1.5),
+    flexWrap: 'wrap',
+    gap: 12,
   },
   priceSection: {
     flexDirection: 'row',
     alignItems: 'baseline',
+    flexWrap: 'wrap',
+    flexShrink: 1,
   },
   budgetText: {
     color: Colors.placeholderColor,
@@ -197,7 +207,7 @@ const styles = StyleSheet.create({
     color: Colors.gradient1,
     fontFamily: Fonts.fontBold,
     fontSize: RFPercentage(1.9),
-    top:1
+    top: 1,
   },
   ctaButton: {
     flexDirection: 'row',
@@ -206,12 +216,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: RFPercentage(1.2),
     paddingVertical: RFPercentage(0.8),
     borderRadius: RFPercentage(1),
+    flexShrink: 1,
   },
   ctaText: {
     color: Colors.gradient1,
     fontFamily: Fonts.semiBold,
     fontSize: RFPercentage(1.6),
     marginRight: RFPercentage(0.5),
+    flexShrink: 1,
   },
   arrowIcon: {
     width: RFPercentage(1.6),

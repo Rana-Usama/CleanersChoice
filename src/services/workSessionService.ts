@@ -96,6 +96,8 @@ type NewWorkRequest = {
   requestId: string;
   reportingTimeZone: string;
   jobId?: string | null;
+  workName?: string;
+  expectedEarnings?: number;
   note?: string;
 };
 type TimesRequest = {
@@ -106,8 +108,9 @@ type TimesRequest = {
   note?: string;
 };
 
-export const clockIn = (input: NewWorkRequest & {plannedFinishAt?: number}) =>
-  operateWorkSession({...input, action: 'clockIn'});
+export const clockIn = (
+  input: NewWorkRequest & {startedAt?: number; plannedFinishAt?: number},
+) => operateWorkSession({...input, action: 'clockIn'});
 export const clockOut = (input: {
   requestId: string;
   sessionId: string;

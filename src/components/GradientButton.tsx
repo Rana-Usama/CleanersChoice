@@ -3,7 +3,6 @@ import {
   Text,
   TouchableOpacity,
   ActivityIndicator,
-  View,
 } from 'react-native';
 import React from 'react';
 import LinearGradient from 'react-native-linear-gradient';
@@ -31,9 +30,9 @@ const GradientButton: React.FC<Props> = (props: Props) => {
         disabled={props.disabled || props.loading}
         style={styles.touchableArea}>
         {props.loading ? (
-          <ActivityIndicator 
-            size="small" 
-            color={Colors.background} 
+          <ActivityIndicator
+            size="small"
+            color={Colors.background}
             animating={true}
           />
         ) : (
@@ -50,7 +49,7 @@ export default GradientButton;
 
 const styles = StyleSheet.create({
   nextButton: {
-    height: RFPercentage(6.2),
+    minHeight: RFPercentage(6.2),
     borderRadius: RFPercentage(100),
     alignItems: 'center',
     justifyContent: 'center',
@@ -58,7 +57,9 @@ const styles = StyleSheet.create({
   },
   touchableArea: {
     width: '100%',
-    height: '100%',
+    minHeight: RFPercentage(6.2),
+    paddingVertical: 12,
+    paddingHorizontal: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -67,5 +68,6 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.semiBold,
     color: Colors.background,
     textAlign: 'center',
+    flexShrink: 1,
   },
 });

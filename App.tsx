@@ -21,8 +21,11 @@ import {AlertProvider} from './src/components/AlertProvider';
 import {toastConfig} from './src/utils/toastConfig';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
+import {
+  SafeAreaProvider,
+  initialWindowMetrics,
+} from 'react-native-safe-area-context';
 import {WorkSessionProvider} from './src/components/work/WorkSessionProvider';
-
 
 /**
  * Mirror the FCM token onto the user's profile so the push functions can
@@ -178,7 +181,6 @@ const App: React.FC = () => {
     };
   }, [onDisplayNotification]);
 
-  
   useEffect(() => {
     return auth().onAuthStateChanged(async user => {
       if (!user) return;
@@ -193,9 +195,12 @@ const App: React.FC = () => {
 
   // Handle notifee notification tap in foreground (e.g. invoice download)
   useEffect(() => {
-    notifee.getInitialNotification().then(initial => {
-      if (initial) handleNotificationTap(initial.notification.data);
-    }).catch(() => {});
+    notifee
+      .getInitialNotification()
+      .then(initial => {
+        if (initial) handleNotificationTap(initial.notification.data);
+      })
+      .catch(() => {});
     return notifee.onForegroundEvent(({type, detail}) => {
       if (type !== EventType.PRESS) return;
 
@@ -219,7 +224,8 @@ const App: React.FC = () => {
 
   return (
     <GestureHandlerRootView style={styles.gestureRoot}>
-      {/*
+      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+        {/*
         @rneui's <ThemeProvider> used to wrap everything below and was removed:
         it provided nothing (no @rneui themed component is rendered anywhere in
         this app) and it re-rendered the entire tree forever.
@@ -235,23 +241,24 @@ const App: React.FC = () => {
         with a MODULE-SCOPE theme (`const appTheme = createTheme({...})`
         outside the component) so the reference stays stable.
       */}
-      <StripeProvider publishableKey={PUBLISHABLE_KEY}>
-        <Provider store={store}>
-          <StatusBar
-            barStyle={'dark-content'}
-            translucent
-            backgroundColor="transparent"
-          />
-          <AlertProvider>
-            <UnreadMessagesProvider>
-              <WorkSessionProvider>
-                <StackNavigator />
-              </WorkSessionProvider>
-            </UnreadMessagesProvider>
-          </AlertProvider>
-          <Toast config={toastConfig} />
-        </Provider>
-      </StripeProvider>
+        <StripeProvider publishableKey={PUBLISHABLE_KEY}>
+          <Provider store={store}>
+            <StatusBar
+              barStyle={'dark-content'}
+              translucent
+              backgroundColor="transparent"
+            />
+            <AlertProvider>
+              <UnreadMessagesProvider>
+                <WorkSessionProvider>
+                  <StackNavigator />
+                </WorkSessionProvider>
+              </UnreadMessagesProvider>
+            </AlertProvider>
+            <Toast config={toastConfig} />
+          </Provider>
+        </StripeProvider>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 };

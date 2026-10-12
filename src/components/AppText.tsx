@@ -1,6 +1,6 @@
 import React from 'react';
 import {Text, TextProps} from 'react-native';
-import {FontScaling, Typography, TypographyVariant} from '../constants/Themes';
+import {Fonts, FontScaling, Typography, TypographyVariant} from '../constants/Themes';
 
 interface AppTextProps extends TextProps {
   /** Optional typography preset from Themes.Typography (fontSize + lineHeight). */
@@ -20,7 +20,11 @@ const AppText: React.FC<AppTextProps> = ({variant, style, children, ...rest}) =>
   return (
     <Text
       maxFontSizeMultiplier={FontScaling.maxMultiplier}
-      style={[variant ? Typography[variant] : undefined, style]}
+      style={[
+        {fontFamily: Fonts.fontRegular},
+        variant ? Typography[variant] : undefined,
+        style,
+      ]}
       {...rest}>
       {children}
     </Text>

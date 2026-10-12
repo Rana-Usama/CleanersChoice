@@ -1,94 +1,252 @@
 import React from 'react';
-import {ActivityIndicator, Text, TouchableOpacity, View} from 'react-native';
+import {
+  ActivityIndicator,
+  Text,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
+} from 'react-native';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {Colors} from '../../constants/Themes';
 import type {WorkMonthlyReport} from '../../services/workMonthlyReport';
 import {workCurrency} from '../../services/workMonthlyReport';
 import {formatWorkDuration} from '../../utils/workSessionFlow';
-import {workRecordStyles as styles} from './WorkRecordLayout';
+import {workStyles as s} from './workTheme';
+import {WorkIconTile} from './WorkUI';
 
+/**
+ * Monthly work hours, separate pending hours and earned amounts.
+ *
+ * `compact` uses the dashboard tiles; the full form includes the month picker.
+ */
 export const WorkMonthSummary = ({
   report,
   loading,
   error,
   fromCache,
   onRetry,
+  compact = false,
+  monthLabel,
+  onPickMonth,
 }: {
   report: WorkMonthlyReport | null;
   loading: boolean;
   error: string;
   fromCache: boolean;
   onRetry(): void;
-}) => (
-  <View style={styles.card}>
-    {loading && (
-      <>
-        <ActivityIndicator />
-        <Text style={styles.help}>Loading monthly hours and invoices…</Text>
-      </>
-    )}
-    {!!error && (
-      <TouchableOpacity onPress={onRetry}>
-        <Text style={styles.error}>{error}</Text>
-        <Text style={styles.link}>Retry monthly totals</Text>
-      </TouchableOpacity>
-    )}
-    {report && (
-      <>
-        <Text style={styles.help}>Confirmed hours</Text>
-        <Text style={[styles.title, styles.headline]}>
-          {formatWorkDuration(report.confirmedMs)}
-        </Text>
-        <Text style={styles.help}>
-          Pending: {formatWorkDuration(report.pendingMs)} ·{' '}
-          {report.pendingCount}{' '}
-          {report.pendingCount === 1 ? 'record' : 'records'} · not counted
-        </Text>
-        <Text style={styles.title}>
-          Collected: {workCurrency(report.collected)}
-        </Text>
-        <Text style={styles.help}>
-          Effective rate:{' '}
-          {report.effectiveRate === null
-            ? 'Unavailable until hours are confirmed'
-            : `${workCurrency(report.effectiveRate)}/hr`}
-        </Text>
-        {report.runningMs > 0 && (
-          <View>
-            <Text style={styles.help}>
-              Including current session:{' '}
-              {formatWorkDuration(report.includingRunningMs)}
+  compact?: boolean;
+  monthLabel?: string;
+  onPickMonth?: () => void;
+}) => {
+  const {fontScale} = useWindowDimensions();
+  const tile = [s.tile, fontScale > 1.2 && {flexBasis: '100%' as const}];
+  return (
+    <View style={compact ? {gap: 12} : s.card}>
+      {loading && (
+        <View style={s.row}>
+          <ActivityIndicator color={Colors.gradient1} />
+          <Text style={[s.help, s.grow]}>Loading work hours and earnings…</Text>
+        </View>
+      )}
+
+      {!!error && !report && (
+        <TouchableOpacity accessibilityRole="button" onPress={onRetry}>
+          <Text style={s.error}>{error}</Text>
+          <Text style={s.link}>Retry monthly totals</Text>
+        </TouchableOpacity>
+      )}
+
+      {report && compact && (
+        <>
+          <View style={s.tileRow}>
+            <View style={tile}>
+              <View style={s.row}>
+                <WorkIconTile
+                  icon="clock-outline"
+                  color={Colors.gradient1}
+                  bg={Colors.blueBg200}
+                />
+                <Text style={[s.sml, s.grow]}>Work hours</Text>
+              </View>
+              <Text style={[s.mid, {marginTop: 6}]}>
+                {formatWorkDuration(report.confirmedMs)}
+              </Text>
+              <Text style={s.sml}>Confirmed hours</Text>
+              {report.pendingCount > 0 && (
+                <Text style={[s.sml, {color: Colors.amberDarkText}]}>
+                  + {formatWorkDuration(report.pendingMs)} pending review
+                </Text>
+              )}
+              {report.runningMs > 0 && (
+                <Text style={s.sml}>
+                  {formatWorkDuration(report.includingRunningMs)} incl. running
+                </Text>
+              )}
+            </View>
+            <View style={tile}>
+              <View style={s.row}>
+                <WorkIconTile
+                  icon="cash"
+                  color={Colors.success}
+                  bg={Colors.greenBg100}
+                />
+                <Text style={[s.sml, s.grow]}>Earned</Text>
+              </View>
+              <Text style={[s.mid, {marginTop: 6}]}>
+                {workCurrency(report.earned)}
+              </Text>
+              <Text style={s.sml}>
+                Confirmed hourly work and completed jobs
+              </Text>
+            </View>
+          </View>
+          {/* {report.unratedMs > 0 && (
+            <Text style={s.sml}>
+              {formatWorkDuration(report.unratedMs)} has no saved rate — not
+              included in earned
             </Text>
-            <Text style={styles.help}>
-              Provisional rate:{' '}
-              {report.provisionalRate === null
-                ? 'Unavailable'
-                : `${workCurrency(report.provisionalRate)}/hr`}{' '}
-              · running time is not confirmed
+          )} */}
+          {report.overdue && (
+            <Text style={s.error}>
+              A timer reached its stop deadline. Its time is pending until
+              reviewed.
+            </Text>
+          )}
+          {!!report.invalidRecordCount && (
+            <Text style={s.error}>
+              Some work records could not be calculated. These totals exclude
+              those records.
+            </Text>
+          )}
+        </>
+      )}
+
+      {report && !compact && (
+        <>
+          <View style={s.rowBetween}>
+            <View style={s.grow}>
+              {!!monthLabel && <Text style={s.eyebrow}>{monthLabel}</Text>}
+            </View>
+            {!!onPickMonth && (
+              <TouchableOpacity
+                accessibilityRole="button"
+                accessibilityLabel="Choose report month"
+                activeOpacity={0.8}
+                style={[s.chip, s.row]}
+                onPress={onPickMonth}>
+                <Text style={s.chipText}>{monthLabel?.split(' ')[0]}</Text>
+                <MaterialCommunityIcons
+                  name="chevron-down"
+                  size={16}
+                  color={Colors.secondaryText}
+                />
+              </TouchableOpacity>
+            )}
+          </View>
+          <Text style={s.hero}>{formatWorkDuration(report.confirmedMs)}</Text>
+          <Text style={s.sml}>
+            Confirmed hours · {report.records.length}{' '}
+            {report.records.length === 1 ? 'session' : 'sessions'}
+          </Text>
+
+          {report.pendingCount > 0 ? (
+            <View style={[s.row, {flexWrap: 'wrap'}]}>
+              <View
+                style={[
+                  s.pill,
+                  {
+                    backgroundColor: Colors.amberBg50,
+                    borderColor: Colors.amberBorder,
+                  },
+                ]}>
+                <Text style={[s.pillText, {color: Colors.amberDarkText}]}>
+                  {report.pendingCount}{' '}
+                  {report.pendingCount === 1 ? 'session' : 'sessions'} pending ·
+                  est. {formatWorkDuration(report.pendingMs)}
+                </Text>
+              </View>
+              <Text style={s.sml}>not counted above</Text>
+            </View>
+          ) : (
+            <Text style={s.sml}>
+              Nothing pending · {report.records.length}{' '}
+              {report.records.length === 1 ? 'session' : 'sessions'} this month
+            </Text>
+          )}
+
+          <View style={[s.divider, {marginVertical: 6}]} />
+
+          <View style={s.rowBetween}>
+            <Text style={s.sml}>Earned</Text>
+            <Text style={[s.statValue, s.grow, {textAlign: 'right'}]}>
+              {workCurrency(report.earned)}
             </Text>
           </View>
-        )}
-        {report.overdue && (
-          <Text style={styles.error}>
-            A timer reached its stop deadline. Its time is shown as a pending
-            estimate until reviewed.
+
+          {/* {report.unratedMs > 0 && (
+            <View style={s.row}>
+              <MaterialCommunityIcons
+                name="help-circle-outline"
+                size={15}
+                color={Colors.secondaryText}
+              />
+              <Text style={[s.sml, s.grow]}>
+                {formatWorkDuration(report.unratedMs)} has no saved rate — not
+                included in earned
+              </Text>
+            </View>
+          )} */}
+
+          {report.runningMs > 0 && (
+            <View style={s.inner}>
+              <Text style={s.sml}>
+                Including current session:{' '}
+                {formatWorkDuration(report.includingRunningMs)}
+              </Text>
+            </View>
+          )}
+
+          {report.overdue && (
+            <Text style={s.error}>
+              A timer reached its stop deadline. Its time is shown as a pending
+              estimate until reviewed.
+            </Text>
+          )}
+
+          {!!report.invalidRecordCount && (
+            <Text style={s.error}>
+              Some work records could not be calculated. These totals exclude
+              those records.
+            </Text>
+          )}
+        </>
+      )}
+
+      {!!error && !!report && (
+        <TouchableOpacity
+          accessibilityRole="button"
+          onPress={onRetry}
+          style={s.noticeRow}>
+          <MaterialCommunityIcons
+            name="alert-circle-outline"
+            size={15}
+            color={Colors.amberDarkText}
+          />
+          <Text style={[s.sml, s.grow, {color: Colors.amberDarkText}]}>
+            {error}
           </Text>
-        )}
-        {!!report.invalidRecordCount && (
-          <Text style={styles.error}>
-            Some work records could not be calculated. These totals exclude
-            those records.
+          <Text style={[s.pillText, {color: Colors.gradient1}]}>
+            Retry monthly totals
           </Text>
-        )}
-        <Text style={styles.help}>
-          Collected uses paid invoices in their paid month. Effective rate
-          compares that cash with confirmed hours.
+        </TouchableOpacity>
+      )}
+
+      {fromCache && (
+        <Text style={s.error}>
+          Cached totals may be incomplete. Reconnect to check the latest records
+          and earnings.
         </Text>
-      </>
-    )}
-    {fromCache && (
-      <Text style={styles.error}>
-        Cached totals may be incomplete. Reconnect to check the latest records
-        and invoice payments.
-      </Text>
-    )}
-  </View>
-);
+      )}
+    </View>
+  );
+};

@@ -97,9 +97,15 @@ it('keeps consent available instead of spinning when storage hangs', async () =>
 it('also bounds an iOS authorization callback that never arrives', async () => {
   jest.replaceProperty(Platform, 'OS', 'ios');
   await mount();
-  await advance(21000);
+  // Silent authorization proceeds to GPS after the 2.5s grace. GPS then
+  // gets its own 20s deadline; silence must not be treated as a denial.
+  await advance(3000);
   expect(mockAuthorization).toHaveBeenCalled();
+  expect(mockPosition).toHaveBeenCalled();
+  expect(result.resolving).toBe(true);
+  await advance(21000);
   expect(result.resolving).toBe(false);
+  expect(result.failure).toBe('timeout');
 });
 
 it('ignores a late GPS callback from an earlier attempt after retry succeeds', async () => {

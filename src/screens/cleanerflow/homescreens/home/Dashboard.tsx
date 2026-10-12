@@ -57,6 +57,7 @@ import {buildAnnualEarningsSummary} from '../../../../services/earningsService';
 import {useAppleReceiptRefresh} from '../../../../hooks/useAppleReceiptRefresh';
 import {WorkMonthlyDashboard} from '../../../../components/work/WorkMonthlyDashboard';
 import {WorkClockPanel} from '../../../../components/work/WorkClockPanel';
+import {WorkTodayJobs} from '../../../../components/work/WorkTodayJobs';
 
 const CURRENT_YEAR = new Date().getFullYear();
 
@@ -156,7 +157,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
       isMountedRef.current = false;
     };
   }, []);
-  
+
   useAppleReceiptRefresh();
 
   const [earningsLoading, setEarningsLoading] = useState(false);
@@ -333,7 +334,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
 
     // Calculate next available slot
     const today = moment();
-    const todayIndex = today.day() - 1; 
+    const todayIndex = today.day() - 1;
 
     let nextAvailableDay = '';
     let nextAvailableTime = '';
@@ -533,8 +534,7 @@ const Dashboard: React.FC = ({navigation}: any) => {
         }
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
-        <WorkClockPanel />
-        <WorkMonthlyDashboard />
+
         {/* Profile Section */}
         <Animated.View
           entering={FadeInDown.duration(600)}
@@ -661,6 +661,12 @@ const Dashboard: React.FC = ({navigation}: any) => {
             ) : null}
           </LinearGradient>
         </Animated.View>
+
+        <View style={styles.workSection}>
+          {/* <WorkClockPanel hideIdle /> */}
+          <WorkTodayJobs />
+          <WorkMonthlyDashboard />
+        </View>
 
         <Animated.View
           entering={FadeInUp.duration(600)}
@@ -1131,8 +1137,13 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(8),
     paddingBottom: Platform.OS === 'ios' ? 140 : RFPercentage(20),
   },
+
+  workSection: {
+    marginTop: 20,
+    marginHorizontal: 20,
+    gap: 16,
+  },
   profileCard: {
-    marginTop: -40,
     marginHorizontal: 20,
     borderRadius: 24,
     shadowColor: Colors.primaryBlue,
@@ -1866,7 +1877,7 @@ const styles = StyleSheet.create({
 
   // ---- Admin Controls entry card (admin only) ----
   adminEntryCard: {
-    marginHorizontal: RFPercentage(2),
+    marginHorizontal: RFPercentage(2.5),
     marginTop: RFPercentage(1.5),
     backgroundColor: Colors.white,
     borderRadius: RFPercentage(2),

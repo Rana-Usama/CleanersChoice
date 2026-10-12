@@ -136,10 +136,15 @@ const Chat = ({navigation, route}: any) => {
     const unsubscribe = firestore()
       .collection('Users')
       .doc(targetReceiverId)
-      .onSnapshot(userDoc => {
-        const role = (userDoc.data()?.role || '').toLowerCase();
-        setResolvedReceiverRole(role);
-      });
+      .onSnapshot(
+        userDoc => {
+          const role = (userDoc?.data()?.role || '').toLowerCase();
+          setResolvedReceiverRole(role);
+        },
+        error => {
+          console.log('[Chat] receiver role listener failed:', error);
+        },
+      );
 
     return () => unsubscribe();
   }, [resolvedReceiverId, receiver]);
@@ -151,7 +156,11 @@ const Chat = ({navigation, route}: any) => {
       .doc(chatId)
       .collection('Messages')
       .orderBy('timestamp', 'desc')
-      .onSnapshot(snapshot => {
+      .onSnapshot(
+        snapshot => {
+        // RNFirebase calls onNext with a null snapshot if the listener errors
+        // without an error callback — never assume it's populated.
+        if (!snapshot) return;
         const newMessages = snapshot.docs.map(doc => {
           const data = doc.data();
           const msg: any = {
@@ -171,7 +180,13 @@ const Chat = ({navigation, route}: any) => {
         });
 
         setMessages(GiftedChat.append([], newMessages).filter(Boolean));
-      });
+        },
+        error => {
+          // e.g. permission-denied on a brand-new chat whose parent doc
+          // doesn't exist yet. Log and keep the screen usable.
+          console.log('[Chat] messages listener failed:', chatId, error);
+        },
+      );
 
     return () => unsubscribe();
   }, [chatId]);

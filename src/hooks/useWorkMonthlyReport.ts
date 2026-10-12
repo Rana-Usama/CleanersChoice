@@ -2,7 +2,7 @@ import {useCallback, useEffect, useMemo, useState} from 'react';
 import {useIsFocused} from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
-import type {Invoice} from '../types/invoice';
+import type {JobEarning} from '../types/jobEarning';
 import type {WorkSession} from '../types/workSession';
 import {useWorkSessions} from '../components/work/WorkSessionProvider';
 import {subscribeWorkSessions} from '../services/workSessionService';
@@ -13,20 +13,20 @@ import {WorkMonth, workMonthQueryRange} from '../utils/workMonth';
 type ReportData = {
   key: string;
   sessions: WorkSession[] | null;
-  invoices: Invoice[] | null;
+  jobEarnings: JobEarning[] | null;
   sessionsError: string;
-  invoicesError: string;
+  jobEarningsError: string;
   sessionsCached: boolean;
-  invoicesCached: boolean;
+  jobEarningsCached: boolean;
 };
 const emptyData = (key: string): ReportData => ({
   key,
   sessions: null,
-  invoices: null,
+  jobEarnings: null,
   sessionsError: '',
-  invoicesError: '',
+  jobEarningsError: '',
   sessionsCached: false,
-  invoicesCached: false,
+  jobEarningsCached: false,
 });
 
 export const useWorkMonthlyReport = ({year, month}: WorkMonth) => {
@@ -74,33 +74,39 @@ export const useWorkMonthlyReport = ({year, month}: WorkMonth) => {
         }
       },
     );
-    // Legacy paidAt values have several representations. Read the owned ledger
-    // rather than excluding legacy payments with a Firestore Timestamp-only range.
-    const unsubscribeInvoices = firestore()
-      .collection('Invoices')
+    // Fixed-price earnings use the completion ledger; invoice payments belong to Earnings.
+    const {from, to} = workMonthQueryRange({year, month});
+    const unsubscribeEarnings = firestore()
+      .collection('JobEarnings')
       .where('cleanerId', '==', uid)
+      .where('completedAt', '>=', from)
+      .where('completedAt', '<', to)
       .onSnapshot(
         {includeMetadataChanges: true},
         snapshot => {
           if (!owned()) {
             return;
           }
-          const invoices = snapshot.docs
-            .map(doc => ({...doc.data(), id: doc.id} as Invoice))
-            .filter(invoice => invoice.cleanerId === uid);
           setData(previous => ({
             ...previous,
-            invoices,
-            invoicesError: '',
-            invoicesCached: snapshot.metadata.fromCache,
+            jobEarnings: snapshot.docs
+              .map(doc => doc.data() as JobEarning)
+              .filter(entry => entry.cleanerId === uid),
+            jobEarningsError: '',
+            jobEarningsCached: snapshot.metadata.fromCache,
           }));
         },
         () => {
           if (owned()) {
+            /*
+              Fail open with an empty ledger rather than blocking the report.
+              Confirmed hours are still correct; only accrued
+              fixed-price money is missing, and the error is surfaced.
+            */
             setData(previous => ({
               ...previous,
-              invoices: null,
-              invoicesError: 'Could not load the invoice totals.',
+              jobEarnings: [],
+              jobEarningsError: 'Could not load fixed-price job earnings.',
             }));
           }
         },
@@ -108,7 +114,7 @@ export const useWorkMonthlyReport = ({year, month}: WorkMonth) => {
     return () => {
       alive = false;
       unsubscribeSessions();
-      unsubscribeInvoices();
+      unsubscribeEarnings();
     };
   }, [available, focused, work.uid, year, month, key, retryNumber]);
   const current = data.key === key && available ? data : emptyData(key);
@@ -119,26 +125,26 @@ export const useWorkMonthlyReport = ({year, month}: WorkMonth) => {
     : 0;
   const report = useMemo(
     () =>
-      current.sessions && current.invoices
+      current.sessions && current.jobEarnings
         ? buildWorkMonthlyReport(
             current.sessions,
-            current.invoices,
+            [],
             {year, month},
             reportClock,
+            current.jobEarnings,
           )
         : null,
-    [current.sessions, current.invoices, year, month, reportClock],
+    [current.sessions, current.jobEarnings, year, month, reportClock],
   );
   const retry = useCallback(() => setRetryNumber(value => value + 1), []);
   return {
     available,
     report,
-    loading:
-      available && !report && !current.sessionsError && !current.invoicesError,
-    error: [current.sessionsError, current.invoicesError]
+    loading: available && !report && !current.sessionsError,
+    error: [current.sessionsError, current.jobEarningsError]
       .filter(Boolean)
       .join(' '),
-    fromCache: current.sessionsCached || current.invoicesCached,
+    fromCache: current.sessionsCached || current.jobEarningsCached,
     retry,
   };
 };

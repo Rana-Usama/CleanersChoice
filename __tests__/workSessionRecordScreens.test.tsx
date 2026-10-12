@@ -26,6 +26,7 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 }));
 jest.mock('react-native-safe-area-context', () => ({
   SafeAreaView: 'SafeAreaView',
+  useSafeAreaInsets: () => ({top: 24, bottom: 16, left: 0, right: 0}),
 }));
 jest.mock('react-native-date-picker', () => 'DatePicker');
 jest.mock('react-native-responsive-fontsize', () => ({
@@ -100,6 +101,7 @@ beforeEach(() => {
       .mockResolvedValue({sessionId: 'record', status: 'needsReview'}),
     review: jest.fn().mockResolvedValue(false),
     edit: jest.fn().mockResolvedValue(false),
+    editEarnings: jest.fn().mockResolvedValue(false),
     retry: jest
       .fn()
       .mockResolvedValue({sessionId: 'record', status: 'needsReview'}),
@@ -121,6 +123,13 @@ const manual = async () => {
       />,
     );
   });
+  if (!mockWork.pending) {
+    await act(async () => {
+      renderer.root
+        .findByProps({accessibilityLabel: 'Work name'})
+        .props.onChangeText('Office deep clean');
+    });
+  }
 };
 const record = (status = 'needsReview'): any => ({
   id: 'record',
@@ -168,6 +177,7 @@ it('saves manual work as pending and opens a separate confirmation screen', asyn
   expect(mockWork.saveManual).toHaveBeenCalledWith(
     expect.objectContaining({
       jobId: null,
+      workName: 'Office deep clean',
       note: '',
       reportingTimeZone: expect.any(String),
     }),
@@ -203,23 +213,18 @@ it('freezes the original uncertain manual request after restart and retries with
     sessionId: 'record',
   });
 });
-it('shows an overlap rejection on the form and keeps General work usable when assigned jobs fail to load', async () => {
-  mockJobs.mockRejectedValueOnce(new Error('offline'));
+it('saves a typed name without a job chooser and keeps overlap errors on the form', async () => {
   mockWork.saveManual.mockRejectedValueOnce(
     new Error('This interval overlaps another work record.'),
   );
   await manual();
-  const choose = buttons().find(item =>
-    item
-      .findAllByType(Text)
-      .some(text => JSON.stringify(text.props.children).includes('Choose')),
-  )!;
-  await act(async () => {
-    choose.props.onPress();
-  });
-  expect(screenText()).toContain('Could not load assigned jobs');
-  await press('General work');
+  expect(screenText()).not.toContain('Work type');
+  expect(screenText()).not.toContain('· Choose');
+  expect(mockJobs).not.toHaveBeenCalled();
   await press('Save pending record');
+  expect(mockWork.saveManual).toHaveBeenCalledWith(
+    expect.objectContaining({workName: 'Office deep clean', jobId: null}),
+  );
   expect(screenText()).toContain('overlaps');
   expect(navigation.replace).not.toHaveBeenCalled();
 });
@@ -281,6 +286,11 @@ it('keeps pending estimates separate, then exposes correction and preserves orig
   expect(mockWork.edit).toHaveBeenCalledWith(
     expect.objectContaining({revision: 2}),
   );
+  await press('Discard record');
+  expect(mockWork.edit).toHaveBeenLastCalledWith(
+    expect.objectContaining({revision: 2}),
+    true,
+  );
   await press('Load older changes');
   expect(mockHistory).toHaveBeenLastCalledWith('record', {id: 'cursor'});
 });
@@ -292,4 +302,44 @@ it('removes private detail and history content when access is denied', async () 
   });
   expect(screenText()).not.toContain('Night cleaning');
   expect(screenText()).toContain('Could not load this work record');
+});
+
+it('shows and edits a total on general-work details and displays amount history', async () => {
+  const saved = {...record('confirmed'), expectedEarnings: 120};
+  mockHistory.mockResolvedValue({
+    events: [
+      {
+        id: 'money',
+        action: 'editEarnings',
+        actorId: 'cleaner',
+        at: NOW,
+        before: saved,
+        after: saved,
+        beforeExpectedEarnings: 100,
+        afterExpectedEarnings: 120,
+      },
+    ],
+    cursor: null,
+    hasMore: false,
+  });
+  await details(saved);
+  expect(screenText()).toContain('$120.00');
+  expect(screenText()).toContain('$100.00');
+  expect(screenText()).toContain('Earnings updated');
+  expect(screenText()).not.toContain('$25.00/hr');
+  await press('Edit earnings');
+  expect(mockWork.editEarnings).toHaveBeenCalledWith(saved);
+});
+
+it('saves a manual general-work total and keeps the entry pending', async () => {
+  await manual();
+  await act(async () =>
+    renderer.root
+      .findByProps({accessibilityLabel: 'Expected earnings'})
+      .props.onChangeText('60.25'),
+  );
+  await press('Save pending record');
+  expect(mockWork.saveManual).toHaveBeenCalledWith(
+    expect.objectContaining({expectedEarnings: 60.25, jobId: null}),
+  );
 });

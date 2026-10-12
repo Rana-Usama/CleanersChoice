@@ -14,6 +14,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import React, {useState, useEffect, useRef} from 'react';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, Icons, IMAGES} from '../../../constants/Themes';
 import HeaderBack from '../../../components/HeaderBack';
@@ -37,6 +38,7 @@ import {useAppAlert} from '../../../components/AlertProvider';
 import {formatExpectedHours, getJobScheduledStart} from '../../../utils/workTiming';
 import {WorkClockPanel} from '../../../components/work/WorkClockPanel';
 import {useWorkSessions} from '../../../components/work/WorkSessionProvider';
+import {formatMoney, parseMoney, parseQuantity} from '../../../utils/money';
 
 const {width} = Dimensions.get('window');
 
@@ -46,6 +48,7 @@ const JobDetails = ({route, navigation}: any) => {
   const {item} = route.params;
   const {showAlert} = useAppAlert();
   const work = useWorkSessions();
+  const insets = useSafeAreaInsets();
   const userData = useSelector((state: any) => state?.profile?.profileData);
   const [loading, setLoading] = useState(false);
   const [loading2, setLoading2] = useState(false);
@@ -156,28 +159,25 @@ const JobDetails = ({route, navigation}: any) => {
       : 'Not specified';
   };
 
-  const parseNumericValue = (value: any) => {
-    const parsed = parseInt(String(value ?? '').replace(/[^0-9]/g, ''), 10);
-    return Number.isFinite(parsed) ? parsed : 0;
-  };
-
+  // parseMoney/parseQuantity keep the decimal point. The parser here used to
+  // strip it, so a $50.50 job rendered as $5050.
   const getBudgetDisplayText = () => {
-    const total = parseNumericValue(item?.priceRange);
-    const totalText = total > 0 ? `$${total}` : 'Custom Budget';
+    const total = parseMoney(item?.priceRange);
+    const totalText = total > 0 ? formatMoney(total) : 'Custom Budget';
 
     if (item?.budgetType === 'hourly') {
-      const rate = parseNumericValue(item?.hourlyRate);
-      const totalHours = parseNumericValue(item?.hours);
+      const rate = parseMoney(item?.hourlyRate);
+      const totalHours = parseQuantity(item?.hours);
       if (rate > 0 && totalHours > 0) {
-        return `$${rate}/hr × ${totalHours}hrs = ${totalText}`;
+        return `${formatMoney(rate)}/hr × ${totalHours}hrs = ${totalText}`;
       }
     }
 
     if (item?.budgetType === 'sqft') {
-      const pricePerSqFt = parseNumericValue(item?.pricePerSqFt);
-      const totalSqFt = parseNumericValue(item?.sqFt);
+      const pricePerSqFt = parseMoney(item?.pricePerSqFt);
+      const totalSqFt = parseQuantity(item?.sqFt);
       if (pricePerSqFt > 0 && totalSqFt > 0) {
-        return `$${pricePerSqFt}/sqft × ${totalSqFt}sqft = ${totalText}`;
+        return `${formatMoney(pricePerSqFt)}/sqft × ${totalSqFt}sqft = ${totalText}`;
       }
     }
 
@@ -504,68 +504,8 @@ const JobDetails = ({route, navigation}: any) => {
 
       setHasApplied(true);
 
-      // Send push notification to job owner
-      if (clientInfo?.fcmToken) {
-        try {
-          // Get current applicant count for push body
-          const jobSnap = await firestore()
-            .collection('Jobs')
-            .doc(item.id)
-            .get();
-          const applicantCount = (jobSnap.data()?.applicants || []).length;
-
-          await fetch(`${SERVER_URL}/api/send-notification`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-              fcmToken: clientInfo.fcmToken,
-              title: 'New Job Application',
-              body: `${applicantCount} cleaner${applicantCount !== 1 ? 's' : ''} applied for "${item.title}"`,
-              data: {screen: 'notifications'},
-            }),
-          });
-        } catch (err) {
-          console.error('Error sending notification:', err);
-        }
-      }
-
-      // Store or update application notification (one per job)
-      try {
-        const existingNotif = await firestore()
-          .collection('Notifications')
-          .where('toUserId', '==', item.jobId)
-          .where('jobId', '==', item.id)
-          .where('type', '==', 'application')
-          .limit(1)
-          .get();
-
-        if (!existingNotif.empty) {
-          const notifDoc = existingNotif.docs[0];
-          const currentCount = notifDoc.data().applicantCount || 1;
-          const newCount = currentCount + 1;
-          await notifDoc.ref.update({
-            applicantCount: newCount,
-            body: `${newCount} cleaners applied for "${item.title}"`,
-            timestamp: firestore.FieldValue.serverTimestamp(),
-            read: false,
-          });
-        } else {
-          await firestore().collection('Notifications').add({
-            type: 'application',
-            fromUserId: userId,
-            toUserId: item.jobId,
-            jobId: item.id,
-            title: 'New Job Application',
-            body: `1 cleaner applied for "${item.title}"`,
-            timestamp: firestore.FieldValue.serverTimestamp(),
-            read: false,
-            jobTitle: item.title,
-            applicantCount: 1,
-          });
-        }
-      } catch (err) {
-        console.error('Error storing notification:', err);
-      }
+      // The Jobs trigger stores the grouped customer notice and sends its push.
+      // A cleaner must never query or update another user's private inbox.
 
       showToast({
         type: 'success',
@@ -924,7 +864,7 @@ const JobDetails = ({route, navigation}: any) => {
       <ScrollView
         contentContainerStyle={[
           styles.scrollViewContent,
-          {paddingBottom: showActionBar ? RFPercentage(15) : RFPercentage(3)},
+          {paddingBottom: RFPercentage(3)},
         ]}
         showsVerticalScrollIndicator={false}
         onScroll={Animated.event(
@@ -1176,7 +1116,7 @@ const JobDetails = ({route, navigation}: any) => {
 
       {/* Fixed Action Buttons */}
       {showActionBar && (
-      <View style={styles.actionBar}>
+      <View style={[styles.actionBar, {paddingBottom: Math.max(insets.bottom, 16)}]}>
         {(jobStatus === 'expired' || jobStatus === 'unconfirmed') && userData.role === 'Customer' ? (
           <View style={styles.actionButtons}>
             <NextButton
@@ -1416,6 +1356,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: RFPercentage(2),
     paddingTop: RFPercentage(2),
     paddingBottom: RFPercentage(15),
+    gap: 14,
   },
   quickInfoContainer: {
     marginTop: RFPercentage(2),
@@ -1685,10 +1626,6 @@ const styles = StyleSheet.create({
     height: RFPercentage(2),
   },
   actionBar: {
-    position: 'absolute',
-    bottom:  0,
-    left: 0,
-    right: 0,
     backgroundColor: Colors.white,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -1698,7 +1635,6 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: -4},
     shadowOpacity: 0.1,
     shadowRadius: 8,
-    height:RFPercentage(12),
     justifyContent:"center",
     borderTopWidth:1,
      borderTopColor: Colors.lightGray200,
@@ -1706,6 +1642,7 @@ const styles = StyleSheet.create({
   },
   actionButtons: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: RFPercentage(1.5),
   },
   editButton: {
@@ -1715,7 +1652,10 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(2.3),
     alignItems: 'center',
     justifyContent: 'center',
-    height: RFPercentage(5.6),
+    minHeight: 48,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    maxWidth: '100%',
   },
   editButtonText: {
     color: Colors.gradient1,
@@ -1724,6 +1664,10 @@ const styles = StyleSheet.create({
   },
   completeButton: {
     flex: 2,
+    flexBasis: 140,
+    minWidth: 120,
+    maxWidth: '100%',
+    width: undefined,
     borderRadius: RFPercentage(2.3),
   },
   completeButtonText: {
@@ -1791,6 +1735,7 @@ const styles = StyleSheet.create({
   },
   cleanerActionButtons: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
     gap: RFPercentage(1),
   },

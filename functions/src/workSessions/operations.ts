@@ -25,6 +25,9 @@ const requestHash = (request: WorkSessionRequest): string => createHash("sha256"
   reportingTimeZone: request.reportingTimeZone ?? null, plannedFinishAt: request.plannedFinishAt ?? null,
   startedAt: request.startedAt ?? null, endedAt: request.endedAt ?? null, note: request.note ?? "",
   ...(request.expectedRevision !== undefined ? {expectedRevision: request.expectedRevision} : {}),
+  // Omit absent names so queued requests from older clients keep their receipt hash.
+  ...(request.workName !== undefined ? {workName: request.workName} : {}),
+  ...(request.expectedEarnings !== undefined ? {expectedEarnings: request.expectedEarnings} : {}),
 })).digest("hex");
 
 const checkOverlap = async (
@@ -45,8 +48,11 @@ const makeSession = (
   job: Record<string, unknown> | undefined, config: WorkSession["timingConfig"], now: number
 ): WorkSession => {
   const manual = request.action === "addManual";
-  const startedAt = manual ? request.startedAt as number : now;
+  const startedAt = request.startedAt ?? now;
   const endedAt = manual ? request.endedAt as number : null;
+  if (!manual && (startedAt > now || now - startedAt >= config.hardCapHours * HOUR_MS)) {
+    fail("invalid-argument", "Choose a current or past start within the cap. Add a manual record for older work.");
+  }
   const scheduledStart = snapshotMillis(job?.scheduledStartAt);
   const hours = job?.expectedHours;
   const expectedHours = typeof hours === "number" && Number.isFinite(hours) && hours > 0 && hours <= 12 ? hours : null;
@@ -60,7 +66,7 @@ const makeSession = (
     if (job && expectedEndAt !== null && expectedEndAt + config.graceHours * HOUR_MS > now) {
       fail("invalid-argument", "The job's expected end is already defined.");
     }
-    if (request.plannedFinishAt <= startedAt || request.plannedFinishAt > capAt) {
+    if (request.plannedFinishAt <= (manual ? startedAt : now) || request.plannedFinishAt > capAt) {
       fail("invalid-argument", "Planned finish must be after clock-in and within the hard cap.");
     }
     expectedEndAt = request.plannedFinishAt;
@@ -75,6 +81,8 @@ const makeSession = (
   const fallback = basis === "hourly" || basis === "general" ? positiveRate(user.defaultHourlyRate) : null;
   return {
     id, cleanerId: uid, jobId: request.jobId || null,
+    ...(!job && request.workName !== undefined ? {workName: request.workName.trim()} : {}),
+    ...(request.expectedEarnings !== undefined ? {expectedEarnings: request.expectedEarnings} : {}),
     jobSnapshot: job ? {
       title: String(job.title || "Job"), customerId: typeof job.jobId === "string" ? job.jobId : null,
       scheduledStartAt: scheduledStart, expectedHours,
@@ -202,6 +210,11 @@ export const executeWorkSessionOperation = async (
           tx.set(receiptRef, {cleanerId: uid, requestHash: hash, result, createdAt: now});
           return result;
         }
+      } else if (request.action === "editEarnings") {
+        if (session.jobId || session.status === "discarded") {
+          fail("failed-precondition", "Earnings can only be edited on retained general-work records.");
+        }
+        session.expectedEarnings = request.expectedEarnings as number;
       } else if (request.action === "setPlannedFinish") {
         if (session.status !== "active" || session.jobId || session.expectedEndAt !== null ||
             activeSessionId !== session.id || now >= session.autoStopAt) {
@@ -263,6 +276,10 @@ export const executeWorkSessionOperation = async (
       before: before ? {startedAt: before.startedAt, endedAt: before.endedAt, status: before.status} : null,
       after: {startedAt: session.startedAt, endedAt: session.endedAt, status: session.status}, note: request.note || "",
     };
+    if (request.expectedEarnings !== undefined) {
+      audit.beforeExpectedEarnings = before?.expectedEarnings ?? null;
+      audit.afterExpectedEarnings = session.expectedEarnings ?? null;
+    }
     if (!recoveryAudit) session.editHistory = [...session.editHistory, audit].slice(-20);
     session.updatedAt = now;
     session.revision = (before?.revision ?? 0) + 1;

@@ -22,6 +22,7 @@ import Messages from '../screens/commonflow/home/Messages';
 import {useUnreadMessages} from '../utils/UnreadMessagesContext';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import {ActiveSessionBanner} from '../components/work/ActiveSessionBanner';
 
 const Tab = createBottomTabNavigator();
 
@@ -61,122 +62,142 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
   const bottomInset = insets.bottom;
 
   return (
-    <View
-      style={[
-        styles.tabBarContainer,
-        {
-          height: RFPercentage(9) + bottomInset,
-          paddingBottom: bottomInset,
-        },
-      ]}>
-      <View style={styles.labelContainer}>
-        {state.routes.filter(route => route.name !== 'Settings').map((route, index) => {
-          const {options} = descriptors[route.key];
-          const label =
-            options.tabBarLabel !== undefined
-              ? options.tabBarLabel
-              : route.name;
-          const isFocused = state.index === index;
+    /*
+      The work bar is mounted here rather than on a screen so a running timer
+      stays visible - and stoppable - from every tab. It renders null when
+      nothing is running and nothing needs review, so it costs no space in the
+      normal case, and it is inside the keyboard check above so it hides with
+      the tab bar.
+    */
+    <>
+      <ActiveSessionBanner />
+      <View
+        style={[
+          styles.tabBarContainer,
+          {
+            height: RFPercentage(9) + bottomInset,
+            paddingBottom: bottomInset,
+          },
+        ]}>
+        <View style={styles.labelContainer}>
+          {state.routes
+            .filter(route => route.name !== 'Settings')
+            .map((route, index) => {
+              const {options} = descriptors[route.key];
+              const label =
+                options.tabBarLabel !== undefined
+                  ? options.tabBarLabel
+                  : route.name;
+              const isFocused = state.index === index;
 
-          return (
-            <TouchableOpacity
-              activeOpacity={0.8}
-              key={index}
-              onPress={() => navigation.navigate(route.name)}
-              style={[styles.tabButton]}>
-              {route.name === 'Home' ? (
-                <View
-                  style={{
-                    bottom:
-                      Platform.OS === 'android'
-                        ? RFPercentage(3)
-                        : RFPercentage(2.5),
-                  }}>
-                  <Image
-                    source={isFocused ? Icons.home : Icons.homeInactive}
-                    style={styles.middle}
-                    resizeMode="contain"
-                  />
-                </View>
-              ) : route.name === 'Messages' ? (
-                <View>
-                  <Image
-                    source={isFocused ? Icons.msgActive : Icons.msg}
-                    style={styles.imgStyle}
-                    resizeMode="contain"
-                  />
-                  {unreadCount > 0 && (
+              return (
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  key={index}
+                  onPress={() => navigation.navigate(route.name)}
+                  style={[styles.tabButton]}>
+                  {route.name === 'Home' ? (
                     <View
-                      style={[
-                        styles.count,
-                        unreadCount > 9 && {
-                          paddingHorizontal: RFPercentage(0.5),
-                          minWidth: RFPercentage(2.8),
-                        },
-                      ]}>
-                      <Text
-                        style={{
-                          color: 'white',
-                          fontSize: RFPercentage(1.4),
-                          fontFamily: Fonts.fontRegular,
-                        }}>
-                        {unreadCount > 9 ? '9+' : unreadCount}
-                      </Text>
+                      style={{
+                        bottom:
+                          Platform.OS === 'android'
+                            ? RFPercentage(3)
+                            : RFPercentage(2.5),
+                      }}>
+                      <Image
+                        source={isFocused ? Icons.home : Icons.homeInactive}
+                        style={styles.middle}
+                        resizeMode="contain"
+                      />
                     </View>
+                  ) : route.name === 'Messages' ? (
+                    <View>
+                      <Image
+                        source={isFocused ? Icons.msgActive : Icons.msg}
+                        style={styles.imgStyle}
+                        resizeMode="contain"
+                      />
+                      {unreadCount > 0 && (
+                        <View
+                          style={[
+                            styles.count,
+                            unreadCount > 9 && {
+                              paddingHorizontal: RFPercentage(0.5),
+                              minWidth: RFPercentage(2.8),
+                            },
+                          ]}>
+                          <Text
+                            style={{
+                              color: 'white',
+                              fontSize: RFPercentage(1.4),
+                              fontFamily: Fonts.fontRegular,
+                            }}>
+                            {unreadCount > 9 ? '9+' : unreadCount}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  ) : route.name === 'Job List' ? (
+                    <Image
+                      source={isFocused ? Icons.jobActive : Icons.job}
+                      style={styles.imgStyle}
+                      resizeMode="contain"
+                    />
+                  ) : route.name === 'Invoices' ? (
+                    <Ionicons
+                      name="document-text-outline"
+                      size={RFPercentage(2.5)}
+                      color={
+                        isFocused ? Colors.gradient2 : Colors.secondaryText
+                      }
+                    />
+                  ) : route.name === 'My Jobs' ? (
+                    <Ionicons
+                      name="briefcase-outline"
+                      size={RFPercentage(2.5)}
+                      color={
+                        isFocused ? Colors.gradient2 : Colors.secondaryText
+                      }
+                    />
+                  ) : (
+                    <Ionicons
+                      name="settings-outline"
+                      size={RFPercentage(2.5)}
+                      color={
+                        isFocused ? Colors.gradient2 : Colors.secondaryText
+                      }
+                    />
                   )}
-                </View>
-              ) : route.name === 'Job List' ? (
-                <Image
-                  source={isFocused ? Icons.jobActive : Icons.job}
-                  style={styles.imgStyle}
-                  resizeMode="contain"
-                />
-              ) : route.name === 'Invoices' ? (
-                <Ionicons
-                  name="document-text-outline"
-                  size={RFPercentage(2.5)}
-                  color={isFocused ? Colors.gradient2 : Colors.secondaryText}
-                />
-              ) : route.name === 'My Jobs' ? (
-                <Ionicons
-                  name="briefcase-outline"
-                  size={RFPercentage(2.5)}
-                  color={isFocused ? Colors.gradient2 : Colors.secondaryText}
-                />
-              ) : (
-                <Ionicons
-                  name="settings-outline"
-                  size={RFPercentage(2.5)}
-                  color={isFocused ? Colors.gradient2 : Colors.secondaryText}
-                />
-              )}
-              <Text
-                numberOfLines={1}
-                style={{
-                  color: isFocused ? Colors.gradient2 : Colors.secondaryText,
-                  fontSize: RFPercentage(1.5),
-                  top:
-                    route.name === 'Home'
-                      ? RFPercentage(-2.1)
-                      : RFPercentage(0.5),
-                  fontFamily: Fonts.fontMedium,
-                }}>
-                {typeof label === 'function'
-                  ? label({
-                      focused: isFocused,
+                  <Text
+                    numberOfLines={1}
+                    style={{
                       color: isFocused
                         ? Colors.gradient2
                         : Colors.secondaryText,
-                      position: 'below-icon',
-                      children: route.name,
-                    })
-                  : label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
+                      fontSize: RFPercentage(1.5),
+                      top:
+                        route.name === 'Home'
+                          ? RFPercentage(-2.1)
+                          : RFPercentage(0.5),
+                      fontFamily: Fonts.fontMedium,
+                    }}>
+                    {typeof label === 'function'
+                      ? label({
+                          focused: isFocused,
+                          color: isFocused
+                            ? Colors.gradient2
+                            : Colors.secondaryText,
+                          position: 'below-icon',
+                          children: route.name,
+                        })
+                      : label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+        </View>
       </View>
-    </View>
+    </>
   );
 };
 

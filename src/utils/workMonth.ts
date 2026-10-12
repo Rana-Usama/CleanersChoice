@@ -1,4 +1,5 @@
 import {HOUR_MS} from '../../functions/src/workSessions/model';
+import {cachedDateFormatter} from './intlCache';
 
 export type WorkMonth = {year: number; month: number};
 const DAY_MS = 24 * HOUR_MS;
@@ -18,7 +19,7 @@ export const workMonthQueryRange = ({year, month}: WorkMonth) => ({
 // Find the first instant in the local calendar month. No device offset, 30-day
 // approximation, or assumed DST offset is involved in this boundary.
 const localMonthStart = ({year, month}: WorkMonth, zone: string): number => {
-  const formatter = new Intl.DateTimeFormat('en-US', {
+  const formatter = cachedDateFormatter('en-US', {
     timeZone: zone,
     year: 'numeric',
     month: 'numeric',

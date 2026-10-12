@@ -9,11 +9,18 @@ import {
 import DatePicker from 'react-native-date-picker';
 import {Colors, Fonts} from '../../constants/Themes';
 import type {WorkSession} from '../../types/workSession';
-import {
-  deviceWorkTimeZone,
-  formatWorkDuration,
-} from '../../utils/workSessionFlow';
+import {formatWorkDuration} from '../../utils/workSessionFlow';
 import {detailedWorkTime, quickWorkTimes} from '../../utils/workSessionEntry';
+import {cachedDateFormatter} from '../../utils/intlCache';
+import {workStyles} from './workTheme';
+
+/** The month a chosen interval's hours would land in. */
+const monthOf = (time: number, timeZone: string) =>
+  cachedDateFormatter('en-US', {
+    timeZone,
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date(time));
 
 export type WorkTimeValues = {startedAt: number; endedAt: number; note: string};
 export const WorkTimeFields = ({
@@ -35,25 +42,42 @@ export const WorkTimeFields = ({
   return (
     <View style={styles.form}>
       <Text style={styles.help}>
-        Choose explicit dates and times, shown in {deviceWorkTimeZone()}. For
-        overnight work, select the next day as the finish date.
+        Choose the start and finish dates and times. For overnight work, select
+        the next day as the finish date.
       </Text>
       {session?.status === 'needsReview' && session.source === 'clock' && (
         <View style={styles.quickRow}>
           {[4, 6, 8].map(hours => {
             const times = quickWorkTimes(session, hours, Date.now());
+            // Highlight whichever quick pick the current values already match,
+            // so the chosen duration stays visible after tapping.
+            const chosen =
+              !!times &&
+              times.startedAt === value.startedAt &&
+              times.endedAt === value.endedAt;
             return (
               <TouchableOpacity
                 key={hours}
                 accessibilityRole="button"
+                accessibilityState={{selected: chosen, disabled: !times}}
                 disabled={disabled || !times}
-                style={[styles.quick, !times && styles.unavailable]}
+                style={[
+                  workStyles.chip,
+                  chosen && workStyles.chipActive,
+                  !times && styles.unavailable,
+                ]}
                 onPress={() => {
                   if (times) {
                     onChange({...value, ...times});
                   }
                 }}>
-                <Text style={styles.quickText}>{hours}h</Text>
+                <Text
+                  style={[
+                    workStyles.chipText,
+                    chosen && workStyles.chipActiveText,
+                  ]}>
+                  {hours}h
+                </Text>
               </TouchableOpacity>
             );
           })}
@@ -71,9 +95,16 @@ export const WorkTimeFields = ({
             {field === 'start' ? 'Started' : 'Actual finish'}
           </Text>
           <Text style={styles.text}>
-            {new Date(
-              field === 'start' ? value.startedAt : value.endedAt,
-            ).toLocaleString()}
+            {cachedDateFormatter('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: true,
+            }).format(
+              new Date(field === 'start' ? value.startedAt : value.endedAt),
+            )}
           </Text>
         </TouchableOpacity>
       ))}
@@ -85,7 +116,25 @@ export const WorkTimeFields = ({
           {detailedWorkTime(value.startedAt, reportingTimeZone)} →{' '}
           {detailedWorkTime(value.endedAt, reportingTimeZone)}
         </Text>
-        <Text style={styles.help}>Reporting timezone: {reportingTimeZone}</Text>
+        {value.endedAt > value.startedAt && (
+          <Text style={styles.consequence}>
+            {monthOf(value.startedAt, reportingTimeZone) ===
+            monthOf(value.endedAt - 1, reportingTimeZone)
+              ? `Adds ${formatWorkDuration(
+                  value.endedAt - value.startedAt,
+                )} to ${monthOf(
+                  value.startedAt,
+                  reportingTimeZone,
+                )} once confirmed.`
+              : `These hours are split between ${monthOf(
+                  value.startedAt,
+                  reportingTimeZone,
+                )} and ${monthOf(
+                  value.endedAt - 1,
+                  reportingTimeZone,
+                )} once confirmed.`}
+          </Text>
+        )}
       </View>
       <Text style={styles.label}>{noteLabel}</Text>
       <TextInput
@@ -122,7 +171,7 @@ export const WorkTimeFields = ({
 };
 const styles = StyleSheet.create({
   form: {gap: 12},
-  help: {fontSize: 13, lineHeight: 20, color: Colors.secondaryText},
+  help: {fontFamily: Fonts.fontRegular, fontSize: 13, lineHeight: 20, color: Colors.secondaryText},
   title: {fontFamily: Fonts.semiBold, fontSize: 16, color: Colors.slateText},
   text: {fontFamily: Fonts.fontMedium, color: Colors.slateText, fontSize: 15},
   label: {
@@ -138,7 +187,7 @@ const styles = StyleSheet.create({
     gap: 6,
     color: Colors.slateText,
   },
-  note: {minHeight: 88},
+  note: {fontFamily: Fonts.fontRegular, minHeight: 88},
   preview: {
     padding: 14,
     borderRadius: 12,
@@ -151,7 +200,11 @@ const styles = StyleSheet.create({
     gap: 8,
     flexWrap: 'wrap',
   },
-  quick: {padding: 12, borderRadius: 10, backgroundColor: Colors.blueBg50},
-  quickText: {fontFamily: Fonts.semiBold, color: Colors.gradient1},
   unavailable: {opacity: 0.4},
+  consequence: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 13,
+    lineHeight: 20,
+    color: Colors.amberDarkText,
+  },
 });

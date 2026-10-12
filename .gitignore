@@ -88,6 +88,9 @@ aab_extracted/
 
 # testing
 /coverage
+firebase-debug*.log
+firestore-debug*.log
+ui-debug*.log
 
 # Yarn
 .yarn/*

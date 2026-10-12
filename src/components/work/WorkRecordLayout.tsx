@@ -1,76 +1,129 @@
 import React from 'react';
 import {
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
-  StyleSheet,
+  ScrollViewProps,
+  StatusBar,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import {Colors, Fonts} from '../../constants/Themes';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import LinearGradient from 'react-native-linear-gradient';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {Colors} from '../../constants/Themes';
+import {workStyles as s} from './workTheme';
 
+/** Header and cards share a scroll surface, so the header inset never clips a card. */
 export const WorkRecordLayout = ({
   title,
   onBack,
+  actionIcon,
+  onAction,
+  actionLabel,
   children,
+  footer,
+  refreshControl,
+  sheet = false,
 }: {
   title: string;
   onBack(): void;
+  actionIcon?: string;
+  onAction?: () => void;
+  actionLabel?: string;
   children: React.ReactNode;
-}) => (
-  <SafeAreaView style={workRecordStyles.safe}>
-    <View style={workRecordStyles.header}>
-      <TouchableOpacity accessibilityRole="button" onPress={onBack}>
-        <Text style={workRecordStyles.link}>Back</Text>
-      </TouchableOpacity>
-      <Text style={[workRecordStyles.title, workRecordStyles.headerTitle]}>
-        {title}
-      </Text>
+  footer?: React.ReactNode;
+  refreshControl?: ScrollViewProps['refreshControl'];
+  sheet?: boolean;
+}) => {
+  const insets = useSafeAreaInsets();
+  const control = (
+    icon: string,
+    label: string,
+    press: () => void,
+    light = true,
+  ) => (
+    <TouchableOpacity
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      activeOpacity={0.8}
+      onPress={press}
+      style={[
+        s.circle,
+        {width: 44, height: 44, borderRadius: 22},
+        !light && {backgroundColor: Colors.inputBg},
+      ]}>
+      <MaterialCommunityIcons
+        name={icon}
+        size={21}
+        color={light ? Colors.white : Colors.secondaryText}
+      />
+    </TouchableOpacity>
+  );
+  const header = sheet ? (
+    <>
+      <View style={s.handle} />
+      <View style={[s.sheetHeader, s.row]}>
+        <Text style={s.sheetTitle}>{title}</Text>
+        {control('close', 'Back', onBack, false)}
+      </View>
+    </>
+  ) : (
+    <LinearGradient
+      colors={[Colors.gradient1, Colors.gradient2]}
+      style={[s.band, {paddingTop: insets.top + 12}]}>
+      {control('arrow-left', 'Back', onBack)}
+      <Text style={s.bandTitle}>{title}</Text>
+      {actionIcon && onAction ? (
+        control(actionIcon, actionLabel || 'Action', onAction)
+      ) : (
+        <View style={{width: 44}} />
+      )}
+    </LinearGradient>
+  );
+  return (
+    <View
+      style={[
+        s.safe,
+        sheet && {
+          backgroundColor: 'rgba(15,23,42,0.45)',
+          justifyContent: 'flex-end',
+        },
+      ]}>
+      {!sheet && (
+        <StatusBar
+          backgroundColor={Colors.gradient1}
+          barStyle="light-content"
+        />
+      )}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={sheet ? s.sheet : {flex: 1}}>
+        {sheet && header}
+        <ScrollView
+          style={{flex: 1}}
+          keyboardShouldPersistTaps="handled"
+          refreshControl={refreshControl}
+          keyboardDismissMode="on-drag"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingBottom: footer ? 0 : Math.max(insets.bottom, 12),
+          }}>
+          {!sheet && header}
+          <View style={[s.content, {marginTop: sheet ? 0 : -22}]}>
+            {children}
+          </View>
+        </ScrollView>
+        {!!footer && (
+          <View
+            style={[s.footer, {paddingBottom: Math.max(insets.bottom, 12)}]}>
+            {footer}
+          </View>
+        )}
+      </KeyboardAvoidingView>
     </View>
-    <ScrollView
-      keyboardShouldPersistTaps="handled"
-      contentContainerStyle={workRecordStyles.content}>
-      {children}
-    </ScrollView>
-  </SafeAreaView>
-);
-
-export const workRecordStyles = StyleSheet.create({
-  safe: {flex: 1, backgroundColor: Colors.gray50},
-  header: {padding: 20, flexDirection: 'row', gap: 20, alignItems: 'center'},
-  content: {padding: 20, paddingBottom: 40, gap: 16},
-  headerTitle: {flex: 1},
-  headline: {fontSize: 28},
-  monthSelector: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  filters: {flexDirection: 'row', flexWrap: 'wrap', gap: 16},
-  monthlyDashboard: {gap: 10, marginBottom: 16},
-  card: {padding: 16, borderRadius: 12, backgroundColor: Colors.white, gap: 8},
-  title: {fontFamily: Fonts.semiBold, fontSize: 17, color: Colors.slateText},
-  help: {fontSize: 14, lineHeight: 21, color: Colors.secondaryText},
-  link: {
-    fontFamily: Fonts.semiBold,
-    fontSize: 14,
-    color: Colors.gradient1,
-    paddingVertical: 10,
-  },
-  button: {
-    backgroundColor: Colors.gradient1,
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  buttonText: {color: Colors.white, fontFamily: Fonts.semiBold, fontSize: 15},
-  input: {
-    borderColor: Colors.gray200,
-    borderWidth: 1,
-    padding: 14,
-    borderRadius: 12,
-    color: Colors.slateText,
-  },
-  error: {color: Colors.amberDarkText, fontSize: 14, lineHeight: 21},
-  disabled: {opacity: 0.45},
-});
+  );
+};
+export {workStyles as workRecordStyles} from './workTheme';

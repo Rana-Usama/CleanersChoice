@@ -1,46 +1,81 @@
 import React from 'react';
 import {
   ActivityIndicator,
-  StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from 'react-native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useNavigation} from '@react-navigation/native';
-import {Colors, Fonts} from '../../constants/Themes';
+import {Colors} from '../../constants/Themes';
 import {useWorkSessions} from './WorkSessionProvider';
+import {useWorkTicker} from '../../hooks/useWorkTicker';
+import {workStyles as s} from './workTheme';
+import {WorkButton, WorkIconTile, WorkPill} from './WorkUI';
 import {
   canStartWork,
   canUseWorkRecords,
   formatWorkDuration,
   formatWorkTime,
+  workSessionTitle,
+  formatWorkTimer,
   workSessionPhase,
 } from '../../utils/workSessionFlow';
+
+/** How the job's money is described next to a running session. */
+const payLabel = (session: {
+  paySnapshot?: {basis: string; hourlyRate: number | null};
+}): string | null => {
+  const pay = session.paySnapshot;
+  if (!pay) {
+    return null;
+  }
+  if (pay.basis === 'hourly' && pay.hourlyRate) {
+    return `$${pay.hourlyRate}/hr`;
+  }
+  if (pay.basis === 'flat') {
+    return 'Flat rate';
+  }
+  if (pay.basis === 'sqft') {
+    return 'Per sq ft';
+  }
+  return null;
+};
 
 export const WorkClockPanel = ({
   jobId,
   jobEligible = true,
   compact = false,
+  hideIdle = false,
+  simple = false,
 }: {
   jobId?: string;
   jobEligible?: boolean;
   compact?: boolean;
+  hideIdle?: boolean;
+  /** Short dashboard footer; detailed timing and pay remain on the job screen. */
+  simple?: boolean;
 }) => {
   const work = useWorkSessions();
   const navigation = useNavigation<any>();
+  const {width, fontScale} = useWindowDimensions();
+  const stacked = width < 360 || fontScale > 1.2;
+  const session = work.current;
+  const active = session?.status === 'active';
+  // 1s ticker only while a timer is actually on screen.
+  const tick = useWorkTicker(!!active);
+
   if (
     !canUseWorkRecords(work.user) ||
     (!work.enabled && !work.hasHistory && !work.current)
   ) {
     return null;
   }
-  const session = work.current;
+
   const mine = !!session && (!jobId || session.jobId === jobId);
-  const active = session?.status === 'active';
   const overdue =
     !!session && workSessionPhase(session, work.now) === 'overdue';
-  const blocked = work.reviews.some(s => s.source === 'clock');
+  const blocked = work.reviews.some(r => r.source === 'clock');
   const mayStart =
     work.enabled &&
     work.ready &&
@@ -48,169 +83,349 @@ export const WorkClockPanel = ({
     !session &&
     !blocked &&
     jobEligible;
-  return (
-    <View style={[styles.card, compact && styles.compact]}>
-      <View style={styles.row}>
-        <MaterialCommunityIcons
-          name="clock-outline"
-          color={Colors.gradient1}
-          size={22}
+  const busy = work.busy || work.pending;
+  if (hideIdle && mayStart && !work.reviews.length && !busy && !work.error) {
+    return null;
+  }
+  const openResolver = () => navigation.navigate('WorkTracking');
+
+  // ---- ClockButton: the five states from the component sheet -------------
+  const clockButton = () => {
+    if (active && mine) {
+      return (
+        <WorkButton
+          variant="danger"
+          icon="stop"
+          label="Clock Out"
+          disabled={busy}
+          onPress={() => {
+            void work.stop();
+          }}
+          style={s.grow}
         />
-        <Text style={styles.title}>
-          {active
-            ? mine
-              ? 'Working'
-              : 'Working elsewhere'
-            : blocked
-            ? 'Work needs review'
-            : 'Work hours'}
-        </Text>
+      );
+    }
+    if (active && !mine) {
+      return (
+        <WorkButton
+          variant="muted"
+          label="Clocked in elsewhere"
+          accessibilityLabel="Clocked in on another job"
+          style={s.grow}
+        />
+      );
+    }
+    if (session && mine) {
+      return (
+        <WorkButton
+          variant="warn"
+          icon="alert-outline"
+          label="Review times"
+          disabled={busy}
+          onPress={() => {
+            void work.review(session);
+          }}
+          style={s.grow}
+        />
+      );
+    }
+    if (blocked) {
+      if (!compact) {
+        return null;
+      }
+      // Still pressable: tapping opens the resolver rather than doing nothing.
+      return (
+        <WorkButton
+          variant="muted"
+          icon="alert-outline"
+          label="Clock In"
+          accessibilityLabel="Clock in, blocked by an unresolved session"
+          onPress={openResolver}
+          style={s.grow}
+        />
+      );
+    }
+    if (mayStart) {
+      return (
+        <WorkButton
+          variant={compact ? 'ghost' : 'primary'}
+          icon="play"
+          label={jobId ? 'Clock In' : 'Clock in · General work'}
+          busy={work.busy}
+          onPress={() => {
+            void work.start(jobId);
+          }}
+          style={s.grow}
+        />
+      );
+    }
+    return null;
+  };
+
+  // Why clock-in is unavailable, in the cleaner's terms.
+  const blockedReason = blocked
+    ? 'Resolve your open sessions first'
+    : !canStartWork(work.user, work.now)
+    ? 'Renew your subscription to start new work. Existing records remain available.'
+    : !work.enabled
+    ? 'New work tracking is currently unavailable.'
+    : !jobEligible
+    ? 'Clock-in is available when this job is confirmed and assigned to you.'
+    : null;
+
+  const pay = session ? payLabel(session) : null;
+  const elapsed = session
+    ? Math.min(active ? tick : work.now, session.autoStopAt) - session.startedAt
+    : 0;
+
+  if (simple) {
+    return (
+      <View style={styles.simpleFooter}>
+        <View style={[s.row, stacked && styles.stackedFooter]}>
+          {session && mine && (
+            <View style={[s.grow, styles.simpleTimer]}>
+              <View style={s.row}>
+                {active && !overdue && <View style={styles.liveDot} />}
+                <Text style={s.sml}>
+                  {active && !overdue ? 'Working' : 'Needs review'}
+                </Text>
+              </View>
+              <Text style={[s.mid, s.mono]}>
+                {active
+                  ? formatWorkTimer(elapsed)
+                  : formatWorkDuration(session.estimatedDurationMs)}
+              </Text>
+            </View>
+          )}
+          {clockButton()}
+        </View>
+        {(!session || !mine) && !!blockedReason && !active && (
+          <Text style={s.sml}>{blockedReason}</Text>
+        )}
+        {!!work.error && (
+          <Text accessibilityRole="alert" style={s.error}>
+            {work.error}
+          </Text>
+        )}
+        {work.pending && (
+          <WorkButton
+            variant="ghost"
+            label="Retry unfinished work update"
+            disabled={work.busy}
+            onPress={() => {
+              void work.retry();
+            }}
+          />
+        )}
       </View>
-      {session && (
+    );
+  }
+
+  return (
+    <View
+      style={[
+        s.card,
+        active && mine && s.liveCard,
+        !!session && !active && s.warnCard,
+        compact && {
+          padding: 14,
+          borderRadius: 0,
+          borderWidth: 0,
+          borderTopWidth: 1,
+        },
+        blocked && !active && s.warnCard,
+      ]}>
+      {/* ---- running session ------------------------------------------- */}
+      {session && mine && (
         <>
-          <Text style={styles.text}>
-            {session.jobSnapshot?.title || 'General work'}
-          </Text>
-          <Text style={styles.duration}>
-            {formatWorkDuration(
-              active
-                ? Math.min(work.now, session.autoStopAt) - session.startedAt
-                : session.estimatedDurationMs,
-            )}
-            <Text style={styles.caption}>
-              {active ? ' · running' : ' · pending'}
-            </Text>
-          </Text>
-          <Text style={styles.help}>
+          <View style={s.detailRow}>
+            <View
+              style={[s.row, s.detailPrimary, stacked && {flexBasis: '100%'}]}>
+              {active ? (
+                <View style={styles.liveDot} />
+              ) : (
+                <WorkIconTile
+                  icon="alert-outline"
+                  color={Colors.amberDarkText}
+                  bg={Colors.amberOverlay10}
+                />
+              )}
+              <View style={s.grow}>
+                <Text style={s.eyebrow}>
+                  {active
+                    ? overdue
+                      ? 'Past its stop time'
+                      : 'Currently working'
+                    : 'Needs your attention'}
+                </Text>
+                <Text style={s.body} numberOfLines={2}>
+                  {workSessionTitle(session)}
+                </Text>
+              </View>
+            </View>
+            <View
+              style={[
+                styles.timerBlock,
+                stacked && {alignItems: 'flex-start'},
+              ]}>
+              <Text style={[s.mid, s.mono, active && {fontSize: 24}]}>
+                {active
+                  ? formatWorkTimer(elapsed)
+                  : formatWorkDuration(session.estimatedDurationMs)}
+              </Text>
+              <Text style={s.sml}>
+                {active
+                  ? `since ${formatWorkTime(
+                      session.startedAt,
+                      session.reportingTimeZone,
+                    )}`
+                  : 'estimated'}
+              </Text>
+            </View>
+          </View>
+
+          {active && !overdue && (
+            <View style={[s.inner, s.rowBetween]}>
+              <Text style={[s.sml, s.detailPrimary]}>
+                {session.expectedEndAt
+                  ? `Expected finish ${formatWorkTime(
+                      session.expectedEndAt,
+                      session.reportingTimeZone,
+                    )}`
+                  : `Stops by ${formatWorkTime(
+                      session.autoStopAt,
+                      session.reportingTimeZone,
+                    )}`}
+              </Text>
+              {!!pay && <WorkPill tone="active" label={pay} />}
+            </View>
+          )}
+
+          <Text style={s.sml}>
             {active
               ? overdue
                 ? 'Checking the stop deadline. These hours need review.'
-                : `Stops by ${formatWorkTime(
-                    session.autoStopAt,
-                    session.reportingTimeZone,
-                  )}`
+                : 'Time counts once you clock out.'
               : 'Confirm actual times before these hours count.'}
           </Text>
-          {active && mine && (
-            <TouchableOpacity
-              style={styles.primary}
-              disabled={work.busy || work.pending}
-              onPress={() => {
-                void work.stop();
-              }}>
-              <Text style={styles.white}>Clock out</Text>
-            </TouchableOpacity>
-          )}
-          {active &&
-            mine &&
-            !session.jobId &&
-            session.expectedEndAt === null &&
-            !overdue && (
-              <TouchableOpacity
-                style={styles.link}
-                disabled={work.busy || work.pending}
-                onPress={work.planFinish}>
-                <Text style={styles.linkText}>Add a planned finish</Text>
-              </TouchableOpacity>
-            )}
-          {!active && mine && (
-            <TouchableOpacity
-              style={styles.primary}
-              disabled={work.busy || work.pending}
-              onPress={() => {
-                void work.review(session);
-              }}>
-              <Text style={styles.white}>Review times</Text>
-            </TouchableOpacity>
-          )}
         </>
       )}
-      {!session && (
+
+      {/* ---- idle / blocked -------------------------------------------- */}
+      {(!session || !mine) && (
         <>
-          <Text style={styles.help}>
-            {!canStartWork(work.user, work.now)
-              ? 'Renew your subscription to start new work. Existing records remain available.'
-              : !work.enabled
-              ? 'New work tracking is currently unavailable.'
-              : !jobEligible
-              ? 'Clock-in is available when this job is confirmed and assigned to you.'
-              : 'Track your time. Hours count after you finish; collected money comes from paid invoices.'}
-          </Text>
-          {mayStart && (
-            <TouchableOpacity
-              style={styles.primary}
-              disabled={work.busy || work.pending}
-              onPress={() => {
-                void work.start(jobId);
-              }}>
-              <Text style={styles.white}>
-                {jobId ? 'Clock in for this job' : 'Clock in · General work'}
+          <View style={s.row}>
+            <WorkIconTile
+              icon={blocked ? 'alert-outline' : 'clock-outline'}
+              color={blocked ? Colors.amberDarkText : Colors.gradient1}
+              bg={blocked ? Colors.amberOverlay10 : Colors.blueOverlay10}
+              size={24}
+            />
+            <View style={s.grow}>
+              <Text style={s.title}>
+                {blocked
+                  ? `${work.reviews.length} ${
+                      work.reviews.length === 1
+                        ? 'session needs'
+                        : 'sessions need'
+                    } review`
+                  : compact
+                  ? 'Work on this job'
+                  : 'Ready to work?'}
               </Text>
-            </TouchableOpacity>
+              {!compact && (
+                <Text style={s.sml}>
+                  {blockedReason ?? 'Clock out to confirm your work hours.'}
+                </Text>
+              )}
+            </View>
+          </View>
+          {compact && !!blockedReason && (
+            <Text style={s.sml}>{blockedReason}</Text>
           )}
         </>
       )}
+
+      <View style={s.row}>{clockButton()}</View>
+      {!compact && work.reviews.length > 0 && (
+        <WorkButton
+          variant="warn"
+          label={`Review ${work.reviews.length} ${
+            work.reviews.length === 1 ? 'session' : 'sessions'
+          }`}
+          onPress={openResolver}
+        />
+      )}
+
+      {/* Planned finish is only offered for general work with no end in sight. */}
+      {active &&
+        mine &&
+        !session.jobId &&
+        session.expectedEndAt === null &&
+        !overdue && (
+          <TouchableOpacity
+            hitSlop={{top: 6, bottom: 6, left: 12, right: 12}}
+            disabled={busy}
+            onPress={work.planFinish}>
+            <Text style={s.link}>Add a planned finish</Text>
+          </TouchableOpacity>
+        )}
+
       {!compact && (
         <TouchableOpacity
-          style={styles.link}
+          accessibilityRole="button"
+          hitSlop={{top: 6, bottom: 6, left: 12, right: 12}}
           onPress={() => navigation.navigate('WorkTracking')}>
-          <Text style={styles.linkText}>
+          {/* <Text style={s.link}>
             Work history
             {work.reviews.length ? ` · ${work.reviews.length} to review` : ''}
-          </Text>
+          </Text> */}
         </TouchableOpacity>
       )}
+
       {work.reminderUnavailable && active && (
-        <Text style={styles.help}>
+        <Text style={s.sml}>
           The phone reminder could not be scheduled. Check your timer in the
           app; the server stop deadline still applies.
         </Text>
       )}
       {!!work.error && (
-        <Text style={styles.error} accessibilityRole="alert">
+        <Text style={s.error} accessibilityRole="alert">
           {work.error}
         </Text>
       )}
       {work.pending && (
-        <TouchableOpacity
-          style={styles.secondary}
+        <WorkButton
+          variant="ghost"
+          label="Retry unfinished work update"
           disabled={work.busy}
           onPress={() => {
             void work.retry();
-          }}>
-          <Text style={styles.linkText}>Retry unfinished work update</Text>
-        </TouchableOpacity>
+          }}
+        />
       )}
       {work.busy && <ActivityIndicator color={Colors.gradient1} />}
     </View>
   );
 };
-const styles = StyleSheet.create({
-  card: {
-    padding: 18,
-    marginVertical: 12,
-    borderRadius: 16,
-    backgroundColor: Colors.white,
-    borderWidth: 1,
-    borderColor: Colors.lightBlueBorder,
+
+const styles = {
+  simpleFooter: {
+    padding: 14,
+    borderTopWidth: 1,
+    borderTopColor: Colors.gray200,
     gap: 10,
   },
-  compact: {margin: 12, padding: 14},
-  row: {flexDirection: 'row', alignItems: 'center', gap: 8},
-  title: {fontFamily: Fonts.semiBold, color: Colors.slateText, fontSize: 17},
-  text: {color: Colors.slateText, fontSize: 15, fontFamily: Fonts.fontMedium},
-  duration: {fontFamily: Fonts.fontBold, fontSize: 28, color: Colors.gradient1},
-  caption: {fontSize: 13, color: Colors.secondaryText},
-  help: {color: Colors.secondaryText, fontSize: 13, lineHeight: 20},
-  primary: {
-    padding: 13,
-    borderRadius: 10,
-    backgroundColor: Colors.gradient1,
-    alignItems: 'center',
+  simpleTimer: {gap: 4},
+  stackedFooter: {
+    flexDirection: 'column' as const,
+    alignItems: 'stretch' as const,
   },
-  white: {color: Colors.white, fontFamily: Fonts.semiBold, fontSize: 15},
-  link: {paddingVertical: 8},
-  linkText: {color: Colors.gradient1, fontFamily: Fonts.semiBold, fontSize: 14},
-  error: {color: Colors.amberDarkText, fontSize: 13, lineHeight: 20},
-  secondary: {padding: 12, borderRadius: 10, backgroundColor: Colors.blueBg50},
-});
+  liveDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: Colors.success,
+  },
+  timerBlock: {alignItems: 'flex-end' as const},
+};

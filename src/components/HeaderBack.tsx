@@ -23,6 +23,12 @@ interface props {
   style?: object;
   arrowColor? : any
   tintColor?:any
+  /**
+   * Overrides the back control's default navigation.goBack(). Needed by
+   * screens that can be the only route in the stack - a cleaner reset lands
+   * directly on WorkTracking, where goBack() is a no-op and strands them.
+   */
+  onBack?: () => void;
 }
 
 const HeaderBack = (props: props) => {
@@ -54,7 +60,9 @@ const HeaderBack = (props: props) => {
                 alignItems: 'center',
                 marginBottom: 10,
               }}
-              onPress={() => navigation.goBack()}>
+              onPress={() =>
+                props.onBack ? props.onBack() : navigation.goBack()
+              }>
               <MaterialIcons
                 name="keyboard-backspace"
                 color={ props.arrowColor ? props?.arrowColor : Colors.secondaryText}

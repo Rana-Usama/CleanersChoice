@@ -3,6 +3,9 @@ import Renderer, {act} from 'react-test-renderer';
 import {Text, TouchableOpacity} from 'react-native';
 import {WorkSessionDialog} from '../src/components/work/WorkSessionDialog';
 import {WorkTimeFields} from '../src/components/work/WorkTimeFields';
+jest.mock('react-native-safe-area-context', () => ({
+  useSafeAreaInsets: () => ({top: 24, bottom: 16, left: 0, right: 0}),
+}));
 jest.mock('@react-native-firebase/auth', () => () => ({}));
 jest.mock('@react-native-firebase/firestore', () => () => ({}));
 jest.mock('react-native-date-picker', () => 'DatePicker');
@@ -101,6 +104,28 @@ it('requires a correction reason and gives discard a separate explicit action', 
   save.mockClear();
   await press('Discard this record instead');
   expect(save).not.toHaveBeenCalled();
+  await press('Discard record');
+  expect(save).toHaveBeenCalledWith(expect.objectContaining({discard: true}));
+});
+it('opens a discard confirmation without saving until the cleaner confirms', async () => {
+  await open();
+  await act(async () => {
+    renderer.update(
+      <WorkSessionDialog
+        state={{kind: 'finish', session, initialDiscard: true}}
+        busy={false}
+        pending={false}
+        error=""
+        onClose={jest.fn()}
+        onContinue={jest.fn()}
+        onFinish={jest.fn()}
+        onRetry={jest.fn()}
+        onSave={save}
+      />,
+    );
+  });
+  expect(save).not.toHaveBeenCalled();
+  expect(renderer.root.findAllByType(WorkTimeFields)).toHaveLength(0);
   await press('Discard record');
   expect(save).toHaveBeenCalledWith(expect.objectContaining({discard: true}));
 });

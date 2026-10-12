@@ -4,6 +4,8 @@ import {onDocumentCreated} from "firebase-functions/v2/firestore";
 
 admin.initializeApp();
 
+export {notifyJobApplications} from "./jobs/tasks";
+
 export {workSessionOperation} from "./workSessions/endpoint";
 export {recoverOverdueWorkSessions, reconcileJobWorkSessionChanges, notifyWorkSessionReview}
   from "./workSessions/tasks";

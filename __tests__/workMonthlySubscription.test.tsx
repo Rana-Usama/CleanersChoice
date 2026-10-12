@@ -8,6 +8,7 @@ let mockUid = 'cleaner';
 let mockFocused = true;
 const mockSessionSubscriptions: any[] = [];
 const mockInvoiceSubscriptions: any[] = [];
+const mockEarningSubscriptions: any[] = [];
 jest.mock('../src/components/work/WorkSessionProvider', () => ({
   useWorkSessions: () => mockWork,
 }));
@@ -25,15 +26,29 @@ jest.mock('../src/services/workSessionService', () => ({
   },
 }));
 jest.mock('@react-native-firebase/firestore', () => () => ({
-  collection: () => ({
-    where: (_field: string, _op: string, uid: string) => ({
-      onSnapshot: (_options: any, change: any, error: any) => {
+  collection: (name: string) => {
+    // where() is chainable because JobEarnings filters on cleanerId and a
+    // completedAt range; the terminal onSnapshot routes by collection.
+    const query: any = {
+      uid: '',
+      where(_field: string, _op: string, value: any) {
+        if (_field === 'cleanerId') {
+          query.uid = value;
+        }
+        return query;
+      },
+      onSnapshot(_options: any, change: any, error: any) {
         const stop = jest.fn();
-        mockInvoiceSubscriptions.push({uid, change, error, stop});
+        const target =
+          name === 'JobEarnings'
+            ? mockEarningSubscriptions
+            : mockInvoiceSubscriptions;
+        target.push({uid: query.uid, change, error, stop});
         return stop;
       },
-    }),
-  }),
+    };
+    return query;
+  },
 }));
 let current: ReturnType<typeof useWorkMonthlyReport>;
 let renderer: Renderer.ReactTestRenderer;
@@ -45,7 +60,8 @@ const workRecord = (status = 'confirmed') => ({
   id: 'work',
   cleanerId: mockUid,
   status,
-  jobId: null,
+  jobId: 'job-hourly',
+  paySnapshot: {basis: 'hourly', hourlyRate: 25, rateSource: 'job'},
   source: 'clock',
   startedAt: NOW - 3600000,
   endedAt: NOW,
@@ -53,26 +69,28 @@ const workRecord = (status = 'confirmed') => ({
   reportingTimeZone: 'UTC',
   durationMs: 3600000,
 });
-const paidInvoice = () => ({
-  id: 'invoice',
+const fixedEarning = () => ({
+  jobId: 'job-flat',
   cleanerId: mockUid,
-  jobId: 'job',
-  price: '$50',
-  paymentStatus: 'paid',
-  paidAt: new Date(2026, 9, 15),
+  basis: 'flat',
+  amount: 80,
+  completedAt: NOW,
+  source: 'jobCompletion',
+  revision: 1,
+  updatedAt: NOW,
 });
 const emit = async (
   sessions = [workRecord()],
-  invoices = [paidInvoice()],
+  earnings: any[] = [],
   cached = false,
 ) => {
   await act(async () => {
-    mockSessionSubscriptions[mockSessionSubscriptions.length - 1].change(
-      sessions,
-    );
-    mockSessionSubscriptions[mockSessionSubscriptions.length - 1].cache(cached);
-    mockInvoiceSubscriptions[mockInvoiceSubscriptions.length - 1].change({
-      docs: invoices.map(value => ({id: value.id, data: () => value})),
+    const records =
+      mockSessionSubscriptions[mockSessionSubscriptions.length - 1];
+    records.change(sessions);
+    records.cache(cached);
+    mockEarningSubscriptions[mockEarningSubscriptions.length - 1].change({
+      docs: earnings.map(value => ({id: value.jobId, data: () => value})),
       metadata: {fromCache: cached},
     });
   });
@@ -82,6 +100,7 @@ beforeEach(async () => {
   mockFocused = true;
   mockSessionSubscriptions.length = 0;
   mockInvoiceSubscriptions.length = 0;
+  mockEarningSubscriptions.length = 0;
   mockWork = {
     uid: mockUid,
     enabled: true,
@@ -111,65 +130,69 @@ afterEach(async () => {
   await act(async () => renderer.unmount());
 });
 
-it('waits for both full datasets and reacts to paid-invoice reversals and confirmed-time edits', async () => {
+it('loads hours and earned without an invoice subscription, and reacts to confirmed-time edits', async () => {
   expect(current.loading).toBe(true);
   await act(async () => {
     mockSessionSubscriptions[0].change([workRecord()]);
   });
   expect(current.report).toBeNull();
-  await emit();
-  expect(current.report?.collected).toBe(50);
+  await emit(undefined, [fixedEarning()]);
+  expect(mockInvoiceSubscriptions).toHaveLength(0);
+  expect(current.report?.earned).toBe(105);
   expect(current.report?.confirmedMs).toBe(3600000);
-  await emit(
-    [{...workRecord(), startedAt: NOW - 1800000}],
-    [{...paidInvoice(), paymentStatus: 'unpaid'}],
-  );
+  await emit([{...workRecord(), startedAt: NOW - 1800000}], [fixedEarning()]);
   expect(current.report?.confirmedMs).toBe(1800000);
-  expect(current.report?.collected).toBe(0);
-  expect(current.report?.outstandingTotal).toBe(50);
+  expect(current.report?.earned).toBe(92.5);
 });
-it('marks cached totals and never turns a failed invoice read into zero collected', async () => {
+it('marks cached totals, blocks incomplete hours and restores listeners on retry', async () => {
   await emit(undefined, undefined, true);
   expect(current.fromCache).toBe(true);
   await act(async () => {
-    mockInvoiceSubscriptions[0].error(new Error('offline'));
+    mockSessionSubscriptions[0].error(new Error('offline'));
   });
   expect(current.report).toBeNull();
-  expect(current.error).toContain('invoice totals');
+  expect(current.error).toContain('all work');
   expect(current.loading).toBe(false);
   await act(async () => {
     current.retry();
   });
-  expect(mockInvoiceSubscriptions).toHaveLength(2);
-  expect(mockInvoiceSubscriptions[0].stop).toHaveBeenCalled();
+  expect(mockSessionSubscriptions).toHaveLength(2);
+  expect(mockSessionSubscriptions[0].stop).toHaveBeenCalled();
+  expect(mockEarningSubscriptions[0].stop).toHaveBeenCalled();
   await emit();
   expect(current.error).toBe('');
 });
 it('clears old month totals immediately and ignores late callbacks from the previous month', async () => {
   await emit();
   const oldSessions = mockSessionSubscriptions[0];
-  const oldInvoices = mockInvoiceSubscriptions[0];
+  const oldEarnings = mockEarningSubscriptions[0];
   await act(async () => {
     renderer.update(<Consumer month={10} />);
   });
   expect(current.report).toBeNull();
   await act(async () => {
     oldSessions.change([workRecord()]);
-    oldInvoices.change({docs: [], metadata: {fromCache: false}});
+    oldEarnings.change({
+      docs: [{data: fixedEarning}],
+      metadata: {fromCache: false},
+    });
   });
   expect(current.report).toBeNull();
   expect(oldSessions.stop).toHaveBeenCalled();
-  await emit();
+  expect(oldEarnings.stop).toHaveBeenCalled();
+  await emit(undefined, [fixedEarning()]);
   expect(current.report?.confirmedMs).toBe(0);
-  expect(current.report?.collected).toBe(0);
+  expect(current.report?.earned).toBe(0);
 });
-it('isolates accounts, including callbacks that arrive after auth changed but before a new screen read', async () => {
-  await emit();
+it('isolates accounts, including callbacks after auth changes and before a new screen read', async () => {
+  await emit(undefined, [fixedEarning()]);
+  const oldEarnings = mockEarningSubscriptions[0];
   mockUid = 'other';
   await act(async () => {
     mockSessionSubscriptions[0].change([workRecord()]);
+    oldEarnings.change({docs: [], metadata: {fromCache: false}});
   });
-  expect(current.report?.confirmedMs).toBe(3600000);
+  expect(current.report?.earned).toBe(105);
   mockWork = {...mockWork, uid: mockUid};
   await act(async () => {
     renderer.update(<Consumer />);
@@ -177,18 +200,18 @@ it('isolates accounts, including callbacks that arrive after auth changed but be
   expect(current.report).toBeNull();
   await emit(
     [{...workRecord(), cleanerId: 'cleaner'}],
-    [{...paidInvoice(), cleanerId: 'cleaner'}],
+    [{...fixedEarning(), cleanerId: 'cleaner'}],
   );
   expect(current.report?.confirmedMs).toBe(0);
-  expect(current.report?.collected).toBe(0);
+  expect(current.report?.earned).toBe(0);
 });
-it('stops background listeners and preserves existing-history access after expiry or feature disablement', async () => {
+it('stops background listeners and preserves history access after expiry or feature disablement', async () => {
   mockFocused = false;
   await act(async () => {
     renderer.update(<Consumer />);
   });
   expect(mockSessionSubscriptions[0].stop).toHaveBeenCalled();
-  expect(mockInvoiceSubscriptions[0].stop).toHaveBeenCalled();
+  expect(mockEarningSubscriptions[0].stop).toHaveBeenCalled();
   mockWork = {
     ...mockWork,
     enabled: false,
@@ -201,7 +224,7 @@ it('stops background listeners and preserves existing-history access after expir
   });
   expect(current.available).toBe(true);
   await emit();
-  expect(current.report?.collected).toBe(50);
+  expect(current.report?.earned).toBe(25);
   mockWork = {
     ...mockWork,
     user: {...mockWork.user, subscriptionStatus: 'refunded'},
@@ -211,4 +234,22 @@ it('stops background listeners and preserves existing-history access after expir
   });
   expect(current.available).toBe(false);
   expect(current.report).toBeNull();
+});
+it('includes the earnings-ledger cache flag and clears it when fresh data arrives', async () => {
+  await emit();
+  await act(async () => {
+    mockEarningSubscriptions[0].change({docs: [], metadata: {fromCache: true}});
+  });
+  expect(current.fromCache).toBe(true);
+  await emit();
+  expect(current.fromCache).toBe(false);
+});
+it('keeps hours available with a visible warning when fixed-price earnings cannot load', async () => {
+  await act(async () => {
+    mockSessionSubscriptions[0].change([workRecord()]);
+    mockEarningSubscriptions[0].error(new Error('offline'));
+  });
+  expect(current.report?.confirmedMs).toBe(3600000);
+  expect(current.error).toContain('fixed-price job earnings');
+  expect(current.loading).toBe(false);
 });

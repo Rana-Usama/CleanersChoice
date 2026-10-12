@@ -32,6 +32,7 @@ import {
   canUseWorkRecords,
   deviceWorkTimeZone,
   workSessionPhase,
+  workSessionTitle,
 } from '../../utils/workSessionFlow';
 import {WorkSessionDialog, WorkDialogState} from './WorkSessionDialog';
 import {DEFAULT_WORK_SESSION_CONFIG} from '../../utils/workSessionConfig';
@@ -56,13 +57,16 @@ type Context = {
   now: number;
   start(jobId?: string): Promise<void>;
   stop(session?: WorkSession): Promise<boolean>;
-  review(session: WorkSession): Promise<boolean>;
-  edit(session: WorkSession): Promise<boolean>;
+  review(session: WorkSession, discard?: boolean): Promise<boolean>;
+  edit(session: WorkSession, discard?: boolean): Promise<boolean>;
+  editEarnings(session: WorkSession): Promise<boolean>;
   saveManual(input: {
     startedAt: number;
     endedAt: number;
     reportingTimeZone: string;
     jobId?: string | null;
+    workName?: string;
+    expectedEarnings?: number;
     note?: string;
   }): Promise<WorkSessionResult>;
   retry(): Promise<WorkSessionResult | null>;
@@ -293,42 +297,76 @@ export const WorkSessionProvider = ({
     dialogResolve.current = null;
   }, []);
 
-  const review = useCallback(async (session: WorkSession): Promise<boolean> => {
-    if (
-      latest.current.dialog ||
-      !canUseWorkRecords(latest.current.user) ||
-      session.cleanerId !== owner.current
-    ) {
-      return false;
-    }
-    return new Promise(resolve => {
-      dialogResolve.current = resolve;
-      setError('');
-      setDialog({kind: 'finish', session});
-    });
-  }, []);
+  const review = useCallback(
+    async (session: WorkSession, discard = false): Promise<boolean> => {
+      if (
+        latest.current.dialog ||
+        !canUseWorkRecords(latest.current.user) ||
+        session.cleanerId !== owner.current
+      ) {
+        return false;
+      }
+      return new Promise(resolve => {
+        dialogResolve.current = resolve;
+        setError('');
+        setDialog({kind: 'finish', session, initialDiscard: discard});
+      });
+    },
+    [],
+  );
 
-  const edit = useCallback(async (session: WorkSession): Promise<boolean> => {
-    if (
-      session.status !== 'confirmed' ||
-      session.cleanerId !== owner.current ||
-      latest.current.dialog ||
-      !canUseWorkRecords(latest.current.user)
-    ) {
-      return false;
-    }
-    return new Promise(resolve => {
-      dialogResolve.current = resolve;
-      setError('');
-      setDialog({kind: 'finish', session, editing: true});
-    });
-  }, []);
+  const edit = useCallback(
+    async (session: WorkSession, discard = false): Promise<boolean> => {
+      if (
+        session.status !== 'confirmed' ||
+        session.cleanerId !== owner.current ||
+        latest.current.dialog ||
+        !canUseWorkRecords(latest.current.user)
+      ) {
+        return false;
+      }
+      return new Promise(resolve => {
+        dialogResolve.current = resolve;
+        setError('');
+        setDialog({
+          kind: 'finish',
+          session,
+          editing: true,
+          initialDiscard: discard,
+        });
+      });
+    },
+    [],
+  );
+  const editEarnings = useCallback(
+    async (session: WorkSession): Promise<boolean> => {
+      if (
+        session.jobId ||
+        session.status === 'discarded' ||
+        session.cleanerId !== owner.current ||
+        latest.current.dialog ||
+        latest.current.busy ||
+        latest.current.pending ||
+        !canUseWorkRecords(latest.current.user)
+      ) {
+        return false;
+      }
+      return new Promise(resolve => {
+        dialogResolve.current = resolve;
+        setError('');
+        setDialog({kind: 'earnings', session});
+      });
+    },
+    [],
+  );
   const saveManual = useCallback(
     async (input: {
       startedAt: number;
       endedAt: number;
       reportingTimeZone: string;
       jobId?: string | null;
+      workName?: string;
+      expectedEarnings?: number;
       note?: string;
     }) => run({...input, action: 'addManual'}),
     [run],
@@ -592,9 +630,14 @@ export const WorkSessionProvider = ({
         }
       } else if (
         dialog &&
-        ['clockIn', 'confirm', 'edit', 'discard', 'setPlannedFinish'].includes(
-          request?.action || '',
-        )
+        [
+          'clockIn',
+          'confirm',
+          'edit',
+          'discard',
+          'setPlannedFinish',
+          'editEarnings',
+        ].includes(request?.action || '')
       ) {
         closeDialog(true);
       }
@@ -632,6 +675,7 @@ export const WorkSessionProvider = ({
         start,
         review,
         edit,
+        editEarnings,
         saveManual,
         refresh,
         stop: async (record = current || undefined) =>
@@ -652,7 +696,8 @@ export const WorkSessionProvider = ({
           setDialog({
             kind: 'start',
             existingSessionId: current.id,
-            title: 'General work',
+            actualStartedAt: current.startedAt,
+            title: workSessionTitle(current),
             reportingTimeZone: current.reportingTimeZone,
             expectedEndAt: null,
             config: current.timingConfig,
@@ -700,11 +745,25 @@ export const WorkSessionProvider = ({
                   action: 'clockIn',
                   jobId: dialog.jobId || null,
                   reportingTimeZone: input.reportingTimeZone!,
+                  ...(input.startedAt !== undefined
+                    ? {startedAt: input.startedAt}
+                    : {}),
+                  ...(input.workName ? {workName: input.workName} : {}),
+                  ...(input.expectedEarnings !== undefined
+                    ? {expectedEarnings: input.expectedEarnings}
+                    : {}),
                   ...(input.plannedFinishAt !== undefined
                     ? {plannedFinishAt: input.plannedFinishAt}
                     : {}),
                 });
               }
+            } else if (dialog.kind === 'earnings') {
+              await run({
+                action: 'editEarnings',
+                sessionId: dialog.session.id,
+                expectedEarnings: input.expectedEarnings!,
+                expectedRevision: dialog.session.revision ?? 0,
+              });
             } else if (dialog.kind === 'finish') {
               if (input.discard) {
                 await run({

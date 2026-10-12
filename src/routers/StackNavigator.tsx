@@ -9,7 +9,6 @@ import SignIn from '../screens/commonflow/authscreens/SignIn';
 import SignUp from '../screens/commonflow/authscreens/SignUp';
 import ResetPassword from '../screens/commonflow/authscreens/ResetPassword';
 import CustomerNavigator from './CustomerNavigator';
-import {SafeAreaProvider} from 'react-native-safe-area-context';
 import ServiceDetails from '../screens/customerflow/home/ServiceDetails';
 import PostJob from '../screens/customerflow/home/PostJob';
 import JobPosted from '../screens/customerflow/home/JobPosted';
@@ -243,119 +242,118 @@ const StackNavigator: React.FC = () => {
   }
 
   return (
-    <SafeAreaProvider>
-      <NavigationContainer
-        ref={navigationRef}
-        onStateChange={enforceWorkAccess}
-        onReady={() => setNavReady(true)}>
-        {isLoading ? (
-          <Decider />
-        ) : (
-          <Stack.Navigator
-            screenOptions={{
-              headerShown: false,
-            }}
-            initialRouteName={initialRoute}>
-            {/* -------Common Screens----- */}
-            <Stack.Screen name="SplashOne" component={Splash} />
-            <Stack.Screen name="OnBoarding" component={OnBoarding} />
-            <Stack.Screen name="UserSelection" component={UserSelection} />
-            <Stack.Screen name="SignUp" component={SignUp} />
-            <Stack.Screen name="SignIn" component={SignIn} />
-            <Stack.Screen name="ResetPassword" component={ResetPassword} />
-            <Stack.Screen name="EditProfile" component={EditProfile} />
-            <Stack.Screen name="JobDetails" component={JobDetails} />
-            <Stack.Screen name="FAQS" component={FAQS} />
-            <Stack.Screen name="Terms" component={Terms} />
-            <Stack.Screen name="Privacy" component={Privacy} />
-            <Stack.Screen
-              name="ChangePasswordV2"
-              component={ChangePasswordV2}
-            />
-            <Stack.Screen name="Availability" component={Availability} />
-            <Stack.Screen name="Chat" component={Chat} />
-            <Stack.Screen name="Messages" component={Messages} />
-            <Stack.Screen name="Location" component={Location} />
-            <Stack.Screen
-              name="NotificationsScreen"
-              component={NotificationsScreen}
-            />
-            <Stack.Screen name="CleanerProfile" component={CleanerProfile} />
-            <Stack.Screen name="CustomerProfile" component={CustomerProfile} />
-            <Stack.Screen
-              name="CongratulationsScreen"
-              component={ProfileCompletionCongratulations}
-            />
+    <NavigationContainer
+      ref={navigationRef}
+      onStateChange={enforceWorkAccess}
+      onReady={() => setNavReady(true)}>
+      {isLoading ? (
+        <Decider />
+      ) : (
+        <Stack.Navigator
+          screenOptions={{
+            headerShown: false,
+          }}
+          initialRouteName={initialRoute}>
+          {/* -------Common Screens----- */}
+          <Stack.Screen name="SplashOne" component={Splash} />
+          <Stack.Screen name="OnBoarding" component={OnBoarding} />
+          <Stack.Screen name="UserSelection" component={UserSelection} />
+          <Stack.Screen name="SignUp" component={SignUp} />
+          <Stack.Screen name="SignIn" component={SignIn} />
+          <Stack.Screen name="ResetPassword" component={ResetPassword} />
+          <Stack.Screen name="EditProfile" component={EditProfile} />
+          <Stack.Screen name="JobDetails" component={JobDetails} />
+          <Stack.Screen name="FAQS" component={FAQS} />
+          <Stack.Screen name="Terms" component={Terms} />
+          <Stack.Screen name="Privacy" component={Privacy} />
+          <Stack.Screen
+            name="ChangePasswordV2"
+            component={ChangePasswordV2}
+          />
+          <Stack.Screen name="Availability" component={Availability} />
+          <Stack.Screen name="Chat" component={Chat} />
+          <Stack.Screen name="Messages" component={Messages} />
+          <Stack.Screen name="Location" component={Location} />
+          <Stack.Screen
+            name="NotificationsScreen"
+            component={NotificationsScreen}
+          />
+          <Stack.Screen name="CleanerProfile" component={CleanerProfile} />
+          <Stack.Screen name="CustomerProfile" component={CustomerProfile} />
+          <Stack.Screen
+            name="CongratulationsScreen"
+            component={ProfileCompletionCongratulations}
+          />
 
-            {/* ------------------Customer Flow------------- */}
-            <Stack.Screen name="Home" component={CustomerNavigator} />
-            <Stack.Screen name="ServiceDetails" component={ServiceDetails} />
-            <Stack.Screen name="PostJob" component={PostJob} />
-            <Stack.Screen name="JobPosted" component={JobPosted} />
-            <Stack.Screen
-              name="CheckAvailability"
-              component={CheckAvailability}
-            />
-            <Stack.Screen name="Jobs" component={Jobs} />
-            <Stack.Screen name="JobManagement" component={JobManagement} />
+          {/* ------------------Customer Flow------------- */}
+          <Stack.Screen name="Home" component={CustomerNavigator} />
+          <Stack.Screen name="ServiceDetails" component={ServiceDetails} />
+          <Stack.Screen name="PostJob" component={PostJob} />
+          <Stack.Screen name="JobPosted" component={JobPosted} />
+          <Stack.Screen
+            name="CheckAvailability"
+            component={CheckAvailability}
+          />
+          <Stack.Screen name="Jobs" component={Jobs} />
+          <Stack.Screen name="JobManagement" component={JobManagement} />
 
-            {/* ----------------- Cleaner Flow ---------------- */}
-            <Stack.Screen name="Premium" component={Premium} />
-            <Stack.Screen
-              name="CleanerNavigator"
-              component={CleanerNavigator}
-            />
-            <Stack.Screen name="ServiceOne" component={ServiceOne} />
-            <Stack.Screen name="ServiceTwo" component={ServiceTwo} />
-            <Stack.Screen name="ServiceThree" component={ServiceThree} />
-            <Stack.Screen
-              name="CancelSubscription"
-              component={CancelSubscription}
-            />
-            <Stack.Screen name="MyJobs" component={MyJobs} />
-            <Stack.Screen name="Settings" component={Settings} />
-            <Stack.Screen name="InvoiceForm" component={InvoiceForm} />
-            <Stack.Screen name="InvoicePreview" component={InvoicePreview} />
-            <Stack.Screen name="PhoneBook" component={PhoneBook} />
-            <Stack.Screen name="CustomerForm" component={CustomerForm} />
-            <Stack.Screen name="Earnings" component={Earnings} />
-            <Stack.Screen name="WorkTracking" component={WorkTracking} />
-            <Stack.Screen name="WorkHours" component={WorkHours} />
-            <Stack.Screen name="ManualWorkEntry" component={ManualWorkEntry} />
-            <Stack.Screen name="WorkSessionDetails" component={WorkSessionDetails} />
-            <Stack.Screen
-              name="CleanerIntroVideo"
-              component={CleanerIntroVideo}
-              options={{animation: 'fade'}}
-            />
-            <Stack.Screen
-              name="CleanerInstructions"
-              component={CleanerInstructions}
-              options={{animation: 'fade', gestureEnabled: false}}
-            />
-            <Stack.Screen
-              name="CompleteBusinessInfo"
-              component={CompleteBusinessInfo}
-              options={{animation: 'fade', gestureEnabled: false}}
-            />
+          {/* ----------------- Cleaner Flow ---------------- */}
+          <Stack.Screen name="Premium" component={Premium} />
+          <Stack.Screen
+            name="CleanerNavigator"
+            component={CleanerNavigator}
+          />
+          <Stack.Screen name="ServiceOne" component={ServiceOne} />
+          <Stack.Screen name="ServiceTwo" component={ServiceTwo} />
+          <Stack.Screen name="ServiceThree" component={ServiceThree} />
+          <Stack.Screen
+            name="CancelSubscription"
+            component={CancelSubscription}
+          />
+          <Stack.Screen name="MyJobs" component={MyJobs} />
+          <Stack.Screen name="Settings" component={Settings} />
+          <Stack.Screen name="InvoiceForm" component={InvoiceForm} />
+          <Stack.Screen name="InvoicePreview" component={InvoicePreview} />
+          <Stack.Screen name="PhoneBook" component={PhoneBook} />
+          <Stack.Screen name="CustomerForm" component={CustomerForm} />
+          <Stack.Screen name="Earnings" component={Earnings} />
+          <Stack.Screen name="WorkTracking" component={WorkTracking} />
+          <Stack.Screen name="WorkHours" component={WorkHours} />
+          <Stack.Screen name="ManualWorkEntry" component={ManualWorkEntry}
+            options={{presentation: 'transparentModal', animation: 'slide_from_bottom', contentStyle: {backgroundColor: 'transparent'}}} />
+          <Stack.Screen name="WorkSessionDetails" component={WorkSessionDetails} />
+          <Stack.Screen
+            name="CleanerIntroVideo"
+            component={CleanerIntroVideo}
+            options={{animation: 'fade'}}
+          />
+          <Stack.Screen
+            name="CleanerInstructions"
+            component={CleanerInstructions}
+            options={{animation: 'fade', gestureEnabled: false}}
+          />
+          <Stack.Screen
+            name="CompleteBusinessInfo"
+            component={CompleteBusinessInfo}
+            options={{animation: 'fade', gestureEnabled: false}}
+          />
 
-            {/* ----------------- Admin Flow ---------------- */}
-            {/*
-              Registered unconditionally so app-launch routing stays simple.
-              Access is gated by the admin-only entry points (Dashboard CTA and
-              Settings row), and each screen re-checks `Users.admin` via
-              useIsAdmin() before rendering anything.
-            */}
-            <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
-            <Stack.Screen name="AdminActiveJobs" component={AdminActiveJobs} />
-            <Stack.Screen
-              name="AdminCleanerServices"
-              component={AdminCleanerServices}
-            />
-          </Stack.Navigator>
-        )}
-      </NavigationContainer>
-    </SafeAreaProvider>
+          {/* ----------------- Admin Flow ---------------- */}
+          {/*
+            Registered unconditionally so app-launch routing stays simple.
+            Access is gated by the admin-only entry points (Dashboard CTA and
+            Settings row), and each screen re-checks `Users.admin` via
+            useIsAdmin() before rendering anything.
+          */}
+          <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
+          <Stack.Screen name="AdminActiveJobs" component={AdminActiveJobs} />
+          <Stack.Screen
+            name="AdminCleanerServices"
+            component={AdminCleanerServices}
+          />
+        </Stack.Navigator>
+      )}
+    </NavigationContainer>
   );
 };
 

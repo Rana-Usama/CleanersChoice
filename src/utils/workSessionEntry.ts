@@ -8,6 +8,7 @@ import {
   HOUR_MS,
   validateInterval,
 } from '../../functions/src/workSessions/model';
+import {cachedDateFormatter} from './intlCache';
 
 export const manualWorkAvailable = (
   config: WorkSessionConfig,
@@ -92,6 +93,7 @@ export const workAuditLabel = (action: string) =>
       addManual: 'Manual record saved',
       confirm: 'Times confirmed',
       edit: 'Times corrected',
+      editEarnings: 'Earnings updated',
       discard: 'Record discarded',
       autoStopped: 'Timer stopped automatically',
       requestReview: 'Actual-time review requested',
@@ -99,7 +101,7 @@ export const workAuditLabel = (action: string) =>
     } as Record<string, string>
   )[action] || 'Record updated');
 export const detailedWorkTime = (time: number, timeZone: string) =>
-  new Intl.DateTimeFormat('en-US', {
+  cachedDateFormatter('en-US', {
     timeZone,
     year: 'numeric',
     month: 'short',

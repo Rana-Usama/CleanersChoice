@@ -5,6 +5,7 @@ import {reconcileJobWorkSessions, sweepOverdueWorkSessions} from "./recovery";
 import {finiteTime} from "./model";
 import type {WorkSession} from "./model";
 import {reviewNotification} from "./recoveryState";
+import {reconcileJobEarning} from "./jobEarnings";
 
 // Recovery remains enabled even when new clock-ins are disabled.
 export const recoverOverdueWorkSessions = onSchedule({
@@ -27,6 +28,20 @@ export const reconcileJobWorkSessionChanges = onDocumentWritten({
     admin.firestore(), event.params.jobId, event.data.before.data(), event.data.after.data(), occurredAt, event.id
   );
   if (summary.recovered) console.log("Job interrupted work sessions", {jobId: event.params.jobId, ...summary});
+
+  // Fixed-price earnings are recognised here because this already fires on
+  // every Jobs write with an authoritative commit timestamp, and because
+  // autoCompleteJobs completes jobs on a schedule with no client present.
+  // Its own failure must not undo the session recovery committed above.
+  try {
+    const earning = await reconcileJobEarning(
+      admin.firestore(), event.params.jobId, event.data.after.data(), occurredAt
+    );
+    if (earning !== "unchanged") console.log("Job earnings", {jobId: event.params.jobId, result: earning});
+  } catch (error) {
+    console.error("Job earnings reconcile failed", {jobId: event.params.jobId, error});
+    throw error;
+  }
 });
 
 // The in-app notice is committed with recovery. Push failure cannot undo hours/state.

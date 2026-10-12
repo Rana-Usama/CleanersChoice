@@ -41,6 +41,7 @@ import {useSoftInputAdjustNothing} from '../../../hooks/useSoftInputMode';
 import DollarIcon from '../../../assets/svg/DollarIcon';
 import SquareFeetIcon from '../../../assets/svg/SquareFeetIcon';
 import useIsAdmin from '../../../hooks/useIsAdmin';
+import {moneyToStored, parseMoney, parseQuantity, roundMoney} from '../../../utils/money';
 
 const {width} = Dimensions.get('window');
 
@@ -245,17 +246,19 @@ const PostJob = ({route}: any) => {
 
     // Budget is optional - compute it if the customer entered one, but never
     // block job submission when it's missing.
+    // parseMoney keeps cents. The previous parseInt(replace(/[^0-9]/g,''))
+    // stripped the decimal point, storing $50.50 as 5050 - and the same bug on
+    // hourlyRate fed a hundredfold error straight into work session pay
+    // snapshots. Quantities use parseQuantity because 2.5 hours is valid.
     let computedBudget = 0;
     if (budgetType === 'flat') {
-      computedBudget = parseInt(budget.replace(/[^0-9]/g, ''), 10) || 0;
+      computedBudget = parseMoney(budget);
     } else if (budgetType === 'hourly') {
-      const rate = parseInt(hourlyRate.replace(/[^0-9]/g, ''), 10) || 0;
-      const hrs = parseInt(hours, 10) || 0;
-      computedBudget = rate * hrs;
+      computedBudget = roundMoney(parseMoney(hourlyRate) * parseQuantity(hours));
     } else if (budgetType === 'sqft') {
-      const ppsf = parseInt(pricePerSqFt.replace(/[^0-9]/g, ''), 10) || 0;
-      const sf = parseInt(sqFt, 10) || 0;
-      computedBudget = ppsf * sf;
+      computedBudget = roundMoney(
+        parseMoney(pricePerSqFt) * parseQuantity(sqFt),
+      );
     }
 
     setLoading(true);
@@ -267,7 +270,7 @@ const PostJob = ({route}: any) => {
         location: userLocation,
         // Empty string (not "0") when no budget was entered, so downstream
         // screens/invoices can tell "no budget" apart from an actual $0.
-        priceRange: computedBudget > 0 ? String(computedBudget) : '',
+        priceRange: moneyToStored(computedBudget),
         budgetType: budgetType,
         expectedHours: expectedDuration,
         scheduledStartAt: firestore.Timestamp.fromDate(date),
@@ -282,10 +285,11 @@ const PostJob = ({route}: any) => {
 
       // Save budget type specific fields
       if (budgetType === 'hourly') {
-        jobData.hourlyRate = hourlyRate.replace(/[^0-9]/g, '');
+        // Stored in the shape the server's positiveRate accepts: \d+(\.\d{1,2})?
+        jobData.hourlyRate = moneyToStored(parseMoney(hourlyRate));
         jobData.hours = hours;
       } else if (budgetType === 'sqft') {
-        jobData.pricePerSqFt = pricePerSqFt.replace(/[^0-9]/g, '');
+        jobData.pricePerSqFt = moneyToStored(parseMoney(pricePerSqFt));
         jobData.sqFt = sqFt;
       }
 

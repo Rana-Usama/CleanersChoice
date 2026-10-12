@@ -3,6 +3,8 @@ import {notifyWorkSessionReview, recoverOverdueWorkSessions, reconcileJobWorkSes
 import {sweepOverdueWorkSessions, reconcileJobWorkSessions} from '../functions/src/workSessions/recovery';
 
 const mockSend = jest.fn();
+const mockLedgerSet = jest.fn();
+const mockLedgerDelete = jest.fn();
 let mockSession: any;
 let mockToken: string | null;
 jest.mock('../functions/node_modules/firebase-admin', () => ({
@@ -10,6 +12,16 @@ jest.mock('../functions/node_modules/firebase-admin', () => ({
     collection: (name: string) => ({doc: () => ({get: async () => ({
       data: () => name === 'WorkSessions' ? mockSession : {fcmToken: mockToken},
     })})}),
+    // The Jobs trigger also reconciles the fixed-price earnings ledger, which
+    // runs in a transaction. Recording the calls keeps that side effect
+    // visible here without turning this into a ledger test - jobEarnings has
+    // its own suite.
+    runTransaction: (handler: any) =>
+      handler({
+        get: async () => ({exists: false, data: () => undefined}),
+        set: (...args: any[]) => mockLedgerSet(...args),
+        delete: (...args: any[]) => mockLedgerDelete(...args),
+      }),
   }), {FieldValue: {serverTimestamp: () => 'server-timestamp'}}),
   messaging: () => ({send: mockSend}),
 }));

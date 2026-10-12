@@ -8,6 +8,8 @@
     "lint": "eslint .",
     "start": "react-native start",
     "test": "jest",
+    "test:work": "jest --runInBand --watchman=false --silent --modulePathIgnorePatterns '<rootDir>/.kilo/' --testPathPattern '(workSession|workMonthly|workTiming|workEarnings|jobEarnings|cleanerProfile|cleanerVisibility|jobEditSignature|locationResolution|adminJob).*\\.test\\.tsx?$'",
+    "test:work:emulator": "npm --prefix functions run build && firebase emulators:exec --only firestore --project demo-cleaners-work --config firebase.work-tests.json 'node --test --test-concurrency=1 scripts/test-work-sessions-emulator.cjs'",
     "postinstall": "patch-package"
   },
   "dependencies": {

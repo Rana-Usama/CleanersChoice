@@ -14,7 +14,7 @@ import MapView, {Marker} from 'react-native-maps';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import {useDispatch} from 'react-redux';
 import axios from 'axios';
-import {Colors} from '../../../constants/Themes';
+import {Colors, Fonts} from '../../../constants/Themes';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {
   setUserLocation,
@@ -261,6 +261,7 @@ const styles = StyleSheet.create({
     top: Platform.OS === 'android' ? RFPercentage(0.5) : 2,
   },
   input: {
+    fontFamily: Fonts.fontRegular,
     height: RFPercentage(6),
     fontSize: RFPercentage(1.9),
     backgroundColor: 'white',
@@ -293,7 +294,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.lightGray,
   },
-  description: {color: 'black', fontSize: RFPercentage(1.8)},
+  description: {fontFamily: Fonts.fontRegular, color: 'black', fontSize: RFPercentage(1.8)},
   buttonWrapper: {
     position: 'absolute',
     bottom: RFPercentage(5),

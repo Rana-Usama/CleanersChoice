@@ -1,35 +1,34 @@
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 import type {RootStackParamList} from '../../../routers/StackNavigator';
 import React, {useEffect, useRef, useState} from 'react';
-import {
-  ActivityIndicator,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {Text, TextInput, TouchableOpacity, View} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import auth from '@react-native-firebase/auth';
-import type {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {WorkRecordLayout} from '../../../components/work/WorkRecordLayout';
+import {workStyles as styles} from '../../../components/work/workTheme';
+import {WorkButton, WorkIconTile} from '../../../components/work/WorkUI';
+import {GeneralWorkEarningsField} from '../../../components/work/GeneralWorkEarningsField';
 import {
-  WorkRecordLayout,
-  workRecordStyles as styles,
-} from '../../../components/work/WorkRecordLayout';
+  parseWorkEarnings,
+  workEarningsError,
+} from '../../../utils/workGeneralEarnings';
+import {Colors} from '../../../constants/Themes';
 import {
   WorkTimeFields,
   WorkTimeValues,
 } from '../../../components/work/WorkTimeFields';
 import {useWorkSessions} from '../../../components/work/WorkSessionProvider';
 import {
-  getManualWorkJobs,
-  ManualWorkJob,
-} from '../../../services/workSessionService';
-import {deviceWorkTimeZone} from '../../../utils/workSessionFlow';
+  deviceWorkTimeZone,
+  formatWorkDuration,
+} from '../../../utils/workSessionFlow';
 import {workIntervalError} from '../../../utils/workSessionEntry';
 import {
   entitlementEnd,
   HOUR_MS,
 } from '../../../../functions/src/workSessions/model';
+import {isValidTimeZone} from '../../../utils/intlCache';
 
 const ManualWorkEntry = ({
   navigation,
@@ -40,26 +39,15 @@ const ManualWorkEntry = ({
     const end = Math.min(Date.now() - 60000, entitlementEnd(work.user || {}));
     return {startedAt: Math.max(0, end - HOUR_MS), endedAt: end, note: ''};
   });
+  const [expectedEarnings, setExpectedEarnings] = useState('');
   const [zone, setZone] = useState(deviceWorkTimeZone);
-  const [job, setJob] = useState<ManualWorkJob | null>(null);
-  const [jobs, setJobs] = useState<ManualWorkJob[]>([]);
-  const [cursor, setCursor] =
-    useState<FirebaseFirestoreTypes.QueryDocumentSnapshot | null>(null);
-  const [more, setMore] = useState(false);
-  const [choosingJob, setChoosingJob] = useState(false);
-  const [jobsLoading, setJobsLoading] = useState(false);
-  const [jobsError, setJobsError] = useState('');
+  const [workName, setWorkName] = useState('');
   const [error, setError] = useState('');
   const generation = useRef(0);
   useEffect(() => {
     const current = ++generation.current;
-    setJobs([]);
-    setJobsLoading(false);
-    setJobsError('');
-    setJob(null);
-    setCursor(null);
-    setMore(false);
-    setChoosingJob(false);
+    setExpectedEarnings('');
+    setWorkName('');
     setError('');
     const end = Math.min(Date.now() - 60000, entitlementEnd(work.user || {}));
     setValue({startedAt: Math.max(0, end - HOUR_MS), endedAt: end, note: ''});
@@ -67,7 +55,11 @@ const ManualWorkEntry = ({
     if (uid) {
       AsyncStorage.getItem(`work-reporting-zone:${uid}`)
         .then(saved => {
-          if (generation.current === current && saved) {
+          if (
+            generation.current === current &&
+            saved &&
+            isValidTimeZone(saved)
+          ) {
             setZone(saved);
           }
         })
@@ -89,43 +81,46 @@ const ManualWorkEntry = ({
       }
     : value;
   const displayedZone = pendingManual?.reportingTimeZone || zone.trim();
-  let zoneError = '';
-  try {
-    new Intl.DateTimeFormat('en', {timeZone: displayedZone}).format();
-  } catch {
-    zoneError = 'Enter a valid reporting timezone, such as America/New_York.';
-  }
+  const displayedAmount = pendingManual
+    ? pendingManual.expectedEarnings?.toFixed(2) ?? ''
+    : expectedEarnings;
+  const general = !pendingManual?.jobId;
+  const displayedName = pendingManual
+    ? pendingManual.workName || 'Saved work'
+    : workName;
   const validation =
-    zoneError ||
+    (!pendingManual && !workName.trim() ? 'Enter a name for this work.' : '') ||
+    (general ? workEarningsError(displayedAmount) : '') ||
     workIntervalError(displayed, work.config, work.now, work.user, true);
   const locked = work.busy || work.pending;
-  const loadJobs = async (older = false) => {
-    if (!uid || jobsLoading) {
-      return;
-    }
-    const current = generation.current;
-    setJobsLoading(true);
-    setJobsError('');
-    try {
-      const page = await getManualWorkJobs(older ? cursor : null);
-      if (generation.current !== current || auth().currentUser?.uid !== uid) {
-        return;
-      }
-      setJobs(prev => (older ? [...prev, ...page.jobs] : page.jobs));
-      setCursor(page.cursor);
-      setMore(page.hasMore);
-    } catch {
-      if (generation.current === current) {
-        setJobsError(
-          'Could not load assigned jobs. Retry or choose General work.',
-        );
-      }
-    } finally {
-      if (generation.current === current) {
-        setJobsLoading(false);
-      }
-    }
-  };
+  /**
+   * The wireframe's checklist. These mirror the rules workIntervalError
+   * enforces, so the cleaner can see which one they are failing rather than
+   * only the first message it returns. Overlap is deliberately absent: only
+   * the server knows the other sessions, so it surfaces as the error line.
+   */
+  const checks = [
+    {
+      label: 'End is after start',
+      ok: displayed.endedAt > displayed.startedAt,
+    },
+    {
+      label: 'Not in the future',
+      ok: displayed.endedAt <= work.now,
+    },
+    {
+      label: `Starts within the last ${work.config.manualEntryMaxAgeDays} days`,
+      ok:
+        work.now - displayed.startedAt <=
+        work.config.manualEntryMaxAgeDays * 24 * HOUR_MS,
+    },
+    {
+      label: `Under the ${work.config.hardCapHours}h limit`,
+      ok:
+        displayed.endedAt - displayed.startedAt <=
+        work.config.hardCapHours * HOUR_MS,
+    },
+  ];
   const save = async () => {
     if (!uid || locked || !work.manualAvailable || validation) {
       return;
@@ -136,7 +131,11 @@ const ManualWorkEntry = ({
       const result = await work.saveManual({
         ...value,
         reportingTimeZone: zone.trim(),
-        jobId: job?.id || null,
+        jobId: null,
+        workName: workName.trim(),
+        ...(parseWorkEarnings(expectedEarnings) !== undefined
+          ? {expectedEarnings: parseWorkEarnings(expectedEarnings)}
+          : {}),
         note: value.note.trim(),
       });
       if (generation.current !== current || auth().currentUser?.uid !== uid) {
@@ -175,10 +174,21 @@ const ManualWorkEntry = ({
     }
   };
   return (
-    <WorkRecordLayout title="Add past work" onBack={() => navigation.goBack()}>
+    <WorkRecordLayout
+      sheet
+      title="Add record manually"
+      onBack={() => navigation.goBack()}
+      footer={
+        <WorkButton
+          label={work.busy ? 'Saving…' : 'Save pending record'}
+          disabled={locked || !work.manualAvailable || !!validation}
+          onPress={save}
+        />
+      }>
       <Text style={styles.help}>
-        Save a pending record, then check and confirm its actual times. Only
-        confirmed hours count. This does not create earnings or an invoice.
+        Forgot to clock in? Log it here. Save a pending record, then check and
+        confirm its actual times. Only confirmed hours count. This does not mark
+        an invoice paid.
       </Text>
       {!work.manualAvailable && (
         <Text style={styles.error}>
@@ -193,7 +203,8 @@ const ManualWorkEntry = ({
           <Text style={styles.help}>
             {pendingManual
               ? `Retry the saved manual entry (${
-                  pendingManual.jobId ? 'saved linked job' : 'General work'
+                  pendingManual.workName ||
+                  (pendingManual.jobId ? 'saved linked job' : 'saved work')
                 }) using its original times and note.`
               : 'Resolve the earlier work action before adding another record.'}
           </Text>
@@ -203,101 +214,84 @@ const ManualWorkEntry = ({
         </View>
       )}
       <View style={styles.card}>
-        <Text style={styles.title}>Work type</Text>
-        <TouchableOpacity
-          disabled={locked}
-          onPress={() => {
-            setChoosingJob(!choosingJob);
-            if (!choosingJob) {
-              void loadJobs();
-            }
-          }}>
-          <Text style={styles.link}>
-            {pendingManual
-              ? pendingManual.jobId
-                ? 'Saved linked job'
-                : 'General work'
-              : job?.title || 'General work'}{' '}
-            · Choose
-          </Text>
-        </TouchableOpacity>
-        {choosingJob && !locked && (
-          <View>
-            <TouchableOpacity
-              onPress={() => {
-                setJob(null);
-                setChoosingJob(false);
-              }}>
-              <Text style={styles.link}>General work</Text>
-            </TouchableOpacity>
-            {jobs.map(item => (
-              <TouchableOpacity
-                key={item.id}
-                onPress={() => {
-                  setJob(item);
-                  setChoosingJob(false);
-                }}>
-                <Text style={styles.link}>{item.title}</Text>
-              </TouchableOpacity>
-            ))}
-            {more && (
-              <TouchableOpacity
-                onPress={() => {
-                  void loadJobs(true);
-                }}
-                disabled={jobsLoading}>
-                <Text style={styles.link}>Load more assigned jobs</Text>
-              </TouchableOpacity>
-            )}
-            {!!jobsError && (
-              <TouchableOpacity
-                onPress={() => {
-                  void loadJobs();
-                }}>
-                <Text style={styles.error}>{jobsError}</Text>
-              </TouchableOpacity>
-            )}
-            {jobsLoading && <ActivityIndicator />}
-          </View>
-        )}
+        <Text style={styles.body}>Work name</Text>
+        <TextInput
+          accessibilityLabel="Work name"
+          style={styles.input}
+          value={displayedName}
+          onChangeText={setWorkName}
+          editable={!locked}
+          placeholder="e.g. Office deep clean"
+          placeholderTextColor={Colors.secondaryText}
+          maxLength={120}
+          autoCapitalize="sentences"
+          returnKeyType="done"
+        />
         <Text style={styles.help}>
           Start within the last {work.config.manualEntryMaxAgeDays} days.
           Maximum {work.config.hardCapHours} hours per record. Past work must
           finish within your recorded subscription access period.
         </Text>
-        <Text style={styles.help}>Reporting timezone</Text>
-        <TextInput
-          accessibilityLabel="Reporting timezone"
-          style={styles.input}
-          value={pendingManual?.reportingTimeZone || zone}
-          onChangeText={setZone}
-          editable={!locked}
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
+        {general && (
+          <GeneralWorkEarningsField
+            value={displayedAmount}
+            onChange={setExpectedEarnings}
+            disabled={locked}
+          />
+        )}
         <WorkTimeFields
           value={displayed}
           onChange={setValue}
           disabled={locked}
-          reportingTimeZone={zoneError ? deviceWorkTimeZone() : displayedZone}
+          reportingTimeZone={displayedZone}
         />
+        <View style={styles.divider} />
+        <View style={styles.rowBetween}>
+          <Text style={styles.sml}>Duration</Text>
+          <Text style={styles.title}>
+            {displayed.endedAt > displayed.startedAt
+              ? formatWorkDuration(displayed.endedAt - displayed.startedAt)
+              : '—'}
+          </Text>
+        </View>
       </View>
+
+      <View style={styles.card}>
+        {checks.map(check => (
+          <View key={check.label} style={styles.row}>
+            <MaterialCommunityIcons
+              name={check.ok ? 'check' : 'close'}
+              size={16}
+              color={check.ok ? Colors.success : Colors.red500}
+            />
+            <Text
+              style={[
+                styles.sml,
+                styles.grow,
+                !check.ok && {color: Colors.red500},
+              ]}>
+              {check.label}
+            </Text>
+          </View>
+        ))}
+      </View>
+
       {!!validation && <Text style={styles.error}>{validation}</Text>}
       {!!(error || work.error) && (
         <Text style={styles.error}>{error || work.error}</Text>
       )}
-      <TouchableOpacity
-        accessibilityRole="button"
-        disabled={locked || !work.manualAvailable || !!validation}
-        style={[
-          styles.button,
-          (locked || !work.manualAvailable || !!validation) && styles.disabled,
-        ]}
-        onPress={save}>
-        <Text style={styles.buttonText}>
-          {work.busy ? 'Saving…' : 'Save pending record'}
+
+      <View style={[styles.card, styles.warnCard, styles.row]}>
+        <WorkIconTile
+          icon="alert-outline"
+          color={Colors.amberDarkText}
+          bg={Colors.amberOverlay20}
+        />
+        <Text style={[styles.sml, styles.grow, {color: Colors.amberDarkText}]}>
+          Manual records are saved as Needs review and do not count toward your
+          month until you confirm them.
         </Text>
-      </TouchableOpacity>
+      </View>
     </WorkRecordLayout>
   );
 };

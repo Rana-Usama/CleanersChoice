@@ -1,11 +1,69 @@
 {
   "indexes": [
     {
+      "collectionGroup": "Chats",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "participants", "arrayConfig": "CONTAINS"},
+        {"fieldPath": "lastMessageTimestamp", "order": "DESCENDING"}
+      ]
+    },
+    {
       "collectionGroup": "Invoices",
       "queryScope": "COLLECTION",
       "fields": [
         {"fieldPath": "cleanerId", "order": "ASCENDING"},
         {"fieldPath": "createdAt", "order": "DESCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "JobEarnings",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "cleanerId", "order": "ASCENDING"},
+        {"fieldPath": "completedAt", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "Jobs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "cancelledCleaners", "arrayConfig": "CONTAINS"},
+        {"fieldPath": "createdAt", "order": "DESCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "Jobs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "confirmedCleaner", "order": "ASCENDING"},
+        {"fieldPath": "status", "order": "ASCENDING"},
+        {"fieldPath": "createdAt", "order": "DESCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "Jobs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "jobId", "order": "ASCENDING"},
+        {"fieldPath": "status", "order": "ASCENDING"},
+        {"fieldPath": "createdAt2", "order": "DESCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "Jobs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "status", "order": "ASCENDING"},
+        {"fieldPath": "createdAt2", "order": "DESCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "Notifications",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "toUserId", "order": "ASCENDING"},
+        {"fieldPath": "timestamp", "order": "DESCENDING"}
       ]
     },
     {
@@ -29,17 +87,17 @@
       "collectionGroup": "WorkSessions",
       "queryScope": "COLLECTION",
       "fields": [
+        {"fieldPath": "jobId", "order": "ASCENDING"},
         {"fieldPath": "status", "order": "ASCENDING"},
-        {"fieldPath": "autoStopAt", "order": "ASCENDING"}
+        {"fieldPath": "startedAt", "order": "ASCENDING"}
       ]
     },
     {
       "collectionGroup": "WorkSessions",
       "queryScope": "COLLECTION",
       "fields": [
-        {"fieldPath": "jobId", "order": "ASCENDING"},
         {"fieldPath": "status", "order": "ASCENDING"},
-        {"fieldPath": "startedAt", "order": "ASCENDING"}
+        {"fieldPath": "autoStopAt", "order": "ASCENDING"}
       ]
     }
   ],

@@ -4,6 +4,7 @@ import {DEFAULT_WORK_SESSION_CONFIG, HOUR_MS, REQUIRED_INSTRUCTIONS_VERSION, Wor
 import {CLEANER_INSTRUCTIONS_VERSION} from '../src/constants/cleanerInstructions';
 
 import {Store, clone} from './helpers/workSessionStore';
+import {createHash} from 'node:crypto';
 
 const BASE = Date.UTC(2026, 9, 7, 9);
 const cleaner = () => ({
@@ -34,6 +35,77 @@ beforeEach(() => {
   store = new Store();
   store.docs.set('Users/cleaner', cleaner());
   store.docs.set('AppConfig/workSessions', {...DEFAULT_WORK_SESSION_CONFIG, enabled: true});
+});
+
+it('saves a named timer and preserves its name through clock-out and receipt replay', async () => {
+  const result = await start('named001', {workName: '  Office deep clean  ', plannedFinishAt: BASE + 2 * HOUR_MS});
+  expect(session(result.sessionId)).toMatchObject({workName: 'Office deep clean', startedAt: BASE,
+    expectedEndAt: BASE + 2 * HOUR_MS, durationMs: 0, jobId: null, jobSnapshot: null});
+  expect(await start('named001', {workName: '  Office deep clean  ', plannedFinishAt: BASE + 2 * HOUR_MS})).toEqual(result);
+  await expect(start('named001', {workName: 'Different work', plannedFinishAt: BASE + 2 * HOUR_MS}))
+    .rejects.toMatchObject({code: 'already-exists'});
+  now += HOUR_MS;
+  await run({action: 'clockOut', requestId: 'stopname1', sessionId: result.sessionId});
+  expect(session(result.sessionId)).toMatchObject({workName: 'Office deep clean', status: 'confirmed', durationMs: HOUR_MS});
+});
+
+it('preserves the receipt hash used by already queued unnamed starts', async () => {
+  const result = await start();
+  const oldHash = createHash('sha256').update(JSON.stringify({action: 'clockIn', sessionId: null, jobId: null,
+    reportingTimeZone: 'America/New_York', plannedFinishAt: null, startedAt: null, endedAt: null, note: ''})).digest('hex');
+  expect(store.docs.get('WorkSessionOperations/cleaner/requests/start001').requestHash).toBe(oldHash);
+  expect(await start()).toEqual(result);
+  expect(session(result.sessionId).workName).toBeUndefined();
+});
+
+it('saves the selected past start, anchors recovery to it and counts hours from it at clock-out', async () => {
+  const selectedStart = BASE - 2 * HOUR_MS;
+  const result = await start('past0001', {startedAt: selectedStart, plannedFinishAt: BASE + HOUR_MS});
+  expect(session(result.sessionId)).toMatchObject({startedAt: selectedStart, expectedEndAt: BASE + HOUR_MS,
+    autoStopAt: BASE + 4 * HOUR_MS, durationMs: 0, status: 'active'});
+  expect(session(result.sessionId).editHistory[0].after.startedAt).toBe(selectedStart);
+  expect(await start('past0001', {startedAt: selectedStart, plannedFinishAt: BASE + HOUR_MS})).toEqual(result);
+  await expect(start('past0001', {startedAt: BASE - HOUR_MS, plannedFinishAt: BASE + HOUR_MS}))
+    .rejects.toMatchObject({code: 'already-exists'});
+  now += HOUR_MS;
+  await run({action: 'clockOut', requestId: 'paststop1', sessionId: result.sessionId});
+  expect(session(result.sessionId)).toMatchObject({durationMs: 3 * HOUR_MS, status: 'confirmed'});
+});
+
+it.each([
+  {startedAt: BASE + 60000}, {startedAt: BASE - 12 * HOUR_MS},
+  {startedAt: BASE - 13 * HOUR_MS}, {startedAt: BASE, endedAt: BASE + HOUR_MS},
+  {startedAt: BASE - 2 * HOUR_MS, plannedFinishAt: BASE - HOUR_MS},
+  {startedAt: BASE - 11 * HOUR_MS, plannedFinishAt: BASE + 2 * HOUR_MS},
+])('rejects invalid live starts or ends without creating a timer: %p', async input => {
+  await expect(start('badpast1', input)).rejects.toMatchObject({code: 'invalid-argument'});
+  expect([...store.docs.keys()].filter(path => /^WorkSessions\/[^/]+$/.test(path))).toHaveLength(0);
+});
+
+it('checks overlap across the selected past start, including already confirmed work', async () => {
+  const record = await manual();
+  await confirm(record.sessionId);
+  await expect(start('overlap1', {startedAt: BASE - 1.5 * HOUR_MS})).rejects.toMatchObject({code: 'already-exists'});
+});
+
+it('keeps the hard cap anchored to a past start with no planned end', async () => {
+  const result = await start('pastcap1', {startedAt: BASE - 11 * HOUR_MS});
+  expect(session(result.sessionId)).toMatchObject({startedAt: BASE - 11 * HOUR_MS, autoStopAt: BASE + HOUR_MS});
+});
+
+it.each(['', '   ', 'x'.repeat(121), 123])('rejects invalid work names without creating a timer: %p', async workName => {
+  await expect(start('badname1', {workName})).rejects.toMatchObject({code: 'invalid-argument'});
+  expect([...store.docs.keys()].filter(path => /^WorkSessions\/[^/]+$/.test(path))).toHaveLength(0);
+});
+
+it('protects linked job titles and prevents renaming an existing record through a time update', async () => {
+  store.docs.set('Jobs/job', {status: 'confirmed', confirmedCleaner: 'cleaner', title: 'House',
+    scheduledStartAt: {toMillis: () => BASE}, expectedHours: 2});
+  await expect(start('jobname1', {jobId: 'job', workName: 'Override'})).rejects.toThrow('unlinked work');
+  const result = await start('jobname2', {jobId: 'job'});
+  expect(session(result.sessionId).jobSnapshot?.title).toBe('House');
+  await expect(run({action: 'clockOut', requestId: 'rename01', sessionId: result.sessionId, workName: 'Override'}))
+    .rejects.toMatchObject({code: 'invalid-argument'});
 });
 
 it('rejects stale confirmations and same-millisecond corrections, but replays the original receipt', async () => {
@@ -282,4 +354,58 @@ it('does not touch jobs, invoices, payments or subscription fields', async () =>
   await confirm(saved.sessionId);
   expect(store.docs.get('Users/cleaner')).toEqual(userBefore);
   expect([...store.docs.keys()].some(path => /^(Jobs|Invoices|Payments)\//.test(path))).toBe(false);
+});
+
+it('stores total earnings, audits revisions and edits money without changing active timer deadlines', async () => {
+  const created = await start('earning1', {expectedEarnings: 125.50});
+  const original = session(created.sessionId);
+  const input = {action: 'editEarnings', requestId: 'earning2', sessionId: created.sessionId,
+    expectedEarnings: 140.25, expectedRevision: 1};
+  const updated = await run(input);
+  expect(session(created.sessionId)).toMatchObject({expectedEarnings: 140.25, revision: 2,
+    status: 'active', startedAt: original.startedAt, endedAt: null, autoStopAt: original.autoStopAt,
+    expectedEndAt: original.expectedEndAt, durationMs: 0});
+  expect(session(created.sessionId).editHistory.slice(-1)[0]).toMatchObject({action: 'editEarnings',
+    beforeExpectedEarnings: 125.50, afterExpectedEarnings: 140.25});
+  expect(await run(input)).toEqual(updated);
+  await expect(run({...input, expectedEarnings: 200})).rejects.toMatchObject({code: 'already-exists'});
+  await expect(run({...input, requestId: 'earning3'})).rejects.toMatchObject({code: 'failed-precondition'});
+  now += HOUR_MS;
+  await run({action: 'clockOut', requestId: 'earning4', sessionId: created.sessionId});
+  store.docs.set('Users/cleaner', {...cleaner(), subscriptionEndDate: BASE - 1});
+  await run({...input, requestId: 'earning5', expectedRevision: 3, expectedEarnings: 0});
+  expect(session(created.sessionId)).toMatchObject({expectedEarnings: 0, durationMs: HOUR_MS, status: 'confirmed'});
+});
+
+it('lets a pending manual general record receive an amount and retains it through confirmation', async () => {
+  const record = await manual('earning6', {expectedEarnings: 0.29});
+  await run({action: 'editEarnings', requestId: 'earning7', sessionId: record.sessionId,
+    expectedRevision: 1, expectedEarnings: 60});
+  expect(session(record.sessionId).status).toBe('needsReview');
+  await confirm(record.sessionId);
+  expect(session(record.sessionId)).toMatchObject({expectedEarnings: 60, status: 'confirmed'});
+});
+
+it.each([-1, 1.001, 1000001, NaN, Infinity, '100', null])('rejects invalid total earnings: %p', async amount => {
+  await expect(start('badmoney', {expectedEarnings: amount})).rejects.toMatchObject({code: 'invalid-argument'});
+});
+
+it('requires a revision, refuses time overrides, linked job amounts, discarded records and other owners', async () => {
+  const record = await start('earning8');
+  const input = {action: 'editEarnings', requestId: 'earning9', sessionId: record.sessionId, expectedEarnings: 50};
+  await expect(run(input)).rejects.toMatchObject({code: 'invalid-argument'});
+  await expect(run({...input, expectedRevision: 1, startedAt: BASE})).rejects.toMatchObject({code: 'invalid-argument'});
+  await expect(run({action: 'clockOut', requestId: 'money001', sessionId: record.sessionId, expectedEarnings: 50}))
+    .rejects.toMatchObject({code: 'invalid-argument'});
+  await run({action: 'discard', requestId: 'money002', sessionId: record.sessionId});
+  await expect(run({...input, expectedRevision: 2})).rejects.toMatchObject({code: 'failed-precondition'});
+  store.docs.set('Jobs/job', {status: 'confirmed', confirmedCleaner: 'cleaner', title: 'House',
+    scheduledStartAt: {toMillis: () => BASE}, expectedHours: 2});
+  await expect(start('money003', {jobId: 'job', expectedEarnings: 50})).rejects.toMatchObject({code: 'invalid-argument'});
+  const linked = await start('money004', {jobId: 'job'});
+  await expect(run({...input, sessionId: linked.sessionId, expectedRevision: 1}))
+    .rejects.toMatchObject({code: 'failed-precondition'});
+  session(linked.sessionId).cleanerId = 'other';
+  await expect(run({...input, sessionId: linked.sessionId, expectedRevision: 1}))
+    .rejects.toMatchObject({code: 'permission-denied'});
 });

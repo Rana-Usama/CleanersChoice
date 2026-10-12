@@ -163,6 +163,36 @@ afterEach(async () => {
   jest.useRealTimers();
 });
 
+it('queues a named clock-in and retries the exact name, timezone and planned end after a timeout', async () => {
+  mockSessions = [];
+  await act(async () => {mockSubscription?.([]);});
+  await act(async () => {await context.start();});
+  expect(mockDialog.state.kind).toBe('start');
+  mockOperate.mockRejectedValueOnce(new Error('timeout'));
+  await act(async () => {await mockDialog.onSave({workName: 'Office deep clean', reportingTimeZone: 'UTC', startedAt: BASE,
+    plannedFinishAt: BASE + 3 * 3600000, expectedEarnings: 125.50});});
+  expect(context.pending).toBe(true);
+  const original = mockOperate.mock.calls[0][0];
+  expect(original).toMatchObject({action: 'clockIn', jobId: null, workName: 'Office deep clean',
+    reportingTimeZone: 'UTC', startedAt: BASE, plannedFinishAt: BASE + 3 * 3600000, expectedEarnings: 125.50});
+  mockOperate.mockResolvedValueOnce({sessionId: 'named', status: 'active'});
+  await act(async () => {await context.retry();});
+  expect(mockOperate.mock.calls[1][0]).toEqual(original);
+  expect(context.pending).toBe(false);
+});
+
+it('keeps the saved work name and original clock-in when adding a planned finish', async () => {
+  mockSessions[0].workName = 'Office deep clean';
+  await act(async () => {mockSubscription?.([...mockSessions]);});
+  await act(async () => {context.planFinish();});
+  expect(mockDialog.state).toMatchObject({kind: 'start', existingSessionId: 'session',
+    title: 'Office deep clean', actualStartedAt: BASE});
+  await act(async () => {await mockDialog.onSave({plannedFinishAt: BASE + 3 * 3600000});});
+  expect(mockOperate.mock.calls[0][0]).toMatchObject({action: 'setPlannedFinish', sessionId: 'session',
+    plannedFinishAt: BASE + 3 * 3600000});
+  expect(mockOperate.mock.calls[0][0].workName).toBeUndefined();
+});
+
 it('sends a correction with the captured record revision and reason', async () => {
   const saved = {...mockSessions[0], status: 'confirmed', endedAt: BASE + 3600000, revision: 7};
   mockOperate.mockResolvedValueOnce({sessionId: 'session', status: 'confirmed'});
@@ -326,4 +356,28 @@ it('an open Still working prompt cannot extend a timer beyond its saved stop dea
   expect(
     mockOperate.mock.calls.every(call => call[0].action === 'reconcile'),
   ).toBe(true);
+});
+
+it('queues earnings-only edits with a revision and preserves the exact amount through retry', async () => {
+  const record = {...mockSessions[0], expectedEarnings: 80, revision: 4};
+  let completed!: Promise<boolean>;
+  await act(async () => {completed = context.editEarnings(record);});
+  expect(mockDialog.state).toMatchObject({kind: 'earnings', session: record});
+  mockOperate.mockRejectedValueOnce(new Error('timeout'));
+  await act(async () => {await mockDialog.onSave({expectedEarnings: 95.25});});
+  expect(context.pending).toBe(true);
+  const request = mockOperate.mock.calls[0][0];
+  expect(request).toEqual({action: 'editEarnings', requestId: expect.any(String), sessionId: 'session',
+    expectedRevision: 4, expectedEarnings: 95.25});
+  await act(async () => {await context.retry();});
+  expect(mockOperate.mock.calls[1][0]).toEqual(request);
+  expect(await completed).toBe(true);
+  expect(mockDialog.state).toBeNull();
+});
+
+it('does not open earnings edits for linked, discarded or another cleaner’s records', async () => {
+  for (const extra of [{jobId: 'job'}, {status: 'discarded'}, {cleanerId: 'other'}]) {
+    expect(await context.editEarnings({...mockSessions[0], ...extra})).toBe(false);
+  }
+  expect(mockDialog.state).toBeNull();
 });

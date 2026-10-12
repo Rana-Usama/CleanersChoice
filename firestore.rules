@@ -226,8 +226,10 @@ service cloud.firestore {
 
     function canReadOwnWork(cleanerId) {
       let owner = get(/databases/$(database)/documents/Users/$(request.auth.uid)).data;
+      let status = owner.get('accountStatus', '');
       return isSelf(cleanerId) && owner.get('role', '') == 'Cleaner'
-        && !(owner.get('accountStatus', '') in ['disabled', 'deleted', 'suspended'])
+        // Match the server's case/whitespace normalization for blocked states.
+        && !(status is string && status.lower().matches('\\s*(disabled|deleted|suspended)\\s*'))
         && owner.get('subscriptionStatus', '') != 'refunded';
     }
 
@@ -241,6 +243,17 @@ service cloud.firestore {
           get(/databases/$(database)/documents/WorkSessions/$(sessionId)).data.cleanerId);
         allow write: if false;
       }
+    }
+
+    /*
+      Fixed-price job earnings. Written only by the Jobs trigger - this is
+      money, and the client never touches it. Reads follow the same
+      canReadOwnWork gate as sessions, so an expired cleaner keeps access to
+      their own historical records.
+    */
+    match /JobEarnings/{jobId} {
+      allow read: if signedIn() && canReadOwnWork(resource.data.cleanerId);
+      allow write: if false;
     }
 
     match /WorkSessionLocks/{cleanerId} {
@@ -297,16 +310,27 @@ service cloud.firestore {
         return signedIn()
           && request.auth.uid in resource.data.get('participants', []);
       }
-      allow get, list: if isParticipant();
+      // A chat doc is only written on the first message, so a new thread has
+      // no parent yet. Fall back to the deterministic `${a}_${b}` id.
+      function isChatIdMember() {
+        return signedIn() && request.auth.uid in chatId.split('_');
+      }
+      allow get: if resource == null ? isChatIdMember() : isParticipant();
+      allow list: if isParticipant();
       allow create: if signedIn()
         && request.auth.uid in request.resource.data.get('participants', []);
       allow update: if isParticipant();
 
       match /Messages/{messageId} {
+        function chatPath() {
+          return /databases/$(database)/documents/Chats/$(chatId);
+        }
         function inParentChat() {
-          return signedIn() && request.auth.uid in
-            get(/databases/$(database)/documents/Chats/$(chatId))
-              .data.get('participants', []);
+          return signedIn() && (
+            exists(chatPath())
+              ? request.auth.uid in get(chatPath()).data.get('participants', [])
+              : request.auth.uid in chatId.split('_')
+          );
         }
         allow read, create: if inParentChat();
         allow update: if inParentChat();

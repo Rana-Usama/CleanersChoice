@@ -24,6 +24,7 @@ jest.mock('@react-native-firebase/auth', () => () => ({}));
 jest.mock('@react-native-firebase/firestore', () => () => ({}));
 jest.mock('react-native-safe-area-context', () => ({
   SafeAreaView: 'SafeAreaView',
+  useSafeAreaInsets: () => ({top: 24, bottom: 16, left: 0, right: 0}),
 }));
 jest.mock('react-native-date-picker', () => 'DatePicker');
 jest.mock('../src/services/invoiceService', () => ({
@@ -35,6 +36,7 @@ const saved: any = {
   cleanerId: 'cleaner',
   jobId: 'job',
   jobSnapshot: {title: 'House'},
+  paySnapshot: {basis: 'hourly', hourlyRate: 25, rateSource: 'job'},
   status: 'confirmed',
   source: 'clock',
   startedAt: NOW - 3600000,
@@ -68,11 +70,52 @@ const open = async () => {
     );
   });
 };
+// Text nodes now nest (a "/hr" unit inside the value, bold leads inside the
+// explanations), and React elements hold circular fiber refs, so JSON.stringify
+// throws on them. Flatten to the strings only.
+const flatten = (value: any): string => {
+  if (value === null || value === undefined || typeof value === 'boolean') {
+    return '';
+  }
+  if (Array.isArray(value)) {
+    return value.map(flatten).join('');
+  }
+  if (typeof value === 'object') {
+    return flatten(value.props?.children);
+  }
+  return String(value);
+};
 const texts = () =>
   renderer.root
     .findAllByType(Text)
-    .map(node => JSON.stringify(node.props.children))
+    .map(node => flatten(node.props.children))
     .join(' ');
+// The month stepper is icon-only, so it is pressed by accessibility label.
+const pressLabel = async (label: string) => {
+  const button = renderer.root
+    .findAllByType(TouchableOpacity)
+    .find(node => node.props.accessibilityLabel === label);
+  expect(button).toBeDefined();
+  await act(async () => {
+    button!.props.onPress();
+  });
+};
+// Session rows are date-led ("Tue, Oct 20 · House"), so they are matched on a
+// substring rather than the whole formatted title, which would pin the test to
+// a date format.
+const pressContaining = async (needle: string) => {
+  const button = renderer.root
+    .findAllByType(TouchableOpacity)
+    .find(node =>
+      node
+        .findAllByType(Text)
+        .some(text => flatten(text.props.children).includes(needle)),
+    );
+  expect(button).toBeDefined();
+  await act(async () => {
+    button!.props.onPress();
+  });
+};
 const press = async (label: string) => {
   const button = renderer.root
     .findAllByType(TouchableOpacity)
@@ -111,43 +154,47 @@ beforeEach(() => {
 afterEach(async () => {
   await act(async () => renderer.unmount());
 });
-it('shows consistent dashboard and full-screen confirmed/cash/effective totals', async () => {
+it('shows hours and earned on the monthly screen and links to them from the compact dashboard', async () => {
   await open();
   expect(texts()).toContain('1h 0m');
-  expect(texts()).toContain('$50.00');
+  expect(texts()).toContain('$25.00');
   expect(texts()).toContain('Confirmed hours');
   const fullText = texts();
   await act(async () => {
     renderer.update(<WorkMonthlyDashboard />);
   });
-  expect(texts()).toContain('1h 0m');
-  expect(texts()).toContain('$50.00');
-  expect(texts()).toContain('Confirmed hours');
-  expect(fullText).toContain('Effective rate');
-  expect(texts()).toContain('Effective rate');
+  // The dashboard's current design uses a navigation row; totals live on Work Hours.
+  expect(texts()).toContain('Work Hours & Earnings');
+  for (const removed of [
+    'Collected',
+    'Unpaid',
+    'unbilled',
+    'Effective rate',
+    'Provisional rate',
+    '$50.00',
+  ]) {
+    expect(fullText).not.toContain(removed);
+    expect(texts()).not.toContain(removed);
+  }
+  expect(fullText).toContain('Earned');
 });
-it('changes months and drills into records and read-only paid invoices', async () => {
+it('changes months and drills into work records without payment breakdowns', async () => {
   await open();
-  await press('Next');
+  await pressLabel('Next');
   expect(mockUseMonthly).toHaveBeenLastCalledWith({year: 2026, month: 10});
-  await press('Previous');
+  await pressLabel('Previous');
   expect(mockUseMonthly).toHaveBeenLastCalledWith({year: 2026, month: 9});
-  await press('View times and history');
+  // The session row navigates as a whole - there is no longer a separate
+  // "View times and history" link inside it.
+  await pressContaining('· House');
   expect(mockNavigate).toHaveBeenCalledWith('WorkSessionDetails', {
     sessionId: 'record',
   });
-  await press('View paid invoices for this month (1)');
-  await press('View paid invoice');
-  expect(mockNavigate).toHaveBeenCalledWith(
-    'InvoicePreview',
-    expect.objectContaining({
-      invoice: paid,
-      viewOnly: true,
-      paymentActionsDisabled: true,
-    }),
-  );
+  expect(texts()).not.toContain('earnings breakdown');
+  expect(texts()).not.toContain('Paid this month');
+  expect(texts()).not.toContain('INV-1');
 });
-it('renders unavailable rates, pending exclusions and recovery cutoff without a running preview', async () => {
+it('renders pending exclusions and recovery cutoff without a running preview', async () => {
   mockMonthly.report = buildWorkMonthlyReport(
     [{...saved, status: 'active', endedAt: null, autoStopAt: NOW}],
     [paid],
@@ -155,14 +202,14 @@ it('renders unavailable rates, pending exclusions and recovery cutoff without a 
     NOW,
   );
   await open();
-  expect(texts()).toContain('Unavailable until hours are confirmed');
+  expect(texts()).not.toContain('Effective rate');
   expect(texts()).toContain('not counted');
   expect(texts()).toContain('reached its stop deadline');
   expect(texts()).not.toContain('Including current session');
 });
 it('shows loading, errors and cache labels without claiming a failed read is a zero total', async () => {
   mockMonthly.report = null;
-  mockMonthly.error = 'Could not load the invoice totals.';
+  mockMonthly.error = 'Could not load all work for this month.';
   await open();
   expect(texts()).toContain('Could not load');
   expect(texts()).not.toContain('Collected:');
@@ -177,7 +224,7 @@ it('shows loading, errors and cache labels without claiming a failed read is a z
       />,
     );
   });
-  expect(texts()).toContain('Loading monthly hours');
+  expect(texts()).toContain('Loading work hours');
   mockMonthly = {
     ...mockMonthly,
     loading: false,

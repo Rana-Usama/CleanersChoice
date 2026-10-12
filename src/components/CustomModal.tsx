@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     flex: 1,
-    height: RFPercentage(5),
+    height: RFPercentage(6.2),
     borderRadius: RFPercentage(100),
     backgroundColor: Colors.white,
     borderWidth: 1,
@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
   },
   splitButton: {
     flex: 1,
-    height: RFPercentage(5),
+    height: RFPercentage(6.2),
     borderRadius: RFPercentage(100),
     backgroundColor: Colors.white,
     borderWidth: 1,
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
   },
   splitCancelButton: {
     flex: 1,
-    height: RFPercentage(5),
+    height: RFPercentage(6.2),
     borderRadius: RFPercentage(100),
     backgroundColor: Colors.white,
     borderWidth: 1,
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
   },
   yesButton: {
     flex: 1,
-    height: RFPercentage(5),
+    height: RFPercentage(6.2),
     borderRadius: RFPercentage(100),
   },
   yesButtonText: {

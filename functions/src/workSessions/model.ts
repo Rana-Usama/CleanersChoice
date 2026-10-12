@@ -27,13 +27,16 @@ export const parseWorkSessionConfig = (raw: unknown): WorkSessionConfig => {
 
 export type WorkSessionStatus = "active" | "needsReview" | "confirmed" | "discarded";
 export type WorkSessionAction = "clockIn" | "clockOut" | "addManual" | "confirm" | "edit" | "discard" |
-  "reconcile" | "requestReview" | "setPlannedFinish";
+  "reconcile" | "requestReview" | "setPlannedFinish" | "editEarnings";
 
 export interface WorkSessionRequest {
   action: WorkSessionAction;
   requestId: string;
   sessionId?: string;
   jobId?: string | null;
+  workName?: string;
+  /** Total amount for unlinked work, independent of its hours. */
+  expectedEarnings?: number;
   reportingTimeZone?: string;
   plannedFinishAt?: number;
   startedAt?: number;
@@ -57,12 +60,18 @@ export interface WorkSessionAudit {
   note: string;
   stopReason?: string;
   eventId?: string;
+  beforeExpectedEarnings?: number | null;
+  afterExpectedEarnings?: number | null;
 }
 
 export interface WorkSession {
   id: string;
   cleanerId: string;
   jobId: string | null;
+  /** Optional for records created before named work was introduced. */
+  workName?: string;
+  /** Total amount for unlinked work, independent of its hours. */
+  expectedEarnings?: number;
   jobSnapshot: {
     title: string;
     customerId: string | null;
@@ -117,6 +126,10 @@ export const fail = (code: string, message: string): never => {
 export const finiteTime = (value: unknown): value is number =>
   typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
 
+export const validWorkEarnings = (value: unknown): value is number =>
+  typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 1000000 &&
+  Math.abs(value * 100 - Math.round(value * 100)) < 0.0000001;
+
 export const validateInterval = (start: unknown, end: unknown, now: number, capHours: number): void => {
   if (!finiteTime(start) || !finiteTime(end) || start >= end || end > now) {
     fail("invalid-argument", "Enter valid start and finish times, with finish after start and not in the future.");
@@ -169,13 +182,13 @@ export const validateRequest = (raw: unknown): WorkSessionRequest => {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) fail("invalid-argument", "Invalid session request.");
   const data = raw as Record<string, unknown>;
   const actions = ["clockIn", "clockOut", "addManual", "confirm", "edit", "discard", "reconcile", "requestReview",
-    "setPlannedFinish"];
+    "setPlannedFinish", "editEarnings"];
   if (typeof data.action !== "string" || !actions.includes(data.action) || typeof data.requestId !== "string" ||
       !/^[A-Za-z0-9_-]{8,100}$/.test(data.requestId)) {
     fail("invalid-argument", "A valid action and unique request ID are required.");
   }
-  const allowed = ["action", "requestId", "sessionId", "jobId", "reportingTimeZone", "plannedFinishAt",
-    "startedAt", "endedAt", "note", "expectedRevision"];
+  const allowed = ["action", "requestId", "sessionId", "jobId", "workName", "reportingTimeZone", "plannedFinishAt",
+    "startedAt", "endedAt", "note", "expectedRevision", "expectedEarnings"];
   if (Object.keys(data).some((key) => !allowed.includes(key))) fail("invalid-argument", "Unexpected request field.");
   for (const key of ["sessionId", "jobId"]) {
     if (data[key] !== undefined && data[key] !== null &&
@@ -189,9 +202,22 @@ export const validateRequest = (raw: unknown): WorkSessionRequest => {
   if (data.note !== undefined && (typeof data.note !== "string" || data.note.length > 1000)) {
     fail("invalid-argument", "Notes must contain at most 1000 characters.");
   }
+  if (data.workName !== undefined && (typeof data.workName !== "string" ||
+      !data.workName.trim() || data.workName.length > 120 ||
+      !["clockIn", "addManual"].includes(String(data.action)) || !!data.jobId)) {
+    fail("invalid-argument", "Enter a work name of 1–120 characters for unlinked work.");
+  }
   if (data.expectedRevision !== undefined && (!finiteTime(data.expectedRevision) ||
-      !["confirm", "edit", "discard", "requestReview"].includes(String(data.action)))) {
+      !["confirm", "edit", "discard", "requestReview", "editEarnings"].includes(String(data.action)))) {
     fail("invalid-argument", "A valid record revision is required for this action.");
+  }
+  if (data.expectedEarnings !== undefined && (!validWorkEarnings(data.expectedEarnings) ||
+      !["clockIn", "addManual", "editEarnings"].includes(String(data.action)) || !!data.jobId)) {
+    fail("invalid-argument", "Enter total general-work earnings from $0 to $1,000,000, with up to two decimals.");
+  }
+  if (data.action === "editEarnings" &&
+      (!validWorkEarnings(data.expectedEarnings) || !finiteTime(data.expectedRevision))) {
+    fail("invalid-argument", "Enter total earnings and the current record revision.");
   }
   const creating = data.action === "clockIn" || data.action === "addManual";
   if (creating) {
@@ -211,8 +237,12 @@ export const validateRequest = (raw: unknown): WorkSessionRequest => {
       fail("invalid-argument", "An existing session's job, timezone and deadlines cannot be changed.");
     }
   }
-  if ((data.action === "clockIn" || data.action === "clockOut" || data.action === "discard" ||
-      data.action === "reconcile" || data.action === "requestReview" || data.action === "setPlannedFinish") &&
+  if (data.action === "clockIn" && data.endedAt !== undefined) {
+    fail("invalid-argument", "A live timer cannot supply an actual finish time.");
+  }
+  if ((data.action === "clockOut" || data.action === "discard" ||
+      data.action === "reconcile" || data.action === "requestReview" || data.action === "setPlannedFinish" ||
+      data.action === "editEarnings") &&
       (data.startedAt !== undefined || data.endedAt !== undefined)) {
     fail("invalid-argument", "Use review or edit to change recorded times.");
   }
