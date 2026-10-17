@@ -103,7 +103,7 @@ const AdminServiceCard: React.FC<Props> = ({service, onPress}) => {
               />
             </View>
 
-            {missingInfo && (
+            {/* {missingInfo && (
               <View style={styles.missingInfo}>
                 <MaterialCommunityIcons
                   name="alert-circle-outline"
@@ -115,7 +115,7 @@ const AdminServiceCard: React.FC<Props> = ({service, onPress}) => {
                   {missingInfo}
                 </Text>
               </View>
-            )}
+            )} */}
 
             {/* Service details */}
             <View style={styles.detailsBlock}>
