@@ -83,6 +83,28 @@ const round = (value: number): number =>
 const effective = (collected: number, duration: number) =>
   duration > 0 ? collected / (duration / HOUR_MS) : null;
 
+/**
+ * What one confirmed record is worth, by the same rules the month total uses:
+ * a reported total on unlinked work, else confirmed hours x the rate saved at
+ * clock-in. Fixed-price work has no per-session amount (its price belongs to
+ * the job), and pending or unrated time has none yet - both return null.
+ */
+export const recordEarned = (record: MonthWorkRecord): number | null => {
+  const {session} = record;
+  if (record.confirmedMs <= 0) {
+    return null;
+  }
+  if (!session.jobId && validWorkEarnings(session.expectedEarnings)) {
+    return round(session.expectedEarnings);
+  }
+  const basis = session.paySnapshot?.basis;
+  const rate = session.paySnapshot?.hourlyRate ?? null;
+  if ((basis === 'hourly' || basis === 'general') && rate !== null && rate > 0) {
+    return round((record.confirmedMs / HOUR_MS) * rate);
+  }
+  return null;
+};
+
 export const buildWorkMonthlyReport = (
   sessions: WorkSession[],
   invoices: Invoice[],

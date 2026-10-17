@@ -1,18 +1,28 @@
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 import type {RootStackParamList} from '../../../routers/StackNavigator';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {ActivityIndicator, Text, TouchableOpacity, View} from 'react-native';
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import auth from '@react-native-firebase/auth';
 import type {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
 import {WorkRecordLayout} from '../../../components/work/WorkRecordLayout';
 import {
+  WorkTone,
   workSessionTone,
   workStyles as styles,
+  workToneStyle,
 } from '../../../components/work/workTheme';
-import {WorkButton, WorkPill} from '../../../components/work/WorkUI';
+import {WorkButton} from '../../../components/work/WorkUI';
 import {useWorkSessions} from '../../../components/work/WorkSessionProvider';
 import {workCurrency} from '../../../services/workMonthlyReport';
-import {Colors} from '../../../constants/Themes';
+import {Colors, Fonts} from '../../../constants/Themes';
+import {HOUR_MS} from '../../../../functions/src/workSessions/model';
 import {
   getOriginalWorkSessionEvent,
   getWorkSessionHistoryPage,
@@ -24,25 +34,52 @@ import {cachedDateFormatter} from '../../../utils/intlCache';
 import {
   canUseWorkRecords,
   formatWorkDuration,
-  formatWorkTime,
   workSessionTitle,
 } from '../../../utils/workSessionFlow';
 import {
-  detailedWorkTime,
   workAuditLabel,
-  workStatusLabel,
   workStopExplanation,
 } from '../../../utils/workSessionEntry';
 
-/** "Saturday, 5 September 2026" in the record's own reporting zone. */
-const longDate = (time: number, timeZone: string) =>
-  cachedDateFormatter('en-US', {
+/** "Saturday, 10 October 2026" in the record's own reporting zone. */
+const longDate = (time: number, timeZone: string) => {
+  const date = new Date(time);
+  return `${cachedDateFormatter('en-GB', {timeZone, weekday: 'long'}).format(
+    date,
+  )}, ${cachedDateFormatter('en-GB', {
     timeZone,
-    weekday: 'long',
     day: 'numeric',
     month: 'long',
     year: 'numeric',
+  }).format(date)}`;
+};
+/** "7:20 PM" */
+const clockTime = (time: number, timeZone: string) =>
+  cachedDateFormatter('en-US', {
+    timeZone,
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
   }).format(new Date(time));
+/** "Sat 10 Oct" */
+const shortDay = (time: number, timeZone: string) =>
+  cachedDateFormatter('en-GB', {
+    timeZone,
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  }).format(new Date(time));
+/** "34 min" under an hour, otherwise "2h 05m"-style duration. */
+const minutesText = (ms: number) =>
+  ms < HOUR_MS ? `${Math.floor(ms / 60000)} min` : formatWorkDuration(ms);
+/** Status dot inside the band's translucent pill. */
+const HERO_DOT: Record<WorkTone, string> = {
+  confirmed: '#6EE7B7',
+  edited: '#6EE7B7',
+  needsReview: '#FCD34D',
+  active: '#BFDBFE',
+  discarded: '#CBD5E1',
+};
 
 /** The month a record's hours land in, in its own reporting zone. */
 const countedMonth = (time: number, timeZone: string) =>
@@ -51,22 +88,6 @@ const countedMonth = (time: number, timeZone: string) =>
     month: 'long',
     year: 'numeric',
   }).format(new Date(time));
-
-/** One label/value line in the Times and Pay cards. */
-const Line = ({
-  label,
-  value,
-  children,
-}: {
-  label: string;
-  value?: string;
-  children?: React.ReactNode;
-}) => (
-  <View style={[styles.rowBetween, styles.line]}>
-    <Text style={[styles.sml, {flexBasis: 100, flexGrow: 1}]}>{label}</Text>
-    {children ?? <Text style={[styles.body, styles.lineValue]}>{value}</Text>}
-  </View>
-);
 
 const WorkSessionDetails = ({
   navigation,
@@ -193,87 +214,184 @@ const WorkSessionDetails = ({
     // Refresh audit pages after a live record change, including recovery on another device.
   }, [session, loadHistory]);
 
-  const timeText = (times: WorkSessionAudit['after'], zone: string) =>
-    `${detailedWorkTime(times.startedAt, zone)} → ${
-      times.endedAt === null ? 'Open' : detailedWorkTime(times.endedAt, zone)
-    } · ${workStatusLabel(times.status)}`;
-
   const busy = work.busy || work.pending;
   const tone = session ? workSessionTone(session) : 'confirmed';
   const zone = session?.reportingTimeZone || 'UTC';
 
+  /* ---- derived headline values (presentation only) ------------------- */
+  const status = session?.status;
+  const shownMs = !session
+    ? 0
+    : status === 'confirmed'
+    ? session.durationMs
+    : status === 'needsReview'
+    ? session.estimatedDurationMs
+    : status === 'active'
+    ? Math.max(0, work.now - session.startedAt)
+    : 0;
+  const basis = session?.paySnapshot?.basis;
+  const rate = session?.paySnapshot?.hourlyRate ?? null;
+  const linked = !!session?.jobId;
+  const hourlyPay = linked && (basis === 'hourly' || basis === 'general');
+  const amount: number | null = !session
+    ? null
+    : !linked
+    ? typeof session.expectedEarnings === 'number'
+      ? session.expectedEarnings
+      : null
+    : hourlyPay &&
+      rate !== null &&
+      (status === 'confirmed' || status === 'needsReview')
+    ? (shownMs / HOUR_MS) * rate
+    : null;
+  const moneyLine =
+    status === 'discarded'
+      ? 'not counted'
+      : status === 'active'
+      ? 'running · not counted'
+      : amount !== null
+      ? `${workCurrency(amount)} ${
+          status === 'needsReview' ? 'once confirmed' : 'earned'
+        }`
+      : status === 'needsReview'
+      ? 'not counted yet'
+      : linked && !hourlyPay
+      ? 'paid with the job'
+      : '';
+  const railColor =
+    status === 'needsReview'
+      ? Colors.amber500
+      : status === 'active'
+      ? '#BFDBFE'
+      : status === 'discarded'
+      ? Colors.gray300
+      : Colors.gradient1;
+  const railLabel =
+    status === 'needsReview'
+      ? `${minutesText(shownMs)} · estimated`
+      : status === 'active'
+      ? `${minutesText(shownMs)} so far`
+      : status === 'discarded'
+      ? 'Not counted'
+      : `${minutesText(shownMs)} worked`;
+  const counted = session
+    ? session.endedAt !== null &&
+      session.endedAt > session.startedAt &&
+      countedMonth(session.startedAt, zone) !==
+        countedMonth(session.endedAt - 1, zone)
+      ? `${countedMonth(session.startedAt, zone)} / ${countedMonth(
+          session.endedAt - 1,
+          zone,
+        )}`
+      : countedMonth(session.startedAt, zone)
+    : '';
+  const sourceLabel =
+    session?.source === 'manualCleaner'
+      ? 'Entered by you'
+      : session?.stopReason
+      ? 'Auto-stopped'
+      : 'Clock recorded';
+  const range = (startedAt: number, endedAt: number | null) => {
+    const text = `${clockTime(startedAt, zone)} – ${
+      endedAt === null ? 'Open' : clockTime(endedAt, zone)
+    }`;
+    return session &&
+      shortDay(startedAt, zone) !== shortDay(session.startedAt, zone)
+      ? `${shortDay(startedAt, zone)} · ${text}`
+      : text;
+  };
+  const unchanged =
+    !!original &&
+    !!session &&
+    original.after.startedAt === session.startedAt &&
+    original.after.endedAt === session.endedAt;
+  const owned = usable && session?.cleanerId === uid;
+
+  const hero =
+    owned && session ? (
+      <View style={d.hero}>
+        <Text style={d.heroDate}>{longDate(session.startedAt, zone)}</Text>
+        <Text style={d.heroDuration}>{formatWorkDuration(shownMs)}</Text>
+        <View style={d.heroMeta}>
+          <View style={d.heroPill}>
+            <View style={[d.heroDot, {backgroundColor: HERO_DOT[tone]}]} />
+            <Text style={d.heroPillText}>{workToneStyle(tone).label}</Text>
+          </View>
+          {!!moneyLine && <Text style={d.heroMoney}>· {moneyLine}</Text>}
+        </View>
+      </View>
+    ) : undefined;
+
   return (
     <WorkRecordLayout
       title="Work record"
+      hero={hero}
       onBack={() =>
         navigation.canGoBack()
           ? navigation.goBack()
           : navigation.navigate('WorkTracking')
       }
       footer={
-        usable &&
-        session?.cleanerId === uid &&
-        session.status !== 'discarded' ? (
-          <>
-            {/* ---- actions -------------------------------------------- */}
-            {session.status === 'needsReview' && (
+        owned && session && session.status !== 'discarded' ? (
+          session.status === 'active' ? (
+            <View style={d.footerRow}>
               <WorkButton
-                label="Review actual times"
+                variant="danger"
+                icon="stop"
+                label="Clock out now"
+                disabled={busy}
+                onPress={() => {
+                  void work.stop(session);
+                }}
+                style={d.grow}
+              />
+              <WorkButton
+                variant="ghost"
+                label="Enter finish time"
+                accessibilityLabel="Enter actual finish time"
                 disabled={busy}
                 onPress={() => {
                   void work.review(session);
                 }}
+                style={d.grow}
               />
-            )}
-            {session.status === 'confirmed' && (
+            </View>
+          ) : (
+            <View style={d.footerRow}>
               <WorkButton
-                variant="ghost"
-                icon="pencil-outline"
-                label="Correct this record"
-                disabled={busy}
-                onPress={() => {
-                  void work.edit(session);
-                }}
-              />
-            )}
-            {session.status === 'active' && (
-              <View style={styles.actionRow}>
-                <WorkButton
-                  variant="danger"
-                  icon="stop"
-                  label="Clock out now"
-                  disabled={busy}
-                  onPress={() => {
-                    void work.stop(session);
-                  }}
-                  style={styles.actionCell}
-                />
-                <WorkButton
-                  variant="ghost"
-                  label="Enter actual finish time"
-                  disabled={busy}
-                  onPress={() => {
-                    void work.review(session);
-                  }}
-                  style={styles.actionCell}
-                />
-              </View>
-            )}
-
-            {session.status !== 'active' && (
-              <WorkButton
-                variant="ghost"
-                label="Discard record"
+                variant="dangerOutline"
                 icon="trash-can-outline"
+                label="Discard"
+                accessibilityLabel="Discard record"
                 disabled={busy}
                 onPress={() => {
                   void (session.status === 'confirmed'
                     ? work.edit(session, true)
                     : work.review(session, true));
                 }}
+                style={d.grow}
               />
-            )}
-          </>
+              <WorkButton
+                label={
+                  session.status === 'needsReview'
+                    ? 'Review actual times'
+                    : 'Correct record'
+                }
+                accessibilityLabel={
+                  session.status === 'needsReview'
+                    ? 'Review actual times'
+                    : 'Correct this record'
+                }
+                disabled={busy}
+                onPress={() => {
+                  void (session.status === 'needsReview'
+                    ? work.review(session)
+                    : work.edit(session));
+                }}
+                style={d.primary}
+              />
+            </View>
+          )
         ) : undefined
       }>
       {!usable && (
@@ -291,100 +409,92 @@ const WorkSessionDetails = ({
         </TouchableOpacity>
       )}
 
-      {usable && session?.cleanerId === uid && (
+      {owned && session && (
         <>
-          {/* ---- headline ------------------------------------------- */}
-          <View style={styles.card}>
-            <View style={styles.rowBetween}>
-              <Text style={[styles.sml, styles.grow]}>
-                {longDate(session.startedAt, zone)}
-              </Text>
-              <WorkPill tone={tone} />
+          {/* ---- what it was ---------------------------------------- */}
+          <View style={d.card}>
+            <View style={d.workRow}>
+              <View style={d.workIcon}>
+                <MaterialCommunityIcons
+                  name={linked ? 'briefcase-outline' : 'broom'}
+                  size={19}
+                  color={Colors.gradient1}
+                />
+              </View>
+              <View style={d.grow}>
+                <Text style={d.workTitle} numberOfLines={2}>
+                  {workSessionTitle(session)}
+                </Text>
+                <Text style={d.sub}>
+                  {sourceLabel} · counted in {counted}
+                </Text>
+              </View>
             </View>
-            <Text style={styles.big}>
-              {session.status === 'confirmed'
-                ? formatWorkDuration(session.durationMs)
-                : session.status === 'needsReview'
-                ? formatWorkDuration(session.estimatedDurationMs)
-                : session.status === 'active'
-                ? formatWorkDuration(work.now - session.startedAt)
-                : '0h 0m'}
-            </Text>
-            <Text style={styles.sml}>
-              {session.status === 'confirmed'
-                ? 'confirmed'
-                : session.status === 'needsReview'
-                ? 'estimated · not counted'
-                : session.status === 'active'
-                ? 'running · not counted'
-                : 'Discarded · not counted'}
-            </Text>
-            <View style={styles.divider} />
-            <View style={styles.rowBetween}>
-              <Text style={[styles.body, styles.grow]} numberOfLines={2}>
-                {workSessionTitle(session)}
-              </Text>
-              <Text style={styles.sml}>
-                {session.source === 'manualCleaner'
-                  ? 'Entered by you'
-                  : 'Clock recorded'}
-              </Text>
-            </View>
-            {session.status === 'needsReview' && (
-              <Text style={styles.error}>
+            {!!session.note && <Text style={d.note}>Note: {session.note}</Text>}
+          </View>
+
+          {session.status === 'needsReview' && (
+            <View style={d.notice}>
+              <MaterialCommunityIcons
+                name="alert-circle-outline"
+                size={16}
+                color={Colors.amberDarkText}
+              />
+              <Text style={d.noticeText}>
                 {session.source === 'manualCleaner'
                   ? 'Check the dates and times you entered, then confirm them before the hours count.'
                   : workStopExplanation(session.stopReason)}
               </Text>
-            )}
-            {!!session.note && (
-              <Text style={styles.help}>Note: {session.note}</Text>
-            )}
-          </View>
+            </View>
+          )}
 
-          {/* ---- times ---------------------------------------------- */}
-          <View style={styles.card}>
-            <Text style={styles.title}>Times</Text>
-            <View style={styles.divider} />
-            <Line
-              label="Clocked in"
-              value={formatWorkTime(session.startedAt, zone)}
-            />
-            <Line
-              label="Clocked out"
-              value={
-                session.endedAt === null
-                  ? 'Open'
-                  : formatWorkTime(session.endedAt, zone)
-              }
-            />
-            <Line label="Recorded by">
-              <WorkPill
-                tone={tone}
-                label={
-                  session.source === 'manualCleaner'
-                    ? 'Entered manually'
-                    : session.stopReason
-                    ? 'Auto-stopped'
-                    : 'Clock in / clock out'
-                }
-              />
-            </Line>
-            <Line
-              label="Counted in"
-              value={
-                session.endedAt !== null &&
-                session.endedAt > session.startedAt &&
-                countedMonth(session.startedAt, zone) !==
-                  countedMonth(session.endedAt - 1, zone)
-                  ? `${countedMonth(session.startedAt, zone)} / ${countedMonth(
-                      session.endedAt - 1,
-                      zone,
-                    )}`
-                  : countedMonth(session.startedAt, zone)
-              }
-            />
-            <Text style={styles.sml}>{timeText(session, zone)}</Text>
+          {/* ---- when: two stops with the length on the rail ---------- */}
+          <View style={d.card}>
+            <View style={d.timeline}>
+              <View style={d.railCol}>
+                <View style={[d.dot, {backgroundColor: railColor}]} />
+                <View style={[d.rail, {backgroundColor: railColor}]} />
+                <View
+                  style={[
+                    d.dot,
+                    session.endedAt === null
+                      ? d.dotOpen
+                      : {backgroundColor: railColor},
+                  ]}
+                />
+              </View>
+              <View style={d.grow}>
+                <View style={d.stop}>
+                  <View>
+                    <Text style={d.stopLabel}>Clocked in</Text>
+                    <Text style={d.stopTime}>
+                      {clockTime(session.startedAt, zone)}
+                    </Text>
+                  </View>
+                  <Text style={d.stopDay}>
+                    {shortDay(session.startedAt, zone)}
+                  </Text>
+                </View>
+                <View style={d.railPillWrap}>
+                  <Text style={d.railPill}>{railLabel}</Text>
+                </View>
+                <View style={d.stop}>
+                  <View>
+                    <Text style={d.stopLabel}>Clocked out</Text>
+                    <Text style={d.stopTime}>
+                      {session.endedAt === null
+                        ? 'Still running'
+                        : clockTime(session.endedAt, zone)}
+                    </Text>
+                  </View>
+                  {session.endedAt !== null && (
+                    <Text style={d.stopDay}>
+                      {shortDay(session.endedAt, zone)}
+                    </Text>
+                  )}
+                </View>
+              </View>
+            </View>
           </View>
 
           {work.pending && (
@@ -400,119 +510,99 @@ const WorkSessionDetails = ({
           )}
           {!!work.error && <Text style={styles.error}>{work.error}</Text>}
 
-          {/* ---- pay ------------------------------------------------ */}
-          {!session.jobId ? (
-            <View style={styles.card}>
-              <Text style={styles.title}>
-                {session.status === 'confirmed'
-                  ? 'Earned'
-                  : 'Expected earnings'}
-              </Text>
-              <Text style={styles.hero}>
-                {session.expectedEarnings !== undefined
-                  ? workCurrency(session.expectedEarnings)
-                  : 'Not set'}
-              </Text>
-              {/* <Text style={styles.sml}>
-                {session.status === 'discarded'
-                  ? 'This record is discarded and contributes no earnings.'
-                  : 'Total for this work. Counts once in the finish month after the hours are confirmed.'}
-              </Text> */}
-              {session.status !== 'discarded' && (
-                <WorkButton
-                  label="Edit earnings"
-                  variant="ghost"
-                  icon="pencil-outline"
-                  disabled={work.busy || work.pending}
-                  onPress={() => {
-                    void work.editEarnings(session);
-                  }}
-                />
-              )}
-            </View>
-          ) : (
-            <View style={styles.card}>
-              <View style={styles.rowBetween}>
-                <Text style={[styles.title, styles.grow]}>Pay</Text>
-                <WorkPill tone="active" label="Snapshotted at clock-in" />
-              </View>
-              <View style={styles.divider} />
-              <Line
-                label="Work type"
-                value={
-                  session.paySnapshot.basis === 'hourly'
-                    ? 'Hourly'
-                    : session.paySnapshot.basis === 'flat'
-                    ? 'Fixed price'
-                    : session.paySnapshot.basis === 'sqft'
-                    ? 'Per square foot'
-                    : 'General work'
-                }
-              />
-              <Line
-                label="Rate applied"
-                value={
-                  session.paySnapshot.hourlyRate === null
-                    ? 'None recorded'
-                    : `$${session.paySnapshot.hourlyRate.toFixed(2)}/hr`
-                }
-              />
-              <Line
-                label="Rate source"
-                value={
-                  session.paySnapshot.hourlyRate === null
-                    ? 'No hourly rate was available'
-                    : session.paySnapshot.rateSource === 'job'
-                    ? 'Job rate'
-                    : 'Your default rate'
-                }
-              />
-              <View style={styles.inner}>
-                <Text style={styles.sml}>
-                  Saved {detailedWorkTime(session.paySnapshot.capturedAt, zone)}
-                  . The saved job and rate remain with this record even if the
-                  job changes.
-                </Text>
-              </View>
-            
-              {(session.paySnapshot.basis === 'hourly' ||
-                session.paySnapshot.basis === 'general') &&
-                session.paySnapshot.hourlyRate !== null &&
-                session.status === 'confirmed' && (
-                  <Line
-                    label="This session earned"
-                    value={`$${(
-                      (session.durationMs / 3600000) *
-                      session.paySnapshot.hourlyRate
-                    ).toFixed(2)}`}
-                  />
-                )}
-              {(session.paySnapshot.basis === 'hourly' ||
-                session.paySnapshot.basis === 'general') &&
-                session.paySnapshot.hourlyRate === null && (
-                  <Text style={[styles.sml, {color: Colors.amberDarkText}]}>
-                    No rate was saved at clock-in, so these hours are not
-                    valued. Set a default hourly rate to value future sessions.
+          {/* ---- how it's paid, as the sum it is ---------------------- */}
+          <View style={[d.card, d.payCard]}>
+            <Text style={d.cardTitle}>How it's paid</Text>
+            {!linked ? (
+              <>
+                <View style={d.payRow}>
+                  <Text style={d.payFormula}>Total for this work</Text>
+                  <Text style={[d.payAmount, amount === null && d.payUnset]}>
+                    {amount !== null ? workCurrency(amount) : 'Not set'}
                   </Text>
+                </View>
+                <Text style={d.sub}>
+                  {session.status === 'discarded'
+                    ? 'This record is discarded and contributes no earnings.'
+                    : 'Counts once, after the hours are confirmed.'}
+                </Text>
+                {session.status !== 'discarded' && (
+                  <TouchableOpacity
+                    accessibilityRole="button"
+                    disabled={work.busy || work.pending}
+                    onPress={() => {
+                      void work.editEarnings(session);
+                    }}
+                    style={d.editLink}>
+                    <MaterialCommunityIcons
+                      name="pencil-outline"
+                      size={15}
+                      color={Colors.gradient1}
+                    />
+                    <Text style={d.editLinkText}>Edit earnings</Text>
+                  </TouchableOpacity>
                 )}
-              <Text style={styles.sml}>
-                Hours count after confirmation. Hourly earnings use the rate
-                saved with this record; fixed-price earnings belong to the
-                completed job.
-              </Text>
-            </View>
-          )}
-
-          {/* ---- original + history --------------------------------- */}
-          <View style={styles.card}>
-            <Text style={styles.title}>Originally recorded</Text>
-            {original ? (
-              <Text style={styles.help}>{timeText(original.after, zone)}</Text>
+              </>
+            ) : hourlyPay && rate !== null ? (
+              <>
+                <View style={d.payRow}>
+                  <Text style={d.payFormula}>
+                    {formatWorkDuration(shownMs)} × ${rate.toFixed(2)}/hr
+                  </Text>
+                  <Text style={d.payAmount}>
+                    {amount !== null ? workCurrency(amount) : '—'}
+                  </Text>
+                </View>
+                <Text style={d.sub}>
+                  {session.paySnapshot.rateSource === 'job'
+                    ? 'Hourly job rate'
+                    : 'Your default rate'}
+                  , saved at clock-in.
+                </Text>
+              </>
+            ) : hourlyPay ? (
+              <>
+                <View style={d.payRow}>
+                  <Text style={d.payFormula}>No rate saved</Text>
+                  <Text style={[d.payAmount, d.payUnset]}>—</Text>
+                </View>
+                <Text style={[d.sub, {color: Colors.amberDarkText}]}>
+                  No rate was saved at clock-in, so these hours are not valued.
+                  Set a default hourly rate to value future sessions.
+                </Text>
+              </>
             ) : (
-              <Text style={styles.help}>
-                {historyLoading
+              <>
+                <View style={d.payRow}>
+                  <Text style={d.payFormula}>
+                    {basis === 'sqft' ? 'Per square foot' : 'Fixed price'}
+                  </Text>
+                  <Text style={[d.payAmount, d.payUnset]}>
+                    Paid with the job
+                  </Text>
+                </View>
+                <Text style={d.sub}>
+                  Fixed-price earnings belong to the completed job.
+                </Text>
+              </>
+            )}
+          </View>
+
+          {/* ---- original record, one honest line ---------------------- */}
+          <View style={[d.card, d.workRow]}>
+            <View style={d.grow}>
+              <Text style={d.stopLabel}>Originally recorded</Text>
+              <Text style={d.historyValue}>
+                {original
+                  ? range(original.after.startedAt, original.after.endedAt)
+                  : historyLoading
                   ? 'Loading original record…'
                   : 'Original times are unavailable. Retry the history below.'}
+              </Text>
+            </View>
+            {!!original && (
+              <Text style={[d.chip, !unchanged && d.chipEdited]}>
+                {unchanged ? 'Unchanged' : 'Edited'}
               </Text>
             )}
           </View>
@@ -610,4 +700,196 @@ const WorkSessionDetails = ({
     </WorkRecordLayout>
   );
 };
+
+const d = StyleSheet.create({
+  grow: {flex: 1, minWidth: 0},
+  hero: {alignItems: 'center', gap: 4},
+  heroDate: {fontFamily: Fonts.fontRegular, fontSize: 13, color: Colors.white},
+  heroDuration: {
+    fontFamily: Fonts.fontBold,
+    fontSize: 42,
+    lineHeight: 50,
+    color: Colors.white,
+    fontVariant: ['tabular-nums'],
+  },
+  heroMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 2,
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+  },
+  heroPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 3,
+    paddingHorizontal: 10,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,255,255,0.22)',
+  },
+  heroDot: {width: 7, height: 7, borderRadius: 4},
+  heroPillText: {fontFamily: Fonts.semiBold, fontSize: 12, color: Colors.white},
+  heroMoney: {fontFamily: Fonts.semiBold, fontSize: 13, color: Colors.white},
+  card: {
+    backgroundColor: Colors.white,
+    borderWidth: 1,
+    borderColor: Colors.lightBlueBorder,
+    borderRadius: 14,
+    padding: 14,
+  },
+  cardTitle: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 13,
+    color: Colors.slateText,
+  },
+  workRow: {flexDirection: 'row', alignItems: 'center', gap: 12},
+  workIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: Colors.blueBg200,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  workTitle: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 14.5,
+    color: Colors.slateText,
+  },
+  sub: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: 12,
+    lineHeight: 17,
+    color: Colors.secondaryText,
+  },
+  note: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: 12.5,
+    lineHeight: 18,
+    color: Colors.slateText,
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: Colors.slate100,
+  },
+  notice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    backgroundColor: Colors.amberBg50,
+    borderWidth: 1,
+    borderColor: Colors.amberBorder,
+  },
+  noticeText: {
+    flex: 1,
+    fontFamily: Fonts.fontMedium,
+    fontSize: 12,
+    lineHeight: 17,
+    color: Colors.amberDarkText,
+  },
+  timeline: {flexDirection: 'row', gap: 12},
+  railCol: {width: 14, alignItems: 'center', paddingTop: 5},
+  dot: {width: 12, height: 12, borderRadius: 6},
+  dotOpen: {
+    borderWidth: 2,
+    borderStyle: 'dashed',
+    borderColor: '#93C5FD',
+    backgroundColor: Colors.white,
+  },
+  rail: {flex: 1, width: 2, minHeight: 36, marginVertical: 4},
+  stop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    gap: 12,
+  },
+  stopLabel: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: 12,
+    color: Colors.secondaryText,
+  },
+  stopTime: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 17,
+    color: Colors.slateText,
+    fontVariant: ['tabular-nums'],
+  },
+  stopDay: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: 12,
+    color: Colors.secondaryText,
+    paddingBottom: 3,
+  },
+  railPillWrap: {paddingVertical: 10, alignItems: 'flex-start'},
+  railPill: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 12,
+    color: Colors.gradient1,
+    backgroundColor: Colors.blueBg200,
+    paddingVertical: 3,
+    paddingHorizontal: 10,
+    borderRadius: 999,
+    overflow: 'hidden',
+  },
+  payCard: {gap: 8},
+  payRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  payFormula: {
+    flex: 1,
+    fontFamily: Fonts.fontRegular,
+    fontSize: 13.5,
+    color: Colors.secondaryText,
+    fontVariant: ['tabular-nums'],
+  },
+  payAmount: {
+    fontFamily: Fonts.fontBold,
+    fontSize: 17,
+    color: '#047857',
+    fontVariant: ['tabular-nums'],
+  },
+  payUnset: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 13.5,
+    color: Colors.secondaryText,
+  },
+  editLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    alignSelf: 'flex-start',
+    minHeight: 36,
+  },
+  editLinkText: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 13,
+    color: Colors.gradient1,
+  },
+  historyValue: {
+    fontFamily: Fonts.fontMedium,
+    fontSize: 13.5,
+    color: Colors.slateText,
+  },
+  chip: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 11.5,
+    color: Colors.secondaryText,
+    backgroundColor: Colors.slate100,
+    paddingVertical: 3,
+    paddingHorizontal: 10,
+    borderRadius: 999,
+    overflow: 'hidden',
+  },
+  chipEdited: {color: Colors.gradient1, backgroundColor: Colors.blueBg200},
+  footerRow: {flexDirection: 'row', gap: 10},
+  primary: {flex: 1.7, minWidth: 0},
+});
 export default WorkSessionDetails;

@@ -49,7 +49,7 @@ export default GradientButton;
 
 const styles = StyleSheet.create({
   nextButton: {
-    minHeight: RFPercentage(6.2),
+    minHeight: RFPercentage(6.5),
     borderRadius: RFPercentage(100),
     alignItems: 'center',
     justifyContent: 'center',
@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
   },
   touchableArea: {
     width: '100%',
-    minHeight: RFPercentage(6.2),
+    minHeight: RFPercentage(6.5),
     paddingVertical: 12,
     paddingHorizontal: 12,
     alignItems: 'center',

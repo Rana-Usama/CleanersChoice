@@ -156,15 +156,15 @@ afterEach(async () => {
 });
 it('shows hours and earned on the monthly screen and links to them from the compact dashboard', async () => {
   await open();
-  expect(texts()).toContain('1h 0m');
-  expect(texts()).toContain('$25.00');
-  expect(texts()).toContain('Confirmed hours');
+  // The calendar footer carries the month: confirmed hours · earned.
+  expect(texts()).toContain('1h 0m · $25.00');
+  expect(texts()).toContain('All sessions');
   const fullText = texts();
   await act(async () => {
     renderer.update(<WorkMonthlyDashboard />);
   });
   // The dashboard's current design uses a navigation row; totals live on Work Hours.
-  expect(texts()).toContain('Work Hours & Earnings');
+  expect(texts()).toContain('Work Hours ›');
   for (const removed of [
     'Collected',
     'Unpaid',
@@ -176,7 +176,7 @@ it('shows hours and earned on the monthly screen and links to them from the comp
     expect(fullText).not.toContain(removed);
     expect(texts()).not.toContain(removed);
   }
-  expect(fullText).toContain('Earned');
+  expect(fullText).toContain('$25.00');
 });
 it('changes months and drills into work records without payment breakdowns', async () => {
   await open();
@@ -184,9 +184,8 @@ it('changes months and drills into work records without payment breakdowns', asy
   expect(mockUseMonthly).toHaveBeenLastCalledWith({year: 2026, month: 10});
   await pressLabel('Previous');
   expect(mockUseMonthly).toHaveBeenLastCalledWith({year: 2026, month: 9});
-  // The session row navigates as a whole - there is no longer a separate
-  // "View times and history" link inside it.
-  await pressContaining('· House');
+  // The whole session row navigates.
+  await pressContaining('House');
   expect(mockNavigate).toHaveBeenCalledWith('WorkSessionDetails', {
     sessionId: 'record',
   });
@@ -240,4 +239,21 @@ it('shows loading, errors and cache labels without claiming a failed read is a z
     );
   });
   expect(texts()).toContain('Cached totals may be incomplete');
+});
+
+it('narrows the list to a tapped calendar day and back to the whole month', async () => {
+  await open();
+  // The saved record started 20 Oct 11:00 UTC, so it belongs to day 20.
+  await pressLabel('20 October 2026, 1h 0m');
+  expect(texts()).toContain('Tuesday 20 October');
+  expect(texts()).toContain('11:00 AM – 12:00 PM');
+  expect(texts()).toContain('Show the whole month');
+
+  await press('Show the whole month');
+  expect(texts()).toContain('All sessions');
+  expect(texts()).not.toContain('Show the whole month');
+
+  // A day with no work says so instead of showing an empty card.
+  await pressLabel('21 October 2026, no work');
+  expect(texts()).toContain('No work recorded on this day.');
 });

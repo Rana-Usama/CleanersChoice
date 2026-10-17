@@ -70,7 +70,7 @@ export const GeneralWorkEarningsDialog = ({
             contentContainerStyle={styles.content}>
             <View style={s.row}>
               <WorkIconTile
-                icon="cash-edit"
+                icon="cash"
                 color={Colors.gradient1}
                 bg={Colors.blueOverlay10}
               />

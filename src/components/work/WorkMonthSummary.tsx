@@ -28,6 +28,10 @@ export const WorkMonthSummary = ({
   compact = false,
   monthLabel,
   onPickMonth,
+  onPrevMonth,
+  onNextMonth,
+  prevDisabled,
+  nextDisabled,
 }: {
   report: WorkMonthlyReport | null;
   loading: boolean;
@@ -37,6 +41,10 @@ export const WorkMonthSummary = ({
   compact?: boolean;
   monthLabel?: string;
   onPickMonth?: () => void;
+  onPrevMonth?: () => void;
+  onNextMonth?: () => void;
+  prevDisabled?: boolean;
+  nextDisabled?: boolean;
 }) => {
   const {fontScale} = useWindowDimensions();
   const tile = [s.tile, fontScale > 1.2 && {flexBasis: '100%' as const}];
@@ -123,34 +131,67 @@ export const WorkMonthSummary = ({
 
       {report && !compact && (
         <>
-          <View style={s.rowBetween}>
-            <View style={s.grow}>
-              {!!monthLabel && <Text style={s.eyebrow}>{monthLabel}</Text>}
-            </View>
-            {!!onPickMonth && (
-              <TouchableOpacity
-                accessibilityRole="button"
-                accessibilityLabel="Choose report month"
-                activeOpacity={0.8}
-                style={[s.chip, s.row]}
-                onPress={onPickMonth}>
-                <Text style={s.chipText}>{monthLabel?.split(' ')[0]}</Text>
+          {/*
+            One month control for the whole screen. There used to be three:
+            an "OCTOBER 2026" eyebrow, an "October" picker pill beside it, and
+            a separate stepper card underneath repeating "October 2026".
+          */}
+          <View style={s.monthRow}>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Previous"
+              activeOpacity={0.7}
+              hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
+              style={[s.stepper, prevDisabled && s.disabled]}
+              disabled={prevDisabled || !onPrevMonth}
+              onPress={onPrevMonth}>
+              <MaterialCommunityIcons
+                name="chevron-left"
+                size={20}
+                color={Colors.gradient1}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Choose report month"
+              activeOpacity={0.8}
+              style={[s.row, s.grow, {justifyContent: 'center'}]}
+              disabled={!onPickMonth}
+              onPress={onPickMonth}>
+              <Text style={s.monthTitle}>{monthLabel}</Text>
+              {!!onPickMonth && (
                 <MaterialCommunityIcons
                   name="chevron-down"
                   size={16}
                   color={Colors.secondaryText}
                 />
-              </TouchableOpacity>
-            )}
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Next"
+              activeOpacity={0.7}
+              hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
+              style={[s.stepper, nextDisabled && s.disabled]}
+              disabled={nextDisabled || !onNextMonth}
+              onPress={onNextMonth}>
+              <MaterialCommunityIcons
+                name="chevron-right"
+                size={20}
+                color={Colors.gradient1}
+              />
+            </TouchableOpacity>
           </View>
-          <Text style={s.hero}>{formatWorkDuration(report.confirmedMs)}</Text>
-          <Text style={s.sml}>
-            Confirmed hours · {report.records.length}{' '}
-            {report.records.length === 1 ? 'session' : 'sessions'}
-          </Text>
 
-          {report.pendingCount > 0 ? (
-            <View style={[s.row, {flexWrap: 'wrap'}]}>
+          <Text style={s.hero}>{formatWorkDuration(report.confirmedMs)}</Text>
+
+          {/* One caption, not two lines both ending in "6 sessions". */}
+          <View style={[s.row, {flexWrap: 'wrap'}]}>
+            <Text style={s.sml}>
+              Confirmed hours · {report.records.length}{' '}
+              {report.records.length === 1 ? 'session' : 'sessions'}
+            </Text>
+            {report.pendingCount > 0 && (
               <View
                 style={[
                   s.pill,
@@ -160,19 +201,12 @@ export const WorkMonthSummary = ({
                   },
                 ]}>
                 <Text style={[s.pillText, {color: Colors.amberDarkText}]}>
-                  {report.pendingCount}{' '}
-                  {report.pendingCount === 1 ? 'session' : 'sessions'} pending ·
-                  est. {formatWorkDuration(report.pendingMs)}
+                  {report.pendingCount} pending · est.{' '}
+                  {formatWorkDuration(report.pendingMs)}
                 </Text>
               </View>
-              <Text style={s.sml}>not counted above</Text>
-            </View>
-          ) : (
-            <Text style={s.sml}>
-              Nothing pending · {report.records.length}{' '}
-              {report.records.length === 1 ? 'session' : 'sessions'} this month
-            </Text>
-          )}
+            )}
+          </View>
 
           <View style={[s.divider, {marginVertical: 6}]} />
 

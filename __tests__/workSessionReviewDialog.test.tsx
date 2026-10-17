@@ -2,7 +2,7 @@ import React from 'react';
 import Renderer, {act} from 'react-test-renderer';
 import {Text, TouchableOpacity} from 'react-native';
 import {WorkSessionDialog} from '../src/components/work/WorkSessionDialog';
-import {WorkTimeFields} from '../src/components/work/WorkTimeFields';
+import {ManualTimeFields} from '../src/components/work/ManualTimeFields';
 jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({top: 24, bottom: 16, left: 0, right: 0}),
 }));
@@ -77,7 +77,7 @@ it('previews a quick duration but only saves after explicit confirmation', async
   await open();
   await press('4h');
   expect(save).not.toHaveBeenCalled();
-  expect(renderer.root.findByType(WorkTimeFields).props.value.endedAt).toBe(
+  expect(renderer.root.findByType(ManualTimeFields).props.value.endedAt).toBe(
     NOW - 4 * 3600000,
   );
   await press('Confirm these times');
@@ -93,7 +93,7 @@ it('requires a correction reason and gives discard a separate explicit action', 
   await open(true);
   await press('Save corrected times');
   expect(save).not.toHaveBeenCalled();
-  const fields = renderer.root.findByType(WorkTimeFields);
+  const fields = renderer.root.findByType(ManualTimeFields);
   await act(async () => {
     fields.props.onChange({...fields.props.value, note: 'Corrected finish'});
   });
@@ -125,7 +125,7 @@ it('opens a discard confirmation without saving until the cleaner confirms', asy
     );
   });
   expect(save).not.toHaveBeenCalled();
-  expect(renderer.root.findAllByType(WorkTimeFields)).toHaveLength(0);
+  expect(renderer.root.findAllByType(ManualTimeFields)).toHaveLength(0);
   await press('Discard record');
   expect(save).toHaveBeenCalledWith(expect.objectContaining({discard: true}));
 });

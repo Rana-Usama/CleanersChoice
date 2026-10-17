@@ -109,7 +109,7 @@ it('loads assigned clock-in cards and navigates to the full jobs list', async ()
     .find(button =>
       button
         .findAllByType(Text)
-        .some(node => node.props.children === 'View all'),
+        .some(node => node.props.children === 'View all jobs'),
     )!;
   await act(async () => viewAll.props.onPress());
   expect(mockNavigate).toHaveBeenCalledWith('MyJobs');

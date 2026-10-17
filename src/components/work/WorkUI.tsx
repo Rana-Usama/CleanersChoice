@@ -42,6 +42,7 @@ export type WorkButtonVariant =
   | 'primary'
   | 'ghost'
   | 'danger'
+  | 'dangerOutline'
   | 'muted'
   | 'warn';
 
@@ -76,6 +77,8 @@ export const WorkButton = ({
       ? s.buttonGhost
       : variant === 'danger'
       ? s.buttonDanger
+      : variant === 'dangerOutline'
+      ? s.buttonDangerOutline
       : variant === 'muted'
       ? s.buttonMuted
       : variant === 'warn'
@@ -86,12 +89,16 @@ export const WorkButton = ({
       ? s.buttonGhostText
       : variant === 'muted'
       ? s.buttonMutedText
+      : variant === 'dangerOutline'
+      ? s.buttonDangerOutlineText
       : undefined;
   const color =
     variant === 'ghost'
       ? Colors.gradient1
       : variant === 'muted'
       ? Colors.gray400
+      : variant === 'dangerOutline'
+      ? '#B91C1C'
       : Colors.white;
   const inert = disabled || busy || !onPress;
   return (
@@ -224,7 +231,7 @@ export const WorkNavRow = ({
       ]}>
       <WorkIconTile icon={icon} color={accent} bg={wash} size={19} />
       <View style={s.detailPrimary}>
-        <Text style={s.body}>{title}</Text>
+        <Text style={s.navTitle}>{title}</Text>
         {!!subtitle && <Text style={s.sml}>{subtitle}</Text>}
       </View>
       {!!badge && (

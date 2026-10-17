@@ -110,6 +110,36 @@ export const workStyles = StyleSheet.create({
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
   },
+  /** Straight-edged band: no curve, no room left for a pulled-up card. */
+  bandFlat: {
+    paddingBottom: 14,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  bandTitleLeft: {
+    flex: 1,
+    fontFamily: Fonts.semiBold,
+    fontSize: 17,
+    color: Colors.white,
+  },
+  contentFlat: {paddingTop: 14, gap: 12},
+  /** A curved band that carries a headline under its title row. */
+  bandHero: {
+    paddingBottom: 22,
+    paddingHorizontal: 16,
+    gap: 16,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+  },
+  bandTitleHero: {
+    flex: 1,
+    textAlign: 'center',
+    fontFamily: Fonts.semiBold,
+    fontSize: 17,
+    color: Colors.white,
+  },
   bandTitle: {
     flex: 1,
     textAlign: 'center',
@@ -182,9 +212,33 @@ export const workStyles = StyleSheet.create({
   big: {fontFamily: Fonts.fontBold, fontSize: 34, color: Colors.slateText},
   mid: {fontFamily: Fonts.fontBold, fontSize: 21, color: Colors.slateText},
   body: {fontFamily: Fonts.fontRegular, fontSize: 15, color: Colors.slateText},
-  help: {fontFamily: Fonts.fontRegular, fontSize: 14, lineHeight: 21, color: Colors.secondaryText},
-  sml: {fontFamily: Fonts.fontRegular, fontSize: 12.5, lineHeight: 18, color: Colors.secondaryText},
-  error: {fontFamily: Fonts.fontRegular, color: Colors.amberDarkText, fontSize: 14, lineHeight: 21},
+  /**
+   * A nav row's title is a label for the destination, not body copy - it needs
+   * weight against the lighter subtitle beneath it.
+   */
+  navTitle: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 15,
+    color: Colors.slateText,
+  },
+  help: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: 14,
+    lineHeight: 21,
+    color: Colors.secondaryText,
+  },
+  sml: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: 12.5,
+    lineHeight: 18,
+    color: Colors.secondaryText,
+  },
+  error: {
+    fontFamily: Fonts.fontRegular,
+    color: Colors.amberDarkText,
+    fontSize: 14,
+    lineHeight: 21,
+  },
   // Timers must not reflow as digits change.
   mono: {fontVariant: ['tabular-nums']},
 
@@ -237,6 +291,52 @@ export const workStyles = StyleSheet.create({
   },
   /** The month bar is a control strip, so it needs less padding than a card. */
   monthBar: {paddingVertical: 8, paddingHorizontal: 8},
+  /** The single month control at the top of the headline card. */
+  monthRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 2,
+  },
+  monthTitle: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 15,
+    color: Colors.slateText,
+  },
+  // ---- month heat calendar --------------------------------------------
+  weekRow: {flexDirection: 'row', marginTop: 2},
+  weekday: {
+    flex: 1,
+    textAlign: 'center',
+    fontFamily: Fonts.semiBold,
+    fontSize: 11,
+    color: Colors.gray400,
+  },
+  dayGrid: {flexDirection: 'row', flexWrap: 'wrap'},
+  /**
+   * Seven per row by percentage so the grid fits any screen width. The inner
+   * box carries the fill, leaving the 1/7th column as the gutter.
+   */
+  dayCell: {width: '14.28%', aspectRatio: 1, padding: 2},
+  dayCellBox: {
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  dayCellSelected: {borderColor: Colors.slateText},
+  dayLabel: {fontSize: 12.5, color: Colors.gray400},
+  dayLabelWorked: {fontFamily: Fonts.semiBold, color: Colors.slateText},
+  dayLabelOnDark: {color: Colors.white},
+  heatKey: {width: 14, height: 14, borderRadius: 4},
+
+  warnText: {color: Colors.amberDarkText},
+  retryLink: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 13,
+    color: Colors.gradient1,
+  },
   /** Compact round control for the month stepper. */
   stepper: {
     width: 36,
@@ -357,6 +457,11 @@ export const workStyles = StyleSheet.create({
   },
   buttonGhostText: {color: Colors.gradient1},
   buttonDanger: {backgroundColor: Colors.red500},
+  buttonDangerOutline: {
+    backgroundColor: Colors.white,
+    borderColor: Colors.redBorder200,
+  },
+  buttonDangerOutlineText: {color: '#B91C1C'},
   buttonMuted: {backgroundColor: Colors.slate100, borderColor: Colors.gray200},
   buttonMutedText: {color: Colors.gray400},
   buttonWarn: {backgroundColor: Colors.amberDarkText},
@@ -416,26 +521,48 @@ export const workStyles = StyleSheet.create({
   },
   sheet: {
     backgroundColor: Colors.white,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    height: '92%',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '92%',
+    // Shrinks to the room above the keyboard instead of overflowing it.
+    flexShrink: 1,
     overflow: 'hidden',
   },
-  sheetHeader: {paddingHorizontal: 20, paddingVertical: 18, gap: 12},
+  sheetBackdrop: {
+    backgroundColor: 'rgba(15,23,42,0.45)',
+    justifyContent: 'flex-end',
+  },
+  sheetHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingTop: 14,
+  },
   handle: {
-    width: 40,
+    width: 36,
     height: 4,
     borderRadius: 2,
-    backgroundColor: Colors.gray200,
+    backgroundColor: Colors.inputBorder,
     alignSelf: 'center',
-    marginTop: 10,
+    marginTop: 8,
   },
   sheetTitle: {
     fontFamily: Fonts.semiBold,
-    fontSize: 19,
+    fontSize: 17,
     color: Colors.slateText,
-    flex: 1,
-    minWidth: 0,
+  },
+  sheetSubtitle: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: 12.5,
+    color: Colors.secondaryText,
+    marginTop: 1,
+  },
+  contentSheet: {paddingTop: 14, paddingBottom: 14},
+  footerSheet: {
+    backgroundColor: Colors.white,
+    paddingHorizontal: 16,
+    gap: 8,
   },
   footer: {
     backgroundColor: Colors.white,

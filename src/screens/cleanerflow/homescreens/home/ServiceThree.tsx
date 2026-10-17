@@ -969,7 +969,7 @@ const styles = StyleSheet.create({
     // elevation: 8,
     width: '100%',
     alignSelf: 'center',
-    height: RFPercentage(5.6),
+    height: RFPercentage(6.5),
   },
   buttonGradient: {
     borderRadius: 100,

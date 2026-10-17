@@ -7,13 +7,10 @@ import {
   ActivityIndicator,
   ScrollView,
   RefreshControl,
-  Platform,
   StatusBar,
 } from 'react-native';
 import React, {useState, useEffect, useRef} from 'react';
-import {RFPercentage} from 'react-native-responsive-fontsize';
 import {Colors, Fonts, Icons, IMAGES} from '../../../../constants/Themes';
-import HeaderBack from '../../../../components/HeaderBack';
 import NotificationBadge from '../../../../components/NotificationBadge';
 import CleanerCoachMarks from '../../../../components/CleanerCoachMarks';
 import LocationDisclosureModal from '../../../../components/LocationDisclosureModal';
@@ -38,8 +35,7 @@ import {
 } from '../../../../utils/coachMarks';
 import {useExitAppOnBack} from '../../../../utils/ExitApp';
 import LinearGradient from 'react-native-linear-gradient';
-import Animated, {FadeInDown, FadeInUp, ZoomIn} from 'react-native-reanimated';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Svg, {Path} from 'react-native-svg';
 import moment from 'moment';
@@ -51,12 +47,10 @@ import PressureIcon from '../../../../assets/svg/pressureIcon';
 import CarIcon from '../../../../assets/svg/carIcon';
 import LawnIcon from '../../../../assets/svg/lawnIcon';
 import OtherIcon from '../../../../assets/svg/otherIcon';
-import EditIcon from '../../../../assets/svg/editIcon';
 import {Invoice} from '../../../../types/invoice';
 import {buildAnnualEarningsSummary} from '../../../../services/earningsService';
 import {useAppleReceiptRefresh} from '../../../../hooks/useAppleReceiptRefresh';
 import {WorkMonthlyDashboard} from '../../../../components/work/WorkMonthlyDashboard';
-import {WorkClockPanel} from '../../../../components/work/WorkClockPanel';
 import {WorkTodayJobs} from '../../../../components/work/WorkTodayJobs';
 
 const CURRENT_YEAR = new Date().getFullYear();
@@ -67,7 +61,13 @@ const formatCurrency = (amount: number): string =>
     maximumFractionDigits: 2,
   })}`;
 
-const AdminIcon = ({width = 12, height = 12}: {width?: number; height?: number}) => (
+const AdminIcon = ({
+  width = 12,
+  height = 12,
+}: {
+  width?: number;
+  height?: number;
+}) => (
   <Svg width={width} height={height} viewBox="0 0 14 14" fill="none">
     <Path
       d="m6.12 1.302-2.912 1.09c-.67.251-1.219 1.045-1.219 1.762v4.334c0 .689.455 1.593 1.01 2.007l2.508 1.873c.822.618 2.176.618 2.998 0l2.508-1.873c.555-.414 1.01-1.318 1.01-2.007V4.154c0-.717-.549-1.51-1.22-1.762l-2.91-1.09c-.496-.181-1.29-.181-1.774 0"
@@ -128,13 +128,13 @@ const items = [
 ];
 
 const Dashboard: React.FC = ({navigation}: any) => {
+  const insets = useSafeAreaInsets();
   const [profile, setProfile] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [loading2, setLoading2] = useState(false);
   const [service, setService] = useState<any>(null);
   const dispatch = useDispatch();
-  const [visibleItems, setVisibleItems] = useState(4);
   const [loading3, setLoading3] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [availabilitySummary, setAvailabilitySummary] = useState({
@@ -427,14 +427,6 @@ const Dashboard: React.FC = ({navigation}: any) => {
   const openBusinessInfo = () =>
     navigation.navigate('CompleteBusinessInfo', {mode: 'edit'});
 
-  const handleShowMore = () => {
-    setVisibleItems(prev => Math.min(prev + 4, service?.type?.length));
-  };
-
-  const handleShowLess = () => {
-    setVisibleItems(4);
-  };
-
   // Service Name with icons
   const getServiceItems = (serviceIds: any) => {
     return serviceIds
@@ -444,7 +436,6 @@ const Dashboard: React.FC = ({navigation}: any) => {
       })
       .filter((item: any) => item !== null);
   };
-  const serviceItems = getServiceItems(service?.type?.slice(0, visibleItems));
 
   const [isExpanded, setIsExpanded] = useState(false);
   const getTruncatedText = (text: any) => {
@@ -464,9 +455,9 @@ const Dashboard: React.FC = ({navigation}: any) => {
       ? earningsSummary.total > 0
         ? `${CURRENT_YEAR} vs ${CURRENT_YEAR - 1}`
         : `No paid invoices in ${CURRENT_YEAR - 1}`
-      : `${earningsSummary.yoyPercent >= 0 ? '+' : ''}${earningsSummary.yoyPercent.toFixed(
-          0,
-        )}% vs ${CURRENT_YEAR - 1}`;
+      : `${
+          earningsSummary.yoyPercent >= 0 ? '+' : ''
+        }${earningsSummary.yoyPercent.toFixed(0)}% vs ${CURRENT_YEAR - 1}`;
 
   const completeCleanerCoachMarks = async () => {
     setShowCleanerCoachMarks(false);
@@ -486,216 +477,151 @@ const Dashboard: React.FC = ({navigation}: any) => {
     void completeCleanerCoachMarks();
   };
 
+  const hour = new Date().getHours();
+  const greeting =
+    hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const businessName = service?.name?.trim?.() || name || 'Your business';
+  const allServices = getServiceItems(service?.type) || [];
+  const openDays: string[] = (service?.availability || [])
+    .filter((item: any) => item.checked)
+    .map((item: any) => item.day);
+
   return (
     <View style={styles.safeArea}>
-      {/* Modern Header */}
       <StatusBar
         backgroundColor={Colors.gradient1}
         barStyle="light-content"
         translucent={true}
       />
 
-      <LinearGradient
-        colors={[Colors.gradient1, Colors.gradient2]}
-        style={styles.gradientHeader}>
-        <HeaderBack
-          title="Dashboard"
-          textStyle={styles.headerText}
-          left={true}
-          arrowColor={Colors.white}
-          style={{
-            backgroundColor: 'transparent',
-            borderBottomWidth: 0,
-            borderBottomColor: 'transparent',
-          }}
-          logo
-          tintColor={Colors.white}
-        />
-        <View style={styles.rightButtons}>
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => navigation.navigate('NotificationsScreen')}
-            style={styles.bellButton}>
-            <Icon name="bell-outline" size={RFPercentage(2.4)} color={Colors.white} />
-            <NotificationBadge count={unreadNotifCount} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => navigation.navigate('Settings')}
-            style={styles.profileIconButton}>
-            <Icon name="cog-outline" size={RFPercentage(2.4)} color={Colors.white} />
-          </TouchableOpacity>
-        </View>
-      </LinearGradient>
-
       <ScrollView
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={d.scroll}
         showsVerticalScrollIndicator={false}>
-
-        {/* Profile Section */}
-        <Animated.View
-          entering={FadeInDown.duration(600)}
-          style={styles.profileCard}>
-          <LinearGradient
-            colors={[Colors.white, Colors.blueBg50]}
-            style={styles.profileGradient}>
-            <View style={styles.profileSection}>
-              <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('EditProfile')}>
-                <View style={styles.avatarContainer}>
-                  {loading ? (
-                    <ActivityIndicator size="large" color={Colors.primaryBlue} />
-                  ) : (
-                    <>
-                      <Image
-                        source={profile ? {uri: profile} : IMAGES.defaultPic}
-                        style={styles.avatar}
-                      />
-                    </>
-                  )}
-                </View>
-              </TouchableOpacity>
-
-              <View style={styles.profileInfo}>
-                <View style={styles.nameContainer}>
-                  <Text style={styles.name} numberOfLines={1}>
-                    {name || 'Cleaner'}
-                  </Text>
-                  {isAdmin && (
-                    <View style={styles.adminBadge}>
-                      <AdminIcon width={12} height={12} />
-                      <Text style={styles.adminText}>Admin</Text>
-                    </View>
-                  )}
-                </View>
-
-                {/* Stats row */}
-                <View style={styles.availabilityStats}>
-                  <View style={styles.availabilityItem}>
-                    <View>
-                      <Text style={styles.availabilityValue}>
-                        {service?.type?.length || 0}
-                      </Text>
-                      <Text style={styles.availabilityLabel}>Services</Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.availabilityDivider} />
-
-                  <View style={styles.availabilityItem}>
-                    <View>
-                      <Text style={styles.availabilityValue} numberOfLines={1}>
-                        {service?.packages?.length || 0}
-                      </Text>
-                      <Text style={styles.availabilityLabel}>Packages</Text>
-                    </View>
-                  </View>
-                </View>
-              </View>
-            </View>
-
-            {/* Listing visibility — replaces the old "Profile Completion %" */}
-            {serviceLoaded && userDoc ? (
-            <View
-              style={[
-                styles.visibilityCard,
-                listingStatus.live
-                  ? styles.visibilityCardLive
-                  : styles.visibilityCardHidden,
-              ]}>
-              <View style={styles.visibilityHeader}>
-                <View
-                  style={[
-                    styles.visibilityDot,
-                    {
-                      backgroundColor: listingStatus.live
-                        ? Colors.green500
-                        : Colors.amber500,
-                    },
-                  ]}
+        {/* ---- greeting band (variant A) ------------------------------- */}
+        <LinearGradient
+          colors={[Colors.gradient1, Colors.gradient2]}
+          start={{x: 0, y: 0}}
+          end={{x: 1, y: 1}}
+          style={[d.band, {paddingTop: insets.top + 14}]}>
+          <View style={d.bandRow}>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Edit profile"
+              activeOpacity={0.8}
+              onPress={() => navigation.navigate('EditProfile')}
+              style={d.avatar}>
+              {loading ? (
+                <ActivityIndicator color={Colors.gradient1} />
+              ) : (
+                <Image
+                  source={profile ? {uri: profile} : IMAGES.defaultPic}
+                  style={d.avatarImage}
                 />
-                <Text
-                  style={[
-                    styles.visibilityTitle,
-                    {
-                      color: listingStatus.live
-                        ? Colors.green800
-                        : Colors.amberDarkText,
-                    },
-                  ]}>
+              )}
+            </TouchableOpacity>
+            <View style={d.grow}>
+              <Text style={d.greeting}>{greeting}</Text>
+              <Text style={d.name} numberOfLines={2}>
+                {businessName}
+              </Text>
+              {isAdmin && (
+                <View style={d.adminBadge}>
+                  <AdminIcon width={11} height={11} />
+                  <Text style={d.adminText}>Admin</Text>
+                </View>
+              )}
+            </View>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel={`Notifications${
+                unreadNotifCount ? `, ${unreadNotifCount} unread` : ''
+              }`}
+              activeOpacity={0.8}
+              onPress={() => navigation.navigate('NotificationsScreen')}
+              style={d.headerButton}>
+              <Icon name="bell-outline" size={20} color={Colors.white} />
+              <NotificationBadge count={unreadNotifCount} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Settings"
+              activeOpacity={0.8}
+              onPress={() => navigation.navigate('Settings')}
+              style={d.headerButton}>
+              <Icon name="cog-outline" size={20} color={Colors.white} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Listing visibility: what customers see, one tap to fix */}
+          {serviceLoaded && userDoc ? (
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Edit business info"
+              activeOpacity={0.8}
+              onPress={openBusinessInfo}
+              style={d.visibility}>
+              <View
+                style={[
+                  d.visibilityDot,
+                  {
+                    backgroundColor: listingStatus.live ? '#6EE7B7' : '#FCD34D',
+                  },
+                ]}
+              />
+              <View style={d.grow}>
+                <Text style={d.visibilityTitle} numberOfLines={1}>
                   {listingStatus.live
                     ? 'Visible to customers'
                     : 'Hidden from customers'}
+                  {serviceAreaLabel ? ` · ${serviceAreaLabel}` : ''}
                 </Text>
+                {!listingStatus.live && (
+                  <Text style={d.visibilityText}>
+                    {listingStatus.reason === 'missing_profile'
+                      ? `Add your ${missingLabels} to appear in customer search.`
+                      : 'Your listing will appear once your membership is active.'}
+                  </Text>
+                )}
               </View>
-              <Text style={styles.visibilityText}>
-                {listingStatus.live
-                  ? 'Customers near your service area can find and contact you.'
-                  : listingStatus.reason === 'missing_profile'
-                  ? `Add your ${missingLabels} to appear in customer search.`
-                  : 'Your listing will appear once your membership is active.'}
+              <Text style={d.visibilityEdit}>
+                {listingStatus.reason === 'missing_profile'
+                  ? 'Complete'
+                  : 'Edit'}
               </Text>
+            </TouchableOpacity>
+          ) : null}
+        </LinearGradient>
 
-              <TouchableOpacity
-                activeOpacity={0.7}
-                onPress={openBusinessInfo}
-                style={styles.businessInfoRow}
-                accessibilityLabel="Edit business info">
-                <Icon
-                  name="map-marker-outline"
-                  size={RFPercentage(2)}
-                  color={Colors.secondaryText}
-                />
-                <Text style={styles.businessInfoText} numberOfLines={1}>
-                  {serviceAreaLabel}
-                </Text>
-                <Text style={styles.businessInfoEdit}>
-                  {listingStatus.reason === 'missing_profile'
-                    ? 'Complete'
-                    : 'Edit'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-            ) : null}
-          </LinearGradient>
-        </Animated.View>
-
-        <View style={styles.workSection}>
-          {/* <WorkClockPanel hideIdle /> */}
+        <View style={d.body}>
+          {/* ---- today + month (variant A) ----------------------------- */}
           <WorkTodayJobs />
           <WorkMonthlyDashboard />
-        </View>
 
-        <Animated.View
-          entering={FadeInUp.duration(600)}
-          style={styles.earningsCard}>
           <TouchableOpacity
+            accessibilityRole="button"
             activeOpacity={0.85}
             onPress={() => navigation.navigate('Earnings')}
-            style={styles.earningsCardInner}>
-            <View style={styles.earningsIconWrap}>
-              <Icon
-                name="chart-bar"
-                size={RFPercentage(2.7)}
-                color={Colors.gradient1}
-              />
+            style={[d.card, d.navRow]}>
+            <View style={[d.navIcon, {backgroundColor: '#ECFDF5'}]}>
+              <Icon name="trending-up" size={20} color="#047857" />
             </View>
-            <View style={styles.earningsContent}>
-              <Text style={styles.earningsLabel}>Earnings · {CURRENT_YEAR}</Text>
+            <View style={d.grow}>
+              <Text style={d.navLabel}>Invoice earnings · {CURRENT_YEAR}</Text>
               {earningsLoading ? (
                 <ActivityIndicator
                   size="small"
                   color={Colors.gradient1}
-                  style={styles.earningsLoader}
+                  style={d.loader}
                 />
               ) : (
                 <>
-                  <Text style={styles.earningsTotal}>
+                  <Text style={d.navValue}>
                     {formatCurrency(earningsSummary.total)}
                   </Text>
-                  <Text style={styles.earningsSubtext}>
+                  <Text style={d.navSub} numberOfLines={1}>
                     {earningsYoyText} · {earningsSummary.paidInvoices.length}{' '}
                     paid invoice
                     {earningsSummary.paidInvoices.length !== 1 ? 's' : ''}
@@ -703,362 +629,233 @@ const Dashboard: React.FC = ({navigation}: any) => {
                 </>
               )}
             </View>
-            <View style={styles.earningsArrowWrap}>
-              <Icon
-                name="chevron-right"
-                size={RFPercentage(2.4)}
-                color={Colors.secondaryText}
-              />
-            </View>
+            <Icon name="chevron-right" size={20} color={Colors.gray400} />
           </TouchableOpacity>
-        </Animated.View>
 
-        {/*
-          Admin Controls — only rendered for users with Users.admin === true.
-          `isAdmin` is the same flag already used for the Admin badge above, so
-          no extra fetch is introduced. Regular cleaners render nothing here and
-          the layout is byte-identical to before.
-        */}
-        {isAdmin && (
-          <Animated.View
-            entering={FadeInUp.duration(600)}
-            style={styles.adminEntryCard}>
+          {/* Admin Controls — only for users with Users.admin === true. */}
+          {isAdmin && (
             <TouchableOpacity
+              accessibilityRole="button"
               activeOpacity={0.85}
               onPress={() => navigation.navigate('AdminDashboard')}
-              style={styles.adminEntryInner}>
-              <View style={styles.earningsIconWrap}>
+              style={[d.card, d.navRow]}>
+              <View style={[d.navIcon, {backgroundColor: Colors.slate100}]}>
                 <Icon
                   name="shield-account-outline"
-                  size={RFPercentage(2.7)}
-                  color={Colors.gradient1}
+                  size={20}
+                  color={Colors.slateText}
                 />
               </View>
-              <View style={styles.adminEntryContent}>
-                <Text style={styles.adminEntryTitle}>Admin Controls</Text>
-                <Text style={styles.adminEntrySubtext}>
+              <View style={d.grow}>
+                <Text style={d.navTitle}>Admin Controls</Text>
+                <Text style={d.navSub}>
                   Monitor all jobs and cleaner services
                 </Text>
               </View>
-              <View style={styles.adminEntryArrowWrap}>
-                <Icon
-                  name="chevron-right"
-                  size={RFPercentage(2.4)}
-                  color={Colors.secondaryText}
-                />
-              </View>
+              <Icon name="chevron-right" size={20} color={Colors.gray400} />
             </TouchableOpacity>
-          </Animated.View>
-        )}
+          )}
 
-        {/* Intro video replay — same screen used by Settings -> Watch Intro Video */}
-        {/* <Animated.View
-          entering={FadeInUp.duration(600)}
-          style={styles.introCard}>
-          <TouchableOpacity
-            activeOpacity={0.85}
-            onPress={() => navigation.navigate('CleanerIntroVideo')}
-            style={styles.introCardInner}>
-            <View style={styles.introIconWrap}>
-              <Icon
-                name="play-circle-outline"
-                size={RFPercentage(2.7)}
-                color={Colors.gradient1}
-              />
+          {/* ---- listing (variant C) ----------------------------------- */}
+          {loading3 ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color={Colors.blueMedium} />
             </View>
-            <View style={styles.introContent}>
-              <Text style={styles.introTitle}>Watch Intro Video</Text>
-              <Text style={styles.introSubtext}>
-                See how Cleaners Choice works
-              </Text>
-            </View>
-            <View style={styles.introArrowWrap}>
-              <Icon
-                name="chevron-right"
-                size={RFPercentage(2.4)}
-                color={Colors.secondaryText}
-              />
-            </View>
-          </TouchableOpacity>
-        </Animated.View> */}
-
-        {loading3 ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={Colors.blueMedium} />
-          </View>
-        ) : (
-          <>
-            {hasServiceDetails ? (
-              <Animated.View entering={FadeInUp.duration(600)}>
-                {/* Description Card */}
-                <View style={styles.sectionCard}>
-                  <View style={styles.cardHeader}>
-                    <Text style={styles.cardTitle}>Service Description</Text>
-                    <TouchableOpacity
-                      style={styles.editButton}
-                      onPress={() => navigation.navigate('ServiceOne')}>
-                      <Svg width={11} height={11} viewBox="0 0 10 10" fill="none">
-                        <Path
-                          d="M4.583.834H3.75C1.666.834.833 1.667.833 3.751v2.5c0 2.083.833 2.916 2.917 2.916h2.5c2.083 0 2.916-.833 2.916-2.916v-.834"
-                          stroke="#407BFF"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <Path
-                          d="M6.684 1.258 3.4 4.542a1.13 1.13 0 0 0-.275.55l-.179 1.254c-.066.454.254.77.709.708l1.254-.18c.175-.024.42-.15.55-.274l3.283-3.283c.567-.567.833-1.225 0-2.059-.833-.833-1.492-.566-2.058 0"
-                          stroke="#407BFF"
-                          strokeMiterlimit={10}
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <Path
-                          d="M6.213 1.729A2.98 2.98 0 0 0 8.27 3.787"
-                          stroke="#407BFF"
-                          strokeMiterlimit={10}
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </Svg>
-                      <Text style={styles.editButtonLabel}>Edit</Text>
-                    </TouchableOpacity>
-                  </View>
-                  <Text style={styles.description}>
-                    {isExpanded
-                      ? cleanDescription + ' '
-                      : getTruncatedText(cleanDescription)}
-                    {cleanDescription?.length > 100 && (
-                      <Text onPress={toggleDescription} style={styles.readMore}>
-                        {isExpanded ? 'Read Less' : 'Read More'}
-                      </Text>
-                    )}
-                  </Text>
+          ) : hasServiceDetails ? (
+            <>
+              <View style={d.section}>
+                <View style={d.sectionHeader}>
+                  <Text style={d.sectionTitle}>My services</Text>
+                  <TouchableOpacity
+                    accessibilityRole="button"
+                    accessibilityLabel="Edit services"
+                    hitSlop={{top: 10, bottom: 10, left: 12, right: 12}}
+                    onPress={() => navigation.navigate('ServiceOne')}>
+                    <Text style={d.sectionLink}>Edit</Text>
+                  </TouchableOpacity>
                 </View>
-
-                {/* Services Grid */}
-                <View style={styles.sectionCard}>
-                  <View style={styles.cardHeader}>
-                    <Text style={styles.cardTitle}>My Services</Text>
-                    <TouchableOpacity
-                      style={styles.editButton}
-                      onPress={() => navigation.navigate('ServiceOne')}>
-                      <EditIcon width={11} height={11} />
-                      <Text style={styles.editButtonLabel}>Edit</Text>
-                    </TouchableOpacity>
-                  </View>
-                  <View style={styles.servicesGrid}>
-                    {serviceItems.map((item: any, index: number) => {
-                      const IconComp = item.Icon;
-                      if (!IconComp) return null;
-                      return (
-                        <Animated.View
-                          key={index}
-                          style={styles.serviceCard}>
-                          <View style={styles.serviceGradient}>
-                            <View style={styles.serviceIconContainer}>
-                              <IconComp width={25} height={25} />
-                            </View>
-                            <Text
-                              style={styles.serviceName}
-                              numberOfLines={1}>
-                              {item.name}
-                            </Text>
-                          </View>
-                        </Animated.View>
-                      );
-                    })}
-                  </View>
-                  {service?.type?.length > 4 && (
-                    <TouchableOpacity
-                      activeOpacity={0.6}
-                      onPress={
-                        visibleItems < service?.type?.length
-                          ? handleShowMore
-                          : handleShowLess
-                      }
-                      style={styles.showMoreButton}>
-                      <Text style={styles.showMoreText}>
-                        {visibleItems < service?.type.length
-                          ? `Show ${service?.type.length - 4} More`
-                          : 'Show Less'}
-                      </Text>
-                      <Image
-                        source={Icons.chevronDown}
-                        style={styles.chevronIcon}
-                      />
-                    </TouchableOpacity>
-                  )}
-                </View>
-
-                {/* Packages Slider */}
-                <View
-                  style={[
-                    styles.sectionCard,
-                    {padding: 0, paddingVertical: 20},
-                  ]}>
-                  <View style={[styles.cardHeader, {paddingHorizontal: 20}]}>
-                    <Text style={styles.cardTitle}>Starting Packages</Text>
-                    <TouchableOpacity
-                      style={styles.editButton}
-                      onPress={() => navigation.navigate('ServiceThree')}>
-                      <EditIcon width={11} height={11} />
-                      <Text style={styles.editButtonLabel}>Edit</Text>
-                    </TouchableOpacity>
-                  </View>
-                  {!service?.packages?.length ? (
-                    <View style={{paddingHorizontal: 20}}>
-                      <Text style={styles.packageDescription}>
-                        No packages added yet. Packages are optional — add
-                        one anytime.
-                      </Text>
-                    </View>
-                  ) : (
+                {allServices.length ? (
                   <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.packagesContainer}>
-                    {service?.packages?.map((item: any, index: number) => (
-                      <Animated.View
-                        key={index}
-                        entering={ZoomIn.delay(index * 150)}
-                        style={styles.packageCard}>
-                        <View style={styles.packageGradient}>
-                          <View style={styles.packageHeader}>
-                            <Text style={styles.packageName}>
-                              Package {item.id}
-                            </Text>
-                            <View style={styles.priceTag}>
-                              <Text style={styles.priceText} numberOfLines={1}>
-                                ${item.price}
-                              </Text>
-                            </View>
+                    contentContainerStyle={d.rail}>
+                    {allServices.map((item: any) => {
+                      const IconComp = item.Icon;
+                      return (
+                        <View key={item.id} style={d.serviceItem}>
+                          <View style={d.serviceIcon}>
+                            {!!IconComp && <IconComp width={24} height={24} />}
                           </View>
-                          <Text style={styles.packageIncludesLabel}>
-                            Includes:
+                          <Text style={d.serviceName} numberOfLines={2}>
+                            {item.name}
                           </Text>
-                          <Text
-                            style={styles.packageDescription}
-                            numberOfLines={8}>
+                        </View>
+                      );
+                    })}
+                  </ScrollView>
+                ) : (
+                  <Text style={d.emptyLine}>No services added yet.</Text>
+                )}
+              </View>
+
+              <View style={d.section}>
+                <View style={d.sectionHeader}>
+                  <Text style={d.sectionTitle}>Starting packages</Text>
+                  <TouchableOpacity
+                    accessibilityRole="button"
+                    accessibilityLabel="Edit packages"
+                    hitSlop={{top: 10, bottom: 10, left: 12, right: 12}}
+                    onPress={() => navigation.navigate('ServiceThree')}>
+                    <Text style={d.sectionLink}>Edit</Text>
+                  </TouchableOpacity>
+                </View>
+                {service?.packages?.length ? (
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={d.rail}>
+                    {service.packages.map((item: any, index: number) => (
+                      <TouchableOpacity
+                        key={item.id ?? index}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Package ${item.id}, $${item.price}, view details`}
+                        activeOpacity={0.85}
+                        onPress={() => navigation.navigate('ServiceThree')}
+                        style={[d.card, d.packageCard]}>
+                        <Text style={d.packageName}>Package {item.id}</Text>
+                        <Text style={d.packagePrice} numberOfLines={1}>
+                          ${item.price}
+                        </Text>
+                        {!!item.details && (
+                          <Text style={d.packageDetails} numberOfLines={2}>
                             {item.details}
                           </Text>
-                          <TouchableOpacity
-                            activeOpacity={0.6}
-                            style={styles.selectButton}
-                            onPress={() => navigation.navigate('ServiceThree')}>
-                            <Text style={styles.selectButtonText}>
-                              View Details
-                            </Text>
-                            <Image
-                              source={Icons.arrowRight}
-                              style={styles.arrowIcon}
-                            />
-                          </TouchableOpacity>
-                        </View>
-                      </Animated.View>
+                        )}
+                        <Text style={d.packageLink}>View details ›</Text>
+                      </TouchableOpacity>
                     ))}
                   </ScrollView>
-                  )}
+                ) : (
+                  <Text style={d.emptyLine}>
+                    No packages added yet. Packages are optional — add one
+                    anytime.
+                  </Text>
+                )}
+              </View>
+
+              <View style={[d.card, d.textCard]}>
+                <View style={d.sectionHeader}>
+                  <Text style={d.cardTitle}>About my service</Text>
+                  <TouchableOpacity
+                    accessibilityRole="button"
+                    accessibilityLabel="Edit service description"
+                    hitSlop={{top: 10, bottom: 10, left: 12, right: 12}}
+                    onPress={() => navigation.navigate('ServiceOne')}>
+                    <Text style={d.sectionLink}>Edit</Text>
+                  </TouchableOpacity>
                 </View>
+                <Text style={d.description}>
+                  {cleanDescription
+                    ? isExpanded
+                      ? cleanDescription + ' '
+                      : getTruncatedText(cleanDescription)
+                    : 'No description added yet.'}
+                  {cleanDescription.length > 100 && (
+                    <Text onPress={toggleDescription} style={d.readMore}>
+                      {isExpanded ? 'Read less' : 'Read more'}
+                    </Text>
+                  )}
+                </Text>
+              </View>
 
-                {/* Detailed Availability */}
-                <View style={styles.sectionCard}>
-                  <View style={styles.cardHeader}>
-                    <Text style={styles.cardTitle}>Weekly Availability</Text>
-                    <TouchableOpacity
-                      style={styles.editButton}
-                      onPress={() => navigation.navigate('Availability')}>
-                      <EditIcon width={11} height={11} />
-                      <Text style={styles.editButtonLabel}>Edit</Text>
-                    </TouchableOpacity>
-                  </View>
-
-                  {service?.availability?.filter((item: any) => item.checked)
-                    .length > 0 ? (
-                    <View style={styles.detailedAvailability}>
-                      {service?.availability
-                        ?.filter((item: any) => item.checked)
-                        .map((item: any, index: number) => (
-                          <View key={index} style={styles.timeSlotCard}>
-                            <View style={styles.timeSlotHeader}>
-                              <Text style={styles.dayText}>{item.day}</Text>
-                              <Text style={styles.timeText}>
-                                {formatTime(item.fromTime)} -{' '}
-                                {formatTime(item.toTime)}
-                              </Text>
-                              <View
-                                style={[
-                                  styles.statusIndicator,
-                                  item.checked && styles.statusIndicatorActive,
-                                ]}>
-                                <Text style={styles.statusText}>
-                                  {item.checked ? 'Available' : 'Unavailable'}
-                                </Text>
-                              </View>
-                            </View>
+              {/* Availability, in the same card language */}
+              <View style={[d.card, d.textCard]}>
+                <View style={d.sectionHeader}>
+                  <Text style={d.cardTitle}>Weekly availability</Text>
+                  <TouchableOpacity
+                    accessibilityRole="button"
+                    accessibilityLabel="Edit availability"
+                    hitSlop={{top: 10, bottom: 10, left: 12, right: 12}}
+                    onPress={() => navigation.navigate('Availability')}>
+                    <Text style={d.sectionLink}>Edit</Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={d.week}>
+                  {WEEK.map(day => {
+                    const open = openDays.includes(day.key);
+                    return (
+                      <View
+                        key={day.key}
+                        accessibilityLabel={`${day.key} ${
+                          open ? 'available' : 'unavailable'
+                        }`}
+                        style={[d.weekDay, open && d.weekDayOpen]}>
+                        <Text style={[d.weekText, open && d.weekTextOpen]}>
+                          {day.short}
+                        </Text>
+                      </View>
+                    );
+                  })}
+                </View>
+                {openDays.length ? (
+                  <>
+                    <View style={d.slots}>
+                      {service.availability
+                        .filter((item: any) => item.checked)
+                        .map((item: any) => (
+                          <View key={item.day} style={d.slotRow}>
+                            <Text style={d.slotDay}>{item.day}</Text>
+                            <Text style={d.slotTime}>
+                              {formatTime(item.fromTime)} –{' '}
+                              {formatTime(item.toTime)}
+                            </Text>
                           </View>
                         ))}
                     </View>
-                  ) : (
-                    <View style={styles.noAvailabilityContainer}>
-                      <MaterialIcons
-                        name="calendar-today"
-                        size={40}
-                        color={Colors.slate300}
+                    <View style={d.nextRow}>
+                      <Icon
+                        name="calendar-clock"
+                        size={16}
+                        color={Colors.gradient1}
                       />
-                      <Text style={styles.noAvailabilityText}>
-                        No availability set
-                      </Text>
-                      <Text style={styles.noAvailabilitySubtext}>
-                        Set your availability to start receiving bookings
+                      <Text style={d.nextText} numberOfLines={1}>
+                        Next available: {availabilitySummary.nextAvailable}
                       </Text>
                     </View>
-                  )}
-                </View>
-              </Animated.View>
-            ) : (
-              <Animated.View
-                entering={FadeInUp.duration(600)}
-                style={styles.emptyStateContainer}>
-                <LinearGradient
-                  colors={[Colors.white, Colors.blueBg50]}
-                  style={styles.emptyStateCard}>
-                  <View style={styles.emptyStateIcon}>
-                    <Image
-                      source={Icons.dashBoard}
-                      style={styles.dashboardIcon}
-                    />
-                  </View>
-                  <Text style={styles.emptyStateTitle}>
-                    Stand Out to Customers ✨
+                  </>
+                ) : (
+                  <Text style={d.emptyLine}>
+                    No availability set. Set your availability to start
+                    receiving bookings.
                   </Text>
-                  <Text style={styles.emptyStateText}>
-                    Optional: add a description, the services you offer, photos
-                    and your availability to help customers choose you
-                  </Text>
-
-                  <TouchableOpacity
-                    activeOpacity={0.6}
-                    style={styles.ctaButton}
-                    onPress={handleNext}
-                    disabled={loading2}>
-                    {loading2 ? (
-                      <ActivityIndicator color={Colors.white} />
-                    ) : (
-                      <>
-                        <Text style={styles.ctaButtonText}>
-                          Set Up Services
-                        </Text>
-                        <Image
-                          source={Icons.arrowRight}
-                          style={styles.ctaArrow}
-                        />
-                      </>
-                    )}
-                  </TouchableOpacity>
-                </LinearGradient>
-              </Animated.View>
-            )}
-          </>
-        )}
+                )}
+              </View>
+            </>
+          ) : (
+            <View style={[d.card, d.setupCard]}>
+              <View style={d.setupIcon}>
+                <Image source={Icons.dashBoard} style={d.setupImage} />
+              </View>
+              <Text style={d.setupTitle}>Stand out to customers</Text>
+              <Text style={d.setupText}>
+                Optional: add a description, the services you offer, photos and
+                your availability to help customers choose you.
+              </Text>
+              <TouchableOpacity
+                accessibilityRole="button"
+                activeOpacity={0.8}
+                style={d.setupButton}
+                onPress={handleNext}
+                disabled={loading2}>
+                {loading2 ? (
+                  <ActivityIndicator color={Colors.white} />
+                ) : (
+                  <Text style={d.setupButtonText}>Set up services</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
       </ScrollView>
 
       <CleanerCoachMarks
@@ -1078,867 +875,297 @@ const Dashboard: React.FC = ({navigation}: any) => {
 
 export default Dashboard;
 
+const WEEK = [
+  {key: 'Mon', short: 'M'},
+  {key: 'Tue', short: 'T'},
+  {key: 'Wed', short: 'W'},
+  {key: 'Thu', short: 'T'},
+  {key: 'Fri', short: 'F'},
+  {key: 'Sat', short: 'S'},
+  {key: 'Sun', short: 'S'},
+];
+
+/** Dashboard v2: variant A on top (today + month), variant C below (listing). */
+const d = StyleSheet.create({
+  scroll: {paddingBottom: 32, backgroundColor: Colors.gray50, flexGrow: 1},
+  grow: {flex: 1, minWidth: 0},
+  band: {paddingHorizontal: 16, paddingBottom: 20, gap: 14},
+  bandRow: {flexDirection: 'row', alignItems: 'center', gap: 12},
+  avatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: Colors.white,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.6)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  avatarImage: {width: '100%', height: '100%'},
+  greeting: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: 12.5,
+    color: Colors.white,
+  },
+  name: {fontFamily: Fonts.semiBold, fontSize: 17, color: Colors.white},
+  adminBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: 4,
+    marginTop: 3,
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
+  adminText: {fontFamily: Fonts.semiBold, fontSize: 10.5, color: Colors.white},
+  headerButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  visibility: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.16)',
+  },
+  visibilityDot: {width: 8, height: 8, borderRadius: 4},
+  visibilityTitle: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 12.5,
+    color: Colors.white,
+  },
+  visibilityText: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: 11.5,
+    lineHeight: 16,
+    color: Colors.white,
+    marginTop: 2,
+  },
+  visibilityEdit: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 12,
+    color: Colors.white,
+  },
+  body: {padding: 16, gap: 18},
+  card: {
+    backgroundColor: Colors.white,
+    borderWidth: 1,
+    borderColor: Colors.lightBlueBorder,
+    borderRadius: 14,
+  },
+  navRow: {flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14},
+  navIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  navLabel: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: 12,
+    color: Colors.secondaryText,
+  },
+  navValue: {fontFamily: Fonts.fontBold, fontSize: 18, color: Colors.slateText},
+  navTitle: {fontFamily: Fonts.semiBold, fontSize: 14, color: Colors.slateText},
+  navSub: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: 11.5,
+    color: Colors.secondaryText,
+  },
+  loader: {alignSelf: 'flex-start', marginTop: 6},
+  section: {gap: 10},
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  sectionTitle: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 15,
+    color: Colors.slateText,
+  },
+  sectionLink: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 13,
+    color: Colors.gradient1,
+  },
+  rail: {gap: 10, paddingRight: 4},
+  serviceItem: {width: 82, alignItems: 'center', gap: 6},
+  serviceIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    backgroundColor: Colors.white,
+    borderWidth: 1,
+    borderColor: Colors.lightBlueBorder,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  serviceName: {
+    fontFamily: Fonts.fontMedium,
+    fontSize: 11.5,
+    lineHeight: 15,
+    color: Colors.slateText,
+    textAlign: 'center',
+  },
+  packageCard: {width: 170, padding: 12, gap: 4},
+  packageName: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: 12,
+    color: Colors.secondaryText,
+  },
+  packagePrice: {
+    fontFamily: Fonts.fontBold,
+    fontSize: 18,
+    color: Colors.slateText,
+  },
+  packageDetails: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: 11.5,
+    lineHeight: 16,
+    color: Colors.secondaryText,
+  },
+  packageLink: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 12,
+    color: Colors.gradient1,
+    marginTop: 4,
+  },
+  textCard: {padding: 14, gap: 10},
+  cardTitle: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 14.5,
+    color: Colors.slateText,
+  },
+  description: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: 13,
+    lineHeight: 20,
+    color: Colors.secondaryText,
+  },
+  readMore: {fontFamily: Fonts.semiBold, color: Colors.gradient1},
+  emptyLine: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: 12.5,
+    lineHeight: 18,
+    color: Colors.secondaryText,
+  },
+  week: {flexDirection: 'row', gap: 4},
+  weekDay: {
+    flex: 1,
+    height: 34,
+    borderRadius: 8,
+    backgroundColor: Colors.slate100,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  weekDayOpen: {backgroundColor: Colors.gradient1},
+  weekText: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 12,
+    color: Colors.secondaryText,
+  },
+  weekTextOpen: {color: Colors.white},
+  slots: {
+    borderTopWidth: 1,
+    borderTopColor: Colors.slate100,
+    paddingTop: 4,
+  },
+  slotRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 7,
+  },
+  slotDay: {
+    fontFamily: Fonts.fontMedium,
+    fontSize: 13,
+    color: Colors.slateText,
+  },
+  slotTime: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: 13,
+    color: Colors.secondaryText,
+    fontVariant: ['tabular-nums'],
+  },
+  nextRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 9,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    backgroundColor: Colors.blueBg200,
+  },
+  nextText: {
+    flex: 1,
+    fontFamily: Fonts.fontMedium,
+    fontSize: 12.5,
+    color: Colors.gradient1,
+  },
+  setupCard: {padding: 20, alignItems: 'center', gap: 10},
+  setupIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    backgroundColor: Colors.blueBg200,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  setupImage: {width: 28, height: 28, resizeMode: 'contain'},
+  setupTitle: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 16,
+    color: Colors.slateText,
+  },
+  setupText: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: 13,
+    lineHeight: 19,
+    color: Colors.secondaryText,
+    textAlign: 'center',
+  },
+  setupButton: {
+    marginTop: 4,
+    minHeight: 46,
+    alignSelf: 'stretch',
+    borderRadius: 12,
+    backgroundColor: Colors.gradient1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  setupButtonText: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 14.5,
+    color: Colors.white,
+  },
+});
+
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: Colors.white,
   },
-  gradientHeader: {
-    paddingTop: Platform.OS === 'ios' ? 50 : 20,
-    paddingBottom: 16,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-    shadowColor: Colors.black,
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    paddingHorizontal: 20,
-  },
-  headerText: {
-    fontSize: RFPercentage(2.1),
-    fontFamily: Fonts.semiBold,
-    color: Colors.white,
-  },
-  rightButtons: {
-    position: 'absolute',
-    right: 20,
-    bottom: 25,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  profileIconButton: {
-    padding: 8,
-    backgroundColor: Colors.whiteOverlay20,
-    borderRadius: 50,
-    width: RFPercentage(4.5),
-    height: RFPercentage(4.5),
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  bellButton: {
-    padding: 8,
-    backgroundColor: Colors.whiteOverlay20,
-    borderRadius: 50,
-    width: RFPercentage(4.5),
-    height: RFPercentage(4.5),
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  editButtonText: {
-    color: Colors.white,
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.7),
-  },
-  scrollContent: {
-    marginTop: RFPercentage(8),
-    paddingBottom: Platform.OS === 'ios' ? 140 : RFPercentage(20),
-  },
-
-  workSection: {
-    marginTop: 20,
-    marginHorizontal: 20,
-    gap: 16,
-  },
-  profileCard: {
-    marginHorizontal: 20,
-    borderRadius: 24,
-    shadowColor: Colors.primaryBlue,
-    shadowOffset: {width: 0, height: 10},
-    shadowOpacity: 0.2,
-    shadowRadius: 20,
-    // elevation: 10,
-  },
-  profileGradient: {
-    borderRadius: 24,
-    padding: 20,
-  },
-  profileSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  avatarContainer: {
-    position: 'relative',
-  },
-  avatar: {
-    width: 108,
-    height: 108,
-    borderRadius: 100,
-    borderWidth: 1.5,
-    borderColor: Colors.gradient1,
-    backgroundColor: Colors.lightGrayBg,
-  },
-  cameraBadge: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    backgroundColor: Colors.gradient1,
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: Colors.white,
-  },
-  profileInfo: {
-    marginLeft: 16,
-    flex: 1,
-  },
-  name: {
-    fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.9),
-    color: Colors.gray800,
-    flexShrink: 1,
-    marginRight: 8,
-  },
-  availabilityStats: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F9FAFF',
-    padding: 12,
-    borderRadius: 16,
-    gap: 12,
-  },
-  availabilityItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    gap: 8,
-    // backgroundColor:"red",
-    justifyContent: 'center',
-  },
-  availabilityIconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: Colors.blueBg300,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  availabilityValue: {
-    fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.7),
-    color: Colors.gradient1,
-    textAlign: 'center',
-  },
-  availabilityLabel: {
-    fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.3),
-    color: Colors.placeholderColor,
-    marginTop: 2,
-    textAlign: 'center',
-  },
-  availabilityDivider: {
-    width: 1,
-    height: 40,
-    backgroundColor: Colors.gray200,
-  },
-  visibilityCard: {
-    marginTop: 8,
-    borderRadius: 14,
-    borderWidth: 1,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-  },
-  visibilityCardLive: {
-    backgroundColor: Colors.greenBg50,
-    borderColor: Colors.greenBorder,
-  },
-  visibilityCardHidden: {
-    backgroundColor: Colors.amberBg50,
-    borderColor: Colors.amberBorder,
-  },
-  visibilityHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  visibilityDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: 8,
-  },
-  visibilityTitle: {
-    fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.7),
-  },
-  visibilityText: {
-    fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.5),
-    lineHeight: RFPercentage(2.2),
-    color: Colors.gray600,
-    marginTop: 4,
-  },
-  businessInfoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 10,
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: Colors.blackOverlay05,
-  },
-  businessInfoText: {
-    flex: 1,
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.55),
-    color: Colors.gray700,
-    marginLeft: 6,
-  },
-  businessInfoEdit: {
-    fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.55),
-    color: Colors.gradient1,
-    marginLeft: 8,
-  },
-  earningsCard: {
-    marginHorizontal: 20,
-    marginTop: 16,
-    borderRadius: 20,
-    backgroundColor: Colors.white,
-    borderWidth: 1,
-    borderColor: Colors.blueBorderOverlay50,
-    shadowColor: Colors.shadowBlueGrayLight,
-    shadowOffset: {width: 0, height: 8},
-    shadowOpacity: 0.2,
-    shadowRadius: 14,
-    // elevation: 8,
-  },
-  earningsCardInner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    gap: 12,
-  },
-  earningsIconWrap: {
-    width: RFPercentage(5.4),
-    height: RFPercentage(5.4),
-    borderRadius: RFPercentage(1.4),
-    backgroundColor: Colors.primaryBlueOverlay10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  earningsContent: {
-    flex: 1,
-  },
-  earningsLabel: {
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
-    color: Colors.secondaryText,
-  },
-  earningsTotal: {
-    fontFamily: Fonts.fontBold,
-    fontSize: RFPercentage(2.5),
-    color: Colors.primaryText,
-    marginTop: 2,
-  },
-  earningsSubtext: {
-    fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.3),
-    color: Colors.secondaryText,
-    marginTop: 2,
-  },
-  earningsLoader: {
-    alignSelf: 'flex-start',
-    marginTop: RFPercentage(0.8),
-  },
 
   // Intro video card — mirrors the earnings card so the two read as one system.
-  introCard: {
-    marginHorizontal: 20,
-    marginTop: 16,
-    borderRadius: 20,
-    backgroundColor: Colors.white,
-    borderWidth: 1,
-    borderColor: Colors.blueBorderOverlay50,
-    shadowColor: Colors.shadowBlueGrayLight,
-    shadowOffset: {width: 0, height: 8},
-    shadowOpacity: 0.2,
-    shadowRadius: 14,
-    // elevation: 8,
-  },
-  introCardInner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    gap: 12,
-  },
-  introIconWrap: {
-    width: RFPercentage(5.4),
-    height: RFPercentage(5.4),
-    borderRadius: RFPercentage(1.4),
-    backgroundColor: Colors.primaryBlueOverlay10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  introContent: {
-    flex: 1,
-  },
-  introTitle: {
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.9),
-    color: Colors.primaryText,
-  },
-  introSubtext: {
-    fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.3),
-    color: Colors.secondaryText,
-    marginTop: 2,
-  },
-  introArrowWrap: {
-    width: RFPercentage(3.8),
-    height: RFPercentage(3.8),
-    borderRadius: RFPercentage(100),
-    backgroundColor: Colors.gray50,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  earningsArrowWrap: {
-    width: RFPercentage(3.8),
-    height: RFPercentage(3.8),
-    borderRadius: RFPercentage(100),
-    backgroundColor: Colors.gray50,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     height: 300,
   },
-  overviewCard: {
-    marginHorizontal: 20,
-    marginTop: 20,
-    borderRadius: 20,
-    overflow: 'hidden',
-    shadowColor: Colors.primaryBlue,
-    shadowOffset: {width: 0, height: 5},
-    shadowOpacity: 0.2,
-    shadowRadius: 15,
-      borderWidth: 1,
-    borderColor: Colors.blueBg150
-    // elevation: 8,
-  },
-  overviewGradient: {
-    padding: 20,
-  },
-  availabilityOverview: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  availabilityOverviewItem: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  overviewNumber: {
-    fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(2.5),
-    color: Colors.secondaryText,
-    marginTop: 8,
-    marginBottom: 4,
-  },
-  overviewSchedule: {
-    fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.9),
-    color: Colors.secondaryText,
-    marginTop: 8,
-    marginBottom: 4,
-    textAlign: 'center',
-  },
-  overviewLabel: {
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
-    color: Colors.grayMuted,
-    textAlign: 'center',
-  },
-  overviewDividerVertical: {
-    width: 1.5,
-    height: 60,
-    backgroundColor: '#5763730D',
-    marginHorizontal: 16,
-  },
-  nextAvailableContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'flex-start',
-    backgroundColor: Colors.whiteOverlay48,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: '#5763730D',
-    marginTop: 8,
-  },
-  nextAvailableIcon: {
-    marginTop: 1,
-  },
-  nextAvailableText: {
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.7),
-    color: Colors.grayMuted,
-    marginLeft: 5,
-    flex: 1,
-  },
-  nextAvailablePrefix: {
-    color: '#407BFF',
-  },
-  sectionCard: {
-    backgroundColor: Colors.white,
-    marginHorizontal: 20,
-    marginTop: 16,
-    borderRadius: 20,
-    padding: 20,
-    shadowColor: Colors.black,
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    borderWidth: 1,
-    borderColor: '#64748B1A',
-    // elevation: 3,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  cardTitle: {
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(2.1),
-    color: '#242B37',
-  },
-  editButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    backgroundColor: '#EEF2FF',
-    gap: 5,
-  },
-  editButtonLabel: {
-    fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.3),
-    color: '#407BFF',
-  },
-  smallEditIcon: {
-    width: 16,
-    height: 16,
-  },
-  description: {
-    fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.7),
-    color: '#A5A9B0',
-  },
-  readMore: {
-    fontFamily: Fonts.semiBold,
-    color: '#407BFF',
-    fontSize: RFPercentage(1.4),
-  },
-  seeAll: {
-    fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.6),
-    color: Colors.primaryBlue,
-  },
-  servicesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  serviceCard: {
-    width: '49%',
-    marginBottom: 12,
-    borderRadius: 16,
-    overflow: 'hidden',
-    shadowColor: Colors.black,
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    borderWidth: 1,
-    borderColor: '#2F354308',
-    // elevation: 2,
-  },
-  serviceGradient: {
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    borderRadius: 16,
-    backgroundColor: '#447DFE0A',
-  },
-  serviceIconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 100,
-    backgroundColor: Colors.white,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: Colors.inputFieldColor,
-  },
-  serviceIcon: {
-    width: 25,
-    height: 25,
-  },
-  serviceName: {
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
-    color: '#2F3543',
-  },
-  showMoreButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 12,
-    padding: 12,
-    backgroundColor: Colors.blueBg50,
-    borderRadius: 12,
-  },
-  showMoreText: {
-    fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.6),
-    color: '#407BFF',
-    marginRight: 8,
-  },
-  chevronIcon: {
-    width: 14,
-    height: 14,
-    tintColor: Colors.primaryBlue,
-  },
-  packagesContainer: {
-    paddingRight: 20,
-    paddingHorizontal: 10,
-  },
-  packageCard: {
-    width: 200,
-    marginRight: 12,
-    borderRadius: 12,
-    overflow: 'hidden',
-    shadowColor: Colors.black,
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    // elevation: 4,
-    height: RFPercentage(34),
-    borderWidth: 1,
-    borderColor: '#2F354308',
-  },
-  packageGradient: {
-    padding: 16,
-    borderRadius: 12,
-    height: RFPercentage(34),
-    backgroundColor: '#447DFE08',
-    justifyContent: 'flex-start',
-  },
-  packageHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  packageName: {
-    fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.7),
-    color: Colors.gray800,
-    flex: 1,
-  },
-  priceTag: {
-    backgroundColor: Colors.success,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    marginLeft: 8,
-    maxWidth:RFPercentage(8)
-  },
-  priceText: {
-    fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.5),
-    color: Colors.white,
-  },
-  packageIncludesLabel: {
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
-    color: Colors.gray800,
-    marginTop: 16,
-    marginBottom: 4,
-  },
-  packageDescription: {
-    fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.5),
-    color: '#6B7380B2',
-    lineHeight: 18,
-    marginBottom: 12,
-    flexShrink: 1,
-  },
-  selectButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#4554670D',
-    paddingVertical: 8,
-    borderRadius: 8,
-    marginTop: 'auto',
-    alignSelf: 'center',
-    paddingHorizontal: 16,
-  },
-  selectButtonText: {
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
-    color: '#363E4B',
-    marginRight: 8,
-  },
-  arrowIcon: {
-    width: 14,
-    height: 14,
-    tintColor: '#363E4B',
-  },
-  availabilityButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.blueBg150,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-  },
-  availabilityButtonText: {
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
-    color: Colors.primaryBlue,
-    marginRight: 6,
-  },
-  editIcon: {
-    width: 12,
-    height: 12,
-    tintColor: Colors.primaryBlue,
-  },
-  detailedAvailability: {
-    gap: 12,
-  },
-  timeSlotCard: {
-    backgroundColor: '#447DFE05',
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#2F354308',
-  },
-  timeSlotHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  dayIndicator: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: Colors.gray200,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  dayIndicatorActive: {
-    backgroundColor: Colors.gradient1,
-  },
-  dayIndicatorText: {
-    fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.7),
-    color: Colors.white,
-  },
-  dayText: {
-    fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.7),
-    color: Colors.gray800,
-    minWidth: 50,
-  },
-  timeSlot: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  timeText: {
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.5),
-    color: Colors.gray600,
-    flex: 1,
-    marginHorizontal: 8,
-  },
-  availabilityStatus: {
-    alignItems: 'flex-end',
-  },
-  statusIndicator: {
-    backgroundColor: Colors.redBg50,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  statusIndicatorActive: {
-    backgroundColor: '#12B8801A',
-  },
-  statusText: {
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.4),
-    color: '#12B880',
-  },
-  noAvailabilityContainer: {
-    alignItems: 'center',
-    paddingVertical: 30,
-  },
-  noAvailabilityText: {
-    fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.7),
-    color: Colors.gray700,
-    marginTop: 12,
-    marginBottom: 4,
-  },
-  noAvailabilitySubtext: {
-    fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.5),
-    color: Colors.placeholderColor,
-    textAlign: 'center',
-  },
-  emptyStateContainer: {
-    marginHorizontal: 20,
-    marginTop: 40,
-  },
-  emptyStateCard: {
-    borderRadius: 24,
-    padding: 30,
-    alignItems: 'center',
-    shadowColor: Colors.black,
-    shadowOffset: {width: 0, height: 10},
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
-
-    borderWidth: 1,
-    borderColor: Colors.blueBg150
-  },
-  emptyStateIcon: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: Colors.blueBg150,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  dashboardIcon: {
-    width: 50,
-    height: 50,
-    tintColor: Colors.primaryBlue,
-  },
-  emptyStateTitle: {
-    fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(2.3),
-    color: Colors.gray800,
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-  emptyStateText: {
-    fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.7),
-    color: Colors.placeholderColor,
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 24,
-  },
-  ctaButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.gradient1,
-    paddingHorizontal: 32,
-    borderRadius: 100,
-    width: '65%',
-    height:RFPercentage(5.6)
-  },
-  ctaButtonText: {
-    fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.6),
-    color: Colors.white,
-    marginRight: 12,
-  },
-  ctaArrow: {
-    width: 16,
-    height: 16,
-    tintColor: Colors.white,
-  },
-
-  nameContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'nowrap',
-    marginBottom: 12,
-    width: '100%',
-  },
 
   // ---- Admin Controls entry card (admin only) ----
-  adminEntryCard: {
-    marginHorizontal: RFPercentage(2.5),
-    marginTop: RFPercentage(1.5),
-    backgroundColor: Colors.white,
-    borderRadius: RFPercentage(2),
-    borderWidth: 1,
-    borderColor: Colors.blueBorderOverlay50,
-    shadowColor: Colors.shadowBlueLight,
-    shadowOffset: {width: 0, height: 3},
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    // elevation: 3,
-    overflow: 'hidden',
-  },
-  adminEntryInner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: RFPercentage(1.8),
-    paddingHorizontal: RFPercentage(2),
-  },
-  adminEntryIconWrap: {
-    width: RFPercentage(5.2),
-    height: RFPercentage(5.2),
-    borderRadius: RFPercentage(2),
-    backgroundColor: Colors.blueBg50,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: RFPercentage(1.5),
-  },
-  adminEntryContent: {
-    flex: 1,
-    minWidth: 0,
-    marginLeft: RFPercentage(1),
-  },
-  adminEntryTitle: {
-    color: Colors.primaryText,
-    fontFamily: Fonts.semiBold,
-    fontSize: RFPercentage(1.9),
-  },
-  adminEntrySubtext: {
-    color: Colors.secondaryText,
-    fontFamily: Fonts.fontRegular,
-    fontSize: RFPercentage(1.45),
-    marginTop: RFPercentage(0.3),
-  },
-  adminEntryArrowWrap: {
-    marginLeft: RFPercentage(0.5),
-  },
-  adminBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.success, // Green color for admin
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 10,
-    marginLeft: 8,
-    flexShrink: 0,
-    gap: 3,
-  },
-
-  adminText: {
-    fontFamily: Fonts.fontMedium,
-    fontSize: RFPercentage(1.2),
-    color: Colors.white,
-  },
 });

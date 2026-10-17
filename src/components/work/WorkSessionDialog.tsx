@@ -19,12 +19,13 @@ import {Colors, Fonts} from '../../constants/Themes';
 import type {WorkSession, WorkSessionConfig} from '../../types/workSession';
 import {
   deviceWorkTimeZone,
+  formatWorkDuration,
   formatWorkTime,
   formatWorkTimer,
   workSessionTitle,
 } from '../../utils/workSessionFlow';
 import {cachedDateFormatter, isValidTimeZone} from '../../utils/intlCache';
-import {WorkTimeFields} from './WorkTimeFields';
+import {ManualTimeFields} from './ManualTimeFields';
 import {workStyles} from './workTheme';
 import {WorkButton, WorkIconTile} from './WorkUI';
 import {GeneralWorkEarningsDialog} from './GeneralWorkEarningsDialog';
@@ -35,9 +36,20 @@ import {
 } from '../../utils/workGeneralEarnings';
 import {useWorkTicker} from '../../hooks/useWorkTicker';
 import {
+  quickWorkTimes,
   workIntervalError,
   workStopExplanation,
 } from '../../utils/workSessionEntry';
+
+const DANGER = '#B91C1C';
+const SUCCESS = '#047857';
+/** The month a time's hours land in, in the record's reporting zone. */
+const monthOf = (time: number, timeZone: string) =>
+  cachedDateFormatter('en-US', {
+    timeZone,
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date(time));
 
 export type WorkDialogState =
   | {
@@ -102,6 +114,7 @@ export const WorkSessionDialog = ({
   const [validation, setValidation] = useState('');
   const [discard, setDiscard] = useState(false);
   const [note, setNote] = useState('');
+  const [noteOpen, setNoteOpen] = useState(false);
   const tick = useWorkTicker(state?.kind === 'checkIn');
   useEffect(() => {
     setValidation('');
@@ -135,6 +148,7 @@ export const WorkSessionDialog = ({
       );
     } else {
       setNote(state.editing ? '' : state.session.note || '');
+      setNoteOpen(!state.editing && !!state.session.note);
       setStartedAt(state.session.startedAt);
       setEndedAt(
         state.session.endedAt ?? Math.min(Date.now(), state.session.autoStopAt),
@@ -207,7 +221,9 @@ export const WorkSessionDialog = ({
         return;
       }
       if (!isValidTimeZone(zone)) {
-        setValidation('Close this form and try again to refresh your work settings.');
+        setValidation(
+          'Close this form and try again to refresh your work settings.',
+        );
         return;
       }
       if (
@@ -262,30 +278,463 @@ export const WorkSessionDialog = ({
       await onSave({startedAt, endedAt, discard, note: note.trim()});
     }
   };
+  if (state.kind === 'checkIn') {
+    const {session} = state;
+    const zone = session.reportingTimeZone;
+    const sameDay = (time: number) =>
+      cachedDateFormatter('en-US', {
+        timeZone: zone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(new Date(time)) ===
+      cachedDateFormatter('en-US', {
+        timeZone: zone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(new Date(tick));
+    // Time only for today; the full date when it falls on another day.
+    const when = (time: number) =>
+      sameDay(time)
+        ? cachedDateFormatter('en-US', {
+            timeZone: zone,
+            hour: 'numeric',
+            minute: '2-digit',
+          }).format(new Date(time))
+        : formatWorkTime(time, zone);
+    const pastBy =
+      session.expectedEndAt !== null ? tick - session.expectedEndAt : null;
+    return (
+      <Modal
+        transparent
+        visible
+        animationType="fade"
+        onRequestClose={() => {
+          if (!busy) {
+            onClose();
+          }
+        }}>
+        <View
+          style={[
+            styles.backdrop,
+            {paddingTop: insets.top + 12, paddingBottom: insets.bottom + 12},
+          ]}>
+          <View style={k.card}>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Close work dialog"
+              disabled={busy}
+              hitSlop={5}
+              onPress={onClose}
+              style={[c.close, k.close]}>
+              <MaterialCommunityIcons
+                name="close"
+                size={18}
+                color={Colors.secondaryText}
+              />
+            </TouchableOpacity>
+            <ScrollView
+              style={{flexShrink: 1}}
+              contentContainerStyle={k.body}
+              showsVerticalScrollIndicator={false}>
+              <View style={k.header}>
+                {/* <View style={k.icon}>
+                  <MaterialCommunityIcons
+                    name="clock-outline"
+                    size={26}
+                    color={Colors.gradient1}
+                  />
+                </View> */}
+                <Text style={k.title}>Still working?</Text>
+                <Text style={k.job} numberOfLines={2}>
+                  {workSessionTitle(session)}
+                </Text>
+              </View>
+
+              {/* The live number is the point of the prompt */}
+              <View style={k.timerPanel}>
+                <Text style={k.timerLabel}>Running total</Text>
+                <Text
+                  style={k.timer}
+                  accessibilityLabel={`Running total ${formatWorkTimer(
+                    tick - session.startedAt,
+                  )}`}>
+                  {formatWorkTimer(tick - session.startedAt)}
+                </Text>
+                <View style={k.since}>
+                  <View style={k.liveDot} />
+                  <Text style={k.sinceText}>
+                    Since {when(session.startedAt)}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={k.stats}>
+                {session.expectedEndAt !== null && (
+                  <View style={k.stat}>
+                    <Text style={k.statLabel}>Expected finish</Text>
+                    <Text style={k.statValue}>
+                      {when(session.expectedEndAt)}
+                    </Text>
+                    {pastBy !== null && pastBy >= 60000 && (
+                      <Text style={k.statLate}>
+                        {formatWorkDuration(pastBy)} ago
+                      </Text>
+                    )}
+                  </View>
+                )}
+                <View style={k.stat}>
+                  <Text style={k.statLabel}>Timer stops by</Text>
+                  <Text style={k.statValue}>{when(session.autoStopAt)}</Text>
+                </View>
+              </View>
+
+              <View style={k.actions}>
+                <WorkButton
+                  label="Yes, still working"
+                  disabled={busy || pending}
+                  onPress={onContinue}
+                  style={c.save}
+                />
+                <WorkButton
+                  variant="ghost"
+                  label="No — I finished at…"
+                  disabled={busy || pending}
+                  onPress={onFinish}
+                  style={c.save}
+                />
+              </View>
+              <Text style={k.note}>
+                Continuing keeps the original stop time. We never count time you
+                did not work.
+              </Text>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+    );
+  }
+  if (state.kind === 'finish') {
+    const {session} = state;
+    const editing = !!state.editing;
+    const length = endedAt - startedAt;
+    const liveError = workIntervalError(
+      {startedAt, endedAt, note},
+      session.timingConfig,
+      Date.now(),
+    );
+    const startMonth = monthOf(startedAt, session.reportingTimeZone);
+    const endMonth = monthOf(
+      Math.max(startedAt, endedAt - 1),
+      session.reportingTimeZone,
+    );
+    const impact =
+      startMonth === endMonth
+        ? `${formatWorkDuration(length)} · counted in ${startMonth}`
+        : `${formatWorkDuration(
+            length,
+          )} · split between ${startMonth} and ${endMonth}`;
+    const showNote = editing || noteOpen;
+    const quick =
+      !editing &&
+      session.status === 'needsReview' &&
+      session.source === 'clock';
+    const title = discard
+      ? 'Discard record'
+      : editing
+      ? 'Correct record'
+      : 'Confirm work time';
+    const savedLength =
+      (session.endedAt ?? session.autoStopAt) - session.startedAt;
+    return (
+      <Modal
+        transparent
+        visible
+        animationType="slide"
+        onRequestClose={() => {
+          if (!busy) {
+            onClose();
+          }
+        }}>
+        <KeyboardAvoidingView
+          style={[
+            styles.backdrop,
+            styles.bottomBackdrop,
+            {paddingTop: insets.top + 12},
+          ]}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          <View style={[styles.sheet, styles.bottomSheet]}>
+            <View style={workStyles.handle} />
+            <View style={workStyles.sheetHeader}>
+              <View style={workStyles.grow}>
+                <Text style={workStyles.sheetTitle}>{title}</Text>
+                <Text style={workStyles.sheetSubtitle} numberOfLines={1}>
+                  {workSessionTitle(session)}
+                </Text>
+              </View>
+              <TouchableOpacity
+                accessibilityRole="button"
+                accessibilityLabel="Close work dialog"
+                disabled={busy}
+                hitSlop={5}
+                onPress={onClose}
+                style={c.close}>
+                <MaterialCommunityIcons
+                  name="close"
+                  size={18}
+                  color={Colors.secondaryText}
+                />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView
+              style={{flexShrink: 1}}
+              contentContainerStyle={c.body}
+              keyboardShouldPersistTaps="handled">
+              {discard ? (
+                <View style={c.discardCard}>
+                  <View style={c.discardIcon}>
+                    <MaterialCommunityIcons
+                      name="trash-can-outline"
+                      size={20}
+                      color={DANGER}
+                    />
+                  </View>
+                  <View style={workStyles.grow}>
+                    <Text style={c.discardTitle}>Discard this record?</Text>
+                    <Text style={c.discardText}>
+                      This will exclude all hours from this record
+                      {savedLength > 0
+                        ? ` (${formatWorkDuration(savedLength)})`
+                        : ''}
+                      . Its history is retained.
+                    </Text>
+                  </View>
+                </View>
+              ) : (
+                <>
+                  {editing ? (
+                    <View style={c.savedRow}>
+                      <Text style={c.label}>Currently saved</Text>
+                      <Text style={c.savedValue}>
+                        {localTime(session.startedAt)} –{' '}
+                        {session.endedAt === null
+                          ? 'Open'
+                          : localTime(session.endedAt)}
+                        {savedLength > 0
+                          ? ` · ${formatWorkDuration(savedLength)}`
+                          : ''}
+                      </Text>
+                    </View>
+                  ) : (
+                    <View style={c.notice}>
+                      <MaterialCommunityIcons
+                        name="alert-circle-outline"
+                        size={16}
+                        color={Colors.amberDarkText}
+                      />
+                      <Text style={c.noticeText}>
+                        {session.source === 'manualCleaner'
+                          ? 'This manual record is pending. Confirm the actual times to count its hours.'
+                          : workStopExplanation(session.stopReason)}
+                      </Text>
+                    </View>
+                  )}
+
+                  {quick && (
+                    <View style={c.group}>
+                      <Text style={c.label}>Quick fill</Text>
+                      <View style={c.quickRow}>
+                        {[4, 6, 8].map(hours => {
+                          const times = quickWorkTimes(
+                            session,
+                            hours,
+                            Date.now(),
+                          );
+                          const chosen =
+                            !!times &&
+                            times.startedAt === startedAt &&
+                            times.endedAt === endedAt;
+                          return (
+                            <TouchableOpacity
+                              key={hours}
+                              accessibilityRole="button"
+                              accessibilityState={{
+                                selected: chosen,
+                                disabled: !times,
+                              }}
+                              activeOpacity={0.8}
+                              disabled={busy || pending || !times}
+                              onPress={() => {
+                                if (times) {
+                                  setStartedAt(times.startedAt);
+                                  setEndedAt(times.endedAt);
+                                }
+                              }}
+                              style={[
+                                c.quickChip,
+                                chosen && c.quickChipOn,
+                                !times && c.unavailable,
+                              ]}>
+                              <Text
+                                style={[c.quickText, chosen && c.quickTextOn]}>
+                                {hours}h
+                              </Text>
+                            </TouchableOpacity>
+                          );
+                        })}
+                      </View>
+                    </View>
+                  )}
+
+                  <ManualTimeFields
+                    value={{startedAt, endedAt, note}}
+                    disabled={busy || pending}
+                    now={Date.now()}
+                    maxAgeDays={
+                      session.timingConfig?.manualEntryMaxAgeDays ?? 7
+                    }
+                    onChange={value => {
+                      setStartedAt(value.startedAt);
+                      setEndedAt(value.endedAt);
+                      setNote(value.note);
+                    }}
+                  />
+
+                  {!editing && (
+                    <View style={c.ghostRow}>
+                      <TouchableOpacity
+                        accessibilityRole="button"
+                        accessibilityState={{expanded: noteOpen}}
+                        activeOpacity={0.8}
+                        disabled={busy || pending}
+                        onPress={() => {
+                          if (noteOpen) {
+                            setNote('');
+                          }
+                          setNoteOpen(!noteOpen);
+                        }}
+                        style={[c.ghost, noteOpen && c.ghostOpen]}>
+                        <Text
+                          style={[c.ghostText, noteOpen && c.ghostTextOpen]}>
+                          {noteOpen ? '− Note' : '+ Note'}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                  {showNote && (
+                    <View style={c.group}>
+                      <View style={c.labelRow}>
+                        <Text style={c.label}>
+                          {editing ? 'Reason for correction' : 'Note'}
+                        </Text>
+                        {editing && <Text style={c.required}>Required</Text>}
+                      </View>
+                      <TextInput
+                        accessibilityLabel={
+                          editing ? 'Reason for correction' : 'Note'
+                        }
+                        value={note}
+                        onChangeText={setNote}
+                        editable={!busy && !pending}
+                        maxLength={1000}
+                        multiline
+                        placeholder={
+                          editing
+                            ? 'e.g. Forgot to clock out on time'
+                            : 'Add context for this work'
+                        }
+                        placeholderTextColor={Colors.gray400}
+                        style={c.input}
+                      />
+                    </View>
+                  )}
+
+                  <View style={[c.rule, !!liveError && c.ruleFailed]}>
+                    <MaterialCommunityIcons
+                      name={liveError ? 'alert-circle-outline' : 'check'}
+                      size={16}
+                      color={liveError ? DANGER : SUCCESS}
+                    />
+                    <Text style={[c.ruleText, !!liveError && {color: DANGER}]}>
+                      {liveError || impact}
+                    </Text>
+                  </View>
+                </>
+              )}
+              {!!(validation || error) && (
+                <Text accessibilityRole="alert" style={c.errorText}>
+                  {validation || error}
+                </Text>
+              )}
+            </ScrollView>
+
+            <View
+              style={[c.footer, {paddingBottom: Math.max(insets.bottom, 20)}]}>
+              {pending ? (
+                <WorkButton
+                  label="Retry unfinished save"
+                  disabled={busy}
+                  onPress={onRetry}
+                  style={c.save}
+                />
+              ) : discard ? (
+                <View style={c.footerRow}>
+                  <WorkButton
+                    variant="ghost"
+                    label="Cancel"
+                    disabled={busy}
+                    onPress={onClose}
+                    style={workStyles.grow}
+                  />
+                  <WorkButton
+                    variant="danger"
+                    icon="trash-can-outline"
+                    label="Discard record"
+                    busy={busy}
+                    onPress={save}
+                    style={[c.save, c.footerPrimary]}
+                  />
+                </View>
+              ) : (
+                <>
+                  <WorkButton
+                    label={
+                      editing ? 'Save corrected times' : 'Confirm these times'
+                    }
+                    busy={busy}
+                    onPress={save}
+                    style={c.save}
+                  />
+                  <Text style={c.caption}>
+                    {editing
+                      ? 'Your previous times stay in this record’s history.'
+                      : 'Hours count as soon as you confirm.'}
+                  </Text>
+                </>
+              )}
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+    );
+  }
   return (
     <Modal
       transparent
       visible
-      animationType={state.kind === 'finish' ? 'slide' : 'fade'}
+      animationType="fade"
       onRequestClose={() => {
         if (!busy) {
           onClose();
         }
       }}>
       <KeyboardAvoidingView
-        style={[
-          styles.backdrop,
-          state.kind === 'finish' && styles.bottomBackdrop,
-          {paddingTop: insets.top + 12},
-        ]}
+        style={[styles.backdrop, {paddingTop: insets.top + 12}]}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View
-          style={[
-            styles.sheet,
-            state.kind === 'start' && styles.startSheet,
-            state.kind === 'finish' && styles.bottomSheet,
-          ]}>
-          {state.kind === 'finish' && <View style={workStyles.handle} />}
+          style={[styles.sheet, state.kind === 'start' && styles.startSheet]}>
           {state.kind === 'start' ? (
             <View style={styles.startHeader}>
               <WorkIconTile
@@ -340,282 +789,140 @@ export const WorkSessionDialog = ({
               fontScale > 1.2 && {gap: 16},
             ]}
             keyboardShouldPersistTaps="handled">
-            {state.kind !== 'start' && (
-              <>
-                <View
-                  style={[
-                    workStyles.row,
-                    state.kind === 'checkIn' && {justifyContent: 'center'},
-                  ]}>
-                  <WorkIconTile
-                    icon={
-                      state.kind === 'checkIn'
-                        ? 'clock-outline'
-                        : state.kind === 'finish'
-                        ? 'alert-outline'
-                        : 'play-circle-outline'
-                    }
-                    color={
-                      state.kind === 'finish'
-                        ? Colors.amberDarkText
-                        : Colors.gradient1
-                    }
-                    bg={
-                      state.kind === 'finish'
-                        ? Colors.amberOverlay10
-                        : Colors.blueOverlay10
-                    }
-                  />
-                </View>
-                <Text
-                  style={[
-                    styles.title,
-                    state.kind === 'checkIn' && styles.centered,
-                  ]}>
-                  {state.kind === 'checkIn'
-                    ? 'Still working?'
-                    : state.editing
-                    ? 'Correct this work record'
-                    : 'Confirm your work time'}
-                </Text>
-                <Text
-                  style={[
-                    styles.text,
-                    state.kind === 'checkIn' && styles.centered,
-                  ]}>
-                  {workSessionTitle(state.session)}
-                </Text>
-              </>
-            )}
-            {state.kind === 'checkIn' ? (
-              <>
-                <Text style={styles.help}>
-                  You clocked in at{' '}
-                  {formatWorkTime(
-                    state.session.startedAt,
-                    state.session.reportingTimeZone,
-                  )}
-                  {state.session.expectedEndAt !== null
-                    ? ` and this job was expected to finish at ${formatWorkTime(
-                        state.session.expectedEndAt,
-                        state.session.reportingTimeZone,
-                      )}`
-                    : ''}
-                  . Continuing keeps the original stop deadline.
-                </Text>
-                <View style={[workStyles.inner, workStyles.rowBetween]}>
-                  <Text style={workStyles.sml}>Running total</Text>
-                  <Text style={[workStyles.mid, workStyles.mono]}>
-                    {formatWorkTimer(tick - state.session.startedAt)}
-                  </Text>
-                </View>
-                <Text style={styles.help}>
-                  Timer stops by{' '}
-                  {formatWorkTime(
-                    state.session.autoStopAt,
-                    state.session.reportingTimeZone,
-                  )}
-                  .
-                </Text>
-                <WorkButton
-                  label="Yes, still working"
-                  disabled={busy || pending}
-                  onPress={onContinue}
-                />
-                <WorkButton
-                  variant="ghost"
-                  label="No — I finished at…"
-                  disabled={busy || pending}
-                  onPress={onFinish}
-                />
-                <Text style={styles.help}>
-                  We never count time you did not work. Nothing is added until
-                  you confirm.
-                </Text>
-              </>
-            ) : (
-              <>
-                {state.kind === 'start' ? (
-                  <>
-                    <View style={styles.inputGroup}>
-                      <Text style={styles.inputLabel}>Work name</Text>
-                      <View
-                        style={[
-                          styles.nameField,
-                          nameFocused && styles.focusedField,
-                        ]}>
-                        <MaterialCommunityIcons
-                          name="briefcase-outline"
-                          size={20}
-                          color={Colors.secondaryText}
-                        />
-                        <TextInput
-                          value={workName}
-                          onChangeText={setWorkName}
-                          onFocus={() => setNameFocused(true)}
-                          onBlur={() => setNameFocused(false)}
-                          editable={
-                            !busy &&
-                            !pending &&
-                            !state.jobId &&
-                            !state.existingSessionId
-                          }
-                          placeholder="e.g. Office deep clean"
-                          placeholderTextColor={Colors.secondaryText}
-                          maxLength={120}
-                          autoCapitalize="sentences"
-                          returnKeyType="done"
-                          style={styles.nameInput}
-                          accessibilityLabel="Work name"
-                        />
-                      </View>
-                    </View>
-                    {!state.jobId && !state.existingSessionId && (
-                      <GeneralWorkEarningsField
-                        value={expectedEarnings}
-                        onChange={setExpectedEarnings}
-                        disabled={busy || pending}
-                      />
-                    )}
+            <>
+              {state.kind === 'start' ? (
+                <>
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.inputLabel}>Work name</Text>
                     <View
                       style={[
-                        styles.timeRow,
-                        (width < 360 || fontScale > 1.2) && styles.stackedTimes,
+                        styles.nameField,
+                        nameFocused && styles.focusedField,
                       ]}>
-                      <View style={styles.timeGroup}>
-                        <Text style={styles.inputLabel}>Start time</Text>
-                        <TouchableOpacity
-                          style={styles.timeField}
-                          disabled={
-                            !!state.existingSessionId || busy || pending
-                          }
-                          accessibilityRole="button"
-                          accessibilityLabel="Select start time"
-                          onPress={() => setPicker('start')}>
-                          <MaterialCommunityIcons
-                            name="clock-outline"
-                            size={17}
-                            color={Colors.gradient1}
-                          />
-                          <View style={styles.timeText}>
-                            <Text style={styles.timeValue}>
-                              {localTime(displayStart)}
-                            </Text>
-                            <Text style={styles.timeDate}>
-                              {localDay(displayStart)}
-                            </Text>
-                          </View>
-                          {!state.existingSessionId && (
-                            <MaterialCommunityIcons
-                              name="chevron-down"
-                              size={16}
-                              color={Colors.secondaryText}
-                            />
-                          )}
-                        </TouchableOpacity>
-                      </View>
-                      <View style={styles.timeGroup}>
-                        <Text style={styles.inputLabel}>End time</Text>
-                        <TouchableOpacity
-                          style={styles.timeField}
-                          disabled={!canChooseEnd || busy || pending}
-                          accessibilityRole="button"
-                          accessibilityLabel="Select end time"
-                          onPress={() => {
-                            if (
-                              state.hardCapAt &&
-                              state.hardCapAt <= Date.now()
-                            ) {
-                              setValidation(
-                                'This timer has reached its stop deadline. Close this dialog and review your work time.',
-                              );
-                              return;
-                            }
-                            setPicker('finish');
-                          }}>
-                          <MaterialCommunityIcons
-                            name="clock-outline"
-                            size={17}
-                            color={Colors.gradient1}
-                          />
-                          <View style={styles.timeText}>
-                            <Text style={styles.timeValue}>
-                              {localTime(displayEnd ?? endedAt)}
-                            </Text>
-                            <Text style={styles.timeDate}>
-                              {localDay(displayEnd ?? endedAt)}
-                            </Text>
-                          </View>
-                          {canChooseEnd && (
-                            <MaterialCommunityIcons
-                              name="chevron-down"
-                              size={16}
-                              color={Colors.secondaryText}
-                            />
-                          )}
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                    {requiredPlan && (
-                      <Text style={styles.warning}>
-                        The original stop deadline has passed. Select a new end
-                        time to start.
-                      </Text>
-                    )}
-                   
-                  </>
-                ) : (
-                  <>
-                    <Text style={styles.help}>
-                      {state.editing
-                        ? 'The saved times will be replaced and the previous times kept in history.'
-                        : state.session.source === 'manualCleaner'
-                        ? 'This manual record is pending. Confirm the actual times to count its hours.'
-                        : workStopExplanation(state.session.stopReason)}
-                    </Text>
-                    {!discard && (
-                      <WorkTimeFields
-                        value={{startedAt, endedAt, note}}
-                        disabled={busy || pending}
-                        reportingTimeZone={state.session.reportingTimeZone}
-                        session={state.session}
-                        noteLabel={
-                          state.editing
-                            ? 'Reason for correction (required)'
-                            : 'Note (optional)'
-                        }
-                        onChange={value => {
-                          setStartedAt(value.startedAt);
-                          setEndedAt(value.endedAt);
-                          setNote(value.note);
-                        }}
+                      <MaterialCommunityIcons
+                        name="briefcase-outline"
+                        size={20}
+                        color={Colors.secondaryText}
                       />
-                    )}
-                    <TouchableOpacity
-                      style={styles.secondary}
+                      <TextInput
+                        value={workName}
+                        onChangeText={setWorkName}
+                        onFocus={() => setNameFocused(true)}
+                        onBlur={() => setNameFocused(false)}
+                        editable={
+                          !busy &&
+                          !pending &&
+                          !state.jobId &&
+                          !state.existingSessionId
+                        }
+                        placeholder="e.g. Office deep clean"
+                        placeholderTextColor={Colors.secondaryText}
+                        maxLength={120}
+                        autoCapitalize="sentences"
+                        returnKeyType="done"
+                        style={styles.nameInput}
+                        accessibilityLabel="Work name"
+                      />
+                    </View>
+                  </View>
+                  {!state.jobId && !state.existingSessionId && (
+                    <GeneralWorkEarningsField
+                      value={expectedEarnings}
+                      onChange={setExpectedEarnings}
                       disabled={busy || pending}
-                      onPress={() => setDiscard(!discard)}>
-                      {/* <Text style={styles.warning}>
-                        {discard
-                          ? 'Keep this record and enter times'
-                          : 'Discard this record instead'}
-                      </Text> */}
-                    </TouchableOpacity>
-                    {discard && (
-                      <Text style={styles.warning}>
-                        This will exclude all hours from this record. Its
-                        history is retained.
-                      </Text>
-                    )}
-                  </>
-                )}
-                {!!(validation || error) && (
-                  <Text accessibilityRole="alert" style={styles.warning}>
-                    {validation || error}
-                  </Text>
-                )}
-              </>
-            )}
+                    />
+                  )}
+                  <View
+                    style={[
+                      styles.timeRow,
+                      (width < 360 || fontScale > 1.2) && styles.stackedTimes,
+                    ]}>
+                    <View style={styles.timeGroup}>
+                      <Text style={styles.inputLabel}>Start time</Text>
+                      <TouchableOpacity
+                        style={styles.timeField}
+                        disabled={!!state.existingSessionId || busy || pending}
+                        accessibilityRole="button"
+                        accessibilityLabel="Select start time"
+                        onPress={() => setPicker('start')}>
+                        <MaterialCommunityIcons
+                          name="clock-outline"
+                          size={17}
+                          color={Colors.gradient1}
+                        />
+                        <View style={styles.timeText}>
+                          <Text style={styles.timeValue}>
+                            {localTime(displayStart)}
+                          </Text>
+                          <Text style={styles.timeDate}>
+                            {localDay(displayStart)}
+                          </Text>
+                        </View>
+                        {!state.existingSessionId && (
+                          <MaterialCommunityIcons
+                            name="chevron-down"
+                            size={16}
+                            color={Colors.secondaryText}
+                          />
+                        )}
+                      </TouchableOpacity>
+                    </View>
+                    <View style={styles.timeGroup}>
+                      <Text style={styles.inputLabel}>End time</Text>
+                      <TouchableOpacity
+                        style={styles.timeField}
+                        disabled={!canChooseEnd || busy || pending}
+                        accessibilityRole="button"
+                        accessibilityLabel="Select end time"
+                        onPress={() => {
+                          if (
+                            state.hardCapAt &&
+                            state.hardCapAt <= Date.now()
+                          ) {
+                            setValidation(
+                              'This timer has reached its stop deadline. Close this dialog and review your work time.',
+                            );
+                            return;
+                          }
+                          setPicker('finish');
+                        }}>
+                        <MaterialCommunityIcons
+                          name="clock-outline"
+                          size={17}
+                          color={Colors.gradient1}
+                        />
+                        <View style={styles.timeText}>
+                          <Text style={styles.timeValue}>
+                            {localTime(displayEnd ?? endedAt)}
+                          </Text>
+                          <Text style={styles.timeDate}>
+                            {localDay(displayEnd ?? endedAt)}
+                          </Text>
+                        </View>
+                        {canChooseEnd && (
+                          <MaterialCommunityIcons
+                            name="chevron-down"
+                            size={16}
+                            color={Colors.secondaryText}
+                          />
+                        )}
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                  {requiredPlan && (
+                    <Text style={styles.warning}>
+                      The original stop deadline has passed. Select a new end
+                      time to start.
+                    </Text>
+                  )}
+                </>
+              ) : null}
+              {!!(validation || error) && (
+                <Text accessibilityRole="alert" style={styles.warning}>
+                  {validation || error}
+                </Text>
+              )}
+            </>
             {/* {state.kind !== 'start' && (
               <TouchableOpacity
                 style={styles.secondary}
@@ -625,7 +932,7 @@ export const WorkSessionDialog = ({
               </TouchableOpacity>
             )} */}
           </ScrollView>
-          {state.kind !== 'checkIn' && (
+          {
             <View
               style={[
                 workStyles.footer,
@@ -675,7 +982,7 @@ export const WorkSessionDialog = ({
                 </TouchableOpacity>
               )}
             </View>
-          )}
+          }
           <DatePicker
             modal
             open={picker !== null}
@@ -871,5 +1178,286 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   secondary: {padding: 12, alignItems: 'center'},
-  warning: {fontFamily: Fonts.fontRegular, color: Colors.amberDarkText, fontSize: 14, lineHeight: 21},
+  warning: {
+    fontFamily: Fonts.fontRegular,
+    color: Colors.amberDarkText,
+    fontSize: 14,
+    lineHeight: 21,
+  },
+});
+
+/** The correct / confirm / discard sheet, matching the Add record quick form. */
+const c = StyleSheet.create({
+  close: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: Colors.slate100,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  body: {paddingHorizontal: 16, paddingTop: 14, paddingBottom: 14, gap: 14},
+  group: {gap: 6},
+  labelRow: {flexDirection: 'row', alignItems: 'center', gap: 8},
+  label: {
+    fontFamily: Fonts.fontMedium,
+    fontSize: 12.5,
+    color: Colors.secondaryText,
+  },
+  required: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 11,
+    color: Colors.gradient1,
+    backgroundColor: Colors.blueBg200,
+    paddingVertical: 1,
+    paddingHorizontal: 8,
+    borderRadius: 999,
+    overflow: 'hidden',
+  },
+  savedRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    backgroundColor: Colors.inputBg,
+  },
+  savedValue: {
+    flexShrink: 1,
+    textAlign: 'right',
+    fontFamily: Fonts.semiBold,
+    fontSize: 13,
+    color: Colors.slateText,
+    fontVariant: ['tabular-nums'],
+  },
+  notice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    backgroundColor: Colors.amberBg50,
+    borderWidth: 1,
+    borderColor: Colors.amberBorder,
+  },
+  noticeText: {
+    flex: 1,
+    fontFamily: Fonts.fontMedium,
+    fontSize: 12,
+    lineHeight: 17,
+    color: Colors.amberDarkText,
+  },
+  quickRow: {flexDirection: 'row', gap: 8},
+  quickChip: {
+    flex: 1,
+    height: 36,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: Colors.inputBorder,
+    backgroundColor: Colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  quickChipOn: {
+    borderColor: Colors.gradient1,
+    backgroundColor: Colors.blueBg200,
+  },
+  quickText: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 13,
+    color: Colors.slateText,
+  },
+  quickTextOn: {color: Colors.gradient1},
+  unavailable: {opacity: 0.4},
+  ghostRow: {flexDirection: 'row', gap: 8},
+  ghost: {
+    height: 36,
+    paddingHorizontal: 12,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: Colors.slate300,
+    backgroundColor: Colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ghostOpen: {borderColor: Colors.gradient1, backgroundColor: Colors.blueBg200},
+  ghostText: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 12.5,
+    color: Colors.secondaryText,
+  },
+  ghostTextOpen: {color: Colors.gradient1},
+  input: {
+    minHeight: 46,
+    maxHeight: 120,
+    borderWidth: 1,
+    borderColor: Colors.inputBorder,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+    fontFamily: Fonts.fontRegular,
+    fontSize: 14.5,
+    color: Colors.slateText,
+    textAlignVertical: 'top',
+  },
+  rule: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    backgroundColor: '#F0FDF4',
+  },
+  ruleFailed: {backgroundColor: Colors.redBg50},
+  ruleText: {
+    flex: 1,
+    fontFamily: Fonts.fontMedium,
+    fontSize: 12,
+    lineHeight: 17,
+    color: SUCCESS,
+  },
+  errorText: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: 12.5,
+    lineHeight: 18,
+    color: DANGER,
+  },
+  discardCard: {
+    flexDirection: 'row',
+    gap: 12,
+    padding: 14,
+    borderRadius: 12,
+    backgroundColor: Colors.redBg50,
+    borderWidth: 1,
+    borderColor: Colors.redBorder200,
+  },
+  discardIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: Colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  discardTitle: {fontFamily: Fonts.semiBold, fontSize: 15, color: DANGER},
+  discardText: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: 12.5,
+    lineHeight: 18,
+    color: Colors.slateText,
+    marginTop: 2,
+  },
+  footer: {backgroundColor: Colors.white, paddingHorizontal: 16, gap: 8},
+  footerRow: {flexDirection: 'row', gap: 10},
+  footerPrimary: {flex: 1.7},
+  save: {minHeight: 50},
+  caption: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: 11.5,
+    color: Colors.secondaryText,
+    textAlign: 'center',
+  },
+});
+
+/** The "Still working?" check-in. */
+const k = StyleSheet.create({
+  card: {
+    width: '100%',
+    maxWidth: 420,
+    maxHeight: '100%',
+    alignSelf: 'center',
+    backgroundColor: Colors.white,
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
+  close: {position: 'absolute', top: 12, right: 12, zIndex: 1},
+  body: {padding: 20, paddingTop: 24, gap: 14},
+  header: {alignItems: 'center', gap: 6, paddingHorizontal: 30},
+  icon: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: Colors.blueBg200,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  title: {fontFamily: Fonts.semiBold, fontSize: 18, color: Colors.slateText},
+  job: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: 13.5,
+    color: Colors.secondaryText,
+    textAlign: 'center',
+  },
+  timerPanel: {
+    alignItems: 'center',
+    gap: 2,
+    paddingVertical: 16,
+    borderRadius: 14,
+    backgroundColor: Colors.inputBg,
+    borderWidth: 1,
+    borderColor: Colors.inputBorder,
+  },
+  timerLabel: {
+    fontFamily: Fonts.fontMedium,
+    fontSize: 11.5,
+    color: Colors.secondaryText,
+  },
+  timer: {
+    fontFamily: Fonts.fontBold,
+    fontSize: 34,
+    lineHeight: 42,
+    color: Colors.slateText,
+    fontVariant: ['tabular-nums'],
+  },
+  since: {flexDirection: 'row', alignItems: 'center', gap: 6},
+  liveDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: Colors.success,
+  },
+  sinceText: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: 12,
+    color: Colors.secondaryText,
+  },
+  stats: {flexDirection: 'row', gap: 10},
+  stat: {
+    flex: 1,
+    minWidth: 0,
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.inputBorder,
+    gap: 2,
+  },
+  statLabel: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: 11.5,
+    color: Colors.secondaryText,
+  },
+  statValue: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 15,
+    color: Colors.slateText,
+  },
+  statLate: {
+    fontFamily: Fonts.fontMedium,
+    fontSize: 11.5,
+    color: Colors.amberDarkText,
+  },
+  actions: {gap: 10, marginTop: 2},
+  note: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: 11.5,
+    lineHeight: 17,
+    color: Colors.secondaryText,
+    textAlign: 'center',
+  },
 });

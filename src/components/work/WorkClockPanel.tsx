@@ -148,7 +148,7 @@ export const WorkClockPanel = ({
     if (mayStart) {
       return (
         <WorkButton
-          variant={compact ? 'ghost' : 'primary'}
+          variant={compact && !simple ? 'ghost' : 'primary'}
           icon="play"
           label={jobId ? 'Clock In' : 'Clock in · General work'}
           busy={work.busy}
@@ -410,10 +410,10 @@ export const WorkClockPanel = ({
 };
 
 const styles = {
+  // The dashboard's Today card: the button sits under the job, no divider.
   simpleFooter: {
-    padding: 14,
-    borderTopWidth: 1,
-    borderTopColor: Colors.gray200,
+    paddingHorizontal: 14,
+    paddingBottom: 14,
     gap: 10,
   },
   simpleTimer: {gap: 4},

@@ -3,7 +3,7 @@ import Renderer, {act} from 'react-test-renderer';
 import {Text, TouchableOpacity} from 'react-native';
 import ManualWorkEntry from '../src/screens/cleanerflow/work/ManualWorkEntry';
 import WorkSessionDetails from '../src/screens/cleanerflow/work/WorkSessionDetails';
-import {WorkTimeFields} from '../src/components/work/WorkTimeFields';
+import {ManualTimeFields} from '../src/components/work/ManualTimeFields';
 import {CLEANER_INSTRUCTIONS_VERSION} from '../src/constants/cleanerInstructions';
 const NOW = Date.UTC(2026, 9, 7, 9);
 let mockWork: any;
@@ -199,7 +199,7 @@ it('freezes the original uncertain manual request after restart and retries with
     jobId: 'assigned',
   };
   await manual();
-  const fields = renderer.root.findByType(WorkTimeFields);
+  const fields = renderer.root.findByType(ManualTimeFields);
   expect(fields.props.disabled).toBe(true);
   expect(fields.props.value).toEqual({
     startedAt: mockWork.pendingRequest.startedAt,
@@ -231,7 +231,7 @@ it('saves a typed name without a job chooser and keeps overlap errors on the for
 it('blocks invalid manual intervals before saving', async () => {
   await manual();
   await act(async () => {
-    renderer.root.findByType(WorkTimeFields).props.onChange({
+    renderer.root.findByType(ManualTimeFields).props.onChange({
       startedAt: NOW - 3600000,
       endedAt: NOW + 3600000,
       note: '',
@@ -282,11 +282,11 @@ it('keeps pending estimates separate, then exposes correction and preserves orig
   expect(screenText()).toContain('1h 0m');
   expect(screenText()).toContain('Originally recorded');
   expect(screenText()).toContain('Corrected start');
-  await press('Correct this record');
+  await press('Correct record');
   expect(mockWork.edit).toHaveBeenCalledWith(
     expect.objectContaining({revision: 2}),
   );
-  await press('Discard record');
+  await press('Discard');
   expect(mockWork.edit).toHaveBeenLastCalledWith(
     expect.objectContaining({revision: 2}),
     true,
@@ -333,13 +333,83 @@ it('shows and edits a total on general-work details and displays amount history'
 
 it('saves a manual general-work total and keeps the entry pending', async () => {
   await manual();
+  await press('+ Amount');
   await act(async () =>
     renderer.root
-      .findByProps({accessibilityLabel: 'Expected earnings'})
+      .findByProps({accessibilityLabel: 'Total amount for this work'})
       .props.onChangeText('60.25'),
   );
   await press('Save pending record');
   expect(mockWork.saveManual).toHaveBeenCalledWith(
     expect.objectContaining({expectedEarnings: 60.25, jobId: null}),
+  );
+});
+
+const manualTimes = () =>
+  renderer.root.findByType(ManualTimeFields).props.value;
+const pressLabelled = async (prefix: string) => {
+  const target = buttons().find(item =>
+    String(item.props.accessibilityLabel || '').startsWith(prefix),
+  );
+  expect(target).toBeDefined();
+  await act(async () => {
+    await target!.props.onPress();
+  });
+};
+
+it('moves a manual record to yesterday keeping its clock times and length', async () => {
+  await manual();
+  const before = manualTimes();
+  await press('Yesterday');
+  const after = manualTimes();
+  expect(after.endedAt - after.startedAt).toBe(
+    before.endedAt - before.startedAt,
+  );
+  expect(new Date(after.startedAt).getHours()).toBe(
+    new Date(before.startedAt).getHours(),
+  );
+  expect((before.startedAt - after.startedAt) / 3600000).toBeCloseTo(24, -0.5);
+  await press('Save pending record');
+  expect(mockWork.saveManual).toHaveBeenCalledWith(
+    expect.objectContaining({
+      startedAt: after.startedAt,
+      endedAt: after.endedAt,
+    }),
+  );
+});
+
+it('treats a finish earlier than the start as overnight work', async () => {
+  await manual();
+  const {startedAt} = manualTimes();
+  await press('Yesterday');
+  await pressLabelled('Finish');
+  const earlier = new Date(manualTimes().startedAt);
+  earlier.setHours(earlier.getHours() - 1);
+  await act(async () => {
+    renderer.root.findByType('DatePicker' as any).props.onConfirm(earlier);
+  });
+  const after = manualTimes();
+  expect(after.endedAt).toBeGreaterThan(after.startedAt);
+  expect(after.endedAt - after.startedAt).toBe(23 * 3600000);
+  expect(after.startedAt).toBeLessThan(startedAt);
+});
+
+it('drops a folded amount instead of saving it hidden', async () => {
+  await manual();
+  await press('+ Amount');
+  await act(async () =>
+    renderer.root
+      .findByProps({accessibilityLabel: 'Total amount for this work'})
+      .props.onChangeText('60'),
+  );
+  await press('− Amount');
+  expect(
+    renderer.root.findAllByProps({
+      accessibilityLabel: 'Total amount for this work',
+    }),
+  ).toHaveLength(0);
+  await press('Save pending record');
+  expect(mockWork.saveManual.mock.calls[0][0]).not.toHaveProperty(
+    'expectedEarnings',
   );
 });

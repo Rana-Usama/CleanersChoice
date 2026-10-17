@@ -1,57 +1,68 @@
-import React, {useEffect, useState} from 'react';
-import {Text, TouchableOpacity, View} from 'react-native';
-import DatePicker from 'react-native-date-picker';
+import React, {useEffect, useMemo, useState} from 'react';
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import DatePicker from 'react-native-date-picker';
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 import type {RootStackParamList} from '../../../routers/StackNavigator';
 import {WorkRecordLayout} from '../../../components/work/WorkRecordLayout';
 import {
-  workSessionTone,
-  workStyles as styles,
-  workToneStyle,
-} from '../../../components/work/workTheme';
-import {
-  WorkButton,
-  WorkCollapsible,
-  WorkIconTile,
-  WorkSectionHeader,
-} from '../../../components/work/WorkUI';
-import {WorkMonthSummary} from '../../../components/work/WorkMonthSummary';
+  buildDayTotals,
+  WorkMonthCalendar,
+  workDayOf,
+} from '../../../components/work/WorkMonthCalendar';
 import {useWorkSessions} from '../../../components/work/WorkSessionProvider';
 import {useWorkMonthlyReport} from '../../../hooks/useWorkMonthlyReport';
 import {getMonthLabel} from '../../../services/earningsService';
-import {workCurrency} from '../../../services/workMonthlyReport';
-import {Colors} from '../../../constants/Themes';
+import {
+  recordEarned,
+  workCurrency,
+} from '../../../services/workMonthlyReport';
+import type {MonthWorkRecord} from '../../../services/workMonthlyReport';
+import {Colors, Fonts} from '../../../constants/Themes';
 import {cachedDateFormatter} from '../../../utils/intlCache';
 import {
   formatWorkDuration,
-  formatWorkTime,
   workSessionTitle,
 } from '../../../utils/workSessionFlow';
-import {workStatusLabel} from '../../../utils/workSessionEntry';
 import {shiftWorkMonth, WorkMonth} from '../../../utils/workMonth';
 
 const PAGE = 25;
-type Filter = 'all' | 'confirmed' | 'needsReview';
 
-/** "Tue 8 Sep", in the record's own reporting zone. */
-const shortDay = (time: number, timeZone: string) =>
+/**
+ * "2:14 PM", time only. formatWorkTime includes the date ("Oct 20, 11:00 AM"),
+ * which doubled up next to the row's own "17 Oct" prefix.
+ */
+const clock = (time: number, timeZone: string) =>
   cachedDateFormatter('en-US', {
     timeZone,
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
+    hour: 'numeric',
+    minute: '2-digit',
   }).format(new Date(time));
 
-/** How a job's money was agreed, for the by-job line. */
-const basisLabel = (basis?: string) =>
-  basis === 'hourly'
-    ? 'hourly'
-    : basis === 'sqft'
-    ? 'per sq ft'
-    : basis === 'flat'
-    ? 'flat'
-    : '';
+/** "17 Oct", in the record's own reporting zone. */
+const dayMonth = (time: number, timeZone: string) =>
+  cachedDateFormatter('en-GB', {timeZone, day: 'numeric', month: 'short'}).format(
+    new Date(time),
+  );
+
+const workedMs = (item: MonthWorkRecord) =>
+  item.confirmedMs || item.pendingMs || item.runningMs || 0;
+
+/** Status dot: green counted, amber awaiting review, blue running, grey else. */
+const dotColor = (item: MonthWorkRecord) =>
+  item.runningMs > 0
+    ? '#407BFF'
+    : item.pendingMs > 0
+    ? '#F59E0B'
+    : item.confirmedMs > 0
+    ? '#10B981'
+    : '#9CA3AF';
 
 const WorkHours = ({
   navigation,
@@ -72,310 +83,227 @@ const WorkHours = ({
       : {year: date.getFullYear(), month: date.getMonth()};
   });
   const monthly = useWorkMonthlyReport(selected);
-  const [picker, setPicker] = useState(false);
-  const [filter, setFilter] = useState<Filter>('all');
-  const [shown, setShown] = useState(PAGE);
-  const [shownJobs, setShownJobs] = useState(PAGE);
   const report = monthly.report;
-  useEffect(() => {
-    setShown(PAGE);
-    setShownJobs(PAGE);
-  }, [selected.year, selected.month, filter, work.uid]);
+  const [picker, setPicker] = useState(false);
+  // The calendar day the list is narrowed to; null shows the whole month.
+  const [day, setDay] = useState<number | null>(null);
+  const [shown, setShown] = useState(PAGE);
 
-  const records =
-    report?.records.filter(
-      item =>
-        filter === 'all' ||
-        (filter === 'confirmed' ? item.confirmedMs > 0 : item.pendingMs > 0),
-    ) || [];
+  // Day 17 of one month means nothing in the next.
+  useEffect(() => {
+    setDay(null);
+    setShown(PAGE);
+  }, [selected.year, selected.month, work.uid]);
+
+  const dayTotals = useMemo(() => buildDayTotals(report), [report]);
+
+  const records = (report?.records ?? []).filter(
+    item =>
+      workedMs(item) > 0 &&
+      (day === null ||
+        workDayOf(item.session.startedAt, item.session.reportingTimeZone) ===
+          day),
+  );
+  const shownMs = records.reduce((sum, item) => sum + workedMs(item), 0);
 
   const monthLabel = `${getMonthLabel(selected.month)} ${selected.year}`;
+  const listTitle =
+    day === null
+      ? 'All sessions'
+      : cachedDateFormatter('en-GB', {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+        }).format(new Date(selected.year, selected.month, day));
 
   return (
     <WorkRecordLayout
+      flat
       title="Work Hours"
       onBack={() => navigation.goBack()}
-      actionIcon="calendar-month-outline"
-      actionLabel="Choose report month"
-      onAction={() => setPicker(true)}>
+      actionIcon={work.manualAvailable ? 'plus' : undefined}
+      actionLabel="Add a record"
+      onAction={
+        work.manualAvailable
+          ? () => navigation.navigate('ManualWorkEntry')
+          : undefined
+      }>
       {!monthly.available ? (
-        <View style={[styles.card, styles.pullUp]}>
-          <Text style={styles.help}>
+        <View style={styles.card}>
+          <Text style={styles.empty}>
             Monthly tracking is available to eligible cleaners when tracking is
             enabled or existing work history is available.
           </Text>
         </View>
       ) : (
         <>
-          <WorkMonthSummary
-            {...monthly}
-            onRetry={monthly.retry}
+          <WorkMonthCalendar
+            month={selected}
             monthLabel={monthLabel}
+            report={report}
+            totals={dayTotals}
+            selectedDay={day}
+            onSelectDay={setDay}
             onPickMonth={() => setPicker(true)}
+            onPrevMonth={() => setSelected(value => shiftWorkMonth(value, -1))}
+            onNextMonth={() => setSelected(value => shiftWorkMonth(value, 1))}
+            prevDisabled={selected.year === 1970 && selected.month === 0}
+            nextDisabled={selected.year === 9998 && selected.month === 11}
           />
 
-          {/* Month stepping stays available; the wireframe's single pill
-              covers choosing, not nudging one month either way. */}
-          <View style={[styles.card, styles.monthSelector, styles.monthBar]}>
+          {/* Only shown when something is wrong or needs a decision. */}
+          {monthly.loading && !report && (
+            <View style={[styles.card, styles.noticeRow]}>
+              <ActivityIndicator color={Colors.gradient1} />
+              <Text style={styles.noticeText}>
+                Loading work hours and earnings…
+              </Text>
+            </View>
+          )}
+          {!!monthly.error && (
             <TouchableOpacity
               accessibilityRole="button"
-              accessibilityLabel="Previous"
-              hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
-              style={styles.stepper}
-              disabled={selected.year === 1970 && selected.month === 0}
-              onPress={() => setSelected(value => shiftWorkMonth(value, -1))}>
+              onPress={monthly.retry}
+              style={[styles.card, styles.noticeRow]}>
               <MaterialCommunityIcons
-                name="chevron-left"
-                size={22}
-                color={Colors.gradient1}
+                name="alert-circle-outline"
+                size={16}
+                color={Colors.amberDarkText}
               />
+              <Text style={[styles.noticeText, styles.warnText]}>
+                {monthly.error}
+              </Text>
+              <Text style={styles.link}>Retry monthly totals</Text>
             </TouchableOpacity>
-            <Text style={styles.sml}>{monthLabel}</Text>
+          )}
+          {monthly.fromCache && (
+            <Text style={[styles.noticeText, styles.warnText]}>
+              Cached totals may be incomplete. Reconnect to check the latest
+              records and invoice payments.
+            </Text>
+          )}
+          {!!report && report.pendingCount > 0 && (
             <TouchableOpacity
               accessibilityRole="button"
-              accessibilityLabel="Next"
-              hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
-              style={styles.stepper}
-              disabled={selected.year === 9998 && selected.month === 11}
-              onPress={() => setSelected(value => shiftWorkMonth(value, 1))}>
+              onPress={() => navigation.navigate('WorkTracking')}
+              style={[styles.card, styles.warnCard, styles.noticeRow]}>
               <MaterialCommunityIcons
-                name="chevron-right"
-                size={22}
-                color={Colors.gradient1}
+                name="alert-outline"
+                size={16}
+                color={Colors.amberDarkText}
               />
+              <Text style={[styles.noticeText, styles.warnText]}>
+                {report.pendingCount}{' '}
+                {report.pendingCount === 1 ? 'session needs' : 'sessions need'}{' '}
+                review · est. {formatWorkDuration(report.pendingMs)} not counted
+              </Text>
+              <Text style={[styles.link, styles.warnText]}>Review</Text>
             </TouchableOpacity>
-          </View>
+          )}
+          {!!report?.overdue && (
+            <Text style={[styles.noticeText, styles.warnText]}>
+              A timer reached its stop deadline. Its time is shown as a pending
+              estimate until reviewed.
+            </Text>
+          )}
+          {!!report?.invalidRecordCount && (
+            <Text style={[styles.noticeText, styles.warnText]}>
+              Some work records could not be calculated. These totals exclude
+              those records.
+            </Text>
+          )}
 
-          {report && (
-            <>
-              {/* ---- needs review ------------------------------------ */}
-              {report.pendingCount > 0 && (
-                <View style={[styles.card, styles.warnCard, styles.detailRow]}>
-                  <WorkIconTile
-                    icon="alert-outline"
-                    color={Colors.amberDarkText}
-                    bg={Colors.amberOverlay20}
-                  />
-                  <View style={styles.detailPrimary}>
-                    <Text style={[styles.body, {color: Colors.amberDarkText}]}>
-                      {report.pendingCount}{' '}
-                      {report.pendingCount === 1 ? 'session' : 'sessions'} need
-                      review
-                    </Text>
-                    <Text style={[styles.sml, {color: Colors.amberDarkText}]}>
-                      Est. {formatWorkDuration(report.pendingMs)} not counted
-                      yet
-                    </Text>
-                  </View>
-                  <WorkButton
-                    variant="warn"
-                    label="Review"
-                    onPress={() => navigation.navigate('WorkTracking')}
-                    style={styles.inlineAction}
-                  />
-                </View>
-              )}
-
-              {/* ---- by job ------------------------------------------ */}
-              <WorkSectionHeader title="By job" hint="Earned" />
-              {report.jobs.length === 0 ? (
-                <Text style={styles.help}>
-                  No work or completed jobs for this month.
+          {!!report && (
+            <View>
+              <View style={styles.listHeader}>
+                <Text style={styles.listTitle}>{listTitle}</Text>
+                <Text style={styles.listTotal}>
+                  {formatWorkDuration(shownMs)}
                 </Text>
-              ) : (
-                <View style={[styles.card, styles.cardFlush]}>
-                  {report.jobs.slice(0, shownJobs).map((job, index) => {
-                    const basis = basisLabel(
-                      report.records.find(
-                        item => item.session.jobId === job.jobId,
-                      )?.session.paySnapshot?.basis,
-                    );
-                    return (
-                      <View key={job.key}>
-                        {index > 0 && <View style={styles.divider} />}
-                        <View style={[styles.cardRow, styles.detailRow]}>
-                          <View style={styles.detailPrimary}>
-                            <Text style={styles.body}>{job.title}</Text>
-                            <Text style={styles.sml}>
-                              {formatWorkDuration(job.confirmedMs)}
-                              {basis ? ` · ${basis}` : ''}
-                            </Text>
-                            {job.pendingMs > 0 && (
-                              <Text style={styles.sml}>
-                                +{formatWorkDuration(job.pendingMs)} pending
-                              </Text>
-                            )}
-                            {job.unratedMs > 0 && (
-                              <Text style={styles.sml}>
-                                {formatWorkDuration(job.unratedMs)} unrated
-                              </Text>
-                            )}
-                          </View>
-                          <View style={styles.metricColumn}>
-                            <Text style={[styles.body, styles.mono]}>
-                              {workCurrency(job.earned)}
-                            </Text>
-                            <Text style={styles.sml}>earned</Text>
-                          </View>
-                        </View>
-                      </View>
-                    );
-                  })}
-                </View>
-              )}
-              {shownJobs < report.jobs.length && (
-                <WorkButton
-                  variant="ghost"
-                  icon="chevron-down"
-                  label="Show more jobs"
-                  onPress={() => setShownJobs(value => value + PAGE)}
-                />
-              )}
-
-              {/* ---- sessions ---------------------------------------- */}
-              <WorkSectionHeader
-                title="Sessions"
-                actionLabel={work.manualAvailable ? '+ Add record' : undefined}
-                onAction={
-                  work.manualAvailable
-                    ? () => navigation.navigate('ManualWorkEntry')
-                    : undefined
-                }
-              />
-              <View style={styles.filters}>
-                {(['all', 'confirmed', 'needsReview'] as Filter[]).map(
-                  value => (
-                    <TouchableOpacity
-                      key={value}
-                      accessibilityRole="button"
-                      accessibilityState={{selected: filter === value}}
-                      style={[
-                        styles.chip,
-                        filter === value && styles.chipSelected,
-                      ]}
-                      onPress={() => setFilter(value)}>
-                      <Text
-                        style={[
-                          styles.chipText,
-                          filter === value && {color: Colors.gradient1},
-                        ]}>
-                        {value === 'all'
-                          ? 'All'
-                          : value === 'confirmed'
-                          ? 'Confirmed'
-                          : 'Pending'}
-                      </Text>
-                    </TouchableOpacity>
-                  ),
-                )}
               </View>
+
               {records.length === 0 ? (
-                <Text style={styles.help}>
-                  No{' '}
-                  {filter === 'all'
-                    ? 'work'
-                    : filter === 'confirmed'
-                    ? 'confirmed'
-                    : 'pending'}{' '}
-                  records for this month.
-                </Text>
+                <View style={styles.card}>
+                  <Text style={styles.empty}>
+                    {day === null
+                      ? 'No work recorded this month.'
+                      : 'No work recorded on this day.'}
+                  </Text>
+                </View>
               ) : (
-                <View style={[styles.card, styles.cardFlush]}>
+                <View style={styles.listCard}>
                   {records.slice(0, shown).map((item, index) => {
-                    const tone = workSessionTone(item.session);
-                    const t = workToneStyle(tone);
                     const zone = item.session.reportingTimeZone;
-                    const pending = item.pendingMs > 0;
+                    const range = `${clock(item.session.startedAt, zone)} – ${
+                      item.session.endedAt === null
+                        ? 'now'
+                        : clock(item.session.endedAt, zone)
+                    }`;
+                    const earned = recordEarned(item);
                     return (
-                      <View key={item.session.id}>
-                        {index > 0 && <View style={styles.divider} />}
-                        <TouchableOpacity
-                          accessibilityRole="button"
-                          activeOpacity={0.75}
+                      <TouchableOpacity
+                        key={item.session.id}
+                        accessibilityRole="button"
+                        activeOpacity={0.7}
+                        onPress={() =>
+                          navigation.navigate('WorkSessionDetails', {
+                            sessionId: item.session.id,
+                          })
+                        }
+                        style={[styles.row, index > 0 && styles.rowDivider]}>
+                        <View
                           style={[
-                            styles.cardRow,
-                            styles.detailRow,
-                            pending && styles.rowWarn,
-                            tone === 'discarded' && styles.rowMuted,
+                            styles.dot,
+                            {backgroundColor: dotColor(item)},
                           ]}
-                          onPress={() =>
-                            navigation.navigate('WorkSessionDetails', {
-                              sessionId: item.session.id,
-                            })
-                          }>
-                          <WorkIconTile
-                            icon={t.icon}
-                            color={t.fg}
-                            bg={t.bg}
-                            size={12}
-                            outerSize={{width: 22, height: 22}}
-                          />
-                          <View style={styles.detailPrimary}>
-                            {/* Date-led, as wireframed: the day is how a
-                                cleaner finds a session, not the job name. */}
-                            <Text style={styles.body}>
-                              {shortDay(item.session.startedAt, zone)} ·{' '}
-                              {workSessionTitle(item.session)}
-                            </Text>
-                            {/* <Text style={styles.sml}>
-                              {formatWorkTime(item.session.startedAt, zone)}
-                              {item.session.endedAt === null
-                                ? ' – open'
-                                : ` – ${formatWorkTime(
-                                    item.session.endedAt,
-                                    zone,
-                                  )}`}
-                              {item.crossesMonth ? ' · split' : ''}
-                            </Text> */}
-                          </View>
-                          <View style={styles.metricColumn}>
-                            <Text style={[styles.body, styles.mono]}>
-                              {pending ? 'est. ' : ''}
-                              {formatWorkDuration(
-                                item.confirmedMs ||
-                                  item.pendingMs ||
-                                  item.runningMs,
-                              )}
-                            </Text>
-                            <Text style={[styles.sml, {color: t.fg}]}>
-                              {pending
-                                ? 'Needs review'
-                                : workStatusLabel(item.session.status)}
-                            </Text>
-                          </View>
-                        </TouchableOpacity>
-                      </View>
+                        />
+                        <View style={styles.rowText}>
+                          <Text style={styles.rowTitle} numberOfLines={1}>
+                            {workSessionTitle(item.session)}
+                          </Text>
+                          <Text style={styles.rowSub} numberOfLines={1}>
+                            {day === null
+                              ? `${dayMonth(item.session.startedAt, zone)} · ${range}`
+                              : range}
+                          </Text>
+                        </View>
+                        <View style={styles.rowRight}>
+                          <Text style={styles.rowTime}>
+                            {formatWorkDuration(workedMs(item))}
+                          </Text>
+                          <Text style={styles.rowMoney}>
+                            {earned !== null
+                              ? workCurrency(earned)
+                              : item.pendingMs > 0
+                              ? 'Needs review'
+                              : item.runningMs > 0
+                              ? 'Running'
+                              : '—'}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
                     );
                   })}
                 </View>
               )}
-              {shown < records.length && (
-                <WorkButton
-                  variant="ghost"
-                  icon="chevron-down"
-                  label="Show more work records"
-                  onPress={() => setShown(value => value + PAGE)}
-                />
-              )}
 
-              <WorkCollapsible title="How these numbers work">
-                <Text style={styles.sml}>
-                  <Text style={styles.body}>Earned</Text> is hourly time at the
-                  rate saved when you clocked in, plus fixed-price jobs
-                  completed this month. A fixed price is never divided across
-                  its sessions. General-work totals count once in the finish
-                  month after their hours are confirmed.
-                </Text>
-                <Text style={styles.sml}>
-                  <Text style={styles.body}>Pending hours</Text> are not counted
-                  anywhere until you confirm the actual times.
-                </Text>
-                <Text style={styles.sml}>
-                  Overnight hours are split between months. Totals use exact
-                  elapsed time; displayed hours use whole minutes.
-                </Text>
-              </WorkCollapsible>
-            </>
+              {shown < records.length && (
+                <TouchableOpacity
+                  accessibilityRole="button"
+                  onPress={() => setShown(value => value + PAGE)}
+                  style={styles.linkButton}>
+                  <Text style={styles.link}>Show more sessions</Text>
+                </TouchableOpacity>
+              )}
+              {day !== null && (
+                <TouchableOpacity
+                  accessibilityRole="button"
+                  onPress={() => setDay(null)}
+                  style={styles.linkButton}>
+                  <Text style={styles.link}>Show the whole month</Text>
+                </TouchableOpacity>
+              )}
+            </View>
           )}
         </>
       )}
@@ -396,3 +324,76 @@ const WorkHours = ({
   );
 };
 export default WorkHours;
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: Colors.white,
+    borderWidth: 1,
+    borderColor: '#E8F0FE',
+    borderRadius: 12,
+    padding: 14,
+  },
+  warnCard: {backgroundColor: '#FFFBEB', borderColor: '#FDE68A'},
+  noticeRow: {flexDirection: 'row', alignItems: 'center', gap: 10},
+  noticeText: {
+    flex: 1,
+    fontFamily: Fonts.fontRegular,
+    fontSize: 12.5,
+    lineHeight: 18,
+    color: '#64748B',
+  },
+  warnText: {color: '#92400E'},
+  empty: {fontFamily: Fonts.fontRegular, fontSize: 13, color: '#64748B'},
+  listHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  listTitle: {fontFamily: Fonts.semiBold, fontSize: 15, color: '#404F65'},
+  listTotal: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 12.5,
+    color: '#404F65',
+    fontVariant: ['tabular-nums'],
+  },
+  listCard: {
+    backgroundColor: Colors.white,
+    borderWidth: 1,
+    borderColor: '#E8F0FE',
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 11,
+    paddingVertical: 11,
+    paddingHorizontal: 14,
+  },
+  rowDivider: {borderTopWidth: 1, borderTopColor: '#F1F5F9'},
+  dot: {width: 7, height: 7, borderRadius: 4},
+  rowText: {flex: 1, minWidth: 0},
+  rowTitle: {fontFamily: Fonts.fontMedium, fontSize: 13.5, color: '#404F65'},
+  rowSub: {fontFamily: Fonts.fontRegular, fontSize: 11.5, color: '#64748B'},
+  rowRight: {alignItems: 'flex-end'},
+  rowTime: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 13.5,
+    color: '#404F65',
+    fontVariant: ['tabular-nums'],
+  },
+  rowMoney: {
+    fontFamily: Fonts.fontRegular,
+    fontSize: 11.5,
+    color: '#64748B',
+    fontVariant: ['tabular-nums'],
+  },
+  linkButton: {
+    alignSelf: 'center',
+    marginTop: 10,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+  },
+  link: {fontFamily: Fonts.semiBold, fontSize: 13, color: '#407BFF'},
+});
