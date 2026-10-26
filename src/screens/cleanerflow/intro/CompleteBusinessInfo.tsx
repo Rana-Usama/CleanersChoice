@@ -33,20 +33,6 @@ import {
   ServiceArea,
 } from '../../../utils/cleanerProfile';
 
-/**
- * Required business info: Service/Business name, phone, service city + state.
- *
- * Two modes:
- *  - `gate` (default) — routed here by resolveCleanerRoute for cleaners who
- *    signed up before these fields were required. Unskippable: no back button
- *    and hardware back exits the app, same as CleanerInstructions. On save the
- *    cleaner continues to wherever the router sends them next (paywall or
- *    dashboard).
- *  - `edit` — opened from the Dashboard / Setup Services to change the values.
- *    Has a back button and returns on save.
- *
- * New sign-ups never see the gate: SignUp collects the same three fields.
- */
 
 type Mode = 'gate' | 'edit';
 
@@ -59,11 +45,6 @@ const formatPhoneNumber = (raw: string = ''): string => {
   return `+1-${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
 };
 
-/**
- * Best-effort prefill from a legacy listing location (a full street address
- * with coordinates). Only used when the city/state can be read confidently —
- * otherwise the cleaner simply picks their city.
- */
 const areaFromLegacyLocation = (location: any): ServiceArea | null => {
   if (!location) return null;
   if (isValidServiceArea(location)) {

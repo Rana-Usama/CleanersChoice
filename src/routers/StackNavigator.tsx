@@ -199,13 +199,7 @@ const StackNavigator: React.FC = () => {
     fetchCredentialsAndUserData();
   }, []);
 
-  /**
-   * A notification tapped from the quit state fires before this component has
-   * rendered its stack, so the payload is queued in notificationNavigation and
-   * replayed here. Waiting on `!isLoading` matters: until then the container
-   * only holds <Decider />, and navigating to a screen that isn't registered
-   * yet is a silent no-op.
-   */
+
   useEffect(() => {
     if (navReady && !isLoading) {
       flushPendingNotification();
@@ -214,10 +208,7 @@ const StackNavigator: React.FC = () => {
 
   console.log(email, password, userData);
 
-  // Single definition of "valid subscription access right now", shared with
-  // resolveCleanerRoute and with the customer-facing visibility rule
-  // (utils/cleanerVisibility.ts). Still `subscriptionEndDate > now` at heart —
-  // centralised so the paywall and the customer side cannot drift apart.
+
   const hasActiveSub = hasActiveSubscriptionAccess(userData);
 
   let initialRoute: keyof RootStackParamList = 'SplashOne';
@@ -230,9 +221,6 @@ const StackNavigator: React.FC = () => {
     userData?.role === 'Cleaner' &&
     hasActiveSub
   ) {
-    // Resolves to CleanerInstructions when the mandatory step is still
-    // pending, otherwise the dashboard. Without this gate, force-quitting on
-    // the instructions screen would skip it permanently.
     initialRoute = resolveCleanerRoute(userData, work.hasHistory || work.manualAvailable);
   } else if (userData?.role === 'Cleaner' && !hasActiveSub) {
     // Unpaid cleaner: instructions first, paywall second.
@@ -339,12 +327,6 @@ const StackNavigator: React.FC = () => {
           />
 
           {/* ----------------- Admin Flow ---------------- */}
-          {/*
-            Registered unconditionally so app-launch routing stays simple.
-            Access is gated by the admin-only entry points (Dashboard CTA and
-            Settings row), and each screen re-checks `Users.admin` via
-            useIsAdmin() before rendering anything.
-          */}
           <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
           <Stack.Screen name="AdminActiveJobs" component={AdminActiveJobs} />
           <Stack.Screen

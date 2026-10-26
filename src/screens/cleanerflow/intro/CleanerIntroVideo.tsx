@@ -14,12 +14,6 @@ import IntroVideoPlayer from '../../../components/IntroVideoPlayer';
 import {useCleanerIntroConfig} from '../../../hooks/useCleanerIntroVideo';
 import {Colors, Fonts, FontScaling} from '../../../constants/Themes';
 
-/**
- * On-demand replay of the Cleaner intro video (Settings -> Watch Intro Video).
- *
- * Deliberately does NOT touch the `introVideoSeen` flag — a replay is not a
- * first view, and re-marking it would corrupt the completed/skipped signal.
- */
 const CleanerIntroVideo = ({navigation}: any) => {
   const insets = useSafeAreaInsets();
   const {config, loading, unavailable, reload} = useCleanerIntroConfig();

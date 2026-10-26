@@ -102,14 +102,7 @@ const AdminActiveJobs = ({navigation}: any) => {
     });
   }, [jobs, query]);
 
-  /**
-   * Pinned toolbar. Rendered as a sibling of the FlatList rather than as its
-   * ListHeaderComponent: passing a function to ListHeaderComponent makes React
-   * treat it as a *component type*, and because the arrow function gets a new
-   * identity on every render, the whole header subtree (search TextInput
-   * included) unmounts and remounts on each keystroke, dropping focus and the
-   * keyboard. As a sibling it keeps a stable position in the tree.
-   */
+  
   const renderToolbar = () => (
     <View style={styles.toolbar}>
       <View style={styles.searchWrap}>

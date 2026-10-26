@@ -62,13 +62,6 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
   const bottomInset = insets.bottom;
 
   return (
-    /*
-      The work bar is mounted here rather than on a screen so a running timer
-      stays visible - and stoppable - from every tab. It renders null when
-      nothing is running and nothing needs review, so it costs no space in the
-      normal case, and it is inside the keyboard check above so it hides with
-      the tab bar.
-    */
     <>
       <ActiveSessionBanner />
       <View

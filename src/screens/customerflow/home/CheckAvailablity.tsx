@@ -293,18 +293,7 @@ const CheckAvailability = ({route, navigation}: any) => {
     tryToFindChat();
   }, [userId, item?.id]);
 
-  /**
-   * Subscription gate for this screen.
-   *
-   * The list this screen was opened from may be minutes old, and a service can
-   * also be reached from a notification or a chat, so the rule is re-checked on
-   * arrival rather than trusted from the caller. `item.id` is the cleaner's uid
-   * (a CleanerServices document id), which is what the visibility lookup takes.
-   *
-   * A cleaner whose subscription lapsed between the list load and the tap is
-   * bounced back with an explanation instead of being shown a listing they can
-   * no longer fulfil.
-   */
+
   useEffect(() => {
     let cancelled = false;
     const enforceCleanerVisibility = async () => {

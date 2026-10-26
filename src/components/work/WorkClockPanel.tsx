@@ -248,6 +248,7 @@ export const WorkClockPanel = ({
                   icon="alert-outline"
                   color={Colors.amberDarkText}
                   bg={Colors.amberOverlay10}
+                  size={18}
                 />
               )}
               <View style={s.grow}>
@@ -347,7 +348,7 @@ export const WorkClockPanel = ({
       )}
 
       <View style={s.row}>{clockButton()}</View>
-      {!compact && work.reviews.length > 0 && (
+      {/* {!compact && work.reviews.length > 0 && (
         <WorkButton
           variant="warn"
           label={`Review ${work.reviews.length} ${
@@ -355,7 +356,7 @@ export const WorkClockPanel = ({
           }`}
           onPress={openResolver}
         />
-      )}
+      )} */}
 
       {/* Planned finish is only offered for general work with no end in sight. */}
       {active &&

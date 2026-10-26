@@ -50,11 +50,7 @@ const ManualWorkEntry = ({
   const [nameTouched, setNameTouched] = useState(false);
   const generation = useRef(0);
   const scrollRef = useRef<ScrollView>(null);
-  /**
-   * Amount and Note sit at the bottom of the form, so once the keyboard is up
-   * scroll the sheet to the end to bring the focused field above it. The
-   * timer covers a keyboard that was already open (moving between fields).
-   */
+ 
   const revealBottom = () => {
     const reveal = () => scrollRef.current?.scrollToEnd({animated: true});
     const shown = Keyboard.addListener('keyboardDidShow', () => {
@@ -124,12 +120,7 @@ const ManualWorkEntry = ({
   );
   const validation = nameError || amountError || intervalError;
   const locked = work.busy || work.pending;
-  /**
-   * The wireframe's checklist. These mirror the rules workIntervalError
-   * enforces, so the cleaner can see which one they are failing rather than
-   * only the first message it returns. Overlap is deliberately absent: only
-   * the server knows the other sessions, so it surfaces as the error line.
-   */
+ 
   const checks = [
     {
       label: 'End is after start',

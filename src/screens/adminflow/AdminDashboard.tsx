@@ -25,17 +25,6 @@ import {
 import {AdminStats} from '../../types/admin';
 import useIsAdmin from '../../hooks/useIsAdmin';
 
-/**
- * Admin hub — the single entry point for admin-only monitoring.
- *
- * Reached from the admin CTA on the cleaner Dashboard and from Settings. The
- * module list is rendered straight off ADMIN_MODULES, so adding a future admin
- * feature needs one registry entry and one screen — no changes here.
- *
- * Note this screen deliberately does NOT use `useExitAppOnBack()` (unlike the
- * tab-level screens): Android back should return to the Dashboard, not quit.
- */
-
 const EMPTY_STATS: AdminStats = {
   activeJobs: 0,
   cleanerServices: 0,

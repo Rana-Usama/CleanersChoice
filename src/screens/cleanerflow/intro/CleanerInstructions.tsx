@@ -29,20 +29,6 @@ import {
   InstructionSection,
 } from '../../../constants/cleanerInstructions';
 
-/**
- * Mandatory cleaner onboarding step, shown BEFORE the paywall so a cleaner
- * understands what the membership is before being asked to pay for it.
- *
- * This screen holds NO copy of its own — every string comes from
- * `constants/cleanerInstructions.ts`, so revised wording can be dropped in
- * without touching this file. Section headings are rendered verbatim so the
- * client's own numbering and emoji survive exactly as written.
- *
- * Unskippable by design: no header back button, hardware back exits the app
- * (the same treatment Dashboard and CleanerJobs use), and the only way forward
- * is the accept CTA, which records the acknowledgement first.
- */
-
 const Block: React.FC<{block: InstructionBlock}> = ({block}) => {
   switch (block.kind) {
     case 'text':

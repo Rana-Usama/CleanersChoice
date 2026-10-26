@@ -166,12 +166,6 @@ const ServiceOne: React.FC = ({navigation}: any) => {
   const addServices = async () => {
     const user = auth().currentUser;
     if (!user) return;
-
-    // Service location is no longer edited here — it is part of the REQUIRED
-    // business info (Users.serviceLocation, mirrored onto this document by
-    // utils/cleanerProfile.ts) and is collected at sign-up. This screen only
-    // writes the optional listing details, so it merges rather than overwrites
-    // and never touches name/phone/location.
     if (description && available && selectedItems?.length > 0) {
       try {
         setLoading(true);
@@ -191,16 +185,6 @@ const ServiceOne: React.FC = ({navigation}: any) => {
             packages: serviceData?.packages || [],
             rating: serviceData?.rating || null,
             reviews: serviceData?.reviews || [],
-            // Customer-facing visibility deadline — stamped only when the
-            // document has none yet. This is a merge write, so an existing
-            // value (owned by the payment webhooks / nightly sweep) is kept
-            // rather than replaced with one derived from a possibly-stale
-            // Redux snapshot of the Users doc.
-            //
-            // Derived from this cleaner's own subscription (utils/
-            // cleanerVisibility.ts) and capped by firestore.rules at their
-            // `Users.subscriptionEndDate`, so it cannot be used to self-grant
-            // visibility.
             ...(typeof serviceData?.visibleUntil === 'number'
               ? {}
               : visibilityFieldsForOwnService(profileData)),

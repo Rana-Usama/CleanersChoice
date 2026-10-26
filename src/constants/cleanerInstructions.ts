@@ -1,23 +1,3 @@
-/**
- * Cleaner "How It Works" content.
- *
- * ─────────────────────────────────────────────────────────────────────────
- * THIS FILE IS THE ONLY PLACE THE INSTRUCTIONS COPY LIVES.
- *
- * To revise the wording, edit the strings below — no screen, component or
- * navigation change is needed. The screen renders whatever this file exports,
- * in the order it is declared.
- *
- * Each section is a list of blocks, so text, checklists and callouts can be
- * interleaved in any order. Headings are rendered verbatim, including their
- * leading emoji.
- *
- * If a revision is material enough that every cleaner should read it again,
- * bump CLEANER_INSTRUCTIONS_VERSION. Cleaners whose stored acknowledgement is
- * for an older version are shown the screen again on their next launch.
- * ─────────────────────────────────────────────────────────────────────────
- */
-
 /** Bump to re-show the screen to cleaners who already accepted. */
 export const CLEANER_INSTRUCTIONS_VERSION = 2;
 

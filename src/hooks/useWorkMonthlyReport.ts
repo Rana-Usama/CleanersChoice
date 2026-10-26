@@ -98,11 +98,6 @@ export const useWorkMonthlyReport = ({year, month}: WorkMonth) => {
         },
         () => {
           if (owned()) {
-            /*
-              Fail open with an empty ledger rather than blocking the report.
-              Confirmed hours are still correct; only accrued
-              fixed-price money is missing, and the error is surfaced.
-            */
             setData(previous => ({
               ...previous,
               jobEarnings: [],

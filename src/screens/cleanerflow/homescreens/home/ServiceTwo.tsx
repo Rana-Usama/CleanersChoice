@@ -70,13 +70,6 @@ const ServiceTwo: React.FC = ({navigation}: any) => {
       const reference = storage().ref(
         `serviceImages/${user.uid}/service_${Date.now()}_${index}.jpg`,
       );
-
-      /**
-       * `cacheControl` matters here. Without it, Firebase serves the download
-       * URL as non-cacheable, so iOS re-fetches the full JPEG on every render
-       * and the Service Details gallery loads slowly each time it is opened.
-       * The object name is unique per upload, so it can safely be immutable.
-       */
       await reference.putFile(compressedImage, {
         contentType: 'image/jpeg',
         cacheControl: 'public, max-age=31536000, immutable',

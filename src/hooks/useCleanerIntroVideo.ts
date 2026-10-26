@@ -30,15 +30,6 @@ export const useCleanerIntroConfig = () => {
   return {config, loading, unavailable, reload: load};
 };
 
-/**
- * First-run gate for the Cleaner intro video.
- *
- * Order matters: the remote config is checked BEFORE the per-user flag, so a
- * disabled or unconfigured feature costs zero extra Firestore reads.
- *
- * `visible` only ever flips to true once — dismissing marks the video seen so
- * it won't reappear on the next mount.
- */
 export const useCleanerIntroAutoPlay = (enabled: boolean) => {
   const [config, setConfig] = useState<CleanerIntroConfig | null>(null);
   const [visible, setVisible] = useState(false);

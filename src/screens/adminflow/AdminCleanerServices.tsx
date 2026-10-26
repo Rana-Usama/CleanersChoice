@@ -29,22 +29,6 @@ import {
 import {formatCityState} from '../../utils/locationFormat';
 import useIsAdmin from '../../hooks/useIsAdmin';
 
-/**
- * All cleaner services, platform-wide, with the owning cleaner's subscription
- * state joined from `Users.subscriptionStatus`.
- *
- * `CleanerServices` is one document per cleaner (keyed by uid), so each row is a
- * cleaner's service profile. Unlike the customer Home screen this list applies
- * no completeness filter — an incomplete profile is exactly what an admin wants
- * to see.
- *
- * Tapping a row opens the existing CleanerProfile screen, which already renders
- * `Users/{cleanerId}` + `CleanerServices/{cleanerId}` for any cleaner and guards
- * every field with optional chaining. (ServiceDetails was the other candidate,
- * but it dereferences `item.createdAt._seconds` and `item.description` without
- * guards, so an incomplete service would crash it.)
- */
-
 /** A chip key from SUBSCRIPTION_FILTERS — one chip can cover several badges. */
 type FilterKey = string;
 
@@ -116,14 +100,6 @@ const AdminCleanerServices = ({navigation, route}: any) => {
     });
   }, [services, query, filter]);
 
-  /**
-   * Pinned toolbar. Rendered as a sibling of the FlatList rather than as its
-   * ListHeaderComponent, so the search field and filter chips stay fixed in
-   * place and only the service rows scroll vertically.
-   *
-   * The chip row is still horizontally scrollable — that's the chips overflowing
-   * their own track, not the toolbar moving.
-   */
   const renderToolbar = () => (
     <View style={styles.toolbar}>
       <View style={styles.searchWrap}>
