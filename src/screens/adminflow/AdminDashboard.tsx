@@ -41,6 +41,7 @@ const EMPTY_STATS: AdminStats = {
   cleanerServices: 0,
   activeSubscriptions: 0,
   overdueSubscriptions: 0,
+  openReports: 0,
 };
 
 const AdminDashboard = ({navigation}: any) => {

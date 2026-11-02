@@ -479,13 +479,6 @@ const ServiceDetails: React.FC = ({route}: any) => {
                   showSkeleton={false}
                   highPriority
                 />
-                <View style={styles.verifiedBadge}>
-                  <MaterialCommunityIcons
-                    name="check-decagram"
-                    size={12}
-                    color={Colors.white}
-                  />
-                </View>
               </TouchableOpacity>
 
               <View style={styles.serviceTitleContainer}>
@@ -759,32 +752,6 @@ const ServiceDetails: React.FC = ({route}: any) => {
               />
               <View style={styles.providerDetails}>
                 <Text style={styles.providerName}>{item.name}</Text>
-                <View style={styles.providerStats}>
-                  <View style={styles.statItem}>
-                    <MaterialCommunityIcons
-                      name="check-decagram"
-                      size={14}
-                      color={Colors.success}
-                    />
-                    <Text style={styles.statText}>Verified</Text>
-                  </View>
-                  {/* <View style={styles.statItem}>
-                    <MaterialCommunityIcons
-                      name="star"
-                      size={14}
-                      color={Colors.gold}
-                    />
-                    <Text style={styles.statText}>5.0 (24)</Text>
-                  </View>
-                  <View style={styles.statItem}>
-                    <MaterialCommunityIcons
-                      name="briefcase-check"
-                      size={14}
-                      color={Colors.gradient1}
-                    />
-                    <Text style={styles.statText}>50+ jobs</Text>
-                  </View> */}
-                </View>
               </View>
             </View>
           </View>
@@ -1117,19 +1084,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: Colors.gradient1,
   },
-  verifiedBadge: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    backgroundColor: Colors.gradient1,
-    borderRadius: 10,
-    width: RFPercentage(2.5),
-    height: RFPercentage(2.5),
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: Colors.white,
-  },
   serviceTitleContainer: {
     flex: 1,
   },
@@ -1331,20 +1285,6 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.fontMedium,
     color: Colors.primaryText,
     marginBottom: RFPercentage(0.5),
-  },
-  providerStats: {
-    flexDirection: 'row',
-    gap: RFPercentage(1.5),
-  },
-  statItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: RFPercentage(0.3),
-  },
-  statText: {
-    fontSize: RFPercentage(1.4),
-    fontFamily: Fonts.fontRegular,
-    color: Colors.secondaryText,
   },
   bottomActionBar: {
     position: 'absolute',

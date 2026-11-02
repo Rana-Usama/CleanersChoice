@@ -18,8 +18,8 @@ android {
         applicationId "com.cleanerschoice"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 38
-        versionName "2.8.1"
+        versionCode 39
+        versionName "2.8.2"
         multiDexEnabled true
         missingDimensionStrategy 'store', 'play'
 

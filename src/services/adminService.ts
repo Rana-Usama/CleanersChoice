@@ -8,6 +8,7 @@ import {
 } from '../types/admin';
 import {getBadgeKeyForUser, resolveSubscriptionStatus} from '../utils/subscriptionStatus';
 import {describeListingStatus} from '../utils/cleanerProfile';
+import {countOpenReports} from './reportService';
 
 /**
  * Data layer for the Admin Controls screens.
@@ -196,7 +197,7 @@ export const fetchCleanerServices = async (): Promise<AdminCleanerService[]> => 
 export const fetchAdminStats = async (
   services?: AdminCleanerService[],
 ): Promise<AdminStats> => {
-  const [activeJobs, cleanerServices] = await Promise.all([
+  const [activeJobs, cleanerServices, openReports] = await Promise.all([
     firestore()
       .collection('Jobs')
       .where('status', '==', 'active')
@@ -210,6 +211,7 @@ export const fetchAdminStats = async (
       .get()
       .then(snap => snap.data().count)
       .catch(() => 0),
+    countOpenReports(),
   ]);
 
   const list = services ?? [];
@@ -224,5 +226,6 @@ export const fetchAdminStats = async (
       s => s.badge === 'active' || s.badge === 'cancelling',
     ).length,
     overdueSubscriptions: list.filter(s => s.badge === 'overdue').length,
+    openReports,
   };
 };

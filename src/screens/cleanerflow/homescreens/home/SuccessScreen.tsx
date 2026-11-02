@@ -102,29 +102,31 @@ const ProfileCompletionCongratulations = ({completionPercentage = 100}) => {
     },
   ];
 
+  // Only list what the membership actually does — no promises about job
+  // volume, ranking or verification (App Store 5.6, see cleanerInstructions).
   const benefits = [
     {
-      icon: 'star-circle',
-      title: 'Featured',
-      description: 'Priority in search results',
-      color: Colors.gold,
-    },
-    {
-      icon: 'trending-up',
-      title: 'Higher Bookings',
-      description: 'More jobs daily',
-      color: Colors.materialGreen,
-    },
-    {
-      icon: 'badge-account',
-      title: 'Trusted',
-      description: 'Verified provider',
+      icon: 'map-marker-radius',
+      title: 'Visible to customers',
+      description: 'Your profile shows in your area',
       color: Colors.materialBlue,
     },
     {
+      icon: 'phone-in-talk',
+      title: 'Direct contact',
+      description: 'Customers reach you directly',
+      color: Colors.materialGreen,
+    },
+    {
       icon: 'cash-multiple',
-      title: 'Steady Income',
-      description: 'Regular contracts',
+      title: 'No commission',
+      description: 'Keep 100% of what you earn',
+      color: Colors.gold,
+    },
+    {
+      icon: 'calendar-clock',
+      title: 'Your terms',
+      description: 'Set your own prices and schedule',
       color: Colors.materialPurple,
     },
   ];

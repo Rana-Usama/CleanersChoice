@@ -123,6 +123,8 @@ export interface AdminStats {
   cleanerServices: number;
   activeSubscriptions: number;
   overdueSubscriptions: number;
+  /** Cleaner reports awaiting review (Reports.status == 'open'). */
+  openReports: number;
 }
 
 /**

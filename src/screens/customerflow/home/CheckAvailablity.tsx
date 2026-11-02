@@ -380,13 +380,6 @@ const CheckAvailability = ({route, navigation}: any) => {
                 style={styles.providerImage}
                 resizeMode="cover"
               />
-              <View style={styles.verifiedBadge}>
-                <MaterialCommunityIcons
-                  name="check-decagram"
-                  size={12}
-                  color={Colors.white}
-                />
-              </View>
             </View>
             <View style={styles.providerInfo}>
               <Text style={styles.providerName}>{item.name}</Text>
@@ -733,19 +726,6 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(3),
     borderWidth: 2,
     borderColor: Colors.gradient1,
-  },
-  verifiedBadge: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    backgroundColor: Colors.gradient1,
-    borderRadius: 10,
-    width: RFPercentage(2.5),
-    height: RFPercentage(2.5),
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: Colors.white,
   },
   providerInfo: {
     flex: 1,

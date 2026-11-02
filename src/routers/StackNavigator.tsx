@@ -52,6 +52,7 @@ import CompleteBusinessInfo from '../screens/cleanerflow/intro/CompleteBusinessI
 import AdminDashboard from '../screens/adminflow/AdminDashboard';
 import AdminActiveJobs from '../screens/adminflow/AdminActiveJobs';
 import AdminCleanerServices from '../screens/adminflow/AdminCleanerServices';
+import AdminReports from '../screens/adminflow/AdminReports';
 import {Customer} from '../types/customer';
 import {navigationRef} from '../utils/navigationRef';
 import {flushPendingNotification} from '../utils/notificationNavigation';
@@ -124,6 +125,7 @@ export type RootStackParamList = {
   AdminCleanerServices:
     | {initialFilter?: 'all' | 'active' | 'overdue' | 'expired'}
     | undefined;
+  AdminReports: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -322,6 +324,7 @@ const StackNavigator: React.FC = () => {
               name="AdminCleanerServices"
               component={AdminCleanerServices}
             />
+            <Stack.Screen name="AdminReports" component={AdminReports} />
           </Stack.Navigator>
         )}
       </NavigationContainer>

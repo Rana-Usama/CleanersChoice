@@ -31,6 +31,8 @@ import {useAppleReceiptRefresh} from '../../../hooks/useAppleReceiptRefresh';
 import {resolveCleanerRouteAsync} from '../../../utils/cleanerRoute';
 import {useAppAlert} from '../../../components/AlertProvider';
 import CleanerIntroVideoModal from '../../../components/CleanerIntroVideoModal';
+import {JOB_VOLUME_DISCLOSURE} from '../../../constants/support';
+import {openSupportEmail} from '../../../utils/support';
 
 const {width} = Dimensions.get('window');
 
@@ -318,6 +320,16 @@ const Premium = ({navigation}: any) => {
             <Text style={styles.pricePeriod}>per month</Text>
           </View>
 
+          {/* Lead-volume disclosure — must stay above the purchase button */}
+          <View style={styles.disclosureBox}>
+            <MaterialCommunityIcons
+              name="information-outline"
+              size={RFPercentage(2.2)}
+              color={Colors.amberDarkText}
+            />
+            <Text style={styles.disclosureText}>{JOB_VOLUME_DISCLOSURE}</Text>
+          </View>
+
           {/* Features List */}
           <View style={styles.featuresContainer}>
             <Text style={styles.featuresTitle}>Premium Features</Text>
@@ -381,6 +393,25 @@ const Premium = ({navigation}: any) => {
             </Text>
           </View>
         )}
+
+        {/* Contact Support */}
+        <TouchableOpacity
+          accessibilityRole="button"
+          activeOpacity={0.7}
+          style={styles.supportRow}
+          onPress={() =>
+            openSupportEmail({subject: 'Question about Premium membership'})
+          }>
+          <MaterialCommunityIcons
+            name="email-outline"
+            size={RFPercentage(1.9)}
+            color={Colors.gradient1}
+          />
+          <Text style={styles.supportText}>
+            Questions before subscribing?{' '}
+            <Text style={styles.link}>Contact Support</Text>
+          </Text>
+        </TouchableOpacity>
 
         {/* Bottom Spacer */}
         <View style={styles.spacer} />
@@ -762,5 +793,36 @@ const styles = StyleSheet.create({
   link: {
     color: Colors.gradient1,
     textDecorationLine: 'underline',
+  },
+  disclosureBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: RFPercentage(1),
+    backgroundColor: Colors.amberBg50,
+    borderWidth: 1,
+    borderColor: Colors.amberBorder,
+    borderRadius: RFPercentage(1.4),
+    padding: RFPercentage(1.4),
+    marginBottom: RFPercentage(1.5),
+  },
+  disclosureText: {
+    flex: 1,
+    color: Colors.amberDarkText,
+    fontFamily: Fonts.fontMedium,
+    fontSize: RFPercentage(1.55),
+    lineHeight: RFPercentage(2.3),
+  },
+  supportRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: RFPercentage(0.6),
+    paddingHorizontal: RFPercentage(2),
+    paddingVertical: RFPercentage(1.2),
+  },
+  supportText: {
+    color: Colors.secondaryText,
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.5),
   },
 });

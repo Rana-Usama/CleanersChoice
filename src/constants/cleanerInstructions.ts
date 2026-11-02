@@ -86,6 +86,13 @@ export const CLEANER_INSTRUCTIONS_SECTIONS: InstructionSection[] = [
         kind: 'callout',
         text: 'Your $20.99 monthly membership is all you pay.',
       },
+      {
+        // Lead-volume disclosure — shown before the paywall so no cleaner pays
+        // expecting a set number of jobs. Keep in sync with JOB_VOLUME_DISCLOSURE
+        // on the Premium screen (src/constants/support.ts).
+        kind: 'callout',
+        text: 'Job opportunities depend on customer demand in your area, so the number of jobs is not guaranteed. New areas may start slowly.',
+      },
     ],
   },
   {

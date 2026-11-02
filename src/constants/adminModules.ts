@@ -29,6 +29,15 @@ export const ADMIN_MODULES: AdminModule[] = [
     enabled: true,
     countKey: 'cleanerServices',
   },
+  {
+    key: 'reports',
+    title: 'Reports',
+    subtitle: 'Jobs and customers flagged by cleaners',
+    icon: 'flag-outline',
+    route: 'AdminReports',
+    enabled: true,
+    countKey: 'openReports',
+  },
 ];
 
 

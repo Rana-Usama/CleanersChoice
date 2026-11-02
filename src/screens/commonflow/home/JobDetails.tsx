@@ -28,12 +28,19 @@ import LinearGradient from 'react-native-linear-gradient';
 import Feather from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import moment from 'moment';
 import {showToast} from '../../../utils/ToastMessage';
 import CustomModal from '../../../components/CustomModal';
 import ModalWrapper from '../../../components/ModalWrapper';
 import {useAppAlert} from '../../../components/AlertProvider';
+import ReportJobSheet from '../../../components/ReportJobSheet';
+import {
+  AlreadyReportedError,
+  hasReportedJob,
+  submitJobReport,
+} from '../../../services/reportService';
+import {ReportReason} from '../../../types/report';
+import {openSupportEmail} from '../../../utils/support';
 
 const {width} = Dimensions.get('window');
 
@@ -75,6 +82,32 @@ const JobDetails = ({route, navigation}: any) => {
   const [canMarkComplete, setCanMarkComplete] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState('');
   const [invoiceExists, setInvoiceExists] = useState(false);
+  const [reportVisible, setReportVisible] = useState(false);
+  const [reportLoading, setReportLoading] = useState(false);
+  const [hasReported, setHasReported] = useState(false);
+
+  // Cleaners can report a job / the customer who posted it. Never on a job the
+  // signed-in user posted themselves.
+  const canReport =
+    userData?.role === 'Cleaner' &&
+    !!item?.id &&
+    item?.jobId !== auth().currentUser?.uid;
+
+  useEffect(() => {
+    if (!canReport) return;
+    let cancelled = false;
+    hasReportedJob(item.id)
+      .then(reported => {
+        if (!cancelled) setHasReported(reported);
+      })
+      .catch(error => {
+        // Non-blocking: worst case the cleaner sees "already reported" on submit.
+        console.log('[JobDetails] report lookup failed:', error);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [canReport, item?.id]);
 
   const showActionBar =
     !(
@@ -818,6 +851,72 @@ const JobDetails = ({route, navigation}: any) => {
     );
   };
 
+  const openReportSheet = () => {
+    if (hasReported) {
+      showToast({
+        type: 'info',
+        title: 'Already reported',
+        message: 'Our team is reviewing your report for this job.',
+      });
+      return;
+    }
+    setReportVisible(true);
+  };
+
+  const handleSubmitReport = async ({
+    reason,
+    details,
+  }: {
+    reason: ReportReason;
+    details: string;
+  }) => {
+    if (reportLoading) return;
+    setReportLoading(true);
+    try {
+      await submitJobReport({
+        jobId: item.id,
+        jobTitle: item.title ?? null,
+        reportedUserId: item.jobId ?? null,
+        reportedUserName: clientInfo?.name ?? null,
+        reporterName: userData?.name ?? null,
+        reporterRole: userData?.role ?? null,
+        reason,
+        details,
+      });
+      setHasReported(true);
+      setReportVisible(false);
+      showToast({
+        type: 'success',
+        title: 'Report submitted',
+        message: 'Thanks — our team will review this job.',
+      });
+    } catch (error) {
+      if (error instanceof AlreadyReportedError) {
+        setHasReported(true);
+        setReportVisible(false);
+        showToast({type: 'info', title: 'Already reported', message: error.message});
+        return;
+      }
+      console.log('[JobDetails] report submit failed:', error);
+      showToast({
+        type: 'error',
+        title: 'Unable to submit report',
+        message:
+          error instanceof Error && error.message
+            ? error.message
+            : 'Please check your connection and try again.',
+      });
+    } finally {
+      setReportLoading(false);
+    }
+  };
+
+  const handleContactSupport = () =>
+    openSupportEmail({
+      subject: `Help with job: ${item?.title || item?.id || ''}`.trim(),
+      body: `Job ID: ${item?.id ?? 'unknown'}\n\n`,
+    });
+
   // Info Card Component
   const InfoCard = ({title, icon, children, style}: any) => (
     <View style={[styles.infoCard, style]}>
@@ -901,6 +1000,14 @@ const JobDetails = ({route, navigation}: any) => {
               onPress={handleEditButton}
               style={styles.backButton}>
               <Feather name="edit-2" size={18} color={Colors.white} />
+            </TouchableOpacity>
+          ) : canReport ? (
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Report this job"
+              onPress={openReportSheet}
+              style={styles.backButton}>
+              <Feather name="flag" size={18} color={Colors.white} />
             </TouchableOpacity>
           ) : (
             <View style={{width: 40}} />
@@ -1116,28 +1223,6 @@ const JobDetails = ({route, navigation}: any) => {
               <View style={styles.userDetails}>
                 <Text style={styles.userName}>{cleanerInfo.name}</Text>
                 <Text style={styles.userRole}>Professional Cleaner</Text>
-                <View style={styles.cleanerStats}>
-                  <View style={styles.statItem}>
-                    <MaterialCommunityIcons
-                      name="check-decagram"
-                      size={14}
-                      color={Colors.success}
-                    />
-                    <Text style={styles.statText}>Verified</Text>
-                  </View>
-                  <View style={styles.statItem}>
-                    <FontAwesome name="star" size={14} color={Colors.amber400} />
-                    <Text style={styles.statText}>4.9 (56)</Text>
-                  </View>
-                  <View style={styles.statItem}>
-                    <MaterialCommunityIcons
-                      name="briefcase-check"
-                      size={14}
-                      color={Colors.gradient1}
-                    />
-                    <Text style={styles.statText}>120+ jobs</Text>
-                  </View>
-                </View>
               </View>
             </View>
           </InfoCard>
@@ -1149,6 +1234,48 @@ const JobDetails = ({route, navigation}: any) => {
             <Text style={styles.remarksText}>{item.remarks}</Text>
           </InfoCard>
         )}
+
+        {/* Help / Report */}
+        <View style={styles.helpCard}>
+          <Text style={styles.helpTitle}>Problem with this job?</Text>
+          <Text style={styles.helpText}>
+            {canReport
+              ? 'Let us know if the contact details don’t work or something looks wrong. Our team reviews every report.'
+              : 'Our support team is here to help.'}
+          </Text>
+          <View style={styles.helpActions}>
+            {canReport && (
+              <TouchableOpacity
+                accessibilityRole="button"
+                activeOpacity={0.8}
+                onPress={openReportSheet}
+                style={[styles.helpBtn, styles.reportBtn]}>
+                <Feather
+                  name={hasReported ? 'check' : 'flag'}
+                  size={16}
+                  color={Colors.dangerRed}
+                />
+                <Text style={[styles.helpBtnText, styles.reportBtnText]}>
+                  {hasReported ? 'Reported' : 'Report Job'}
+                </Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              accessibilityRole="button"
+              activeOpacity={0.8}
+              onPress={handleContactSupport}
+              style={[styles.helpBtn, styles.supportBtn]}>
+              <MaterialCommunityIcons
+                name="email-outline"
+                size={17}
+                color={Colors.gradient1}
+              />
+              <Text style={[styles.helpBtnText, styles.supportBtnText]}>
+                Contact Support
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
 
         {/* Spacer for buttons */}
         <View style={styles.spacer} />
@@ -1312,6 +1439,16 @@ const JobDetails = ({route, navigation}: any) => {
           null
         ) : null}
       </View>
+      )}
+
+      {canReport && (
+        <ReportJobSheet
+          visible={reportVisible}
+          jobTitle={item?.title}
+          loading={reportLoading}
+          onClose={() => setReportVisible(false)}
+          onSubmit={handleSubmitReport}
+        />
       )}
 
       {/* Confirm Modal */}
@@ -1640,21 +1777,6 @@ const styles = StyleSheet.create({
     color: Colors.secondaryText,
     marginLeft: RFPercentage(0.3),
   },
-  cleanerStats: {
-    flexDirection: 'row',
-    gap: RFPercentage(1.5),
-    marginTop: RFPercentage(0.5),
-  },
-  statItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: RFPercentage(0.3),
-  },
-  statText: {
-    fontSize: RFPercentage(1.4),
-    fontFamily: Fonts.fontRegular,
-    color: Colors.secondaryText,
-  },
   remarksText: {
     fontSize: RFPercentage(1.6),
     fontFamily: Fonts.fontRegular,
@@ -1663,6 +1785,61 @@ const styles = StyleSheet.create({
   },
   spacer: {
     height: RFPercentage(2),
+  },
+  helpCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderBottomWidth: 2,
+    borderColor: Colors.lightGrayBg,
+    padding: RFPercentage(2),
+    marginBottom: RFPercentage(2),
+  },
+  helpTitle: {
+    color: Colors.primaryText,
+    fontFamily: Fonts.semiBold,
+    fontSize: RFPercentage(1.8),
+  },
+  helpText: {
+    color: Colors.secondaryText,
+    fontFamily: Fonts.fontRegular,
+    fontSize: RFPercentage(1.5),
+    lineHeight: RFPercentage(2.2),
+    marginTop: RFPercentage(0.5),
+  },
+  helpActions: {
+    flexDirection: 'row',
+    gap: RFPercentage(1.2),
+    marginTop: RFPercentage(1.5),
+  },
+  helpBtn: {
+    flex: 1,
+    minHeight: 42,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: RFPercentage(0.7),
+    borderRadius: RFPercentage(1.5),
+    borderWidth: 1,
+    paddingHorizontal: RFPercentage(1),
+  },
+  reportBtn: {
+    backgroundColor: Colors.redBg50,
+    borderColor: Colors.redBorder200,
+  },
+  supportBtn: {
+    backgroundColor: Colors.blueBg200,
+    borderColor: Colors.gradient1,
+  },
+  helpBtnText: {
+    fontFamily: Fonts.semiBold,
+    fontSize: RFPercentage(1.6),
+  },
+  reportBtnText: {
+    color: Colors.dangerRed,
+  },
+  supportBtnText: {
+    color: Colors.gradient1,
   },
   actionBar: {
     position: 'absolute',
